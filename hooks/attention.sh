@@ -21,11 +21,18 @@
 # }
 
 # === CONFIGURATION ===
-# Option 1: Slack webhook
-SLACK_WEBHOOK=""
+# Load webhook URLs from ~/.claude/.env if it exists
+ENV_FILE="$HOME/.claude/.env"
+if [ -f "$ENV_FILE" ]; then
+    # Source the .env file (supports KEY="value" format)
+    set -a
+    source "$ENV_FILE"
+    set +a
+fi
 
-# Option 2: Discord webhook
-DISCORD_WEBHOOK=""
+# Use environment variables (can be set in ~/.claude/.env or shell environment)
+SLACK_WEBHOOK="${SLACK_WEBHOOK_URL:-}"
+DISCORD_WEBHOOK="${DISCORD_WEBHOOK_URL:-}"
 
 # === READ HOOK INPUT ===
 INPUT=$(cat)
@@ -51,17 +58,30 @@ truncate_text() {
 # Extract text content from message (handles both string and array content)
 extract_content() {
     local json="$1"
-    # If content is a string, return it directly
-    # If content is an array, extract text from text blocks
-    echo "$json" | jq -r '
-        if .message.content | type == "string" then
-            .message.content
-        elif .message.content | type == "array" then
-            [.message.content[] | select(.type == "text") | .text] | join("\n")
-        else
-            ""
-        end
-    '
+    local msg_type="$2"
+
+    # Human messages have content directly, assistant messages have .message.content
+    if [ "$msg_type" = "human" ]; then
+        echo "$json" | jq -r '
+            if .message.content | type == "string" then
+                .message.content
+            elif .message.content | type == "array" then
+                [.message.content[] | select(type == "string" or .type == "text") | if type == "string" then . else .text end] | join("\n")
+            else
+                ""
+            end
+        '
+    else
+        echo "$json" | jq -r '
+            if .message.content | type == "string" then
+                .message.content
+            elif .message.content | type == "array" then
+                [.message.content[] | select(.type == "text") | .text] | join("\n")
+            else
+                ""
+            end
+        '
+    fi
 }
 
 # Parse todo status from transcript
@@ -88,9 +108,9 @@ parse_todos() {
     local total=$((completed + in_progress + pending))
 
     if [ "$total" -gt 0 ]; then
-        echo "✅ Todo: $completed/$total 완료"
+        echo ":white_check_mark: Todo: $completed/$total done"
         if [ "$in_progress" -gt 0 ]; then
-            echo "  (진행중: $in_progress, 대기: $pending)"
+            echo "  (in progress: $in_progress, pending: $pending)"
         fi
     fi
 }
@@ -100,13 +120,11 @@ HOSTNAME=$(hostname)
 TITLE="Claude Code @ $HOSTNAME"
 
 if [ -n "$TRANSCRIPT_PATH" ] && [ -f "$TRANSCRIPT_PATH" ]; then
-    # Get last human message
-    LAST_HUMAN=$(jq -s '[.[] | select(.type == "human")] | last' "$TRANSCRIPT_PATH" 2>/dev/null)
-    LAST_HUMAN_TEXT=$(extract_content "$LAST_HUMAN")
+    # Get last user message with string content (real human input, not tool results)
+    LAST_HUMAN_TEXT=$(jq -rs '[.[] | select(.type == "user" and (.message.content | type == "string"))] | last | .message.content // ""' "$TRANSCRIPT_PATH" 2>/dev/null)
 
-    # Get last assistant message
-    LAST_ASSISTANT=$(jq -s '[.[] | select(.type == "assistant")] | last' "$TRANSCRIPT_PATH" 2>/dev/null)
-    LAST_ASSISTANT_TEXT=$(extract_content "$LAST_ASSISTANT")
+    # Get last assistant message with text content
+    LAST_ASSISTANT_TEXT=$(jq -rs '[.[] | select(.type == "assistant")] | last | .message.content | if type == "array" then [.[] | select(.type == "text") | .text] | join("\n") else . // "" end' "$TRANSCRIPT_PATH" 2>/dev/null)
 
     # Get todo status
     TODO_STATUS=$(parse_todos "$TRANSCRIPT_PATH")
@@ -116,12 +134,12 @@ if [ -n "$TRANSCRIPT_PATH" ] && [ -f "$TRANSCRIPT_PATH" ]; then
 
     if [ -n "$LAST_HUMAN_TEXT" ]; then
         TRUNCATED_REQUEST=$(truncate_text "$LAST_HUMAN_TEXT")
-        MESSAGE+=$'\n'"📝 요청:"$'\n'"$TRUNCATED_REQUEST"$'\n'
+        MESSAGE+=$'\n'":memo: Request:"$'\n'"$TRUNCATED_REQUEST"$'\n'
     fi
 
     if [ -n "$LAST_ASSISTANT_TEXT" ]; then
         TRUNCATED_RESPONSE=$(truncate_text "$LAST_ASSISTANT_TEXT")
-        MESSAGE+=$'\n'"🤖 응답:"$'\n'"$TRUNCATED_RESPONSE"$'\n'
+        MESSAGE+=$'\n'":robot_face: Response:"$'\n'"$TRUNCATED_RESPONSE"$'\n'
     fi
 
     if [ -n "$TODO_STATUS" ]; then

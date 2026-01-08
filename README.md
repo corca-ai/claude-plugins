@@ -48,7 +48,12 @@ Claude Code가 사용자의 입력을 60초 이상 기다릴 때 Slack 또는 Di
 **설정 방법**:
 
 1. `hooks/attention.sh`를 `~/.claude/hooks/`에 복사
-2. 스크립트 내 `SLACK_WEBHOOK` 또는 `DISCORD_WEBHOOK` 변수 설정 (관련 봇에 권한 설정 필요)
+2. `~/.claude/.env` 파일 생성 후 웹훅 URL 설정:
+```bash
+# ~/.claude/.env
+SLACK_WEBHOOK_URL="https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+DISCORD_WEBHOOK_URL=""  # Discord 사용 시 설정
+```
 3. `~/.claude/settings.json`에 훅 설정 추가:
 
 ```json
