@@ -1,6 +1,6 @@
 #!/bin/bash
 # Test cases for attention.sh
-# Run: ./hooks/attention.test.sh
+# Run: ./hooks/scripts/attention.test.sh
 #
 # This test sources attention.sh to test the actual functions,
 # ensuring tests fail when the implementation changes.
@@ -89,8 +89,8 @@ assert_eq "$EXPECTED_LONG" "$RESULT" "truncate_text: 12 lines truncated to 5+...
 echo ""
 echo "=== Testing LAST_HUMAN_TEXT extraction ==="
 
-# Fixtures directory (relative to script location)
-FIXTURES_DIR="$SCRIPT_DIR/fixtures"
+# Fixtures directory (relative to script location - one level up)
+FIXTURES_DIR="$SCRIPT_DIR/../fixtures"
 
 # Helper: the jq query for human text (same as attention.sh)
 JQ_HUMAN='[.[] | select(.type == "user" and .isMeta != true) |
