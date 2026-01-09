@@ -51,11 +51,11 @@ truncate_text() {
     local text="$1"
     local line_count=$(echo "$text" | wc -l)
 
-    if [ "$line_count" -le 6 ]; then
+    if [ "$line_count" -le 10 ]; then
         echo "$text"
     else
-        local first=$(echo "$text" | head -n 3)
-        local last=$(echo "$text" | tail -n 3)
+        local first=$(echo "$text" | head -n 5)
+        local last=$(echo "$text" | tail -n 5)
         echo "$first"
         echo "..."
         echo "$last"
@@ -116,8 +116,20 @@ parse_todos() {
 
     if [ "$total" -gt 0 ]; then
         echo ":white_check_mark: Todo: $completed/$total done"
-        if [ "$in_progress" -gt 0 ]; then
-            echo "  (in progress: $in_progress, pending: $pending)"
+        # Show in_progress items
+        local in_progress_items=$(echo "$todo_json" | jq -r '.[] | select(.status == "in_progress") | "  :arrow_forward: " + .content')
+        if [ -n "$in_progress_items" ]; then
+            echo "$in_progress_items"
+        fi
+        # Show pending items
+        local pending_items=$(echo "$todo_json" | jq -r '.[] | select(.status == "pending") | "  :white_circle: " + .content')
+        if [ -n "$pending_items" ]; then
+            echo "$pending_items"
+        fi
+        # Show completed items
+        local completed_items=$(echo "$todo_json" | jq -r '.[] | select(.status == "completed") | "  :white_check_mark: " + .content')
+        if [ -n "$completed_items" ]; then
+            echo "$completed_items"
         fi
     fi
 }
