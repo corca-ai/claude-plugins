@@ -27,25 +27,9 @@
 #   }
 # }
 
-# === CONFIGURATION ===
-# Load webhook URLs from ~/.claude/.env if it exists
-ENV_FILE="$HOME/.claude/.env"
-if [ -f "$ENV_FILE" ]; then
-    # Source the .env file (supports KEY="value" format)
-    set -a
-    source "$ENV_FILE"
-    set +a
-fi
-
-# Use environment variables (can be set in ~/.claude/.env or shell environment)
-SLACK_WEBHOOK="${SLACK_WEBHOOK_URL:-}"
-DISCORD_WEBHOOK="${DISCORD_WEBHOOK_URL:-}"
-
-# === READ HOOK INPUT ===
-INPUT=$(cat)
-TRANSCRIPT_PATH=$(echo "$INPUT" | jq -r '.transcript_path // empty')
-
 # === HELPER FUNCTIONS ===
+# These functions are always defined, allowing this script to be sourced for testing.
+
 # Truncate text to first N lines + ... + last N lines
 truncate_text() {
     local text="$1"
@@ -57,7 +41,9 @@ truncate_text() {
         local first=$(echo "$text" | head -n 5)
         local last=$(echo "$text" | tail -n 5)
         echo "$first"
-        echo "\n...(truncated)...\n"
+        echo ""
+        echo "...(truncated)..."
+        echo ""
         echo "$last"
     fi
 }
@@ -134,45 +120,6 @@ parse_todos() {
     fi
 }
 
-# === BUILD NOTIFICATION ===
-HOSTNAME=$(hostname)
-TITLE="Claude Code @ $HOSTNAME"
-
-if [ -n "$TRANSCRIPT_PATH" ] && [ -f "$TRANSCRIPT_PATH" ]; then
-    # Get last user message with actual text (skip tool_result-only messages)
-    LAST_HUMAN_TEXT=$(jq -rs '[.[] | select(.type == "user") | select((.message.content | type == "string") or (.message.content | type == "array" and any(.[]; type == "string" or .type == "text")))] | last | .message.content | if type == "string" then . elif type == "array" then [.[] | select(type == "string" or .type == "text") | if type == "string" then . else .text end] | join("\n") else "" end // ""' "$TRANSCRIPT_PATH" 2>/dev/null)
-
-    # Get assistant messages after the last user message (current turn only)
-    LAST_ASSISTANT_TEXT=$(jq -rs '
-      . as $all |
-      ([to_entries[] | select(.value.type == "user") | select(.value.message.content | (type == "string") or (type == "array" and any(type == "string" or .type == "text"))) | .key] | last // -1) as $last_user_idx |
-      $all | [to_entries[] | select(.key > $last_user_idx and .value.type == "assistant") | .value.message.content | if type == "array" then [.[] | select(.type == "text") | .text] else [. // ""] end] | flatten | map(select(. != "")) | join("\n\n")
-    ' "$TRANSCRIPT_PATH" 2>/dev/null)
-
-    # Get todo status
-    TODO_STATUS=$(parse_todos "$TRANSCRIPT_PATH")
-
-    # Build message
-    MESSAGE="━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"$'\n'
-
-    if [ -n "$LAST_HUMAN_TEXT" ]; then
-        TRUNCATED_REQUEST=$(truncate_text "$LAST_HUMAN_TEXT")
-        MESSAGE+=$'\n'":memo: Request:"$'\n'"$TRUNCATED_REQUEST"$'\n'
-    fi
-
-    if [ -n "$LAST_ASSISTANT_TEXT" ]; then
-        TRUNCATED_RESPONSE=$(truncate_text "$LAST_ASSISTANT_TEXT")
-        MESSAGE+=$'\n'":robot_face: Response:"$'\n'"$TRUNCATED_RESPONSE"$'\n'
-    fi
-
-    if [ -n "$TODO_STATUS" ]; then
-        MESSAGE+=$'\n'"$TODO_STATUS"
-    fi
-else
-    MESSAGE="Claude is waiting for your input"
-fi
-
-# === SEND NOTIFICATIONS ===
 # Escape special characters for JSON
 escape_json() {
     local text="$1"
@@ -183,23 +130,81 @@ escape_json() {
     echo "$text"
 }
 
-ESCAPED_TITLE=$(escape_json "$TITLE")
-ESCAPED_MESSAGE=$(escape_json "$MESSAGE")
+# === MAIN LOGIC ===
+# Only run when executed directly (not when sourced)
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    # === CONFIGURATION ===
+    # Load webhook URLs from ~/.claude/.env if it exists
+    ENV_FILE="$HOME/.claude/.env"
+    if [ -f "$ENV_FILE" ]; then
+        # Source the .env file (supports KEY="value" format)
+        set -a
+        source "$ENV_FILE"
+        set +a
+    fi
 
-# Send to Slack
-if [ -n "$SLACK_WEBHOOK" ]; then
-    curl -s -X POST "$SLACK_WEBHOOK" \
-        -H "Content-Type: application/json" \
-        -d "{\"text\": \"*$ESCAPED_TITLE*\\n$ESCAPED_MESSAGE\"}" \
-        > /dev/null 2>&1
+    # Use environment variables (can be set in ~/.claude/.env or shell environment)
+    SLACK_WEBHOOK="${SLACK_WEBHOOK_URL:-}"
+    DISCORD_WEBHOOK="${DISCORD_WEBHOOK_URL:-}"
+
+    # === READ HOOK INPUT ===
+    INPUT=$(cat)
+    TRANSCRIPT_PATH=$(echo "$INPUT" | jq -r '.transcript_path // empty')
+
+    # === BUILD NOTIFICATION ===
+    HOSTNAME=$(hostname)
+    TITLE="Claude Code @ $HOSTNAME"
+
+    if [ -n "$TRANSCRIPT_PATH" ] && [ -f "$TRANSCRIPT_PATH" ]; then
+        # Get last user message with actual text (skip tool_result-only and isMeta messages)
+        # Also replace image objects with [Image] placeholder
+        LAST_HUMAN_TEXT=$(jq -rs '[.[] | select(.type == "user" and (.isMeta | not)) | select((.message.content | type == "string") or (.message.content | type == "array" and any(.[]; type == "string" or .type == "text" or .type == "image")))] | last | .message.content | if type == "string" then . elif type == "array" then [.[] | if .type == "image" then "[Image]" elif type == "string" then . elif .type == "text" then .text else empty end] | join("\n") else "" end // ""' "$TRANSCRIPT_PATH" 2>/dev/null)
+
+        # Get assistant messages after the last user message (current turn only, skip isMeta)
+        LAST_ASSISTANT_TEXT=$(jq -rs '. as $all | ([to_entries[] | select(.value.type == "user" and (.value.isMeta | not)) | select(.value.message.content | (type == "string") or (type == "array" and any(type == "string" or .type == "text" or .type == "image"))) | .key] | last // -1) as $last_user_idx | $all | [to_entries[] | select(.key > $last_user_idx and .value.type == "assistant") | .value.message.content | if type == "array" then [.[] | select(.type == "text") | .text] else [. // ""] end] | flatten | map(select(. != "")) | join("\n\n")' "$TRANSCRIPT_PATH" 2>/dev/null)
+
+        # Get todo status
+        TODO_STATUS=$(parse_todos "$TRANSCRIPT_PATH")
+
+        # Build message
+        MESSAGE="━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"$'\n'
+
+        if [ -n "$LAST_HUMAN_TEXT" ]; then
+            TRUNCATED_REQUEST=$(truncate_text "$LAST_HUMAN_TEXT")
+            MESSAGE+=$'\n'":memo: Request:"$'\n'"$TRUNCATED_REQUEST"$'\n'
+        fi
+
+        if [ -n "$LAST_ASSISTANT_TEXT" ]; then
+            TRUNCATED_RESPONSE=$(truncate_text "$LAST_ASSISTANT_TEXT")
+            MESSAGE+=$'\n'":robot_face: Response:"$'\n'"$TRUNCATED_RESPONSE"$'\n'
+        fi
+
+        if [ -n "$TODO_STATUS" ]; then
+            MESSAGE+=$'\n'"$TODO_STATUS"
+        fi
+    else
+        MESSAGE="Claude is waiting for your input"
+    fi
+
+    # === SEND NOTIFICATIONS ===
+    ESCAPED_TITLE=$(escape_json "$TITLE")
+    ESCAPED_MESSAGE=$(escape_json "$MESSAGE")
+
+    # Send to Slack
+    if [ -n "$SLACK_WEBHOOK" ]; then
+        curl -s -X POST "$SLACK_WEBHOOK" \
+            -H "Content-Type: application/json" \
+            -d "{\"text\": \"*$ESCAPED_TITLE*\\n$ESCAPED_MESSAGE\"}" \
+            > /dev/null 2>&1
+    fi
+
+    # Send to Discord
+    if [ -n "$DISCORD_WEBHOOK" ]; then
+        curl -s -X POST "$DISCORD_WEBHOOK" \
+            -H "Content-Type: application/json" \
+            -d "{\"content\": \"**$ESCAPED_TITLE**\\n$ESCAPED_MESSAGE\"}" \
+            > /dev/null 2>&1
+    fi
+
+    exit 0
 fi
-
-# Send to Discord
-if [ -n "$DISCORD_WEBHOOK" ]; then
-    curl -s -X POST "$DISCORD_WEBHOOK" \
-        -H "Content-Type: application/json" \
-        -d "{\"content\": \"**$ESCAPED_TITLE**\\n$ESCAPED_MESSAGE\"}" \
-        > /dev/null 2>&1
-fi
-
-exit 0

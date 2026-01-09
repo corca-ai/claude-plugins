@@ -1,0 +1,2 @@
+{"type":"user","message":{"content":"Request"}}
+{"type":"assistant","message":{"content":[{"type":"text","text":"Single response"}]}}

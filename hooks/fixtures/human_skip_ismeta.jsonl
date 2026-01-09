@@ -1,0 +1,2 @@
+{"type":"user","message":{"content":[{"type":"text","text":"Real request with image"},{"type":"image","source":{"type":"base64","data":"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk"}}]}}
+{"type":"user","isMeta":true,"message":{"content":[{"type":"text","text":"[Image: original 2032x960, displayed at 2000x945]"}]}}

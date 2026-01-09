@@ -1,0 +1,4 @@
+{"type":"user","message":{"content":"Request"}}
+{"type":"assistant","message":{"content":[{"type":"text","text":"First response"},{"type":"tool_use","id":"toolu_01ABC","name":"Bash","input":{"command":"ls"}}]}}
+{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"toolu_01ABC","content":"file1.txt\nfile2.txt"}]}}
+{"type":"assistant","message":{"content":[{"type":"text","text":"Second response after tool"}]}}

@@ -1,0 +1,3 @@
+{"type":"user","message":{"content":"First message"}}
+{"type":"assistant","message":{"content":[{"type":"text","text":"Response to first"}]}}
+{"type":"user","message":{"content":"Second message with text only"}}
