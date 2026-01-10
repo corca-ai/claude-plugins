@@ -1,4 +1,4 @@
-# korka-claude-tools
+# corca-claude-plugins
 
 코르카에서 유지보수하는, [AI-Native Product Team](AI_NATIVE_PRODUCT_TEAM.md)을 위한 Claude Code 플러그인입니다.
 
@@ -8,7 +8,7 @@
 
 ```bash
 # 레포지토리 클론
-git clone https://github.com/korkaio/public-agents-and-skills.git
+git clone https://github.com/corcaio/public-agents-and-skills.git
 
 # Claude Code 실행 시 플러그인 디렉토리 지정
 claude --plugin-dir /path/to/public-agents-and-skills
@@ -32,9 +32,7 @@ chmod +x ~/.claude/hooks/attention.sh
 
 ### [clarify](skills/clarify/SKILL.md)
 
-모호하거나 불명확한 요구사항을 반복적인 질문을 통해 명확하고 실행 가능한 사양으로 변환하는 스킬입니다. [정구봉님](https://www.linkedin.com/in/gb-jeong/)의 [Team Attention](https://github.com/team-attention)에서 만든 [Clarify 스킬](https://github.com/team-attention/plugins-for-claude-natives/blob/main/plugins/clarify/SKILL.md)의 복제본입니다. (사용법 참조: 정구봉님 [링크드인 포스트](https://www.linkedin.com/posts/gb-jeong_%ED%81%B4%EB%A1%9C%EB%93%9C%EC%BD%94%EB%93%9C%EA%B0%80-%EA%B0%9D%EA%B4%80%EC%8B%9D%EC%9C%BC%EB%A1%9C-%EC%A7%88%EB%AC%B8%ED%95%98%EA%B2%8C-%ED%95%98%EB%8A%94-skills%EB%A5%BC-%EC%82%AC%EC%9A%A9%ED%95%B4%EB%B3%B4%EC%84%B8%EC%9A%94-clarify-activity-7413349697022570496-qLts))
-
-사실 [클로드 코드의 AskUserQuestion Tool이 좋아서](https://www.stdy.blog/claude-code-ask-user-question/) 직접 만들어서 쓰던 버전이 있었습니다. 그런데 구봉님이 만드신 버전이 좋아보여서, 제 버전과 통합해봤지만 구봉님의 원본보다 성능이 떨어지더군요. 그래서 현재는 그냥 구봉님 버전을 쓰고 있는데, 꾸준히 사용하다가 개선점이 보이면 수정해볼 생각입니다.
+모호하거나 불명확한 요구사항을 반복적인 질문을 통해 명확하고 실행 가능한 사양으로 변환하는 스킬입니다. [Team Attention](https://github.com/team-attention)에서 만든 [Clarify 스킬](https://github.com/team-attention/plugins-for-claude-natives/blob/main/plugins/clarify/SKILL.md)을 가져와서 커스터마이즈했습니다. (사용법 참조: 정구봉님 [링크드인 포스트](https://www.linkedin.com/posts/gb-jeong_%ED%81%B4%EB%A1%9C%EB%93%9C%EC%BD%94%EB%93%9C%EA%B0%80-%EA%B0%9D%EA%B4%80%EC%8B%9D%EC%9C%BC%EB%A1%9C-%EC%A7%88%EB%AC%B8%ED%95%98%EA%B2%8C-%ED%95%98%EB%8A%94-skills%EB%A5%BC-%EC%82%AC%EC%9A%A9%ED%95%B4%EB%B3%B4%EC%84%B8%EC%9A%94-clarify-activity-7413349697022570496-qLts))
 
 **사용법**: "다음 요구사항을 명확하게 해줘", "clarify the following:" 등으로 트리거
 
@@ -128,7 +126,7 @@ DISCORD_WEBHOOK_URL=""  # Discord 사용 시 설정
 ## 플러그인 구조
 
 ```
-korka-claude-tools/
+corca-claude-plugins/
 ├── .claude-plugin/
 │   └── plugin.json          # 플러그인 매니페스트
 ├── skills/

@@ -1,11 +1,10 @@
 {
-  "name": "korka-claude-tools",
-  "description": "Tools for AI-Native Product Team - Skills and hooks for Claude Code including clarify, slack-to-md, and attention notifications",
-  "version": "1.0.0",
+  "name": "corca-claude-plugins",
+  "description": "Claude Plugins for AI-Native Product Team - developed and managed by Corca",
+  "version": "0.1.0",
   "author": {
-    "name": "Korka"
+    "name": "Corca",
+    "url": "https://www.corca.ai/"
   },
-  "homepage": "https://github.com/korkaio/public-agents-and-skills",
-  "repository": "https://github.com/korkaio/public-agents-and-skills",
-  "license": "MIT"
+  "repository": "https://github.com/corca-ai/public-agents-and-skills"
 }

@@ -1,15 +1,20 @@
 ---
 name: clarify
-description: This skill should be used when the user asks to "clarify requirements", "refine requirements", "specify requirements", "what do I mean", "make this clearer", or when the user's request is ambiguous and needs iterative questioning to become actionable. Also trigger when user says "clarify", "/clarify", or mentions unclear/vague requirements.
+description: Transform vague or ambiguous requirements into precise, actionable specifications through structured questioning. Use when user says "clarify", "refine requirements", or when requirements are unclear, incomplete, or open to multiple interpretations. Always use before implementing any ambiguous feature request.
+allowed-tools:
+  - AskUserQuestion
+  - Write
+  - Read
 ---
 
 # Clarify
 
-Transform vague or ambiguous requirements into precise, actionable specifications through iterative questioning.
+## Quick Start
 
-## Purpose
-
-When requirements are unclear, incomplete, or open to multiple interpretations, use structured questioning to extract the user's true intent before any implementation begins.
+1. **Capture**: Record the original requirement verbatim
+2. **Clarify**: Use `AskUserQuestion` to resolve ambiguities iteratively
+3. **Compare**: Present Before/After comparison
+4. **Save** (optional): Offer to save clarified spec to file
 
 ## Protocol
 
@@ -22,14 +27,11 @@ Record the original requirement exactly as stated:
 "{user's original request verbatim}"
 ```
 
-Identify ambiguities:
-- What is unclear or underspecified?
-- What assumptions would need to be made?
-- What decisions are left to interpretation?
+Identify ambiguities using the categories below (see **Ambiguity Categories**).
 
 ### Phase 2: Iterative Clarification
 
-Use AskUserQuestion tool to resolve each ambiguity. Continue until ALL aspects are clear.
+Use `AskUserQuestion` tool to resolve each ambiguity. Continue until ALL aspects are clear.
 
 **Question Design Principles:**
 - **Specific over general**: Ask about concrete details, not abstract preferences
@@ -38,24 +40,12 @@ Use AskUserQuestion tool to resolve each ambiguity. Continue until ALL aspects a
 - **Neutral framing**: Present options without bias
 
 **Loop Structure:**
-```
+```python
 while ambiguities_remain:
     identify_most_critical_ambiguity()
     ask_clarifying_question()  # Use AskUserQuestion tool
     update_requirement_understanding()
     check_for_new_ambiguities()
-```
-
-**AskUserQuestion Format:**
-```
-question: "What authentication method should be used?"
-options:
-  - label: "Username/Password"
-    description: "Traditional email/password login"
-  - label: "OAuth"
-    description: "Google, GitHub, etc. social login"
-  - label: "Magic Link"
-    description: "Passwordless email link"
 ```
 
 ### Phase 3: Before/After Comparison
@@ -70,6 +60,7 @@ After clarification is complete, present the transformation:
 
 ### After (Clarified)
 **Goal**: [precise description of what user wants]
+**Reason**: [the ultimate purpose or jobs to be done]
 **Scope**: [what's included and excluded]
 **Constraints**: [limitations, requirements, preferences]
 **Success Criteria**: [how to know when done]
@@ -83,17 +74,9 @@ After clarification is complete, present the transformation:
 
 ### Phase 4: Save Option
 
-Ask if the user wants to save the clarified requirement:
-
-```
-AskUserQuestion:
-question: "Save this requirement specification to a file?"
-options:
-  - label: "Yes, save to file"
-    description: "Save to requirements/ directory"
-  - label: "No, proceed"
-    description: "Continue without saving"
-```
+Use `AskUserQuestion` to ask if the user wants to save the clarified requirement:
+- Question: "Save this requirement specification to a file?"
+- Options: "Yes, save to file" (Save to requirements/ directory) / "No, proceed" (Continue without saving)
 
 If saving:
 - Default location: `requirements/` or project-appropriate directory
@@ -112,6 +95,8 @@ Common types to probe:
 | **Data** | Inputs? Outputs? Format? |
 | **Constraints** | Performance? Compatibility? |
 | **Priority** | Must-have vs nice-to-have? |
+| **Reason** | Why are you doing this? What are jobs to be done? |
+| **Success** | How to verify we're taking the right steps? |
 
 ## Examples
 
@@ -127,9 +112,10 @@ Common types to probe:
 
 **Clarified**:
 - Goal: Add username/password login with self-registration
+- Reason: Restrict access to authorized users only
 - Scope: Login, logout, registration, password reset
 - Constraints: 24h session, bcrypt, rate limit 5 attempts
-- Success: User can register, login, logout, reset password
+- Success Criteria: User can register, login, logout, reset password
 
 ### Example 2: Bug Report
 
@@ -143,9 +129,10 @@ Common types to probe:
 
 **Clarified**:
 - Goal: Fix CSV export producing empty files
+- Reason: Users need to export data for external reporting
 - Scope: CSV only, other formats work
-- Constraint: Regression from v2.1
-- Success: CSV contains correct data matching UI
+- Constraints: Regression from v2.1, must not break other exports
+- Success Criteria: CSV contains correct data matching UI
 
 ## Rules
 
