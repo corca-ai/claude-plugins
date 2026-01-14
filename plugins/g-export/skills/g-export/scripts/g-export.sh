@@ -55,8 +55,9 @@ OUTPUT_PATH="${OUTPUT_DIR}/${FILENAME}"
 curl -sL -o "$OUTPUT_PATH" "$EXPORT_URL"
 
 # For markdown files, remove base64 embedded images (they waste context for LLM analysis)
+# Google Docs uses reference-style images: [imageN]: <data:image/...>
 if [[ "$FORMAT" == "md" ]]; then
-    sed -i '' 's/!\[[^]]*\](data:image[^)]*)/[image removed]/g' "$OUTPUT_PATH"
+    sed -i '' '/^\[image[0-9]*\]: <data:image/d' "$OUTPUT_PATH"
 fi
 
 # Check if download succeeded (non-empty file)

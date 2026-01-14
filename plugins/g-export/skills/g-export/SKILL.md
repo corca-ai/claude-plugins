@@ -36,4 +36,4 @@ Download public Google documents to `./g-exports/`.
 - Only public documents work
 - Uses original document title as filename
 - Sheets csv/tsv: first sheet only; use `&gid={sheetId}` in URL for others
-- **Markdown images**: Base64 embedded images are removed from md exports (replaced with `[image removed]`). For documents with important images, use `docx` or `pdf` format instead.
+- md exports: base64 images removed; use `docx` or `pdf` for image-heavy documents

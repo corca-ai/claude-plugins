@@ -5,7 +5,7 @@
 ## 1. 수정
 
 - `plugins/<plugin-name>/` 디렉토리의 파일을 수정한다.
-- [marketplace.json](../.claude-plugin/marketplace.json)에서 적절하게 해당 플러그인의 버전을 업데이트한다.
+- plugin.json에서 적절하게 해당 플러그인의 버전을 업데이트한다.
 
 ## 2. 테스트
 

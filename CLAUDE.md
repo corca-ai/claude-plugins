@@ -1,15 +1,12 @@
-## 문서 업데이트 필수
+## Before You Start
 
-코드를 수정할 때는 **반드시 README.md를 읽고** 관련 내용이 있는지 확인해야 한다.
+**Always** read the relevant documentation before modifying any code:
 
-**작업 순서**:
-1. `README.md` 읽기 ← 이 단계를 건너뛰지 말 것
-2. 코드 수정
-3. 수정한 코드와 관련된 문서 내용이 있으면 함께 갱신
+1. Read `README.md` — check if your changes affect documented content
+2. For plugin work, also read:
+   - [Modifying/Testing/Deploying Plugins](docs/modifying-plugin.md)
+   - [Adding New Plugins](docs/adding-plugin.md)
+3. Modify code
+4. Update any affected documentation
 
-문서를 읽지 않고 작업을 완료했다고 하면 안 된다.
-
-## 플러그인 작업 가이드
-
-- [플러그인 수정/테스트/배포](docs/modifying-plugin.md)
-- [새 플러그인 추가 시](docs/adding-plugin.md)
+Do not consider the task complete without updating related docs.
