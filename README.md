@@ -59,7 +59,7 @@ claude plugin update <plugin-name>@corca-plugins
 /plugin install g-export@corca-plugins
 ```
 
-공개된 Google 문서(Slides, Docs, Sheets)를 로컬 파일로 다운로드하는 스킬입니다.
+공개된 Google 문서(Slides, Docs, Sheets)를 로컬 파일로 다운로드하는 스킬입니다. ([작업 배경 블로그 글](https://www.stdy.blog/1p1w-02-g-export/))
 
 **사용법**:
 - 명시적 호출: `/g-export`
