@@ -4,27 +4,30 @@
 
 ## 설치
 
-### 1. Marketplace 추가
-
-클로드 코드 내에서 다음을 실행하세요:
+### 1. Marketplace 추가 및 업데이트
 
 ```bash
-/plugin marketplace add corca-ai/claude-plugins
+claude plugin marketplace add corca-plugins
 ```
 
-새 플러그인이 추가되거나 기존 플러그인이 업데이트되면, 아래 명령으로 최신 버전 기준 플러그인을 조회 및 설치할 수 있습니다:
-
+새 플러그인이 추가되거나 기존 플러그인이 업데이트되면, 먼저 마켓플레이스를 업데이트하세요:
 ```bash
+claude plugin marketplace update corca-plugins
+```
+
+그 다음 필요한 플러그인을 설치하거나 업데이트합니다:
+```bash
+claude plugin install <plugin-name>@corca-plugins  # 새로 설치
+claude plugin update <plugin-name>@corca-plugins   # 기존 플러그인 업데이트
+```
+
+설치/업데이트 후 Claude Code를 재시작하면 적용됩니다.
+
+터미널 대신 Claude Code 내에서도 동일한 작업이 가능합니다:
+```
+/plugin marketplace add corca-ai/claude-plugins
 /plugin marketplace update
 ```
-
-개별 플러그인이 업데이트된 경우 marketplace update 후 터미널에서 다음 명령어를 실행하는 게 가장 확실합니다:
-
-```bash
-claude plugin update <plugin-name>@corca-plugins
-```
-
-업데이트 후 Claude Code를 재시작하면 새 플러그인 사용이 가능해집니다.
 
 ### 2. 플러그인 오버뷰
 
