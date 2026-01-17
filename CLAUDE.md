@@ -10,3 +10,9 @@ Do NOT proceed with code changes until completing the above steps.
 
 After modifying code, update any affected documentation.
 Do NOT consider the task complete without updating related docs.
+
+## Language
+
+Write all documentation in English, except for:
+- `README.md`
+- `AI_NATIVE_PRODUCT_TEAM.md`
