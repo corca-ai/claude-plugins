@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "A collection of Claude Code plugins for AI-Native Product Teams",
-    "version": "1.2.0"
+    "version": "1.3.0"
   },
   "plugins": [
     {

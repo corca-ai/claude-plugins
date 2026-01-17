@@ -34,8 +34,8 @@ claude plugin update <plugin-name>@corca-plugins   # 기존 플러그인 업데�
 | 플러그인 | 유형 | 설명 |
 |---------|------|------|
 | [clarify](#clarify) | Skill | 모호한 요구사항을 명확하게 정리 |
-| [g-export](#g-export) | Skill | Google 문서를 로컬 파일로 다운로드 |
 | [interview](#interview) | Skill | 구조화된 인터뷰로 요구사항 추출 |
+| [g-export](#g-export) | Skill | Google 문서를 로컬 파일로 다운로드 |
 | [slack-to-md](#slack-to-md) | Skill | Slack 메시지를 마크다운으로 변환 |
 | [suggest-tidyings](#suggest-tidyings) | Skill | 안전한 리팩토링 기회 제안 |
 | [attention-hook](#attention-hook) | Hook | 대기 상태일 때 Slack/Discord 알림 |
@@ -56,6 +56,30 @@ claude plugin update <plugin-name>@corca-plugins   # 기존 플러그인 업데�
 - 원본 요구사항 기록 후 체계적인 질문을 통해 모호함 해소
 - Before/After 비교로 명확해진 결과 제시
 - 명확해진 요구사항을 파일로 저장하는 옵션 제공. 필요시 이 문서를 Plan 모드에 넣어서 구현하면 됨
+
+### [interview](plugins/interview/skills/interview/SKILL.md)
+
+```bash
+/plugin install interview@corca-plugins
+```
+
+코르카의 AX 컨설턴트로 합류하신 [최정혁님](https://denoiser.club/)이 본인의 취향에 맞게 만드신 스킬입니다. 목적은 Clarify와 유사합니다. 구조화된 인터뷰를 통해 요구사항, 제약사항, 설계 결정을 추출하는 스킬입니다. 대화를 통해 프로젝트의 핵심 요구사항을 발견하고 문서화합니다.
+
+**사용법**:
+- `/interview <topic>` - 새 인터뷰 시작 (예: `/interview auth-system`)
+- `/interview <topic> --ref <path>` - 참조 파일을 기반으로 인터뷰
+- `/interview <topic> --workspace <dir>` - 작업 디렉토리 지정
+
+**주요 기능**:
+- 한 번에 하나의 질문으로 집중된 대화 진행
+- 실시간으로 SCRATCHPAD.md에 메모 기록
+- 인터뷰 종료 시 SYNTHESIS.md로 요약 문서 생성
+- 사용자 언어 자동 감지 및 적응 (한국어/영어)
+
+**출력물**:
+- `SCRATCHPAD.md` - 인터뷰 중 실시간 메모
+- `SYNTHESIS.md` - 정리된 요구사항 종합 문서
+- `JUST_IN_CASE.md` - 미래 에이전트를 위한 추가 맥락 (선택)
 
 ### [g-export](plugins/g-export/skills/g-export/SKILL.md)
 
@@ -86,30 +110,6 @@ g-export는 LLM이 문서 내용을 쉽게 파악할 수 있도록 텍스트 기
 **추출 예시(Sheet → TOON → Markdown)**:
 
 <img src="assets/g-export-sheet-md-example.png" alt="Sheet → TOON → Markdown" width="400">
-
-### [interview](plugins/interview/skills/interview/SKILL.md)
-
-```bash
-/plugin install interview@corca-plugins
-```
-
-구조화된 인터뷰를 통해 요구사항, 제약사항, 설계 결정을 추출하는 스킬입니다. 대화를 통해 프로젝트의 핵심 요구사항을 발견하고 문서화합니다.
-
-**사용법**:
-- `/interview <topic>` - 새 인터뷰 시작 (예: `/interview auth-system`)
-- `/interview <topic> --ref <path>` - 참조 파일을 기반으로 인터뷰
-- `/interview <topic> --workspace <dir>` - 작업 디렉토리 지정
-
-**주요 기능**:
-- 한 번에 하나의 질문으로 집중된 대화 진행
-- 실시간으로 SCRATCHPAD.md에 메모 기록
-- 인터뷰 종료 시 SYNTHESIS.md로 요약 문서 생성
-- 사용자 언어 자동 감지 및 적응 (한국어/영어)
-
-**출력물**:
-- `SCRATCHPAD.md` - 인터뷰 중 실시간 메모
-- `SYNTHESIS.md` - 정리된 요구사항 종합 문서
-- `JUST_IN_CASE.md` - 미래 에이전트를 위한 추가 맥락 (선택)
 
 ### [slack-to-md](plugins/slack-to-md/skills/slack-to-md/SKILL.md)
 
