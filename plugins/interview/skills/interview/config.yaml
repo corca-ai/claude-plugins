@@ -1,0 +1,6 @@
+# Interview skill configuration
+# These defaults can be overridden via command-line arguments
+
+# Directory where interview workspaces are created
+# Relative paths are resolved from the project root
+workspace_dir: workspace/interviews
