@@ -1,0 +1,10 @@
+{
+  "name": "interview",
+  "description": "A skill that conducts structured interviews to extract requirements, constraints, and design decisions",
+  "version": "1.0.0",
+  "author": {
+    "name": "Corca",
+    "url": "https://www.corca.ai/"
+  },
+  "repository": "https://github.com/corca-ai/claude-plugins"
+}

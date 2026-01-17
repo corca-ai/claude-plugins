@@ -38,6 +38,12 @@
       "source": "./plugins/g-export",
       "description": "A skill that downloads public Google Slides, Docs, and Sheets to local files",
       "keywords": ["google", "slides", "docs", "sheets", "export", "download"]
+    },
+    {
+      "name": "interview",
+      "source": "./plugins/interview",
+      "description": "A skill that conducts structured interviews to extract requirements, constraints, and design decisions",
+      "keywords": ["interview", "requirements", "discovery", "specification"]
     }
   ]
 }
