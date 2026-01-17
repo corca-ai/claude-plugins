@@ -82,6 +82,10 @@ g-export는 LLM이 문서 내용을 쉽게 파악할 수 있도록 텍스트 기
 - md 포맷은 base64 이미지가 자동 제거됨 (이미지가 중요하면 `docx`나 `pdf` 사용)
 - TOON 변환 가이드: [references/TOON.md](plugins/g-export/skills/g-export/references/TOON.md)
 
+**추출 예시(Sheet → TOON → Markdown)**:
+
+<img src="assets/g-export-sheet-md-example.png" alt="Sheet → TOON → Markdown" width="400">
+
 ### [slack-to-md](plugins/slack-to-md/skills/slack-to-md/SKILL.md)
 
 ```bash
@@ -165,7 +169,7 @@ DISCORD_WEBHOOK_URL=""  # Discord 사용 시 설정
 
 **알림 예시(Slack)**:
 
-![Slack 알림 예시](assets/slack-message-example.jpg)
+<img src="assets/slack-message-example.jpg" alt="Slack 알림 예시" width="600">
 
 ## 라이선스
 
