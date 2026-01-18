@@ -179,13 +179,14 @@ Claude Code가 사용자의 입력을 기다릴 때 Slack으로 푸시 알림을
 
 **필수 조건**:
 - `jq` 설치 필요 (JSON 파싱용)
+- Slack 봇 설정 후 알림 받을 채널에 대한 Webhook URL 준비
 
 **설정 방법**:
 
 1. `~/.claude/.env` 파일 생성 후 웹훅 URL 설정:
 ```bash
 # ~/.claude/.env
-SLACK_WEBHOOK_URL="" # Slack 사용 시 설정
+SLACK_WEBHOOK_URL=""
 CLAUDE_ATTENTION_DELAY=30  # AskUserQuestion 알림 지연 시간 (초, 기본값: 30)
 ```
 
@@ -197,11 +198,11 @@ CLAUDE_ATTENTION_DELAY=30  # AskUserQuestion 알림 지연 시간 (초, 기본�
 - ❓ 질문 대기 중: AskUserQuestion의 질문과 선택지 (있을 경우)
 - ✅ Todo: 완료/진행중/대기 항목 수 및 각 항목 내용
 
-**알림 예시(Slack)**:
+**알림 예시**:
 
-<img src="assets/attention-hook-normal-response.png" alt="Slack 알림 예시" width="600">
+<img src="assets/attention-hook-normal-response.png" alt="Slack 알림 예시 1 - 일반적인 응답" width="600">
 
-<img src="assets/attention-hook-AskUserQuestion.png" alt="Slack 알림 예시" width="600">
+<img src="assets/attention-hook-AskUserQuestion.png" alt="Slack 알림 예시 2 - AskUserQuestion" width="600">
 
 ## 라이선스
 
