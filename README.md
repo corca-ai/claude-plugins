@@ -7,7 +7,7 @@
 ### 1. Marketplace 추가 및 업데이트
 
 ```bash
-claude plugin marketplace add corca-plugins
+claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
 ```
 
 새 플러그인이 추가되거나 기존 플러그인이 업데이트되면, 먼저 마켓플레이스를 업데이트하세요:
