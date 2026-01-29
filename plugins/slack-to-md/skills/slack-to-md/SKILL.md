@@ -17,9 +17,9 @@ Before using this skill, the following setup is required:
    - `channels:join` - Auto-join channels when needed
    - `users:read` - Resolve user IDs to names
    - `files:read` - Download file attachments
-3. **Configure token**: Copy `.env` to `.env.local` and add your bot token:
+3. **Configure token**: Add your bot token to `~/.claude/.env`:
    ```
-   BOT_TOKEN=xoxb-your-token-here
+   SLACK_BOT_TOKEN=xoxb-your-token-here
    ```
 
 ## Workflow
@@ -70,7 +70,7 @@ The `slack-api.mjs` script automatically handles common errors:
 - `missing_scope`: Prints required OAuth scope to stderr
 
 If errors persist, check:
-1. Bot token is valid in `.env.local`
+1. Bot token is valid in `~/.claude/.env`
 2. Bot has required OAuth scopes
 3. Bot is added to the workspace
 

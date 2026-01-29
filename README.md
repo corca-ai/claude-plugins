@@ -136,7 +136,7 @@ g-export는 LLM이 문서 내용을 쉽게 파악할 수 있도록 텍스트 기
 - `jq` 설치 필요 (JSON 파싱용)
 - Slack Bot 설정 필요 ([생성 가이드](https://api.slack.com/apps)):
   - OAuth scopes: `channels:history`, `channels:join`, `users:read`, `files:read`
-  - `plugins/slack-to-md/skills/slack-to-md/.env.local`에 `BOT_TOKEN=xoxb-...` 설정
+  - `~/.claude/.env`에 `SLACK_BOT_TOKEN=xoxb-...` 설정
 
 ### [suggest-tidyings](plugins/suggest-tidyings/skills/suggest-tidyings/SKILL.md)
 

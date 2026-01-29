@@ -11,6 +11,7 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+import { homedir } from 'os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SKILL_DIR = join(__dirname, '..');
@@ -22,20 +23,23 @@ const CACHE_FILE = join(CACHE_DIR, 'users.json');
 // ============================================
 
 function loadToken() {
-  // Try .env.local first, then .env
-  for (const filename of ['.env.local', '.env']) {
-    const filepath = join(SKILL_DIR, filename);
-    if (existsSync(filepath)) {
-      const content = readFileSync(filepath, 'utf-8');
-      const match = content.match(/^BOT_TOKEN=(.+)$/m);
-      if (match && match[1].trim()) {
-        // Remove surrounding quotes and whitespace
-        return match[1].trim().replace(/^["']|["']$/g, '').trim();
-      }
+  // Check environment variable first
+  if (process.env.SLACK_BOT_TOKEN) {
+    return process.env.SLACK_BOT_TOKEN;
+  }
+
+  // Read from ~/.claude/.env
+  const envPath = join(homedir(), '.claude', '.env');
+  if (existsSync(envPath)) {
+    const content = readFileSync(envPath, 'utf-8');
+    const match = content.match(/^SLACK_BOT_TOKEN=(.+)$/m);
+    if (match && match[1].trim()) {
+      return match[1].trim().replace(/^["']|["']$/g, '').trim();
     }
   }
+
   throw new Error(
-    'BOT_TOKEN not found. Create .env.local with BOT_TOKEN=xoxb-...'
+    'SLACK_BOT_TOKEN not found. Add SLACK_BOT_TOKEN=xoxb-... to ~/.claude/.env'
   );
 }
 
