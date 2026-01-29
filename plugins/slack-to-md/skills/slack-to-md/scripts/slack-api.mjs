@@ -185,11 +185,22 @@ async function resolveUsers(userIds, token, cache) {
 // File Downloads
 // ============================================
 
-async function downloadFile(file, token, attachmentsDir) {
+async function downloadFile(file, token, attachmentsDir, usedNames) {
   const url = file.url_private_download;
   if (!url) return null;
 
-  const localName = `${file.id}_${file.name}`;
+  // Use original filename, adding numeric suffix on collision
+  let localName = file.name;
+  if (usedNames.has(localName)) {
+    const dotIdx = localName.lastIndexOf('.');
+    const base = dotIdx > 0 ? localName.slice(0, dotIdx) : localName;
+    const ext = dotIdx > 0 ? localName.slice(dotIdx) : '';
+    let n = 2;
+    while (usedNames.has(`${base}_${n}${ext}`)) n++;
+    localName = `${base}_${n}${ext}`;
+  }
+  usedNames.add(localName);
+
   const localPath = join(attachmentsDir, localName);
 
   // Skip if already downloaded
@@ -217,12 +228,13 @@ async function downloadFiles(messages, token, attachmentsDir) {
   if (!attachmentsDir) return;
 
   mkdirSync(attachmentsDir, { recursive: true });
+  const usedNames = new Set();
 
   for (const msg of messages) {
     if (!msg.files || msg.files.length === 0) continue;
 
     for (const file of msg.files) {
-      const localName = await downloadFile(file, token, attachmentsDir);
+      const localName = await downloadFile(file, token, attachmentsDir, usedNames);
       if (localName) {
         file.local_path = localName;
       }

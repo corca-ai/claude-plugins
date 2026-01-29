@@ -133,11 +133,12 @@ EOF
 
             if [[ -n "$local_path" ]]; then
                 # File was downloaded - use relative path from output file
+                # Wrap in <angle brackets> to handle special chars (spaces, parentheses, etc.)
                 rel_path="attachments/$local_path"
                 if is_image "$file_name"; then
-                    echo "- ![${file_name}](${rel_path})" >> "$OUTPUT_FILE"
+                    echo "- ![${file_name}](<${rel_path}>)" >> "$OUTPUT_FILE"
                 else
-                    echo "- [${file_name}](${rel_path})" >> "$OUTPUT_FILE"
+                    echo "- [${file_name}](<${rel_path}>)" >> "$OUTPUT_FILE"
                 fi
             else
                 # File not downloaded - just list the name
