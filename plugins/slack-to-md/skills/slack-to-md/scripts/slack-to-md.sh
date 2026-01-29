@@ -66,8 +66,33 @@ convert_links() {
     echo "$text"
 }
 
+# Image file extensions for inline rendering
+IMAGE_EXTS="png jpg jpeg gif webp svg bmp"
+
+is_image() {
+    local ext="${1##*.}"
+    ext=$(echo "$ext" | tr '[:upper:]' '[:lower:]')
+    for img_ext in $IMAGE_EXTS; do
+        if [[ "$ext" == "$img_ext" ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+# Compute relative path from output file to attachments directory
+OUTPUT_DIR=$(dirname "$OUTPUT_FILE")
+
+# Get total message count
+MSG_COUNT=$(echo "$JSON" | jq '.messages | sort_by(.ts) | length')
+
 # Process each message sorted by timestamp
-echo "$JSON" | jq -r '.messages | sort_by(.ts) | .[] | "\(.ts)\t\(.user)\t\(.text | gsub("\n"; "\\n"))"' | while IFS=$'\t' read -r ts user_id text; do
+for (( i=0; i<MSG_COUNT; i++ )); do
+    # Extract message fields
+    ts=$(echo "$JSON" | jq -r ".messages | sort_by(.ts) | .[$i].ts")
+    user_id=$(echo "$JSON" | jq -r ".messages | sort_by(.ts) | .[$i].user")
+    text=$(echo "$JSON" | jq -r ".messages | sort_by(.ts) | .[$i].text | gsub(\"\\n\"; \"\\\\n\")")
+
     # Get username
     user_name=$(get_username "$user_id")
 
@@ -95,6 +120,33 @@ echo "$JSON" | jq -r '.messages | sort_by(.ts) | .[] | "\(.ts)\t\(.user)\t\(.tex
 $text
 
 EOF
+
+    # Process file attachments
+    FILE_COUNT=$(echo "$JSON" | jq ".messages | sort_by(.ts) | .[$i].files // [] | length")
+    if [[ "$FILE_COUNT" -gt 0 ]]; then
+        # Write attachments header (using unicode directly instead of emoji shortcode)
+        printf '\xf0\x9f\x93\x8e **Attachments**\n' >> "$OUTPUT_FILE"
+
+        for (( j=0; j<FILE_COUNT; j++ )); do
+            file_name=$(echo "$JSON" | jq -r ".messages | sort_by(.ts) | .[$i].files[$j].name // \"unknown\"")
+            local_path=$(echo "$JSON" | jq -r ".messages | sort_by(.ts) | .[$i].files[$j].local_path // empty")
+
+            if [[ -n "$local_path" ]]; then
+                # File was downloaded - use relative path from output file
+                rel_path="attachments/$local_path"
+                if is_image "$file_name"; then
+                    echo "- ![${file_name}](${rel_path})" >> "$OUTPUT_FILE"
+                else
+                    echo "- [${file_name}](${rel_path})" >> "$OUTPUT_FILE"
+                fi
+            else
+                # File not downloaded - just list the name
+                echo "- ${file_name}" >> "$OUTPUT_FILE"
+            fi
+        done
+
+        echo "" >> "$OUTPUT_FILE"
+    fi
 done
 
 echo "Saved to $OUTPUT_FILE" >&2

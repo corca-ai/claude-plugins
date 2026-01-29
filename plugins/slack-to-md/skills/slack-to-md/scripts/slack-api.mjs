@@ -1,8 +1,11 @@
 #!/usr/bin/env node
 /**
  * Slack API wrapper for fetching thread messages
- * Usage: node slack-api.mjs <channel_id> <thread_ts>
+ * Usage: node slack-api.mjs <channel_id> <thread_ts> [--attachments-dir <path>]
  * Outputs JSON to stdout: { messages: [...], users: [...] }
+ *
+ * When --attachments-dir is provided, downloads file attachments from messages
+ * to the specified directory and includes local_path in file metadata.
  */
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
@@ -175,14 +178,74 @@ async function resolveUsers(userIds, token, cache) {
 }
 
 // ============================================
+// File Downloads
+// ============================================
+
+async function downloadFile(file, token, attachmentsDir) {
+  const url = file.url_private_download;
+  if (!url) return null;
+
+  const localName = `${file.id}_${file.name}`;
+  const localPath = join(attachmentsDir, localName);
+
+  // Skip if already downloaded
+  if (existsSync(localPath)) {
+    console.error(`Skipping (already exists): ${file.name}`);
+    return localName;
+  }
+
+  const response = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    console.error(`Failed to download ${file.name}: HTTP ${response.status}`);
+    return null;
+  }
+
+  const buffer = Buffer.from(await response.arrayBuffer());
+  writeFileSync(localPath, buffer);
+  console.error(`Downloaded: ${file.name} (${buffer.length} bytes)`);
+  return localName;
+}
+
+async function downloadFiles(messages, token, attachmentsDir) {
+  if (!attachmentsDir) return;
+
+  mkdirSync(attachmentsDir, { recursive: true });
+
+  for (const msg of messages) {
+    if (!msg.files || msg.files.length === 0) continue;
+
+    for (const file of msg.files) {
+      const localName = await downloadFile(file, token, attachmentsDir);
+      if (localName) {
+        file.local_path = localName;
+      }
+    }
+  }
+}
+
+// ============================================
 // Main
 // ============================================
 
 async function main() {
-  const [channelId, threadTs] = process.argv.slice(2);
+  const args = process.argv.slice(2);
+  const channelId = args[0];
+  const threadTs = args[1];
+
+  // Parse optional --attachments-dir flag
+  let attachmentsDir = null;
+  const attachIdx = args.indexOf('--attachments-dir');
+  if (attachIdx !== -1 && args[attachIdx + 1]) {
+    attachmentsDir = args[attachIdx + 1];
+  }
 
   if (!channelId || !threadTs) {
-    console.error('Usage: node slack-api.mjs <channel_id> <thread_ts>');
+    console.error(
+      'Usage: node slack-api.mjs <channel_id> <thread_ts> [--attachments-dir <path>]'
+    );
     process.exit(1);
   }
 
@@ -190,6 +253,9 @@ async function main() {
   const cache = loadUserCache();
 
   const messages = await fetchThread(channelId, threadTs, token);
+
+  // Download attachments if output directory is specified
+  await downloadFiles(messages, token, attachmentsDir);
 
   // Collect unique user IDs
   const userIds = [...new Set(messages.map((m) => m.user).filter(Boolean))];

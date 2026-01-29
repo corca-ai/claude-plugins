@@ -126,6 +126,7 @@ g-export는 LLM이 문서 내용을 쉽게 파악할 수 있도록 텍스트 기
 
 **주요 기능**:
 - Slack 스레드의 모든 메시지를 마크다운으로 변환. 봇은 필요시 자동으로 해당 채널에 join
+- 메시지에 첨부된 파일 자동 다운로드 (`slack-outputs/attachments/`에 저장)
 - 문서 생성을 위한 bash 스크립트를 이용해 토큰 절약
 - 첫 메시지 내용을 기반으로 의미있는 파일명 자동 생성
 - `slack-outputs/` 디렉토리에 저장
@@ -134,7 +135,7 @@ g-export는 LLM이 문서 내용을 쉽게 파악할 수 있도록 텍스트 기
 - Node.js 18+ 필요
 - `jq` 설치 필요 (JSON 파싱용)
 - Slack Bot 설정 필요 ([생성 가이드](https://api.slack.com/apps)):
-  - OAuth scopes: `channels:history`, `channels:join`, `users:read`
+  - OAuth scopes: `channels:history`, `channels:join`, `users:read`, `files:read`
   - `plugins/slack-to-md/skills/slack-to-md/.env.local`에 `BOT_TOKEN=xoxb-...` 설정
 
 ### [suggest-tidyings](plugins/suggest-tidyings/skills/suggest-tidyings/SKILL.md)

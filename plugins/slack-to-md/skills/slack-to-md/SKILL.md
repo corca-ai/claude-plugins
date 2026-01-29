@@ -16,6 +16,7 @@ Before using this skill, the following setup is required:
    - `channels:history` - Read messages from public channels
    - `channels:join` - Auto-join channels when needed
    - `users:read` - Resolve user IDs to names
+   - `files:read` - Download file attachments
 3. **Configure token**: Copy `.env` to `.env.local` and add your bot token:
    ```
    BOT_TOKEN=xoxb-your-token-here
@@ -39,14 +40,14 @@ Extract:
 Run the two scripts in a pipe:
 
 ```bash
-node {SKILL_DIR}/scripts/slack-api.mjs <channel_id> <thread_ts> | \
+node {SKILL_DIR}/scripts/slack-api.mjs <channel_id> <thread_ts> --attachments-dir {PROJECT_ROOT}/slack-outputs/attachments | \
   {SKILL_DIR}/scripts/slack-to-md.sh <channel_id> <thread_ts> <workspace> {PROJECT_ROOT}/slack-outputs/<output_file>.md [title]
 ```
 
 - `{SKILL_DIR}`: Shown at the top when skill is invoked as "Base directory for this skill: ..."
 - `{PROJECT_ROOT}`: Git root or current working directory (use absolute paths for reliability)
-- `slack-api.mjs`: Fetches thread data from Slack API, outputs JSON
-- `slack-to-md.sh`: Reads JSON from stdin, generates markdown file
+- `slack-api.mjs`: Fetches thread data from Slack API, outputs JSON. With `--attachments-dir`, also downloads file attachments to the specified directory.
+- `slack-to-md.sh`: Reads JSON from stdin, generates markdown file. If files have `local_path`, renders them as links (images inline, others as download links).
 
 ### 3. Rename to Meaningful Filename
 
