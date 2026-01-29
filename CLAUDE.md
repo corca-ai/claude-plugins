@@ -12,6 +12,10 @@ Do NOT proceed with code changes until completing the above steps.
 After modifying code, update any affected documentation.
 Do NOT consider the task complete without updating related docs.
 
+## Plan Mode
+
+When entering plan mode, follow the [Plan & Lessons Protocol](docs/plan-and-lessons.md).
+
 ## Language
 
 Write all documentation in English, except for:
