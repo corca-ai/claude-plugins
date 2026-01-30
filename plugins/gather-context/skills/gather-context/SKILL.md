@@ -57,91 +57,43 @@ When a service-specific env var is not set, pass the unified output dir as a CLI
 
 ## Google Export
 
-Download public Google Slides, Docs, and Sheets to local files.
-
 ```bash
 {SKILL_DIR}/scripts/g-export.sh <url> [format] [output-dir]
 ```
 
-| Type | Formats | Default |
-|------|---------|---------|
-| Slides | pptx, odp, pdf, txt | txt |
-| Docs | docx, odt, pdf, txt, epub, html, md | md |
-| Sheets | xlsx, ods, pdf, csv, tsv, toon | toon |
-
-**Prerequisites**: Only public documents (Share > Publish to web).
-
-**Notes**:
-- Uses original document title as filename
-- md exports: base64 images removed; use `docx` or `pdf` for image-heavy documents
-- Sheets default to TOON format. After reading, autonomously decide to transform survey/session data to Markdown (preserve the original file). See: [references/TOON.md](references/TOON.md)
-
-See: [references/google-export.md](references/google-export.md)
+**Prerequisites**: Public documents only (Share > Publish to web).
+Sheets default to TOON format — see [references/TOON.md](references/TOON.md). Details: [references/google-export.md](references/google-export.md)
 
 ---
 
 ## Slack Export
 
-Convert Slack thread URLs to markdown documents.
-
 **URL format**: `https://{workspace}.slack.com/archives/{channel_id}/p{timestamp}`
 
-Parse `thread_ts`: convert `p{digits}` → `{first10}.{rest}` (e.g., `p1234567890123456` → `1234567890.123456`)
-
-**Existing .md file**: Read and extract Slack URL from `> Source:` line to re-fetch.
-
-### Execution
-
-Run the two scripts in a pipe:
+Parse `thread_ts`: `p{digits}` → `{first10}.{rest}` (e.g., `p1234567890123456` → `1234567890.123456`)
 
 ```bash
 node {SKILL_DIR}/scripts/slack-api.mjs <channel_id> <thread_ts> --attachments-dir OUTPUT_DIR/attachments | \
   {SKILL_DIR}/scripts/slack-to-md.sh <channel_id> <thread_ts> <workspace> OUTPUT_DIR/<output_file>.md [title]
 ```
 
-- `slack-api.mjs`: Fetches thread data from Slack API, outputs JSON. Downloads file attachments with `--attachments-dir`.
-- `slack-to-md.sh`: Reads JSON from stdin, generates markdown file with inline images and download links.
+After conversion, rename to a meaningful name from the first message (lowercase, hyphens, max 50 chars).
+**Existing .md file**: Extract Slack URL from `> Source:` line to re-fetch.
 
-### Post-processing
-
-After conversion, rename the file to a meaningful name derived from the first message (lowercase, hyphens, max 50 chars).
-
-### Prerequisites
-
-1. **Node.js 18+**
-2. **Slack Bot** with OAuth scopes: `channels:history`, `channels:join`, `users:read`, `files:read`
-3. **Token** in `~/.claude/.env`: `SLACK_BOT_TOKEN=xoxb-your-token-here`
-
-### Error Handling
-
-- `not_in_channel`: Auto-joins and retries
-- `missing_scope`: Prints required scope to stderr
-
-See: [references/slack-export.md](references/slack-export.md)
+**Prerequisites**: Node.js 18+, Slack Bot (`channels:history`, `channels:join`, `users:read`, `files:read`), `SLACK_BOT_TOKEN` in `~/.claude/.env`.
+Details: [references/slack-export.md](references/slack-export.md)
 
 ---
 
 ## Notion Export
 
-Convert public Notion pages to local Markdown files. Python 3.7+ stdlib only.
-
 ```bash
 python3 {SKILL_DIR}/scripts/notion-to-md.py "$URL" "$OUTPUT_PATH"
 ```
 
-**Supported URLs**:
-- `https://workspace.notion.site/Title-{32hex}`
-- `https://www.notion.so/Title-{32hex}`
-- `https://www.notion.so/{32hex}`
-- 32-character hex string (bare page ID)
-
-**Prerequisites**: Page must be **published to the web** (Share > Publish in Notion). Python 3.7+.
-
-**Limitations**: Sub-pages render as `<!-- missing block -->`. Images are URL-only (S3 URLs expire). Database views not supported.
-
-**Language**: Adapt all outputs to match the user's prompt language.
-
-See: [references/notion-export.md](references/notion-export.md)
+**Prerequisites**: Page must be **published to the web**. Python 3.7+.
+**Limitations**: Sub-pages → `<!-- missing block -->`, images URL-only (S3 expires), no database views.
+Details: [references/notion-export.md](references/notion-export.md)
 
 ---
 
