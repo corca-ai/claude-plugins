@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "A collection of Claude Code plugins for AI-Native Product Teams",
-    "version": "1.6.0"
+    "version": "1.7.0"
   },
   "plugins": [
     {
@@ -58,10 +58,10 @@
       "keywords": ["retrospective", "session-review", "learning", "improvement"]
     },
     {
-      "name": "url-export",
-      "source": "./plugins/url-export",
-      "description": "A unified skill that auto-detects URL types and delegates to the appropriate export skill",
-      "keywords": ["url", "export", "google", "slack", "notion", "unified"]
+      "name": "gather-context",
+      "source": "./plugins/gather-context",
+      "description": "A skill that auto-detects URLs and gathers external content from Google Docs, Slack, Notion, and web pages",
+      "keywords": ["url", "export", "google", "slack", "notion", "gather", "context"]
     },
     {
       "name": "web-search",

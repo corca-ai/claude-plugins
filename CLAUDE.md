@@ -19,6 +19,8 @@ This is separate from the system plan file — create `prompt-logs/` directory w
 
 For non-trivial implementation tasks (new plugins, multi-file changes, architectural decisions), proactively use `EnterPlanMode` even when the user does not explicitly request it.
 
+On entering plan mode, proactively read `.claude/settings.json` to check for registered hooks and follow their intent, regardless of whether the hook execution was observed.
+
 ## Collaboration Style
 
 - The user communicates in Korean. Respond in Korean for conversation, English for code and docs (per Language rules below).
@@ -26,6 +28,7 @@ For non-trivial implementation tasks (new plugins, multi-file changes, architect
 - Prefer short, precise feedback loops — ask for intent confirmation before large implementations.
 - When researching Claude Code features (hooks, settings, plugins), always verify against the official docs (https://code.claude.com/docs/en/) via WebFetch. Do not rely solely on claude-code-guide agent responses.
 - When testing hooks or infrastructure, verify incrementally — test one path first, then expand to others.
+- When a custom skill (e.g., `/web-search`, `/gather-context`) overlaps with a built-in tool (e.g., WebSearch, WebFetch), prefer the custom skill. This supports dogfooding and ensures the skill is tested in real workflows.
 
 ## Language
 

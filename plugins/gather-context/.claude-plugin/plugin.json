@@ -1,6 +1,6 @@
 {
-  "name": "url-export",
-  "description": "A unified skill that auto-detects URL types and delegates to the appropriate export skill",
+  "name": "gather-context",
+  "description": "A skill that auto-detects URLs and gathers external content from Google Docs, Slack, Notion, and web pages",
   "version": "1.0.0",
   "author": {
     "name": "Corca",

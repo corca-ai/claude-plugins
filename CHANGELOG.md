@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-01-30
+
+### Added
+- Skills: `gather-context` - Unified context gathering skill that auto-detects URLs (Google Docs, Slack, Notion) and bundles all converter scripts. No separate skill installation needed.
+
+### Removed
+- Skills: `url-export` - Replaced by `gather-context`. Users should install `gather-context` instead.
+
 ## [1.6.0] - 2026-01-30
 
 ### Added

@@ -33,7 +33,7 @@ AI가 잘하는 영역과 인간이 반드시 개입해야 하는 영역을 구�
 
 **자료 조사 → 스펙 작성 → 스펙 정교화 → 스펙 리뷰 → 구현 지시 → 회고 → 코드 리뷰** 싸이클이 정착된다.
 
-1. **자료 조사**: 스펙을 작성하기 위해 필요한 회사 내부/외부의 정보들이 이미 LLM이 읽기 좋은 형태로 준비되어 있거나, 정보를 취합하는 도구들(MCP, 스크립트, 커스텀 프롬프트 등. 예: [url-export skill](./plugins/url-export)로 URL만 주면 자동 감지하여 적절한 도구([slack-to-md](./plugins/slack-to-md), [g-export](./plugins/g-export), [notion-to-md](./plugins/notion-to-md))로 위임, [web-search](./plugins/web-search) skill로 웹 검색/코드 검색을 통한 외부 정보 수집)이 준비되어 있다. 이러한 기초 자료들을 리서치 에이전트에게 제공해 보고서를 받는다.
+1. **자료 조사**: 스펙을 작성하기 위해 필요한 회사 내부/외부의 정보들이 이미 LLM이 읽기 좋은 형태로 준비되어 있거나, 정보를 취합하는 도구들(MCP, 스크립트, 커스텀 프롬프트 등. 예: [gather-context skill](./plugins/gather-context)로 URL만 주면 자동 감지하여 내장 스크립트로 Google Docs, Slack, Notion 콘텐츠를 수집, [web-search](./plugins/web-search) skill로 웹 검색/코드 검색을 통한 외부 정보 수집)이 준비되어 있다. 이러한 기초 자료들을 리서치 에이전트에게 제공해 보고서를 받는다.
 
 2. **스펙 작성**: 보고서를 가공한 스펙을 Jira 티켓/Github 이슈 등에 (가능하면 짝 작업으로) 작성한다.
 

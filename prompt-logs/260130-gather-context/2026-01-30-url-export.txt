@@ -1,0 +1,984 @@
+
+ ▐▛███▜▌   Claude Code v2.1.12
+▝▜█████▛▘  Opus 4.5 · Claude Max
+  ▘▘ ▝▝    ~/codes/claude-plugins
+
+❯ url-export 스킬에 대한 고민이 생겼습니다.                                 
+                                                                            
+  원래는 이 구조가 좋다고 생각했는데...                                     
+  - 사용자가 다른 스킬들을 설치해야 하는 의존성이 생김.                     
+  - 어차피 이렇게 export하는 목적은 context gathering임. 행위보다 목적이    
+  더 중요함. gather-context 같이 리네임하고, 유저                           
+  인풋 안에 들어있는 모든 url을 찾아서 적절히 export하면 되는 거 아닐까?    
+  필요하면 web-search 스킬도 쓰고?                                          
+  - 각 스킬은 deprecated 시킬까? (아예 삭제하면 기존에 설치했던 사람은      
+  어떻게 되는거지?) 근데 web-search 는 꼭 context                           
+  gather를 위해서 있는 건 아니라고 봐도 되려나? 근데 web-search 의 목적도   
+  결국은 context gathering 이긴 하지...                                     
+                                                                            
+  함께 논의해봅시다.                                                        
+
+● 좋은 고민이네요. 제대로 논의하려면 현재 구조를 먼저 파악해야 합니다. 코드를 살펴보겠습니다.
+
+● Explore(Explore plugin/skill structure)
+  ⎿  Done (45 tool uses · 54.4k tokens · 1m 34s)                         
+
+
+● 현재 구조를 파악했습니다. 정리하고 같이 논의해봅시다.
+
+  현재 상태
+
+  url-export: URL 타입을 감지해서 적절한 스킬로 라우팅하는 게이트웨이
+  - Google Docs/Slides/Sheets → g-export 호출
+  - Slack → slack-to-md 호출
+  - Notion → notion-to-md 호출
+  - 기타 → WebFetch fallback
+
+  web-search: Tavily/Exa API로 검색 + URL 콘텐츠 추출
+  - /web-search <query> → 웹 검색
+  - /web-search code <query> → 코드 검색
+  - /web-search extract <url> → URL 콘텐츠 추출
+
+  ---
+  논의 포인트
+
+  1. "행위보다 목적이 중요하다"는 관점에 동의합니다.
+
+  url-export는 이름 자체가 수단(export)을 설명하는데, 사용자 입장에서는 "이 URL에 있는 정보를 컨텍스트로 가져와줘"가 진짜 의도입니다. web-search도 마찬가지로 "내가 모르는 정보를 찾아와줘"이고 결국 context gathering입니다.
+
+  2. 하지만 합치기 전에 고려할 것:
+
+  - 스코프 폭발 위험: gather-context가 URL 파싱, Google API, Slack API, Notion API, Tavily API, Exa API를 전부 품으면 SKILL.md가 500줄 제한을 훌쩍 넘기고, 유지보수가 어려워집니다.
+  - API 키 부담: 사용자가 gather-context 하나를 설치했는데 TAVILY_API_KEY, EXA_API_KEY 등 여러 키를 요구하면 진입장벽이 높아집니다.
+  - 개별 스킬의 독립적 가치: g-export는 context gathering이 아니라 "Google 문서를 로컬 파일로 변환"하는 독립적 유틸리티로도 쓸 수 있습니다.
+
+  3. 대안적 구조 제안:
+
+  옵션 A: 완전 통합
+    gather-context (모든 기능 흡수)
+    → g-export, slack-to-md, notion-to-md, web-search 전부 deprecated
+
+  옵션 B: 목적 중심 리네임 + 의존성 내재화
+    gather-context (= url-export 진화)
+    → g-export, slack-to-md, notion-to-md의 로직을 직접 내장
+    → web-search는 독립 유지 (검색은 URL export와 다른 트리거)
+    → gather-context가 필요할 때 /web-search를 내부적으로 호출
+
+  옵션 C: 레이어 분리
+    gather-context (오케스트레이터, 상위 레벨)
+    → 하위 스킬들은 그대로 유지하되, gather-context가 자동 설치/번들
+    → 사용자는 gather-context만 설치하면 됨
+
+  4. 기존 사용자 영향:
+
+  현재 deprecation 메커니즘이 없습니다. 삭제하면 기존 설치 캐시는 남아있지만 업데이트를 못 받게 됩니다. marketplace.json에서 빼고 CHANGELOG에 deprecated로 기록하는 정도가 현실적입니다.
+
+  ---
+  제 의견: 옵션 B가 가장 현실적이라고 봅니다. url-export의 근본적 문제(의존성)를 해결하면서, web-search는 트리거가 다르니 분리를 유지합니다. 개별 export 스킬(g-export, slack-to-md, notion-to-md)은 deprecated 처리하되 marketplace에서 바로 삭제하지는 않고, gather-context의 description에서 "이 스킬이 대체합니다"를 명시하는 방식이요.
+
+  어떻게 생각하시나요?
+
+✻ Cooked for 2m 26s
+
+❯ 좋습니다. 새 브랜치 체크아웃하고, 그렇게 하기 위한 계획을 세워주세요.     
+  자율적으로, 적절한 단위로 커밋하면서 진행해주세요.                        
+
+● Bash(git checkout -b feat/gather-context)
+  ⎿  Switched to a new branch 'feat/gather-context'
+                                                                   
+● Entered plan mode
+  Claude is now exploring and designing an implementation approach.
+
+● Plan mode에 진입했습니다. 먼저 수정 대상 파일들을 상세히 파악하겠습니다.
+
+● Explore(Explore export skills details)
+  ⎿  Done (14 tool uses · 37.7k tokens · 40s)                            
+
+
+● 충분한 정보를 확보했습니다. 이제 구체적인 구현 계획을 설계하겠습니다.
+
+● Plan(Design gather-context plan)
+  ⎿  Done (35 tool uses · 72.7k tokens · 2m 24s)                         
+
+
+● 핵심 파일 몇 개를 직접 확인해서 계획을 검증하겠습니다.
+
+● Read(CHANGELOG.md)
+  ⎿  Read 51 lines
+
+● Search(pattern: "plugins/notion-to-md/skills/notion-to-md/references/**/*")
+  ⎿  Found 1 file (ctrl+o to expand)
+
+● Search(pattern: "url-export", path: "docs/project-context.md", output_mode:
+        "content")
+  ⎿  Found 5 lines (ctrl+o to expand)
+
+● Read(AI_NATIVE_PRODUCT_TEAM.md)
+  ⎿  Read 5 lines
+
+● 모든 정보를 확인했습니다. 최종 계획을 작성합니다.
+  ⎿  Interrupted · What should Claude do instead?
+
+❯ I'm wondering if you read plan-and-lesson doc (which should have been     
+  trigerred by the project hook in settings.json)                           
+
+● 확인하겠습니다. 탐색 단계에서 docs/plan-and-lessons.md를 요청은 했지만, 직접 읽어서 내용을 확인하지는 않았습니다. 지금 읽겠습니다.
+
+● Read(.claude/settings.json)
+  ⎿  Read 16 lines
+
+● 맞습니다. settings.json에 EnterPlanMode에 대한 PreToolUse 훅이 있어서, plan mode 진입 시 docs/plan-and-lessons.md를 읽고 따라야 합니다. 이제 읽었으니, 프로토콜에 맞춰 계획을 작성합니다.
+
+  핵심 요구사항:
+  - prompt-logs/260130-gather-context/plan.md — 영문, Success Criteria (Gherkin), Deferred Actions 포함
+  - prompt-logs/260130-gather-context/lessons.md — 한국어, 대화에서 얻은 러닝 기록
+  - 이 두 파일은 구현 시작 전에 생성
+
+  시스템 plan 파일에 통합해서 작성하겠습니다.
+  ⎿  Interrupted · What should Claude do instead?
+
+❯ Was the hook correctly triggered? can u check? 
+
+● 제가 대화 내에서 훅이 정상적으로 트리거되었는지 직접 확인할 수 있는 방법은 제한적입니다. 다만 두 가지 관찰이 가능합니다:
+
+  1. 훅 설정은 올바릅니다 — .claude/settings.json에 PreToolUse → EnterPlanMode 매처가 type: "prompt"로 구성되어 있음
+  2. 결과적으로 저는 프로토콜을 따르지 않았습니다 — plan mode 진입 후 docs/plan-and-lessons.md를 읽지 않고 바로 탐색을 시작했음
+
+  사용자 측 터미널에서 EnterPlanMode 호출 시점에 훅 관련 출력이 보였는지 확인해주시겠어요? 그게 트리거 여부를 확인하는 가장 확실한 방법입니다.
+
+❯ 현재 클코 안에 있어서 hook 발동 여부를 어떻게 확인하는지 모릅니다. 이     
+  observability를 당신이 어떻게 확보할지 고민이 되네요. 여기에 대한 의견을  
+  주시고, 그다음 원래 하던 일로 돌아가시죠.                                 
+
+● 좋은 질문입니다. 현실적으로 몇 가지 방법이 있습니다:
+
+  1. 현재 구조의 한계
+  type: "prompt" 훅은 텍스트를 제 컨텍스트에 주입하는데, 주입된 텍스트와 시스템 메시지를 구분할 명확한 방법이 없습니다. 발동 여부를 제가 스스로 검증할 수 없는 구조입니다.
+
+  2. 실용적 대안들
+
+  - 자기 방어적 접근: plan mode 진입 시 제가 직접 .claude/settings.json을 읽고, 등록된 훅의 의도를 능동적으로 수행. 훅 발동 여부에 의존하지 않음
+  - command 타입 + 로그 파일: type: "command"로 바꿔서 스크립트가 로그 파일을 남기게 하면, 제가 그 파일을 읽어서 발동 여부를 확인 가능
+  - 명시적 확인 패턴: 훅 프롬프트에 "이 메시지를 받으면 [HOOK:plan-protocol] 을 출력하라"는 지시를 넣으면, 출력 부재로 미발동을 감지 가능
+
+  3. 제 의견
+  가장 견고한 건 첫 번째 — 훅에 의존하지 않고 CLAUDE.md에 이미 명시된 프로토콜을 제가 능동적으로 따르는 것. 훅은 "리마인더" 역할이고, 실패해도 프로토콜 자체는 CLAUDE.md에 있으니까요. 다만 이번에 제가 CLAUDE.md에 있는 것도 안 따랐으니, 이건 제 실수입니다.
+
+  ---
+  원래 작업으로 돌아가겠습니다. plan-and-lessons 프로토콜에 따라 prompt-logs/260130-gather-context/ 디렉토리에 plan.md를 작성하고, lessons.md도 시작하겠습니다.
+
+● Write(prompt-logs/260130-gather-context/lessons.md)
+  ⎿  Wrote 24 lines to prompt-logs/260130-gather-context/lessons.md      
+      1 # Lessons
+      2 ### 훅 발동 확인의 어려움
+      3 - **Expected**: `PreToolUse: EnterPlanMode` 훅이 발동되면 plan-an
+        d-lessons 프로토콜을 즉시 따를 것
+      4 - **Actual**: 훅 발동 여부를 확인하지 못하고, CLAUDE.md에 명시된 
+        프로토콜도 따르지 않음
+      5 - **Takeaway**: 훅에 의존하지 말고, plan mode 진입 시 CLAUDE.md의
+         프로토콜 섹션을 능동적으로 확인할 것
+      6 When plan mode 진입 → `.claude/settings.json` 훅 확인 + `docs/pla
+        n-and-lessons.md` 읽기를 먼저 수행
+     … +14 lines (ctrl+o to expand)
+
+● 이제 시스템 plan 파일에 최종 계획을 작성하겠습니다.
+
+● Updated plan
+  ⎿  Wrote 121 lines to ../../.claude/plans/lovely-beaming-stardust.md   
+      1 # Plan: Migrate url-export → gather-context (Option B)
+      2 ## Overview
+      3 Rename `url-export` to `gather-context`, internalize scripts from
+         g-export/slack-to-md/notion-to-md (eliminating dependency on sep
+        arate skill installations), keep `web-search` independent, remove
+         `url-export` from marketplace.
+      4 ## Success Criteria
+      5 ```gherkin
+      6 Given a user installs only gather-context
+     … +111 lines (ctrl+o to expand)
+                                                                         
+● User approved Claude's plan
+  ⎿  Plan saved to: ~/.claude/plans/lovely-beaming-stardust.md · /plan to 
+     edit
+
+     Plan: Migrate url-export → gather-context (Option B)
+
+     Overview
+
+     Rename url-export to gather-context, internalize scripts from
+     g-export/slack-to-md/notion-to-md (eliminating dependency on separate
+     skill installations), keep web-search independent, remove url-export
+     from marketplace.
+
+     Success Criteria
+
+     Given a user installs only gather-context
+     When they provide a Google Docs URL
+     Then g-export.sh (bundled) runs and exports the document without
+     needing g-export skill installed
+
+     Given a user installs only gather-context
+     When they provide a Slack thread URL
+     Then slack-api.mjs + slack-to-md.sh (bundled) run and export the
+     thread
+
+     Given a user installs only gather-context
+     When they provide a Notion page URL
+     Then notion-to-md.py (bundled) runs and exports the page
+
+     Given a user provides a generic URL
+     When gather-context processes it
+     Then WebFetch fallback saves content as markdown
+
+     Given a user needs to search for information (no specific URL)
+     When gather-context detects this intent
+     Then it suggests using /web-search (no hard dependency)
+
+     Given url-export was previously in the marketplace
+     When a user updates the marketplace
+     Then url-export is no longer listed and gather-context is available
+
+     Target Directory Structure
+
+     plugins/gather-context/
+     ├── .claude-plugin/
+     │   └── plugin.json
+     └── skills/gather-context/
+         ├── SKILL.md                    # Orchestrator (<500 lines)
+         ├── references/
+         │   ├── google-export.md        # g-export details (formats, TOON)
+         │   ├── slack-export.md         # slack-to-md details (workflow,
+     errors)
+         │   ├── notion-export.md        # notion-to-md details (blocks,
+     API)
+         │   └── TOON.md                 # TOON format spec (copied from
+     g-export)
+         └── scripts/
+             ├── g-export.sh             # From plugins/g-export (122
+     lines)
+             ├── csv-to-toon.sh          # From plugins/g-export (177
+     lines)
+             ├── slack-api.mjs           # From plugins/slack-to-md (296
+     lines)
+             ├── slack-to-md.sh          # From plugins/slack-to-md (155
+     lines)
+             └── notion-to-md.py         # From plugins/notion-to-md (520
+     lines)
+
+     Note: test-fixes.sh is NOT copied (test-only, not runtime).
+
+     SKILL.md Design
+
+     ~200-250 lines target. Structure:
+     1. YAML frontmatter (name, description, trigger conditions,
+     allowed-tools)
+     2. URL Detection table (pattern → handler → script path)
+     3. Workflow (scan URLs → classify → execute → report → suggest
+     web-search if needed)
+     4. Configuration (env vars with priority chain)
+     5. Per-service condensed sections (command syntax, prereqs, key notes)
+     6. WebFetch fallback
+     7. Web search suggestion (non-dependency reference)
+
+     Key changes from url-export:
+     - Scripts referenced as {SKILL_DIR}/scripts/... instead of delegating
+     to other skills
+     - Env var: CLAUDE_CORCA_GATHER_CONTEXT_OUTPUT_DIR (default:
+     ./gathered)
+     - Service-specific env vars still work as overrides
+     - No "install missing skill" messages — everything is bundled
+
+     Scripts: No Modifications Needed
+
+     All scripts are self-contained:
+     - g-export.sh resolves SCRIPT_DIR via $(dirname "${BASH_SOURCE[0]}") —
+      finds csv-to-toon.sh relative to itself
+     - slack-api.mjs uses dirname(fileURLToPath(import.meta.url)) for
+     __dirname
+     - notion-to-md.py has no sibling file dependencies
+     - All scripts already read their own service-specific env vars
+
+     Files to Modify
+
+
+
+
+
+     File: plugins/gather-context/ (new)
+     Action: Create entire plugin directory
+     ────────────────────────────────────────
+     File: plugins/url-export/
+     Action: Delete entirely
+     ────────────────────────────────────────
+     File: .claude-plugin/marketplace.json
+     Action: Remove url-export, add gather-context, bump to 1.7.0
+     ────────────────────────────────────────
+     File: CHANGELOG.md
+     Action: Add [1.7.0] section
+     ────────────────────────────────────────
+     File: README.md
+     Action: Replace url-export section with gather-context
+     ────────────────────────────────────────
+     File: AI_NATIVE_PRODUCT_TEAM.md
+     Action: Update url-export reference on line 36
+     ────────────────────────────────────────
+     File: docs/project-context.md
+     Action: Update skill list on line 8
+     Commit Strategy
+     #: 1
+     Scope: Create gather-context
+     Description: plugin.json, SKILL.md, references/, scripts/ (copy)
+     ────────────────────────────────────────
+     #: 2
+     Scope: Update marketplace & changelog
+     Description: marketplace.json, CHANGELOG.md
+     ────────────────────────────────────────
+     #: 3
+     Scope: Remove url-export
+     Description: Delete plugins/url-export/
+     ────────────────────────────────────────
+     #: 4
+     Scope: Update documentation
+     Description: README.md, AI_NATIVE_PRODUCT_TEAM.md,
+     docs/project-context.md
+     ────────────────────────────────────────
+     #: 5
+     Scope: Add prompt-logs
+     Description: prompt-logs/260130-gather-context/plan.md, lessons.md
+     Individual Skills (g-export, slack-to-md, notion-to-md)
+
+     Keep as-is. They have independent standalone value. No deprecation.
+     Trade-off: script duplication may drift over time — acceptable given
+     independent use cases.
+
+     Deferred Actions
+
+     - Hook observability improvement (discussed during plan mode —
+     separate task)
+
+     Verification
+
+     1. Review SKILL.md line count (must be <500)
+     2. Verify scripts are byte-identical copies (diff against originals)
+     3. Verify marketplace.json is valid JSON after edits
+     4. Verify all internal links in README.md resolve correctly
+     5. Verify env var naming follows CLAUDE_CORCA_<SKILL>_<SETTING>
+     convention
+
+
+● 계획이 승인되었습니다. 구현을 시작합니다.
+
+● 먼저 디렉토리 구조를 만들고 스크립트를 복사하겠습니다.
+
+● Bash(mkdir -p
+      /home/hwidong/codes/claude-plugins/plugins/gather-context/.claude-plugin
+      && mkdir -p
+      /home/hwidong/codes/claude-plugins/plugins/gather-context/skills/g…)
+  ⎿  (No content)
+
+● Bash(cp plugins/g-export/skills/g-export/scripts/g-export.sh
+      plugins/gather-context/skills/gather-context/scripts/ && cp
+      plugins/g-export/skills/g-export/scripts/csv…)
+  ⎿  (No content)
+
+● 스크립트 복사 완료. 이제 source 파일들을 읽어서 SKILL.md와 reference 파일들을 작성하겠습니다.
+
+● Read(plugins/notion-to-md/skills/notion-to-md/references/supported-blocks.md)
+  ⎿  Read 48 lines
+
+● 모든 소스를 파악했습니다. 이제 파일들을 작성합니다.
+
+● Write(plugins/gather-context/skills/gather-context/references/TOON.md)
+  ⎿  Wrote 66 lines to                                              
+     plugins/gather-context/skills/gather-context/references/TOON.md
+      1 # TOON Format & Transformation
+      2 ## Format
+      3 ```toon
+      4 rows[3]{Name,Score,Comment}:
+      5   Alice,"95",Great work!
+      6   Bob,"87","Good effort\nKeep improving"
+      7   Charlie,"92","Well done, excellent!"
+      8 ```
+     … +56 lines (ctrl+o to expand)
+
+● Write(plugins/gather-context/skills/gather-context/references/notion-export.md
+       )
+  ⎿  Wrote 71 lines to plugins/gather-context/skills/gather-context/refer
+     ces/notion-export.md
+      1 # Notion Export Reference
+      2 ## Supported URL Formats
+      3 - `https://workspace.notion.site/Title-{32hex}`
+      4 - `https://www.notion.so/Title-{32hex}`
+      5 - `https://www.notion.so/{32hex}`
+      6 - 32-character hex string (bare page ID)
+      7 ## Script Usage
+     … +61 lines (ctrl+o to expand)
+
+● 이제 핵심인 SKILL.md를 작성합니다.
+
+● Write(plugins/gather-context/skills/gather-context/SKILL.md)
+  ⎿  Wrote 165 lines to                                                  
+     plugins/gather-context/skills/gather-context/SKILL.md
+      1 ---
+      2 name: gather-context
+      3 description: |
+      4   Gather external content from URLs into local files.
+      5   Auto-detects URL types and runs the appropriate bundled convert
+        er
+      6   (Google Docs, Slack threads, Notion pages) or falls back to Web
+        Fetch.
+      7   **IMPORTANT: Use this skill INSTEAD OF WebFetch** when you enco
+        unter
+      8   Google document URLs (docs.google.com/*). WebFetch cannot extra
+        ct
+      9   content from Google Docs - it only returns JavaScript loader co
+        de.
+     … +155 lines (ctrl+o to expand)
+
+● SKILL.md 작성 완료. 라인 수와 스크립트 복사 정합성을 검증합니다.
+
+● Bash(diff /home/hwidong/codes/claude-plugins/plugins/g-export/skills/g-export/
+      scripts/g-export.sh
+      /home/hwidong/codes/claude-plugins/plugins/gather-context/skills/ga…)
+  ⎿  All scripts are identical copies
+
+● SKILL.md 164줄 (500줄 이하), 스크립트 전부 동일 확인. Commit 1을 만들겠습니다.
+
+● Bash(git add plugins/gather-context/ && git commit -m "Add gather-context
+      plugin with bundled scripts…)
+  ⎿ [feat/gather-context 5c1969c] Add gather-context plugin with bundled 
+    sc
+    ripts
+     11 files changed, 1671 insertions(+)
+    … +21 lines (ctrl+o to expand)
+
+
+● Commit 2: marketplace.json과 CHANGELOG.md를 수정합니다.
+
+● Read(.claude-plugin/marketplace.json)
+  ⎿  Read 74 lines
+
+● Update(.claude-plugin/marketplace.json)
+  ⎿  Added 1 line, removed 1 line                                        
+       6    },
+       7    "metadata": {
+       8      "description": "A collection of Claude Code plugins for AI-
+          Native Product Teams",
+       9 -    "version": "1.6.0"                                         
+       9 +    "version": "1.7.0"                                         
+      10    },
+      11    "plugins": [
+      12      {
+
+● Update(.claude-plugin/marketplace.json)
+  ⎿  Added 4 lines, removed 4 lines                                      
+      58        "keywords": ["retrospective", "session-review", "learning
+          ", "improvement"]
+      59      },
+      60      {
+      61 -      "name": "url-export",                                    
+      62 -      "source": "./plugins/url-export",                        
+      63 -      "description": "A unified skill that auto-detects URL typ
+         -es and delegates to the appropriate export skill",             
+      64 -      "keywords": ["url", "export", "google", "slack", "notion"
+         -, "unified"]                                                   
+      61 +      "name": "gather-context",                                
+      62 +      "source": "./plugins/gather-context",                    
+      63 +      "description": "A skill that auto-detects URLs and gather
+         +s external content from Google Docs, Slack, Notion, and web pag
+         +es",                                                           
+      64 +      "keywords": ["url", "export", "google", "slack", "notion"
+         +, "gather", "context"]                                         
+      65      },
+      66      {
+      67        "name": "web-search",
+
+● Bash(python3 -c "import json; json.load(open('/home/hwidong/codes/claude-plugi
+      ns/.claude-plugin/marketplace.json')); print('Valid JSON')")
+  ⎿  Valid JSON
+
+● Read(CHANGELOG.md)
+  ⎿  Read 51 lines
+
+● Update(CHANGELOG.md)
+  ⎿  Added 8 lines                                                       
+       5  The format is based on [Keep a Changelog](https://keepachangelo
+          g.com/en/1.1.0/),
+       6  and this project adheres to [Semantic Versioning](https://semve
+          r.org/spec/v2.0.0.html).
+       7  
+       8 +## [1.7.0] - 2026-01-30                                        
+       9 +                                                               
+      10 +### Added                                                      
+      11 +- Skills: `gather-context` - Unified context gathering skill th
+         +at auto-detects URLs (Google Docs, Slack, Notion) and bundles a
+         +ll converter scripts. No separate skill installation needed.   
+      12 +                                                               
+      13 +### Removed                                                    
+      14 +- Skills: `url-export` - Replaced by `gather-context`. Users sh
+         +ould install `gather-context` instead.                         
+      15 +                                                               
+      16  ## [1.6.0] - 2026-01-30
+      17  
+      18  ### Added
+
+● Bash(git add .claude-plugin/marketplace.json CHANGELOG.md && git commit -m
+      "Replace url-export with gather-context in marketplace…)
+  ⎿ [feat/gather-context 6a5f3bc] Replace url-export with gather-context 
+    in
+     marketplace
+     2 files changed, 13 insertions(+), 5 deletions(-)
+
+
+● Commit 3: url-export 삭제.
+
+● Bash(rm -rf /home/hwidong/codes/claude-plugins/plugins/url-export && git add
+      -A plugins/url-export/ && git commit -m "Remove url-export plugin…)
+  ⎿  [feat/gather-context b6258b2] Remove url-export plugin           
+      2 files changed, 66 deletions(-)
+      delete mode 100644 plugins/url-export/.claude-plugin/plugin.json
+     … +3 lines (ctrl+o to expand)
+
+● Commit 4: 문서 업데이트. README.md, AI_NATIVE_PRODUCT_TEAM.md, docs/project-context.md를 수정합니다.
+
+● Read(README.md)
+  ⎿  Read 402 lines
+
+● Update(README.md)
+  ⎿  Added 1 line, removed 1 line                                        
+      40  | [notion-to-md](#notion-to-md) | Skill | 공개 Notion 페이지를 
+          마크다운으로 변환 |
+      41  | [suggest-tidyings](#suggest-tidyings) | Skill | 안전한 리팩토
+          링 기회 제안 |
+      42  | [retro](#retro) | Skill | 세션 종료 시 포괄적 회고 수행 |
+      43 -| [url-export](#url-export) | Skill | URL 자동 감지 후 적절한 e
+         -xport 스킬로 위임 |                                            
+      43 +| [gather-context](#gather-context) | Skill | URL 자동 감지 후 
+         +외부 콘텐츠를 자체 스크립트로 수집 |                           
+      44  | [web-search](#web-search) | Skill | 웹 검색, 코드 검색, URL 
+          콘텐츠 추출 |
+      45  | [attention-hook](#attention-hook) | Hook | 대기 상태일 때 Sla
+          ck 알림 |
+      46  
+
+● Update(README.md)
+  ⎿  Added 15 lines, removed 15 lines                                    
+      273  **출력물**:
+      274  - `prompt-logs/{YYMMDD}-{title}/retro.md` — plan.md, lessons.m
+           d와 같은 디렉토리에 저장
+      275  
+      276 -### [url-export](plugins/url-export/skills/url-export/SKILL.md
+          -)                                                             
+      276 +### [gather-context](plugins/gather-context/skills/gather-cont
+          +ext/SKILL.md)                                                 
+      277  
+      278  **설치**:
+      279  ```bash
+      280  claude plugin marketplace add https://github.com/corca-ai/clau
+           de-plugins.git
+      281 -claude plugin install url-export@corca-plugins                
+      281 +claude plugin install gather-context@corca-plugins            
+      282  ```
+      283  
+      284  **갱신**:
+      285  ```bash
+      286  claude plugin marketplace update corca-plugins
+      287 -claude plugin update url-export@corca-plugins                 
+      287 +claude plugin update gather-context@corca-plugins             
+      288  ```
+      289  
+      290 -URL 유형을 자동 감지하여 적절한 export 스킬(g-export, slack-to
+          --md, notion-to-md)로 위임하는 통합 스킬입니다. 사용자가 어떤  
+          -스킬을 호출해야 하는지 기억할 필요 없이, 하나의 명령으로 모든 
+          -외부 콘텐츠를 내보낼 수 있습니다.                             
+      290 +URL 유형을 자동 감지하여 외부 콘텐츠를 로컬 파일로 수집하는 통
+          +합 스킬입니다. 변환 스크립트가 내장되어 있어 **별도의 스킬 설 
+          +치 없이** 하나의 플러그인으로 Google Docs, Slack, Notion 콘텐 
+          +츠를 모두 수집할 수 있습니다. `url-export`를 대체합니다.      
+      291  
+      292  **사용법**:
+      293 -- 명시적 호출: `/url-export <url>`                            
+      294 -- URL 감지: 지원되는 서비스의 URL을 에이전트가 발견하면 자동으
+          -로 적절한 스킬로 위임                                         
+      293 +- 명시적 호출: `/gather-context <url>`                        
+      294 +- URL 감지: 지원되는 서비스의 URL을 에이전트가 발견하면 자동으
+          +로 적절한 변환기 실행                                         
+      295  
+      296  **지원 서비스**:
+      297  
+      298 -| URL 패턴 | 위임 대상 |                                      
+      299 -|----------|----------|                                       
+      300 -| `docs.google.com/*` | g-export |                            
+      301 -| `*.slack.com/archives/*/p*` | slack-to-md |                 
+      302 -| `*.notion.site/*`, `www.notion.so/*` | notion-to-md |       
+      298 +| URL 패턴 | 핸들러 |                                         
+      299 +|----------|--------|                                         
+      300 +| `docs.google.com/{document,presentation,spreadsheets}/d/*` |
+          + Google Export (내장 스크립트) |                              
+      301 +| `*.slack.com/archives/*/p*` | Slack to MD (내장 스크립트) | 
+      302 +| `*.notion.site/*`, `www.notion.so/*` | Notion to MD (내장 스
+          +크립트) |                                                     
+      303  | 기타 URL | WebFetch 폴백 |
+      304  
+      305 -**저장 위치**: 각 서비스별 기본 디렉토리 사용 (통합 기본값: `.
+          -/exports/`, 환경변수 `CLAUDE_CORCA_URL_EXPORT_OUTPUT_DIR`로 변
+          -경 가능)                                                      
+      305 +**저장 위치**: 통합 기본값 `./gathered/` (환경변수 `CLAUDE_COR
+          +CA_GATHER_CONTEXT_OUTPUT_DIR`로 변경 가능, 서비스별 환경변수로
+          + 개별 지정도 가능)                                            
+      306  
+      307 -**주의사항**:                                                 
+      308 -- 각 서비스의 개별 스킬이 설치되어 있어야 합니다. 미설치 시 안
+          -내 메시지를 표시합니다.                                       
+      309 -- 개별 스킬(`/g-export`, `/slack-to-md`, `/notion-to-md`)도 독
+          -립적으로 계속 사용 가능합니다.                                
+      307 +**참고**:                                                     
+      308 +- 개별 스킬(`/g-export`, `/slack-to-md`, `/notion-to-md`)은 독
+          +립적으로 계속 사용 가능합니다.                                
+      309 +- 정보 검색이 필요한 경우 `/web-search` 사용을 제안합니다.    
+      310  
+      311  ### [web-search](plugins/web-search/skills/web-search/SKILL.md
+           )
+      312  
+
+● 이제 AI_NATIVE_PRODUCT_TEAM.md와 docs/project-context.md를 수정합니다.
+
+● Read(docs/project-context.md)
+  ⎿  Read 29 lines
+
+● Update(AI_NATIVE_PRODUCT_TEAM.md)
+  ⎿  Added 1 line, removed 1 line                                        
+      33  
+      34  **자료 조사 → 스펙 작성 → 스펙 정교화 → 스펙 리뷰 → 구현 지시 →
+           회고 → 코드 리뷰** 싸이클이 정착된다.
+      35  
+      36 -1. **자료 조사**: 스펙을 작성하기 위해 필요한 회사 내부/외부의 
+         -정보들이 이미 LLM이 읽기 좋은 형태로 준비되어 있거나, 정보를 취
+         -합하는 도구들(MCP, 스크립트, 커스텀 프롬프트 등. 예: [url-expor
+         -t skill](./plugins/url-export)로 URL만 주면 자동 감지하여 적절 
+         -한 도구([slack-to-md](./plugins/slack-to-md), [g-export](./plug
+         -ins/g-export), [notion-to-md](./plugins/notion-to-md))로 위임, 
+         -[web-search](./plugins/web-search) skill로 웹 검색/코드 검색을 
+         -통한 외부 정보 수집)이 준비되어 있다. 이러한 기초 자료들을 리서
+         -치 에이전트에게 제공해 보고서를 받는다.                        
+      36 +1. **자료 조사**: 스펙을 작성하기 위해 필요한 회사 내부/외부의 
+         +정보들이 이미 LLM이 읽기 좋은 형태로 준비되어 있거나, 정보를 취
+         +합하는 도구들(MCP, 스크립트, 커스텀 프롬프트 등. 예: [gather-co
+         +ntext skill](./plugins/gather-context)로 URL만 주면 자동 감지하
+         +여 내장 스크립트로 Google Docs, Slack, Notion 콘텐츠를 수집, [w
+         +eb-search](./plugins/web-search) skill로 웹 검색/코드 검색을 통
+         +한 외부 정보 수집)이 준비되어 있다. 이러한 기초 자료들을 리서치
+         + 에이전트에게 제공해 보고서를 받는다.                          
+      37  
+      38  2. **스펙 작성**: 보고서를 가공한 스펙을 Jira 티켓/Github 이슈 
+          등에 (가능하면 짝 작업으로) 작성한다.
+      39  
+
+● Update(docs/project-context.md)
+  ⎿  Added 1 line, removed 1 line                                        
+       5  ## Project
+       6  
+       7  - corca-plugins is a Claude Code plugin marketplace for "AI Nat
+          ive Product Teams"
+       8 -- Contains skills (clarify, interview, g-export, slack-to-md, n
+         -otion-to-md, suggest-tidyings, retro, url-export, web-search), 
+         -hooks (attention-hook), and supporting docs                    
+       8 +- Contains skills (clarify, interview, g-export, slack-to-md, n
+         +otion-to-md, suggest-tidyings, retro, gather-context, web-searc
+         +h), hooks (attention-hook), and supporting docs                
+       9  - Plan & Lessons Protocol creates `prompt-logs/{YYMMDD}-{title}
+          /` per session with plan.md, lessons.md, and optionally retro.m
+          d
+      10  
+      11  ## Design Principles
+
+● Bash(git add README.md AI_NATIVE_PRODUCT_TEAM.md docs/project-context.md &&
+      git commit -m "Update docs to reference gather-context instead of
+      url-export…)
+  ⎿ [feat/gather-context f282ae3] Update docs to reference gather-context
+    i
+    nstead of url-export
+     3 files changed, 18 insertions(+), 18 deletions(-)
+
+● Commit 5: prompt-logs. plan.md를 작성하고 기존 lessons.md를 업데이트합니다.
+
+● Write(prompt-logs/260130-gather-context/plan.md)
+  ⎿  Wrote 37 lines to prompt-logs/260130-gather-context/plan.md         
+      1 # Plan: Migrate url-export to gather-context
+      2 ## Goal
+      3 Replace `url-export` (a router that delegates to separately insta
+        lled skills) with `gather-context` (a self-contained plugin that 
+        bundles all converter scripts).
+      4 ## Decision: Option B — Internalize scripts, keep web-search inde
+        pendent
+      5 - Bundle scripts from g-export, slack-to-md, notion-to-md directl
+        y into gather-context
+      6 - Keep web-search as a separate skill (different trigger, differe
+        nt purpose)
+     … +27 lines (ctrl+o to expand)
+
+● Read(prompt-logs/260130-gather-context/lessons.md)
+  ⎿  Read 24 lines
+
+● lessons.md는 이미 작성되어 있습니다. 커밋합니다.
+
+● Bash(git add prompt-logs/260130-gather-context/ && git commit -m "Add
+      prompt-logs for gather-context session…)
+  ⎿ [feat/gather-context a9823c9] Add prompt-logs for gather-context     
+    sessio
+    n
+     2 files changed, 59 insertions(+)
+    … +2 lines (ctrl+o to expand)
+
+● 모든 작업 완료. 최종 커밋 로그를 확인합니다.
+
+● Bash(git log --oneline main..HEAD)
+  ⎿ a9823c9 Add prompt-logs for gather-context session                   
+    f282ae3 Update docs to reference gather-context instead of url-export
+    b6258b2 Remove url-export plugin
+    … +2 lines (ctrl+o to expand)
+
+
+● 완료했습니다. feat/gather-context 브랜치에 5개 커밋이 생성되었습니다:
+  #: 1
+  커밋: 5c1969c
+  내용: gather-context 플러그인 생성 (plugin.json, SKILL.md 164줄, references 4개,
+    scripts 5개)
+  ────────────────────────────────────────
+  #: 2
+  커밋: 6a5f3bc
+  내용: marketplace.json에서 url-export → gather-context 교체, 버전 1.7.0
+  ────────────────────────────────────────
+  #: 3
+  커밋: b6258b2
+  내용: url-export 디렉토리 삭제
+  ────────────────────────────────────────
+  #: 4
+  커밋: f282ae3
+  내용: README.md, AI_NATIVE_PRODUCT_TEAM.md, project-context.md 업데이트
+  ────────────────────────────────────────
+  #: 5
+  커밋: a9823c9
+  내용: prompt-logs (plan.md, lessons.md)
+  검증 결과:
+  - SKILL.md: 164줄 (500줄 제한 이내)
+  - 번들된 스크립트 5개: 원본과 byte-identical 확인
+  - marketplace.json: valid JSON 확인
+
+❯ Unknown skill: retro 
+
+❯ /retro 
+
+● Skill(retro)
+  ⎿  Successfully loaded skill · 6 tools allowed
+
+● retro를 시작합니다. 먼저 기존 아티팩트들을 읽겠습니다.
+
+● Read(prompt-logs/260130-gather-context/plan.md)
+  ⎿  Read 37 lines
+
+● Read(prompt-logs/260130-gather-context/lessons.md)
+  ⎿  Read 24 lines
+
+● Read(CLAUDE.md)
+  ⎿  Read 34 lines
+
+● Read(docs/project-context.md)
+  ⎿  Read 29 lines
+
+● Section 1: Context Worth Remembering
+  - The user has a design philosophy of "purpose over action" for naming - this was explicitly discussed
+  - The user's decision-making pattern: present options → discuss trade-offs → make decisive choice → delegate implementation with autonomy
+  - Hook observability is a known gap they want to address (deferred action)
+  - The user expects CLAUDE.md protocols to be followed proactively, not reactively
+
+  Most of these are already in project-context.md or lessons.md. Let me focus on what's genuinely new.
+
+  Section 2: Collaboration Preferences
+  - The user started with a thoughtful, structured problem statement listing multiple considerations
+  - They expected me to explore the codebase before discussing, which I did
+  - They gave a clear "좋습니다" (good) and then delegated implementation with "자율적으로" (autonomously)
+  - They caught that I didn't follow the plan-and-lessons protocol - they expect protocols to be followed without reminders (this is already in CLAUDE.md)
+  - They engaged in meta-discussion about hook observability - shows interest in improving the tooling itself
+  - They were brief and decisive - didn't need long explanations
+
+  Comparing to CLAUDE.md:
+  - "The user expects protocols in CLAUDE.md to be followed without explicit reminders." - This was validated
+  - The hook discussion revealed a gap: CLAUDE.md says to follow protocols, but the mechanism (hooks) failed and there's no self-check
+
+  Potential CLAUDE.md update:
+  - Add something about self-checking hook intentions when entering plan mode, rather than relying on hook execution
+
+  Section 3: Prompting Habits
+  - The initial prompt was excellent - well-structured problem statement with multiple considerations, inviting discussion
+  - "함께 논의해봅시다" was effective - it set the right collaborative tone
+  - "새 브랜치 체크아웃하고, 그렇게 하기 위한 계획을 세워주세요. 자율적으로, 적절한 단위로 커밋하면서 진행해주세요." - Very efficient, gave clear constraints + delegation
+  - The hook observability question was a good meta-observation - showing the user thinks about tool reliability
+
+  Section 4: Learning Resources
+  - The session touched on: plugin architecture, hook observability, naming conventions
+  - The user seems advanced - they're building a plugin marketplace, thinking about developer experience
+  - Topics: Claude Code hooks documentation, plugin deprecation strategies
+
+  Section 5: Relevant Skills
+  - No obvious skill gaps - the session was about restructuring existing skills
+
+  Let me now search for learning resources.
+
+
+  Learning Resources를 위한 검색을 하겠습니다.
+
+● Web Search("Claude Code hooks observability debugging 2026")
+  ⎿  Did 1 search in 32s                                                 
+
+
+● Web Search("Claude Code plugin marketplace best practices 2026")
+  ⎿  Did 1 search in 25s                                                 
+
+  ⎿  Interrupted · What should Claude do instead?
+
+❯ 방금 web-search skill은 왜 사용하지 않았을까요? 
+
+● 좋은 지적입니다. 솔직히 말하면, 빌트인 WebSearch 도구가 바로 사용 가능하니까 관성적으로 그걸 쓴 겁니다. /web-search 스킬이 Skill 목록에 등록되어 있고 Tavily/Exa API를 통해 더 나은 결과를 줄 수 있는데도요.
+
+  이건 lessons.md에 기록할 만한 사항입니다 — "사용 가능한 커스텀 스킬이 있으면 빌트인 도구보다 우선 사용할 것." dogfooding 원칙과도 맞닿아 있고요.
+
+  retro를 /web-search 스킬로 다시 진행할까요?
+
+❯ 네. 그리고 이걸 포함해서 회고합시다. 
+
+● Skill(web-search)
+  ⎿  Successfully loaded skill · 1 tool allowed
+
+● Bash(if ! command -v jq &>/dev/null; then JSON_TOOL="python3"; else
+      JSON_TOOL="jq"; fi && if [ -z "$TAVILY_API_KEY" ]; then echo "ERROR:
+      TAVILY_API_KEY is not set";…)
+  ⎿  Error: Exit code 1
+     ERROR: TAVILY_API_KEY is not set
+
+● TAVILY_API_KEY가 설정되어 있지 않습니다. 빌트인 WebSearch로 fallback하겠습니다.
+
+● Web Search("Claude Code hooks observability PreToolUse prompt type debugging
+            2026")
+  ⎿  Did 1 search in 31s                                                 
+
+
+● Web Search("Claude Code plugin deprecation strategy migration best practices
+            2026")
+  ⎿  Did 1 search in 30s                                                 
+
+
+● 리소스 확보 완료. 이제 retro를 작성합니다.
+
+● Write(prompt-logs/260130-gather-context/retro.md)
+  ⎿  Wrote 47 lines to prompt-logs/260130-gather-context/retro.md        
+      1 # Retro: gather-context 마이그레이션
+      2 > Session date: 2026-01-30
+      3 ## 1. Context Worth Remembering
+      4 - **TAVILY_API_KEY 미설정**: `web-search` 스킬이 설치되어 있지만 
+        `TAVILY_API_KEY`가 환경에 설정되어 있지 않아 실제 사용 불가. `~/.
+        claude/.env` 또는 `~/.zshrc`에 설정 필요.
+      5 - **Dogfooding 의식**: 유저는 자신이 만든 도구를 실제 워크플로우
+        에서 사용하는 것을 중시함. retro 작성 시 빌트인 WebSearch 대신 `/
+        web-search` 스킬을 쓰지 않은 것을 즉시 지적.
+      6 - **메타 관찰 습관**: 유저는 작업 중 도구의 동작 방식 자체에 대해
+         질문하고 개선점을 찾는 패턴이 있음 (훅 발동 확인, 스킬 미사용 지
+        적 등). 단순히 결과물만이 아닌 프로세스 품질에 관심.
+     … +37 lines (ctrl+o to expand)
+
+● retro.md를 작성했습니다. lessons.md에도 이번 세션에서 추가로 발견된 내용을 기록합니다.
+
+● Read(prompt-logs/260130-gather-context/lessons.md)
+  ⎿  Read 24 lines
+
+● Update(prompt-logs/260130-gather-context/lessons.md)
+  ⎿  Added 8 lines                                                       
+      21  - **Takeaway**: 옵션 B (스크립트 번들링 + web-search 독립 유지)
+          가 의존성 제거와 관심사 분리의 균형점
+      22  
+      23  When 통합 스킬 설계 → 스크립트 복사로 의존성 내재화하되, 트리거
+          가 다른 스킬은 독립 유지
+      24 +                                                               
+      25 +### 커스텀 스킬 vs 빌트인 도구 우선순위                        
+      26 +                                                               
+      27 +- **Expected**: retro의 Learning Resources 검색 시 `/web-search
+         +` 스킬 사용                                                    
+      28 +- **Actual**: 빌트인 `WebSearch` 도구를 관성적으로 사용. 유저가
+         + "web-search skill은 왜 사용하지 않았을까요?"로 지적           
+      29 +- **Takeaway**: 커스텀 스킬과 빌트인 도구가 겹칠 때 커스텀 스킬
+         + 우선 사용 (dogfooding 원칙)                                   
+      30 +                                                               
+      31 +When 검색/URL 추출 필요 → `/web-search` 스킬 우선, API 키 미설 
+         +정 등 실패 시 빌트인 fallback                                  
+
+● 이제 CLAUDE.md 업데이트 제안에 대해 확인합니다.
+                                                               
+● User answered Claude's questions:
+  ⎿  · retro에서 제안한 CLAUDE.md 변경사항을 적용할까요? → 적용
+
+● Read(CLAUDE.md)
+  ⎿  Read 34 lines
+
+● Update(CLAUDE.md)
+  ⎿  Added 2 lines                                                       
+      19  
+      20  For non-trivial implementation tasks (new plugins, multi-file c
+          hanges, architectural decisions), proactively use `EnterPlanMod
+          e` even when the user does not explicitly request it.
+      21  
+      22 +On entering plan mode, proactively read `.claude/settings.json`
+         + to check for registered hooks and follow their intent, regardl
+         +ess of whether the hook execution was observed.                
+      23 +                                                               
+      24  ## Collaboration Style
+      25  
+      26  - The user communicates in Korean. Respond in Korean for conver
+          sation, English for code and docs (per Language rules below).
+
+● Update(CLAUDE.md)
+  ⎿  Added 1 line                                                        
+      27  - The user expects protocols in CLAUDE.md to be followed withou
+          t explicit reminders.
+      28  - Prefer short, precise feedback loops — ask for intent confirm
+          ation before large implementations.
+      29  - When researching Claude Code features (hooks, settings, plugi
+          ns), always verify against the official docs (https://code.clau
+          de.com/docs/en/) via WebFetch. Do not rely solely on claude-cod
+          e-guide agent responses.
+      30 +- When a custom skill (e.g., `/web-search`, `/gather-context`) 
+         +overlaps with a built-in tool (e.g., WebSearch, WebFetch), pref
+         +er the custom skill. This supports dogfooding and ensures the s
+         +kill is tested in real workflows.                              
+      31  
+      32  ## Language
+      33  
+
+● CLAUDE.md 업데이트 완료. 이제 project-context.md에도 이번 세션에서 새로 발견된 내용을 반영할지 확인합니다.
+
+  project-context.md에 추가할 만한 새로운 컨텍스트:
+  - Design Principles에 "dogfooding: prefer custom skills over built-in tools" — 이미 Dogfooding: new tools are tested in the session that creates them이 있으므로 중복. 추가 불필요.
+
+  새로운 프로젝트 컨텍스트는 이미 기존 내용으로 충분히 커버됩니다. 마지막으로 retro와 CLAUDE.md 변경을 커밋합니다.
+
+● Bash(git add CLAUDE.md prompt-logs/260130-gather-context/ && git commit -m
+      "Add retro and update CLAUDE.md with session learnings…)
+  ⎿ [feat/gather-context 19ba4ba] Add retro and update CLAUDE.md with    
+    sessi
+    on learnings
+     3 files changed, 57 insertions(+)
+     create mode 100644 prompt-logs/260130-gather-context/retro.md
+
+● retro 완료. 요약:
+
+  주요 발견:
+  1. 커스텀 스킬 우선 원칙 — 빌트인 도구와 겹칠 때 커스텀 스킬을 먼저 사용 (CLAUDE.md에 반영)
+  2. 훅 자기 점검 — plan mode 진입 시 settings.json을 능동적으로 읽어 훅 의도를 따르기 (CLAUDE.md에 반영)
+  3. TAVILY_API_KEY 미설정 — web-search 스킬이 실제로 동작하려면 API 키 설정 필요
+
+  CLAUDE.md에 적용된 변경:
+  - Collaboration Style: 커스텀 스킬 우선 사용 원칙 추가
+  - Plan Mode: settings.json 훅 확인 자기점검 추가
+
+✻ Worked for 2m 41s
+
+
+
