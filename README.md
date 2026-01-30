@@ -40,7 +40,7 @@ claude plugin update <plugin-name>@corca-plugins   # 기존 플러그인 업데�
 | [notion-to-md](#notion-to-md) | Skill | 공개 Notion 페이지를 마크다운으로 변환 |
 | [suggest-tidyings](#suggest-tidyings) | Skill | 안전한 리팩토링 기회 제안 |
 | [retro](#retro) | Skill | 세션 종료 시 포괄적 회고 수행 |
-| [url-export](#url-export) | Skill | URL 자동 감지 후 적절한 export 스킬로 위임 |
+| [gather-context](#gather-context) | Skill | URL 자동 감지 후 외부 콘텐츠를 자체 스크립트로 수집 |
 | [web-search](#web-search) | Skill | 웹 검색, 코드 검색, URL 콘텐츠 추출 |
 | [attention-hook](#attention-hook) | Hook | 대기 상태일 때 Slack 알림 |
 
@@ -273,40 +273,40 @@ claude plugin update retro@corca-plugins
 **출력물**:
 - `prompt-logs/{YYMMDD}-{title}/retro.md` — plan.md, lessons.md와 같은 디렉토리에 저장
 
-### [url-export](plugins/url-export/skills/url-export/SKILL.md)
+### [gather-context](plugins/gather-context/skills/gather-context/SKILL.md)
 
 **설치**:
 ```bash
 claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
-claude plugin install url-export@corca-plugins
+claude plugin install gather-context@corca-plugins
 ```
 
 **갱신**:
 ```bash
 claude plugin marketplace update corca-plugins
-claude plugin update url-export@corca-plugins
+claude plugin update gather-context@corca-plugins
 ```
 
-URL 유형을 자동 감지하여 적절한 export 스킬(g-export, slack-to-md, notion-to-md)로 위임하는 통합 스킬입니다. 사용자가 어떤 스킬을 호출해야 하는지 기억할 필요 없이, 하나의 명령으로 모든 외부 콘텐츠를 내보낼 수 있습니다.
+URL 유형을 자동 감지하여 외부 콘텐츠를 로컬 파일로 수집하는 통합 스킬입니다. 변환 스크립트가 내장되어 있어 **별도의 스킬 설치 없이** 하나의 플러그인으로 Google Docs, Slack, Notion 콘텐츠를 모두 수집할 수 있습니다. `url-export`를 대체합니다.
 
 **사용법**:
-- 명시적 호출: `/url-export <url>`
-- URL 감지: 지원되는 서비스의 URL을 에이전트가 발견하면 자동으로 적절한 스킬로 위임
+- 명시적 호출: `/gather-context <url>`
+- URL 감지: 지원되는 서비스의 URL을 에이전트가 발견하면 자동으로 적절한 변환기 실행
 
 **지원 서비스**:
 
-| URL 패턴 | 위임 대상 |
-|----------|----------|
-| `docs.google.com/*` | g-export |
-| `*.slack.com/archives/*/p*` | slack-to-md |
-| `*.notion.site/*`, `www.notion.so/*` | notion-to-md |
+| URL 패턴 | 핸들러 |
+|----------|--------|
+| `docs.google.com/{document,presentation,spreadsheets}/d/*` | Google Export (내장 스크립트) |
+| `*.slack.com/archives/*/p*` | Slack to MD (내장 스크립트) |
+| `*.notion.site/*`, `www.notion.so/*` | Notion to MD (내장 스크립트) |
 | 기타 URL | WebFetch 폴백 |
 
-**저장 위치**: 각 서비스별 기본 디렉토리 사용 (통합 기본값: `./exports/`, 환경변수 `CLAUDE_CORCA_URL_EXPORT_OUTPUT_DIR`로 변경 가능)
+**저장 위치**: 통합 기본값 `./gathered/` (환경변수 `CLAUDE_CORCA_GATHER_CONTEXT_OUTPUT_DIR`로 변경 가능, 서비스별 환경변수로 개별 지정도 가능)
 
-**주의사항**:
-- 각 서비스의 개별 스킬이 설치되어 있어야 합니다. 미설치 시 안내 메시지를 표시합니다.
-- 개별 스킬(`/g-export`, `/slack-to-md`, `/notion-to-md`)도 독립적으로 계속 사용 가능합니다.
+**참고**:
+- 개별 스킬(`/g-export`, `/slack-to-md`, `/notion-to-md`)은 독립적으로 계속 사용 가능합니다.
+- 정보 검색이 필요한 경우 `/web-search` 사용을 제안합니다.
 
 ### [web-search](plugins/web-search/skills/web-search/SKILL.md)
 
