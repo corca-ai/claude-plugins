@@ -21,3 +21,11 @@ When plan mode 진입 → `.claude/settings.json` 훅 확인 + `docs/plan-and-le
 - **Takeaway**: 옵션 B (스크립트 번들링 + web-search 독립 유지)가 의존성 제거와 관심사 분리의 균형점
 
 When 통합 스킬 설계 → 스크립트 복사로 의존성 내재화하되, 트리거가 다른 스킬은 독립 유지
+
+### 커스텀 스킬 vs 빌트인 도구 우선순위
+
+- **Expected**: retro의 Learning Resources 검색 시 `/web-search` 스킬 사용
+- **Actual**: 빌트인 `WebSearch` 도구를 관성적으로 사용. 유저가 "web-search skill은 왜 사용하지 않았을까요?"로 지적
+- **Takeaway**: 커스텀 스킬과 빌트인 도구가 겹칠 때 커스텀 스킬 우선 사용 (dogfooding 원칙)
+
+When 검색/URL 추출 필요 → `/web-search` 스킬 우선, API 키 미설정 등 실패 시 빌트인 fallback
