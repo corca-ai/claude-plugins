@@ -29,3 +29,9 @@ When API 공식 문서를 조사할 때 → 엔드포인트별 파라미터 전�
 - **Expected**: README.md만 수정하면 될 것
 - **Actual**: README.ko.md도 항상 동기화해야 함 (CLAUDE.md에 명시됨)
 - **Takeaway**: 플랜 단계에서 Files to Modify에 양쪽 README를 모두 포함시킬 것
+
+### 커스텀 스킬 우선 사용 (dogfooding)
+
+- **Expected**: retro에서 Learning Resources 검색 시 빌트인 WebSearch를 사용해도 될 것
+- **Actual**: CLAUDE.md에 "커스텀 스킬이 빌트인 도구와 겹치면 커스텀 스킬을 우선하라"고 명시되어 있음. `/web-search`를 사용했어야 함
+- **Takeaway**: 검색이 필요할 때 항상 `/web-search` 스킬을 먼저 쓸 것. 특히 해당 스킬을 개선하는 세션에서는 dogfooding이 검증 기회이기도 함

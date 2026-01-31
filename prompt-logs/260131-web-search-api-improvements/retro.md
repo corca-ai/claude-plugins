@@ -51,3 +51,7 @@
 이번 세션에서 새로운 스킬 갭은 발견되지 않음. 기존 워크플로우(plan-and-lessons → 구현 → retro → 커밋)가 잘 정의되어 있고, 문제는 스킬 부재가 아니라 워크플로우 준수에 있었음.
 
 향후 고려할 점: Exa의 /search + contents 엔드포인트를 활용하는 심화 코드 검색이 필요해지면, web-search 스킬의 `code` 서브커맨드를 /context → /search로 마이그레이션하는 작업이 생길 수 있음.
+
+### Post-Retro Findings
+
+**커스텀 스킬 우선 사용 규칙 위반**: retro의 Learning Resources 검색 시 빌트인 `WebSearch` 도구를 사용하는 Task agent를 띄웠으나, CLAUDE.md Collaboration Style에 "When a custom skill overlaps with a built-in tool, prefer the custom skill"이 명시되어 있으므로 `/web-search`를 사용했어야 함. 이것 역시 "CLAUDE.md 프로토콜을 능동적으로 따르지 않은 것"이라는 동일한 근본 원인에 해당. 특히 web-search 스킬을 개선하는 세션에서 해당 스킬을 dogfooding하지 않은 것은 개선 검증 기회를 놓친 셈.
