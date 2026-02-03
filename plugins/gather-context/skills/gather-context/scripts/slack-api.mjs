@@ -22,24 +22,37 @@ const CACHE_FILE = join(CACHE_DIR, 'users.json');
 // Environment / Token
 // ============================================
 
+function extractVarFromFile(filePath, varName) {
+  if (!existsSync(filePath)) return null;
+  const content = readFileSync(filePath, 'utf-8');
+  // Match both "VAR=value" and "export VAR=value"
+  const re = new RegExp(`^(?:export\\s+)?${varName}=(.+)$`, 'm');
+  const match = content.match(re);
+  if (match && match[1].trim()) {
+    return match[1].trim().replace(/^["']|["']$/g, '').trim();
+  }
+  return null;
+}
+
 function loadToken() {
-  // Check environment variable first
+  // 1. Check environment variable first
   if (process.env.SLACK_BOT_TOKEN) {
     return process.env.SLACK_BOT_TOKEN;
   }
 
-  // Read from ~/.claude/.env
-  const envPath = join(homedir(), '.claude', '.env');
-  if (existsSync(envPath)) {
-    const content = readFileSync(envPath, 'utf-8');
-    const match = content.match(/^SLACK_BOT_TOKEN=(.+)$/m);
-    if (match && match[1].trim()) {
-      return match[1].trim().replace(/^["']|["']$/g, '').trim();
-    }
+  // 2. Read from ~/.claude/.env
+  const token = extractVarFromFile(join(homedir(), '.claude', '.env'), 'SLACK_BOT_TOKEN');
+  if (token) return token;
+
+  // 3. Search shell profiles
+  const profiles = ['.zshenv', '.zshrc', '.bashrc', '.bash_profile', '.profile'];
+  for (const profile of profiles) {
+    const found = extractVarFromFile(join(homedir(), profile), 'SLACK_BOT_TOKEN');
+    if (found) return found;
   }
 
   throw new Error(
-    'SLACK_BOT_TOKEN not found. Add SLACK_BOT_TOKEN=xoxb-... to ~/.claude/.env'
+    'SLACK_BOT_TOKEN not found. Add SLACK_BOT_TOKEN=xoxb-... to ~/.claude/.env or shell profile'
   );
 }
 

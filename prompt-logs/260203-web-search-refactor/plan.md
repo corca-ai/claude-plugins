@@ -47,4 +47,4 @@ Then it produces correct output (unit-testable independently)
 
 - [ ] Apply same pattern to other execution-heavy skills if they emerge
 - [ ] Consider whether api-reference.md should be kept or removed
-- [ ] Apply 3-tier env loading pattern to gather-context scripts (slack-api.mjs, notion-to-md.py)
+- [x] Apply 3-tier env loading pattern to gather-context scripts (slack-api.mjs — only file with credential loading)

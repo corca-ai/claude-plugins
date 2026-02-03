@@ -1,7 +1,7 @@
 {
   "name": "gather-context",
   "description": "A skill that auto-detects URLs and gathers external content from Google Docs, Slack, Notion, and web pages",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "author": {
     "name": "Corca",
     "url": "https://www.corca.ai/"
