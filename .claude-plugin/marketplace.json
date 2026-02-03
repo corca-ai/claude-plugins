@@ -56,6 +56,12 @@
       "source": "./plugins/plan-and-lessons",
       "description": "A hook that injects the Plan & Lessons Protocol when entering plan mode",
       "keywords": ["plan", "lessons", "protocol", "plan-mode", "hook"]
+    },
+    {
+      "name": "smart-read",
+      "source": "./plugins/smart-read",
+      "description": "A hook that enforces intelligent file reading based on file size",
+      "keywords": ["read", "file-size", "context", "hook", "guard"]
     }
   ]
 }

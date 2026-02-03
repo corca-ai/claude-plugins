@@ -43,6 +43,7 @@ You can do the same from inside Claude Code (instead of your terminal):
 | [web-search](#web-search) | Skill + Hook | Web search, code search, and URL content extraction |
 | [attention-hook](#attention-hook) | Hook | Send a Slack notification when idle/waiting |
 | [plan-and-lessons](#plan-and-lessons) | Hook | Inject the Plan & Lessons Protocol when entering plan mode |
+| [smart-read](#smart-read) | Hook | Enforce intelligent file reading based on file size |
 
 ## Skills
 
@@ -317,6 +318,41 @@ A hook that automatically injects the Plan & Lessons Protocol when Claude Code e
 **Notes**:
 - If you enter plan mode directly via `/plan` or Shift+Tab, the hook won't fire (CLI mode toggle; no tool call happens)
 - For better coverage, also referencing the protocol from `CLAUDE.md` is recommended
+
+### [smart-read](plugins/smart-read/hooks/hooks.json)
+
+**Install**:
+```bash
+claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
+claude plugin install smart-read@corca-plugins
+```
+
+**Update**:
+```bash
+claude plugin marketplace update corca-plugins
+claude plugin update smart-read@corca-plugins
+```
+
+A hook that intercepts Read tool calls and enforces intelligent file reading based on file size. Prevents context waste by warning on medium files and blocking full reads on large files, guiding Claude to use offset/limit or Grep instead.
+
+**How it works**:
+- Uses a `PreToolUse` → `Read` matcher to intercept file reads
+- Checks file size (line count) before allowing full reads
+- Small files (≤500 lines): allowed silently
+- Medium files (500-2000 lines): allowed with `additionalContext` showing line count
+- Large files (>2000 lines): denied with guidance to use `offset`/`limit` or `Grep`
+- Binary files (PDF, images, notebooks): always allowed (Read handles these natively)
+
+**Bypass**: Claude can bypass the deny by setting `offset` or `limit` explicitly — the hook only blocks when both are absent, so intentional partial reads always go through.
+
+**Configuration** (optional):
+
+Set thresholds in `~/.claude/.env`:
+```bash
+# ~/.claude/.env
+CLAUDE_CORCA_SMART_READ_WARN_LINES=500   # Lines above which additionalContext is added (default: 500)
+CLAUDE_CORCA_SMART_READ_DENY_LINES=2000  # Lines above which read is denied (default: 2000)
+```
 
 ## Removed skills
 

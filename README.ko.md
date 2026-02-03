@@ -43,6 +43,7 @@ claude plugin update <plugin-name>@corca-plugins   # 기존 플러그인 업데�
 | [web-search](#web-search) | Skill + Hook | 웹 검색, 코드 검색, URL 콘텐츠 추출 |
 | [attention-hook](#attention-hook) | Hook | 대기 상태일 때 Slack 알림 |
 | [plan-and-lessons](#plan-and-lessons) | Hook | Plan 모드 진입 시 Plan & Lessons Protocol 주입 |
+| [smart-read](#smart-read) | Hook | 파일 크기 기반 지능적 읽기 강제 |
 
 ## Skills
 
@@ -318,6 +319,41 @@ Claude Code가 Plan 모드에 진입할 때(`EnterPlanMode` 도구 호출 시) P
 **주의사항**:
 - `/plan`이나 Shift+Tab으로 직접 plan 모드에 진입하는 경우에는 훅이 발동되지 않음 (CLI 모드 토글이라 도구 호출 없음)
 - 커버리지를 위해 CLAUDE.md에 프로토콜 참조를 병행 설정하는 것을 권장
+
+### [smart-read](plugins/smart-read/hooks/hooks.json)
+
+**설치**:
+```bash
+claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
+claude plugin install smart-read@corca-plugins
+```
+
+**갱신**:
+```bash
+claude plugin marketplace update corca-plugins
+claude plugin update smart-read@corca-plugins
+```
+
+Read 도구 호출을 가로채서 파일 크기에 따라 지능적인 읽기를 강제하는 훅입니다. 큰 파일의 전체 읽기를 차단하여 컨텍스트 낭비를 방지하고, offset/limit 또는 Grep 사용을 안내합니다.
+
+**동작 방식**:
+- `PreToolUse` → `Read` 매처로 파일 읽기를 가로챔
+- 전체 읽기 허용 전 파일 크기(줄 수)를 확인
+- 작은 파일 (≤500줄): 조용히 허용
+- 중간 파일 (500-2000줄): 허용하되 `additionalContext`로 줄 수 정보 제공
+- 큰 파일 (>2000줄): 차단 후 `offset`/`limit` 또는 `Grep` 사용 안내
+- 바이너리 파일 (PDF, 이미지, 노트북): 항상 허용 (Read가 자체적으로 처리)
+
+**우회**: Claude가 `offset` 또는 `limit`을 명시적으로 설정하면 훅을 우회합니다. 둘 다 없을 때만 차단하므로, 의도적인 부분 읽기는 항상 허용됩니다.
+
+**설정** (선택):
+
+`~/.claude/.env`에서 임계값 조정:
+```bash
+# ~/.claude/.env
+CLAUDE_CORCA_SMART_READ_WARN_LINES=500   # 이 줄 수 이상이면 additionalContext 추가 (기본값: 500)
+CLAUDE_CORCA_SMART_READ_DENY_LINES=2000  # 이 줄 수 이상이면 읽기 차단 (기본값: 2000)
+```
 
 ## 삭제된 스킬
 

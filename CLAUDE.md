@@ -23,8 +23,9 @@ After implementing a plan, complete the full workflow without waiting for explic
 1. Mark plan.md as done (✅ on completed items)
 2. Update lessons.md with implementation learnings
 3. Run `/retro`
-4. Commit and push
-5. After committing plugin changes, update the marketplace and verify globally installed plugin versions are current
+4. For plugin changes: test locally with `/plugin install <name>@corca-plugins` before committing
+5. Commit and push
+6. After committing plugin changes, update the marketplace and verify globally installed plugin versions are current
 
 ## Collaboration Style
 
