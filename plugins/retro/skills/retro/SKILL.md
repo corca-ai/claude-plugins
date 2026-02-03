@@ -7,6 +7,7 @@ allowed-tools:
   - Read
   - Write
   - Edit
+  - WebSearch
   - Skill
   - AskUserQuestion
 ---
@@ -64,7 +65,7 @@ Patterns that caused misunderstandings, with specific examples and improved alte
 
 #### Section 4: Learning Resources
 
-- Use `/web-search` skill (via Skill tool) to find 2–5 relevant resources
+- Search the web to find 2–5 relevant resources
 - Calibrate to user's apparent knowledge level
 - Focus on topics where the session revealed knowledge gaps or curiosity
 - Each resource: title, URL, and one-line reason for relevance
