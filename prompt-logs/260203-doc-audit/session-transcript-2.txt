@@ -1,0 +1,1772 @@
+
+ ▐▛███▜▌   Claude Code v2.1.12
+▝▜█████▛▘  Opus 4.5 · Claude Max
+  ▘▘ ▝▝    ~/codes/claude-plugins
+══════════════════ Conversation compacted · ctrl+o for history ═════════════════
+
+❯ /compact 
+  ⎿  Compacted (ctrl+o to see full summary)
+  ⎿ Referenced file 
+    ../../.claude/projects/-home-hwidong-codes-claude-plugins/5022a970-06b7-4935
+    -80bc-26c0b6c57d02/tool-results/toolu_013mUesTx8zsngnHfdhHKADP.txt
+  ⎿  Read prompt-logs/260203-doc-audit/retro.md (40 lines)
+  ⎿  Read prompt-logs/260203-doc-audit/lessons.md (38 lines)
+  ⎿  Read plugins/plan-and-lessons/.claude-plugin/plugin.json (11 lines)
+  ⎿  Read plugins/plan-and-lessons/protocol.md (93 lines)
+  ⎿  Plan file referenced (~/.claude/plans/precious-roaming-lantern.md)
+  ⎿  Skills restored (web-search, retro)
+
+❯ 2026-02-03-prompt-logs-lesson-retro.txt 를 읽고, 적절한 위치로 옮기고,    
+  다른 에이전트들이 리뷰해준 내용을 검토해서 medium 이상의 문제를 모두      
+  개선합시다. 그리고 이러한 리뷰 패턴은 앞으로도 사용하면 좋겠으니, 완료 후 
+  retro도 잘 갱신합시다.                                                    
+
+● Explore(Find and read txt file)
+  ⎿  Done (5 tool uses · 54.9k tokens · 19s)                             
+
+
+● Bash(git log --oneline -5)
+  ⎿ 9abd19f Add Prior Art Search to plan protocol; fix missed version    
+    bumps
+    8f20490 Comprehensive doc audit: slim bloat, deduplicate, add missing
+    l
+    essons
+    … +4 lines (ctrl+o to expand)
+
+● Bash(ls /home/hwidong/codes/claude-plugins/prompt-logs/260203-doc-audit/)
+  ⎿  lessons.md
+     plan.md
+     retro.md
+
+● Read(2026-02-03-prompt-logs-lesson-retro.txt)
+  ⎿  Read 114 lines
+
+● Now let me read the current state of all files that need fixing.
+
+● Read(CLAUDE.md)
+  ⎿  Read 50 lines
+
+● Read(docs/claude-marketplace.md)
+  ⎿  Read 44 lines
+
+● Read(CHANGELOG.md)
+  ⎿  Read 83 lines
+
+● Read(.claude-plugin/marketplace.json)
+  ⎿  Read 68 lines
+
+● Read(docs/plugin-dev-cheatsheet.md)
+  ⎿  Read 148 lines
+
+● Read(docs/project-context.md)
+  ⎿  Read 43 lines
+
+● Read(docs/adding-plugin.md)
+  ⎿  Read 37 lines
+
+● Read(docs/skills-guide.md)
+  ⎿  Read 76 lines
+
+● Let me also read the README and retro files, and verify the marketplace link.
+
+● Read(README.md)
+  ⎿  Read 380 lines
+
+● Read(prompt-logs/260203-doc-audit/retro.md)
+  ⎿  Read 40 lines
+
+● Read(prompt-logs/260203-doc-audit/lessons.md)
+  ⎿  Read 38 lines
+
+● Read(plugins/retro/skills/retro/SKILL.md)
+  ⎿  Read 134 lines
+
+● Good, I now have a complete picture. Let me verify the marketplace link and then start fixing everything.
+
+● Bash(mv
+      /home/hwidong/codes/claude-plugins/2026-02-03-prompt-logs-lesson-retro.txt
+       /home/hwidong/codes/claude-plugins/prompt-logs/260203-doc-audit/session-t
+      ranscript…)
+  ⎿  (No content)
+
+● Skill(web-search)
+  ⎿  Successfully loaded skill · 1 tool allowed
+
+● Bash(/home/hwidong/.claude/plugins/cache/corca-plugins/web-search/2.0.0/skills
+      /web-search/scripts/extract.sh
+      "https://code.claude.com/docs/en/marketplace" --query "m…)
+  ⎿ ## Extracted: https://code.claude.com/docs/en/marketplace            
+
+    ![light
+    logo](https://mintcdn.com/claude-code/o69F7a6qoW9vboof/logo/lig
+    … +25 lines (ctrl+o to expand)
+
+● 404 confirmed. Let me find the correct URL.
+
+● Bash(/home/hwidong/.claude/plugins/cache/corca-plugins/web-search/2.0.0/skills
+      /web-search/scripts/search.sh "claude code marketplace plugin
+      documentation site:code.c…)
+  ⎿ ## Search Results: claude code marketplace plugin documentation      
+    site:co
+    de.claude.com
+    … +116 lines (ctrl+o to expand)
+
+● Found it — the correct URL is plugin-marketplaces (plural), not marketplace. Let me verify.
+
+● Bash(/home/hwidong/.claude/plugins/cache/corca-plugins/web-search/2.0.0/skills
+      /web-search/scripts/extract.sh
+      "https://code.claude.com/docs/en/plugin-marketplaces" --…)
+  ⎿  ## Extracted: https://code.claude.com/docs/en/plugin-marketplaces
+
+     Creating and distributing a marketplace involves:
+     … +47 lines (ctrl+o to expand)
+
+● Link verified. Now let me start fixing everything systematically. First the high-priority bugs, then medium improvements.
+
+● Fix #1 (broken link), #2 (CLAUDE.md link text), #3 (CHANGELOG), #4 (marketplace.json version) in parallel:
+
+● Update(docs/claude-marketplace.md)
+  ⎿  Added 1 line, removed 1 line                                        
+      1  # Marketplace Reference
+      2  
+      3 -For full marketplace documentation (creating, hosting, distribut
+        -ing, troubleshooting), see the [official Claude Code docs](https
+        -://code.claude.com/docs/en/marketplace).                        
+      3 +For full marketplace documentation (creating, hosting, distribut
+        +ing, troubleshooting), see the [official Claude Code docs](https
+        +://code.claude.com/docs/en/plugin-marketplaces).                
+      4  
+      5  ## This Project's marketplace.json
+      6  
+
+● Update(CLAUDE.md)
+  ⎿  Added 1 line, removed 1 line                                        
+       8  - [Modifying/Testing/Deploying Plugins](docs/modifying-plugin.m
+          d)
+       9  - [Adding New Plugins](docs/adding-plugin.md)
+      10  - [Skills Guide](docs/skills-guide.md)
+      11 -- [Marketplace Schema](docs/claude-marketplace.md)             
+      11 +- [Marketplace Reference](docs/claude-marketplace.md)          
+      12  
+      13  Do NOT proceed with code changes until completing the above ste
+          ps.
+      14  
+
+● Update(CHANGELOG.md)
+  ⎿  Added 1 line, removed 1 line                                        
+      17  - Skills: `web-search` (2.0.0→2.0.1) — refactored to script del
+          egation pattern (SKILL.md → wrapper scripts for API execution);
+           added PreToolUse hook to redirect built-in WebSearch to `/web-
+          search`; slimmed api-reference.md (381→56 lines, removed dead c
+          url/jq patterns)
+      18  - Skills: `gather-context` (1.1.1) — applied 3-tier env loading
+           to slack-api.mjs; loosely coupled with WebSearch (hook handles
+           redirect)
+      19  - Skills: `retro` (1.3.2) — minor refinements
+      20 -- Hooks: `plan-and-lessons` (1.1.0) — protocol timing: lessons.
+         -md created alongside plan.md, not after implementation         
+      20 +- Hooks: `plan-and-lessons` (1.1.0→1.2.0) — protocol timing: le
+         +ssons.md created alongside plan.md; added Prior Art Search sect
+         +ion to protocol                                                
+      21  - Docs: comprehensive doc audit — slimmed claude-marketplace.md
+           (510→43 lines), api-reference.md (381→56 lines); updated proje
+          ct-context.md, cheatsheet, CHANGELOG
+      22  
+      23  ## [1.8.0] - 2026-01-30
+
+● Update(.claude-plugin/marketplace.json)
+  ⎿  Added 1 line, removed 1 line                                        
+       6    },
+       7    "metadata": {
+       8      "description": "A collection of Claude Code plugins for AI-
+          Native Product Teams",
+       9 -    "version": "1.8.0"                                         
+       9 +    "version": "1.9.0"                                         
+      10    },
+      11    "plugins": [
+      12      {
+
+● Now the medium priority fixes. #5 (env loading "why"), #6 (project-context link), #8 (find-skills/skill-creator), #9 (skills-guide parenthetical) in parallel:
+
+● Update(docs/plugin-dev-cheatsheet.md)
+  ⎿  Added 2 lines, removed 2 lines                                      
+       97  
+       98  Naming: `CLAUDE_CORCA_{PLUGIN_NAME}_{SETTING}`
+       99  
+      100 -3-tier loading in scripts:                                    
+      100 +3-tier loading in scripts (needed because Claude Code runs Bas
+          +h sessions — `~/.zshrc` is not sourced automatically):        
+      101  ```bash
+      102  # 1. Shell env (already set)
+      103  # 2. ~/.claude/.env
+      104  [ -f "$HOME/.claude/.env" ] && { set -a; source "$HOME/.claude
+           /.env"; set +a; }
+      105 -# 3. Shell profiles                                           
+      105 +# 3. Shell profiles (fallback: grep for exports in zsh/bash co
+          +nfigs)                                                        
+      106  [ -z "${VAR:-}" ] && eval "$(grep -sh '^export VAR=' ~/.zshrc 
+           ~/.bashrc)"
+      107  ```
+      108  
+
+● Update(CLAUDE.md)
+  ⎿  Added 1 line                                                        
+       9  - [Adding New Plugins](docs/adding-plugin.md)
+      10  - [Skills Guide](docs/skills-guide.md)
+      11  - [Marketplace Reference](docs/claude-marketplace.md)
+      12 +- [Project Context](docs/project-context.md) — accumulated arch
+         +itecture patterns and conventions                              
+      13  
+      14  Do NOT proceed with code changes until completing the above ste
+          ps.
+      15  
+
+● Update(plugins/retro/skills/retro/SKILL.md)
+  ⎿  Added 2 lines, removed 2 lines                                      
+      74  #### Section 5: Relevant Skills
+      75  
+      76  - Assess whether the session reveals a workflow gap or repetiti
+          ve pattern
+      77 -- If yes: invoke `find-skills` via Skill tool, report relevant 
+         -results                                                        
+      78 -- If a needed skill does not exist: briefly describe what it wo
+         -uld do and suggest using `skill-creator`                       
+      77 +- If yes: search the marketplace or web for existing solutions,
+         + report relevant results                                       
+      78 +- If a needed skill does not exist: briefly describe what it wo
+         +uld do and suggest creating one                                
+      79  - If no clear gap: state "No skill gaps identified in this sess
+          ion"
+      80  
+      81  ### 4. Write retro.md
+
+● Update(docs/skills-guide.md)
+  ⎿  Added 1 line, removed 1 line                                        
+      21  4. **Progressive Disclosure** - Load SKILL.md on trigger, load 
+          references as needed
+      22  5. **English only** - All skill files (SKILL.md, references) mu
+          st be written in English
+      23  
+      24 -## Design Principles (skill-creator philosophy)                
+      24 +## Design Principles                                           
+      25  
+      26  - **Concise is Key**: Context window is shared resource. Don't 
+          explain what Claude already knows
+      27  - **Set Appropriate Degrees of Freedom**:
+
+● Now #7 (fold adding-plugin.md into cheatsheet). The unique content in adding-plugin.md is the sed cross-platform example and the AI_NATIVE_PRODUCT_TEAM.md link check. The cheatsheet already has the cross-platform note. Let me simplify adding-plugin.md to just reference the cheatsheet.
+
+● Update(docs/adding-plugin.md)
+  ⎿  Added 6 lines, removed 32 lines                                     
+       1  # Adding a New Plugin
+       2  
+       3 -For plugin structure, `plugin.json` schema, `marketplace.json` 
+         -schema, etc., refer to [claude-marketplace.md](claude-marketpla
+         -ce.md).                                                        
+       3 +For directory structure, schemas, script guidelines, testing, a
+         +nd deploy workflow, see the [Plugin Dev Cheat Sheet](plugin-dev
+         +-cheatsheet.md).                                               
+       4  
+       5 -After adding a new plugin, update the version appropriately in 
+         -[marketplace.json](../.claude-plugin/marketplace.json).        
+       5 +Additional checklist for **new** plugins:                      
+       6  
+       7 -## Script Writing Guidelines                                   
+       8 -                                                               
+       9 -### Cross-Platform Compatibility                               
+      10 -                                                               
+      11 -Scripts must work on both macOS and Linux:                     
+      12 -                                                               
+      13 -```bash                                                        
+      14 -# Bad: macOS only                                              
+      15 -sed -i '' 's/foo/bar/' file.txt                                
+      16 -                                                               
+      17 -# Good: cross-platform                                         
+      18 -sed 's/foo/bar/' file.txt > file.tmp && mv file.tmp file.txt   
+      19 -# or                                                           
+      20 -grep -v 'pattern' file.txt > file.tmp && mv file.tmp file.txt  
+      21 -```                                                            
+      22 -                                                               
+      23 -### Minimal Dependencies                                       
+      24 -                                                               
+      25 -Use basic tools like bash and curl whenever possible. Minimize 
+         -external dependencies (such as python3).                       
+      26 -                                                               
+      27 -## Review AI_NATIVE_PRODUCT_TEAM.md Links                      
+      28 -                                                               
+      29 -When adding a new plugin, review whether a link to that plugin 
+         -can be added to `AI_NATIVE_PRODUCT_TEAM.md` (and `AI_NATIVE_PRO
+         -DUCT_TEAM.ko.md` if applicable).                               
+      30 -                                                               
+      31 -This document explains AI-native team workflows and links to re
+         -levant tools as examples:                                      
+      32 -- Research tools (e.g., gather-context)                        
+      33 -- Spec refinement tools (e.g., Clarify)                        
+      34 -- Code quality tools (e.g., suggest-tidyings)                  
+      35 -                                                               
+      36 -If the new plugin falls into one of these categories or could s
+         -erve as a good example in another context within the document, 
+         -add the link.                                                  
+       7 +1. Add entry to `.claude-plugin/marketplace.json` → `plugins[]`
+       8 +2. Bump marketplace metadata version                           
+       9 +3. Update `README.md` and `README.ko.md` (table + detail sectio
+         +n)                                                             
+      10 +4. Review whether `AI_NATIVE_PRODUCT_TEAM.md` / `AI_NATIVE_PROD
+         +UCT_TEAM.ko.md` should link to the new plugin (research tools, 
+         +spec refinement tools, code quality tools, etc.)               
+
+● Now #10 — the README install block deduplication. Let me also read README.ko.md to handle both.
+
+● Read(README.ko.md)
+  ⎿  Read 381 lines
+
+● Now for #10 — the README install block deduplication. Both READMEs repeat the same install/update pattern 9 times. The Installation section already explains the general pattern. I'll remove per-plugin install blocks and add a single reference note.
+
+● Update(README.md)
+  ⎿  Removed 12 lines                                                    
+      54  
+      55  ### [clarify](plugins/clarify/skills/clarify/SKILL.md)
+      56  
+      57 -**Install**:                                                   
+      58 -```bash                                                        
+      59 -claude plugin marketplace add https://github.com/corca-ai/claud
+         -e-plugins.git                                                  
+      60 -claude plugin install clarify@corca-plugins                    
+      61 -```                                                            
+      62 -                                                               
+      63 -**Update**:                                                    
+      64 -```bash                                                        
+      65 -claude plugin marketplace update corca-plugins                 
+      66 -claude plugin update clarify@corca-plugins                     
+      67 -```                                                            
+      68 -                                                               
+      57  A skill that turns vague or unclear requirements into clear, ex
+          ecutable specs through iterative questioning. It is based on Te
+          am Attention's [Clarify skill](https://github.com/team-attentio
+          n/plugins-for-claude-natives/blob/main/plugins/clarify/SKILL.md
+          ) and customized for our workflow. (Usage reference: Jeong Gubo
+          ng's [LinkedIn post](https://www.linkedin.com/posts/gb-jeong_%E
+          D%81%B4%EB%A1%9C%EB%93%9C%EC%BD%94%EB%93%9C%EA%B0%80-%EA%B0%9D%
+          EA%B4%80%EC%8B%9D%EC%9C%BC%EB%A1%9C-%EC%A7%88%EB%AC%B8%ED%95%98
+          %EA%B2%8C-%ED%95%98%EB%8A%94-skills%EB%A5%BC-%EC%82%AC%EC%9A%A9
+          %ED%95%B4%EB%B3%B4%EC%84%B8%EC%9A%94-clarify-activity-741334969
+          7022570496-qLts))
+      58  
+      59  **How to use**: trigger with phrases like "clarify the followin
+          g:" / "Please clarify this requirement"
+
+● Update(README.md)
+  ⎿  Removed 12 lines                                                    
+      65  
+      66  ### [interview](plugins/interview/skills/interview/SKILL.md)
+      67  
+      68 -**Install**:                                                   
+      69 -```bash                                                        
+      70 -claude plugin marketplace add https://github.com/corca-ai/claud
+         -e-plugins.git                                                  
+      71 -claude plugin install interview@corca-plugins                  
+      72 -```                                                            
+      73 -                                                               
+      74 -**Update**:                                                    
+      75 -```bash                                                        
+      76 -claude plugin marketplace update corca-plugins                 
+      77 -claude plugin update interview@corca-plugins                   
+      78 -```                                                            
+      79 -                                                               
+      68  A skill created by Corca AX consultant [Jeonghyeok Choi](https:
+          //denoiser.club/) to match his preferred workflow. Its goal is 
+          similar to Clarify: it runs a structured interview to extract r
+          equirements, constraints, and design decisions, and documents t
+          he project's core requirements via conversation.
+      69  
+      70  **Usage**:
+
+● Update(README.md)
+  ⎿  Removed 12 lines                                                    
+       85  
+       86  ### [suggest-tidyings](plugins/suggest-tidyings/skills/suggest
+           -tidyings/SKILL.md)
+       87  
+       88 -**Install**:                                                  
+       89 -```bash                                                       
+       90 -claude plugin marketplace add https://github.com/corca-ai/clau
+          -de-plugins.git                                                
+       91 -claude plugin install suggest-tidyings@corca-plugins          
+       92 -```                                                           
+       93 -                                                              
+       94 -**Update**:                                                   
+       95 -```bash                                                       
+       96 -claude plugin marketplace update corca-plugins                
+       97 -claude plugin update suggest-tidyings@corca-plugins           
+       98 -```                                                           
+       99 -                                                              
+       88  A skill based on Kent Beck's "Tidy First?" philosophy. It anal
+           yzes recent commits and finds safe refactoring opportunities. 
+           It uses parallel sub-agents to review multiple commits at once
+           .
+       89  
+       90  **Usage**:
+
+● Update(README.md)
+  ⎿  Removed 12 lines                                                    
+      105  
+      106  ### [retro](plugins/retro/skills/retro/SKILL.md)
+      107  
+      108 -**Install**:                                                  
+      109 -```bash                                                       
+      110 -claude plugin marketplace add https://github.com/corca-ai/clau
+          -de-plugins.git                                                
+      111 -claude plugin install retro@corca-plugins                     
+      112 -```                                                           
+      113 -                                                              
+      114 -**Update**:                                                   
+      115 -```bash                                                       
+      116 -claude plugin marketplace update corca-plugins                
+      117 -claude plugin update retro@corca-plugins                      
+      118 -```                                                           
+      119 -                                                              
+      108  A skill that runs a comprehensive retrospective at the end of 
+           a session. If `lessons.md` in the [Plan & Lessons Protocol](pl
+           ugins/plan-and-lessons/protocol.md) is a progressively accumul
+           ated learning log, `retro` is a "full-session, bird's-eye" ret
+           rospective.
+      109  
+      110  **Usage**:
+
+● Continue with the remaining README.md install block removals:
+
+● Update(README.md)
+  ⎿  Added 1 line, removed 1 line                                        
+      116  - Observes working style and collaboration patterns and sugges
+           ts CLAUDE.md updates (applies only with user approval)
+      117  - Suggests prompting habit improvements (with concrete example
+           s from the session)
+      118  - Shares learning resources tailored to the user's knowledge/e
+           xperience level
+      119 -- Can recommend workflow skills via find-skills or plan new sk
+          -ills via skill-creator                                        
+      119 +- Searches for relevant workflow skills or suggests creating n
+          +ew ones                                                       
+      120  
+      121  **Outputs**:
+      122  - `prompt-logs/{YYMMDD}-{title}/retro.md` — saved alongside pl
+           an.md and lessons.md
+
+● Update(README.md)
+  ⎿  Removed 12 lines                                                    
+      123  
+      124  ### [gather-context](plugins/gather-context/skills/gather-cont
+           ext/SKILL.md)
+      125  
+      126 -**Install**:                                                  
+      127 -```bash                                                       
+      128 -claude plugin marketplace add https://github.com/corca-ai/clau
+          -de-plugins.git                                                
+      129 -claude plugin install gather-context@corca-plugins            
+      130 -```                                                           
+      131 -                                                              
+      132 -**Update**:                                                   
+      133 -```bash                                                       
+      134 -claude plugin marketplace update corca-plugins                
+      135 -claude plugin update gather-context@corca-plugins             
+      136 -```                                                           
+      137 -                                                              
+      126  An integrated skill that detects URL types and gathers externa
+           l content into local files. It includes built-in converters, s
+           o it can gather Google Docs, Slack, and Notion content with a 
+           single plugin **without installing separate skills**. It combi
+           nes the functionality of [`slack-to-md`](https://www.stdy.blog
+           /1p1w-01-slack-to-md/), [`g-export`](https://www.stdy.blog/1p1
+           w-02-g-export/), and `notion-to-md`.
+      127  
+      128  **Usage**:
+
+● Update(README.md)
+  ⎿  Removed 12 lines                                                    
+      145  
+      146  ### [web-search](plugins/web-search/skills/web-search/SKILL.md
+           )
+      147  
+      148 -**Install**:                                                  
+      149 -```bash                                                       
+      150 -claude plugin marketplace add https://github.com/corca-ai/clau
+          -de-plugins.git                                                
+      151 -claude plugin install web-search@corca-plugins                
+      152 -```                                                           
+      153 -                                                              
+      154 -**Update**:                                                   
+      155 -```bash                                                       
+      156 -claude plugin marketplace update corca-plugins                
+      157 -claude plugin update web-search@corca-plugins                 
+      158 -```                                                           
+      159 -                                                              
+      148  A skill that uses the Tavily and Exa REST APIs for web search,
+            code search, and URL content extraction. Uses the **script de
+           legation pattern**: SKILL.md handles command parsing and query
+            intelligence, wrapper scripts handle API execution.
+      149  
+      150  **Usage**:
+
+● Update(README.md)
+  ⎿  Removed 12 lines                                                    
+      180  
+      181  ### [attention-hook](plugins/attention-hook/hooks/hooks.json)
+      182  
+      183 -**Install**:                                                  
+      184 -```bash                                                       
+      185 -claude plugin marketplace add https://github.com/corca-ai/clau
+          -de-plugins.git                                                
+      186 -claude plugin install attention-hook@corca-plugins            
+      187 -```                                                           
+      188 -                                                              
+      189 -**Update**:                                                   
+      190 -```bash                                                       
+      191 -claude plugin marketplace update corca-plugins                
+      192 -claude plugin update attention-hook@corca-plugins             
+      193 -```                                                           
+      194 -                                                              
+      183  A hook that sends Slack push notifications when Claude Code is
+            waiting for user input. The notification includes task contex
+           t (user request, Claude response, AskUserQuestion prompt, and 
+           Todo status) so you can immediately understand what's going on
+           . Useful when running on a remote server. (Background: [blog p
+           ost](https://www.stdy.blog/1p1w-03-attention-hook/))
+      184  
+      185  **Notification triggers**:
+
+● Update(README.md)
+  ⎿  Removed 12 lines                                                    
+      217  
+      218  ### [plan-and-lessons](plugins/plan-and-lessons/hooks/hooks.js
+           on)
+      219  
+      220 -**Install**:                                                  
+      221 -```bash                                                       
+      222 -claude plugin marketplace add https://github.com/corca-ai/clau
+          -de-plugins.git                                                
+      223 -claude plugin install plan-and-lessons@corca-plugins          
+      224 -```                                                           
+      225 -                                                              
+      226 -**Update**:                                                   
+      227 -```bash                                                       
+      228 -claude plugin marketplace update corca-plugins                
+      229 -claude plugin update plan-and-lessons@corca-plugins           
+      230 -```                                                           
+      231 -                                                              
+      220  A hook that automatically injects the Plan & Lessons Protocol 
+           when Claude Code enters plan mode (via the `EnterPlanMode` too
+           l call). The protocol defines a workflow that creates plan.md 
+           and lessons.md under `prompt-logs/{YYMMDD}-{title}/`.
+      221  
+      222  **How it works**:
+
+● Update(README.md)
+  ⎿  Removed 12 lines                                                    
+      230  
+      231  ### [smart-read](plugins/smart-read/hooks/hooks.json)
+      232  
+      233 -**Install**:                                                  
+      234 -```bash                                                       
+      235 -claude plugin marketplace add https://github.com/corca-ai/clau
+          -de-plugins.git                                                
+      236 -claude plugin install smart-read@corca-plugins                
+      237 -```                                                           
+      238 -                                                              
+      239 -**Update**:                                                   
+      240 -```bash                                                       
+      241 -claude plugin marketplace update corca-plugins                
+      242 -claude plugin update smart-read@corca-plugins                 
+      243 -```                                                           
+      244 -                                                              
+      233  A hook that intercepts Read tool calls and enforces intelligen
+           t file reading based on file size. Prevents context waste by w
+           arning on medium files and blocking full reads on large files,
+            guiding Claude to use offset/limit or Grep instead.
+      234  
+      235  **How it works**:
+
+● Now do the same for README.ko.md:
+
+● Update(README.ko.md)
+  ⎿  Removed 12 lines                                                    
+      54  
+      55  ### [clarify](plugins/clarify/skills/clarify/SKILL.md)
+      56  
+      57 -**설치**:                                                      
+      58 -```bash                                                        
+      59 -claude plugin marketplace add https://github.com/corca-ai/claud
+         -e-plugins.git                                                  
+      60 -claude plugin install clarify@corca-plugins                    
+      61 -```                                                            
+      62 -                                                               
+      63 -**갱신**:                                                      
+      64 -```bash                                                        
+      65 -claude plugin marketplace update corca-plugins                 
+      66 -claude plugin update clarify@corca-plugins                     
+      67 -```                                                            
+      68 -                                                               
+      57  모호하거나 불명확한 요구사항을 반복적인 질문을 통해 명확하고 실
+          행 가능한 사양으로 변환하는 스킬입니다. [Team Attention](https:
+          //github.com/team-attention)에서 만든 [Clarify 스킬](https://gi
+          thub.com/team-attention/plugins-for-claude-natives/blob/main/pl
+          ugins/clarify/SKILL.md)을 가져와서 커스터마이즈했습니다. (사용
+          법 참조: 정구봉님 [링크드인 포스트](https://www.linkedin.com/po
+          sts/gb-jeong_%ED%81%B4%EB%A1%9C%EB%93%9C%EC%BD%94%EB%93%9C%EA%B
+          0%80-%EA%B0%9D%EA%B4%80%EC%8B%9D%EC%9C%BC%EB%A1%9C-%EC%A7%88%EB
+          %AC%B8%ED%95%98%EA%B2%8C-%ED%95%98%EB%8A%94-skills%EB%A5%BC-%EC
+          %82%AC%EC%9A%A9%ED%95%B4%EB%B3%B4%EC%84%B8%EC%9A%94-clarify-act
+          ivity-7413349697022570496-qLts))
+      58  
+      59  **사용법**: "다음 요구사항을 명확하게 해줘", "clarify the follo
+          wing:" 등으로 트리거
+
+● Update(README.ko.md)
+  ⎿  Removed 12 lines                                                    
+      65  
+      66  ### [interview](plugins/interview/skills/interview/SKILL.md)
+      67  
+      68 -**설치**:                                                      
+      69 -```bash                                                        
+      70 -claude plugin marketplace add https://github.com/corca-ai/claud
+         -e-plugins.git                                                  
+      71 -claude plugin install interview@corca-plugins                  
+      72 -```                                                            
+      73 -                                                               
+      74 -**갱신**:                                                      
+      75 -```bash                                                        
+      76 -claude plugin marketplace update corca-plugins                 
+      77 -claude plugin update interview@corca-plugins                   
+      78 -```                                                            
+      79 -                                                               
+      68  코르카의 AX 컨설턴트 [최정혁님](https://denoiser.club/)이 본인
+          의 취향에 맞게 만드신 스킬입니다. 목적은 Clarify와 유사합니다. 
+          구조화된 인터뷰를 통해 요구사항, 제약사항, 설계 결정을 추출하는
+           스킬입니다. 대화를 통해 프로젝트의 핵심 요구사항을 발견하고 문
+          서화합니다.
+      69  
+      70  **사용법**:
+
+● Update(README.ko.md)
+  ⎿  Removed 12 lines                                                    
+       85  
+       86  ### [suggest-tidyings](plugins/suggest-tidyings/skills/suggest
+           -tidyings/SKILL.md)
+       87  
+       88 -**설치**:                                                     
+       89 -```bash                                                       
+       90 -claude plugin marketplace add https://github.com/corca-ai/clau
+          -de-plugins.git                                                
+       91 -claude plugin install suggest-tidyings@corca-plugins          
+       92 -```                                                           
+       93 -                                                              
+       94 -**갱신**:                                                     
+       95 -```bash                                                       
+       96 -claude plugin marketplace update corca-plugins                
+       97 -claude plugin update suggest-tidyings@corca-plugins           
+       98 -```                                                           
+       99 -                                                              
+       88  Kent Beck의 "Tidy First?" 철학에 기반하여 최근 커밋들을 분석하
+           고 안전한 리팩토링 기회를 찾아주는 스킬입니다. Sub-agent를 병
+           렬로 활용하여 여러 커밋을 동시에 분석합니다.
+       89  
+       90  **사용법**:
+
+● Update(README.ko.md)
+  ⎿  Removed 12 lines                                                    
+      105  
+      106  ### [retro](plugins/retro/skills/retro/SKILL.md)
+      107  
+      108 -**설치**:                                                     
+      109 -```bash                                                       
+      110 -claude plugin marketplace add https://github.com/corca-ai/clau
+          -de-plugins.git                                                
+      111 -claude plugin install retro@corca-plugins                     
+      112 -```                                                           
+      113 -                                                              
+      114 -**갱신**:                                                     
+      115 -```bash                                                       
+      116 -claude plugin marketplace update corca-plugins                
+      117 -claude plugin update retro@corca-plugins                      
+      118 -```                                                           
+      119 -                                                              
+      108  세션 종료 시점에 포괄적인 회고를 수행하는 스킬입니다. [Plan & 
+           Lessons Protocol](plugins/plan-and-lessons/protocol.md)의 `les
+           sons.md`가 세션 중 점진적으로 쌓이는 학습 기록이라면, `retro`
+           는 세션 전체를 조감하는 종합 회고입니다.
+      109  
+      110  **사용법**:
+
+● Update(README.ko.md)
+  ⎿  Added 1 line, removed 1 line                                        
+      116  - 업무 스타일·협업 방식 관찰 후 CLAUDE.md 업데이트 제안 (유저 
+           승인 후 적용)
+      117  - 프롬프팅 습관 개선점 제안 (세션의 구체적 사례와 함께)
+      118  - 유저의 지식/경험 수준에 맞춘 학습자료 링크 제공
+      119 -- find-skills로 워크플로우에 도움될 스킬 탐색 또는 skill-creat
+          -or로 새 스킬 제작 계획                                        
+      119 +- 워크플로우에 도움될 스킬 탐색 또는 새 스킬 제작 제안        
+      120  
+      121  **출력물**:
+      122  - `prompt-logs/{YYMMDD}-{title}/retro.md` — plan.md, lessons.m
+           d와 같은 디렉토리에 저장
+
+● Update(README.ko.md)
+  ⎿  Removed 12 lines                                                    
+      123  
+      124  ### [gather-context](plugins/gather-context/skills/gather-cont
+           ext/SKILL.md)
+      125  
+      126 -**설치**:                                                     
+      127 -```bash                                                       
+      128 -claude plugin marketplace add https://github.com/corca-ai/clau
+          -de-plugins.git                                                
+      129 -claude plugin install gather-context@corca-plugins            
+      130 -```                                                           
+      131 -                                                              
+      132 -**갱신**:                                                     
+      133 -```bash                                                       
+      134 -claude plugin marketplace update corca-plugins                
+      135 -claude plugin update gather-context@corca-plugins             
+      136 -```                                                           
+      137 -                                                              
+      126  URL 유형을 자동 감지하여 외부 콘텐츠를 로컬 파일로 수집하는 통
+           합 스킬입니다. 변환 스크립트가 내장되어 있어 **별도의 스킬 설
+           치 없이** 하나의 플러그인으로 Google Docs, Slack, Notion 콘텐
+           츠를 모두 수집할 수 있습니다. 기존의 [`slack-to-md`](https://w
+           ww.stdy.blog/1p1w-01-slack-to-md/), [`g-export`](https://www.s
+           tdy.blog/1p1w-02-g-export/), `notion-to-md`를 통합한 스킬입니
+           다.
+      127  
+      128  **사용법**:
+
+● Update(README.ko.md)
+  ⎿  Removed 12 lines                                                    
+      145  
+      146  ### [web-search](plugins/web-search/skills/web-search/SKILL.md
+           )
+      147  
+      148 -**설치**:                                                     
+      149 -```bash                                                       
+      150 -claude plugin marketplace add https://github.com/corca-ai/clau
+          -de-plugins.git                                                
+      151 -claude plugin install web-search@corca-plugins                
+      152 -```                                                           
+      153 -                                                              
+      154 -**갱신**:                                                     
+      155 -```bash                                                       
+      156 -claude plugin marketplace update corca-plugins                
+      157 -claude plugin update web-search@corca-plugins                 
+      158 -```                                                           
+      159 -                                                              
+      148  Tavily와 Exa REST API를 활용하여 웹 검색, 코드 검색, URL 콘텐
+           츠 추출을 수행하는 스킬입니다. **스크립트 위임 패턴** 사용: SK
+           ILL.md가 커맨드 파싱과 쿼리 인텔리전스를 담당하고, 래퍼 스크립
+           트가 API 실행을 처리합니다.
+      149  
+      150  **사용법**:
+
+● Update(README.ko.md)
+  ⎿  Removed 12 lines                                                    
+      180  
+      181  ### [attention-hook](plugins/attention-hook/hooks/hooks.json)
+      182  
+      183 -**설치**:                                                     
+      184 -```bash                                                       
+      185 -claude plugin marketplace add https://github.com/corca-ai/clau
+          -de-plugins.git                                                
+      186 -claude plugin install attention-hook@corca-plugins            
+      187 -```                                                           
+      188 -                                                              
+      189 -**갱신**:                                                     
+      190 -```bash                                                       
+      191 -claude plugin marketplace update corca-plugins                
+      192 -claude plugin update attention-hook@corca-plugins             
+      193 -```                                                           
+      194 -                                                              
+      183  Claude Code가 사용자의 입력을 기다릴 때 Slack으로 푸시 알림을 
+           보내는 훅입니다. 알림에 이미지를 제외한 작업 컨텍스트(사용자 
+           요청, Claude 응답, AskUserQuestion을 통한 질문 내용, Todo 상태
+           )가 포함되어 어떤 작업인지 즉시 파악할 수 있습니다. 원격 서버
+           에 세팅해뒀을 때 유용합니다. ([작업 배경 블로그 글](https://ww
+           w.stdy.blog/1p1w-03-attention-hook/))
+      184  
+      185  
+
+● Update(README.ko.md)
+  ⎿  Removed 12 lines                                                    
+      218  
+      219  ### [plan-and-lessons](plugins/plan-and-lessons/hooks/hooks.js
+           on)
+      220  
+      221 -**설치**:                                                     
+      222 -```bash                                                       
+      223 -claude plugin marketplace add https://github.com/corca-ai/clau
+          -de-plugins.git                                                
+      224 -claude plugin install plan-and-lessons@corca-plugins          
+      225 -```                                                           
+      226 -                                                              
+      227 -**갱신**:                                                     
+      228 -```bash                                                       
+      229 -claude plugin marketplace update corca-plugins                
+      230 -claude plugin update plan-and-lessons@corca-plugins           
+      231 -```                                                           
+      232 -                                                              
+      221  Claude Code가 Plan 모드에 진입할 때(`EnterPlanMode` 도구 호출 
+           시) Plan & Lessons Protocol을 자동으로 주입하는 훅입니다. 프로
+           토콜은 `prompt-logs/{YYMMDD}-{title}/` 디렉토리에 plan.md와 le
+           ssons.md를 생성하는 워크플로우를 정의합니다.
+      222  
+      223  **동작 방식**:
+
+● Update(README.ko.md)
+  ⎿  Removed 12 lines                                                    
+      231  
+      232  ### [smart-read](plugins/smart-read/hooks/hooks.json)
+      233  
+      234 -**설치**:                                                     
+      235 -```bash                                                       
+      236 -claude plugin marketplace add https://github.com/corca-ai/clau
+          -de-plugins.git                                                
+      237 -claude plugin install smart-read@corca-plugins                
+      238 -```                                                           
+      239 -                                                              
+      240 -**갱신**:                                                     
+      241 -```bash                                                       
+      242 -claude plugin marketplace update corca-plugins                
+      243 -claude plugin update smart-read@corca-plugins                 
+      244 -```                                                           
+      245 -                                                              
+      234  Read 도구 호출을 가로채서 파일 크기에 따라 지능적인 읽기를 강
+           제하는 훅입니다. 큰 파일의 전체 읽기를 차단하여 컨텍스트 낭비
+           를 방지하고, offset/limit 또는 Grep 사용을 안내합니다.
+      235  
+      236  **동작 방식**:
+
+● Good, #5-#10 are done. Now let me update todos and handle #11 (reflect missing lessons) and the retro/lessons updates. The retro SKILL.md changed, so I need to bump retro's plugin version too.
+
+● For #11, the two unreflected lessons are:
+  1. "새 규칙 도입 시 그 변경 자체가 첫 적용인지 확인" (meta-rule about self-referential rule application)
+  2. "행동 오류 시 지시 추가보다 구조적 비대칭 제거" (surface fix vs structural fix heuristic)
+
+  These belong in project-context.md under a Design Principles or similar section, and in lessons.md.
+
+● Update(docs/project-context.md)
+  ⎿  Error: Interrupted by user
+  ⎿  Interrupted · What should Claude do instead?
+
+❯ 잠시만요. 리드미의 설치/갱신 중복은 원래 의도적인 것이었습니다. 제가 각각 
+  갱신하기 귀찮았기도 하고, 유저도 그럴 거라고 생각해서 쉽게 bash           
+  스크립트를 리드미로부터 복사하기 쉽게 하려고 했어요. 그런데 오늘 추가한   
+  update-all (이름이 맞나요?) 쉘 스크립트가 이걸 해결해줄 것 같기도 하고    
+  애매하네요. 이건 일반 유저용은 아닌데... 어떻게 생각하세요?               
+
+● 좋은 지적입니다. 솔직히 말하면, 서브에이전트가 "90줄 노이즈"로 판단한 건 문서 구조 관점이고, 유저 UX 관점에서는 다릅니다.
+
+  README를 읽는 유저는 보통 특정 플러그인 섹션으로 점프합니다. 거기서 바로 복붙할 수 있는 install 명령이 있는 건 실제 편의성이고, 많은 멀티 패키지 프로젝트가 이 패턴을 씁니다.
+
+  update-all.sh는 이 repo를 clone한 개발자(사실상 본인)용이지, claude plugin install로 설치하는 일반 유저용이 아니니까 대체재가 아닙니다.
+
+  다만 한 가지 중간안이 있긴 합니다:
+
+  - marketplace add + install 전체 블록 (10줄) → 매번 반복할 필요 없음. marketplace는 한 번만 추가하면 되니까.
+  - per-plugin install 한 줄만 남기는 건 어떨까요? 예: Install: claude plugin install clarify@corca-plugins
+
+  하지만 이것도 취향 문제입니다. 원래 의도가 "복붙 편의성"이었다면, revert하는 게 맞을 수 있습니다.
+
+  되돌릴까요, 아니면 한 줄 축약 버전으로 갈까요?
+
+✻ Baked for 31s
+
+❯ update-all 을 해주는 플러그인을 추가하는 건 과하려나요? 
+
+● Explore(Explore update-all.sh script)
+  ⎿  Done (12 tool uses · 18.3k tokens · 27s)                            
+
+
+● 과하다고 봅니다. 이유:
+
+  1. 기능이 Claude의 지능을 필요로 하지 않음 — bash 스크립트 한 줄 실행이 전부. skill은 의도 분석이나 판단이 필요한 작업에 적합합니다.
+  2. 유지보수 대상 +1 — plugin.json, SKILL.md, marketplace.json 엔트리, README 양국어 섹션 등 보일러플레이트가 실제 로직보다 많음.
+  3. 사용 빈도가 낮음 — 플러그인 업데이트는 가끔 일어나는 일이고, 일반 유저가 9개를 전부 설치하진 않을 것.
+  4. 기존 CLI가 이미 커버 — claude plugin update {name}@corca-plugins 가 있음.
+
+  결론적으로, README install 블록을 되돌리되, 약간 축약하는 게 가장 실용적이라고 생각합니다:
+
+  - marketplace add 반복은 제거 (한 번이면 됨)
+  - per-plugin에는 install/update 한 줄씩만 남기기
+
+  이렇면 원래 의도(복붙 편의성)를 살리면서 ~50줄은 줄일 수 있습니다. 되돌리고 축약할까요?
+
+✻ Cogitated for 1m 6s
+
+❯ 그러시죠. 그리고 나머지 계속합시다. 
+
+● README.md와 README.ko.md 현재 상태를 확인하고 축약형 install 블록을 추가하겠습니다.
+
+● Read(README.md)
+  ⎿  Read 120 lines
+
+● Read(README.ko.md)
+  ⎿  Read 120 lines
+
+● Let me also check the hooks sections.
+
+● Read(README.md)
+  ⎿  Read 98 lines
+
+● Now I'll add shortened install/update lines to each plugin section in both READMEs. 9 edits each file — doing them in batches.
+
+● Update(README.md)
+  ⎿  Added 2 lines                                                       
+      54  
+      55  ### [clarify](plugins/clarify/skills/clarify/SKILL.md)
+      56  
+      57 +**Install**: `claude plugin install clarify@corca-plugins` | **
+         +Update**: `claude plugin update clarify@corca-plugins`         
+      58 +                                                               
+      59  A skill that turns vague or unclear requirements into clear, ex
+          ecutable specs through iterative questioning. It is based on Te
+          am Attention's [Clarify skill](https://github.com/team-attentio
+          n/plugins-for-claude-natives/blob/main/plugins/clarify/SKILL.md
+          ) and customized for our workflow. (Usage reference: Jeong Gubo
+          ng's [LinkedIn post](https://www.linkedin.com/posts/gb-jeong_%E
+          D%81%B4%EB%A1%9C%EB%93%9C%EC%BD%94%EB%93%9C%EA%B0%80-%EA%B0%9D%
+          EA%B4%80%EC%8B%9D%EC%9C%BC%EB%A1%9C-%EC%A7%88%EB%AC%B8%ED%95%98
+          %EA%B2%8C-%ED%95%98%EB%8A%94-skills%EB%A5%BC-%EC%82%AC%EC%9A%A9
+          %ED%95%B4%EB%B3%B4%EC%84%B8%EC%9A%94-clarify-activity-741334969
+          7022570496-qLts))
+      60  
+      61  **How to use**: trigger with phrases like "clarify the followin
+          g:" / "Please clarify this requirement"
+
+● Update(README.md)
+  ⎿  Added 2 lines                                                       
+      67  
+      68  ### [interview](plugins/interview/skills/interview/SKILL.md)
+      69  
+      70 +**Install**: `claude plugin install interview@corca-plugins` | 
+         +**Update**: `claude plugin update interview@corca-plugins`     
+      71 +                                                               
+      72  A skill created by Corca AX consultant [Jeonghyeok Choi](https:
+          //denoiser.club/) to match his preferred workflow. Its goal is 
+          similar to Clarify: it runs a structured interview to extract r
+          equirements, constraints, and design decisions, and documents t
+          he project's core requirements via conversation.
+      73  
+      74  **Usage**:
+
+● Update(README.md)
+  ⎿  Added 2 lines                                                       
+      89  
+      90  ### [suggest-tidyings](plugins/suggest-tidyings/skills/suggest-
+          tidyings/SKILL.md)
+      91  
+      92 +**Install**: `claude plugin install suggest-tidyings@corca-plug
+         +ins` | **Update**: `claude plugin update suggest-tidyings@corca
+         +-plugins`                                                      
+      93 +                                                               
+      94  A skill based on Kent Beck's "Tidy First?" philosophy. It analy
+          zes recent commits and finds safe refactoring opportunities. It
+           uses parallel sub-agents to review multiple commits at once.
+      95  
+      96  **Usage**:
+
+● Update(README.md)
+  ⎿  Added 2 lines                                                       
+      111  
+      112  ### [retro](plugins/retro/skills/retro/SKILL.md)
+      113  
+      114 +**Install**: `claude plugin install retro@corca-plugins` | **U
+          +pdate**: `claude plugin update retro@corca-plugins`           
+      115 +                                                              
+      116  A skill that runs a comprehensive retrospective at the end of 
+           a session. If `lessons.md` in the [Plan & Lessons Protocol](pl
+           ugins/plan-and-lessons/protocol.md) is a progressively accumul
+           ated learning log, `retro` is a "full-session, bird's-eye" ret
+           rospective.
+      117  
+      118  **Usage**:
+
+● Update(README.md)
+  ⎿  Added 2 lines                                                       
+      131  
+      132  ### [gather-context](plugins/gather-context/skills/gather-cont
+           ext/SKILL.md)
+      133  
+      134 +**Install**: `claude plugin install gather-context@corca-plugi
+          +ns` | **Update**: `claude plugin update gather-context@corca-p
+          +lugins`                                                       
+      135 +                                                              
+      136  An integrated skill that detects URL types and gathers externa
+           l content into local files. It includes built-in converters, s
+           o it can gather Google Docs, Slack, and Notion content with a 
+           single plugin **without installing separate skills**. It combi
+           nes the functionality of [`slack-to-md`](https://www.stdy.blog
+           /1p1w-01-slack-to-md/), [`g-export`](https://www.stdy.blog/1p1
+           w-02-g-export/), and `notion-to-md`.
+      137  
+      138  **Usage**:
+
+● Update(README.md)
+  ⎿  Added 2 lines                                                       
+      155  
+      156  ### [web-search](plugins/web-search/skills/web-search/SKILL.md
+           )
+      157  
+      158 +**Install**: `claude plugin install web-search@corca-plugins` 
+          +| **Update**: `claude plugin update web-search@corca-plugins` 
+      159 +                                                              
+      160  A skill that uses the Tavily and Exa REST APIs for web search,
+            code search, and URL content extraction. Uses the **script de
+           legation pattern**: SKILL.md handles command parsing and query
+            intelligence, wrapper scripts handle API execution.
+      161  
+      162  **Usage**:
+
+● Update(README.md)
+  ⎿  Added 2 lines                                                       
+      192  
+      193  ### [attention-hook](plugins/attention-hook/hooks/hooks.json)
+      194  
+      195 +**Install**: `claude plugin install attention-hook@corca-plugi
+          +ns` | **Update**: `claude plugin update attention-hook@corca-p
+          +lugins`                                                       
+      196 +                                                              
+      197  A hook that sends Slack push notifications when Claude Code is
+            waiting for user input. The notification includes task contex
+           t (user request, Claude response, AskUserQuestion prompt, and 
+           Todo status) so you can immediately understand what's going on
+           . Useful when running on a remote server. (Background: [blog p
+           ost](https://www.stdy.blog/1p1w-03-attention-hook/))
+      198  
+      199  **Notification triggers**:
+
+● Update(README.md)
+  ⎿  Added 2 lines                                                       
+      231  
+      232  ### [plan-and-lessons](plugins/plan-and-lessons/hooks/hooks.js
+           on)
+      233  
+      234 +**Install**: `claude plugin install plan-and-lessons@corca-plu
+          +gins` | **Update**: `claude plugin update plan-and-lessons@cor
+          +ca-plugins`                                                   
+      235 +                                                              
+      236  A hook that automatically injects the Plan & Lessons Protocol 
+           when Claude Code enters plan mode (via the `EnterPlanMode` too
+           l call). The protocol defines a workflow that creates plan.md 
+           and lessons.md under `prompt-logs/{YYMMDD}-{title}/`.
+      237  
+      238  **How it works**:
+
+● Update(README.md)
+  ⎿  Added 2 lines                                                       
+      246  
+      247  ### [smart-read](plugins/smart-read/hooks/hooks.json)
+      248  
+      249 +**Install**: `claude plugin install smart-read@corca-plugins` 
+          +| **Update**: `claude plugin update smart-read@corca-plugins` 
+      250 +                                                              
+      251  A hook that intercepts Read tool calls and enforces intelligen
+           t file reading based on file size. Prevents context waste by w
+           arning on medium files and blocking full reads on large files,
+            guiding Claude to use offset/limit or Grep instead.
+      252  
+      253  **How it works**:
+
+● Good. Now the same for README.ko.md:
+
+● Update(README.ko.md)
+  ⎿  Added 2 lines                                                       
+      54  
+      55  ### [clarify](plugins/clarify/skills/clarify/SKILL.md)
+      56  
+      57 +**설치**: `claude plugin install clarify@corca-plugins` | **갱 
+         +신**: `claude plugin update clarify@corca-plugins`             
+      58 +                                                               
+      59  모호하거나 불명확한 요구사항을 반복적인 질문을 통해 명확하고 실
+          행 가능한 사양으로 변환하는 스킬입니다. [Team Attention](https:
+          //github.com/team-attention)에서 만든 [Clarify 스킬](https://gi
+          thub.com/team-attention/plugins-for-claude-natives/blob/main/pl
+          ugins/clarify/SKILL.md)을 가져와서 커스터마이즈했습니다. (사용
+          법 참조: 정구봉님 [링크드인 포스트](https://www.linkedin.com/po
+          sts/gb-jeong_%ED%81%B4%EB%A1%9C%EB%93%9C%EC%BD%94%EB%93%9C%EA%B
+          0%80-%EA%B0%9D%EA%B4%80%EC%8B%9D%EC%9C%BC%EB%A1%9C-%EC%A7%88%EB
+          %AC%B8%ED%95%98%EA%B2%8C-%ED%95%98%EB%8A%94-skills%EB%A5%BC-%EC
+          %82%AC%EC%9A%A9%ED%95%B4%EB%B3%B4%EC%84%B8%EC%9A%94-clarify-act
+          ivity-7413349697022570496-qLts))
+      60  
+      61  **사용법**: "다음 요구사항을 명확하게 해줘", "clarify the follo
+          wing:" 등으로 트리거
+
+● Update(README.ko.md)
+  ⎿  Added 2 lines                                                       
+      67  
+      68  ### [interview](plugins/interview/skills/interview/SKILL.md)
+      69  
+      70 +**설치**: `claude plugin install interview@corca-plugins` | ** 
+         +갱신**: `claude plugin update interview@corca-plugins`         
+      71 +                                                               
+      72  코르카의 AX 컨설턴트 [최정혁님](https://denoiser.club/)이 본인
+          의 취향에 맞게 만드신 스킬입니다. 목적은 Clarify와 유사합니다. 
+          구조화된 인터뷰를 통해 요구사항, 제약사항, 설계 결정을 추출하는
+           스킬입니다. 대화를 통해 프로젝트의 핵심 요구사항을 발견하고 문
+          서화합니다.
+      73  
+      74  **사용법**:
+
+● Update(README.ko.md)
+  ⎿  Added 2 lines                                                       
+      89  
+      90  ### [suggest-tidyings](plugins/suggest-tidyings/skills/suggest-
+          tidyings/SKILL.md)
+      91  
+      92 +**설치**: `claude plugin install suggest-tidyings@corca-plugins
+         +` | **갱신**: `claude plugin update suggest-tidyings@corca-plug
+         +ins`                                                           
+      93 +                                                               
+      94  Kent Beck의 "Tidy First?" 철학에 기반하여 최근 커밋들을 분석하
+          고 안전한 리팩토링 기회를 찾아주는 스킬입니다. Sub-agent를 병렬
+          로 활용하여 여러 커밋을 동시에 분석합니다.
+      95  
+      96  **사용법**:
+
+● Update(README.ko.md)
+  ⎿  Added 2 lines                                                       
+      111  
+      112  ### [retro](plugins/retro/skills/retro/SKILL.md)
+      113  
+      114 +**설치**: `claude plugin install retro@corca-plugins` | **갱신
+          +**: `claude plugin update retro@corca-plugins`                
+      115 +                                                              
+      116  세션 종료 시점에 포괄적인 회고를 수행하는 스킬입니다. [Plan & 
+           Lessons Protocol](plugins/plan-and-lessons/protocol.md)의 `les
+           sons.md`가 세션 중 점진적으로 쌓이는 학습 기록이라면, `retro`
+           는 세션 전체를 조감하는 종합 회고입니다.
+      117  
+      118  **사용법**:
+
+● Update(README.ko.md)
+  ⎿  Added 2 lines                                                       
+      131  
+      132  ### [gather-context](plugins/gather-context/skills/gather-cont
+           ext/SKILL.md)
+      133  
+      134 +**설치**: `claude plugin install gather-context@corca-plugins`
+          + | **갱신**: `claude plugin update gather-context@corca-plugin
+          +s`                                                            
+      135 +                                                              
+      136  URL 유형을 자동 감지하여 외부 콘텐츠를 로컬 파일로 수집하는 통
+           합 스킬입니다. 변환 스크립트가 내장되어 있어 **별도의 스킬 설
+           치 없이** 하나의 플러그인으로 Google Docs, Slack, Notion 콘텐
+           츠를 모두 수집할 수 있습니다. 기존의 [`slack-to-md`](https://w
+           ww.stdy.blog/1p1w-01-slack-to-md/), [`g-export`](https://www.s
+           tdy.blog/1p1w-02-g-export/), `notion-to-md`를 통합한 스킬입니
+           다.
+      137  
+      138  **사용법**:
+
+● Update(README.ko.md)
+  ⎿  Added 2 lines                                                       
+      155  
+      156  ### [web-search](plugins/web-search/skills/web-search/SKILL.md
+           )
+      157  
+      158 +**설치**: `claude plugin install web-search@corca-plugins` | *
+          +*갱신**: `claude plugin update web-search@corca-plugins`      
+      159 +                                                              
+      160  Tavily와 Exa REST API를 활용하여 웹 검색, 코드 검색, URL 콘텐
+           츠 추출을 수행하는 스킬입니다. **스크립트 위임 패턴** 사용: SK
+           ILL.md가 커맨드 파싱과 쿼리 인텔리전스를 담당하고, 래퍼 스크립
+           트가 API 실행을 처리합니다.
+      161  
+      162  **사용법**:
+
+● Update(README.ko.md)
+  ⎿  Added 2 lines                                                       
+      192  
+      193  ### [attention-hook](plugins/attention-hook/hooks/hooks.json)
+      194  
+      195 +**설치**: `claude plugin install attention-hook@corca-plugins`
+          + | **갱신**: `claude plugin update attention-hook@corca-plugin
+          +s`                                                            
+      196 +                                                              
+      197  Claude Code가 사용자의 입력을 기다릴 때 Slack으로 푸시 알림을 
+           보내는 훅입니다. 알림에 이미지를 제외한 작업 컨텍스트(사용자 
+           요청, Claude 응답, AskUserQuestion을 통한 질문 내용, Todo 상태
+           )가 포함되어 어떤 작업인지 즉시 파악할 수 있습니다. 원격 서버
+           에 세팅해뒀을 때 유용합니다. ([작업 배경 블로그 글](https://ww
+           w.stdy.blog/1p1w-03-attention-hook/))
+      198  
+      199  
+
+● Update(README.ko.md)
+  ⎿  Added 2 lines                                                       
+      232  
+      233  ### [plan-and-lessons](plugins/plan-and-lessons/hooks/hooks.js
+           on)
+      234  
+      235 +**설치**: `claude plugin install plan-and-lessons@corca-plugin
+          +s` | **갱신**: `claude plugin update plan-and-lessons@corca-pl
+          +ugins`                                                        
+      236 +                                                              
+      237  Claude Code가 Plan 모드에 진입할 때(`EnterPlanMode` 도구 호출 
+           시) Plan & Lessons Protocol을 자동으로 주입하는 훅입니다. 프로
+           토콜은 `prompt-logs/{YYMMDD}-{title}/` 디렉토리에 plan.md와 le
+           ssons.md를 생성하는 워크플로우를 정의합니다.
+      238  
+      239  **동작 방식**:
+
+● Update(README.ko.md)
+  ⎿  Added 2 lines                                                       
+      247  
+      248  ### [smart-read](plugins/smart-read/hooks/hooks.json)
+      249  
+      250 +**설치**: `claude plugin install smart-read@corca-plugins` | *
+          +*갱신**: `claude plugin update smart-read@corca-plugins`      
+      251 +                                                              
+      252  Read 도구 호출을 가로채서 파일 크기에 따라 지능적인 읽기를 강
+           제하는 훅입니다. 큰 파일의 전체 읽기를 차단하여 컨텍스트 낭비
+           를 방지하고, offset/limit 또는 Grep 사용을 안내합니다.
+      253  
+      254  **동작 방식**:
+
+● README 완료. 이제 나머지 작업을 진행합니다: #11 (미반영 교훈), retro 버전 bump, retro/lessons 업데이트, CHANGELOG.
+
+● Update(docs/project-context.md)
+  ⎿  Added 5 lines                                                       
+      14  - Progressive disclosure: CLAUDE.md is concise, details live in
+           docs/
+      15  - Dogfooding: new tools are tested in the session that creates 
+          them
+      16  
+      17 +## Process Heuristics                                          
+      18 +                                                               
+      19 +- **Meta-rule check**: When introducing a new rule, verify that
+         + the change itself is the first application of that rule (e.g.,
+         + adding "always bump version" should include bumping the versio
+         +n of the file being changed)                                   
+      20 +- **Structural fix over instruction fix**: When a behavioral er
+         +ror recurs, prefer removing the structural asymmetry that cause
+         +d it over adding more instructions. Adding rules has diminishin
+         +g returns; changing structure is more durable.                 
+      21 +                                                               
+      22  ## Conventions
+      23  
+      24  - Documentation language: English for docs/ and default top-lev
+          el docs; Korean versions live in README.ko.md and AI_NATIVE_PRO
+          DUCT_TEAM.ko.md
+
+● Read(plugins/retro/.claude-plugin/plugin.json)
+  ⎿  Read 11 lines
+
+● Update(plugins/retro/.claude-plugin/plugin.json)
+  ⎿  Added 1 line, removed 1 line                                        
+      1  {
+      2    "name": "retro",
+      3    "description": "A skill that performs comprehensive session re
+         trospectives",
+      4 -  "version": "1.3.2",                                           
+      4 +  "version": "1.3.3",                                           
+      5    "author": {
+      6      "name": "Corca",
+      7      "url": "https://www.corca.ai/"
+
+● Now update lessons.md, retro.md, and CHANGELOG.
+
+● Update(prompt-logs/260203-doc-audit/lessons.md)
+  ⎿  Added 16 lines                                                      
+      35  - **Expected**: api-reference.md 변경이 문서 감사의 일부라 버전
+           불필요할 것
+      36  - **Actual**: 플러그인 내부 파일이 변경되면 patch 버전이라도 올
+          려야 함 (설치된 사본이 캐시되므로)
+      37  - **Takeaway**: 플러그인 디렉토리 안의 어떤 파일이든 바뀌면 버
+          전 bump 필요
+      38 +                                                               
+      39 +### 서브에이전트 "신선한 눈" 리뷰 패턴                         
+      40 +                                                               
+      41 +- **Expected**: 자기 작업을 직접 검토하면 충분할 것            
+      42 +- **Actual**: 3개 독립 서브에이전트(content integrity, missed o
+         +pportunities, progressive disclosure)에게 lessons/retro를 컨텍 
+         +스트로 주고 최근 커밋의 diff를 리뷰시킨 결과, 4개 버그 + 7개 개
+         +선점 발견. 특히 404 링크, CHANGELOG 오류, marketplace.json 버전
+         + 누락 등 자기 작업에서 놓친 문제들.                            
+      43 +- **Takeaway**: 대규모 변경 후 "리뷰 에이전트"를 병렬로 돌리는 
+         +패턴이 효과적. 각 에이전트에게 서로 다른 관점(정합성, 누락, 구 
+         +조)을 부여하면 커버리지가 넓어짐.                              
+      44 +                                                               
+      45 +커밋 전 품질 검증이 필요할 때 → 서브에이전트에게 lessons/retro 
+         +컨텍스트 + diff를 주고 관점별 병렬 리뷰                        
+      46 +                                                               
+      47 +### README install 블록은 의도적 반복                          
+      48 +                                                               
+      49 +- **Expected**: per-plugin install/update 블록이 중복이라 제거 
+         +가능할 것                                                      
+      50 +- **Actual**: 유저가 특정 플러그인 섹션으로 바로 점프해서 복붙 
+         +하는 UX를 위해 의도적으로 반복한 것                            
+      51 +- **Takeaway**: "중복 제거"가 항상 옳진 않음. 독자의 실제 사용 
+         +패턴을 고려해야 함. 축약(한 줄 inline)이 중간안.               
+      52 +                                                               
+      53 +문서 중복 제거 시 → "누가 어떻게 이 문서를 읽는가?" 먼저 확인  
+
+● Now update retro.md with the post-retro findings from this session:
+
+● Update(prompt-logs/260203-doc-audit/retro.md)
+  ⎿  Added 6 lines                                                       
+      37  ## 5. Relevant Skills
+      38  
+      39  이 세션에서 명확한 스킬 갭은 없음. "문서 감사"는 빈도가 낮은 작
+          업이라 전용 스킬보다는 필요 시 ad-hoc으로 진행하는 것이 적절. 
+          다만, 이번 감사에서 발견한 체크리스트(단일 출처 원칙, 독자별 수
+          준, 죽은 문서 감지)는 lessons.md에 기록되어 향후 감사 시 참조 
+          가능.
+      40 +                                                               
+      41 +### Post-Retro Findings (continued)                            
+      42 +                                                               
+      43 +3. **서브에이전트 병렬 리뷰 패턴**: 대규모 변경 후 3개 독립 서 
+         +브에이전트(content integrity, missed opportunities, progressive
+         + disclosure)에게 lessons/retro 컨텍스트 + diff를 주고 리뷰시킨 
+         +결과 4개 버그 + 7개 개선점 발견. 자기 작업의 맹점을 잡기 위한  
+         +효과적인 패턴으로, 향후 커밋 전 품질 검증에 활용 가능.         
+      44 +4. **README install 블록은 의도적 반복**: 서브에이전트가 "90줄 
+         +노이즈"로 판단한 per-plugin install 블록은 실제로 유저의 복붙  
+         +편의성을 위해 의도적으로 배치한 것. "중복 제거"와 "사용자 UX"  
+         +사이의 균형이 필요 — 축약(한 줄 inline)이 중간안으로 채택됨.   
+      45 +5. **수정된 항목 종합**: 404 링크 수정(marketplace→plugin-marke
+         +tplaces), CLAUDE.md 링크 텍스트 정합, CHANGELOG plan-and-lesson
+         +s 엔트리 정정, marketplace.json 메타 버전 bump, cheatsheet env 
+         +설명 보강, project-context.md 발견성 개선(CLAUDE.md에서 링크), 
+         +adding-plugin.md 슬림화, retro SKILL.md의 find-skills/skill-cre
+         +ator 참조 수정, skills-guide.md 불투명 괄호 제거, 미반영 교훈 2
+         +건(meta-rule, structural fix) project-context.md에 반영.       
+
+● Now update CHANGELOG:
+
+● Update(CHANGELOG.md)
+  ⎿  Added 6 lines                                                       
+       5  The format is based on [Keep a Changelog](https://keepachangelo
+          g.com/en/1.1.0/),
+       6  and this project adheres to [Semantic Versioning](https://semve
+          r.org/spec/v2.0.0.html).
+       7  
+       8 +## [1.9.1] - 2026-02-03                                        
+       9 +                                                               
+      10 +### Changed                                                    
+      11 +- Skills: `retro` (1.3.2→1.3.3) — replaced find-skills/skill-cr
+         +eator references with generic guidance                         
+      12 +- Docs: sub-agent review follow-up — fixed 404 link in claude-m
+         +arketplace.md, CLAUDE.md link text mismatch, CHANGELOG plan-and
+         +-lessons entry error, marketplace.json meta version; slimmed ad
+         +ding-plugin.md; added env loading rationale to cheatsheet; link
+         +ed project-context.md from CLAUDE.md; added process heuristics 
+         +to project-context.md; cleaned skills-guide.md; shortened READM
+         +E install blocks (9×10 lines → 9×1 line)                       
+      13 +                                                               
+      14  ## [1.9.0] - 2026-02-03
+      15  
+      16  ### Added
+
+● Also need to bump marketplace.json to 1.9.1:
+
+● Update(.claude-plugin/marketplace.json)
+  ⎿  Added 1 line, removed 1 line                                        
+       6    },
+       7    "metadata": {
+       8      "description": "A collection of Claude Code plugins for AI-
+          Native Product Teams",
+       9 -    "version": "1.9.0"                                         
+       9 +    "version": "1.9.1"                                         
+      10    },
+      11    "plugins": [
+      12      {
+
+● Now commit and push.
+
+● Bash(git status)
+  ⎿  On branch main                               
+     Your branch is up to date with 'origin/main'.
+     … +23 lines (ctrl+o to expand)
+
+● Bash(git diff --stat)
+  ⎿   .claude-plugin/marketplace.json          |   2 +- 
+      CHANGELOG.md                             |   8 ++-
+      CLAUDE.md                                |   3 +-
+     … +14 lines (ctrl+o to expand)
+
+● Bash(git log --oneline -3)
+  ⎿ 9abd19f Add Prior Art Search to plan protocol; fix missed version    
+    bumps
+    8f20490 Comprehensive doc audit: slim bloat, deduplicate, add missing
+    l
+    essons
+    3f57e59 Validate and improve cheat sheet via sub-agent testing
+
+● 14 files changed, net -172 lines. Committing now.
+
+● Bash(git add .claude-plugin/marketplace.json CHANGELOG.md CLAUDE.md
+      README.ko.md README.md docs/adding-plugin.md docs/claude-marketplace.md
+      docs/plugin-dev-cheatshee…)
+  ⎿  (No content)
+
+● Bash(git commit -m "Fix sub-agent review findings: 404 link, version
+      mismatches, doc improvements…)
+  ⎿ [main 59f0558] Fix sub-agent review findings: 404 link, version      
+    mismatc
+    hes, doc improvements
+     15 files changed, 2352 insertions(+), 246 deletions(-)
+    … +2 lines (ctrl+o to expand)
+
+● Bash(git push)
+  ⎿  To https://github.com/corca-ai/claude-plugins.git
+        9abd19f..59f0558  main -> main
+
+● Bash(bash /home/hwidong/codes/claude-plugins/scripts/update-all.sh)
+  ⎿  ==> Updating marketplace: corca-plugins
+     Updating marketplace: corca-plugins...
+     Updating existing marketplace cache…
+     … +37 lines (ctrl+o to expand)
+
+● 모두 완료했습니다. 정리하면:
+
+  수정한 항목 (15파일, net -172줄):
+  #: 1
+  내용: 404 링크 수정 (marketplace → plugin-marketplaces)
+  파일: claude-marketplace.md
+  ────────────────────────────────────────
+  #: 2
+  내용: 링크 텍스트 "Marketplace Schema" → "Marketplace Reference"
+  파일: CLAUDE.md
+  ────────────────────────────────────────
+  #: 3
+  내용: plan-and-lessons 엔트리 1.1.0→1.2.0 + Prior Art Search
+  파일: CHANGELOG.md
+  ────────────────────────────────────────
+  #: 4
+  내용: marketplace.json 메타 버전 1.8.0→1.9.1
+  파일: marketplace.json
+  ────────────────────────────────────────
+  #: 5
+  내용: 3-tier env loading에 "왜" 설명 추가 (bash 세션)
+  파일: cheatsheet.md
+  ────────────────────────────────────────
+  #: 6
+  내용: project-context.md를 CLAUDE.md에서 링크
+  파일: CLAUDE.md
+  ────────────────────────────────────────
+  #: 7
+  내용: adding-plugin.md 슬림화 (37→11줄)
+  파일: adding-plugin.md
+  ────────────────────────────────────────
+  #: 8
+  내용: find-skills/skill-creator 참조 → 일반적 표현으로 수정
+  파일: retro SKILL.md
+  ────────────────────────────────────────
+  #: 9
+  내용: "(skill-creator philosophy)" 괄호 제거
+  파일: skills-guide.md
+  ────────────────────────────────────────
+  #: 10
+  내용: README install 블록 축약 (10줄→1줄 inline × 9)
+  파일: README.md, README.ko.md
+  ────────────────────────────────────────
+  #: 11
+  내용: meta-rule, structural fix 교훈 반영
+  파일: project-context.md
+  추가 작업:
+  - retro v1.3.3 버전 bump
+  - lessons.md에 서브에이전트 리뷰 패턴 + README 의도적 반복 교훈 추가
+  - retro.md Post-Retro Findings 갱신
+  - 세션 트랜스크립트를 prompt-logs/260203-doc-audit/로 이동
+  - 7개 플러그인 전부 update 완료
+
+✻ Baked for 4m 6s
+
+❯ 방금 여러가지 교훈이 추가로 생겼는데, 이 시점에 CLAUDE.md, 기존 스킬      
+  업데이트 여지가 있는지도 살펴봅시다. post-retro 에서는 이부분을 덜 살피는 
+  느낌이 있네요. (이것 자체도 retro + skill update 여지가 있을지도?)        
+
+● 이번 세션에서 나온 교훈들을 정리하고, 각각 어디에 반영되어야 하는지 살펴보겠습니다.
+
+● Read(prompt-logs/260203-doc-audit/lessons.md)
+  ⎿  Read 54 lines
+
+● Read(prompt-logs/260203-doc-audit/retro.md)
+  ⎿  Read 46 lines
+
+● 좋은 지적입니다. 체계적으로 분석해 보겠습니다.
+
+● Read(plugins/retro/skills/retro/SKILL.md)
+  ⎿  Read 39 lines
+
+● Read(CLAUDE.md)
+  ⎿  Read 51 lines
+
+● 이번 세션 교훈들을 하나씩 대조해 봤습니다. 분석 결과:
+
+  CLAUDE.md
+
+  현재 CLAUDE.md에 반영할 만한 건 하나입니다:
+
+  - 서브에이전트 리뷰 패턴: 워크플로우 항목 5(commit) 전에 "대규모 변경 시 서브에이전트 리뷰 고려"를 넣을 수 있지만, 이건 아직 한 번 해본 실험이라 워크플로우에 고정하긴 이릅니다. Collaboration Style에 가볍게 언급하는 정도가 적절할 것 같습니다.
+
+  retro SKILL.md — 여기가 핵심 문제
+
+  유저가 정확히 짚으셨습니다. Section 6 (Post-Retro Discussion)의 세 번째 bullet이 문제입니다:
+
+  - If any learning should be persistent beyond the session
+    (protocol docs, CLAUDE.md, etc.), apply it to the appropriate file
+
+  이게 너무 모호합니다. 실제로 이번 세션에서도 이 bullet이 있었지만, post-retro에서 lessons.md와 retro.md만 업데이트하고 CLAUDE.md/skills 업데이트 검토를 건너뛰었습니다. "해야 한다"고 적혀 있어도 구체적인 체크리스트가 없으면 놓치는 거죠.
+
+  개선안: 모호한 한 줄을 구체적인 "persistence checklist"로 바꾸기:
+
+  - Persistence check — for each new learning, evaluate:
+    - CLAUDE.md: new collaboration pattern or workflow change?
+    - Skills/protocol: does a skill's behavior need updating?
+    - project-context.md: new architecture pattern or convention?
+
+  project-context.md
+
+  README install 블록 의도에 대한 메모를 추가하는 것도 의미 있습니다 — 향후 감사에서 또 "중복이니 제거하자"고 할 수 있으니까.
+
+  정리하면:
+  대상: retro SKILL.md
+  변경: Section 6 persistence checklist 구체화
+  이유: post-retro에서 persistent doc 반영 누락 방지
+  ────────────────────────────────────────
+  대상: CLAUDE.md
+  변경: Collaboration Style에 서브에이전트 리뷰 언급
+  이유: 대규모 변경 후 품질 검증 패턴
+  ────────────────────────────────────────
+  대상: project-context.md
+  변경: README install 의도 메모
+  이유: 향후 감사에서 반복 실수 방지
+  진행할까요?
+
+✻ Cooked for 1m 6s
+
+❯ 좋습니다. 이 자체도 retro에 추가. 
+
+● Update(plugins/retro/skills/retro/SKILL.md)
+  ⎿  Added 5 lines, removed 2 lines                                      
+       98  After writing retro.md and persisting findings, the user will 
+           often read the retro and continue the conversation — asking qu
+           estions, giving corrections, raising new points. This is expec
+           ted and valuable.
+       99  
+      100  During any post-retro conversation:
+      101 -- Update `retro.md` — append learnings under `### Post-Retro F
+          -indings` in Section 2                                         
+      101 +- Update `retro.md` — append learnings under `### Post-Retro F
+          +indings`                                                      
+      102  - Update `lessons.md` — add new learnings from the discussion
+      103 -- If any learning should be persistent beyond the session (pro
+          -tocol docs, CLAUDE.md, etc.), apply it to the appropriate file
+      103 +- **Persistence check** — for each new learning, evaluate wher
+          +e it belongs beyond the session:                              
+      104 +  - `CLAUDE.md`: new collaboration pattern or workflow change?
+      105 +  - Skills/protocol docs: does a skill's instructions or behav
+          +ior need updating?                                            
+      106 +  - `project-context.md`: new architecture pattern, convention
+          +, or design intent?                                           
+      107  - If plugin code was changed (SKILL.md, scripts, hooks, protoc
+           ol docs), follow normal release procedures: update `plugin.jso
+           n` version and `CHANGELOG.md`
+      108  
+      109  Do not prompt the user to start this discussion. Simply stay a
+           ware that conversation after the retro may produce learnings w
+           orth capturing.
+
+● Update(CLAUDE.md)
+  ⎿  Added 1 line                                                        
+      41  - When testing scripts, do not manually set up the environment 
+          (e.g., `source ~/.zshrc`) before running tests. Test in a clean
+           environment to reproduce real-world conditions.
+      42  - When a custom skill overlaps with a built-in tool, prefer the
+           custom skill. The web-search plugin enforces this automaticall
+          y via PreToolUse hook (blocks WebSearch, redirects to `/web-sea
+          rch`). For other overlaps (e.g., `/gather-context` vs WebFetch)
+          , prefer the custom skill manually.
+      43  - When creating new skills or automation tools, first evaluate:
+           marketplace plugin (`plugins/`, general-purpose, usable in any
+           project) vs local skill (`.claude/skills/`, repo-specific). Pr
+          efer local skill unless the tool has clear cross-project utilit
+          y.
+      44 +- After large multi-file changes, consider running parallel sub
+         +-agent reviews before committing — give each agent a different 
+         +review perspective (content integrity, missed opportunities, st
+         +ructural analysis) along with session lessons/retro as context.
+      45  
+      46  ## Language
+      47  
+
+● Update(docs/project-context.md)
+  ⎿  Added 4 lines                                                       
+      19  - **Meta-rule check**: When introducing a new rule, verify that
+           the change itself is the first application of that rule (e.g.,
+           adding "always bump version" should include bumping the versio
+          n of the file being changed)
+      20  - **Structural fix over instruction fix**: When a behavioral er
+          ror recurs, prefer removing the structural asymmetry that cause
+          d it over adding more instructions. Adding rules has diminishin
+          g returns; changing structure is more durable.
+      21  
+      22 +## Documentation Intent                                        
+      23 +                                                               
+      24 +- README per-plugin install/update commands are intentionally r
+         +epeated for copy-paste UX — users jump directly to a plugin sec
+         +tion. The `marketplace add` line is omitted (only needed once);
+         + each plugin has a one-line install + update.                  
+      25 +                                                               
+      26  ## Conventions
+      27  
+      28  - Documentation language: English for docs/ and default top-lev
+          el docs; Korean versions live in README.ko.md and AI_NATIVE_PRO
+          DUCT_TEAM.ko.md
+
+● Update(prompt-logs/260203-doc-audit/retro.md)
+  ⎿  Added 1 line                                                        
+      43  3. **서브에이전트 병렬 리뷰 패턴**: 대규모 변경 후 3개 독립 서
+          브에이전트(content integrity, missed opportunities, progressive
+           disclosure)에게 lessons/retro 컨텍스트 + diff를 주고 리뷰시킨 
+          결과 4개 버그 + 7개 개선점 발견. 자기 작업의 맹점을 잡기 위한 
+          효과적인 패턴으로, 향후 커밋 전 품질 검증에 활용 가능.
+      44  4. **README install 블록은 의도적 반복**: 서브에이전트가 "90줄 
+          노이즈"로 판단한 per-plugin install 블록은 실제로 유저의 복붙 
+          편의성을 위해 의도적으로 배치한 것. "중복 제거"와 "사용자 UX" 
+          사이의 균형이 필요 — 축약(한 줄 inline)이 중간안으로 채택됨.
+      45  5. **수정된 항목 종합**: 404 링크 수정(marketplace→plugin-marke
+          tplaces), CLAUDE.md 링크 텍스트 정합, CHANGELOG plan-and-lesson
+          s 엔트리 정정, marketplace.json 메타 버전 bump, cheatsheet env 
+          설명 보강, project-context.md 발견성 개선(CLAUDE.md에서 링크), 
+          adding-plugin.md 슬림화, retro SKILL.md의 find-skills/skill-cre
+          ator 참조 수정, skills-guide.md 불투명 괄호 제거, 미반영 교훈 2
+          건(meta-rule, structural fix) project-context.md에 반영.
+      46 +6. **Post-retro persistence gap 발견**: post-retro에서 lessons.
+         +md와 retro.md는 업데이트하면서도 CLAUDE.md, skills, project-con
+         +text.md 반영 여부를 체계적으로 검토하지 않았음. retro SKILL.md 
+         +Section 6의 "If any learning should be persistent..." 한 줄이  
+         +너무 모호해서 실행이 안 됨. → retro SKILL.md에 "Persistence che
+         +ck" 체크리스트 추가(CLAUDE.md / skills·protocol / project-conte
+         +xt.md 3항목), retro v1.3.4. 서브에이전트 리뷰 패턴은 CLAUDE.md 
+         +Collaboration Style에, README install 의도는 project-context.md
+         + Documentation Intent에 각각 반영.                             
+
+● Update(prompt-logs/260203-doc-audit/lessons.md)
+  ⎿  Added 9 lines                                                       
+      51  - **Takeaway**: "중복 제거"가 항상 옳진 않음. 독자의 실제 사용 
+          패턴을 고려해야 함. 축약(한 줄 inline)이 중간안.
+      52  
+      53  문서 중복 제거 시 → "누가 어떻게 이 문서를 읽는가?" 먼저 확인
+      54 +                                                               
+      55 +### Post-retro에서 persistent doc 반영 누락                    
+      56 +                                                               
+      57 +- **Expected**: retro SKILL.md Section 6에 "persistent beyond t
+         +he session" 지침이 있으니 자연스럽게 CLAUDE.md/skills 업데이트 
+         +가 이루어질 것                                                 
+      58 +- **Actual**: lessons.md와 retro.md만 업데이트하고, CLAUDE.md·s
+         +kills·project-context.md 반영 여부를 체계적으로 검토하지 않음. 
+         +모호한 한 줄 지침("If any learning should be persistent...")은 
+         +실행력이 없었음.                                               
+      59 +- **Takeaway**: 모호한 지침은 구체적 체크리스트로 바꿔야 실행됨
+         +. "해야 한다"보다 "이것, 이것, 이것을 확인하라"가 효과적.      
+      60 +                                                               
+      61 +post-retro 교훈 기록 시 → CLAUDE.md / skills·protocol / project
+         +-context.md 3가지 persistence 대상을 명시적으로 확인           
+      62 +→ retro SKILL.md Section 6에 "Persistence check" 체크리스트 추 
+         +가 완료.                                                       
+
+● Now bump retro version and update CHANGELOG.
+
+● Update(plugins/retro/.claude-plugin/plugin.json)
+  ⎿  Added 1 line, removed 1 line                                        
+      1  {
+      2    "name": "retro",
+      3    "description": "A skill that performs comprehensive session re
+         trospectives",
+      4 -  "version": "1.3.3",                                           
+      4 +  "version": "1.3.4",                                           
+      5    "author": {
+      6      "name": "Corca",
+      7      "url": "https://www.corca.ai/"
+
+● Update(CHANGELOG.md)
+  ⎿  Added 5 lines                                                       
+       5  The format is based on [Keep a Changelog](https://keepachangelo
+          g.com/en/1.1.0/),
+       6  and this project adheres to [Semantic Versioning](https://semve
+          r.org/spec/v2.0.0.html).
+       7  
+       8 +## [1.9.2] - 2026-02-03                                        
+       9 +                                                               
+      10 +### Changed                                                    
+      11 +- Skills: `retro` (1.3.3→1.3.4) — added explicit "Persistence c
+         +heck" checklist to post-retro phase (CLAUDE.md / skills·protoco
+         +l / project-context.md)                                        
+      12 +                                                               
+      13  ## [1.9.1] - 2026-02-03
+      14  
+      15  ### Changed
+
+● Update(.claude-plugin/marketplace.json)
+  ⎿  Added 1 line, removed 1 line                                        
+       6    },
+       7    "metadata": {
+       8      "description": "A collection of Claude Code plugins for AI-
+          Native Product Teams",
+       9 -    "version": "1.9.1"                                         
+       9 +    "version": "1.9.2"                                         
+      10    },
+      11    "plugins": [
+      12      {
+
+● Bash(git add -A && git commit -m "retro v1.3.4: add persistence checklist to
+      post-retro phase…)
+  ⎿ [main a9ff17d] retro v1.3.4: add persistence checklist to post-retro 
+    ph
+    ase
+     8 files changed, 27 insertions(+), 4 deletions(-)
+
+
+● Bash(git push)
+  ⎿  To https://github.com/corca-ai/claude-plugins.git
+        59f0558..a9ff17d  main -> main
+
+● Bash(bash /home/hwidong/codes/claude-plugins/scripts/update-all.sh)
+  ⎿  ==> Updating marketplace: corca-plugins
+     Updating marketplace: corca-plugins...
+     Updating existing marketplace cache…
+     … +37 lines (ctrl+o to expand)
+
+❯ /export 
+
+● 완료했습니다. 이번 라운드에서 한 일 정리:
+  변경: retro Section 6: 모호한 한 줄 → "Persistence check" 3항목 체크리스트
+  파일: retro SKILL.md
+  ────────────────────────────────────────
+  변경: 서브에이전트 리뷰 패턴 추가
+  파일: CLAUDE.md
+  ────────────────────────────────────────
+  변경: README install 의도 메모
+  파일: project-context.md
+  ────────────────────────────────────────
+  변경: persistence gap 교훈 기록
+  파일: lessons.md, retro.md
+  ────────────────────────────────────────
+  변경: retro v1.3.3→1.3.4, marketplace v1.9.1→1.9.2
+  파일: plugin.json, marketplace.json, CHANGELOG
+  핵심 교훈: "모호한 지침은 구체적 체크리스트로 바꿔야 실행된다." 이것이 이번 세션에서 structural fix over instruction fix 원칙의 실제 적용 사례이기도 합니다 — retro SKILL.md의 모호한 한 줄(instruction)을 구조화된 체크리스트(structure)로 교체한 것.
+
+● Bash(ls /home/hwidong/codes/claude-plugins/prompt-logs/260203-doc-audit/)
+  ⎿  lessons.md            
+     plan.md
+     retro.md
+     session-transcript.txt
+
+● /export는 Claude Code의 빌트인 명령어로, 현재 대화를 파일로 내보내는 기능입니다. 이 명령어는 제가 실행하는 게 아니라 CLI가 직접 처리합니다. 터미널에서 /export를 입력하시면 됩니다.
+
+  혹시 이 세션의 대화 내용을 특정 파일로 저장하고 싶으시다면, 어떤 형태로 원하시는지 알려주세요.
+
+✻ Cooked for 2m 6s
+
+
+
