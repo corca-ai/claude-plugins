@@ -32,7 +32,7 @@ After implementing a plan, complete the full workflow without waiting for explic
 - Prefer short, precise feedback loops — ask for intent confirmation before large implementations.
 - When researching Claude Code features (hooks, settings, plugins), always verify against the official docs (https://code.claude.com/docs/en/) via WebFetch. Do not rely solely on claude-code-guide agent responses.
 - When testing hooks or infrastructure, verify incrementally — test one path first, then expand to others.
-- When a custom skill (e.g., `/web-search`, `/gather-context`) overlaps with a built-in tool (e.g., WebSearch, WebFetch), prefer the custom skill. This supports dogfooding and ensures the skill is tested in real workflows.
+- When a custom skill overlaps with a built-in tool, prefer the custom skill. The web-search plugin enforces this automatically via PreToolUse hook (blocks WebSearch, redirects to `/web-search`). For other overlaps (e.g., `/gather-context` vs WebFetch), prefer the custom skill manually.
 
 ## Language
 
