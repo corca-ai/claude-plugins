@@ -37,3 +37,9 @@ CLAUDE.md 변경 제안 없음 — 현재 CLAUDE.md가 이 세션의 워크플�
 ## 5. Relevant Skills
 
 이 세션에서 명확한 스킬 갭은 없음. "문서 감사"는 빈도가 낮은 작업이라 전용 스킬보다는 필요 시 ad-hoc으로 진행하는 것이 적절. 다만, 이번 감사에서 발견한 체크리스트(단일 출처 원칙, 독자별 수준, 죽은 문서 감지)는 lessons.md에 기록되어 향후 감사 시 참조 가능.
+
+### Post-Retro Findings (continued)
+
+3. **서브에이전트 병렬 리뷰 패턴**: 대규모 변경 후 3개 독립 서브에이전트(content integrity, missed opportunities, progressive disclosure)에게 lessons/retro 컨텍스트 + diff를 주고 리뷰시킨 결과 4개 버그 + 7개 개선점 발견. 자기 작업의 맹점을 잡기 위한 효과적인 패턴으로, 향후 커밋 전 품질 검증에 활용 가능.
+4. **README install 블록은 의도적 반복**: 서브에이전트가 "90줄 노이즈"로 판단한 per-plugin install 블록은 실제로 유저의 복붙 편의성을 위해 의도적으로 배치한 것. "중복 제거"와 "사용자 UX" 사이의 균형이 필요 — 축약(한 줄 inline)이 중간안으로 채택됨.
+5. **수정된 항목 종합**: 404 링크 수정(marketplace→plugin-marketplaces), CLAUDE.md 링크 텍스트 정합, CHANGELOG plan-and-lessons 엔트리 정정, marketplace.json 메타 버전 bump, cheatsheet env 설명 보강, project-context.md 발견성 개선(CLAUDE.md에서 링크), adding-plugin.md 슬림화, retro SKILL.md의 find-skills/skill-creator 참조 수정, skills-guide.md 불투명 괄호 제거, 미반영 교훈 2건(meta-rule, structural fix) project-context.md에 반영.

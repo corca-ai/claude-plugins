@@ -1,6 +1,6 @@
 # Marketplace Reference
 
-For full marketplace documentation (creating, hosting, distributing, troubleshooting), see the [official Claude Code docs](https://code.claude.com/docs/en/marketplace).
+For full marketplace documentation (creating, hosting, distributing, troubleshooting), see the [official Claude Code docs](https://code.claude.com/docs/en/plugin-marketplaces).
 
 ## This Project's marketplace.json
 

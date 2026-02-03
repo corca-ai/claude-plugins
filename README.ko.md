@@ -54,17 +54,7 @@ bash scripts/update-all.sh
 
 ### [clarify](plugins/clarify/skills/clarify/SKILL.md)
 
-**설치**:
-```bash
-claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
-claude plugin install clarify@corca-plugins
-```
-
-**갱신**:
-```bash
-claude plugin marketplace update corca-plugins
-claude plugin update clarify@corca-plugins
-```
+**설치**: `claude plugin install clarify@corca-plugins` | **갱신**: `claude plugin update clarify@corca-plugins`
 
 모호하거나 불명확한 요구사항을 반복적인 질문을 통해 명확하고 실행 가능한 사양으로 변환하는 스킬입니다. [Team Attention](https://github.com/team-attention)에서 만든 [Clarify 스킬](https://github.com/team-attention/plugins-for-claude-natives/blob/main/plugins/clarify/SKILL.md)을 가져와서 커스터마이즈했습니다. (사용법 참조: 정구봉님 [링크드인 포스트](https://www.linkedin.com/posts/gb-jeong_%ED%81%B4%EB%A1%9C%EB%93%9C%EC%BD%94%EB%93%9C%EA%B0%80-%EA%B0%9D%EA%B4%80%EC%8B%9D%EC%9C%BC%EB%A1%9C-%EC%A7%88%EB%AC%B8%ED%95%98%EA%B2%8C-%ED%95%98%EB%8A%94-skills%EB%A5%BC-%EC%82%AC%EC%9A%A9%ED%95%B4%EB%B3%B4%EC%84%B8%EC%9A%94-clarify-activity-7413349697022570496-qLts))
 
@@ -77,17 +67,7 @@ claude plugin update clarify@corca-plugins
 
 ### [interview](plugins/interview/skills/interview/SKILL.md)
 
-**설치**:
-```bash
-claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
-claude plugin install interview@corca-plugins
-```
-
-**갱신**:
-```bash
-claude plugin marketplace update corca-plugins
-claude plugin update interview@corca-plugins
-```
+**설치**: `claude plugin install interview@corca-plugins` | **갱신**: `claude plugin update interview@corca-plugins`
 
 코르카의 AX 컨설턴트 [최정혁님](https://denoiser.club/)이 본인의 취향에 맞게 만드신 스킬입니다. 목적은 Clarify와 유사합니다. 구조화된 인터뷰를 통해 요구사항, 제약사항, 설계 결정을 추출하는 스킬입니다. 대화를 통해 프로젝트의 핵심 요구사항을 발견하고 문서화합니다.
 
@@ -109,17 +89,7 @@ claude plugin update interview@corca-plugins
 
 ### [suggest-tidyings](plugins/suggest-tidyings/skills/suggest-tidyings/SKILL.md)
 
-**설치**:
-```bash
-claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
-claude plugin install suggest-tidyings@corca-plugins
-```
-
-**갱신**:
-```bash
-claude plugin marketplace update corca-plugins
-claude plugin update suggest-tidyings@corca-plugins
-```
+**설치**: `claude plugin install suggest-tidyings@corca-plugins` | **갱신**: `claude plugin update suggest-tidyings@corca-plugins`
 
 Kent Beck의 "Tidy First?" 철학에 기반하여 최근 커밋들을 분석하고 안전한 리팩토링 기회를 찾아주는 스킬입니다. Sub-agent를 병렬로 활용하여 여러 커밋을 동시에 분석합니다.
 
@@ -141,17 +111,7 @@ Kent Beck의 "Tidy First?" 철학에 기반하여 최근 커밋들을 분석하�
 
 ### [retro](plugins/retro/skills/retro/SKILL.md)
 
-**설치**:
-```bash
-claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
-claude plugin install retro@corca-plugins
-```
-
-**갱신**:
-```bash
-claude plugin marketplace update corca-plugins
-claude plugin update retro@corca-plugins
-```
+**설치**: `claude plugin install retro@corca-plugins` | **갱신**: `claude plugin update retro@corca-plugins`
 
 세션 종료 시점에 포괄적인 회고를 수행하는 스킬입니다. [Plan & Lessons Protocol](plugins/plan-and-lessons/protocol.md)의 `lessons.md`가 세션 중 점진적으로 쌓이는 학습 기록이라면, `retro`는 세션 전체를 조감하는 종합 회고입니다.
 
@@ -164,24 +124,14 @@ claude plugin update retro@corca-plugins
 - 업무 스타일·협업 방식 관찰 후 CLAUDE.md 업데이트 제안 (유저 승인 후 적용)
 - 프롬프팅 습관 개선점 제안 (세션의 구체적 사례와 함께)
 - 유저의 지식/경험 수준에 맞춘 학습자료 링크 제공
-- find-skills로 워크플로우에 도움될 스킬 탐색 또는 skill-creator로 새 스킬 제작 계획
+- 워크플로우에 도움될 스킬 탐색 또는 새 스킬 제작 제안
 
 **출력물**:
 - `prompt-logs/{YYMMDD}-{title}/retro.md` — plan.md, lessons.md와 같은 디렉토리에 저장
 
 ### [gather-context](plugins/gather-context/skills/gather-context/SKILL.md)
 
-**설치**:
-```bash
-claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
-claude plugin install gather-context@corca-plugins
-```
-
-**갱신**:
-```bash
-claude plugin marketplace update corca-plugins
-claude plugin update gather-context@corca-plugins
-```
+**설치**: `claude plugin install gather-context@corca-plugins` | **갱신**: `claude plugin update gather-context@corca-plugins`
 
 URL 유형을 자동 감지하여 외부 콘텐츠를 로컬 파일로 수집하는 통합 스킬입니다. 변환 스크립트가 내장되어 있어 **별도의 스킬 설치 없이** 하나의 플러그인으로 Google Docs, Slack, Notion 콘텐츠를 모두 수집할 수 있습니다. 기존의 [`slack-to-md`](https://www.stdy.blog/1p1w-01-slack-to-md/), [`g-export`](https://www.stdy.blog/1p1w-02-g-export/), `notion-to-md`를 통합한 스킬입니다.
 
@@ -205,17 +155,7 @@ URL 유형을 자동 감지하여 외부 콘텐츠를 로컬 파일로 수집하
 
 ### [web-search](plugins/web-search/skills/web-search/SKILL.md)
 
-**설치**:
-```bash
-claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
-claude plugin install web-search@corca-plugins
-```
-
-**갱신**:
-```bash
-claude plugin marketplace update corca-plugins
-claude plugin update web-search@corca-plugins
-```
+**설치**: `claude plugin install web-search@corca-plugins` | **갱신**: `claude plugin update web-search@corca-plugins`
 
 Tavily와 Exa REST API를 활용하여 웹 검색, 코드 검색, URL 콘텐츠 추출을 수행하는 스킬입니다. **스크립트 위임 패턴** 사용: SKILL.md가 커맨드 파싱과 쿼리 인텔리전스를 담당하고, 래퍼 스크립트가 API 실행을 처리합니다.
 
@@ -252,17 +192,7 @@ Tavily와 Exa REST API를 활용하여 웹 검색, 코드 검색, URL 콘텐츠 
 
 ### [attention-hook](plugins/attention-hook/hooks/hooks.json)
 
-**설치**:
-```bash
-claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
-claude plugin install attention-hook@corca-plugins
-```
-
-**갱신**:
-```bash
-claude plugin marketplace update corca-plugins
-claude plugin update attention-hook@corca-plugins
-```
+**설치**: `claude plugin install attention-hook@corca-plugins` | **갱신**: `claude plugin update attention-hook@corca-plugins`
 
 Claude Code가 사용자의 입력을 기다릴 때 Slack으로 푸시 알림을 보내는 훅입니다. 알림에 이미지를 제외한 작업 컨텍스트(사용자 요청, Claude 응답, AskUserQuestion을 통한 질문 내용, Todo 상태)가 포함되어 어떤 작업인지 즉시 파악할 수 있습니다. 원격 서버에 세팅해뒀을 때 유용합니다. ([작업 배경 블로그 글](https://www.stdy.blog/1p1w-03-attention-hook/))
 
@@ -302,17 +232,7 @@ CLAUDE_ATTENTION_DELAY=30  # AskUserQuestion 알림 지연 시간 (초, 기본�
 
 ### [plan-and-lessons](plugins/plan-and-lessons/hooks/hooks.json)
 
-**설치**:
-```bash
-claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
-claude plugin install plan-and-lessons@corca-plugins
-```
-
-**갱신**:
-```bash
-claude plugin marketplace update corca-plugins
-claude plugin update plan-and-lessons@corca-plugins
-```
+**설치**: `claude plugin install plan-and-lessons@corca-plugins` | **갱신**: `claude plugin update plan-and-lessons@corca-plugins`
 
 Claude Code가 Plan 모드에 진입할 때(`EnterPlanMode` 도구 호출 시) Plan & Lessons Protocol을 자동으로 주입하는 훅입니다. 프로토콜은 `prompt-logs/{YYMMDD}-{title}/` 디렉토리에 plan.md와 lessons.md를 생성하는 워크플로우를 정의합니다.
 
@@ -327,17 +247,7 @@ Claude Code가 Plan 모드에 진입할 때(`EnterPlanMode` 도구 호출 시) P
 
 ### [smart-read](plugins/smart-read/hooks/hooks.json)
 
-**설치**:
-```bash
-claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
-claude plugin install smart-read@corca-plugins
-```
-
-**갱신**:
-```bash
-claude plugin marketplace update corca-plugins
-claude plugin update smart-read@corca-plugins
-```
+**설치**: `claude plugin install smart-read@corca-plugins` | **갱신**: `claude plugin update smart-read@corca-plugins`
 
 Read 도구 호출을 가로채서 파일 크기에 따라 지능적인 읽기를 강제하는 훅입니다. 큰 파일의 전체 읽기를 차단하여 컨텍스트 낭비를 방지하고, offset/limit 또는 Grep 사용을 안내합니다.
 

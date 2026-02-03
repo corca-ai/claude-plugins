@@ -74,8 +74,8 @@ Patterns that caused misunderstandings, with specific examples and improved alte
 #### Section 5: Relevant Skills
 
 - Assess whether the session reveals a workflow gap or repetitive pattern
-- If yes: invoke `find-skills` via Skill tool, report relevant results
-- If a needed skill does not exist: briefly describe what it would do and suggest using `skill-creator`
+- If yes: search the marketplace or web for existing solutions, report relevant results
+- If a needed skill does not exist: briefly describe what it would do and suggest creating one
 - If no clear gap: state "No skill gaps identified in this session"
 
 ### 4. Write retro.md

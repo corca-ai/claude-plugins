@@ -97,12 +97,12 @@ For simple context injection (no JSON formatting), use `"type": "prompt"` instea
 
 Naming: `CLAUDE_CORCA_{PLUGIN_NAME}_{SETTING}`
 
-3-tier loading in scripts:
+3-tier loading in scripts (needed because Claude Code runs Bash sessions — `~/.zshrc` is not sourced automatically):
 ```bash
 # 1. Shell env (already set)
 # 2. ~/.claude/.env
 [ -f "$HOME/.claude/.env" ] && { set -a; source "$HOME/.claude/.env"; set +a; }
-# 3. Shell profiles
+# 3. Shell profiles (fallback: grep for exports in zsh/bash configs)
 [ -z "${VAR:-}" ] && eval "$(grep -sh '^export VAR=' ~/.zshrc ~/.bashrc)"
 ```
 

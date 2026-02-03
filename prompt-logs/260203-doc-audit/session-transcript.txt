@@ -1,0 +1,2278 @@
+
+ ▐▛███▜▌   Claude Code v2.1.12
+▝▜█████▛▘  Opus 4.5 · Claude Max
+  ▘▘ ▝▝    ~/codes/claude-plugins
+
+❯ prompt-logs 안의 모든 lesson과 retro를 종합적으로 읽고, 현재의 모든 doc   
+  및 skill md 파일들을 검토해봅시다. (스크립트는 제외, 마크다운 파일들만)   
+                                                                            
+  반영할 만한데 빠진 내용은 없는지 / 지나치게 방대하거나, 너무 지능을 믿지  
+  않고 구체적이거나, 지나치게 중복이 있거나, progressive disclosure 원칙을  
+  지키지 않았거나 등등을 세세하게 살펴봅시다. 의도를 이해하셨나요?          
+  plan-and-lesson 프로토콜 이용해서 개선 계획 작성 후 진행, retro, commit,  
+  push.                                                                     
+
+● 네, 의도를 정확히 이해했습니다. prompt-logs의 교훈들이 실제 문서에 잘 반영되어 있는지, 그리고 문서 자체의 품질(간결성, progressive disclosure, 중복 등)을 종합 감사하는 작업이군요.
+
+  먼저 전체 파일을 파악하겠습니다.
+
+● 2 Explore agents finished (ctrl+o to expand)
+   ├─ Read all prompt-logs files · 39 tool uses · 13.7k tokens
+   │  ⎿  Done
+   └─ Find all markdown files · 1 tool use · 11.7k tokens
+      ⎿  Done
+
+● 이제 모든 문서와 스킬 파일들을 읽어야 합니다. 병렬로 진행하겠습니다.
+
+● Read(CLAUDE.md)
+  ⎿  Read 50 lines
+
+● Read(docs/plugin-dev-cheatsheet.md)
+  ⎿  Read 145 lines
+
+● Read(docs/modifying-plugin.md)
+  ⎿  Read 62 lines
+
+● Read(docs/adding-plugin.md)
+  ⎿  Read 37 lines
+
+● Read(docs/skills-guide.md)
+  ⎿  Read 76 lines
+
+● Read(docs/project-context.md)
+  ⎿  Read 30 lines
+
+● Read(docs/claude-marketplace.md)
+  ⎿  Read 511 lines
+
+● Read(plugins/plan-and-lessons/protocol.md)
+  ⎿  Read 87 lines
+
+● Read(plugins/web-search/skills/web-search/SKILL.md)
+  ⎿  Read 98 lines
+
+● Read(plugins/gather-context/skills/gather-context/SKILL.md)
+  ⎿  Read 121 lines
+
+● Read(plugins/clarify/skills/clarify/SKILL.md)
+  ⎿  Read 126 lines
+
+● Read(plugins/retro/skills/retro/SKILL.md)
+  ⎿  Read 134 lines
+
+● Read(plugins/suggest-tidyings/skills/suggest-tidyings/SKILL.md)
+  ⎿  Read 58 lines
+
+● Read(plugins/interview/skills/interview/SKILL.md)
+  ⎿  Read 134 lines
+
+● Read(plugins/web-search/skills/web-search/references/api-reference.md)
+  ⎿  Read 381 lines
+
+● Read(.claude/skills/plugin-deploy/SKILL.md)
+  ⎿  Read 94 lines
+
+● Read(README.md)
+  ⎿  Read 380 lines
+
+● Read(README.ko.md)
+  ⎿  Read 381 lines
+
+● Read(AI_NATIVE_PRODUCT_TEAM.md)
+  ⎿  Read 104 lines
+
+● Read(plugins/suggest-tidyings/skills/suggest-tidyings/references/tidying-guide
+      .md)
+  ⎿  Read 34 lines
+
+● Read(plugins/gather-context/skills/gather-context/references/google-export.md)
+  ⎿  Read 17 lines
+
+● Read(plugins/gather-context/skills/gather-context/references/slack-export.md)
+  ⎿  Read 19 lines
+
+● Read(plugins/gather-context/skills/gather-context/references/notion-export.md)
+  ⎿  Read 19 lines
+
+● Read(plugins/gather-context/skills/gather-context/references/TOON.md)
+  ⎿  Read 66 lines
+
+● Read(CHANGELOG.md)
+  ⎿  Read 68 lines
+
+● Read(.claude/skills/plugin-deploy/references/checklist.md)
+  ⎿  Read 78 lines
+
+● 이제 모든 파일을 읽었습니다. 분석 결과를 정리하고 plan mode로 진입하겠습니다.
+                                                                   
+● Entered plan mode
+  Claude is now exploring and designing an implementation approach.
+
+● 분석을 마쳤으니 계획을 작성하겠습니다.
+
+● Bash(mkdir -p /home/hwidong/codes/claude-plugins/prompt-logs/260203-doc-audit)
+  ⎿  (No content)
+
+● Write(prompt-logs/260203-doc-audit/plan.md)
+  ⎿  Wrote 77 lines to prompt-logs/260203-doc-audit/plan.md              
+      1 # Documentation Audit & Improvement Plan
+      2 ## Goal
+      3 Comprehensive audit of all markdown docs against prompt-logs less
+        ons/retros. Fix gaps, trim bloat, enforce progressive disclosure.
+      4 ## Success Criteria
+      5 ```gherkin
+      6 Given the full set of prompt-logs lessons and retros
+     … +67 lines (ctrl+o to expand)
+
+● Write(prompt-logs/260203-doc-audit/lessons.md)
+  ⎿  Wrote 8 lines to prompt-logs/260203-doc-audit/lessons.md            
+      1 ### 문서 감사 시작
+      2 - **Expected**: prompt-logs 교훈이 대부분 문서에 반영되어 있을 것
+      3 - **Actual**: 핵심 교훈 3개가 cheatsheet에 빠져 있고, claude-mark
+        etplace.md가 공식 문서 전체 복사본이며, api-reference.md가 스크립
+        트 위임 전환 후 죽은 문서가 됨
+      4 - **Takeaway**: 아키텍처 변경(스크립트 위임) 시 관련 참조 문서도 
+        함께 슬림화해야 함
+      5 문서 변경 시 → 동일 정보가 다른 문서에도 있는지 확인하고 단일 출
+        처 원칙 적용
+
+● Now let me also write the system plan file and then get the plugin versions for the changelog update.
+
+● Updated plan
+  ⎿  Wrote 30 lines to ../../.claude/plans/precious-roaming-lantern.md   
+      1 # Documentation Audit & Improvement Plan
+      2 ## Goal
+      3 Audit all markdown docs against prompt-logs lessons/retros. Fix g
+        aps, trim bloat, deduplicate, enforce progressive disclosure.
+      4 ## Changes (10 items)
+      5 ### A. Bloated / Scope Violation
+      6 1. **`docs/claude-marketplace.md`** (510→~30 lines): Replace full
+         official docs copy with slim project-specific reference + link
+     … +20 lines (ctrl+o to expand)
+
+● 변경된 플러그인들의 현재 버전을 확인해두겠습니다.
+
+● Bash(for dir in /home/hwidong/codes/claude-plugins/plugins/*/; do
+      name=$(basename "$dir"); json="$dir.claude-plugin/plugin.json"; if [ -f
+      "$json" ]; then version=$(g…)
+  ⎿  attention-hook: v1.2.1       
+     clarify: v1.0.0
+     gather-context: v1.1.1
+     … +6 lines (ctrl+o to expand)
+
+● 계획이 완성되었습니다. 승인을 요청하겠습니다.
+                                                                         
+● User approved Claude's plan
+  ⎿  Plan saved to: ~/.claude/plans/precious-roaming-lantern.md · /plan to 
+     edit
+     Documentation Audit & Improvement Plan
+
+     Goal
+
+     Audit all markdown docs against prompt-logs lessons/retros. Fix gaps,
+     trim bloat, deduplicate, enforce progressive disclosure.
+
+     Changes (10 items)
+
+     A. Bloated / Scope Violation
+
+     1. docs/claude-marketplace.md (510→~30 lines): Replace full official
+     docs copy with slim project-specific reference + link
+     2. web-search/references/api-reference.md (381→~80 lines): Remove dead
+      curl/jq/python patterns (now in scripts), keep only env vars + params
+      + token table
+
+     B. Duplication
+
+     3. plugin-deploy/references/checklist.md: Remove duplicated Version
+     Bump Rules and marketplace.json format — cross-ref cheatsheet
+     4. api-reference.md: Remove duplicated Usage Message (already in
+     SKILL.md)
+
+     C. Stale Content
+
+     5. CHANGELOG.md: Add all Feb 3 plugin changes
+     6. docs/project-context.md: Add script delegation pattern, hook
+     redirects, smart-read, 3-tier env loading
+
+     D. Missing Lessons
+
+     7. docs/plugin-dev-cheatsheet.md: Add "hooks are snapshots" to Testing
+      section
+     8. docs/plugin-dev-cheatsheet.md: Add type: prompt note to hooks.json
+     section
+     9. docs/plugin-dev-cheatsheet.md: Add ((var++)) bash gotcha to Script
+     Guidelines
+
+     E. Verification
+
+     - Review each changed file for consistency
+     - Ensure all cross-references are valid
+     - Confirm no content was lost (only moved or linked)
+
+
+● 시작합니다. 먼저 가장 큰 변경인 claude-marketplace.md 슬림화부터.
+
+● Write(docs/claude-marketplace.md)
+  ⎿  Added 26 lines, removed 494 lines                                   
+        1 -# Create and distribute a plugin marketplace                  
+        1 +# Marketplace Reference                                       
+        2  
+        3 -> Build and host plugin marketplaces to distribute Claude Code
+          - extensions across teams and communities.                     
+        3 +For full marketplace documentation (creating, hosting, distrib
+          +uting, troubleshooting), see the [official Claude Code docs](h
+          +ttps://code.claude.com/docs/en/marketplace).                  
+        4  
+        5 -A plugin marketplace is a catalog that lets you distribute plu
+          -gins to others. Marketplaces provide centralized discovery, ve
+          -rsion tracking, automatic updates, and support for multiple so
+          -urce types (git repositories, local paths, and more). This gui
+          -de shows you how to create your own marketplace to share plugi
+          -ns with your team or community.                               
+        5 +## This Project's marketplace.json                            
+        6  
+        7 -Looking to install plugins from an existing marketplace? See [
+          -Discover and install prebuilt plugins](/en/discover-plugins). 
+        7 +Location: `.claude-plugin/marketplace.json`                   
+        8  
+        9 -## Overview                                                   
+        9 +### Plugin Entry Format                                       
+       10  
+       11 -Creating and distributing a marketplace involves:             
+       12 -                                                              
+       13 -1. **Creating plugins**: build one or more plugins with comman
+          -ds, agents, hooks, MCP servers, or LSP servers. This guide ass
+          -umes you already have plugins to distribute; see [Create plugi
+          -ns](/en/plugins) for details on how to create them.           
+       14 -2. **Creating a marketplace file**: define a `marketplace.json
+          -` that lists your plugins and where to find them (see [Create 
+          -the marketplace file](#create-the-marketplace-file)).         
+       15 -3. **Host the marketplace**: push to GitHub, GitLab, or anothe
+          -r git host (see [Host and distribute marketplaces](#host-and-d
+          -istribute-marketplaces)).                                     
+       16 -4. **Share with users**: users add your marketplace with `/plu
+          -gin marketplace add` and install individual plugins (see [Disc
+          -over and install plugins](/en/discover-plugins)).             
+       17 -                                                              
+       18 -Once your marketplace is live, you can update it by pushing ch
+          -anges to your repository. Users refresh their local copy with 
+          -`/plugin marketplace update`.                                 
+       19 -                                                              
+       20 -## Walkthrough: create a local marketplace                    
+       21 -                                                              
+       22 -This example creates a marketplace with one plugin: a `/review
+          -` command for code reviews. You'll create the directory struct
+          -ure, add a slash command, create the plugin manifest and marke
+          -tplace catalog, then install and test it.                     
+       23 -                                                              
+       24 -<Steps>                                                       
+       25 -  <Step title="Create the directory structure">               
+       26 -    ```bash  theme={null}                                     
+       27 -    mkdir -p my-marketplace/.claude-plugin                    
+       28 -    mkdir -p my-marketplace/plugins/review-plugin/.claude-plug
+          -in                                                            
+       29 -    mkdir -p my-marketplace/plugins/review-plugin/commands    
+       30 -    ```                                                       
+       31 -  </Step>                                                     
+       32 -                                                              
+       33 -  <Step title="Create the plugin command">                    
+       34 -    Create a Markdown file that defines what the `/review` com
+          -mand does.                                                    
+       35 -                                                              
+       36 -    ```markdown my-marketplace/plugins/review-plugin/commands/
+          -review.md theme={null}                                        
+       37 -    Review the code I've selected or the recent changes for:  
+       38 -    - Potential bugs or edge cases                            
+       39 -    - Security concerns                                       
+       40 -    - Performance issues                                      
+       41 -    - Readability improvements                                
+       42 -                                                              
+       43 -    Be concise and actionable.                                
+       44 -    ```                                                       
+       45 -  </Step>                                                     
+       46 -                                                              
+       47 -  <Step title="Create the plugin manifest">                   
+       48 -    Create a `plugin.json` file that describes the plugin. The
+          - manifest goes in the `.claude-plugin/` directory.            
+       49 -                                                              
+       50 -    ```json my-marketplace/plugins/review-plugin/.claude-plugi
+          -n/plugin.json theme={null}                                    
+       51 -    {                                                         
+       52 -      "name": "review-plugin",                                
+       53 -      "description": "Adds a /review command for quick code re
+          -views",                                                       
+       54 -      "version": "1.0.0"                                      
+       55 -    }                                                         
+       56 -    ```                                                       
+       57 -  </Step>                                                     
+       58 -                                                              
+       59 -  <Step title="Create the marketplace file">                  
+       60 -    Create the marketplace catalog that lists your plugin.    
+       61 -                                                              
+       62 -    ```json my-marketplace/.claude-plugin/marketplace.json the
+          -me={null}                                                     
+       63 -    {                                                         
+       64 -      "name": "my-plugins",                                   
+       65 -      "owner": {                                              
+       66 -        "name": "Your Name"                                   
+       67 -      },                                                      
+       68 -      "plugins": [                                            
+       69 -        {                                                     
+       70 -          "name": "review-plugin",                            
+       71 -          "source": "./plugins/review-plugin",                
+       72 -          "description": "Adds a /review command for quick cod
+          -e reviews"                                                    
+       73 -        }                                                     
+       74 -      ]                                                       
+       75 -    }                                                         
+       76 -    ```                                                       
+       77 -  </Step>                                                     
+       78 -                                                              
+       79 -  <Step title="Add and install">                              
+       80 -    Add the marketplace and install the plugin.               
+       81 -                                                              
+       82 -    ```shell  theme={null}                                    
+       83 -    /plugin marketplace add ./my-marketplace                  
+       84 -    /plugin install review-plugin@my-plugins                  
+       85 -    ```                                                       
+       86 -  </Step>                                                     
+       87 -                                                              
+       88 -  <Step title="Try it out">                                   
+       89 -    Select some code in your editor and run your new command. 
+       90 -                                                              
+       91 -    ```shell  theme={null}                                    
+       92 -    /review                                                   
+       93 -    ```                                                       
+       94 -  </Step>                                                     
+       95 -</Steps>                                                      
+       96 -                                                              
+       97 -To learn more about what plugins can do, including hooks, agen
+          -ts, MCP servers, and LSP servers, see [Plugins](/en/plugins). 
+       98 -                                                              
+       99 -<Note>                                                        
+      100 -  **How plugins are installed**: When users install a plugin, 
+          -Claude Code copies the plugin directory to a cache location. T
+          -his means plugins can't reference files outside their director
+          -y using paths like `../shared-utils`, because those files won'
+          -t be copied.                                                  
+      101 -                                                              
+      102 -  If you need to share files across plugins, use symlinks (whi
+          -ch are followed during copying) or restructure your marketplac
+          -e so the shared directory is inside the plugin source path. Se
+          -e [Plugin caching and file resolution](/en/plugins-reference#p
+          -lugin-caching-and-file-resolution) for details.               
+      103 -</Note>                                                       
+      104 -                                                              
+      105 -## Create the marketplace file                                
+      106 -                                                              
+      107 -Create `.claude-plugin/marketplace.json` in your repository ro
+          -ot. This file defines your marketplace's name, owner informati
+          -on, and a list of plugins with their sources.                 
+      108 -                                                              
+      109 -Each plugin entry needs at minimum a `name` and `source` (wher
+          -e to fetch it from). See the [full schema](#marketplace-schema
+          -) below for all available fields.                             
+      110 -                                                              
+      111 -```json  theme={null}                                         
+       11 +```json                                                       
+       12  {
+      113 -  "name": "company-tools",                                    
+      114 -  "owner": {                                                  
+      115 -    "name": "DevTools Team",                                  
+      116 -    "email": "devtools@example.com"                           
+      117 -  },                                                          
+      118 -  "plugins": [                                                
+      119 -    {                                                         
+      120 -      "name": "code-formatter",                               
+      121 -      "source": "./plugins/formatter",                        
+      122 -      "description": "Automatic code formatting on save",     
+      123 -      "version": "2.1.0",                                     
+      124 -      "author": {                                             
+      125 -        "name": "DevTools Team"                               
+      126 -      }                                                       
+      127 -    },                                                        
+      128 -    {                                                         
+      129 -      "name": "deployment-tools",                             
+      130 -      "source": {                                             
+      131 -        "source": "github",                                   
+      132 -        "repo": "company/deploy-plugin"                       
+      133 -      },                                                      
+      134 -      "description": "Deployment automation tools"            
+      135 -    }                                                         
+      136 -  ]                                                           
+       13 +  "name": "{name}",                                           
+       14 +  "source": "./plugins/{name}",                               
+       15 +  "description": "A {skill|hook} that ...",                   
+       16 +  "keywords": ["keyword1", "keyword2"]                        
+       17  }
+       18  ```
+       19  
+      140 -## Marketplace schema                                         
+       20 +### Key Rules                                                 
+       21  
+      142 -### Required fields                                           
+       22 +- `name`: kebab-case, matches the plugin directory name       
+       23 +- `source`: relative path to the plugin directory (always `./p
+          +lugins/{name}`)                                               
+       24 +- `description`: should match `plugin.json` description       
+       25 +- `keywords`: for discovery and categorization                
+       26  
+      144 -| Field     | Type   | Description                            
+          -                                                              
+          -                                                              
+          -    | Example        |                                        
+      145 -| :-------- | :----- | :--------------------------------------
+          ---------------------------------------------------------------
+          ---------------------------------------------------------------
+          ---- | :------------- |                                        
+      146 -| `name`    | string | Marketplace identifier (kebab-case, no 
+          -spaces). This is public-facing: users see it when installing p
+          -lugins (for example, `/plugin install my-tool@your-marketplace
+          -`). | `"acme-tools"` |                                        
+      147 -| `owner`   | object | Marketplace maintainer information ([se
+          -e fields below](#owner-fields))                               
+          -                                                              
+          -    |                |                                        
+      148 -| `plugins` | array  | List of available plugins              
+          -                                                              
+          -                                                              
+          -    | See below      |                                        
+       27 +### Plugin Caching                                            
+       28  
+      150 -<Note>                                                        
+      151 -  **Reserved names**: The following marketplace names are rese
+          -rved for official Anthropic use and cannot be used by third-pa
+          -rty marketplaces: `claude-code-marketplace`, `claude-code-plug
+          -ins`, `claude-plugins-official`, `anthropic-marketplace`, `ant
+          -hropic-plugins`, `agent-skills`, `life-sciences`. Names that i
+          -mpersonate official marketplaces (like `official-claude-plugin
+          -s` or `anthropic-tools-v2`) are also blocked.                 
+      152 -</Note>                                                       
+       29 +Plugins are copied to a cache location on install. Files outsi
+          +de the plugin directory (e.g., `../shared-utils`) won't be ava
+          +ilable. Use `${CLAUDE_PLUGIN_ROOT}` in hooks and MCP configs t
+          +o reference files within the installed plugin.                
+       30  
+      154 -### Owner fields                                              
+       31 +### User Commands                                             
+       32  
+      156 -| Field   | Type   | Required | Description                   
+          -   |                                                          
+      157 -| :------ | :----- | :------- | :-----------------------------
+          --- |                                                          
+      158 -| `name`  | string | Yes      | Name of the maintainer or team
+          -   |                                                          
+      159 -| `email` | string | No       | Contact email for the maintain
+          -er |                                                          
+       33 +```bash                                                       
+       34 +# Add marketplace                                             
+       35 +/plugin marketplace add corca-ai/claude-plugins               
+       36  
+      161 -### Optional metadata                                         
+       37 +# Update marketplace catalog                                  
+       38 +/plugin marketplace update                                    
+       39  
+      163 -| Field                  | Type   | Description               
+          -                                                              
+          -                                                              
+          -                    |                                         
+      164 -| :--------------------- | :----- | :-------------------------
+          ---------------------------------------------------------------
+          ---------------------------------------------------------------
+          -------------------- |                                         
+      165 -| `metadata.description` | string | Brief marketplace descript
+          -ion                                                           
+          -                                                              
+          -                    |                                         
+      166 -| `metadata.version`     | string | Marketplace version       
+          -                                                              
+          -                                                              
+          -                    |                                         
+      167 -| `metadata.pluginRoot`  | string | Base directory prepended t
+          -o relative plugin source paths (for example, `"./plugins"` let
+          -s you write `"source": "formatter"` instead of `"source": "./p
+          -lugins/formatter"`) |                                         
+      168 -                                                              
+      169 -## Plugin entries                                             
+      170 -                                                              
+      171 -Each plugin entry in the `plugins` array describes a plugin an
+          -d where to find it. You can include any field from the [plugin
+          - manifest schema](/en/plugins-reference#plugin-manifest-schema
+          -) (like `description`, `version`, `author`, `commands`, `hooks
+          -`, etc.), plus these marketplace-specific fields: `source`, `c
+          -ategory`, `tags`, and `strict`.                               
+      172 -                                                              
+      173 -### Required fields                                           
+      174 -                                                              
+      175 -| Field    | Type           | Description                     
+          -                                                              
+          -                                                         |    
+      176 -| :------- | :------------- | :-------------------------------
+          ---------------------------------------------------------------
+          --------------------------------------------------------- |    
+      177 -| `name`   | string         | Plugin identifier (kebab-case, n
+          -o spaces). This is public-facing: users see it when installing
+          - (for example, `/plugin install my-plugin@marketplace`). |    
+      178 -| `source` | string\|object | Where to fetch the plugin from (
+          -see [Plugin sources](#plugin-sources) below)                  
+          -                                                         |    
+      179 -                                                              
+      180 -### Optional plugin fields                                    
+      181 -                                                              
+      182 -**Standard metadata fields:**                                 
+      183 -                                                              
+      184 -| Field         | Type    | Description                       
+          -                                                              
+          -                                                              
+          -                                                              
+          -                                                              
+          -                                                              
+          -                                                              
+          -           |                                                  
+      185 -| :------------ | :------ | :---------------------------------
+          ---------------------------------------------------------------
+          ---------------------------------------------------------------
+          ---------------------------------------------------------------
+          ---------------------------------------------------------------
+          ---------------------------------------------------------------
+          ---------------------------------------------------------------
+          ----------- |                                                  
+      186 -| `description` | string  | Brief plugin description          
+          -                                                              
+          -                                                              
+          -                                                              
+          -                                                              
+          -                                                              
+          -                                                              
+          -           |                                                  
+      187 -| `version`     | string  | Plugin version                    
+          -                                                              
+          -                                                              
+          -                                                              
+          -                                                              
+          -                                                              
+          -                                                              
+          -           |                                                  
+      188 -| `author`      | object  | Plugin author information (`name` 
+          -required, `email` optional)                                   
+          -                                                              
+          -                                                              
+          -                                                              
+          -                                                              
+          -                                                              
+          -           |                                                  
+      189 -| `homepage`    | string  | Plugin homepage or documentation U
+          -RL                                                            
+          -                                                              
+          -                                                              
+          -                                                              
+          -                                                              
+          -                                                              
+          -           |                                                  
+      190 -| `repository`  | string  | Source code repository URL        
+          -                                                              
+          -                                                              
+          -                                                              
+          -                                                              
+          -                                                              
+          -                                                              
+          -           |                                                  
+      191 -| `license`     | string  | SPDX license identifier (for examp
+          -le, MIT, Apache-2.0)                                          
+          -                                                              
+          -                                                              
+          -                                                              
+          -                                                              
+          -                                                              
+          -           |                                                  
+      192 -| `keywords`    | array   | Tags for plugin discovery and cate
+          -gorization                                                    
+          -                                                              
+          -                                                              
+          -                                                              
+          -                                                              
+          -                                                              
+          -           |                                                  
+      193 -| `category`    | string  | Plugin category for organization  
+          -                                                              
+          -                                                              
+          -                                                              
+          -                                                              
+          -                                                              
+          -                                                              
+          -           |                                                  
+      194 -| `tags`        | array   | Tags for searchability            
+          -                                                              
+          -                                                              
+          -                                                              
+          -                                                              
+          -                                                              
+          -                                                              
+          -           |                                                  
+      195 -| `strict`      | boolean | Controls whether plugins need thei
+          -r own `plugin.json` file. When `true` (default), the plugin so
+          -urce must contain a `plugin.json`, and any fields you add here
+          - in the marketplace entry get merged with it. When `false`, th
+          -e plugin doesn't need its own `plugin.json`; the marketplace e
+          -ntry itself defines everything about the plugin. Use `false` w
+          -hen you want to define simple plugins entirely in your marketp
+          -lace file. |                                                  
+      196 -                                                              
+      197 -**Component configuration fields:**                           
+      198 -                                                              
+      199 -| Field        | Type           | Description                 
+          -                     |                                        
+      200 -| :----------- | :------------- | :---------------------------
+          --------------------- |                                        
+      201 -| `commands`   | string\|array  | Custom paths to command file
+          -s or directories     |                                        
+      202 -| `agents`     | string\|array  | Custom paths to agent files 
+          -                     |                                        
+      203 -| `hooks`      | string\|object | Custom hooks configuration o
+          -r path to hooks file |                                        
+      204 -| `mcpServers` | string\|object | MCP server configurations or
+          - path to MCP config  |                                        
+      205 -| `lspServers` | string\|object | LSP server configurations or
+          - path to LSP config  |                                        
+      206 -                                                              
+      207 -## Plugin sources                                             
+      208 -                                                              
+      209 -### Relative paths                                            
+      210 -                                                              
+      211 -For plugins in the same repository:                           
+      212 -                                                              
+      213 -```json  theme={null}                                         
+      214 -{                                                             
+      215 -  "name": "my-plugin",                                        
+      216 -  "source": "./plugins/my-plugin"                             
+      217 -}                                                             
+       40 +# Install/update a plugin                                     
+       41 +/plugin install {name}@corca-plugins                          
+       42 +/plugin update {name}@corca-plugins                           
+       43  ```
+      219 -                                                              
+      220 -### GitHub repositories                                       
+      221 -                                                              
+      222 -```json  theme={null}                                         
+      223 -{                                                             
+      224 -  "name": "github-plugin",                                    
+      225 -  "source": {                                                 
+      226 -    "source": "github",                                       
+      227 -    "repo": "owner/plugin-repo"                               
+      228 -  }                                                           
+      229 -}                                                             
+      230 -```                                                           
+      231 -                                                              
+      232 -### Git repositories                                          
+      233 -                                                              
+      234 -```json  theme={null}                                         
+      235 -{                                                             
+      236 -  "name": "git-plugin",                                       
+      237 -  "source": {                                                 
+      238 -    "source": "url",                                          
+      239 -    "url": "https://gitlab.com/team/plugin.git"               
+      240 -  }                                                           
+      241 -}                                                             
+      242 -```                                                           
+      243 -                                                              
+      244 -### Advanced plugin entries                                   
+      245 -                                                              
+      246 -This example shows a plugin entry using many of the optional f
+          -ields, including custom paths for commands, agents, hooks, and
+          - MCP servers:                                                 
+      247 -                                                              
+      248 -```json  theme={null}                                         
+      249 -{                                                             
+      250 -  "name": "enterprise-tools",                                 
+      251 -  "source": {                                                 
+      252 -    "source": "github",                                       
+      253 -    "repo": "company/enterprise-plugin"                       
+      254 -  },                                                          
+      255 -  "description": "Enterprise workflow automation tools",      
+      256 -  "version": "2.1.0",                                         
+      257 -  "author": {                                                 
+      258 -    "name": "Enterprise Team",                                
+      259 -    "email": "enterprise@example.com"                         
+      260 -  },                                                          
+      261 -  "homepage": "https://docs.example.com/plugins/enterprise-too
+          -ls",                                                          
+      262 -  "repository": "https://github.com/company/enterprise-plugin"
+          -,                                                             
+      263 -  "license": "MIT",                                           
+      264 -  "keywords": ["enterprise", "workflow", "automation"],       
+      265 -  "category": "productivity",                                 
+      266 -  "commands": [                                               
+      267 -    "./commands/core/",                                       
+      268 -    "./commands/enterprise/",                                 
+      269 -    "./commands/experimental/preview.md"                      
+      270 -  ],                                                          
+      271 -  "agents": ["./agents/security-reviewer.md", "./agents/compli
+          -ance-checker.md"],                                            
+      272 -  "hooks": {                                                  
+      273 -    "PostToolUse": [                                          
+      274 -      {                                                       
+      275 -        "matcher": "Write|Edit",                              
+      276 -        "hooks": [                                            
+      277 -          {                                                   
+      278 -            "type": "command",                                
+      279 -            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/validate
+          -.sh"                                                          
+      280 -          }                                                   
+      281 -        ]                                                     
+      282 -      }                                                       
+      283 -    ]                                                         
+      284 -  },                                                          
+      285 -  "mcpServers": {                                             
+      286 -    "enterprise-db": {                                        
+      287 -      "command": "${CLAUDE_PLUGIN_ROOT}/servers/db-server",   
+      288 -      "args": ["--config", "${CLAUDE_PLUGIN_ROOT}/config.json"
+          -]                                                             
+      289 -    }                                                         
+      290 -  },                                                          
+      291 -  "strict": false                                             
+      292 -}                                                             
+      293 -```                                                           
+      294 -                                                              
+      295 -Key things to notice:                                         
+      296 -                                                              
+      297 -* **`commands` and `agents`**: You can specify multiple direct
+          -ories or individual files. Paths are relative to the plugin ro
+          -ot.                                                           
+      298 -* **`${CLAUDE_PLUGIN_ROOT}`**: Use this variable in hooks and 
+          -MCP server configs to reference files within the plugin's inst
+          -allation directory. This is necessary because plugins are copi
+          -ed to a cache location when installed.                        
+      299 -* **`strict: false`**: Since this is set to false, the plugin 
+          -doesn't need its own `plugin.json`. The marketplace entry defi
+          -nes everything.                                               
+      300 -                                                              
+      301 -## Host and distribute marketplaces                           
+      302 -                                                              
+      303 -### Host on GitHub (recommended)                              
+      304 -                                                              
+      305 -GitHub provides the easiest distribution method:              
+      306 -                                                              
+      307 -1. **Create a repository**: Set up a new repository for your m
+          -arketplace                                                    
+      308 -2. **Add marketplace file**: Create `.claude-plugin/marketplac
+          -e.json` with your plugin definitions                          
+      309 -3. **Share with teams**: Users add your marketplace with `/plu
+          -gin marketplace add owner/repo`                               
+      310 -                                                              
+      311 -**Benefits**: Built-in version control, issue tracking, and te
+          -am collaboration features.                                    
+      312 -                                                              
+      313 -### Host on other git services                                
+      314 -                                                              
+      315 -Any git hosting service works, such as GitLab, Bitbucket, and 
+          -self-hosted servers. Users add with the full repository URL:  
+      316 -                                                              
+      317 -```shell  theme={null}                                        
+      318 -/plugin marketplace add https://gitlab.com/company/plugins.git
+      319 -```                                                           
+      320 -                                                              
+      321 -### Test locally before distribution                          
+      322 -                                                              
+      323 -Test your marketplace locally before sharing:                 
+      324 -                                                              
+      325 -```shell  theme={null}                                        
+      326 -/plugin marketplace add ./my-local-marketplace                
+      327 -/plugin install test-plugin@my-local-marketplace              
+      328 -```                                                           
+      329 -                                                              
+      330 -For the full range of add commands (GitHub, Git URLs, local pa
+          -ths, remote URLs), see [Add marketplaces](/en/discover-plugins
+          -#add-marketplaces).                                           
+      331 -                                                              
+      332 -### Require marketplaces for your team                        
+      333 -                                                              
+      334 -You can configure your repository so team members are automati
+          -cally prompted to install your marketplace when they trust the
+          - project folder. Add your marketplace to `.claude/settings.jso
+          -n`:                                                           
+      335 -                                                              
+      336 -```json  theme={null}                                         
+      337 -{                                                             
+      338 -  "extraKnownMarketplaces": {                                 
+      339 -    "company-tools": {                                        
+      340 -      "source": {                                             
+      341 -        "source": "github",                                   
+      342 -        "repo": "your-org/claude-plugins"                     
+      343 -      }                                                       
+      344 -    }                                                         
+      345 -  }                                                           
+      346 -}                                                             
+      347 -```                                                           
+      348 -                                                              
+      349 -You can also specify which plugins should be enabled by defaul
+          -t:                                                            
+      350 -                                                              
+      351 -```json  theme={null}                                         
+      352 -{                                                             
+      353 -  "enabledPlugins": {                                         
+      354 -    "code-formatter@company-tools": true,                     
+      355 -    "deployment-tools@company-tools": true                    
+      356 -  }                                                           
+      357 -}                                                             
+      358 -```                                                           
+      359 -                                                              
+      360 -For full configuration options, see [Plugin settings](/en/sett
+          -ings#plugin-settings).                                        
+      361 -                                                              
+      362 -### Managed marketplace restrictions                          
+      363 -                                                              
+      364 -For organizations requiring strict control over plugin sources
+          -, administrators can restrict which plugin marketplaces users 
+          -are allowed to add using the [`strictKnownMarketplaces`](/en/s
+          -ettings#strictknownmarketplaces) setting in managed settings. 
+      365 -                                                              
+      366 -When `strictKnownMarketplaces` is configured in managed settin
+          -gs, the restriction behavior depends on the value:            
+      367 -                                                              
+      368 -| Value               | Behavior                              
+          -                           |                                  
+      369 -| ------------------- | --------------------------------------
+          --------------------------- |                                  
+      370 -| Undefined (default) | No restrictions. Users can add any mar
+          -ketplace                   |                                  
+      371 -| Empty array `[]`    | Complete lockdown. Users cannot add an
+          -y new marketplaces         |                                  
+      372 -| List of sources     | Users can only add marketplaces that m
+          -atch the allowlist exactly |                                  
+      373 -                                                              
+      374 -#### Common configurations                                    
+      375 -                                                              
+      376 -Disable all marketplace additions:                            
+      377 -                                                              
+      378 -```json  theme={null}                                         
+      379 -{                                                             
+      380 -  "strictKnownMarketplaces": []                               
+      381 -}                                                             
+      382 -```                                                           
+      383 -                                                              
+      384 -Allow specific marketplaces only:                             
+      385 -                                                              
+      386 -```json  theme={null}                                         
+      387 -{                                                             
+      388 -  "strictKnownMarketplaces": [                                
+      389 -    {                                                         
+      390 -      "source": "github",                                     
+      391 -      "repo": "acme-corp/approved-plugins"                    
+      392 -    },                                                        
+      393 -    {                                                         
+      394 -      "source": "github",                                     
+      395 -      "repo": "acme-corp/security-tools",                     
+      396 -      "ref": "v2.0"                                           
+      397 -    },                                                        
+      398 -    {                                                         
+      399 -      "source": "url",                                        
+      400 -      "url": "https://plugins.example.com/marketplace.json"   
+      401 -    }                                                         
+      402 -  ]                                                           
+      403 -}                                                             
+      404 -```                                                           
+      405 -                                                              
+      406 -#### How restrictions work                                    
+      407 -                                                              
+      408 -Restrictions are validated early in the plugin installation pr
+          -ocess, before any network requests or filesystem operations oc
+          -cur. This prevents unauthorized marketplace access attempts.  
+      409 -                                                              
+      410 -The allowlist uses exact matching. For a marketplace to be all
+          -owed, all specified fields must match exactly:                
+      411 -                                                              
+      412 -* For GitHub sources: `repo` is required, and `ref` or `path` 
+          -must also match if specified in the allowlist                 
+      413 -* For URL sources: the full URL must match exactly            
+      414 -                                                              
+      415 -Because `strictKnownMarketplaces` is set in [managed settings]
+          -(/en/settings#settings-file-locations), individual users and p
+          -roject configurations cannot override these restrictions.     
+      416 -                                                              
+      417 -For complete configuration details including all supported sou
+          -rce types and comparison with `extraKnownMarketplaces`, see th
+          -e [strictKnownMarketplaces reference](/en/settings#strictknown
+          -marketplaces).                                                
+      418 -                                                              
+      419 -## Validation and testing                                     
+      420 -                                                              
+      421 -Test your marketplace before sharing.                         
+      422 -                                                              
+      423 -Validate your marketplace JSON syntax:                        
+      424 -                                                              
+      425 -```bash  theme={null}                                         
+      426 -claude plugin validate .                                      
+      427 -```                                                           
+      428 -                                                              
+      429 -Or from within Claude Code:                                   
+      430 -                                                              
+      431 -```shell  theme={null}                                        
+      432 -/plugin validate .                                            
+      433 -```                                                           
+      434 -                                                              
+      435 -Add the marketplace for testing:                              
+      436 -                                                              
+      437 -```shell  theme={null}                                        
+      438 -/plugin marketplace add ./path/to/marketplace                 
+      439 -```                                                           
+      440 -                                                              
+      441 -Install a test plugin to verify everything works:             
+      442 -                                                              
+      443 -```shell  theme={null}                                        
+      444 -/plugin install test-plugin@marketplace-name                  
+      445 -```                                                           
+      446 -                                                              
+      447 -For complete plugin testing workflows, see [Test your plugins 
+          -locally](/en/plugins#test-your-plugins-locally). For technical
+          - troubleshooting, see [Plugins reference](/en/plugins-referenc
+          -e).                                                           
+      448 -                                                              
+      449 -## Troubleshooting                                            
+      450 -                                                              
+      451 -### Marketplace not loading                                   
+      452 -                                                              
+      453 -**Symptoms**: Can't add marketplace or see plugins from it    
+      454 -                                                              
+      455 -**Solutions**:                                                
+      456 -                                                              
+      457 -* Verify the marketplace URL is accessible                    
+      458 -* Check that `.claude-plugin/marketplace.json` exists at the s
+          -pecified path                                                 
+      459 -* Ensure JSON syntax is valid using `claude plugin validate` o
+          -r `/plugin validate`                                          
+      460 -* For private repositories, confirm you have access permission
+          -s                                                             
+      461 -                                                              
+      462 -### Marketplace validation errors                             
+      463 -                                                              
+      464 -Run `claude plugin validate .` or `/plugin validate .` from yo
+          -ur marketplace directory to check for issues. Common errors:  
+      465 -                                                              
+      466 -| Error                                             | Cause   
+          -                        | Solution                            
+          -                          |                                   
+      467 -| :------------------------------------------------ | :-------
+          ------------------------ | :-----------------------------------
+          -------------------------- |                                   
+      468 -| `File not found: .claude-plugin/marketplace.json` | Missing 
+          -manifest                | Create `.claude-plugin/marketplace.j
+          -son` with required fields |                                   
+      469 -| `Invalid JSON syntax: Unexpected token...`        | JSON syn
+          -tax error               | Check for missing commas, extra comm
+          -as, or unquoted strings   |                                   
+      470 -| `Duplicate plugin name "x" found in marketplace`  | Two plug
+          -ins share the same name | Give each plugin a unique `name` val
+          -ue                        |                                   
+      471 -| `plugins[0].source: Path traversal not allowed`   | Source p
+          -ath contains `..`       | Use paths relative to marketplace ro
+          -ot without `..`           |                                   
+      472 -                                                              
+      473 -**Warnings** (non-blocking):                                  
+      474 -                                                              
+      475 -* `Marketplace has no plugins defined`: add at least one plugi
+          -n to the `plugins` array                                      
+      476 -* `No marketplace description provided`: add `metadata.descrip
+          -tion` to help users understand your marketplace               
+      477 -* `Plugin "x" uses npm source which is not yet fully implement
+          -ed`: use `github` or local path sources instead               
+      478 -                                                              
+      479 -### Plugin installation failures                              
+      480 -                                                              
+      481 -**Symptoms**: Marketplace appears but plugin installation fail
+          -s                                                             
+      482 -                                                              
+      483 -**Solutions**:                                                
+      484 -                                                              
+      485 -* Verify plugin source URLs are accessible                    
+      486 -* Check that plugin directories contain required files        
+      487 -* For GitHub sources, ensure repositories are public or you ha
+          -ve access                                                     
+      488 -* Test plugin sources manually by cloning/downloading         
+      489 -                                                              
+      490 -### Files not found after installation                        
+      491 -                                                              
+      492 -**Symptoms**: Plugin installs but references to files fail, es
+          -pecially files outside the plugin directory                   
+      493 -                                                              
+      494 -**Cause**: Plugins are copied to a cache directory rather than
+          - used in-place. Paths that reference files outside the plugin'
+          -s directory (such as `../shared-utils`) won't work because tho
+          -se files aren't copied.                                       
+      495 -                                                              
+      496 -**Solutions**: See [Plugin caching and file resolution](/en/pl
+          -ugins-reference#plugin-caching-and-file-resolution) for workar
+          -ounds including symlinks and directory restructuring.         
+      497 -                                                              
+      498 -For additional debugging tools and common issues, see [Debuggi
+          -ng and development tools](/en/plugins-reference#debugging-and-
+          -development-tools).                                           
+      499 -                                                              
+      500 -## See also                                                   
+      501 -                                                              
+      502 -* [Discover and install prebuilt plugins](/en/discover-plugins
+          -) - Installing plugins from existing marketplaces             
+      503 -* [Plugins](/en/plugins) - Creating your own plugins          
+      504 -* [Plugins reference](/en/plugins-reference) - Complete techni
+          -cal specifications and schemas                                
+      505 -* [Plugin settings](/en/settings#plugin-settings) - Plugin con
+          -figuration options                                            
+      506 -* [strictKnownMarketplaces reference](/en/settings#strictknown
+          -marketplaces) - Managed marketplace restrictions              
+      507 -                                                              
+      508 -                                                              
+      509 ----                                                           
+      510 -                                                              
+      511 -> To find navigation and other pages in this documentation, fe
+          -tch the llms.txt file at: https://code.claude.com/docs/llms.tx
+          -t                                                             
+       44   No newline at end of file
+
+● 510 → 43 lines. 이제 api-reference.md 슬림화.
+
+● Write(plugins/web-search/skills/web-search/references/api-reference.md)
+  ⎿  Added 15 lines, removed 340 lines                                   
+      1  # API Reference
+      2  
+      3 -Detailed curl patterns, output formats, and error handling for t
+        -he web-search skill.                                            
+      3 +Reference for the web-search skill. Execution is handled by wrap
+        +per scripts (`search.sh`, `code-search.sh`, `extract.sh`); this 
+        +document covers what SKILL.md needs for intent analysis and para
+        +meter decisions.                                                
+      4  
+      5 ----                                                             
+      6 -                                                                
+      5  ## Environment Variables
+      6  
+      7  | Variable | Required for | Get key at |
+     ...
+       11  
+       12  Only check the key required for the invoked subcommand. Do not
+            require both keys at once.
+       13  
+       16 -### Loading Keys                                              
+       14 +## Tavily Search Parameters                                   
+       15  
+       18 -Always load API keys with this pattern before any API call:   
+       19 -                                                              
+       20 -```bash                                                       
+       21 -# Shell env first, then ~/.claude/.env fallback               
+       22 -[ -z "$TAVILY_API_KEY" ] && [ -f ~/.claude/.env ] && source ~/
+          -.claude/.env                                                  
+       23 -```                                                           
+       24 -                                                              
+       25 -Do NOT use `grep | cut` to extract values from `.env` files — 
+          -this breaks on quoted values and `export` prefixes.           
+       26 -                                                              
+       27 ----                                                           
+       28 -                                                              
+       29 -## JSON Builder Helper                                        
+       30 -                                                              
+       31 -Always use safe JSON construction. Never interpolate variables
+          - directly into JSON strings.                                  
+       32 -                                                              
+       33 -```bash                                                       
+       34 -# With jq (preferred)                                         
+       35 -PAYLOAD=$(jq -n --arg q "$QUERY" '{query: $q, search_depth: "b
+          -asic", max_results: 5, include_answer: true}')                
+       36 -                                                              
+       37 -# Without jq (python3 fallback)                               
+       38 -PAYLOAD=$(python3 -c "import json,sys; print(json.dumps({'quer
+          -y': sys.argv[1], 'search_depth': 'basic', 'max_results': 5, 'i
+          -nclude_answer': True}))" "$QUERY")                            
+       39 -```                                                           
+       40 -                                                              
+       41 ----                                                           
+       42 -                                                              
+       43 -## curl Pattern                                               
+       44 -                                                              
+       45 -All API calls follow this pattern:                            
+       46 -                                                              
+       47 -```bash                                                       
+       48 -TMPFILE=$(mktemp)                                             
+       49 -trap 'rm -f "$TMPFILE"' EXIT INT TERM                         
+       50 -                                                              
+       51 -HTTP_CODE=$(curl -s --max-time 30 --connect-timeout 10 \      
+       52 -  -X POST "$ENDPOINT" \                                       
+       53 -  -H "Content-Type: application/json" \                       
+       54 -  -H "$AUTH_HEADER" \                                         
+       55 -  -d "$PAYLOAD" \                                             
+       56 -  -o "$TMPFILE" -w "%{http_code}")                            
+       57 -CURL_EXIT=$?                                                  
+       58 -                                                              
+       59 -# Check curl exit code first                                  
+       60 -if [ "$CURL_EXIT" -ne 0 ] || [ "$HTTP_CODE" = "000" ]; then   
+       61 -  echo "Error: Connection failed. Check your network."        
+       62 -  exit 1                                                      
+       63 -fi                                                            
+       64 -                                                              
+       65 -# Check HTTP status                                           
+       66 -if [ "$HTTP_CODE" = "200" ]; then                             
+       67 -  # Parse and format results                                  
+       68 -elif [ "$HTTP_CODE" = "401" ]; then                           
+       69 -  echo "Error: API key is invalid. Check your $KEY_VAR_NAME." 
+       70 -elif [ "$HTTP_CODE" = "429" ]; then                           
+       71 -  echo "Error: Rate limit exceeded. Please wait and retry."   
+       72 -else                                                          
+       73 -  echo "Error: Request failed (HTTP $HTTP_CODE). Try built-in 
+          -WebSearch as fallback."                                       
+       74 -fi                                                            
+       75 -```                                                           
+       76 -                                                              
+       77 ----                                                           
+       78 -                                                              
+       79 -## 1. Tavily Search (`/web-search <query>`)                   
+       80 -                                                              
+       81 -**Endpoint**: `POST https://api.tavily.com/search`            
+       82 -**Auth**: `Authorization: Bearer $TAVILY_API_KEY`             
+       83 -                                                              
+       84 -### Request                                                   
+       85 -                                                              
+       86 -```bash                                                       
+       87 -# Base payload — always included                              
+       88 -PAYLOAD=$(jq -n --arg q "$QUERY" '{                           
+       89 -  query: $q,                                                  
+       90 -  search_depth: "basic",                                      
+       91 -  max_results: 5,                                             
+       92 -  include_answer: true                                        
+       93 -}')                                                           
+       94 -                                                              
+       95 -# Conditional parameters — add based on query analysis (see SK
+          -ILL.md Execution Flow)                                        
+       96 -# topic: set when query matches a specific topic              
+       97 -PAYLOAD=$(echo "$PAYLOAD" | jq --arg t "$TOPIC" '. + {topic: $
+          -t}')                                                          
+       98 -# time_range: set when temporal intent detected               
+       99 -PAYLOAD=$(echo "$PAYLOAD" | jq --arg tr "$TIME_RANGE" '. + {ti
+          -me_range: $tr}')                                              
+      100 -# search_depth: override to "advanced" when --deep flag or com
+          -plex query                                                    
+      101 -PAYLOAD=$(echo "$PAYLOAD" | jq '. + {search_depth: "advanced",
+          - include_raw_content: "markdown"}')                           
+      102 -```                                                           
+      103 -                                                              
+       16  ### Conditional Parameters
+       17  
+       18  | Parameter | Values | When to set |
+     ...
+       22  | `search_depth` | `"basic"` (default), `"advanced"` | Overrid
+           e to `"advanced"` when `--deep` flag is used or query is compl
+           ex/research-oriented. |
+       23  | `include_raw_content` | `"markdown"` | Include when `search_
+           depth` is `"advanced"`. Provides full page content for deeper 
+           analysis. |
+       24  
+      113 -**Important**: Only add conditional parameters when they apply
+          -. Default behavior (no extra params) must remain unchanged for
+          - simple queries.                                              
+       25 +Only add conditional parameters when they apply. Default behav
+          +ior (no extra params) must remain unchanged for simple queries
+          +.                                                             
+       26  
+      115 -### Response Fields                                           
+       27 +## Tavily Extract Parameters                                  
+       28  
+      117 -```json                                                       
+      118 -{                                                             
+      119 -  "answer": "string or null",                                 
+      120 -  "results": [                                                
+      121 -    {                                                         
+      122 -      "title": "string",                                      
+      123 -      "url": "string",                                        
+      124 -      "content": "string"                                     
+      125 -    }                                                         
+      126 -  ]                                                           
+      127 -}                                                             
+      128 -```                                                           
+       29 +| Parameter | Type | Description |                            
+       30 +|-----------|------|-------------|                            
+       31 +| `query` | string | Optional. Reranks extracted chunks by rel
+          +evance to this query. Only add when the user provides a query 
+          +after the URL. |                                              
+       32  
+      130 -### Output Format                                             
+       33 +## Exa Code Context — Token Allocation                        
+       34  
+      132 -```markdown                                                   
+      133 -## Search Results: <query>                                    
+      134 -                                                              
+      135 -<answer if present>                                           
+      136 -                                                              
+      137 -### 1. <title>                                                
+      138 -<content snippet>                                             
+      139 -- URL: <url>                                                  
+      140 -                                                              
+      141 -### 2. <title>                                                
+      142 -...                                                           
+      143 -                                                              
+      144 ----                                                           
+      145 -Sources:                                                      
+      146 -- [Title1](url1)                                              
+      147 -- [Title2](url2)                                              
+      148 -```                                                           
+      149 -                                                              
+      150 -### jq Parse                                                  
+      151 -                                                              
+      152 -```bash                                                       
+      153 -# Extract answer                                              
+      154 -ANSWER=$(jq -r '.answer // empty' "$TMPFILE")                 
+      155 -                                                              
+      156 -# Extract numbered results                                    
+      157 -jq -r '[.results[] | {t: (.title // "Untitled"), c: (.content 
+          -// ""), u: (.url // "")}] | to_entries[] | "### \(.key + 1). \
+          -(.value.t)\n\(.value.c)\n- URL: \(.value.u)\n"' "$TMPFILE"    
+      158 -                                                              
+      159 -# Extract sources                                             
+      160 -jq -r '.results[] | "- [\(.title // "Untitled")](\(.url // "")
+          -)"' "$TMPFILE"                                                
+      161 -```                                                           
+      162 -                                                              
+      163 -### python3 Parse (fallback)                                  
+      164 -                                                              
+      165 -```bash                                                       
+      166 -python3 -c "                                                  
+      167 -import json, sys                                              
+      168 -try:                                                          
+      169 -    data = json.load(open(sys.argv[1]))                       
+      170 -except (json.JSONDecodeError, FileNotFoundError) as e:        
+      171 -    print(f'Error parsing response: {e}', file=sys.stderr)    
+      172 -    sys.exit(1)                                               
+      173 -answer = data.get('answer')                                   
+      174 -if answer:                                                    
+      175 -    print(answer + '\n')                                      
+      176 -for i, r in enumerate(data.get('results', []), 1):            
+      177 -    print(f\"### {i}. {r.get('title', 'Untitled')}\")         
+      178 -    print(r.get('content', ''))                               
+      179 -    print(f\"- URL: {r.get('url', '')}\n\")                   
+      180 -print('---')                                                  
+      181 -print('Sources:')                                             
+      182 -for r in data.get('results', []):                             
+      183 -    print(f\"- [{r.get('title', 'Untitled')}]({r.get('url', ''
+          -)})\")                                                        
+      184 -" "$TMPFILE"                                                  
+      185 -```                                                           
+      186 -                                                              
+      187 ----                                                           
+      188 -                                                              
+      189 -## 2. Exa Code Context (`/web-search code <query>`)           
+      190 -                                                              
+      191 -**Endpoint**: `POST https://api.exa.ai/context`               
+      192 -**Auth**: `x-api-key: $EXA_API_KEY`                           
+      193 -                                                              
+      194 -### Request                                                   
+      195 -                                                              
+      196 -```bash                                                       
+      197 -PAYLOAD=$(jq -n --arg q "$QUERY" --argjson t "$TOKENS_NUM" '{ 
+      198 -  query: $q,                                                  
+      199 -  tokensNum: $t                                               
+      200 -}')                                                           
+      201 -```                                                           
+      202 -                                                              
+      203 -### Token Allocation                                          
+      204 -                                                              
+       35  `tokensNum`: Max response tokens (range: 1000-50000). Set dyna
+           mically based on query complexity:
+       36  
+       37  | Query type | tokensNum | Example |
+     ...
+       43  
+       44  Choose the tier that best matches the query. When unsure, defa
+           ult to 5000.
+       45  
+      216 -### Response Fields                                           
+      217 -                                                              
+      218 -```json                                                       
+      219 -{                                                             
+      220 -  "response": "string (formatted code context)",              
+      221 -  "resultsCount": 15,                                         
+      222 -  "costDollars": "0.0025"                                     
+      223 -}                                                             
+      224 -```                                                           
+      225 -                                                              
+      226 -### Output Format                                             
+      227 -                                                              
+      228 -```markdown                                                   
+      229 -## Code Context: <query>                                      
+      230 -                                                              
+      231 -*Source: Exa Code Context API (GitHub, Stack Overflow, docs)* 
+      232 -                                                              
+      233 -<response content>                                            
+      234 -```                                                           
+      235 -                                                              
+      236 -### jq Parse                                                  
+      237 -                                                              
+      238 -```bash                                                       
+      239 -jq -r '.response // "No results"' "$TMPFILE"                  
+      240 -```                                                           
+      241 -                                                              
+      242 -### python3 Parse (fallback)                                  
+      243 -                                                              
+      244 -```bash                                                       
+      245 -python3 -c "                                                  
+      246 -import json, sys                                              
+      247 -try:                                                          
+      248 -    data = json.load(open(sys.argv[1]))                       
+      249 -except (json.JSONDecodeError, FileNotFoundError) as e:        
+      250 -    print(f'Error parsing response: {e}', file=sys.stderr)    
+      251 -    sys.exit(1)                                               
+      252 -print(data.get('response', 'No results'))                     
+      253 -" "$TMPFILE"                                                  
+      254 -```                                                           
+      255 -                                                              
+      256 ----                                                           
+      257 -                                                              
+      258 -## 3. Tavily Extract (`/web-search extract <url>`)            
+      259 -                                                              
+      260 -**Endpoint**: `POST https://api.tavily.com/extract`           
+      261 -**Auth**: `Authorization: Bearer $TAVILY_API_KEY`             
+      262 -                                                              
+      263 -### URL Validation                                            
+      264 -                                                              
+      265 -Before calling the API, validate that the URL starts with `htt
+          -p://` or `https://`.                                          
+      266 -If invalid, suggest: `Did you mean: /web-search <query>?`     
+      267 -                                                              
+      268 -### Request                                                   
+      269 -                                                              
+      270 -```bash                                                       
+      271 -# Base payload                                                
+      272 -PAYLOAD=$(jq -n --arg u "$URL" '{                             
+      273 -  urls: [$u],                                                 
+      274 -  extract_depth: "basic",                                     
+      275 -  format: "markdown"                                          
+      276 -}')                                                           
+      277 -                                                              
+      278 -# Optional: add query for relevance reranking                 
+      279 -# When user provides a query after the URL (e.g., /web-search 
+          -extract <url> "pricing")                                      
+      280 -PAYLOAD=$(echo "$PAYLOAD" | jq --arg q "$EXTRACT_QUERY" '. + {
+          -query: $q}')                                                  
+      281 -```                                                           
+      282 -                                                              
+      283 -### Optional Parameter                                        
+      284 -                                                              
+      285 -| Parameter | Type | Description |                            
+      286 -|-----------|------|-------------|                            
+      287 -| `query` | string | Reranks extracted chunks by relevance to 
+          -this query. Only add when the user provides a query after the 
+          -URL. |                                                        
+      288 -                                                              
+      289 -### Response Fields                                           
+      290 -                                                              
+      291 -```json                                                       
+      292 -{                                                             
+      293 -  "results": [                                                
+      294 -    {                                                         
+      295 -      "url": "string",                                        
+      296 -      "raw_content": "string"                                 
+      297 -    }                                                         
+      298 -  ],                                                          
+      299 -  "failed_results": []                                        
+      300 -}                                                             
+      301 -```                                                           
+      302 -                                                              
+      303 -### Output Format                                             
+      304 -                                                              
+      305 -```markdown                                                   
+      306 -## Extracted: <url>                                           
+      307 -                                                              
+      308 -<raw_content>                                                 
+      309 -```                                                           
+      310 -                                                              
+      311 -### jq Parse                                                  
+      312 -                                                              
+      313 -```bash                                                       
+      314 -jq -r '.results[0].raw_content // "Extraction failed"' "$TMPFI
+          -LE"                                                           
+      315 -```                                                           
+      316 -                                                              
+      317 -### python3 Parse (fallback)                                  
+      318 -                                                              
+      319 -```bash                                                       
+      320 -python3 -c "                                                  
+      321 -import json, sys                                              
+      322 -try:                                                          
+      323 -    data = json.load(open(sys.argv[1]))                       
+      324 -except (json.JSONDecodeError, FileNotFoundError) as e:        
+      325 -    print(f'Error parsing response: {e}', file=sys.stderr)    
+      326 -    sys.exit(1)                                               
+      327 -results = data.get('results', [])                             
+      328 -if results:                                                   
+      329 -    print(results[0].get('raw_content', 'No content'))        
+      330 -else:                                                         
+      331 -    failed = data.get('failed_results', [])                   
+      332 -    print('Extraction failed' + (f': {failed}' if failed else 
+          -''))                                                          
+      333 -" "$TMPFILE"                                                  
+      334 -```                                                           
+      335 -                                                              
+      336 ----                                                           
+      337 -                                                              
+       46  ## Error Handling
+       47  
+      340 -| HTTP Code | Message |                                       
+      341 -|-----------|---------|                                       
+      342 -| curl non-zero exit | `Connection failed. Check your network.
+          -` |                                                           
+      343 -| 200 | (parse and display results) |                         
+      344 -| 401 | `API key is invalid. Check your {KEY_VAR}.` |         
+      345 -| 429 | `Rate limit exceeded. Please wait and retry.` |       
+      346 -| Other | `Request failed (HTTP {code}). Try built-in WebSearc
+          -h as fallback.` |                                             
+       48 +Handled by scripts. Common HTTP status codes for reference:   
+       49  
+      348 -## Missing API Key Message                                    
+      349 -                                                              
+      350 -Show only the relevant provider for the invoked subcommand:   
+      351 -                                                              
+      352 -```                                                           
+      353 -Error: {KEY_VAR} is not set.                                  
+      354 -                                                              
+      355 -Get your API key: {provider_url}                              
+      356 -                                                              
+      357 -Then add to your shell profile:                               
+      358 -  export {KEY_VAR}="your-key-here"                            
+      359 -```                                                           
+      360 -                                                              
+      361 -## Usage Message (no args or "help")                          
+      362 -                                                              
+      363 -```                                                           
+      364 -Web Search Skill                                              
+      365 -                                                              
+      366 -Usage:                                                        
+      367 -  /web-search <query>                General web search (Tavil
+          -y)                                                            
+      368 -  /web-search --news <query>         News search (Tavily, topi
+          -c: news)                                                      
+      369 -  /web-search --deep <query>         Advanced depth search (Ta
+          -vily)                                                         
+      370 -  /web-search code <query>           Code/technical search (Ex
+          -a)                                                            
+      371 -  /web-search extract <url> [query]  Extract URL content, opti
+          -onally reranked by query (Tavily)                             
+      372 -                                                              
+      373 -Query intelligence (auto-detected):                           
+      374 -  Temporal keywords (latest, today, 2025...) → time_range filt
+          -er                                                            
+      375 -  News/finance topics → topic filter                          
+      376 -                                                              
+      377 -Environment variables:                                        
+      378 -  TAVILY_API_KEY    Required for search and extract           
+      379 -  EXA_API_KEY       Required for code search                  
+      380 -```                                                           
+       50 +| HTTP Code | Meaning |                                       
+       51 +|-----------|---------|                                       
+       52 +| 200 | Success |                                             
+       53 +| 401 | Invalid API key |                                     
+       54 +| 429 | Rate limit exceeded |                                 
+       55 +| Other | Request failed |                                    
+
+● 381 → 56 lines. 이제 checklist.md 중복 제거.
+
+● Write(.claude/skills/plugin-deploy/references/checklist.md)
+  ⎿  Added 6 lines, removed 23 lines                                     
+       2  
+       3  Detailed reference for edge cases. SKILL.md handles the main fl
+          ow; consult this for specifics.
+       4  
+       5 +For version bump rules, marketplace.json format, and deploy wor
+         +kflow, see [plugin-dev-cheatsheet.md](../../../../docs/plugin-d
+         +ev-cheatsheet.md).                                             
+       6 +                                                               
+       7  ## New Plugin Checklist
+       8  
+       9  - [ ] `plugins/{name}/` directory with correct structure
+      10  - [ ] `.claude-plugin/plugin.json` with name, description, vers
+          ion, author, repository
+      11  - [ ] SKILL.md (skill) or hooks.json (hook) or both (hybrid)
+      10 -- [ ] marketplace.json entry: name, source (`./plugins/{name}`)
+         -, description, keywords                                        
+      12 +- [ ] marketplace.json entry added                             
+      13  - [ ] README.md: add to overview table + detail section under S
+          kills or Hooks
+      14  - [ ] README.ko.md: same structure, Korean translation
+      15  - [ ] AI_NATIVE_PRODUCT_TEAM.md: add link if plugin fits an exi
+          sting category
+     ...
+      17  ## Modified Plugin Checklist
+      18  
+      19  - [ ] Version bumped in plugin.json
+      18 -- [ ] marketplace.json version/description synced (if version i
+         -s tracked there)                                               
+      20 +- [ ] marketplace.json description synced                      
+      21  - [ ] README.md and README.ko.md descriptions still accurate
+      22  - [ ] No breaking changes without major version bump
+      23  
+      22 -## Version Bump Rules                                          
+      23 -                                                               
+      24 -| Change type | Bump | Examples |                              
+      25 -|------------|------|---------|                                
+      26 -| Bug fix, typo, minor tweak | patch | Fix script error, update
+         - wording |                                                     
+      27 -| New feature, new flag, new capability | minor | Add --deep fl
+         -ag, new subcommand |                                           
+      28 -| Breaking change, renamed skill, changed API | major | Rename 
+         -/search → /web-search |                                        
+      29 -                                                               
+      24  ## README Format Reference
+      25  
+      26  ### Overview table row
+      27  
+      28  ```markdown
+      35 -| [{name}](#{name}) | {Skill\|Hook\|Skill + Hook} | {Short desc
+         -ription} |                                                     
+      29 +| [{name}](#{name}) | {Skill|Hook|Skill + Hook} | {Short descri
+         +ption} |                                                       
+      30  ```
+      31  
+      32  ### Detail section
+     ...
+      52  **Key features**: ...
+      53  ```
+      54  
+      61 -## marketplace.json Entry Format                               
+      62 -                                                               
+      63 -```json                                                        
+      64 -{                                                              
+      65 -  "name": "{name}",                                            
+      66 -  "source": "./plugins/{name}",                                
+      67 -  "description": "A {skill|hook} that ...",                    
+      68 -  "keywords": ["keyword1", "keyword2"]                         
+      69 -}                                                              
+      70 -```                                                            
+      71 -                                                               
+      55  ## Edge Cases
+      56  
+      57  - **Plugin with scripts but no SKILL.md/hooks.json**: invalid —
+           needs entry point
+      58  - **Plugin renamed**: treat as new plugin + deprecate old
+      76 -- **marketplace.json has no version field for plugin**: some en
+         -tries omit version — that's OK, version lives in plugin.json   
+      59 +- **marketplace.json has no version field for plugin**: OK, ver
+         +sion lives in plugin.json                                      
+      60  - **README section order**: Skills come before Hooks, within ea
+          ch group maintain existing order
+
+● 이제 CHANGELOG.md, project-context.md, cheatsheet 세 파일을 병렬로 수정하겠습니다.
+
+● Update(CHANGELOG.md)
+  ⎿  Added 15 lines                                                      
+       5  The format is based on [Keep a Changelog](https://keepachangelo
+          g.com/en/1.1.0/),
+       6  and this project adheres to [Semantic Versioning](https://semve
+          r.org/spec/v2.0.0.html).
+       7  
+       8 +## [1.9.0] - 2026-02-03                                        
+       9 +                                                               
+      10 +### Added                                                      
+      11 +- Hooks: `smart-read` (1.0.0) — PreToolUse hook that enforces i
+         +ntelligent file reading based on file size (warn >500 lines, de
+         +ny >2000 lines)                                                
+      12 +- Skills (local): `plugin-deploy` — local skill to automate pos
+         +t-modification plugin lifecycle                                
+      13 +- Docs: `docs/plugin-dev-cheatsheet.md` — quick reference to re
+         +duce repeated doc reads                                        
+      14 +- Scripts: `scripts/update-all.sh` — bulk marketplace + plugin 
+         +update script                                                  
+      15 +                                                               
+      16 +### Changed                                                    
+      17 +- Skills: `web-search` (2.0.0) — refactored to script delegatio
+         +n pattern (SKILL.md → wrapper scripts for API execution); added
+         + PreToolUse hook to redirect built-in WebSearch to `/web-search
+         +`                                                              
+      18 +- Skills: `gather-context` (1.1.1) — applied 3-tier env loading
+         + to slack-api.mjs; loosely coupled with WebSearch (hook handles
+         + redirect)                                                     
+      19 +- Skills: `retro` (1.3.2) — minor refinements                  
+      20 +- Hooks: `plan-and-lessons` (1.1.0) — protocol timing: lessons.
+         +md created alongside plan.md, not after implementation         
+      21 +- Docs: comprehensive doc audit — slimmed claude-marketplace.md
+         + (510→43 lines), api-reference.md (381→56 lines); updated proje
+         +ct-context.md, cheatsheet, CHANGELOG                           
+      22 +                                                               
+      23  ## [1.8.0] - 2026-01-30
+      24  
+      25  ### Changed
+
+● Update(docs/project-context.md)
+  ⎿  Added 14 lines                                                      
+      21  - Lessons and retro: written in the user's language
+      22  - Plugin structure: `plugins/{name}/.claude-plugin/plugin.json`
+           + `plugins/{name}/skills/{name}/SKILL.md`
+      23  
+      24 +## Architecture Patterns                                       
+      25 +                                                               
+      26 +- **Script delegation**: Execution-heavy skills (web-search, ga
+         +ther-context) delegate API calls to wrapper scripts. SKILL.md h
+         +andles intent analysis and parameter decisions; scripts handle 
+         +env loading, JSON building, curl, and response formatting. This
+         + reduces context cost and improves reliability.                
+      27 +- **Hook-based tool redirect**: Use PreToolUse hooks with `perm
+         +issionDecision: "deny"` to redirect built-in tools to custom sk
+         +ills (e.g., WebSearch → `/web-search`). Enables loose coupling 
+         +between plugins.                                               
+      28 +- **3-tier env loading**: Shell environment → `~/.claude/.env` 
+         +→ grep shell profiles (fallback). All credential-loading script
+         +s must use this pattern.                                       
+      29 +- **Local vs marketplace**: Repo-specific automation → `.claude
+         +/skills/` (e.g., plugin-deploy). Cross-project utility → `plugi
+         +ns/` marketplace.                                              
+      30 +                                                               
+      31  ## Hook Configuration
+      32  
+      33  - Project hooks go in `.claude/settings.json` under the `"hooks
+          "` key — NOT `.claude/hooks.json` (which is plugin-only format)
+      34  - EnterPlanMode hook is now provided by the `plan-and-lessons` 
+          plugin (no longer in `.claude/settings.json`)
+      35  - `type: prompt` hooks work with any hook event and are simpler
+           for context injection (no JSON formatting needed)
+      36 +- Hooks are **snapshots at session start** — no hot-reload. Req
+         +uires new session or `/hooks` review to pick up changes.       
+      37  - Claude Code hook docs: https://code.claude.com/docs/en/hooks.
+          md
+      38 +                                                               
+      39 +## Plugins                                                     
+      40 +                                                               
+      41 +- Contains skills (clarify, interview, suggest-tidyings, retro,
+         + gather-context, web-search), hooks (attention-hook, plan-and-l
+         +essons, smart-read), and supporting docs                       
+      42 +- `smart-read` hook: PreToolUse → Read, enforces file-size-awar
+         +e reading (warn >500 lines, deny >2000 lines)                  
+      43 +- `web-search` hook: PreToolUse → WebSearch, redirects to `/web
+         +-search` skill                                                 
+
+● Update(docs/plugin-dev-cheatsheet.md)
+  ⎿  Added 1 line                                                        
+      109  - Cross-platform (macOS + Linux): avoid `sed -i ''` (macOS-onl
+           y)
+      110  - Minimal deps: prefer bash + curl, minimize python3/node
+      111  - Use `#!/usr/bin/env bash` and `set -euo pipefail`
+      112 +- Bash gotcha: `((var++))` returns exit code 1 when var is 0, 
+          +failing under `set -e`. Use `var=$((var + 1))` instead.       
+      113  
+      114  ## Testing
+      115  
+
+● 이제 cheatsheet에 나머지 두 교훈도 추가하겠습니다.
+
+● Update(docs/plugin-dev-cheatsheet.md)
+  ⎿  Added 2 lines                                                       
+      91  
+      92  Matchers: `PreToolUse`, `PostToolUse`, `Notification` (idle_pro
+          mpt, etc.)
+      93  
+      94 +For simple context injection (no JSON formatting), use `"type":
+         + "prompt"` instead of `"type": "command"`.                     
+      95 +                                                               
+      96  ## Environment Variables
+      97  
+      98  Naming: `CLAUDE_CORCA_{PLUGIN_NAME}_{SETTING}`
+
+● Update(docs/plugin-dev-cheatsheet.md)
+  ⎿  Added 1 line, removed 1 line                                        
+      120  echo '{"tool_input":{"file_path":"/path/to/file"}}' | plugins/
+           {name}/hooks/scripts/{script}.sh
+      121  ```
+      122  
+      123 -**Integration** — start new session with plugin loaded:       
+      123 +**Integration** — hooks are **snapshots at session start** (no
+          + hot-reload). Start a new session:                            
+      124  ```bash
+      125  claude --plugin-dir ./plugins/{name} --dangerously-skip-permis
+           sions --resume
+      126  ```
+
+● 마지막으로 project-context.md에서 중복된 내용을 정리하겠습니다 (원래의 plugins 설명이 두 곳에 있었음).
+
+● Update(docs/project-context.md)
+  ⎿  Removed 1 line                                                      
+       5  ## Project
+       6  
+       7  - corca-plugins is a Claude Code plugin marketplace for "AI Nat
+          ive Product Teams"
+       8 -- Contains skills (clarify, interview, suggest-tidyings, retro,
+         - gather-context, web-search), hooks (attention-hook, plan-and-l
+         -essons), and supporting docs                                   
+       8  - Plan & Lessons Protocol creates `prompt-logs/{YYMMDD}-{title}
+          /` per session with plan.md, lessons.md, and optionally retro.m
+          d
+       9  
+      10  ## Design Principles
+
+● 모든 변경 완료. 이제 todo를 업데이트하고 plan.md에 완료 표시하겠습니다.
+
+● plan.md에 완료 표시하고, lessons.md를 업데이트하겠습니다.
+
+● Update(prompt-logs/260203-doc-audit/plan.md)
+  ⎿  Added 10 lines, removed 20 lines                                    
+      19  
+      20  ### A. Bloated / Scope Violation
+      21  
+      22 -1. **`docs/claude-marketplace.md`** (510 lines) — full copy of 
+         -official Claude Code docs page. Includes walkthroughs, hosting 
+         -guides, troubleshooting, managed restrictions — none of which a
+         -re project-specific. Cheatsheet already has the essential marke
+         -tplace.json schema.                                            
+      23 -   - **Action**: Replace with slim project-specific reference (
+         -~30 lines) + link to official docs.                            
+      22 +1. ✅ **`docs/claude-marketplace.md`** (510→43 lines): Replaced
+         + with slim project-specific reference + official docs link.    
+      23  
+      25 -2. **`web-search/references/api-reference.md`** (381 lines) — d
+         -etailed curl/jq/python patterns that are now **dead documentati
+         -on** since web-search v2.0.0 moved to script delegation. Script
+         -s are the source of truth.                                     
+      26 -   - **Action**: Slim down to ~60 lines — keep only what SKILL.
+         -md references (env vars, conditional parameters, token allocati
+         -on table). Remove curl/jq/python3 patterns that are now in scri
+         -pts.                                                           
+      24 +2. ✅ **`web-search/references/api-reference.md`** (381→56 line
+         +s): Kept env vars, params, token table. Removed all curl/jq/pyt
+         +hon patterns.                                                  
+      25  
+      26  ### B. Duplication
+      27  
+      30 -3. **Version Bump Rules** — identical in cheatsheet and checkli
+         -st.md                                                          
+      31 -   - **Action**: Remove from checklist.md, add cross-reference 
+         -to cheatsheet.                                                 
+      28 +3. ✅ **checklist.md**: Removed duplicated Version Bump Rules a
+         +nd marketplace.json format. Added cross-reference to cheatsheet
+         +.                                                              
+      29  
+      33 -4. **marketplace.json Entry Format** — in both cheatsheet and c
+         -hecklist.md                                                    
+      34 -   - **Action**: Remove from checklist.md, add cross-reference 
+         -to cheatsheet.                                                 
+      30 +4. ✅ (merged with #3)                                         
+      31  
+      36 -5. **Usage Message** — identical in web-search SKILL.md (lines 
+         -77-93) and api-reference.md (lines 362-380)                    
+      37 -   - **Action**: Remove from api-reference.md (SKILL.md is the 
+         -source of truth for usage).                                    
+      32 +5. ✅ **api-reference.md**: Usage Message removed along with ov
+         +erall slim-down.                                               
+      33  
+      34  ### C. Stale / Missing Content
+      35  
+      41 -6. **`CHANGELOG.md`** — last entry is v1.8.0 (2026-01-30). Miss
+         -ing ALL Feb 3 changes: web-search v2.0.0 refactor, smart-read v
+         -1.0.0 addition, gather-context v1.1.1, etc.                    
+      42 -   - **Action**: Add entries for all Feb 3 plugin changes.     
+      36 +6. ✅ **`CHANGELOG.md`**: Added v1.9.0 entry with all Feb 3 cha
+         +nges.                                                          
+      37  
+      44 -7. **`docs/project-context.md`** — Missing: script delegation p
+         -attern, hook-based tool redirect pattern, smart-read plugin, 3-
+         -tier env loading.                                              
+      45 -   - **Action**: Update with new patterns and plugins from Feb 
+         -3 sessions.                                                    
+      38 +7. ✅ **`docs/project-context.md`**: Added Architecture Pattern
+         +s section (script delegation, hook redirects, 3-tier env, local
+         + vs marketplace) and Plugins section.                          
+      39  
+      40  ### D. Lessons Not Yet Reflected in Docs
+      41  
+      49 -8. **"Hooks are snapshots at session start"** — in modifying-pl
+         -ugin.md but NOT in cheatsheet's Testing section (where it matte
+         -rs most).                                                      
+      50 -   - **Action**: Add note to cheatsheet Testing section.       
+      42 +8. ✅ **cheatsheet Testing**: Added "hooks are snapshots at ses
+         +sion start" note.                                              
+      43  
+      52 -9. **`type: prompt` hooks are simpler for context injection** —
+         - in project-context.md but not in cheatsheet hooks.json section
+         -.                                                              
+      53 -   - **Action**: Add brief note to cheatsheet hooks.json sectio
+         -n.                                                             
+      44 +9. ✅ **cheatsheet hooks.json**: Added `type: prompt` tip.     
+      45  
+      55 -10. **`((var++))` fails in `set -e`** — discovered in update-al
+         -l-script session. Useful script gotcha.                        
+      56 -    - **Action**: Add to cheatsheet Script Guidelines as a one-
+         -liner gotcha.                                                  
+      46 +10. ✅ **cheatsheet Script Guidelines**: Added `((var++))` gotc
+         +ha.                                                            
+      47  
+      48  ### E. Not Needed
+      49  
+
+● Update(prompt-logs/260203-doc-audit/lessons.md)
+  ⎿  Added 15 lines                                                      
+       5  - **Takeaway**: 아키텍처 변경(스크립트 위임) 시 관련 참조 문서
+          도 함께 슬림화해야 함
+       6  
+       7  문서 변경 시 → 동일 정보가 다른 문서에도 있는지 확인하고 단일 
+          출처 원칙 적용
+       8 +                                                               
+       9 +### 외부 공식 문서 복사 금지                                   
+      10 +                                                               
+      11 +- **Expected**: claude-marketplace.md가 프로젝트 고유 정보를 담
+         +고 있을 것                                                     
+      12 +- **Actual**: 510줄 전체가 Claude Code 공식 문서의 복사본 (walk
+         +throughs, hosting, troubleshooting 포함)                       
+      13 +- **Takeaway**: 공식 문서는 링크로 참조하고, 프로젝트 고유 정보
+         +만 문서화                                                      
+      14 +                                                               
+      15 +외부 공식 문서 참조 시 → 복사 대신 링크 + 프로젝트 고유 내용만 
+         +추가                                                           
+      16 +                                                               
+      17 +### Progressive Disclosure 체크리스트                          
+      18 +                                                               
+      19 +감사 기준으로 유용했던 항목:                                   
+      20 +1. 단일 출처 원칙: 같은 정보가 2곳 이상에 있으면 하나만 남기고 
+         +나머지는 참조                                                  
+      21 +2. 독자별 적정 수준: CLAUDE.md(포인터) → cheatsheet(빠른 참조) 
+         +→ deep docs(상세)                                              
+      22 +3. 죽은 문서 감지: 아키텍처 변경 후 기존 참조 문서가 실제 코드 
+         +와 괴리가 있는지 확인                                          
+
+● 이제 retro를 실행하겠습니다.
+
+● Skill(retro)
+  ⎿  Successfully loaded skill · 6 tools allowed
+
+● Read(prompt-logs/260203-doc-audit/plan.md)
+  ⎿  Read 67 lines
+
+● Read(prompt-logs/260203-doc-audit/lessons.md)
+  ⎿  Read 23 lines
+
+● Read(CLAUDE.md)
+  ⎿  Read 50 lines
+
+● Read(docs/project-context.md)
+  ⎿  Read 43 lines
+
+● Skill(web-search)
+  ⎿  Successfully loaded skill · 1 tool allowed
+
+● Bash(/home/hwidong/.claude/plugins/cache/corca-plugins/web-search/2.0.0/skills
+      /web-search/scripts/search.sh "documentation progressive disclosure
+      principles for deve…)
+  ⎿ ## Search Results: documentation progressive disclosure principles fo
+    developer docs 2026
+    … +65 lines (ctrl+o to expand)
+
+
+● Bash(/home/hwidong/.claude/plugins/cache/corca-plugins/web-search/2.0.0/skills
+      /web-search/scripts/search.sh "Divio documentation system tutorials
+      explanations refere…)
+  ⎿ ## Search Results: Divio documentation system tutorials explanations 
+    re
+    ference how-to
+    … +45 lines (ctrl+o to expand)
+
+
+● Now let me write the retro.
+
+● Write(prompt-logs/260203-doc-audit/retro.md)
+  ⎿  Wrote 35 lines to prompt-logs/260203-doc-audit/retro.md             
+      1 # Retro: 문서 감사 및 개선
+      2 > Session date: 2026-02-03
+      3 ## 1. Context Worth Remembering
+      4 - 이번 감사로 문서 총량이 ~850줄 감소 (claude-marketplace.md 510→
+        43, api-reference.md 381→56, checklist.md 중복 제거)
+      5 - Progressive disclosure 계층이 확립됨: CLAUDE.md(포인터, ~50줄) 
+        → cheatsheet(~150줄) → deep docs(modifying-plugin, adding-plugin,
+         skills-guide, marketplace-ref)
+      6 - project-context.md가 이번에 Architecture Patterns, Plugins 섹션
+        이 추가되어 프로젝트의 "살아있는 지식"으로서 역할이 강화됨
+     … +25 lines (ctrl+o to expand)
+
+● Retro 작성 완료. Section 1에서 새로운 context가 나왔는데, project-context.md에 이미 이번 세션에서 업데이트했으므로 추가 반영은 불필요합니다. Section 2에서도 CLAUDE.md 변경 제안이 없으므로 바로 커밋으로 진행하겠습니다.
+
+● Bash(git status)
+  ⎿  On branch main                               
+     Your branch is up to date with 'origin/main'.
+     … +16 lines (ctrl+o to expand)
+
+● Bash(git diff --stat)
+  ⎿  .../skills/plugin-deploy/references/checklist.md   |  29 +-         
+     CHANGELOG.md                                       |  15 +
+     docs/claude-marketplace.md                         | 520
+    ++-----------
+    … +6 lines (ctrl+o to expand)
+
+● Bash(git log --oneline -5)
+  ⎿ 3f57e59 Validate and improve cheat sheet via sub-agent testing       
+    e1f6696 Add plugin-deploy local skill and plugin dev cheat sheet
+    7486657 gather-context v1.1.1: apply 3-tier env loading to
+    slack-api.mj
+    … +3 lines (ctrl+o to expand)
+
+● Bash(git add .claude/skills/plugin-deploy/references/checklist.md CHANGELOG.md
+       docs/claude-marketplace.md docs/plugin-dev-cheatsheet.md
+      docs/project-context.md plugi…)
+  ⎿ [main 8f20490] Comprehensive doc audit: slim bloat, deduplicate, add 
+    mi
+    ssing lessons
+     9 files changed, 259 insertions(+), 916 deletions(-)
+    … +6 lines (ctrl+o to expand)
+
+
+● Bash(git push)
+  ⎿  To https://github.com/corca-ai/claude-plugins.git
+        3f57e59..8f20490  main -> main
+
+● 모든 작업이 완료되었습니다. 요약:
+
+  감사 결과 및 조치 (10개 항목)
+  카테고리: 비대/범위 초과
+  파일: docs/claude-marketplace.md
+  조치: 510→43줄. 공식 문서 전체 복사본을 프로젝트 고유 참조 + 링크로 교체
+  ────────────────────────────────────────
+  카테고리:
+  파일: api-reference.md
+  조치: 381→56줄. 스크립트 위임 후 죽은 curl/jq/python 패턴 제거, 파라미터 테이블만
+     유지
+  ────────────────────────────────────────
+  카테고리: 중복
+  파일: checklist.md
+  조치: Version Bump Rules, marketplace.json 형식 중복 제거, cheatsheet 교차 참조
+  ────────────────────────────────────────
+  카테고리: 누락/부실
+  파일: CHANGELOG.md
+  조치: v1.9.0 엔트리 추가 (2월 3일 모든 변경사항)
+  ────────────────────────────────────────
+  카테고리:
+  파일: project-context.md
+  조치: Architecture Patterns (스크립트 위임, 훅 리다이렉트, 3-tier env), Plugins
+    섹션 추가
+  ────────────────────────────────────────
+  카테고리: 미반영 교훈 3건
+  파일: cheatsheet.md
+  조치: ① 훅은 세션 시작 시 스냅샷 ② type: prompt 팁 ③ ((var++)) bash gotcha
+  순 효과: -916줄 삭제, +259줄 추가 (prompt-logs 포함). 문서 실질 감소 ~850줄.
+
+✻ Churned for 8m 21s
+
+❯ retro 를 읽다 보니, 저 문서들을 계획을 작성하는 시점에 참고했으면 더 좋은 
+  계획을 적었을까? 하는 생각이 들었습니다. 사실 제가 gather-context 스킬을  
+  설계할 때 지향하는 바가 그쪽이었기도 했죠. 어떻게 생각하세요?             
+
+● 솔직하게 말하면, 이번 감사에서는 큰 차이가 없었을 것 같습니다. 발견한 문제들 — 510줄짜리 공식 문서 복사본, 스크립트 위임 후 죽은 api-reference, 동일한 테이블의 3중 복사 — 이런 것들은 외부 프레임워크 없이도 내부 증거만으로 충분히 드러났습니다.
+
+  하지만 질문의 본질은 다른 데 있다고 생각합니다. 감사가 아니라 설계 단계였다면 이야기가 달라집니다. 예를 들어, 처음에 이 프로젝트의 문서 계층 구조(CLAUDE.md → cheatsheet → deep docs)를 설계할 때 Diataxis 프레임워크를 참고했다면 "이 문서는 reference인가 how-to인가?"라는 질문을 자연스럽게 했을 것이고, claude-marketplace.md 같은 범위 초과 문서가 애초에 생기지 않았을 수도 있습니다.
+
+  gather-context의 설계 철학과 연결하자면 — "작업 전에 참조 자료를 앞단에 모아두면 에이전트가 더 나은 결과를 낸다"는 것은 맞는데, 그 효과는 작업의 성격에 따라 다릅니다:
+
+  - 설계/창작 작업: 외부 프레임워크를 먼저 보는 것이 고효과. 어휘와 사고 틀이 달라짐
+  - 감사/검증 작업: 내부 증거 기반이라 외부 자료의 효과가 제한적
+  - 구현 작업: 유사 사례/패턴을 먼저 보는 것이 중간 수준의 효과
+
+  그래서 retro의 Learning Resources를 기계적으로 plan 단계로 옮기는 것보다는, plan 단계에서 "이 작업이 설계 성격인가?"를 판별하고, 그렇다면 관련 참조 자료를 먼저 수집하는 분기가 더 적절할 것 같습니다.
+
+✻ Cooked for 42s
+
+❯ 흠... 그런데 모든 plan 은 설계 아닌가요? 저도 (정말로 '항상' 필요한가가   
+  확실치는 않습니다만), "더 나은 방법을 누군가는 고민한 적 있을 것이다"라고 
+  생각하고 찾아보는 게 유리한 전략 같아서요. How to measure anything에서    
+  이런 글을 읽은 기억이 납니다.                                             
+  1. It's been done before--don't reinvent the wheel.                       
+  2. You have access to more data than you think--it might just involve     
+  some resourcefulness and original observations.                           
+  3. You need less data than you think, if you are clever about how to      
+  analyze it.                                                               
+  4. An adequate amount of new data is probably more accessible than you    
+  first thought.                                                            
+                                                                            
+  + 지금 보니 스킬 내부 문서가 바뀌었지만 버전업이 안된 게 있는 것 같은데   
+  맞나요?                                                                   
+
+● 두 가지 모두 맞는 지적입니다.
+
+  첫 번째 — "모든 plan은 설계"라는 점에 대해. 설득력 있습니다. 제가 "감사 작업이라 외부 자료 효과가 제한적"이라고 했는데, 그건 결과론적 판단이었습니다. 사전에 검색 비용은 낮고, 발견할 수 있는 프레임워크의 잠재적 가치는 비대칭적으로 큽니다. "How to Measure Anything"의 1번 원칙이 정확히 이걸 말하는 거죠 — 남이 이미 고민한 걸 다시 고민하지 마라. plan 단계에서 관련 프레임워크/prior art를 한 번 찾아보는 것을 기본 동작으로 넣는 게 맞겠습니다.
+
+  두 번째 — 버전 누락. web-search의 api-reference.md를 381→56줄로 대폭 수정했는데 plugin.json 버전을 안 올렸습니다. 바로 수정하겠습니다.
+
+● Read(plugins/web-search/.claude-plugin/plugin.json)
+  ⎿  Read 11 lines
+
+● Update(plugins/web-search/.claude-plugin/plugin.json)
+  ⎿  Added 1 line, removed 1 line                                        
+      1  {
+      2    "name": "web-search",
+      3    "description": "A skill that provides web search, code search,
+          and URL content extraction via Tavily and Exa APIs",
+      4 -  "version": "2.0.0",                                           
+      4 +  "version": "2.0.1",                                           
+      5    "author": {
+      6      "name": "Corca",
+      7      "url": "https://www.corca.ai/"
+
+● CHANGELOG도 수정하겠습니다.
+
+● Update(CHANGELOG.md)
+  ⎿  Added 1 line, removed 1 line                                        
+      14  - Scripts: `scripts/update-all.sh` — bulk marketplace + plugin 
+          update script
+      15  
+      16  ### Changed
+      17 -- Skills: `web-search` (2.0.0) — refactored to script delegatio
+         -n pattern (SKILL.md → wrapper scripts for API execution); added
+         - PreToolUse hook to redirect built-in WebSearch to `/web-search
+         -`                                                              
+      17 +- Skills: `web-search` (2.0.0→2.0.1) — refactored to script del
+         +egation pattern (SKILL.md → wrapper scripts for API execution);
+         + added PreToolUse hook to redirect built-in WebSearch to `/web-
+         +search`; slimmed api-reference.md (381→56 lines, removed dead c
+         +url/jq patterns)                                               
+      18  - Skills: `gather-context` (1.1.1) — applied 3-tier env loading
+           to slack-api.mjs; loosely coupled with WebSearch (hook handles
+           redirect)
+      19  - Skills: `retro` (1.3.2) — minor refinements
+      20  - Hooks: `plan-and-lessons` (1.1.0) — protocol timing: lessons.
+          md created alongside plan.md, not after implementation
+
+● 그리고 첫 번째 포인트 — plan 단계에서 prior art 검색을 기본 동작으로 넣는 건 protocol.md에 반영하는 게 맞겠습니다. lessons.md와 retro.md도 업데이트하겠습니다.
+
+● Read(plugins/plan-and-lessons/protocol.md)
+  ⎿  Read 87 lines
+
+● Update(plugins/plan-and-lessons/protocol.md)
+  ⎿  Added 6 lines                                                       
+      40  
+      41  Write the plan in English. The plan is primarily for the agent,
+           not the user.
+      42  
+      43 +### Prior Art Search                                           
+      44 +                                                               
+      45 +Before finalizing the plan, search for frameworks, methodologie
+         +s, or prior art relevant to the task. Someone has likely though
+         +t about this problem before. The cost of a quick search is low;
+         + the potential value of discovering a better approach is high. 
+      46 +                                                               
+      47 +Use `/web-search` or equivalent to find: established frameworks
+         +, best practices, common patterns, or cautionary tales related 
+         +to the task domain.                                            
+      48 +                                                               
+      49  ### Timing
+      50  
+      51  Create the plan document when entering plan mode, before implem
+          entation begins.
+
+● plan-and-lessons 플러그인 버전도 올리겠습니다.
+
+● Read(plugins/plan-and-lessons/.claude-plugin/plugin.json)
+  ⎿  Read 11 lines
+
+● Update(plugins/plan-and-lessons/.claude-plugin/plugin.json)
+  ⎿  Added 1 line, removed 1 line                                        
+      1  {
+      2    "name": "plan-and-lessons",
+      3    "description": "A hook that injects the Plan & Lessons Protoco
+         l when entering plan mode",
+      4 -  "version": "1.1.0",                                           
+      4 +  "version": "1.2.0",                                           
+      5    "author": {
+      6      "name": "Corca",
+      7      "url": "https://www.corca.ai/"
+
+● Minor가 맞습니다 — "Prior Art Search"는 새로운 기능(새 섹션). lessons.md와 retro.md도 업데이트합니다.
+
+● Update(prompt-logs/260203-doc-audit/lessons.md)
+  ⎿  Added 15 lines                                                      
+      20  1. 단일 출처 원칙: 같은 정보가 2곳 이상에 있으면 하나만 남기고 
+          나머지는 참조
+      21  2. 독자별 적정 수준: CLAUDE.md(포인터) → cheatsheet(빠른 참조) 
+          → deep docs(상세)
+      22  3. 죽은 문서 감지: 아키텍처 변경 후 기존 참조 문서가 실제 코드
+          와 괴리가 있는지 확인
+      23 +                                                               
+      24 +### Plan 단계에서 Prior Art 검색은 기본 동작                   
+      25 +                                                               
+      26 +- **Expected**: 감사 작업이라 외부 프레임워크가 필요 없을 것   
+      27 +- **Actual**: retro에서 찾은 Diátaxis 프레임워크가 plan 단계에 
+         +서 있었다면 더 구조적인 어휘와 기준을 제공했을 것              
+      28 +- **Takeaway**: "누군가 이미 고민한 적 있을 것이다" — 검색 비용
+         +은 낮고 잠재 가치는 비대칭적으로 높음. How to Measure Anything 
+         +의 원칙: "It's been done before—don't reinvent the wheel."     
+      29 +                                                               
+      30 +plan 작성 시 → 관련 프레임워크/prior art를 먼저 검색하는 것을  
+         +기본 동작으로.                                                 
+      31 +→ protocol.md에 "Prior Art Search" 섹션 추가 완료.             
+      32 +                                                               
+      33 +### 스킬 내부 문서 변경 시 버전 누락 주의                      
+      34 +                                                               
+      35 +- **Expected**: api-reference.md 변경이 문서 감사의 일부라 버전
+         + 불필요할 것                                                   
+      36 +- **Actual**: 플러그인 내부 파일이 변경되면 patch 버전이라도 올
+         +려야 함 (설치된 사본이 캐시되므로)                             
+      37 +- **Takeaway**: 플러그인 디렉토리 안의 어떤 파일이든 바뀌면 버 
+         +전 bump 필요                                                   
+
+● retro.md에 Post-Retro Findings도 추가합니다.
+
+● Update(prompt-logs/260203-doc-audit/retro.md)
+  ⎿  Added 5 lines                                                       
+      29  - [6 Things Developer Tools Must Have in 2026 (Evil Martians)](
+          https://evilmartians.com/chronicles/six-things-developer-tools-
+          must-have-to-earn-trust-and-adoption) — 개발자 도구의 discovera
+          bility와 progressive disclosure를 다룸. CLI 플러그인 생태계 설
+          계에 참고 가치 있음
+      30  - [SwiftUI API Design: Progressive Disclosure (WWDC22)](https:/
+          /developer.apple.com/videos/play/wwdc2022/10059/) — API/인터페
+          이스 설계에서 progressive disclosure를 적용하는 사례. SKILL.md 
+          설계 철학("적절한 자유도 설정")과 맥이 같음
+      31  
+      32 +### Post-Retro Findings                                        
+      33 +                                                               
+      34 +1. **Prior Art 검색을 plan 단계 기본 동작으로**: 유저가 "모든 p
+         +lan은 설계 아닌가?"라고 지적. How to Measure Anything 인용 — "I
+         +t's been done before—don't reinvent the wheel." 검색 비용 대비 
+         +잠재 가치가 비대칭적으로 높음. → protocol.md에 "Prior Art Searc
+         +h" 섹션 추가, plan-and-lessons v1.2.0                          
+      35 +2. **버전 누락 발견**: web-search api-reference.md를 381→56줄로
+         + 대폭 수정했지만 plugin.json 버전을 안 올림. 플러그인 내부 파일
+         +은 어떤 것이든 바뀌면 patch 이상 bump 필요. → web-search v2.0.1
+      36 +                                                               
+      37  ## 5. Relevant Skills
+      38  
+      39  이 세션에서 명확한 스킬 갭은 없음. "문서 감사"는 빈도가 낮은 작
+          업이라 전용 스킬보다는 필요 시 ad-hoc으로 진행하는 것이 적절. 
+          다만, 이번 감사에서 발견한 체크리스트(단일 출처 원칙, 독자별 수
+          준, 죽은 문서 감지)는 lessons.md에 기록되어 향후 감사 시 참조 
+          가능.
+
+● 커밋하고 푸시합니다.
+
+● Bash(git add -A && git commit -m "Add Prior Art Search to plan protocol; fix
+      missed version bumps…)
+  ⎿ [main 9abd19f] Add Prior Art Search to plan protocol; fix missed     
+    versio
+    n bumps
+     6 files changed, 29 insertions(+), 3 deletions(-)
+    … +2 lines (ctrl+o to expand)
+
+● Bash(bash                                                        timeout: 1m 
+      /home/hwidong/codes/claude-plugins/scripts/update-all.sh)    0s
+  ⎿  ==> Updating marketplace: corca-plugins
+     Updating marketplace: corca-plugins...
+     Updating existing marketplace cache…
+     … +37 lines (ctrl+o to expand)
+
+● 완료되었습니다. 요약하면:
+
+  1. protocol.md에 "Prior Art Search" 섹션 추가 (plan-and-lessons v1.2.0) — plan 작성 전에 관련 프레임워크/prior art를 검색하는 것을 기본 동작으로 명시
+  2. web-search v2.0.1 — api-reference.md 변경에 대한 누락 버전 bump 수정
+  3. 마켓플레이스 및 설치된 플러그인 7개 모두 업데이트 완료
+
+  좋은 지적이었습니다. "모든 plan은 설계"라는 관점이 맞고, 저도 이번에 retro에서야 찾은 Diátaxis가 plan 단계에 있었다면 감사 기준에 더 구조적인 어휘를 줬을 겁니다. 비용 비대칭 논거가 설득력 있었습니다.
+
+✻ Worked for 2m 5s
+
+❯ 혹시 지금 시점에서, lesson과 retro를 주고 지난 몇 커밋을 서브에이전트와   
+  codex로 검토하게 해보면 어떨까요? 의도를 이해하셨나요?                    
+
+● 네, 이해했습니다. 이번 세션의 lessons/retro를 컨텍스트로 주고, 최근 커밋들을 독립적인 서브에이전트에게 검토시키는 거죠 — "자기 작업을 자기가 리뷰하면 놓치는 것"을 잡기 위해 신선한 눈으로 보게 하는 것. 바로 실행하겠습니다.
+
+● Bash(git log --oneline -3)
+  ⎿ 9abd19f Add Prior Art Search to plan protocol; fix missed version    
+    bumps
+    8f20490 Comprehensive doc audit: slim bloat, deduplicate, add missing
+    l
+    essons
+    3f57e59 Validate and improve cheat sheet via sub-agent testing
+
+● Bash(git diff 3f57e59..HEAD --stat)
+  ⎿  .../skills/plugin-deploy/references/checklist.md   |  29 +-         
+     CHANGELOG.md                                       |  15 +
+     docs/claude-marketplace.md                         | 520
+    ++-----------
+    … +12 lines (ctrl+o to expand)
+
+● Bash(git diff 3f57e59..HEAD)
+  ⎿ diff --git a/.claude/skills/plugin-deploy/references/checklist.md    
+    b/.cl
+    aude/skills/plugin-deploy/references/checklist.md
+    index 8dcbc25..5a05b01 100644
+    … +1704 lines (ctrl+o to expand)
+
+● Read(~/.claude/projects/-home-hwidong-codes-claude-plugins/5022a970-06b7-4935-
+      80bc-26c0b6c57d02/tool-results/toolu_013mUesTx8zsngnHfdhHKADP.txt)
+  ⎿  Read 1296 lines
+
+● diff를 확보했습니다. 이제 서브에이전트 3개를 병렬로 띄워서 각각 다른 관점에서 검토시키겠습니다.
+
+● 3 Task agents finished (ctrl+o to expand)
+   ├─ Review: content integrity check · 40 tool uses · 56.0k tokens
+   │  ⎿  Done
+   ├─ Review: missed opportunities · 67 tool uses · 97.9k tokens
+   │  ⎿  Done
+   └─ Review: progressive disclosure · 16 tool uses · 33.6k tokens
+      ⎿  Done
+
+● 3개 에이전트의 결과를 종합하겠습니다. 상당히 많은 것을 잡아냈습니다.
+
+  서브에이전트 리뷰 결과 종합
+
+  즉시 수정 필요 (버그)
+  #: 1
+  발견: claude-marketplace.md 공식 문서 링크 404 —
+    code.claude.com/docs/en/marketplace가 존재하지 않을 가능성
+  파일: docs/claude-marketplace.md:3
+  ────────────────────────────────────────
+  #: 2
+  발견: CLAUDE.md 링크 텍스트 불일치 — "Marketplace Schema"라고 적혀있지만 문서
+    제목은 "Marketplace Reference"로 바뀜
+  파일: CLAUDE.md:11
+  ────────────────────────────────────────
+  #: 3
+  발견: CHANGELOG plan-and-lessons 엔트리 오류 — v1.9.0에 1.1.0 설명 중복, 실제
+    1.2.0(Prior Art Search) 누락
+  파일: CHANGELOG.md:20
+  ────────────────────────────────────────
+  #: 4
+  발견: marketplace.json 메타데이터 버전 1.8.0 — 1.9.0으로 안 올림
+  파일: .claude-plugin/marketplace.json:9
+  문서 개선 (medium)
+  #: 5
+  발견: cheatsheet 3-tier env 설명에 "왜"가 빠짐 — Claude Code Bash는 bash 세션이라
+     ~/.zshrc가 자동 로드 안 됨
+  에이전트: #2
+  ────────────────────────────────────────
+  #: 6
+  발견: project-context.md가 CLAUDE.md에서 링크 안 됨 — 아키텍처 패턴이 정상 개발
+    경로에서 발견 불가
+  에이전트: #3
+  ────────────────────────────────────────
+  #: 7
+  발견: adding-plugin.md가 cheatsheet와 완전 중복 — 유일한 고유 내용이 sed 예시 한
+    줄. 접어서 제거 가능
+  에이전트: #3
+  ────────────────────────────────────────
+  #: 8
+  발견: find-skills/skill-creator 참조가 존재하지 않는 도구 — retro SKILL.md와
+    README에서 "있는 것처럼" 참조
+  에이전트: #2
+  ────────────────────────────────────────
+  #: 9
+  발견: skills-guide.md "(skill-creator philosophy)" 불투명
+  에이전트: #2
+  ────────────────────────────────────────
+  #: 10
+  발견: README 설치 블록 9회 반복 — ~90줄의 순수 노이즈. 상단에 한 번 가르치면 됨
+  에이전트: #3
+  ────────────────────────────────────────
+  #: 11
+  발견: 두 가지 미반영 교훈: "새 규칙 도입 시 그 변경 자체가 첫 적용인지 확인" /
+    "행동 오류 시 지시 추가보다 구조적 비대칭 제거"
+  에이전트: #2
+  낮은 우선순위
+
+  - prompt-logs 내 역사적 stale 참조 (정상)
+  - retro allowed-tools에 WebSearch 명시되어 있지만 hook이 리다이렉트 (기능상 문제 없음)
+  - hook 설계 가이드 부재 (미래 과제)
+  - 신규 기여자용 튜토리얼 부재 (미래 과제)
+
+  ---
+  이번 커밋 자체의 품질 문제로는 #1~#4가 확실한 버그입니다. 특히 #1(링크 404)은 510줄 삭제의 유일한 대체물이 깨진 링크라는 점에서 심각합니다. #5~#11은 이번 감사 범위에서 놓친 개선 기회들이고요.
+
+  어디까지 지금 수정할까요? 최소한 #1~#4는 바로 잡아야 할 것 같고, #5~#11 중에서도 취사선택이 가능합니다.
+
+✻ Churned for 4m 58s
+
+
+

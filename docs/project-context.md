@@ -14,6 +14,11 @@ Accumulated context from retrospectives. Each session's retro may add to this do
 - Progressive disclosure: CLAUDE.md is concise, details live in docs/
 - Dogfooding: new tools are tested in the session that creates them
 
+## Process Heuristics
+
+- **Meta-rule check**: When introducing a new rule, verify that the change itself is the first application of that rule (e.g., adding "always bump version" should include bumping the version of the file being changed)
+- **Structural fix over instruction fix**: When a behavioral error recurs, prefer removing the structural asymmetry that caused it over adding more instructions. Adding rules has diminishing returns; changing structure is more durable.
+
 ## Conventions
 
 - Documentation language: English for docs/ and default top-level docs; Korean versions live in README.ko.md and AI_NATIVE_PRODUCT_TEAM.ko.md

@@ -8,7 +8,8 @@ For deeper reference (only when the cheat sheet isn't enough):
 - [Modifying/Testing/Deploying Plugins](docs/modifying-plugin.md)
 - [Adding New Plugins](docs/adding-plugin.md)
 - [Skills Guide](docs/skills-guide.md)
-- [Marketplace Schema](docs/claude-marketplace.md)
+- [Marketplace Reference](docs/claude-marketplace.md)
+- [Project Context](docs/project-context.md) — accumulated architecture patterns and conventions
 
 Do NOT proceed with code changes until completing the above steps.
 

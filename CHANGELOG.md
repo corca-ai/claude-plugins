@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.1] - 2026-02-03
+
+### Changed
+- Skills: `retro` (1.3.2→1.3.3) — replaced find-skills/skill-creator references with generic guidance
+- Docs: sub-agent review follow-up — fixed 404 link in claude-marketplace.md, CLAUDE.md link text mismatch, CHANGELOG plan-and-lessons entry error, marketplace.json meta version; slimmed adding-plugin.md; added env loading rationale to cheatsheet; linked project-context.md from CLAUDE.md; added process heuristics to project-context.md; cleaned skills-guide.md; shortened README install blocks (9×10 lines → 9×1 line)
+
 ## [1.9.0] - 2026-02-03
 
 ### Added
@@ -17,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Skills: `web-search` (2.0.0→2.0.1) — refactored to script delegation pattern (SKILL.md → wrapper scripts for API execution); added PreToolUse hook to redirect built-in WebSearch to `/web-search`; slimmed api-reference.md (381→56 lines, removed dead curl/jq patterns)
 - Skills: `gather-context` (1.1.1) — applied 3-tier env loading to slack-api.mjs; loosely coupled with WebSearch (hook handles redirect)
 - Skills: `retro` (1.3.2) — minor refinements
-- Hooks: `plan-and-lessons` (1.1.0) — protocol timing: lessons.md created alongside plan.md, not after implementation
+- Hooks: `plan-and-lessons` (1.1.0→1.2.0) — protocol timing: lessons.md created alongside plan.md; added Prior Art Search section to protocol
 - Docs: comprehensive doc audit — slimmed claude-marketplace.md (510→43 lines), api-reference.md (381→56 lines); updated project-context.md, cheatsheet, CHANGELOG
 
 ## [1.8.0] - 2026-01-30

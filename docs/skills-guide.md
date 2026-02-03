@@ -21,7 +21,7 @@ In this marketplace, skills are located within `plugins/{name}/skills/{name}/`.
 4. **Progressive Disclosure** - Load SKILL.md on trigger, load references as needed
 5. **English only** - All skill files (SKILL.md, references) must be written in English
 
-## Design Principles (skill-creator philosophy)
+## Design Principles
 
 - **Concise is Key**: Context window is shared resource. Don't explain what Claude already knows
 - **Set Appropriate Degrees of Freedom**:

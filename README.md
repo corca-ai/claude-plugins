@@ -54,17 +54,7 @@ You can do the same from inside Claude Code (instead of your terminal):
 
 ### [clarify](plugins/clarify/skills/clarify/SKILL.md)
 
-**Install**:
-```bash
-claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
-claude plugin install clarify@corca-plugins
-```
-
-**Update**:
-```bash
-claude plugin marketplace update corca-plugins
-claude plugin update clarify@corca-plugins
-```
+**Install**: `claude plugin install clarify@corca-plugins` | **Update**: `claude plugin update clarify@corca-plugins`
 
 A skill that turns vague or unclear requirements into clear, executable specs through iterative questioning. It is based on Team Attention's [Clarify skill](https://github.com/team-attention/plugins-for-claude-natives/blob/main/plugins/clarify/SKILL.md) and customized for our workflow. (Usage reference: Jeong Gubong's [LinkedIn post](https://www.linkedin.com/posts/gb-jeong_%ED%81%B4%EB%A1%9C%EB%93%9C%EC%BD%94%EB%93%9C%EA%B0%80-%EA%B0%9D%EA%B4%80%EC%8B%9D%EC%9C%BC%EB%A1%9C-%EC%A7%88%EB%AC%B8%ED%95%98%EA%B2%8C-%ED%95%98%EB%8A%94-skills%EB%A5%BC-%EC%82%AC%EC%9A%A9%ED%95%B4%EB%B3%B4%EC%84%B8%EC%9A%94-clarify-activity-7413349697022570496-qLts))
 
@@ -77,17 +67,7 @@ A skill that turns vague or unclear requirements into clear, executable specs th
 
 ### [interview](plugins/interview/skills/interview/SKILL.md)
 
-**Install**:
-```bash
-claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
-claude plugin install interview@corca-plugins
-```
-
-**Update**:
-```bash
-claude plugin marketplace update corca-plugins
-claude plugin update interview@corca-plugins
-```
+**Install**: `claude plugin install interview@corca-plugins` | **Update**: `claude plugin update interview@corca-plugins`
 
 A skill created by Corca AX consultant [Jeonghyeok Choi](https://denoiser.club/) to match his preferred workflow. Its goal is similar to Clarify: it runs a structured interview to extract requirements, constraints, and design decisions, and documents the project's core requirements via conversation.
 
@@ -109,17 +89,7 @@ A skill created by Corca AX consultant [Jeonghyeok Choi](https://denoiser.club/)
 
 ### [suggest-tidyings](plugins/suggest-tidyings/skills/suggest-tidyings/SKILL.md)
 
-**Install**:
-```bash
-claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
-claude plugin install suggest-tidyings@corca-plugins
-```
-
-**Update**:
-```bash
-claude plugin marketplace update corca-plugins
-claude plugin update suggest-tidyings@corca-plugins
-```
+**Install**: `claude plugin install suggest-tidyings@corca-plugins` | **Update**: `claude plugin update suggest-tidyings@corca-plugins`
 
 A skill based on Kent Beck's "Tidy First?" philosophy. It analyzes recent commits and finds safe refactoring opportunities. It uses parallel sub-agents to review multiple commits at once.
 
@@ -141,17 +111,7 @@ A skill based on Kent Beck's "Tidy First?" philosophy. It analyzes recent commit
 
 ### [retro](plugins/retro/skills/retro/SKILL.md)
 
-**Install**:
-```bash
-claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
-claude plugin install retro@corca-plugins
-```
-
-**Update**:
-```bash
-claude plugin marketplace update corca-plugins
-claude plugin update retro@corca-plugins
-```
+**Install**: `claude plugin install retro@corca-plugins` | **Update**: `claude plugin update retro@corca-plugins`
 
 A skill that runs a comprehensive retrospective at the end of a session. If `lessons.md` in the [Plan & Lessons Protocol](plugins/plan-and-lessons/protocol.md) is a progressively accumulated learning log, `retro` is a "full-session, bird's-eye" retrospective.
 
@@ -164,24 +124,14 @@ A skill that runs a comprehensive retrospective at the end of a session. If `les
 - Observes working style and collaboration patterns and suggests CLAUDE.md updates (applies only with user approval)
 - Suggests prompting habit improvements (with concrete examples from the session)
 - Shares learning resources tailored to the user's knowledge/experience level
-- Can recommend workflow skills via find-skills or plan new skills via skill-creator
+- Searches for relevant workflow skills or suggests creating new ones
 
 **Outputs**:
 - `prompt-logs/{YYMMDD}-{title}/retro.md` — saved alongside plan.md and lessons.md
 
 ### [gather-context](plugins/gather-context/skills/gather-context/SKILL.md)
 
-**Install**:
-```bash
-claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
-claude plugin install gather-context@corca-plugins
-```
-
-**Update**:
-```bash
-claude plugin marketplace update corca-plugins
-claude plugin update gather-context@corca-plugins
-```
+**Install**: `claude plugin install gather-context@corca-plugins` | **Update**: `claude plugin update gather-context@corca-plugins`
 
 An integrated skill that detects URL types and gathers external content into local files. It includes built-in converters, so it can gather Google Docs, Slack, and Notion content with a single plugin **without installing separate skills**. It combines the functionality of [`slack-to-md`](https://www.stdy.blog/1p1w-01-slack-to-md/), [`g-export`](https://www.stdy.blog/1p1w-02-g-export/), and `notion-to-md`.
 
@@ -205,17 +155,7 @@ An integrated skill that detects URL types and gathers external content into loc
 
 ### [web-search](plugins/web-search/skills/web-search/SKILL.md)
 
-**Install**:
-```bash
-claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
-claude plugin install web-search@corca-plugins
-```
-
-**Update**:
-```bash
-claude plugin marketplace update corca-plugins
-claude plugin update web-search@corca-plugins
-```
+**Install**: `claude plugin install web-search@corca-plugins` | **Update**: `claude plugin update web-search@corca-plugins`
 
 A skill that uses the Tavily and Exa REST APIs for web search, code search, and URL content extraction. Uses the **script delegation pattern**: SKILL.md handles command parsing and query intelligence, wrapper scripts handle API execution.
 
@@ -252,17 +192,7 @@ A skill that uses the Tavily and Exa REST APIs for web search, code search, and 
 
 ### [attention-hook](plugins/attention-hook/hooks/hooks.json)
 
-**Install**:
-```bash
-claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
-claude plugin install attention-hook@corca-plugins
-```
-
-**Update**:
-```bash
-claude plugin marketplace update corca-plugins
-claude plugin update attention-hook@corca-plugins
-```
+**Install**: `claude plugin install attention-hook@corca-plugins` | **Update**: `claude plugin update attention-hook@corca-plugins`
 
 A hook that sends Slack push notifications when Claude Code is waiting for user input. The notification includes task context (user request, Claude response, AskUserQuestion prompt, and Todo status) so you can immediately understand what's going on. Useful when running on a remote server. (Background: [blog post](https://www.stdy.blog/1p1w-03-attention-hook/))
 
@@ -301,17 +231,7 @@ CLAUDE_ATTENTION_DELAY=30  # AskUserQuestion notification delay in seconds (defa
 
 ### [plan-and-lessons](plugins/plan-and-lessons/hooks/hooks.json)
 
-**Install**:
-```bash
-claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
-claude plugin install plan-and-lessons@corca-plugins
-```
-
-**Update**:
-```bash
-claude plugin marketplace update corca-plugins
-claude plugin update plan-and-lessons@corca-plugins
-```
+**Install**: `claude plugin install plan-and-lessons@corca-plugins` | **Update**: `claude plugin update plan-and-lessons@corca-plugins`
 
 A hook that automatically injects the Plan & Lessons Protocol when Claude Code enters plan mode (via the `EnterPlanMode` tool call). The protocol defines a workflow that creates plan.md and lessons.md under `prompt-logs/{YYMMDD}-{title}/`.
 
@@ -326,17 +246,7 @@ A hook that automatically injects the Plan & Lessons Protocol when Claude Code e
 
 ### [smart-read](plugins/smart-read/hooks/hooks.json)
 
-**Install**:
-```bash
-claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
-claude plugin install smart-read@corca-plugins
-```
-
-**Update**:
-```bash
-claude plugin marketplace update corca-plugins
-claude plugin update smart-read@corca-plugins
-```
+**Install**: `claude plugin install smart-read@corca-plugins` | **Update**: `claude plugin update smart-read@corca-plugins`
 
 A hook that intercepts Read tool calls and enforces intelligent file reading based on file size. Prevents context waste by warning on medium files and blocking full reads on large files, guiding Claude to use offset/limit or Grep instead.
 
