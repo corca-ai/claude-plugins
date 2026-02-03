@@ -25,7 +25,7 @@ After implementing a plan, complete the full workflow without waiting for explic
 3. Run `/retro`
 4. For plugin changes: test locally with `/plugin install <name>@corca-plugins` before committing
 5. Commit and push
-6. After committing plugin changes, update the marketplace and verify globally installed plugin versions are current
+6. After committing plugin changes, run `bash scripts/update-all.sh` to update the marketplace and all installed plugins
 
 ## Collaboration Style
 

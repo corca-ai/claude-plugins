@@ -25,6 +25,11 @@ claude plugin update <plugin-name>@corca-plugins   # update
 
 Restart Claude Code after installing/updating for changes to take effect.
 
+To update the marketplace and **all** installed plugins at once:
+```bash
+bash scripts/update-all.sh
+```
+
 You can do the same from inside Claude Code (instead of your terminal):
 ```
 /plugin marketplace add corca-ai/claude-plugins

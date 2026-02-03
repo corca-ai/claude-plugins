@@ -25,6 +25,11 @@ claude plugin update <plugin-name>@corca-plugins   # 기존 플러그인 업데�
 
 설치/업데이트 후 Claude Code를 재시작하면 적용됩니다.
 
+마켓플레이스와 설치된 **모든** 플러그인을 한번에 업데이트하려면:
+```bash
+bash scripts/update-all.sh
+```
+
 터미널 대신 Claude Code 내에서도 동일한 작업이 가능합니다:
 ```
 /plugin marketplace add corca-ai/claude-plugins
