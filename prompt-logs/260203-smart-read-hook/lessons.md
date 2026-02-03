@@ -35,3 +35,19 @@ When 여러 환경변수가 서로 의존적일 때 → 스크립트에서 일�
 - **Takeaway**: push 전 로컬 테스트는 `--plugin-dir`가 정답. `plugin install`은 marketplace에 이미 존재하는 플러그인용.
 
 When 로컬 플러그인을 테스트할 때 → `claude --plugin-dir ./plugins/<name> --dangerously-skip-permissions --resume`
+
+### Hook은 세션 시작 시 스냅샷
+
+- **Expected**: 세션 내에서 플러그인을 설치하거나 hook을 수정하면 즉시 반영
+- **Actual**: 공식 문서 — "hooks are snapshot at session start". 세션 중 수정해도 즉시 반영 안 됨. `/hooks` 메뉴에서 리뷰 후 적용하거나, 새 세션 필요.
+- **Takeaway**: hook 통합 테스트는 반드시 새 세션(`--plugin-dir`) 또는 `/hooks` 리뷰를 거쳐야 함. stdin 파이핑은 로직 검증용.
+
+When hook 통합 테스트를 할 때 → 스크립트 로직은 stdin 파이핑, 실제 발동은 새 세션 or `/hooks` 리뷰
+
+### web-search skill은 지시 기반
+
+- **Expected**: `/web-search` skill 호출 시 실행 가능한 스크립트 파일이 있을 것
+- **Actual**: SKILL.md가 로드되고, 에이전트가 지시에 따라 직접 curl을 실행하는 구조. 별도 .sh 파일 없음.
+- **Takeaway**: skill은 "스크립트 실행"이 아니라 "지시 로드" — Skill 도구 호출 후 로드된 지시를 따라야 함
+
+When skill을 호출했는데 스크립트가 없을 때 → SKILL.md의 지시를 따라 직접 실행하는 구조인지 확인
