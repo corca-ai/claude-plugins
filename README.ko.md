@@ -217,7 +217,7 @@ claude plugin marketplace update corca-plugins
 claude plugin update web-search@corca-plugins
 ```
 
-Tavily와 Exa REST API를 활용하여 웹 검색, 코드 검색, URL 콘텐츠 추출을 수행하는 스킬입니다. curl을 직접 호출하여 외부 검색 서비스에 접근합니다.
+Tavily와 Exa REST API를 활용하여 웹 검색, 코드 검색, URL 콘텐츠 추출을 수행하는 스킬입니다. **스크립트 위임 패턴** 사용: SKILL.md가 커맨드 파싱과 쿼리 인텔리전스를 담당하고, 래퍼 스크립트가 API 실행을 처리합니다.
 
 **사용법**:
 - 웹 검색: `/web-search <query>`
@@ -228,11 +228,11 @@ Tavily와 Exa REST API를 활용하여 웹 검색, 코드 검색, URL 콘텐츠 
 
 **주요 기능**:
 - Tavily API를 통한 일반 웹 검색 (답변 요약 + 소스 목록)
-- 쿼리 인텔리전스: 시간적 의도와 토픽을 자동 감지하여 API 파라미터 설정 (time_range, topic)
+- 쿼리 인텔리전스: 시간적 의도와 토픽을 자동 감지하여 스크립트 파라미터 설정
 - 선택적 모디파이어: `--news`로 뉴스 토픽, `--deep`으로 심층 검색
 - Exa API를 통한 코드/기술 전문 검색 (동적 토큰 할당)
 - URL 추출 시 쿼리 파라미터로 관련성 기반 재정렬 지원
-- jq 또는 python3 자동 선택으로 JSON 파싱
+- 독립 실행 가능한 스크립트 (`search.sh`, `code-search.sh`, `extract.sh`)가 환경 변수 로딩, JSON 빌드, curl, 응답 포맷팅 처리
 - 검색 결과에 Sources 섹션 포함
 
 **필수 조건**:

@@ -10,7 +10,7 @@ allowed-tools:
 
 # Web Search (/web-search)
 
-Call Tavily/Exa REST APIs directly for web search, code search, and URL content extraction.
+Call Tavily/Exa REST APIs via wrapper scripts for web search, code search, and URL content extraction.
 
 **Language**: Adapt all outputs to match the user's prompt language.
 
@@ -30,40 +30,68 @@ Call Tavily/Exa REST APIs directly for web search, code search, and URL content 
 
 ## Execution Flow
 
-```
 1. Parse args → subcommand (search | code | extract), query/url, modifiers (--news, --deep)
 2. No args or "help" → print usage and stop
-3. Query analysis (search subcommand only):
+3. **Query intelligence** (search subcommand only — analyze before calling script):
    a. Detect modifier flags:
-      --news → set topic: "news"
-      --deep → set search_depth: "advanced", include_raw_content: "markdown"
-   b. Detect temporal intent in query → set time_range:
-      "today", "latest today" → "day"
-      "this week", "latest", "recent" → "week"
-      "this month" → "month"
-      "this year", "2025", "2026" → "year"
+      `--news` → `--topic news`
+      `--deep` → `--deep`
+   b. Detect temporal intent in query → `--time-range`:
+      "today", "latest today" → `day`
+      "this week", "latest", "recent" → `week`
+      "this month" → `month`
+      "this year", "2025", "2026" → `year`
    c. Detect topic from query (if not set by flag):
-      news keywords (breaking, headline, announced, report) → topic: "news"
-      finance keywords (stock, price, market, earnings, revenue) → topic: "finance"
-   d. If no signals detected → use defaults (no extra params)
-4. If extract: validate URL starts with http(s)://, check for optional query after URL
-5. If code: assess query complexity → set tokensNum (see api-reference.md Token Allocation)
-6. Check required API key env var for the subcommand
-   - search/extract → TAVILY_API_KEY
-   - code → EXA_API_KEY
-7. Check jq availability → fallback to python3 if missing
-8. Build JSON payload safely with jq -n --arg (or python3)
-   - Start with base payload, then add conditional params only if set
-9. curl with --max-time 30 --connect-timeout 10, capture HTTP status
-10. Check curl exit code first → connection error if non-zero
-11. Branch on HTTP status: 200 ok / 401,429,other → error message
-12. Parse response and output markdown with Sources section
+      news keywords (breaking, headline, announced, report) → `--topic news`
+      finance keywords (stock, price, market, earnings, revenue) → `--topic finance`
+   d. If no signals detected → no extra flags
+4. **Call the appropriate script**:
+
+### search (default)
+
+```bash
+{SKILL_DIR}/scripts/search.sh [--topic news|finance] [--time-range day|week|month|year] [--deep] "<query>"
+```
+
+### code
+
+Assess query complexity → set tokensNum:
+- Simple lookup (e.g., "golang sort slice") → 3000
+- Standard query (e.g., "React useEffect cleanup") → 5000
+- Complex/architectural → 10000
+- Deep research → 15000
+
+```bash
+{SKILL_DIR}/scripts/code-search.sh [--tokens NUM] "<query>"
+```
+
+### extract
+
+```bash
+{SKILL_DIR}/scripts/extract.sh "<url>" [--query "<relevance_query>"]
+```
+
+## Usage Message (no args or "help")
+
+```
+Web Search Skill
+
+Usage:
+  /web-search <query>                General web search (Tavily)
+  /web-search --news <query>         News search (Tavily, topic: news)
+  /web-search --deep <query>         Advanced depth search (Tavily)
+  /web-search code <query>           Code/technical search (Exa)
+  /web-search extract <url> [query]  Extract URL content, optionally reranked by query (Tavily)
+
+Query intelligence (auto-detected):
+  Temporal keywords (latest, today, 2025...) → time_range filter
+  News/finance topics → topic filter
+
+Environment variables:
+  TAVILY_API_KEY    Required for search and extract
+  EXA_API_KEY       Required for code search
 ```
 
 ## Data Privacy
 
 Queries are sent to external search services. Do not include confidential code or sensitive information in search queries.
-
-## References
-
-- [api-reference.md](references/api-reference.md) - API endpoints, curl patterns, env vars, output formats, error handling

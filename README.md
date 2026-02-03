@@ -217,7 +217,7 @@ claude plugin marketplace update corca-plugins
 claude plugin update web-search@corca-plugins
 ```
 
-A skill that uses the Tavily and Exa REST APIs for web search, code search, and URL content extraction. It calls external search services directly via curl.
+A skill that uses the Tavily and Exa REST APIs for web search, code search, and URL content extraction. Uses the **script delegation pattern**: SKILL.md handles command parsing and query intelligence, wrapper scripts handle API execution.
 
 **Usage**:
 - Web search: `/web-search <query>`
@@ -228,11 +228,11 @@ A skill that uses the Tavily and Exa REST APIs for web search, code search, and 
 
 **Key features**:
 - General web search via Tavily (summary + sources)
-- Query intelligence: auto-detects temporal intent and topic to set API parameters (time_range, topic)
+- Query intelligence: auto-detects temporal intent and topic to set script parameters
 - Optional modifiers: `--news` for news topic, `--deep` for advanced search depth
 - Specialized code/technical search via Exa with dynamic token allocation
 - URL extraction with optional relevance reranking via query parameter
-- Automatically chooses jq or python3 to parse JSON
+- Self-contained scripts (`search.sh`, `code-search.sh`, `extract.sh`) handle env loading, JSON building, curl, and response formatting
 - Includes a Sources section in results
 
 **Requirements**:
