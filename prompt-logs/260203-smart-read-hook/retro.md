@@ -41,3 +41,40 @@
 ### Post-Retro Findings
 
 - 로컬 플러그인 테스트 시 `claude plugin install`이 아닌 `claude --plugin-dir ./plugins/<name>` 플래그를 사용해야 함. 에이전트가 이 방법을 모르고 `plugin install` → `plugin validate` 등을 시도하다 실패 — 유저가 직접 알려줌. CLAUDE.md나 docs/modifying-plugin.md에 로컬 테스트 명령어를 명시하면 재발 방지 가능.
+
+---
+
+## Continuation Session (post-compaction)
+
+> 이전 세션이 컨텍스트 한도에 도달하여 /compact 후 이어진 세션.
+
+### 1. Context Worth Remembering
+
+- 유저는 세 가지 후속 주제를 동시에 제기: (1) web-search 최신 버전으로 문제 해결 여부, (2) 플러그인 배포 자동화 스킬 필요성, (3) smart-read을 Claude Code 공식 이슈로 올리기.
+- 유저는 "왔다갔다 여러 이슈를 동시에 다뤄서 미안합니다"라고 했지만, 이 멀티토픽 접근이 오히려 깊은 인사이트를 촉발함 — web-search 분석이 스크립트 위임 패턴이라는 아키텍처적 발견으로 이어짐.
+- `@` 파일 첨부 시 큰 파일이 조용히 실패하는 문제를 이전 세션(exported.txt 앞부분)에서 이미 탐구했었음. 이를 Claude Code 이슈에 통합하여 Read tool + `@` attachment를 "파일 로딩의 두 진입점"이라는 프레임으로 묶음.
+
+### 2. Collaboration Preferences
+
+- **"더 깊이 생각해보라"는 프롬프트가 핵심 전환점**: 에이전트가 "SKILL.md에 한 줄 추가" 수준의 표면적 답변을 했을 때, 유저가 "좀 더 깊이 생각해볼까요?"라고 push했고, 이게 hook/skill 아키텍처 비대칭이라는 근본 원인 발견으로 이어짐. 유저는 에이전트의 첫 번째 답을 그대로 수용하지 않고 더 나은 해결책을 요구하는 패턴.
+- **plan 문서를 다른 세션에 넘기는 패턴**: 현재 세션에서 아이디어를 도출하고, plan 문서로 정리해서 별도 세션에서 실행하는 워크플로우. 세션 간 컨텍스트 전달 수단으로 plan 문서를 활용.
+- **"머지는 제가 직접 하겠습니다"**: 유저는 git push/merge 같은 destructive action은 직접 제어하려는 경향.
+
+### Suggested CLAUDE.md Updates
+
+- 문제 분석 시 "첫 번째 답이 표면적 fix인지 구조적 fix인지 자문하라"는 원칙을 추가 고려. 현재 CLAUDE.md에는 이런 분석 깊이에 대한 가이드가 없음.
+
+### 3. Prompting Habits
+
+- **멀티토픽 브리핑이 효과적**: 유저가 한 번에 3가지 주제를 제시한 것은 에이전트가 주제 간 연결고리를 찾게 만듦. web-search 분석이 자동화 스킬 설계에도 영향을 줌(스크립트 위임 패턴의 일반화).
+- **"솔직한 의견을 듣고 싶습니다"**: 에이전트에게 객관적 평가를 명시적으로 요청. 이 덕분에 "플러그인 버전 문제가 아니라 제 행동 오류"라는 솔직한 진단이 나올 수 있었음.
+
+### 4. Learning Resources
+
+- [anthropics/claude-code issues](https://github.com/anthropics/claude-code/issues) — 관련 이슈 landscape 파악에 사용. 특히 #14888 (dynamic token limits), #22506 (/tokens command), #6780 (session corruption), #12349 (context flood protection, autoclose됨), #16390 (attachment warnings)이 smart-read과 직접 관련.
+- [feature_request.yml template](https://github.com/anthropics/claude-code/blob/main/.github/ISSUE_TEMPLATE/feature_request.yml) — Claude Code 이슈 작성 시 참고할 공식 템플릿.
+
+### 5. Relevant Skills
+
+- **plugin-deploy 스킬 gap 확인**: 플러그인 수정 후 marketplace 업데이트, README 동기화, 로컬 테스트, 배포까지의 워크플로우를 자동화하는 스킬이 없음. plan 문서 작성 완료 (plan-plugin-automation-skill.md).
+- **web-search 리팩터링 필요**: 실행 중심 skill에 스크립트 위임 패턴 적용. gather-context가 이미 이 패턴을 사용 중이므로, web-search에도 동일하게 적용하여 일관성 확보. plan 문서 작성 완료 (plan-web-search-refactor.md).

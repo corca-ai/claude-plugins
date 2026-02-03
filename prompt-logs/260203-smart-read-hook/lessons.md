@@ -51,3 +51,31 @@ When hook 통합 테스트를 할 때 → 스크립트 로직은 stdin 파이핑
 - **Takeaway**: skill은 "스크립트 실행"이 아니라 "지시 로드" — Skill 도구 호출 후 로드된 지시를 따라야 함
 
 When skill을 호출했는데 스크립트가 없을 때 → SKILL.md의 지시를 따라 직접 실행하는 구조인지 확인
+
+---
+
+## Continuation Session Lessons
+
+### 표면적 원인 vs 구조적 원인 구분
+
+- **Expected**: web-search skill에서 스크립트를 못 찾은 문제 → SKILL.md에 "스크립트 없음" 한 줄 추가로 해결
+- **Actual**: 유저가 "더 깊이 생각해보라" 고 요청. 근본 원인은 hook(스크립트 실행)과 skill(지시 따르기)의 아키텍처 비대칭. 이 비대칭을 없애는 것이 진짜 해결책 — 실행 중심 skill에도 wrapper script 추가.
+- **Takeaway**: 문제 해결 시 첫 번째 답이 표면적 fix인지 구조적 fix인지 자문할 것. "지시를 더 추가"하는 것은 대부분 표면적 fix.
+
+When 에이전트 행동 오류의 원인을 분석할 때 → "더 많은 지시"가 아니라 "구조적 비대칭 제거"를 먼저 검토
+
+### 실행 중심 skill의 스크립트 위임 패턴
+
+- **Expected**: skill은 SKILL.md 지시만으로 충분
+- **Actual**: 실행 중심 skill(API 호출, 파일 처리)은 에이전트가 curl을 매번 수동 조립해야 해서 오류 가능성 높고 컨텍스트 소비 큼. gather-context는 이미 scripts/ 패턴을 사용 중.
+- **Takeaway**: 에이전트가 잘하는 것(의도 파악, 파라미터 결정)과 스크립트가 잘하는 것(안정적 실행)을 분리. SKILL.md는 얇게, scripts/에 실행 로직 위임.
+
+When 실행 중심 skill을 만들거나 리팩터링할 때 → gather-context의 scripts/ 위임 패턴을 따르기
+
+### 이슈 작성 시 기존 이슈 landscape 파악
+
+- **Expected**: 아이디어를 바로 이슈로 작성
+- **Actual**: 검색 결과 관련 이슈 12개 이상 발견. 각 이슈의 접근 방식과 차별점을 파악한 뒤 작성해야 중복/autoclose를 피할 수 있음. #12349는 같은 문제의식이었지만 구체성 부족으로 autoclose됨.
+- **Takeaway**: 기존 이슈 검색 → 차별점 명확화 → working PoC 첨부가 이슈 생존율을 높임
+
+When 오픈소스 이슈를 작성할 때 → 기존 이슈 landscape를 먼저 파악하고, "왜 이전 이슈들과 다른지"를 명시
