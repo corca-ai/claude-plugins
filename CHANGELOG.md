@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Scripts: `scripts/update-all.sh` — bulk marketplace + plugin update script
 
 ### Changed
-- Skills: `web-search` (2.0.0) — refactored to script delegation pattern (SKILL.md → wrapper scripts for API execution); added PreToolUse hook to redirect built-in WebSearch to `/web-search`
+- Skills: `web-search` (2.0.0→2.0.1) — refactored to script delegation pattern (SKILL.md → wrapper scripts for API execution); added PreToolUse hook to redirect built-in WebSearch to `/web-search`; slimmed api-reference.md (381→56 lines, removed dead curl/jq patterns)
 - Skills: `gather-context` (1.1.1) — applied 3-tier env loading to slack-api.mjs; loosely coupled with WebSearch (hook handles redirect)
 - Skills: `retro` (1.3.2) — minor refinements
 - Hooks: `plan-and-lessons` (1.1.0) — protocol timing: lessons.md created alongside plan.md, not after implementation

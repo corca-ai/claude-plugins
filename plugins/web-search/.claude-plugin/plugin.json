@@ -1,7 +1,7 @@
 {
   "name": "web-search",
   "description": "A skill that provides web search, code search, and URL content extraction via Tavily and Exa APIs",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "author": {
     "name": "Corca",
     "url": "https://www.corca.ai/"

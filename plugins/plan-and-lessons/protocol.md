@@ -40,6 +40,12 @@ When starting implementation, check Deferred Actions first and handle the items.
 
 Write the plan in English. The plan is primarily for the agent, not the user.
 
+### Prior Art Search
+
+Before finalizing the plan, search for frameworks, methodologies, or prior art relevant to the task. Someone has likely thought about this problem before. The cost of a quick search is low; the potential value of discovering a better approach is high.
+
+Use `/web-search` or equivalent to find: established frameworks, best practices, common patterns, or cautionary tales related to the task domain.
+
 ### Timing
 
 Create the plan document when entering plan mode, before implementation begins.

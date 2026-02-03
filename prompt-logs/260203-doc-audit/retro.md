@@ -29,6 +29,11 @@ CLAUDE.md 변경 제안 없음 — 현재 CLAUDE.md가 이 세션의 워크플�
 - [6 Things Developer Tools Must Have in 2026 (Evil Martians)](https://evilmartians.com/chronicles/six-things-developer-tools-must-have-to-earn-trust-and-adoption) — 개발자 도구의 discoverability와 progressive disclosure를 다룸. CLI 플러그인 생태계 설계에 참고 가치 있음
 - [SwiftUI API Design: Progressive Disclosure (WWDC22)](https://developer.apple.com/videos/play/wwdc2022/10059/) — API/인터페이스 설계에서 progressive disclosure를 적용하는 사례. SKILL.md 설계 철학("적절한 자유도 설정")과 맥이 같음
 
+### Post-Retro Findings
+
+1. **Prior Art 검색을 plan 단계 기본 동작으로**: 유저가 "모든 plan은 설계 아닌가?"라고 지적. How to Measure Anything 인용 — "It's been done before—don't reinvent the wheel." 검색 비용 대비 잠재 가치가 비대칭적으로 높음. → protocol.md에 "Prior Art Search" 섹션 추가, plan-and-lessons v1.2.0
+2. **버전 누락 발견**: web-search api-reference.md를 381→56줄로 대폭 수정했지만 plugin.json 버전을 안 올림. 플러그인 내부 파일은 어떤 것이든 바뀌면 patch 이상 bump 필요. → web-search v2.0.1
+
 ## 5. Relevant Skills
 
 이 세션에서 명확한 스킬 갭은 없음. "문서 감사"는 빈도가 낮은 작업이라 전용 스킬보다는 필요 시 ad-hoc으로 진행하는 것이 적절. 다만, 이번 감사에서 발견한 체크리스트(단일 출처 원칙, 독자별 수준, 죽은 문서 감지)는 lessons.md에 기록되어 향후 감사 시 참조 가능.
