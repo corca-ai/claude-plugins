@@ -1,0 +1,1096 @@
+
+ ▐▛███▜▌   Claude Code v2.1.25
+▝▜█████▛▘  Opus 4.5 · Claude Max
+  ▘▘ ▝▝    ~/codes/corca/claude-plugins
+
+❯ 별도 세션에서 @exported.txt 와 같은 대화를 나눴습니다. 이걸 hook          
+  플러그인으로 만들 여지가 있을지 궁금합니다. 어떻게 생각하세요?            
+
+⏺ exported.txt의 핵심 아이디어를 정리하면: 파일 경로가 주어졌을 때, 크기에 따라 
+  전체 읽기 vs 부분 탐색을 지능적으로 분기하는 것이네요.
+
+  이게 hook 플러그인으로 가능한지 판단하려면 현재 플러그인 구조와 hook의
+  제약사항을 먼저 확인해야 합니다.
+
+⏺ Explore(Explore plugin/hook architecture) Sonnet 4.5
+  ⎿  Done (37 tool uses · 67.4k tokens · 1m 48s)
+
+⏺ 좋은 아이디어입니다. 분석 결과를 공유하겠습니다.
+
+  결론: PreToolUse hook으로 충분히 가능합니다
+
+  exported.txt의 핵심 전략은 **"파일 크기를 먼저 확인하고 읽기 방식을
+  분기"**하는 건데, 이건 PreToolUse hook이 Read 도구 호출을 가로채서 처리할 수
+  있습니다.
+
+  hook이 받을 수 있는 데이터
+
+  PreToolUse에서 tool_input으로 file_path, offset, limit을 모두 받습니다.
+
+  hook이 할 수 있는 일
+  ┌─────────────────────────┬────────┬─────────────────────────────────────────┐
+  │          능력           │ 지원   │                  용도                   │
+  │                         │  여부  │                                         │
+  ├─────────────────────────┼────────┼─────────────────────────────────────────┤
+  │ permissionDecision:     │ O      │ 큰 파일 전체 읽기 차단                  │
+  │ "deny"                  │        │                                         │
+  ├─────────────────────────┼────────┼─────────────────────────────────────────┤
+  │ updatedInput            │ O      │ offset/limit 자동 주입                  │
+  ├─────────────────────────┼────────┼─────────────────────────────────────────┤
+  │ additionalContext       │ O      │ "이 파일은 3000줄입니다. Grep이나       │
+  │                         │        │ offset을 사용하세요" 안내               │
+  └─────────────────────────┴────────┴─────────────────────────────────────────┘
+  설계 구상
+
+  PreToolUse (matcher: "Read")
+    ├─ offset/limit이 이미 있음 → allow (Claude가 이미 똑똑하게 요청)
+    ├─ 파일 크기 확인 (wc -l / file 명령)
+    │   ├─ ≤500줄: allow
+    │   ├─ 500~2000줄: allow + additionalContext로 "총 X줄" 알림
+    │   └─ >2000줄 또는 바이너리: deny + 안내 메시지
+    └─ PDF 등 바이너리: deny + "Read의 offset/limit 또는 Grep을 사용하세요"
+
+  이미 이 repo에 동일한 패턴이 있습니다 — web-search 플러그인이 PreToolUse로
+  WebSearch 도구를 deny하고 /web-search skill로 redirect하는 것과 같은
+  구조입니다.
+
+  CLAUDE.md 방식과의 차이
+  Column 1: 강제성
+  CLAUDE.md 규칙: Claude가 무시할 수 있음
+  Hook 플러그인: 도구 레벨에서 물리적 차단
+  ────────────────────────────────────────
+  Column 1: 턴 소모
+  CLAUDE.md 규칙: Claude가 스스로 크기 확인 (1턴 추가)
+  Hook 플러그인: Hook이 크기 확인 (턴 소모 없음)
+  ────────────────────────────────────────
+  Column 1: 이식성
+  CLAUDE.md 규칙: 프로젝트마다 CLAUDE.md 복붙 필요
+  Hook 플러그인: 플러그인 설치 한 번으로 전역 적용
+  ────────────────────────────────────────
+  Column 1: 세밀한 제어
+  CLAUDE.md 규칙: 자연어 지시라 일관성 부족
+  Hook 플러그인: 스크립트 로직으로 정확한 분기
+  Hook이 턴을 소모하지 않고 크기를 확인해준다는 점이 가장 큰 이점입니다.
+  CLAUDE.md 방식에서는 Claude가 wc -l을 먼저 호출해야 하는데, hook은 이걸 도구
+  호출 전에 자동으로 처리합니다.
+
+  만들어볼까요?
+
+❯ 브랜치 하나 파서, plan mode 거쳐서 만들어봅시다. 
+
+⏺ Bash(git checkout -b feat/smart-read-hook)
+  ⎿  Switched to a new branch 'feat/smart-read-hook'
+
+⏺ Entered plan mode
+  Claude is now exploring and designing an implementation approach.
+
+⏺ Plan mode에 진입했습니다. 먼저 프로토콜과 기존 패턴을 파악하겠습니다.
+
+⏺ Read 2 files (ctrl+o to expand)
+
+⏺ 이제 기존 hook 플러그인 패턴을 더 자세히 탐색하겠습니다.
+
+⏺ Explore(Explore existing hook plugin patterns) Sonnet 4.5
+  ⎿  Done (26 tool uses · 39.9k tokens · 1m 30s)
+
+⏺ 좋습니다. 탐색 결과를 바탕으로 설계를 구체화하겠습니다. 몇 가지 확인하고 싶은
+  점이 있습니다.
+
+⏺ User answered Claude's questions:
+  ⎿  · 플러그인 이름을 어떻게 할까요? → smart-read
+     · 2000줄 초과 파일에 대해 어떤 전략을 쓸까요? (Read 도구 자체가 기본 
+     2000줄 제한이 있으므로 deny하면 Claude가 offset/limit으로 재시도해야 
+     합니다) → deny + 안내 (Recommended)
+     · 임계값을 환경변수로 설정 가능하게 할까요? → 환경변수 지원 
+     (Recommended)
+
+⏺ 좋습니다. 이제 plan 파일을 작성하겠습니다.
+
+⏺ Bash(mkdir -p
+      /Users/ted/codes/corca/claude-plugins/prompt-logs/260203-smart-read-hook)
+  ⎿  (No content)
+
+⏺ Write(prompt-logs/260203-smart-read-hook/plan.md)
+  ⎿  Wrote 133 lines to prompt-logs/260203-smart-read-hook/plan.md
+       1 # Plan: smart-read Hook Plugin
+       2 
+       3 ## Goal
+       4 
+       5 Create a `PreToolUse` hook plugin that intercepts `Read` tool ca
+         lls and enforces intelligent file reading based on file size. Pr
+         events context waste by denying full reads on large files and gu
+         iding Claude to use offset/limit or Grep.
+       6 
+       7 ## Success Criteria
+       8 
+       9 ```gherkin
+      10 Given a Read call on a file with ≤500 lines and no offset/limit
+     … +123 lines (ctrl+o to expand)
+
+⏺ Write(prompt-logs/260203-smart-read-hook/lessons.md)
+  ⎿  Wrote 22 lines to prompt-logs/260203-smart-read-hook/lessons.md
+      1 # Lessons: smart-read Hook Plugin
+      2 
+      3 ### PreToolUse hook의 도구 입력 접근
+      4 
+      5 - **Expected**: hook에서 tool_input을 직접 접근 가능
+      6 - **Actual**: stdin으로 JSON이 들어오고, `tool_input.file_path`, 
+        `tool_input.offset`, `tool_input.limit` 등을 jq로 파싱해야 함
+      7 - **Takeaway**: PreToolUse hook은 stdin JSON → jq 파싱이 표준 패
+        턴
+      8 
+      9 ### Read 도구의 기본 2000줄 제한
+     … +12 lines (ctrl+o to expand)
+
+⏺ 이제 system plan 파일도 작성합니다.
+
+⏺ Updated plan
+  ⎿  /plan to preview
+
+⏺ Plan 작성 완료했습니다. 핵심 요약:
+
+  - PreToolUse on Read: offset/limit 없이 큰 파일 전체 읽기를 차단
+  - 3단계 분기: ≤500줄 허용 / 500-2000줄 허용+안내 / >2000줄 차단+가이드
+  - 우회 수단: Claude가 offset 또는 limit을 명시하면 항상 허용 (의도적 읽기)
+  - 바이너리 예외: PDF, 이미지, notebook은 Read가 특수 처리하므로 항상 허용
+  - 환경변수: CLAUDE_CORCA_SMART_READ_WARN_LINES, DENY_LINES로 커스텀 가능
+
+⏺ User approved Claude's plan
+  ⎿  Plan saved to: ~/.claude/plans/piped-jingling-sunbeam.md · /plan to 
+     edit
+     Plan: smart-read Hook Plugin
+
+     Overview
+
+     Create a PreToolUse hook that intercepts Read tool calls. Denies full
+     reads on large files (>2000 lines), adds context for medium files
+     (500-2000 lines), and silently allows small files. Thresholds
+     configurable via env vars.
+
+     Files to Create
+
+     1. plugins/smart-read/.claude-plugin/plugin.json — Plugin metadata
+     (v1.0.0)
+     2. plugins/smart-read/hooks/hooks.json — PreToolUse matcher on "Read"
+     3. plugins/smart-read/hooks/scripts/smart-read.sh — Main hook logic:
+       - Parse stdin JSON for file_path, offset, limit
+       - Allow if offset/limit already set (intentional read)
+       - Allow binary files (PDF, image, notebook)
+       - ≤500 lines: allow silently
+       - 500-2000 lines: allow + additionalContext with line count
+       2000 lines: deny + guidance to use offset/limit or Grep
+       - Thresholds from CLAUDE_CORCA_SMART_READ_WARN_LINES / DENY_LINES
+
+     Files to Modify
+
+     4. .claude-plugin/marketplace.json — Add smart-read entry
+     5. README.md + README.ko.md — Add to plugin table and Hooks section
+
+     Verification
+
+     - Install: /plugin install smart-read@corca-plugins
+     - Test: small file (allow), medium file (context), large file (deny),
+     offset/limit bypass, binary file (allow)
+
+⏺ Plan이 승인되었습니다. 구현을 시작하겠습니다.
+
+⏺ Bash(mkdir -p
+      /Users/ted/codes/corca/claude-plugins/plugins/smart-read/.claude-plugin
+      /Users/ted/codes/corca/claude-plugins/plugins/smart-read/hooks/scripts)
+  ⎿  (No content)
+
+⏺ Write(plugins/smart-read/.claude-plugin/plugin.json)
+  ⎿  Wrote 11 lines to plugins/smart-read/.claude-plugin/plugin.json
+       1 {
+       2   "name": "smart-read",
+       3   "description": "A hook that enforces intelligent file reading 
+         based on file size — warns on medium files, blocks full reads on
+          large files",
+       4   "version": "1.0.0",
+       5   "author": {
+       6     "name": "Corca",
+       7     "url": "https://www.corca.ai/"
+       8   },
+       9   "repository": "https://github.com/corca-ai/claude-plugins"
+      10 }
+     … +1 line (ctrl+o to expand)
+
+⏺ Write(plugins/smart-read/hooks/hooks.json)
+  ⎿  Wrote 16 lines to plugins/smart-read/hooks/hooks.json
+       1 {
+       2   "hooks": {
+       3     "PreToolUse": [
+       4       {
+       5         "matcher": "Read",
+       6         "hooks": [
+       7           {
+       8             "type": "command",
+       9             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/smar
+         t-read.sh"
+      10           }
+     … +6 lines (ctrl+o to expand)
+
+⏺ Write(plugins/smart-read/hooks/scripts/smart-read.sh)
+  ⎿  Wrote 89 lines to plugins/smart-read/hooks/scripts/smart-read.sh
+       1 #!/bin/bash
+       2 # smart-read: PreToolUse hook for Read tool.
+       3 # Checks file size before allowing full reads to prevent context
+          waste.
+       4 # - Small files (≤WARN): allowed silently
+       5 # - Medium files (WARN..DENY]: allowed with additionalContext (l
+         ine count)
+       6 # - Large files (>DENY): denied with guidance to use offset/limi
+         t or Grep
+       7 # Bypass: set offset or limit explicitly to signal intentional r
+         eading.
+       8 
+       9 # --- Load environment variables ---
+      10 ENV_FILE="$HOME/.claude/.env"
+     … +79 lines (ctrl+o to expand)
+
+⏺ Bash(chmod +x /Users/ted/codes/corca/claude-plugins/plugins/smart-read/hooks/s
+      cripts/smart-read.sh)
+  ⎿  (No content)
+
+⏺ 이제 marketplace와 README 업데이트입니다.
+
+⏺ Read 3 files (ctrl+o to expand)
+
+⏺ 이제 marketplace.json과 두 README를 업데이트합니다.
+
+⏺ Update(.claude-plugin/marketplace.json)
+  ⎿  Added 6 lines
+      56        "source": "./plugins/plan-and-lessons",
+      57        "description": "A hook that injects the Plan & Lessons Pr
+          otocol when entering plan mode",
+      58        "keywords": ["plan", "lessons", "protocol", "plan-mode", 
+          "hook"]
+      59 +    },                                                         
+      60 +    {                                                          
+      61 +      "name": "smart-read",                                    
+      62 +      "source": "./plugins/smart-read",                        
+      63 +      "description": "A hook that enforces intelligent file rea
+         +ding based on file size",                                      
+      64 +      "keywords": ["read", "file-size", "context", "hook", "gua
+         +rd"]                                                           
+      65      }
+      66    ]
+      67  }
+
+⏺ Update(README.md)
+  ⎿  Added 1 line
+      43  | [web-search](#web-search) | Skill + Hook | Web search, code s
+          earch, and URL content extraction |
+      44  | [attention-hook](#attention-hook) | Hook | Send a Slack notif
+          ication when idle/waiting |
+      45  | [plan-and-lessons](#plan-and-lessons) | Hook | Inject the Pla
+          n & Lessons Protocol when entering plan mode |
+      46 +| [smart-read](#smart-read) | Hook | Enforce intelligent file r
+         +eading based on file size |                                    
+      47  
+      48  ## Skills
+      49  
+
+⏺ Update(README.md)
+  ⎿  Added 35 lines
+      319  - If you enter plan mode directly via `/plan` or Shift+Tab, th
+           e hook won't fire (CLI mode toggle; no tool call happens)
+      320  - For better coverage, also referencing the protocol from `CLA
+           UDE.md` is recommended
+      321  
+      322 +### [smart-read](plugins/smart-read/hooks/hooks.json)         
+      323 +                                                              
+      324 +**Install**:                                                  
+      325 +```bash                                                       
+      326 +claude plugin marketplace add https://github.com/corca-ai/clau
+          +de-plugins.git                                                
+      327 +claude plugin install smart-read@corca-plugins                
+      328 +```                                                           
+      329 +                                                              
+      330 +**Update**:                                                   
+      331 +```bash                                                       
+      332 +claude plugin marketplace update corca-plugins                
+      333 +claude plugin update smart-read@corca-plugins                 
+      334 +```                                                           
+      335 +                                                              
+      336 +A hook that intercepts Read tool calls and enforces intelligen
+          +t file reading based on file size. Prevents context waste by w
+          +arning on medium files and blocking full reads on large files,
+          + guiding Claude to use offset/limit or Grep instead.          
+      337 +                                                              
+      338 +**How it works**:                                             
+      339 +- Uses a `PreToolUse` → `Read` matcher to intercept file reads
+      340 +- Checks file size (line count) before allowing full reads    
+      341 +- Small files (≤500 lines): allowed silently                  
+      342 +- Medium files (500-2000 lines): allowed with `additionalConte
+          +xt` showing line count                                        
+      343 +- Large files (>2000 lines): denied with guidance to use `offs
+          +et`/`limit` or `Grep`                                         
+      344 +- Binary files (PDF, images, notebooks): always allowed (Read 
+          +handles these natively)                                       
+      345 +                                                              
+      346 +**Bypass**: Claude can bypass the deny by setting `offset` or 
+          +`limit` explicitly — the hook only blocks when both are absent
+          +, so intentional partial reads always go through.             
+      347 +                                                              
+      348 +**Configuration** (optional):                                 
+      349 +                                                              
+      350 +Set thresholds in `~/.claude/.env`:                           
+      351 +```bash                                                       
+      352 +# ~/.claude/.env                                              
+      353 +CLAUDE_CORCA_SMART_READ_WARN_LINES=500   # Lines above which a
+          +dditionalContext is added (default: 500)                      
+      354 +CLAUDE_CORCA_SMART_READ_DENY_LINES=2000  # Lines above which r
+          +ead is denied (default: 2000)                                 
+      355 +```                                                           
+      356 +                                                              
+      357  ## Removed skills
+      358  
+      359  The following skills were removed in v1.8.0. The same function
+           ality is now built into [gather-context](#gather-context).
+
+⏺ 이제 Korean README도 업데이트합니다.
+
+⏺ Update(README.ko.md)
+  ⎿  Added 1 line
+      43  | [web-search](#web-search) | Skill + Hook | 웹 검색, 코드 검색
+          , URL 콘텐츠 추출 |
+      44  | [attention-hook](#attention-hook) | Hook | 대기 상태일 때 Sla
+          ck 알림 |
+      45  | [plan-and-lessons](#plan-and-lessons) | Hook | Plan 모드 진입
+           시 Plan & Lessons Protocol 주입 |
+      46 +| [smart-read](#smart-read) | Hook | 파일 크기 기반 지능적 읽기
+         + 강제 |                                                        
+      47  
+      48  ## Skills
+      49  
+
+⏺ Update(README.ko.md)
+  ⎿  Added 35 lines
+      320  - `/plan`이나 Shift+Tab으로 직접 plan 모드에 진입하는 경우에는
+            훅이 발동되지 않음 (CLI 모드 토글이라 도구 호출 없음)
+      321  - 커버리지를 위해 CLAUDE.md에 프로토콜 참조를 병행 설정하는 것
+           을 권장
+      322  
+      323 +### [smart-read](plugins/smart-read/hooks/hooks.json)         
+      324 +                                                              
+      325 +**설치**:                                                     
+      326 +```bash                                                       
+      327 +claude plugin marketplace add https://github.com/corca-ai/clau
+          +de-plugins.git                                                
+      328 +claude plugin install smart-read@corca-plugins                
+      329 +```                                                           
+      330 +                                                              
+      331 +**갱신**:                                                     
+      332 +```bash                                                       
+      333 +claude plugin marketplace update corca-plugins                
+      334 +claude plugin update smart-read@corca-plugins                 
+      335 +```                                                           
+      336 +                                                              
+      337 +Read 도구 호출을 가로채서 파일 크기에 따라 지능적인 읽기를 강 
+          +제하는 훅입니다. 큰 파일의 전체 읽기를 차단하여 컨텍스트 낭비 
+          +를 방지하고, offset/limit 또는 Grep 사용을 안내합니다.        
+      338 +                                                              
+      339 +**동작 방식**:                                                
+      340 +- `PreToolUse` → `Read` 매처로 파일 읽기를 가로챔             
+      341 +- 전체 읽기 허용 전 파일 크기(줄 수)를 확인                   
+      342 +- 작은 파일 (≤500줄): 조용히 허용                             
+      343 +- 중간 파일 (500-2000줄): 허용하되 `additionalContext`로 줄 수
+          + 정보 제공                                                    
+      344 +- 큰 파일 (>2000줄): 차단 후 `offset`/`limit` 또는 `Grep` 사용
+          + 안내                                                         
+      345 +- 바이너리 파일 (PDF, 이미지, 노트북): 항상 허용 (Read가 자체 
+          +적으로 처리)                                                  
+      346 +                                                              
+      347 +**우회**: Claude가 `offset` 또는 `limit`을 명시적으로 설정하면
+          + 훅을 우회합니다. 둘 다 없을 때만 차단하므로, 의도적인 부분 읽
+          +기는 항상 허용됩니다.                                         
+      348 +                                                              
+      349 +**설정** (선택):                                              
+      350 +                                                              
+      351 +`~/.claude/.env`에서 임계값 조정:                             
+      352 +```bash                                                       
+      353 +# ~/.claude/.env                                              
+      354 +CLAUDE_CORCA_SMART_READ_WARN_LINES=500   # 이 줄 수 이상이면 a
+          +dditionalContext 추가 (기본값: 500)                           
+      355 +CLAUDE_CORCA_SMART_READ_DENY_LINES=2000  # 이 줄 수 이상이면  
+          +읽기 차단 (기본값: 2000)                                      
+      356 +```                                                           
+      357 +                                                              
+      358  ## 삭제된 스킬
+      359  
+      360  다음 스킬들은 v1.8.0에서 삭제되었습니다. 동일한 기능이 [gather
+           -context](#gather-context)에 내장되어 있습니다.
+
+⏺ 이제 스크립트를 테스트합니다. 실제 파일들로 각 시나리오를 검증하겠습니다.
+
+⏺ Bash(echo '--- Small file test (README.md) ---' && wc -l README.md && echo
+      '{"tool_input":{"file_path":"'$(pwd)'/README.md"}}' |
+      plugins/smart-read/hooks/scripts/sma…)
+  ⎿  --- Small file test (README.md) ---
+          374 README.md
+     (exit: 0)
+
+⏺ Bash(echo '--- Medium file test (exported.txt ~132 lines, simulating 600-line
+      file with temp) ---' && python3 -c
+      "open('/tmp/medium-test.txt','w').write('\n'.join(f'…)
+  ⎿ --- Medium file test (exported.txt ~132 lines, simulating 600-line file
+     with temp) ---
+    {
+    … +7 lines (ctrl+o to expand)
+
+
+⏺ Bash(echo '--- Large file test (3000 lines) ---' && python3 -c
+      "open('/tmp/large-test.txt','w').write('\n'.join(f'line {i}' for i in
+      range(3000)))" && echo '{"tool_i…)
+  ⎿  --- Large file test (3000 lines) ---
+     {
+       "hookSpecificOutput": {
+     … +9 lines (ctrl+o to expand)
+
+⏺ Bash(echo '--- Bypass test (large file with offset) ---' && echo '{"tool_input
+      ":{"file_path":"/tmp/large-test.txt","offset":100,"limit":50}}' |
+      plugins/smart-read/ho…)
+  ⎿  --- Bypass test (large file with offset) ---
+     (exit:
+     --- Bypass test (large file with limit only) ---
+     (exit:
+
+⏺ Bash(echo '--- Binary/PDF test ---' && echo
+      '{"tool_input":{"file_path":"/Users/ted/codes/corca/claude-plugins/assets/
+      attention-hook-normal-response.png"}}' | /Users…)
+  ⎿  --- Binary/PDF test ---
+     (exit:
+     --- Notebook test ---
+     (exit:
+
+⏺ Bash(echo '--- Env var override test ---' &&
+      CLAUDE_CORCA_SMART_READ_DENY_LINES=100 /Users/ted/codes/corca/claude-plugi
+      ns/plugins/smart-read/hooks/scripts/smart-read…)
+  ⎿  --- Env var override test ---
+     (exit: 0)
+
+⏺ 테스트에서 로직 문제를 발견했습니다. DENY < WARN일 때 잘못된 동작이 발생할 수
+  있습니다. 수정하겠습니다.
+
+⏺ Read 1 file (ctrl+o to expand)
+
+⏺ Update(plugins/smart-read/hooks/scripts/smart-read.sh)
+  ⎿  Added 5 lines
+      17  WARN_LINES="${CLAUDE_CORCA_SMART_READ_WARN_LINES:-500}"
+      18  DENY_LINES="${CLAUDE_CORCA_SMART_READ_DENY_LINES:-2000}"
+      19  
+      20 +# Ensure WARN ≤ DENY (if user sets DENY < WARN, clamp WARN down
+         +)                                                              
+      21 +if [ "$WARN_LINES" -gt "$DENY_LINES" ]; then                   
+      22 +    WARN_LINES="$DENY_LINES"                                   
+      23 +fi                                                             
+      24 +                                                               
+      25  # --- Parse stdin ---
+      26  INPUT=$(cat)
+      27  FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // emp
+          ty')
+
+⏺ 이제 env override 테스트를 다시 실행합니다.
+
+⏺ Bash(echo '--- Env override: DENY=100, README has 374 lines → should deny ---'
+       && CLAUDE_CORCA_SMART_READ_DENY_LINES=100
+      /Users/ted/codes/corca/claude-plugins/plugin…)
+  ⎿  --- Env override: DENY=100, README has 374 lines → should deny ---
+     {
+       "hookSpecificOutput": {
+     … +19 lines (ctrl+o to expand)
+
+⏺ Bash(echo '--- Nonexistent file test ---' && /Users/ted/codes/corca/claude-plu
+      gins/plugins/smart-read/hooks/scripts/smart-read.sh <<<
+      '{"tool_input":{"file_path":"/t…)
+  ⎿  --- Nonexistent file test ---
+     (exit: 0)
+     … +2 lines (ctrl+o to expand)
+
+⏺ 모든 테스트 통과했습니다. 결과 정리:
+  ┌────────────────────────────────────────┬───────────────────────────┐
+  │                시나리오                │           결과            │
+  ├────────────────────────────────────────┼───────────────────────────┤
+  │ 작은 파일 (374줄)                      │ allow (silent)            │
+  ├────────────────────────────────────────┼───────────────────────────┤
+  │ 중간 파일 (799줄)                      │ allow + additionalContext │
+  ├────────────────────────────────────────┼───────────────────────────┤
+  │ 큰 파일 (2999줄)                       │ deny + guidance           │
+  ├────────────────────────────────────────┼───────────────────────────┤
+  │ offset/limit 우회                      │ allow (silent)            │
+  ├────────────────────────────────────────┼───────────────────────────┤
+  │ 바이너리 (PNG)                         │ allow (silent)            │
+  ├────────────────────────────────────────┼───────────────────────────┤
+  │ notebook (.ipynb)                      │ allow (silent)            │
+  ├────────────────────────────────────────┼───────────────────────────┤
+  │ env override (DENY=100)                │ deny                      │
+  ├────────────────────────────────────────┼───────────────────────────┤
+  │ env override (WARN=50, DENY=100, 79줄) │ warn                      │
+  ├────────────────────────────────────────┼───────────────────────────┤
+  │ WARN>DENY 클램핑                       │ WARN이 DENY로 자동 조정   │
+  ├────────────────────────────────────────┼───────────────────────────┤
+  │ 파일 없음                              │ allow (Read에 위임)       │
+  ├────────────────────────────────────────┼───────────────────────────┤
+  │ file_path 없음                         │ allow                     │
+  └────────────────────────────────────────┴───────────────────────────┘
+
+⏺ 이제 lessons.md에 구현 중 발견한 내용을 추가합니다.
+
+⏺ Read 1 file (ctrl+o to expand)
+
+⏺ Update(prompt-logs/260203-smart-read-hook/lessons.md)
+  ⎿  Added 8 lines
+      19  - **Takeaway**: 기존 도구 파라미터를 "의도 표현" 수단으로 재활
+          용하면 별도 설정 없이 자연스러운 우회 가능
+      20  
+      21  When hook에 우회 메커니즘이 필요할 때 → 기존 도구 파라미터를 활
+          용해 의도를 표현하게 하기
+      22 +                                                               
+      23 +### 환경변수 간 일관성 검증 필요                               
+      24 +                                                               
+      25 +- **Expected**: 사용자가 WARN_LINES와 DENY_LINES를 항상 올바른 
+         +관계(WARN ≤ DENY)로 설정                                       
+      26 +- **Actual**: DENY_LINES만 낮추면 WARN_LINES(기본 500)보다 작아
+         +져서 중간 범위가 사라지는 버그 발생                            
+      27 +- **Takeaway**: 여러 임계값을 환경변수로 제공할 때는 스크립트  
+         +내에서 관계 검증(clamp)이 필요                                 
+      28 +                                                               
+      29 +When 여러 환경변수가 서로 의존적일 때 → 스크립트에서 일관성을  
+         +보정하는 guard 추가                                            
+
+⏺ plan.md도 완료 표시합니다.
+
+⏺ Read 1 file (ctrl+o to expand)
+
+⏺ Update(prompt-logs/260203-smart-read-hook/plan.md)
+  ⎿  Added 9 lines
+      127  6. Test binary: Read a PDF — should be allowed
+      128  7. Test env override: Set `CLAUDE_CORCA_SMART_READ_DENY_LINES=
+           100` in `~/.claude/.env`, verify lower threshold
+      129  
+      130 +## Status                                                     
+      131 +                                                              
+      132 +- ✅ plugin.json created                                      
+      133 +- ✅ hooks.json created                                       
+      134 +- ✅ smart-read.sh created (with WARN≤DENY clamp fix)         
+      135 +- ✅ marketplace.json updated                                 
+      136 +- ✅ README.md + README.ko.md updated                         
+      137 +- ✅ All test scenarios passed                                
+      138 +                                                              
+      139  ## Deferred Actions
+      140  
+      141  - [ ] None
+
+⏺ 구현이 완료되었습니다. retro를 실행하겠습니다.
+
+⏺ Skill(retro)
+  ⎿  Successfully loaded skill · 6 tools allowed
+
+⏺ retro를 작성하기 위해 필요한 자료들을 먼저 확인하겠습니다.
+
+⏺ Read 3 files (ctrl+o to expand)
+
+⏺ 이제 학습 자료를 검색하겠습니다.
+
+⏺ Skill(web-search)
+  ⎿  Successfully loaded skill · 1 tool allowed
+
+⏺ Bash(TAVILY_API_KEY="${TAVILY_API_KEY}" /Users/ted/.claude/plugins/cache/corca
+      -plugins/web-search/1.2.0/skills/web-search/scripts/web-search.sh search
+      "Claude Code h…)
+  ⎿  Error: Exit code 127
+     (eval):1: no such file or directory: /Users/ted/.claude/plugins/cache/corca
+     plugins/web-search/1.2.0/skills/web-search/scripts/web-search.sh
+
+⏺ Searched for 4 patterns, read 2 files (ctrl+o to expand)
+
+⏺ Actually, looking at the SKILL.md more carefully, this skill is designed to be
+   executed by Claude following the instructions (it's a skill, not a standalone
+   script). Let me just use the WebSearch tool or do a Bash curl call to Tavily.
+
+  Wait, the web-search plugin blocks WebSearch via hook. Let me just use Bash
+  with curl to Tavily directly.
+
+⏺ Bash([ -z "$TAVILY_API_KEY" ] && [ -f ~/.claude/.env ] && source
+      ~/.claude/.env && PAYLOAD=$(jq -n --arg q "Claude Code hooks PreToolUse
+      updatedInput additionalConte…)
+  ⎿  Error: Exit code 1
+
+⏺ Bash(source ~/.claude/.env 2>/dev/null; PAYLOAD=$(jq -n --arg q "Claude Code
+      hooks PreToolUse updatedInput additionalContext examples advanced
+      patterns" '{query: $q,…)
+  ⎿ HTTP: 200
+    PreToolUse hooks in Claude code return additionalContext to provide ext
+    ra information before tool use. They support advanced JSON output and c
+    … +48 lines (ctrl+o to expand)
+
+
+
+⏺ Bash(source ~/.claude/.env 2>/dev/null; PAYLOAD=$(jq -n --arg q "Claude Code
+      context window management token optimization large file strategies 2025"
+      '{query: $q, se…)
+  ⎿ HTTP: 200
+    - [Understanding Claude Code's Context Window](https://damiangalarza.co
+    m/posts/2025-12-08-understanding-claude-code-context-window/)
+    … +29 lines (ctrl+o to expand)
+
+
+⏺ 좋은 자료들을 찾았습니다. 이제 retro.md를 작성합니다.
+
+⏺ Write(prompt-logs/260203-smart-read-hook/retro.md)
+  ⎿  Wrote 40 lines to prompt-logs/260203-smart-read-hook/retro.md
+      1 # Retro: smart-read Hook Plugin
+      2 
+      3 > Session date: 2026-02-03
+      4 
+      5 ## 1. Context Worth Remembering
+      6 
+      7 - 유저는 별도 세션(exported.txt)에서 `@` 파일 첨부 vs 경로 텍스트
+        의 차이를 탐구하다가, 파일 크기 기반 지능적 읽기 전략을 구상했음.
+         CLAUDE.md에 규칙으로 넣는 방안까지 도출했으나, hook 플러그인이 
+        더 효과적이라는 결론에 도달.
+      8 - 유저는 이전 세션의 아이디어를 exported.txt로 내보내고, 새 세션
+        에서 구현을 이어가는 패턴을 사용. 이때 "이 대화를 hook으로 만들 
+        여지가 있을지" 같은 탐색적 질문으로 시작하여, 타당성 확인 후 구현
+        으로 진행.
+      9 - `PreToolUse` hook의 `updatedInput`, `additionalContext`, `permi
+        ssionDecision` 세 가지 출력이 이 플러그인의 핵심 도구. 특히 `addi
+        tionalContext`가 CLAUDE.md 방식의 상위 호환(턴 소모 없이 정보 주
+        입)이라는 점이 핵심 인사이트.
+     … +30 lines (ctrl+o to expand)
+
+⏺ retro.md를 작성했습니다. Section 2에서 CLAUDE.md 업데이트 제안이 있습니다.
+
+⏺ User answered Claude's questions:
+  ⎿  · CLAUDE.md에 커밋 전 로컬 설치 테스트 단계를 추가할까요? (현재: 
+     plan.md 완료 → lessons.md → retro → commit. 제안: plan.md 완료 → 
+     lessons.md → retro → **로컬 테스트** → commit) → 적용
+
+⏺ Read 1 file (ctrl+o to expand)
+
+⏺ Update(CLAUDE.md)
+  ⎿  Added 3 lines, removed 2 lines
+      23  1. Mark plan.md as done (✅ on completed items)
+      24  2. Update lessons.md with implementation learnings
+      25  3. Run `/retro`
+      26 -4. Commit and push                                             
+      27 -5. After committing plugin changes, update the marketplace and 
+         -verify globally installed plugin versions are current          
+      26 +4. For plugin changes: test locally with `/plugin install <name
+         +>@corca-plugins` before committing                             
+      27 +5. Commit and push                                             
+      28 +6. After committing plugin changes, update the marketplace and 
+         +verify globally installed plugin versions are current          
+      29  
+      30  ## Collaboration Style
+      31  
+
+⏺ CLAUDE.md 업데이트 완료했습니다. 이제 CLAUDE.md 워크플로우 4번에 따라 로컬
+  설치 테스트를 하고, 커밋하겠습니다.
+
+⏺ Bash(claude plugin install smart-read@corca-plugins 2>&1 || echo "Note: plugin
+       install may need to run inside Claude Code session")
+  ⎿ Installing plugin "smart-read@corca-plugins"...
+    ✘ Failed to install plugin "smart-read@corca-plugins": Plugin "smart-re
+    ad" not found in marketplace "corca-plugins"
+    Note: plugin install may need to run inside Claude Code session
+
+
+⏺ Bash(claude plugin marketplace update corca-plugins 2>&1 && claude plugin
+      install smart-read@corca-plugins 2>&1)
+  ⎿  Error: Exit code 1
+     Updating marketplace: corca-plugins...
+     Updating existing marketplace cache…
+     ✔ Successfully updated marketplace: corca-plugins
+     Installing plugin "smart-read@corca-plugins"...
+     ✘ Failed to install plugin "smart-read@corca-plugins": Plugin "smart-read" 
+     not found in marketplace "corca-plugins"
+
+⏺ For local testing before push, I need to install directly from the local path.
+   Let me check how to do this.
+
+
+  marketplace가 리모트에서 업데이트되기 때문에 아직 push 전이라 찾을 수
+  없습니다. 로컬 경로에서 직접 설치하겠습니다.
+
+⏺ Bash(claude plugin install --path
+      /Users/ted/codes/corca/claude-plugins/plugins/smart-read 2>&1)
+  ⎿  Error: Exit code 1
+     error: unknown option '--path'
+
+⏺ Bash(claude plugin install
+      /Users/ted/codes/corca/claude-plugins/plugins/smart-read 2>&1)
+  ⎿  Error: Exit code 1
+     Installing plugin 
+     "/Users/ted/codes/corca/claude-plugins/plugins/smart-read"...
+     ✘ Failed to install plugin 
+     "/Users/ted/codes/corca/claude-plugins/plugins/smart-read": Plugin 
+     "/Users/ted/codes/corca/claude-plugins/plugins/smart-read" not found in any
+     configured marketplace
+
+
+⏺ Bash(claude plugin install 2>&1 | head -30)
+  ⎿  error: missing required argument 'plugin'
+
+⏺ Bash(claude plugin --help 2>&1)
+  ⎿  Usage: claude plugin [options] [command]
+
+     Manage Claude Code plugins
+     … +20 lines (ctrl+o to expand)
+
+⏺ Bash(claude plugin validate
+      /Users/ted/codes/corca/claude-plugins/plugins/smart-read 2>&1)
+  ⎿  Error: Interrupted by user
+  ⎿  Interrupted · What should Claude do instead?
+
+❯ 저는 대략 이런 걸 썼었습니다. 당신이 스스로 못 찾다니 의외네요. claude    
+  --plugin-dir ./plugins/<path> --dangerously-skip-permissions --resume     
+
+⏺ 맞습니다. --plugin-dir로 로컬 플러그인을 직접 로드하는 방법이 있었는데, 못
+  찾은 건 부끄럽습니다. lessons.md에 기록하겠습니다.
+
+⏺ Read 1 file (ctrl+o to expand)
+
+⏺ Update(prompt-logs/260203-smart-read-hook/lessons.md)
+  ⎿  Added 8 lines
+      27  - **Takeaway**: 여러 임계값을 환경변수로 제공할 때는 스크립트 
+          내에서 관계 검증(clamp)이 필요
+      28  
+      29  When 여러 환경변수가 서로 의존적일 때 → 스크립트에서 일관성을 
+          보정하는 guard 추가
+      30 +                                                               
+      31 +### 로컬 플러그인 테스트 방법                                  
+      32 +                                                               
+      33 +- **Expected**: `claude plugin install`로 로컬 플러그인을 설치 
+         +하려 했으나, marketplace에 push 전이라 실패                    
+      34 +- **Actual**: `claude --plugin-dir ./plugins/<path>` 플래그로  
+         +로컬 플러그인 디렉토리를 직접 로드할 수 있음. `--dangerously-sk
+         +ip-permissions`와 `--resume`을 함께 사용.                      
+      35 +- **Takeaway**: push 전 로컬 테스트는 `--plugin-dir`가 정답. `p
+         +lugin install`은 marketplace에 이미 존재하는 플러그인용.       
+      36 +                                                               
+      37 +When 로컬 플러그인을 테스트할 때 → `claude --plugin-dir ./plugi
+         +ns/<name> --dangerously-skip-permissions --resume`             
+
+⏺ retro.md에도 반영합니다.
+
+⏺ Read 1 file (ctrl+o to expand)
+
+⏺ Update(prompt-logs/260203-smart-read-hook/retro.md)
+  ⎿  Added 4 lines
+      37  이 세션에서 새로운 skill gap은 발견되지 않았음. smart-read 자체
+          가 hook 플러그인으로 구현되었으며, 기존 플러그인 생태계(plan-an
+          d-lessons, web-search 등)의 패턴을 잘 따랐음.
+      38  
+      39  한 가지 향후 고려사항: smart-read hook이 실제 사용에서 어떤 패
+          턴으로 deny/warn이 발생하는지 로깅하는 기능이 있으면 임계값 튜
+          닝에 도움될 수 있음. 이는 별도 세션에서 검토할 사항.
+      40 +                                                               
+      41 +### Post-Retro Findings                                        
+      42 +                                                               
+      43 +- 로컬 플러그인 테스트 시 `claude plugin install`이 아닌 `claud
+         +e --plugin-dir ./plugins/<name>` 플래그를 사용해야 함. 에이전트
+         +가 이 방법을 모르고 `plugin install` → `plugin validate` 등을  
+         +시도하다 실패 — 유저가 직접 알려줌. CLAUDE.md나 docs/modifying-
+         +plugin.md에 로컬 테스트 명령어를 명시하면 재발 방지 가능.      
+
+⏺ 이제 커밋하겠습니다.
+
+⏺ Bash(git status)
+  ⎿  On branch feat/smart-read-hook
+     Changes not staged for commit:
+       (use "git add <file>..." to update what will be committed)
+     … +15 lines (ctrl+o to expand)
+
+⏺ Bash(git diff .claude-plugin/marketplace.json CLAUDE.md README.md
+      README.ko.md)
+  ⎿ diff --git a/.claude-plugin/marketplace.json b/.claude-plugin/marketpla
+    ce.json
+    index 4bf2b9e..3057b6f 100644
+    … +181 lines (ctrl+o to expand)
+
+
+⏺ Bash(git log --oneline -5)
+  ⎿ 8d30c64 gather-context v1.1.0: autonomous supplementary research via We
+    bSearch
+    00a5a3c Fix missing web-search hook docs in READMEs, enable gather-cont
+    … +4 lines (ctrl+o to expand)
+
+
+
+⏺ Bash(git add .claude-plugin/marketplace.json CLAUDE.md README.md README.ko.md
+      plugins/smart-read/ prompt-logs/260203-smart-read-hook/)
+  ⎿  (No content)
+
+⏺ Bash(git commit -m "smart-read v1.0.0: PreToolUse hook for intelligent file
+      reading based on size…)
+  ⎿ [feat/smart-read-hook e44828a] smart-read v1.0.0: PreToolUse hook for i
+    ntelligent file reading based on size
+     10 files changed, 420 insertions(+), 2 deletions(-)
+    … +6 lines (ctrl+o to expand)
+
+
+⏺ Bash(git status)
+  ⎿  On branch feat/smart-read-hook
+     Untracked files:
+       (use "git add <file>..." to include in what will be committed)
+     … +6 lines (ctrl+o to expand)
+
+⏺ 커밋 완료했습니다. 정리하면:
+
+  완료된 작업:
+  - plugins/smart-read/ — hook 플러그인 생성 (plugin.json, hooks.json,
+  smart-read.sh)
+  - marketplace.json, README.md, README.ko.md 업데이트
+  - CLAUDE.md에 로컬 테스트 단계 추가
+  - prompt-logs에 plan.md, lessons.md, retro.md 작성
+
+  --plugin-dir 건에 대해: 유저가 알려준 로컬 테스트 방법을 lessons.md와
+  retro.md에 기록했습니다. CLAUDE.md 4번 항목은 현재 /plugin install로 되어
+  있는데, push 전 테스트 시에는 --plugin-dir를 써야 한다는 점도 반영하면 좋을 것
+   같습니다. 수정할까요?
+
+✻ Sautéed for 1m 3s
+
+❯ 음.. 저 방식으로는 세션을 껐다가 켜야 로컬 테스트가 가능한 거 같은데 세션 
+  내에서 방금 만든 스킬을 어떻게 로컬 테스트하는지는 저도 모르겠습니다. 제  
+  도움이 있어야만 가능하다면 좀 아쉬운데요. 더 찾아볼까요?                  
+
+⏺ 좋은 질문입니다. 세션 내 핫 리로드가 가능한지 공식 문서와 CLI를
+  확인해보겠습니다.
+
+⏺ Bash(source ~/.claude/.env 2>/dev/null; PAYLOAD=$(jq -n --arg q "Claude Code
+      plugin hot reload test locally current session without restart 2025 2026"
+      '{query: $q, s…)
+  ⎿ HTTP: 200
+    To hot reload settings in Claude Code without restarting, use the /relo
+    adSettings command. This feature is a requested enhancement. The latest
+    … +68 lines (ctrl+o to expand)
+
+
+
+⏺ Bash(claude --help 2>&1 | grep -i -E "plugin|reload|refresh")
+  ⎿   --plugin-dir <paths...>                           Load plugins from d
+    irectories for this session only (repeatable)
+      plugin                                            Manage Claude Code
+    plugins
+
+
+⏺ Bash(source ~/.claude/.env 2>/dev/null; PAYLOAD=$(jq -n --arg q "Claude Code
+      /plugin install local directory path development testing in-session"
+      '{query: $q, search…)
+  ⎿ HTTP: 200
+    To install a local plugin in Claude Code, add the local directory as a
+    marketplace and then install the plugin. Plugins must be in the correct
+    … +101 lines (ctrl+o to expand)
+
+
+⏺ 흥미로운 단서를 찾았습니다. 로컬 디렉토리를 marketplace로 추가하는 방법이 있을
+   수 있습니다. 공식 문서와 해당 이슈를 더 확인하겠습니다.
+
+⏺ Fetch(https://code.claude.com/docs/en/plugins-reference)
+  ⎿  Received 28.4KB (200 OK)
+
+⏺ Fetch(https://github.com/anthropics/claude-code/issues/12457)
+  ⎿  Received 274.6KB (200 OK)
+
+⏺ Fetch(https://code.claude.com/docs/en/hooks)
+  ⎿  Received 71.7KB (200 OK)
+
+⏺ 공식 문서에서 핵심 정보를 찾았습니다.
+
+  조사 결과
+
+  세션 내 핫 리로드는 불가
+
+  공식 문서에 명시되어 있습니다:
+
+  "Direct edits to hooks in settings files don't take effect immediately. Claude
+   Code captures a snapshot of hooks at startup and uses it throughout the 
+  session."
+
+  Hook은 세션 시작 시 스냅샷으로 캡처되고 세션 내내 그 스냅샷을 사용합니다.
+  플러그인도 설치 시 캐시 디렉토리로 복사되므로, 세션 중 플러그인을 설치해도
+  hook이 즉시 발동하지 않습니다.
+
+  가능한 방법 3가지
+  ┌─────────────────────────────┬─────────────────┬─────────────────────┐
+  │            방법             │    세션 내?     │    통합 테스트?     │
+  ├─────────────────────────────┼─────────────────┼─────────────────────┤
+  │ stdin 파이핑 (우리가 한 것) │ O               │ X (스크립트 로직만) │
+  ├─────────────────────────────┼─────────────────┼─────────────────────┤
+  │ /hooks 메뉴로 직접 추가     │ O (가능성 있음) │ O                   │
+  ├─────────────────────────────┼─────────────────┼─────────────────────┤
+  │ --plugin-dir로 재시작       │ X               │ O                   │
+  └─────────────────────────────┴─────────────────┴─────────────────────┘
+  /hooks 메뉴 방식이 가장 유망합니다. 공식 문서에:
+
+  "Type /hooks in Claude Code to open the interactive hooks manager, where you 
+  can view, add, and delete hooks"
+  "If hooks are modified externally, Claude Code warns you and requires review 
+  in the /hooks menu before changes apply."
+
+  즉 /hooks 메뉴에서 PreToolUse → Read 매처로 로컬 스크립트 경로를 직접
+  추가하면, 플러그인으로 설치하지 않아도 동일한 hook을 세션 내에서 테스트할 수
+  있을 가능성이 있습니다. 다만 스냅샷 정책과 충돌하는지는 직접 확인이
+  필요합니다.
+
+  결론
+
+  에이전트 혼자서 세션 내 통합 테스트를 완결하기는 현재 구조상 어렵습니다. 가장
+  현실적인 워크플로우는:
+
+  1. 스크립트 로직: stdin 파이핑으로 세션 내 검증 (완료)
+  2. 통합 테스트: --plugin-dir로 새 세션을 열거나, /hooks로 직접 추가해서 확인
+
+  이 내용을 docs/modifying-plugin.md에 로컬 테스트 가이드로 문서화할까요?
+
+✻ Churned for 2m 7s
+
+❯ 그래주세요. 그런데 별개 질문인데, 지금 당신이 계속 web-search를 bash로    
+  하고 있는 건 web-search에서 API 호출하다가 에러가 나서 그런 건가요?       
+
+⏺ 아닙니다. /web-search skill을 Skill 도구로 호출하면 SKILL.md가 로드되고, 그
+  안의 지시에 따라 제가 직접 curl로 Tavily/Exa API를 호출하는 구조입니다.
+  스크립트 파일이 따로 있는 게 아닙니다.
+
+  문제는 첫 호출 때 제가 실행 가능한 .sh 스크립트를 찾으려 했다가 못 찾고, 그냥
+  curl을 직접 친 겁니다. 결과적으로 SKILL.md가 시키는 것과 동일한 작업을 한
+  건데, Skill 도구를 통해 로드된 지시를 무시하고 우회한 셈이라
+  비효율적이었습니다.
+
+  올바른 흐름은: Skill("web-search", args: "query") → SKILL.md 로드 → 지시에
+  따라 curl 실행. 제가 한 것은: Skill 호출 → 스크립트 파일 찾기 실패 → 수동
+  curl. 같은 API를 치긴 했지만 skill의 query intelligence(시간 감지, 토픽 분류
+  등)를 건너뛴 겁니다.
+
+  이제 docs 업데이트를 하겠습니다.
+
+⏺ Read 1 file (ctrl+o to expand)
+
+⏺ Write(docs/modifying-plugin.md)
+  ⎿  Added 33 lines, removed 6 lines
+      11  
+      12  Testing methods vary by plugin type:
+      13  
+      14 -- **If a test script exists** (e.g., `attention-hook`): Run the
+         - script                                                        
+      15 -  ```bash                                                      
+      16 -  plugins/attention-hook/hooks/scripts/attention.test.sh       
+      17 -  ```                                                          
+      18 -- **For skills**: Apply locally and run directly to verify beha
+         -vior                                                           
+      14 +### Hook scripts (unit test)                                   
+      15  
+      16 +Test hook logic by piping JSON to stdin. This works in the curr
+         +ent session without any installation:                          
+      17 +                                                               
+      18 +```bash                                                        
+      19 +# Example: test a PreToolUse hook for Read                     
+      20 +echo '{"tool_input":{"file_path":"/path/to/file.txt"}}' | plugi
+         +ns/<name>/hooks/scripts/<script>.sh                            
+      21 +```                                                            
+      22 +                                                               
+      23 +Check exit code and stdout JSON to verify behavior.            
+      24 +                                                               
+      25 +If a dedicated test script exists (e.g., `attention-hook`), run
+         + it:                                                           
+      26 +```bash                                                        
+      27 +plugins/attention-hook/hooks/scripts/attention.test.sh         
+      28 +```                                                            
+      29 +                                                               
+      30 +### Skills                                                     
+      31 +                                                               
+      32 +Apply locally and run directly to verify behavior.             
+      33 +                                                               
+      34 +### Integration test (hook fires on real tool calls)           
+      35 +                                                               
+      36 +Hook plugins require Claude Code to load the hook at startup. T
+         +here is no hot-reload — hooks are **snapshot at session start**
+         + (see [official docs](https://code.claude.com/docs/en/hooks)). 
+      37 +                                                               
+      38 +Options for integration testing:                               
+      39 +                                                               
+      40 +1. **`--plugin-dir` (recommended)**: Start a new Claude Code se
+         +ssion with the local plugin:                                   
+      41 +   ```bash                                                     
+      42 +   claude --plugin-dir ./plugins/<name> --dangerously-skip-perm
+         +issions --resume                                               
+      43 +   ```                                                         
+      44 +                                                               
+      45 +2. **`/hooks` menu**: Add the hook manually via `/hooks` in the
+         + current session, pointing to the local script path. Changes go
+         + through a review process before taking effect.                
+      46 +                                                               
+      47  ## 3. Apply Locally
+      48  
+      49  Plugins are copied to cache on installation, so you must reinst
+          all after making changes:
+     ...
+      58  The plugin has been updated. To apply:
+      59  1. /plugin marketplace update
+      60  2. /plugin install <plugin-name>@corca-plugins
+      34 -```                                                            
+      61   No newline at end of file
+      62 +```                                                            
+
+⏺ lessons.md도 업데이트합니다.
+
+⏺ Read 1 file (ctrl+o to expand)
+
+⏺ Update(prompt-logs/260203-smart-read-hook/lessons.md)
+  ⎿  Added 16 lines
+      35  - **Takeaway**: push 전 로컬 테스트는 `--plugin-dir`가 정답. `p
+          lugin install`은 marketplace에 이미 존재하는 플러그인용.
+      36  
+      37  When 로컬 플러그인을 테스트할 때 → `claude --plugin-dir ./plugi
+          ns/<name> --dangerously-skip-permissions --resume`
+      38 +                                                               
+      39 +### Hook은 세션 시작 시 스냅샷                                 
+      40 +                                                               
+      41 +- **Expected**: 세션 내에서 플러그인을 설치하거나 hook을 수정하
+         +면 즉시 반영                                                   
+      42 +- **Actual**: 공식 문서 — "hooks are snapshot at session start"
+         +. 세션 중 수정해도 즉시 반영 안 됨. `/hooks` 메뉴에서 리뷰 후  
+         +적용하거나, 새 세션 필요.                                      
+      43 +- **Takeaway**: hook 통합 테스트는 반드시 새 세션(`--plugin-dir
+         +`) 또는 `/hooks` 리뷰를 거쳐야 함. stdin 파이핑은 로직 검증용. 
+      44 +                                                               
+      45 +When hook 통합 테스트를 할 때 → 스크립트 로직은 stdin 파이핑,  
+         +실제 발동은 새 세션 or `/hooks` 리뷰                           
+      46 +                                                               
+      47 +### web-search skill은 지시 기반                               
+      48 +                                                               
+      49 +- **Expected**: `/web-search` skill 호출 시 실행 가능한 스크립 
+         +트 파일이 있을 것                                              
+      50 +- **Actual**: SKILL.md가 로드되고, 에이전트가 지시에 따라 직접 
+         +curl을 실행하는 구조. 별도 .sh 파일 없음.                      
+      51 +- **Takeaway**: skill은 "스크립트 실행"이 아니라 "지시 로드" — 
+         +Skill 도구 호출 후 로드된 지시를 따라야 함                     
+      52 +                                                               
+      53 +When skill을 호출했는데 스크립트가 없을 때 → SKILL.md의 지시를 
+         +따라 직접 실행하는 구조인지 확인                               
+
+⏺ 이제 amend가 아닌 새 커밋으로 추가합니다.
+
+⏺ Bash(git add docs/modifying-plugin.md
+      prompt-logs/260203-smart-read-hook/lessons.md && git commit -m "Add local
+      testing guide to modifying-plugin.md, update lessons…)
+  ⎿ [feat/smart-read-hook c027db7] Add local testing guide to modifying-plu
+    gin.md, update lessons
+     2 files changed, 49 insertions(+), 6 deletions(-)
+
+
+⏺ 완료했습니다. 정리하면:
+
+  docs/modifying-plugin.md 변경사항:
+  - Hook 단위 테스트: stdin 파이핑 (세션 내 즉시 가능)
+  - 통합 테스트: --plugin-dir (추천) 또는 /hooks 메뉴
+  - Hook 스냅샷 정책 명시 + 공식 문서 링크
+
+  web-search 건: 스크립트 파일이 없는 게 정상입니다. SKILL.md가 로드되면 제가 그
+   안의 지시(API 엔드포인트, curl 패턴 등)를 따라 직접 실행하는 구조인데,
+  스크립트를 찾으려 한 게 실수였습니다. lessons.md에 기록했습니다.
+
+✻ Worked for 1m 8s
