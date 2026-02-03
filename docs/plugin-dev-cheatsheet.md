@@ -91,6 +91,8 @@ Keep SKILL.md < 500 lines. Move details to `references/`.
 
 Matchers: `PreToolUse`, `PostToolUse`, `Notification` (idle_prompt, etc.)
 
+For simple context injection (no JSON formatting), use `"type": "prompt"` instead of `"type": "command"`.
+
 ## Environment Variables
 
 Naming: `CLAUDE_CORCA_{PLUGIN_NAME}_{SETTING}`
@@ -109,6 +111,7 @@ Naming: `CLAUDE_CORCA_{PLUGIN_NAME}_{SETTING}`
 - Cross-platform (macOS + Linux): avoid `sed -i ''` (macOS-only)
 - Minimal deps: prefer bash + curl, minimize python3/node
 - Use `#!/usr/bin/env bash` and `set -euo pipefail`
+- Bash gotcha: `((var++))` returns exit code 1 when var is 0, failing under `set -e`. Use `var=$((var + 1))` instead.
 
 ## Testing
 
@@ -117,7 +120,7 @@ Naming: `CLAUDE_CORCA_{PLUGIN_NAME}_{SETTING}`
 echo '{"tool_input":{"file_path":"/path/to/file"}}' | plugins/{name}/hooks/scripts/{script}.sh
 ```
 
-**Integration** — start new session with plugin loaded:
+**Integration** — hooks are **snapshots at session start** (no hot-reload). Start a new session:
 ```bash
 claude --plugin-dir ./plugins/{name} --dangerously-skip-permissions --resume
 ```

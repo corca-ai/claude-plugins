@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] - 2026-02-03
+
+### Added
+- Hooks: `smart-read` (1.0.0) — PreToolUse hook that enforces intelligent file reading based on file size (warn >500 lines, deny >2000 lines)
+- Skills (local): `plugin-deploy` — local skill to automate post-modification plugin lifecycle
+- Docs: `docs/plugin-dev-cheatsheet.md` — quick reference to reduce repeated doc reads
+- Scripts: `scripts/update-all.sh` — bulk marketplace + plugin update script
+
+### Changed
+- Skills: `web-search` (2.0.0) — refactored to script delegation pattern (SKILL.md → wrapper scripts for API execution); added PreToolUse hook to redirect built-in WebSearch to `/web-search`
+- Skills: `gather-context` (1.1.1) — applied 3-tier env loading to slack-api.mjs; loosely coupled with WebSearch (hook handles redirect)
+- Skills: `retro` (1.3.2) — minor refinements
+- Hooks: `plan-and-lessons` (1.1.0) — protocol timing: lessons.md created alongside plan.md, not after implementation
+- Docs: comprehensive doc audit — slimmed claude-marketplace.md (510→43 lines), api-reference.md (381→56 lines); updated project-context.md, cheatsheet, CHANGELOG
+
 ## [1.8.0] - 2026-01-30
 
 ### Changed

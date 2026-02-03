@@ -5,7 +5,6 @@ Accumulated context from retrospectives. Each session's retro may add to this do
 ## Project
 
 - corca-plugins is a Claude Code plugin marketplace for "AI Native Product Teams"
-- Contains skills (clarify, interview, suggest-tidyings, retro, gather-context, web-search), hooks (attention-hook, plan-and-lessons), and supporting docs
 - Plan & Lessons Protocol creates `prompt-logs/{YYMMDD}-{title}/` per session with plan.md, lessons.md, and optionally retro.md
 
 ## Design Principles
@@ -21,9 +20,23 @@ Accumulated context from retrospectives. Each session's retro may add to this do
 - Lessons and retro: written in the user's language
 - Plugin structure: `plugins/{name}/.claude-plugin/plugin.json` + `plugins/{name}/skills/{name}/SKILL.md`
 
+## Architecture Patterns
+
+- **Script delegation**: Execution-heavy skills (web-search, gather-context) delegate API calls to wrapper scripts. SKILL.md handles intent analysis and parameter decisions; scripts handle env loading, JSON building, curl, and response formatting. This reduces context cost and improves reliability.
+- **Hook-based tool redirect**: Use PreToolUse hooks with `permissionDecision: "deny"` to redirect built-in tools to custom skills (e.g., WebSearch → `/web-search`). Enables loose coupling between plugins.
+- **3-tier env loading**: Shell environment → `~/.claude/.env` → grep shell profiles (fallback). All credential-loading scripts must use this pattern.
+- **Local vs marketplace**: Repo-specific automation → `.claude/skills/` (e.g., plugin-deploy). Cross-project utility → `plugins/` marketplace.
+
 ## Hook Configuration
 
 - Project hooks go in `.claude/settings.json` under the `"hooks"` key — NOT `.claude/hooks.json` (which is plugin-only format)
 - EnterPlanMode hook is now provided by the `plan-and-lessons` plugin (no longer in `.claude/settings.json`)
 - `type: prompt` hooks work with any hook event and are simpler for context injection (no JSON formatting needed)
+- Hooks are **snapshots at session start** — no hot-reload. Requires new session or `/hooks` review to pick up changes.
 - Claude Code hook docs: https://code.claude.com/docs/en/hooks.md
+
+## Plugins
+
+- Contains skills (clarify, interview, suggest-tidyings, retro, gather-context, web-search), hooks (attention-hook, plan-and-lessons, smart-read), and supporting docs
+- `smart-read` hook: PreToolUse → Read, enforces file-size-aware reading (warn >500 lines, deny >2000 lines)
+- `web-search` hook: PreToolUse → WebSearch, redirects to `/web-search` skill
