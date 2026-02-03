@@ -13,6 +13,17 @@ Detailed curl patterns, output formats, and error handling for the web-search sk
 
 Only check the key required for the invoked subcommand. Do not require both keys at once.
 
+### Loading Keys
+
+Always load API keys with this pattern before any API call:
+
+```bash
+# Shell env first, then ~/.claude/.env fallback
+[ -z "$TAVILY_API_KEY" ] && [ -f ~/.claude/.env ] && source ~/.claude/.env
+```
+
+Do NOT use `grep | cut` to extract values from `.env` files — this breaks on quoted values and `export` prefixes.
+
 ---
 
 ## JSON Builder Helper
