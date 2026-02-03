@@ -124,12 +124,21 @@ claude --plugin-dir ./plugins/{name} --dangerously-skip-permissions --resume
 
 **Skills** — verify SKILL.md frontmatter and script executability.
 
+## Version Bump Rules
+
+| Change type | Bump | Examples |
+|------------|------|---------|
+| Bug fix, typo, minor tweak | patch | Fix script error, update wording |
+| New feature, new flag, new capability | minor | Add --deep flag, new subcommand |
+| Breaking change, renamed skill, changed API | major | Rename /search → /web-search |
+
 ## Deploy Workflow
 
-1. Bump version in `plugin.json`
+1. Bump version in `plugin.json` (see version bump rules above)
 2. Sync `marketplace.json` entry (version if listed, description, keywords)
-3. Update `README.md` and `README.ko.md` (table + detail section)
-4. New plugins: check `AI_NATIVE_PRODUCT_TEAM.md` for link opportunities
-5. Test locally
-6. Commit and push
-7. Run `bash scripts/update-all.sh`
+3. Update `CHANGELOG.md` if the plugin has one (describe what changed)
+4. Update `README.md` and `README.ko.md` (table + detail section)
+5. New plugins: check `AI_NATIVE_PRODUCT_TEAM.md` for link opportunities
+6. Test locally
+7. Commit and push
+8. Run `bash scripts/update-all.sh`

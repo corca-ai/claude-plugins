@@ -1,0 +1,541 @@
+
+ ▐▛███▜▌   Claude Code v2.1.12
+▝▜█████▛▘  Opus 4.5 · Claude Max
+  ▘▘ ▝▝    ~/codes/claude-plugins
+
+❯ prompt-logs/260203-smart-read-hook/plan-plugin-automation-skill.md 를     
+  plan-and-lesson 프로토콜에 따라 구현해주세요. 구현 후 가능한 부분은       
+  최대한 로컬 테스트, retro, commit, push. 필요시 저를 호출해주세요.        
+  세션에서 나갔다 오겠습니다.                                               
+
+● 먼저 계획 파일과 필수 문서들을 읽겠습니다.
+
+● Read(prompt-logs/260203-smart-read-hook/plan-plugin-automation-skill.md)
+  ⎿  Read 146 lines
+
+● 계획 파일과 문서들을 확인했습니다. 기존 플러그인 구조와 marketplace.json을 참조하겠습니다.
+
+● Explore(Explore existing plugin structures) Haiku 4.5
+  ⎿  Done (31 tool uses · 31.6k tokens · 57s)                            
+
+
+● 기존 스크립트와 참조할 SKILL.md를 확인하겠습니다.
+
+● Read(plugins/retro/skills/retro/SKILL.md)
+  ⎿  Read 134 lines
+
+● AI_NATIVE_PRODUCT_TEAM.md도 확인하겠습니다.
+
+● Read(docs/claude-marketplace.md)
+  ⎿  Read 511 lines
+
+● 충분한 컨텍스트를 확보했습니다. 구현을 시작하겠습니다.
+
+● Bash(mkdir -p
+      /home/hwidong/codes/claude-plugins/plugins/plugin-deploy/.claude-plugin &&
+       mkdir -p
+      /home/hwidong/codes/claude-plugins/plugins/plugin-deploy/skills/plu…)
+  ⎿  (No content)
+
+● Write(prompt-logs/260203-plugin-deploy/lessons.md)
+  ⎿  Wrote 16 lines to prompt-logs/260203-plugin-deploy/lessons.md       
+      1 # Lessons: plugin-deploy Skill Implementation
+      2 ### 기존 플러그인 패턴 분석
+      3 - **Expected**: 플러그인마다 구조가 다를 것
+      4 - **Actual**: 모든 플러그인이 일관된 패턴 사용 (plugin.json 필드,
+         디렉토리 구조, env 로딩)
+      5 - **Takeaway**: `check-consistency.sh`에서 이 일관된 패턴을 기준
+        으로 검증하면 됨
+      6 ### Open Questions 해결
+     … +6 lines (ctrl+o to expand)
+
+● 이제 핵심 파일들을 작성하겠습니다.
+
+● Write(plugins/plugin-deploy/skills/plugin-deploy/SKILL.md)
+  ⎿  Error: Interrupted by user
+  ⎿  Interrupted · What should Claude do instead?
+
+❯ U always check similar dirs and files at first when adding/modifying      
+  plugins which seems little token-wasting. Is it possible to create a new  
+  doc which helps make it faster and token-efficient? What do you think? (i 
+  know it's off-topic)                                                      
+  ⎿  Interrupted · What should Claude do instead?
+
+❯ Also, I think this plugin-deploy should not be plugin, just local skill   
+  since it is too specific to this repo itself. I want to here your frank   
+  opinion                                                                   
+
+● 두 가지 모두 좋은 지적입니다.
+
+  1. 토큰 낭비 문제: 맞습니다. CLAUDE.md가 "코드 변경 전 이 문서들을 읽어라"라고 하니까 매번 README, adding-plugin, modifying-plugin, skills-guide를 전부 읽습니다. 해결 방법은 두 가지인데:
+
+  - A) 치트시트 문서: plugin.json 스키마, 디렉토리 구조, marketplace.json 포맷, env 네이밍 컨벤션 등 핵심 패턴을 한 파일로 압축. 매번 4개 문서 대신 1개만 읽으면 됨
+  - B) CLAUDE.md 조건 분기: "새 플러그인이면 adding-plugin.md, 수정이면 modifying-plugin.md만 읽어라"로 세분화
+
+  B가 유지보수 측면에서 낫지만, 실질적으로 효과가 큰 건 A입니다. 원하시면 이 세션에서 같이 만들 수 있습니다.
+
+  2. plugin-deploy는 로컬 스킬이어야 한다: 동의합니다. 솔직히 맞는 말입니다.
+
+  - clarify, retro, web-search는 어떤 프로젝트에서든 쓸 수 있는 범용 스킬
+  - plugin-deploy는 이 레포 안에서만 의미가 있음 — marketplace.json, README.md, AI_NATIVE_PRODUCT_TEAM.md 같은 이 레포 특정 파일을 직접 참조
+  - 마켓플레이스에 올려봤자 다른 사람이 설치할 이유가 없음
+
+  .claude/skills/plugin-deploy/에 로컬 스킬로 두는 게 맞습니다. 방금 만든 plugins/plugin-deploy/ 구조를 .claude/skills/로 옮기겠습니다. 그러면 marketplace.json, README 업데이트도 필요 없고 — 이 스킬 자체가 자기 자신을 검증하는 재귀적 상황도 피할 수 있습니다.
+
+  방향 수정해서 진행할까요?
+
+❯ 1. 효과 높은 걸로 지금 먼저 합시다.                                       
+  2. 좋습니다.                                                              
+
+● 먼저 기존에 만든 plugins/plugin-deploy를 정리하고, 치트시트와 로컬 스킬을 병렬로 만들겠습니다.
+
+● Bash(mkdir -p
+      /home/hwidong/codes/claude-plugins/.claude/skills/plugin-deploy/scripts &&
+       mkdir -p
+      /home/hwidong/codes/claude-plugins/.claude/skills/plugin-deploy/ref…)
+  ⎿  (No content)
+
+● 치트시트를 만들겠습니다. 4개 문서에서 핵심만 추출합니다.
+
+● Write(docs/plugin-dev-cheatsheet.md)
+  ⎿  Wrote 136 lines to docs/plugin-dev-cheatsheet.md                    
+      1 # Plugin Development Cheat Sheet
+      2 Quick reference for adding and modifying plugins. For full detail
+        s, see [adding-plugin.md](adding-plugin.md), [modifying-plugin.md
+        ](modifying-plugin.md), [skills-guide.md](skills-guide.md), [clau
+        de-marketplace.md](claude-marketplace.md).
+      3 ## Directory Patterns
+      4 ```
+      5 # Skill-only (e.g., clarify, retro)
+      6 plugins/{name}/
+      7 ├── .claude-plugin/plugin.json
+     … +126 lines (ctrl+o to expand)
+
+● 이제 CLAUDE.md를 수정해서 치트시트를 참조하도록 하겠습니다.
+
+● Read(CLAUDE.md)
+  ⎿  Read 46 lines
+
+● Update(CLAUDE.md)
+  ⎿  Added 8 lines, removed 5 lines                                      
+       1  ## Before You Start
+       2  
+       3  **IMPORTANT**: Before modifying ANY code, you MUST:
+       4 -1. Read `README.md` — check if your changes affect documented c
+         -ontent                                                         
+       5 -2. For plugin work, also read:                                 
+       6 -   - [Modifying/Testing/Deploying Plugins](docs/modifying-plugi
+         -n.md)                                                          
+       7 -   - [Adding New Plugins](docs/adding-plugin.md)               
+       8 -   - [Skills Guide](docs/skills-guide.md) — skill structure, en
+         -v var conventions, design principles                           
+       4 +1. Read the [Plugin Dev Cheat Sheet](docs/plugin-dev-cheatsheet
+         +.md) — covers directory patterns, schemas, testing, and deploy 
+         +workflow                                                       
+       5 +2. Check if your changes affect `README.md` or `README.ko.md`  
+       6  
+       7 +For deeper reference (only when the cheat sheet isn't enough): 
+       8 +- [Modifying/Testing/Deploying Plugins](docs/modifying-plugin.m
+         +d)                                                             
+       9 +- [Adding New Plugins](docs/adding-plugin.md)                  
+      10 +- [Skills Guide](docs/skills-guide.md)                         
+      11 +- [Marketplace Schema](docs/claude-marketplace.md)             
+      12 +                                                               
+      13  Do NOT proceed with code changes until completing the above ste
+          ps.
+      14  
+      15  After modifying code, update any affected documentation.
+
+● 이제 로컬 스킬 핵심 파일들을 작성합니다.
+
+● Write(.claude/skills/plugin-deploy/references/checklist.md)
+  ⎿  Wrote 78 lines to .claude/skills/plugin-deploy/references/checklist.
+
+      1 # Plugin Deploy Checklist
+      2 Detailed reference for edge cases. SKILL.md handles the main flow
+        ; consult this for specifics.
+      3 ## New Plugin Checklist
+      4 - [ ] `plugins/{name}/` directory with correct structure
+      5 - [ ] `.claude-plugin/plugin.json` with name, description, versio
+        n, author, repository
+      6 - [ ] SKILL.md (skill) or hooks.json (hook) or both (hybrid)
+      7 - [ ] marketplace.json entry: name, source (`./plugins/{name}`), 
+        description, keywords
+     … +68 lines (ctrl+o to expand)
+
+● Bash(chmod +x /home/hwidong/codes/claude-plugins/.claude/skills/plugin-deploy/
+      scripts/check-consistency.sh)
+  ⎿  (No content)
+
+● 로컬 테스트 — 기존 플러그인들로 스크립트를 검증합니다.
+
+● Bash(bash .claude/skills/plugin-deploy/scripts/check-consistency.sh retro)
+  ⎿  Error: Exit code 1
+     {"error": "Plugin directory not found: plugins/retro/"}
+
+● REPO_ROOT 경로 계산이 잘못됐습니다. 수정합니다.
+
+● Update(.claude/skills/plugin-deploy/scripts/check-consistency.sh)
+  ⎿  Added 1 line, removed 1 line                                        
+       7  
+       8  set -euo pipefail
+       9  
+      10 -REPO_ROOT="$(cd "$(dirname "$0")/../../../../.." && pwd)"      
+      10 +REPO_ROOT="$(cd "$(dirname "$0")/../../../.." && pwd)"         
+      11  
+      12  PLUGIN_NAME="${1:-}"
+      13  IS_NEW=false
+
+● Bash(bash .claude/skills/plugin-deploy/scripts/check-consistency.sh retro)
+  ⎿  {                                
+       "plugin_name": "retro",
+       "plugin_dir": "plugins/retro/",
+     … +17 lines (ctrl+o to expand)
+
+● JSON 출력에 중복 값 버그가 있습니다. 조건부 확장이 둘 다 실행되는 문제입니다.
+
+● Read(.claude/skills/plugin-deploy/scripts/check-consistency.sh)
+  ⎿  Read 92 lines
+
+● Update(.claude/skills/plugin-deploy/scripts/check-consistency.sh)
+  ⎿  Added 7 lines, removed 4 lines                                      
+      139  fi
+      140  
+      141  # --- Output JSON ---
+      142 +# Helper: output "value" or null for optional strings         
+      143 +json_str() { if [[ -n "$1" ]]; then echo "\"$1\""; else echo "
+          +null"; fi; }                                                  
+      144 +                                                              
+      145  gaps_json="["
+      146  for i in "${!gaps[@]}"; do
+      147    if [[ $i -gt 0 ]]; then
+     ...
+      156  {
+      157    "plugin_name": "$PLUGIN_NAME",
+      158    "plugin_dir": "plugins/$PLUGIN_NAME/",
+      156 -  "plugin_json_version": ${plugin_json_version:+"\"$plugin_jso
+          -n_version\""}${plugin_json_version:-null},                    
+      157 -  "marketplace_version": ${marketplace_version:+"\"$marketplac
+          -e_version\""}${marketplace_version:-null},                    
+      159 +  "plugin_json_version": $(json_str "$plugin_json_version"),  
+      160 +  "marketplace_version": $(json_str "$marketplace_version"),  
+      161    "in_marketplace": $in_marketplace,
+      162    "detected_new": $detected_new,
+      163    "version_match": $version_match,
+     ...
+      167    "plugin_type": "$plugin_type",
+      168    "has_skill": $has_skill,
+      169    "has_hooks": $has_hooks,
+      167 -  "skill_md": ${skill_md:+"\"$skill_md\""}${skill_md:-null},  
+      168 -  "hooks_json": ${hooks_json:+"\"$hooks_json\""}${hooks_json:-
+          -null},                                                        
+      170 +  "skill_md": $(json_str "$skill_md"),                        
+      171 +  "hooks_json": $(json_str "$hooks_json"),                    
+      172    "gap_count": ${#gaps[@]},
+      173    "gaps": $gaps_json
+      174  }
+
+● 다시 테스트합니다.
+
+● Bash(bash .claude/skills/plugin-deploy/scripts/check-consistency.sh 2>&1; echo
+       "exit: $?")
+  ⎿  {                                                             
+       "error": "Usage: check-consistency.sh <plugin-name> [--new]"
+     }
+     exit: 1
+
+● JSON 출력 정상, 에러 케이스 정상. --new 플래그도 테스트합니다.
+
+● Bash(bash .claude/skills/plugin-deploy/scripts/check-consistency.sh smart-read
+       --new)
+  ⎿  {                                     
+       "plugin_name": "smart-read",
+       "plugin_dir": "plugins/smart-read/",
+     … +16 lines (ctrl+o to expand)
+
+● 모든 테스트 통과. SKILL.md 구조도 확인합니다.
+
+● Bash(ls -la .claude/skills/plugin-deploy/ && echo "---" && ls -la
+      .claude/skills/plugin-deploy/scripts/ && echo "---" && ls -la
+      .claude/skills/plugin-deploy/referenc…)
+  ⎿  total 20                                         
+     drwxrwxr-x 4 hwidong hwidong 4096 Feb  3 19:30 .
+     drwxrwxr-x 3 hwidong hwidong 4096 Feb  3 19:28 ..
+     … +13 lines (ctrl+o to expand)
+
+● plan.md와 lessons.md를 업데이트합니다.
+
+● Read(prompt-logs/260203-plugin-deploy/plan.md)
+  ⎿  Read 51 lines
+
+● Write(prompt-logs/260203-plugin-deploy/lessons.md)
+  ⎿  Added 24 lines                                                      
+      13  - **Takeaway**: 플랜에 방향성이 적혀 있으면 그대로 따르고, 구현
+           중 발견된 문제만 질문
+      14  
+      15  When 플랜에 "leaning toward" 방향이 있으면 → 그대로 결정하고 진
+          행
+      16 +                                                               
+      17 +### 로컬 스킬 vs 마켓플레이스 플러그인                         
+      18 +                                                               
+      19 +- **Expected**: 원래 계획대로 marketplace plugin으로 구현      
+      20 +- **Actual**: 유저가 "이 레포에만 특화된 스킬이니 로컬 스킬이어
+         +야 한다"고 피드백                                              
+      21 +- **Takeaway**: 범용성이 없는 자동화 도구는 `.claude/skills/`에
+         + 로컬로 두는 게 맞음. marketplace plugin은 어떤 프로젝트에서든 
+         +쓸 수 있는 것만.                                               
+      22 +                                                               
+      23 +When 특정 레포에만 의미 있는 스킬 → `.claude/skills/`에 로컬 배
+         +치, marketplace 불필요                                         
+      24 +                                                               
+      25 +### 토큰 효율 치트시트                                         
+      26 +                                                               
+      27 +- **Expected**: CLAUDE.md에 4개 문서 읽으라는 지시가 필요      
+      28 +- **Actual**: 유저가 "매번 같은 문서 4개 읽는 게 토큰 낭비"라고
+         + 지적                                                          
+      29 +- **Takeaway**: 핵심 패턴을 한 파일로 압축한 치트시트를 만들고,
+         + CLAUDE.md는 치트시트를 우선 참조하도록 변경                   
+      30 +                                                               
+      31 +When 반복적으로 읽는 참조 문서가 여러 개 → 치트시트로 통합하여 
+         +토큰 절약                                                      
+      32 +                                                               
+      33 +### bash 조건부 확장 JSON 버그                                 
+      34 +                                                               
+      35 +- **Expected**: `${var:+"\"$var\""}${var:-null}` 패턴으로 JSON 
+         +optional string 처리                                           
+      36 +- **Actual**: 변수가 non-empty일 때 둘 다 확장되어 `"value"valu
+         +e` 출력                                                        
+      37 +- **Takeaway**: bash에서 JSON optional을 출력하려면 helper 함수
+         + (`json_str()`) 사용                                           
+      38 +                                                               
+      39 +When bash에서 optional JSON 필드 출력 → `json_str()` 헬퍼 함수 
+         +로 분기                                                        
+
+● Skill(retro)
+  ⎿  Successfully loaded skill · 6 tools allowed
+
+● 기존 아티팩트를 읽겠습니다.
+
+● Read(prompt-logs/260203-plugin-deploy/plan.md)
+  ⎿  Read 56 lines
+
+● retro를 작성하겠습니다. 관련 학습자료를 검색합니다.
+
+● Skill(web-search)
+  ⎿  Successfully loaded skill · 1 tool allowed
+
+● Bash(bash /home/hwidong/.claude/plugins/cache/corca-plugins/web-search/2.0.0/s
+      kills/web-search/scripts/search.sh --time-range year "Claude Code custom
+      skills best pr…)
+  ⎿ ## Search Results: Claude Code custom skills best practices 2026     
+
+    Best practices for custom Claude Code skills include adherence to the
+    5
+    … +133 lines (ctrl+o to expand)
+
+● Bash(bash /home/hwidong/.claude/plugins/cache/corca-plugins/web-search/2.0.0/s
+      kills/web-search/scripts/search.sh --time-range year "Claude Code
+      CLAUDE.md context opt…)
+  ⎿ ## Search Results: Claude Code CLAUDE.md context optimization token  
+    eff
+    iciency prompt engineering
+    … +2 lines (ctrl+o to expand)
+
+● Bash(bash /home/hwidong/.claude/plugins/cache/corca-plugins/web-search/2.0.0/s
+      kills/web-search/scripts/search.sh --time-range year "Claude Code plugin
+      marketplace lo…)
+  ⎿ ## Search Results: Claude Code plugin marketplace local skills .claud
+    directory best practices
+    … +2 lines (ctrl+o to expand)
+
+
+● Bash(bash /home/hwidong/.claude/plugins/cache/corca-plugins/web-search/2.0.0/s
+      kills/web-search/scripts/search.sh "Anthropic Claude Code plugins
+      documentation skills…)
+  ⎿ ## Search Results: Anthropic Claude Code plugins documentation skills
+    h
+    ooks 2026
+    … +76 lines (ctrl+o to expand)
+
+● retro.md를 작성합니다.
+
+● Write(prompt-logs/260203-plugin-deploy/retro.md)
+  ⎿  Wrote 37 lines to prompt-logs/260203-plugin-deploy/retro.md         
+      1 # Retro: plugin-deploy 스킬 구현
+      2 > Session date: 2026-02-03
+      3 ## 1. Context Worth Remembering
+      4 - **로컬 스킬 vs 마켓플레이스 플러그인 구분 기준**: 범용성이 핵심
+        . 어떤 프로젝트에서든 쓸 수 있으면 marketplace plugin (`plugins/`
+        ), 이 레포에서만 의미 있으면 local skill (`.claude/skills/`). plu
+        gin-deploy는 후자.
+      5 - **토큰 효율에 민감**: 유저는 에이전트의 반복적 문서 읽기 패턴을
+         관찰하고 개선을 요구함. 이 세션에서 치트시트(`docs/plugin-dev-ch
+        eatsheet.md`)를 만들어 해결.
+      6 - **Script delegation pattern**: 이 레포의 실행형 스킬(web-search
+        , gather-context)은 SKILL.md가 의도 분석, 스크립트가 결정적 실행
+        을 담당하는 패턴을 따름. plugin-deploy도 이 패턴 적용 (check-cons
+        istency.sh).
+     … +27 lines (ctrl+o to expand)
+
+● Read(CLAUDE.md)
+  ⎿  Read 49 lines
+
+● Update(CLAUDE.md)
+  ⎿  Added 1 line                                                        
+      39  - When testing hooks or infrastructure, verify incrementally — 
+          test one path first, then expand to others.
+      40  - When testing scripts, do not manually set up the environment 
+          (e.g., `source ~/.zshrc`) before running tests. Test in a clean
+           environment to reproduce real-world conditions.
+      41  - When a custom skill overlaps with a built-in tool, prefer the
+           custom skill. The web-search plugin enforces this automaticall
+          y via PreToolUse hook (blocks WebSearch, redirects to `/web-sea
+          rch`). For other overlaps (e.g., `/gather-context` vs WebFetch)
+          , prefer the custom skill manually.
+      42 +- When creating new skills or automation tools, first evaluate:
+         + marketplace plugin (`plugins/`, general-purpose, usable in any
+         + project) vs local skill (`.claude/skills/`, repo-specific). Pr
+         +efer local skill unless the tool has clear cross-project utilit
+         +y.                                                             
+      43  
+      44  ## Language
+      45  
+
+● 커밋하겠습니다.
+
+● Bash(git log --oneline -5)
+  ⎿ 7486657 gather-context v1.1.1: apply 3-tier env loading to           
+    slack-api.mj
+    s
+    1443a5c web-search v2.0.0: refactor to script delegation pattern
+    … +3 lines (ctrl+o to expand)
+
+● Bash(git add CLAUDE.md docs/plugin-dev-cheatsheet.md .claude/skills/
+      prompt-logs/260203-plugin-deploy/ && git commit -m "Add plugin-deploy
+      local skill and plugin dev…)
+  ⎿ [main e1f6696] Add plugin-deploy local skill and plugin dev cheat    
+    sheet
+     8 files changed, 619 insertions(+), 5 deletions(-)
+     create mode 100644 .claude/skills/plugin-deploy/SKILL.md
+    … +8 lines (ctrl+o to expand)
+
+● Bash(git push)
+  ⎿  To https://github.com/corca-ai/claude-plugins.git
+        7486657..e1f6696  main -> main
+
+● 완료했습니다. 요약:
+
+  구현한 것:
+
+  1. docs/plugin-dev-cheatsheet.md — 4개 문서(adding-plugin, modifying-plugin, skills-guide, claude-marketplace)의 핵심을 1파일로 압축. CLAUDE.md가 이걸 우선 참조하도록 변경. 앞으로 플러그인 작업 시 토큰 절약.
+  2. .claude/skills/plugin-deploy/ — 로컬 스킬로 구현 (marketplace plugin 아님):
+    - scripts/check-consistency.sh: plugin.json 버전, marketplace.json 동기, README 언급, hook/skill 구조를 JSON으로 검증
+    - SKILL.md: /plugin-deploy <name> 워크플로우 오케스트레이션
+    - references/checklist.md: 엣지 케이스 참조
+  3. CLAUDE.md 업데이트: 치트시트 우선 참조 + 로컬 스킬 vs 마켓플레이스 플러그인 구분 가이드 추가
+
+  테스트 결과: smart-read(hook), web-search(hybrid), retro(skill-only), 에러 케이스 모두 통과.
+
+❯ 세션 나갔다 왔습니다. cheat sheet 를 읽으면 다른 문서를 안/덜 읽거나,     
+  아무튼 동일 작업을 더 잘/더 토큰을 절약하면서 (즉 더 빠르게) 하리라는 걸  
+  어떻게 검증할 수 있을까요? 서브에이전트에게 시켜보면 되려나요? 어떻게     
+  생각하세요?                                                               
+
+● 좋은 질문입니다. 두 가지 축으로 나눠서 생각할 수 있습니다.
+
+  1. 입력 크기 감소 — 지금 바로 측정 가능합니다.
+
+● Bash(echo "=== Before: 4 docs ===" && wc -l
+      /home/hwidong/codes/claude-plugins/docs/adding-plugin.md
+      /home/hwidong/codes/claude-plugins/docs/modifying-plugin.md /hom…)
+  ⎿  === Before: 4 docs ===                                           
+        36 /home/hwidong/codes/claude-plugins/docs/adding-plugin.md
+        61 /home/hwidong/codes/claude-plugins/docs/modifying-plugin.md
+     … +6 lines (ctrl+o to expand)
+
+● 682줄 → 135줄, ~80% 감소. 입력 토큰 기준으로는 확실히 절약됩니다.
+
+  2. 정보 충분성 (치트시트만으로 작업 가능한가) — 이건 서브에이전트 테스트가 맞는 방향이긴 한데, 실용적으로 한계가 있습니다:
+
+  - Claude Code 세션 내에서 서브에이전트의 토큰 사용량을 직접 추적하는 방법이 없음
+  - A/B로 "치트시트만" vs "4개 문서 전부" 비교하려면 동일 태스크를 두 번 돌려야 하는데, 비결정적이라 1회 비교로는 신뢰성 낮음
+
+  현실적으로 더 나은 방법: 치트시트만 주고 구체적 작업을 시킨 뒤, 결과물의 정확성을 체크하는 겁니다. 토큰 수는 입력 크기에서 이미 증명됐으니, 남은 질문은 "정보가 빠져서 틀리는 경우가 있는가"입니다.
+
+  지금 해볼 수 있습니다 — 서브에이전트에게 치트시트만 읽게 하고 "suggest-tidyings 플러그인을 새로 추가하려면 어떤 파일을 만들어야 하는지 구체적으로 나열하라" 같은 과제를 주면, 치트시트의 정보 완결성을 테스트할 수 있습니다. 해볼까요?
+
+✻ Churned for 32s
+
+❯ 방향성은 좋은데, 질의가 조금 아쉽습니다. 더 authentic하게 할 수 있을까요? 
+
+● 맞습니다. "어떤 파일을 만들어야 하는지 나열하라"는 치트시트 내용을 되풀이하는 거라 실제 작업을 테스트하는 게 아닙니다.
+
+  더 authentic한 방법: 실제 플러그인 수정 작업을 주고, 치트시트만 읽은 에이전트가 빠뜨리는 단계 없이 완주하는지 보는 겁니다.
+
+  예를 들어:
+
+  "retro 플러그인의 SKILL.md에 Section 6 (Post-Retro Discussion)의 동작을 약간 수정했다. 배포를 준비해라."
+
+  이건 실제 세션에서 일어나는 작업이고, 에이전트가 알아야 하는 건:
+  - plugin.json 버전 범프가 필요한지 판단
+  - marketplace.json 동기화 필요 여부
+  - README 설명이 아직 정확한지 확인
+  - 로컬 테스트 방법
+
+  치트시트만으로 이걸 빠짐없이 하면 정보 충분, 하나라도 빠지면 치트시트에 보강할 부분이 명확해집니다.
+
+  이 방향으로 진행할까요? 아니면 더 다듬고 싶은 부분이 있으면 말씀해주세요.
+
+❯ Go! 
+
+● Task(Test cheat sheet sufficiency)
+  ⎿  Done (8 tool uses · 34.9k tokens · 1m 9s)                           
+
+
+● 결과가 나왔습니다.
+
+  핵심 결론: 치트시트만으로 8단계 워크플로우를 빠짐없이 완주했습니다. 순서도 맞고, 판단(README 변경 불필요, marketplace.json 버전 필드 없음 등)도 정확합니다.
+
+  다만 에이전트가 치트시트에서 부족하다고 느낀 6가지가 있는데, 보강할 가치가 있는 것과 아닌 것을 구분하면:
+  지적: 버전 범프 기준 (patch/minor/major)
+  보강 필요?: Yes
+  이유: 치트시트에 없음. checklist.md에는 있지만 치트시트가 유일 참조일 때 빠짐
+  ────────────────────────────────────────
+  지적: CHANGELOG.md 언급 없음
+  보강 필요?: Yes
+  이유: retro SKILL.md가 "update CHANGELOG.md"를 언급하는데 치트시트 Deploy
+    Workflow에 없음
+  ────────────────────────────────────────
+  지적: README 업데이트 판단 기준
+  보강 필요?: No
+  이유: 이건 판단력의 영역이고, 에이전트가 올바르게 판단함
+  ────────────────────────────────────────
+  지적: 커밋 메시지 컨벤션
+  보강 필요?: No
+  이유: git log에서 추론 가능, 치트시트에 넣기엔 과함
+  ────────────────────────────────────────
+  지적: 스킬 테스트 깊이
+  보강 필요?: Maybe
+  이유: 현재 "frontmatter + 실행 가능성"만 명시. integration test 언급 추가할 수
+    있음
+  ────────────────────────────────────────
+  지적: marketplace.json 메타 버전
+  보강 필요?: No
+  이유: update-all.sh가 처리함
+  치트시트에 2가지를 보강하면 충분해 보입니다: 버전 범프 기준 표 + CHANGELOG 단계. 추가할까요?
+
+✻ Brewed for 1m 37s
+
+❯ Good! Go ahead, then retro, then commit & push. 
+
+● Read(docs/plugin-dev-cheatsheet.md)
+  ⎿  Read 136 lines
+  ⎿  Interrupted · What should Claude do instead?
+
+
+                                                                         
+● User answered Claude's questions:
+  ⎿  · CLAUDE.md Collaboration Style에 로컬 스킬 vs 마켓플레이스 플러그인 
+     구분 가이드를 추가할까요? → Yes, 추가
+
+  ⎿  Running PostToolUse hook…
