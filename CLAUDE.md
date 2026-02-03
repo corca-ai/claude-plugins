@@ -24,6 +24,7 @@ After implementing a plan, complete the full workflow without waiting for explic
 2. Update lessons.md with implementation learnings
 3. Run `/retro`
 4. Commit and push
+5. After committing plugin changes, update the marketplace and verify globally installed plugin versions are current
 
 ## Collaboration Style
 

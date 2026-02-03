@@ -15,6 +15,7 @@ description: |
   - When a reference file contains URLs that need to be fetched
 allowed-tools:
   - Bash
+  - WebSearch
 ---
 
 # Gather Context (/gather-context)
@@ -107,10 +108,13 @@ For URLs that don't match any known service:
 
 ---
 
-## Web Search
+## Supplementary Research
 
-When the user needs to **find** information (not export a specific URL), suggest:
+After gathering content, if best practices, reference documentation, or supplementary context would help the user, use the **WebSearch** tool to look them up autonomously.
 
-> You might want to use `/web-search` to find relevant content first.
+Examples:
+- Gathered a Google Doc describing a migration plan → search for best practices on that migration
+- Gathered a Slack thread about an unfamiliar library → search for its official docs or common patterns
+- Gathered a Notion page with a technical spec → search for related implementation examples
 
-Do NOT invoke web-search directly. It is an independent skill with its own trigger.
+The user's environment determines how WebSearch is fulfilled (built-in or redirected to an external search skill via hook). This skill does not need to know the details.

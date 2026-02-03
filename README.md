@@ -40,7 +40,7 @@ You can do the same from inside Claude Code (instead of your terminal):
 | [suggest-tidyings](#suggest-tidyings) | Skill | Suggest safe refactoring opportunities |
 | [retro](#retro) | Skill | Run a comprehensive end-of-session retrospective |
 | [gather-context](#gather-context) | Skill | Auto-detect URLs and gather external content via built-in scripts |
-| [web-search](#web-search) | Skill | Web search, code search, and URL content extraction |
+| [web-search](#web-search) | Skill + Hook | Web search, code search, and URL content extraction |
 | [attention-hook](#attention-hook) | Hook | Send a Slack notification when idle/waiting |
 | [plan-and-lessons](#plan-and-lessons) | Hook | Inject the Plan & Lessons Protocol when entering plan mode |
 
@@ -233,6 +233,11 @@ A skill that uses the Tavily and Exa REST APIs for web search, code search, and 
 - `TAVILY_API_KEY` — required for web search and URL extraction ([get a key](https://app.tavily.com/home))
 - `EXA_API_KEY` — required for code search ([get a key](https://dashboard.exa.ai/api-keys))
 - Set keys in `~/.zshrc` or `~/.claude/.env`
+
+**Built-in WebSearch redirect** (Hook):
+- Installing this plugin also registers a `PreToolUse` hook that blocks Claude's built-in `WebSearch` tool and redirects to `/web-search`.
+- This ensures all web searches go through the Tavily/Exa APIs with proper key management.
+- The redirect is automatic and requires no additional configuration.
 
 **Caution**:
 - Your queries are sent to external search services. Do not include confidential code or sensitive information in search queries.

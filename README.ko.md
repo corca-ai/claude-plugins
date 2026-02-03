@@ -40,7 +40,7 @@ claude plugin update <plugin-name>@corca-plugins   # 기존 플러그인 업데�
 | [suggest-tidyings](#suggest-tidyings) | Skill | 안전한 리팩토링 기회 제안 |
 | [retro](#retro) | Skill | 세션 종료 시 포괄적 회고 수행 |
 | [gather-context](#gather-context) | Skill | URL 자동 감지 후 외부 콘텐츠를 자체 스크립트로 수집 |
-| [web-search](#web-search) | Skill | 웹 검색, 코드 검색, URL 콘텐츠 추출 |
+| [web-search](#web-search) | Skill + Hook | 웹 검색, 코드 검색, URL 콘텐츠 추출 |
 | [attention-hook](#attention-hook) | Hook | 대기 상태일 때 Slack 알림 |
 | [plan-and-lessons](#plan-and-lessons) | Hook | Plan 모드 진입 시 Plan & Lessons Protocol 주입 |
 
@@ -233,6 +233,11 @@ Tavily와 Exa REST API를 활용하여 웹 검색, 코드 검색, URL 콘텐츠 
 - `TAVILY_API_KEY` — 웹 검색과 URL 추출에 필요 ([발급](https://app.tavily.com/home))
 - `EXA_API_KEY` — 코드 검색에 필요 ([발급](https://dashboard.exa.ai/api-keys))
 - API 키는 `~/.zshrc` 또는 `~/.claude/.env`에 설정
+
+**빌트인 WebSearch 리다이렉트** (Hook):
+- 이 플러그인을 설치하면 Claude의 빌트인 `WebSearch` 도구를 차단하고 `/web-search`로 리다이렉트하는 `PreToolUse` 훅이 함께 등록됩니다.
+- 모든 웹 검색이 Tavily/Exa API를 통해 적절한 키 관리 하에 이루어지도록 보장합니다.
+- 리다이렉트는 자동이며 추가 설정이 필요 없습니다.
 
 **주의사항**:
 - 쿼리가 외부 검색 서비스로 전송됩니다. 기밀 코드나 민감한 정보를 검색 쿼리에 포함하지 마세요.
