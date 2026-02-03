@@ -98,9 +98,12 @@ retro.md is session-specific. Findings worth keeping across sessions should be p
 After writing retro.md and persisting findings, the user will often read the retro and continue the conversation — asking questions, giving corrections, raising new points. This is expected and valuable.
 
 During any post-retro conversation:
-- Update `retro.md` — append learnings under `### Post-Retro Findings` in Section 2
+- Update `retro.md` — append learnings under `### Post-Retro Findings`
 - Update `lessons.md` — add new learnings from the discussion
-- If any learning should be persistent beyond the session (protocol docs, CLAUDE.md, etc.), apply it to the appropriate file
+- **Persistence check** — for each new learning, evaluate where it belongs beyond the session:
+  - `CLAUDE.md`: new collaboration pattern or workflow change?
+  - Skills/protocol docs: does a skill's instructions or behavior need updating?
+  - `project-context.md`: new architecture pattern, convention, or design intent?
 - If plugin code was changed (SKILL.md, scripts, hooks, protocol docs), follow normal release procedures: update `plugin.json` version and `CHANGELOG.md`
 
 Do not prompt the user to start this discussion. Simply stay aware that conversation after the retro may produce learnings worth capturing.

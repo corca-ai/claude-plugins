@@ -51,3 +51,12 @@ plan 작성 시 → 관련 프레임워크/prior art를 먼저 검색하는 것�
 - **Takeaway**: "중복 제거"가 항상 옳진 않음. 독자의 실제 사용 패턴을 고려해야 함. 축약(한 줄 inline)이 중간안.
 
 문서 중복 제거 시 → "누가 어떻게 이 문서를 읽는가?" 먼저 확인
+
+### Post-retro에서 persistent doc 반영 누락
+
+- **Expected**: retro SKILL.md Section 6에 "persistent beyond the session" 지침이 있으니 자연스럽게 CLAUDE.md/skills 업데이트가 이루어질 것
+- **Actual**: lessons.md와 retro.md만 업데이트하고, CLAUDE.md·skills·project-context.md 반영 여부를 체계적으로 검토하지 않음. 모호한 한 줄 지침("If any learning should be persistent...")은 실행력이 없었음.
+- **Takeaway**: 모호한 지침은 구체적 체크리스트로 바꿔야 실행됨. "해야 한다"보다 "이것, 이것, 이것을 확인하라"가 효과적.
+
+post-retro 교훈 기록 시 → CLAUDE.md / skills·protocol / project-context.md 3가지 persistence 대상을 명시적으로 확인
+→ retro SKILL.md Section 6에 "Persistence check" 체크리스트 추가 완료.
