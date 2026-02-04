@@ -44,6 +44,28 @@ LOG_DIR="${CLAUDE_CORCA_PROMPT_LOGGER_DIR:-${CWD}/prompt-logs/sessions}"
 TRUNCATE_THRESHOLD="${CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE:-10}"
 AUTO_COMMIT="${CLAUDE_CORCA_PROMPT_LOGGER_AUTO_COMMIT:-true}"
 
+# ── Timezone helpers (transcript timestamps are UTC) ─────────────────────────
+LOCAL_TZ=$(date +%Z)
+
+utc_to_epoch() {
+    local ts_short
+    ts_short=$(echo "$1" | cut -c1-19)
+    TZ=UTC date -j -f "%Y-%m-%dT%H:%M:%S" "$ts_short" "+%s" 2>/dev/null || \
+    date -d "${ts_short}Z" "+%s" 2>/dev/null || \
+    echo ""
+}
+
+utc_to_local() {
+    local fmt="${2:-%H:%M:%S}"
+    local epoch
+    epoch=$(utc_to_epoch "$1")
+    if [ -n "$epoch" ]; then
+        date -r "$epoch" "+$fmt" 2>/dev/null || \
+        date -d "@$epoch" "+$fmt" 2>/dev/null || \
+        echo ""
+    fi
+}
+
 # ── Session hash & state ─────────────────────────────────────────────────────
 HASH=$(echo -n "$SESSION_ID" | shasum -a 256 | cut -c1-8)
 STATE_DIR="/tmp/claude-prompt-logger-${HASH}"
@@ -72,6 +94,17 @@ if [ "$TOTAL_LINES" -lt "$LAST_OFFSET" ]; then
     REWOUND=true
     LAST_OFFSET=0
 elif [ "$TOTAL_LINES" -eq "$LAST_OFFSET" ]; then
+    # No new lines — but SessionEnd still needs to auto-commit the existing log
+    if [ "$HOOK_TYPE" = "session_end" ] && [ "$AUTO_COMMIT" = "true" ]; then
+        DATE_STR=$(date +%y%m%d)
+        OUT_FILE="${LOG_DIR}/${DATE_STR}-${HASH}.md"
+        if [ -f "$OUT_FILE" ] && git -C "$CWD" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+            if git -C "$CWD" diff --cached --quiet 2>/dev/null; then
+                git -C "$CWD" add -- "$OUT_FILE" 2>/dev/null && \
+                git -C "$CWD" commit --no-verify -m "prompt-log: $(basename "$OUT_FILE" .md)" 2>/dev/null || true
+            fi
+        fi
+    fi
     exit 0
 fi
 
@@ -144,10 +177,8 @@ if [ ! -f "$OUT_FILE" ]; then
 
     FIRST_TS=$(echo "$NEW_ENTRIES" | jq -r 'select(.timestamp) | .timestamp // empty' | head -1)
     if [ -n "$FIRST_TS" ]; then
-        TS_SHORT=$(echo "$FIRST_TS" | cut -c1-19)
-        STARTED=$(date -j -f "%Y-%m-%dT%H:%M:%S" "$TS_SHORT" "+%Y-%m-%d %H:%M:%S" 2>/dev/null || \
-                  date -d "$FIRST_TS" "+%Y-%m-%d %H:%M:%S" 2>/dev/null || \
-                  echo "$FIRST_TS")
+        STARTED=$(utc_to_local "$FIRST_TS" "%Y-%m-%d %H:%M:%S")
+        [ -z "$STARTED" ] && STARTED="$FIRST_TS"
     else
         STARTED=$(date "+%Y-%m-%d %H:%M:%S")
     fi
@@ -156,7 +187,7 @@ if [ ! -f "$OUT_FILE" ]; then
 # Session: ${HASH}
 Model: ${MODEL} | Branch: ${BRANCH}
 CWD: ${CWD}
-Started: ${STARTED} | Claude Code v${VERSION}
+Started: ${STARTED} ${LOCAL_TZ} | Claude Code v${VERSION}
 EOF
 fi
 
@@ -191,25 +222,14 @@ while [ "$TURN_IDX" -lt "$TURN_COUNT" ]; do
     USER_TS=$(echo "$TURN" | jq -r '.user.timestamp // empty')
     LAST_ASSISTANT_TS=$(echo "$TURN" | jq -r '.assistants[-1].timestamp // empty')
 
-    format_time() {
-        local ts="$1"
-        if [ -n "$ts" ]; then
-            date -j -f "%Y-%m-%dT%H:%M:%S" "$(echo "$ts" | cut -c1-19)" "+%H:%M:%S" 2>/dev/null || \
-            date -d "$ts" "+%H:%M:%S" 2>/dev/null || \
-            echo ""
-        fi
-    }
-
-    USER_TIME=$(format_time "$USER_TS")
-    ASSISTANT_TIME=$(format_time "$LAST_ASSISTANT_TS")
+    USER_TIME=$(utc_to_local "$USER_TS")
+    ASSISTANT_TIME=$(utc_to_local "$LAST_ASSISTANT_TS")
 
     # Duration
     DURATION_STR=""
     if [ -n "$USER_TS" ] && [ -n "$LAST_ASSISTANT_TS" ]; then
-        USER_EPOCH=$(date -j -f "%Y-%m-%dT%H:%M:%S" "$(echo "$USER_TS" | cut -c1-19)" "+%s" 2>/dev/null || \
-                     date -d "$USER_TS" "+%s" 2>/dev/null || echo "")
-        ASSISTANT_EPOCH=$(date -j -f "%Y-%m-%dT%H:%M:%S" "$(echo "$LAST_ASSISTANT_TS" | cut -c1-19)" "+%s" 2>/dev/null || \
-                          date -d "$LAST_ASSISTANT_TS" "+%s" 2>/dev/null || echo "")
+        USER_EPOCH=$(utc_to_epoch "$USER_TS")
+        ASSISTANT_EPOCH=$(utc_to_epoch "$LAST_ASSISTANT_TS")
         if [ -n "$USER_EPOCH" ] && [ -n "$ASSISTANT_EPOCH" ]; then
             DURATION=$((ASSISTANT_EPOCH - USER_EPOCH))
             if [ "$DURATION" -ge 0 ]; then

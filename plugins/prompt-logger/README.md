@@ -21,7 +21,7 @@ Each session produces one markdown file at `{cwd}/prompt-logs/sessions/{date}-{h
 # Session: abc12345
 Model: claude-opus-4-5-20251101 | Branch: main
 CWD: /Users/ted/codes/project
-Started: 2026-02-04 14:30:00 | Claude Code v2.1.31
+Started: 2026-02-04 14:30:00 KST | Claude Code v2.1.31
 
 ---
 ## Turn 1 [14:30:05 → 14:31:22] (77s) | Tokens: 5394↑ 1283↓
@@ -51,6 +51,7 @@ last 5 lines...
 - **Text truncation** — long assistant responses show first 5 + last 5 lines
 - **Image handling** — image content replaced with `[Image]`
 - **Thinking blocks** — skipped entirely
+- **Local timezone** — UTC transcript timestamps converted to local time (e.g., KST)
 - **Race-safe** — atomic mkdir lock prevents concurrent Stop/SessionEnd conflicts
 - **Auto-commit** — session log is committed automatically at session end (no untracked leftovers)
 

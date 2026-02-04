@@ -57,3 +57,5 @@ Accumulated context from retrospectives. Each session's retro may add to this do
 - `smart-read` hook: PreToolUse → Read, enforces file-size-aware reading (warn >500 lines, deny >2000 lines)
 - `web-search` hook: PreToolUse → WebSearch, redirects to `/web-search` skill
 - `prompt-logger` hook: Stop + SessionEnd → incremental transcript-to-markdown logger. Uses `/tmp/` state files (offset, turn_num) with session hash for incremental processing. Atomic `mkdir` lock prevents race between concurrent Stop/SessionEnd hooks. SessionEnd auto-commits the session log file (`--no-verify`, only if no pre-existing staged changes) to avoid untracked leftovers after session close.
+  - **Early-exit trap**: When Stop and SessionEnd share a script, Stop runs first and updates offset. SessionEnd finds no new lines → hits early-exit before reaching auto-commit. Fix: duplicate the auto-commit logic in the early-exit branch.
+  - **Timezone**: Claude Code transcript timestamps are UTC (ISO 8601 with `Z` suffix). Must convert to local time for display using epoch-based conversion.
