@@ -7,6 +7,7 @@ allowed-tools:
   - Read
   - Write
   - Edit
+  - Bash
   - WebSearch
   - Skill
   - AskUserQuestion
@@ -82,7 +83,21 @@ Patterns that caused misunderstandings, with specific examples and improved alte
 
 Write to `{output-dir}/retro.md` using the format below.
 
-### 5. Persist Findings
+### 5. Link Session Log
+
+If `prompt-logs/sessions/` exists (prompt-logger plugin installed):
+1. List files in `prompt-logs/sessions/` matching today's date (`{YYMMDD}-*.md`)
+2. Filter out files already symlinked from any `prompt-logs/{YYMMDD}-*/session.md`
+3. For each remaining candidate, read a sample of the file and verify it matches the current session (user prompts, tool calls, or topics should be recognizable — note: the latest turns may not yet be written due to async logging)
+4. If verified and `{output-dir}/session.md` does not exist, create a relative symlink:
+   ```bash
+   ln -s "../sessions/{filename}" "{output-dir}/session.md"
+   ```
+5. If no candidates or `prompt-logs/sessions/` does not exist, skip silently
+
+This step is defensive — it does nothing if prompt-logger is not installed.
+
+### 6. Persist Findings
 
 retro.md is session-specific. Findings worth keeping across sessions should be persisted to project-level documents.
 
@@ -95,7 +110,7 @@ retro.md is session-specific. Findings worth keeping across sessions should be p
 
 **Actionable improvements (Section 5)**: If the retro identifies concrete, implementable improvements (protocol changes, skill modifications, new automation), offer to implement them now rather than just recording them. Use AskUserQuestion: "Implement now?" — this prevents findings from becoming stale notes that require a separate session to act on.
 
-### 6. Post-Retro Discussion
+### 7. Post-Retro Discussion
 
 After writing retro.md and persisting findings, the user will often read the retro and continue the conversation — asking questions, giving corrections, raising new points. This is expected and valuable.
 

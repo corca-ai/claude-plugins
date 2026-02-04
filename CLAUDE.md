@@ -28,7 +28,7 @@ After implementing a plan, complete the full workflow without waiting for explic
 2. Update lessons.md with implementation learnings
 3. Run `/retro`
 4. For plugin changes: use `/plugin-deploy` skill to automate version checks, marketplace sync, README updates, and local testing
-5. Commit and push
+5. Commit and push (push is required before step 6 — `update-all.sh` pulls from the remote)
 6. After committing plugin changes, run `bash scripts/update-all.sh` to update the marketplace and all installed plugins
 
 ## Collaboration Style

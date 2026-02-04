@@ -2,6 +2,9 @@
 slack-outputs
 work-in-progress
 
+# Runtime output
+prompt-logs/sessions/
+
 # Plugin secrets
 .env.local
 .cache/
