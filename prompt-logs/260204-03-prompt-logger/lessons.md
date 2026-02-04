@@ -15,3 +15,5 @@
 4. **Token fields**: `message.usage.input_tokens` and `message.usage.output_tokens` are the key fields. Cache-related fields (`cache_creation_input_tokens`, `cache_read_input_tokens`) exist but aren't needed for basic turn logging.
 
 5. **Stop + SessionEnd hooks both provide**: `session_id`, `transcript_path`, `cwd`, `permission_mode`, `hook_event_name`. SessionEnd also has `reason` field.
+
+6. **update-all.sh는 push 후에 실행해야 함**: `claude plugin marketplace update`는 remote git repo에서 pull하므로, 로컬 커밋만 있는 상태에서는 새 플러그인이 반영되지 않음. CLAUDE.md의 "5. Commit and push → 6. run update-all.sh" 순서를 기계적으로 따르지 말고 *왜* 그 순서인지 이해할 것.
