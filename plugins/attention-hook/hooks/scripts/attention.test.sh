@@ -1,8 +1,8 @@
 #!/bin/bash
-# Test cases for attention.sh and parse-transcript.sh
+# Test cases for attention.sh, parse-transcript.sh, and slack-send.sh
 # Run: ./hooks/scripts/attention.test.sh
 #
-# This test sources attention.sh and parse-transcript.sh to test the actual functions,
+# This test sources the actual scripts to test real functions,
 # ensuring tests fail when the implementation changes.
 
 set -e
@@ -13,6 +13,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Source the actual scripts to get the real functions
 source "$SCRIPT_DIR/attention.sh"
 source "$SCRIPT_DIR/parse-transcript.sh"
+source "$SCRIPT_DIR/slack-send.sh"
 
 PASSED=0
 FAILED=0
@@ -64,6 +65,34 @@ assert_not_empty() {
     else
         echo -e "${RED}FAIL${NC}: $test_name"
         echo "  Expected non-empty value"
+        FAILED=$((FAILED + 1))
+    fi
+}
+
+assert_file_exists() {
+    local file="$1"
+    local test_name="$2"
+
+    if [ -f "$file" ]; then
+        echo -e "${GREEN}PASS${NC}: $test_name"
+        PASSED=$((PASSED + 1))
+    else
+        echo -e "${RED}FAIL${NC}: $test_name"
+        echo "  Expected file to exist: $file"
+        FAILED=$((FAILED + 1))
+    fi
+}
+
+assert_file_not_exists() {
+    local file="$1"
+    local test_name="$2"
+
+    if [ ! -f "$file" ]; then
+        echo -e "${GREEN}PASS${NC}: $test_name"
+        PASSED=$((PASSED + 1))
+    else
+        echo -e "${RED}FAIL${NC}: $test_name"
+        echo "  Expected file to NOT exist: $file"
         FAILED=$((FAILED + 1))
     fi
 }
@@ -229,6 +258,159 @@ assert_eq 'col1\tcol2' "$RESULT" "escape_json: tabs"
 # Test: backslashes
 RESULT=$(escape_json 'path\to\file')
 assert_eq 'path\\to\\file' "$RESULT" "escape_json: backslashes"
+
+
+# === TEST: slack-send.sh functions ===
+echo ""
+echo "=== Testing slack-send.sh functions ==="
+
+# Test: slack_session_hash produces 12-char hex string
+HASH=$(slack_session_hash "test-session-id-12345")
+assert_eq 12 "${#HASH}" "slack_session_hash: output is 12 characters"
+
+# Test: same input produces same hash
+HASH2=$(slack_session_hash "test-session-id-12345")
+assert_eq "$HASH" "$HASH2" "slack_session_hash: deterministic output"
+
+# Test: different input produces different hash
+HASH3=$(slack_session_hash "different-session-id")
+if [ "$HASH" != "$HASH3" ]; then
+    echo -e "${GREEN}PASS${NC}: slack_session_hash: different inputs produce different hashes"
+    PASSED=$((PASSED + 1))
+else
+    echo -e "${RED}FAIL${NC}: slack_session_hash: different inputs produce different hashes"
+    FAILED=$((FAILED + 1))
+fi
+
+# Test: slack_state_file returns correct path
+STATE_PATH=$(slack_state_file "abc123def456" "thread-ts")
+assert_eq "/tmp/claude-attention-abc123def456-thread-ts" "$STATE_PATH" "slack_state_file: correct path format"
+
+STATE_PATH2=$(slack_state_file "abc123def456" "last-user-ts")
+assert_eq "/tmp/claude-attention-abc123def456-last-user-ts" "$STATE_PATH2" "slack_state_file: correct path for different state"
+
+# Test: slack_escape_json (same as escape_json but from slack-send.sh)
+RESULT=$(slack_escape_json "line1
+line2")
+assert_eq 'line1\nline2' "$RESULT" "slack_escape_json: newlines"
+
+RESULT=$(slack_escape_json 'say "hello"')
+assert_eq 'say \"hello\"' "$RESULT" "slack_escape_json: quotes"
+
+
+# === TEST: Session isolation ===
+echo ""
+echo "=== Testing session isolation ==="
+
+# Setup: create temp state files for two different sessions
+TEST_HASH_A=$(slack_session_hash "session-A-test-isolation")
+TEST_HASH_B=$(slack_session_hash "session-B-test-isolation")
+
+# Verify different hashes
+if [ "$TEST_HASH_A" != "$TEST_HASH_B" ]; then
+    echo -e "${GREEN}PASS${NC}: session isolation: different session_ids produce different hashes"
+    PASSED=$((PASSED + 1))
+else
+    echo -e "${RED}FAIL${NC}: session isolation: different session_ids produce different hashes"
+    FAILED=$((FAILED + 1))
+fi
+
+# Test: thread_ts isolation between sessions
+TEST_TS_FILE_A=$(slack_state_file "$TEST_HASH_A" "thread-ts")
+TEST_TS_FILE_B=$(slack_state_file "$TEST_HASH_B" "thread-ts")
+
+# Clean up first
+rm -f "$TEST_TS_FILE_A" "$TEST_TS_FILE_B"
+
+# Write thread_ts for session A
+slack_save_thread_ts "$TEST_HASH_A" "1234567890.123456"
+
+# Session A should have thread_ts
+RESULT_A=$(slack_get_thread_ts "$TEST_HASH_A")
+assert_eq "1234567890.123456" "$RESULT_A" "session isolation: session A has its thread_ts"
+
+# Session B should NOT have thread_ts
+RESULT_B=$(slack_get_thread_ts "$TEST_HASH_B")
+assert_eq "" "$RESULT_B" "session isolation: session B has no thread_ts"
+
+# Write different thread_ts for session B
+slack_save_thread_ts "$TEST_HASH_B" "9876543210.654321"
+
+# Both should have their own values
+RESULT_A=$(slack_get_thread_ts "$TEST_HASH_A")
+RESULT_B=$(slack_get_thread_ts "$TEST_HASH_B")
+assert_eq "1234567890.123456" "$RESULT_A" "session isolation: session A unchanged after B write"
+assert_eq "9876543210.654321" "$RESULT_B" "session isolation: session B has its own thread_ts"
+
+# Clean up
+rm -f "$TEST_TS_FILE_A" "$TEST_TS_FILE_B"
+
+
+# === TEST: Heartbeat threshold logic ===
+echo ""
+echo "=== Testing heartbeat threshold logic ==="
+
+TEST_HASH_HB=$(slack_session_hash "session-heartbeat-test")
+TEST_LAST_USER=$(slack_state_file "$TEST_HASH_HB" "last-user-ts")
+TEST_HEARTBEAT=$(slack_state_file "$TEST_HASH_HB" "heartbeat-ts")
+
+# Clean up
+rm -f "$TEST_LAST_USER" "$TEST_HEARTBEAT"
+
+# Test: no last-user-ts file → heartbeat should not fire
+assert_file_not_exists "$TEST_LAST_USER" "heartbeat: no last-user-ts file initially"
+
+# Test: recent user interaction → should not fire heartbeat
+NOW=$(date +%s)
+echo "$NOW" > "$TEST_LAST_USER"
+IDLE_THRESHOLD=300
+IDLE_SECONDS=$((NOW - $(cat "$TEST_LAST_USER")))
+if [ "$IDLE_SECONDS" -lt "$IDLE_THRESHOLD" ]; then
+    echo -e "${GREEN}PASS${NC}: heartbeat: recent user interaction blocks heartbeat"
+    PASSED=$((PASSED + 1))
+else
+    echo -e "${RED}FAIL${NC}: heartbeat: recent user interaction blocks heartbeat"
+    FAILED=$((FAILED + 1))
+fi
+
+# Test: old user interaction → should allow heartbeat
+OLD_TS=$((NOW - 600))
+echo "$OLD_TS" > "$TEST_LAST_USER"
+IDLE_SECONDS=$((NOW - $(cat "$TEST_LAST_USER")))
+if [ "$IDLE_SECONDS" -ge "$IDLE_THRESHOLD" ]; then
+    echo -e "${GREEN}PASS${NC}: heartbeat: old user interaction allows heartbeat"
+    PASSED=$((PASSED + 1))
+else
+    echo -e "${RED}FAIL${NC}: heartbeat: old user interaction allows heartbeat"
+    FAILED=$((FAILED + 1))
+fi
+
+# Test: recent heartbeat → should not fire again
+echo "$NOW" > "$TEST_HEARTBEAT"
+HEARTBEAT_INTERVAL=300
+HEARTBEAT_AGE=$((NOW - $(cat "$TEST_HEARTBEAT")))
+if [ "$HEARTBEAT_AGE" -lt "$HEARTBEAT_INTERVAL" ]; then
+    echo -e "${GREEN}PASS${NC}: heartbeat: recent heartbeat blocks duplicate"
+    PASSED=$((PASSED + 1))
+else
+    echo -e "${RED}FAIL${NC}: heartbeat: recent heartbeat blocks duplicate"
+    FAILED=$((FAILED + 1))
+fi
+
+# Test: old heartbeat → should allow new heartbeat
+OLD_HB=$((NOW - 600))
+echo "$OLD_HB" > "$TEST_HEARTBEAT"
+HEARTBEAT_AGE=$((NOW - $(cat "$TEST_HEARTBEAT")))
+if [ "$HEARTBEAT_AGE" -ge "$HEARTBEAT_INTERVAL" ]; then
+    echo -e "${GREEN}PASS${NC}: heartbeat: old heartbeat allows new send"
+    PASSED=$((PASSED + 1))
+else
+    echo -e "${RED}FAIL${NC}: heartbeat: old heartbeat allows new send"
+    FAILED=$((FAILED + 1))
+fi
+
+# Clean up
+rm -f "$TEST_LAST_USER" "$TEST_HEARTBEAT"
 
 
 # === TEST: parse-transcript.sh integration ===

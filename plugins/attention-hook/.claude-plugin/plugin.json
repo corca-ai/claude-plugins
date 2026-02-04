@@ -1,7 +1,7 @@
 {
   "name": "attention-hook",
-  "description": "A hook that sends Slack notifications when Claude Code is waiting, including AskUserQuestion details",
-  "version": "1.2.1",
+  "description": "Slack notifications with threading when Claude Code is waiting — idle alerts, AskUserQuestion prompts, plan mode approval, and periodic heartbeat status updates",
+  "version": "2.1.0",
   "author": {
     "name": "Corca",
     "url": "https://www.corca.ai/"

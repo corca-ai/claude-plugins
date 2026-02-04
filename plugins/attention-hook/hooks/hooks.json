@@ -1,12 +1,25 @@
 {
   "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/track-user-input.sh",
+            "async": true
+          }
+        ]
+      }
+    ],
     "Notification": [
       {
         "matcher": "idle_prompt",
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/attention.sh"
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/attention.sh",
+            "async": true
           }
         ]
       }
@@ -20,11 +33,57 @@
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/start-timer.sh"
           }
         ]
+      },
+      {
+        "matcher": "EnterPlanMode",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/start-timer.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "ExitPlanMode",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/start-timer.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/heartbeat.sh",
+            "async": true
+          }
+        ]
       }
     ],
     "PostToolUse": [
       {
         "matcher": "AskUserQuestion",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/cancel-timer.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "EnterPlanMode",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/cancel-timer.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "ExitPlanMode",
         "hooks": [
           {
             "type": "command",

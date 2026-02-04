@@ -43,6 +43,9 @@ Accumulated context from retrospectives. Each session's retro may add to this do
 - EnterPlanMode hook is now provided by the `plan-and-lessons` plugin (no longer in `.claude/settings.json`)
 - `type: prompt` hooks work with any hook event and are simpler for context injection (no JSON formatting needed)
 - Hooks are **snapshots at session start** — no hot-reload. Requires new session or `/hooks` review to pick up changes.
+- **sync vs async rule of thumb**: If a hook only calls external services (Slack, logging) and doesn't need to modify Claude's behavior → use async. Sync hooks with empty stdout can corrupt conversation history on some event types.
+- **System tool matching**: Internal tools (`EnterPlanMode`, `ExitPlanMode`, `AskUserQuestion`) can be matched via `PreToolUse`/`PostToolUse` matchers — no dedicated hook events needed.
+- **Async race conditions**: Async hooks that check-then-create state files need atomic locking (e.g., `mkdir`). Multiple async instances of the same hook can run concurrently.
 - Claude Code hook docs: https://code.claude.com/docs/en/hooks.md
 
 ## Plugins

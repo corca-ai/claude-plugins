@@ -210,38 +210,46 @@ A skill that uses the Tavily and Exa REST APIs for web search, code search, and 
 
 ## Hooks
 
-### [attention-hook](plugins/attention-hook/hooks/hooks.json)
+### [attention-hook](plugins/attention-hook/README.md)
 
 **Install**: `claude plugin install attention-hook@corca-plugins` | **Update**: `claude plugin update attention-hook@corca-plugins`
 
-A hook that sends Slack push notifications when Claude Code is waiting for user input. The notification includes task context (user request, Claude response, AskUserQuestion prompt, and Todo status) so you can immediately understand what's going on. Useful when running on a remote server. (Background: [blog post](https://www.stdy.blog/1p1w-03-attention-hook/))
+Slack notifications with threading when Claude Code is waiting for input. All notifications from a single session are grouped into one Slack thread, keeping your channel clean. Useful when running on a remote server. (Background: [blog post](https://www.stdy.blog/1p1w-03-attention-hook/))
 
-**Notification triggers**:
-- `idle_prompt`: when Claude Code waits for user input for 60+ seconds (Claude Code internal behavior; cannot be changed)
-- `AskUserQuestion`: when Claude asks a question and there is no response for 30+ seconds (tunable via `CLAUDE_ATTENTION_DELAY`)
+**Key features**:
+- **Thread grouping**: first user prompt creates a parent message; subsequent notifications appear as thread replies
+- **Idle notification**: when Claude waits 60+ seconds for input (`idle_prompt`)
+- **AskUserQuestion notification**: when Claude asks a question and gets no response for 30+ seconds (`CLAUDE_ATTENTION_DELAY`)
+- **Plan mode notification**: when Claude enters or exits plan mode and gets no response for 30+ seconds
+- **Heartbeat status**: periodic updates during long autonomous operations (5+ min idle)
+- **Backward compatible**: falls back to webhook (no threading) if only `SLACK_WEBHOOK_URL` is set
 
 > **Compatibility note**: this script parses Claude Code's internal transcript structure using `jq`. It may break when Claude Code updates. See the script comments for the tested version info.
 
 **Requirements**:
 - `jq` installed (for JSON parsing)
-- Slack bot + an Incoming Webhook URL for the channel
+- Slack App with `chat:write` + `im:write` scopes (recommended) or Incoming Webhook URL
 
-**Setup**:
+**Setup** (Slack App — enables threading):
 
-1. Create `~/.claude/.env` and set your webhook URL:
+1. Create a Slack App at [api.slack.com/apps](https://api.slack.com/apps), add `chat:write` and `im:write` scopes, install to workspace
+2. Get the channel ID: open a DM with your bot → click the bot name → copy the Channel ID (starts with `D`). For channels, use `/invite @YourBotName` first.
+3. Create `~/.claude/.env`:
 ```bash
 # ~/.claude/.env
-SLACK_WEBHOOK_URL=""
+SLACK_BOT_TOKEN="xoxb-your-bot-token"
+SLACK_CHANNEL_ID="D0123456789"  # Bot DM channel (or C... for channels)
 CLAUDE_ATTENTION_DELAY=30  # AskUserQuestion notification delay in seconds (default: 30)
 ```
 
-2. After installing the plugin, `hooks/hooks.json` is applied automatically.
+For legacy webhook setup (no threading), set `SLACK_WEBHOOK_URL` instead. See [plugin README](plugins/attention-hook/README.md) for details.
 
 **Notification contents**:
 - 📝 User request (first/last 5 lines, truncated)
 - 🤖 Claude response (first/last 5 lines, truncated)
 - ❓ Waiting on a question: AskUserQuestion prompt + choices (if any)
 - ✅ Todo: counts of done/in-progress/pending items and their text
+- 💓 Heartbeat: periodic status with todo progress during long tasks
 
 **Examples**:
 

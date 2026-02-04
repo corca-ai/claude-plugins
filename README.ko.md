@@ -210,39 +210,46 @@ Tavily와 Exa REST API를 활용하여 웹 검색, 코드 검색, URL 콘텐츠 
 
 ## Hooks
 
-### [attention-hook](plugins/attention-hook/hooks/hooks.json)
+### [attention-hook](plugins/attention-hook/README.md)
 
 **설치**: `claude plugin install attention-hook@corca-plugins` | **갱신**: `claude plugin update attention-hook@corca-plugins`
 
-Claude Code가 사용자의 입력을 기다릴 때 Slack으로 푸시 알림을 보내는 훅입니다. 알림에 이미지를 제외한 작업 컨텍스트(사용자 요청, Claude 응답, AskUserQuestion을 통한 질문 내용, Todo 상태)가 포함되어 어떤 작업인지 즉시 파악할 수 있습니다. 원격 서버에 세팅해뒀을 때 유용합니다. ([작업 배경 블로그 글](https://www.stdy.blog/1p1w-03-attention-hook/))
+Claude Code가 입력을 기다릴 때 Slack 스레드로 알림을 보내는 훅입니다. 하나의 세션 알림이 하나의 스레드로 묶여 채널이 깔끔하게 유지됩니다. 원격 서버에 세팅해뒀을 때 유용합니다. ([작업 배경 블로그 글](https://www.stdy.blog/1p1w-03-attention-hook/))
 
-
-**알림 트리거 조건**:
-- `idle_prompt`: 사용자 입력을 60초 이상 기다릴 때 (Claude Code 내부 구현, 변경 불가)
-- `AskUserQuestion`: Claude가 질문을 하고 30초 이상 응답이 없을 때 (`CLAUDE_ATTENTION_DELAY` 환경변수로 조정 가능)
+**주요 기능**:
+- **스레드 그룹화**: 첫 사용자 프롬프트가 부모 메시지를 생성하고, 이후 알림은 스레드 답글로 표시
+- **대기 알림**: 사용자 입력을 60초 이상 기다릴 때 (`idle_prompt`)
+- **AskUserQuestion 알림**: Claude가 질문 후 30초 이상 응답이 없을 때 (`CLAUDE_ATTENTION_DELAY`)
+- **Plan 모드 알림**: Claude가 Plan 모드 진입/종료를 요청하고 30초 이상 응답이 없을 때
+- **하트비트 상태**: 장시간 자율 작업 중 주기적 상태 업데이트 (5분 이상 유휴)
+- **하위 호환**: `SLACK_WEBHOOK_URL`만 설정된 경우 스레딩 없이 기존 방식으로 동작
 
 > **호환성 주의**: 이 스크립트는 Claude Code의 내부 transcript 구조를 `jq`로 파싱합니다. Claude Code 버전이 업데이트되면 동작하지 않을 수 있습니다. 테스트된 버전 정보는 스크립트 주석을 참조하세요.
 
 **필수 조건**:
 - `jq` 설치 필요 (JSON 파싱용)
-- Slack 봇 설정 후 알림 받을 채널에 대한 Webhook URL 준비
+- Slack App (`chat:write` + `im:write` 권한, 권장) 또는 Incoming Webhook URL
 
-**설정 방법**:
+**설정 방법** (Slack App — 스레딩 지원):
 
-1. `~/.claude/.env` 파일 생성 후 웹훅 URL 설정:
+1. [api.slack.com/apps](https://api.slack.com/apps)에서 Slack App 생성, `chat:write` + `im:write` 스코프 추가, 워크스페이스에 설치
+2. 채널 ID 확인: 봇에게 DM 열기 → 봇 이름 클릭 → 하단의 채널 ID 복사 (`D`로 시작). 채널 사용 시 `/invite @봇이름`으로 먼저 초대.
+3. `~/.claude/.env` 파일 설정:
 ```bash
 # ~/.claude/.env
-SLACK_WEBHOOK_URL=""
+SLACK_BOT_TOKEN="xoxb-your-bot-token"
+SLACK_CHANNEL_ID="D0123456789"  # 봇 DM 채널 (또는 C...로 시작하는 채널 ID)
 CLAUDE_ATTENTION_DELAY=30  # AskUserQuestion 알림 지연 시간 (초, 기본값: 30)
 ```
 
-2. 플러그인 설치 후 `hooks/hooks.json`이 자동으로 적용됩니다.
+레거시 웹훅 설정(스레딩 없음)은 `SLACK_WEBHOOK_URL`을 대신 설정하세요. 자세한 내용은 [플러그인 README](plugins/attention-hook/README.md)를 참조하세요.
 
 **알림 내용**:
 - 📝 사용자 요청 내용 (처음/끝 5줄씩 truncate)
 - 🤖 요청에 대한 Claude의 응답 (처음/끝 5줄씩 truncate)
 - ❓ 질문 대기 중: AskUserQuestion의 질문과 선택지 (있을 경우)
 - ✅ Todo: 완료/진행중/대기 항목 수 및 각 항목 내용
+- 💓 하트비트: 장시간 작업 중 Todo 진행 상황과 함께 주기적 상태 업데이트
 
 **알림 예시**:
 
