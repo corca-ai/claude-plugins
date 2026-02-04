@@ -66,11 +66,14 @@ Patterns that caused misunderstandings, with specific examples and improved alte
 
 #### Section 4: Learning Resources
 
-- Search the web to find 2–5 relevant resources
+- Search the web to find 2–3 relevant resources
 - Calibrate to user's apparent knowledge level
 - Focus on topics where the session revealed knowledge gaps or curiosity
-- Each resource: title, URL, and one-line reason for relevance
-- Prefer fewer high-quality links over many mediocre ones
+- For each resource, fetch the content and provide:
+  - Title + URL
+  - 2–3 sentence summary of key takeaways relevant to this session
+  - Why this matters for the user's work
+- Prefer fewer high-quality resources with good summaries over many links
 
 #### Section 5: Relevant Skills
 
