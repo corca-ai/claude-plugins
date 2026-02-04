@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "A collection of Claude Code plugins for AI-Native Product Teams",
-    "version": "1.9.2"
+    "version": "1.10.0"
   },
   "plugins": [
     {
@@ -14,6 +14,12 @@
       "source": "./plugins/clarify",
       "description": "A skill that transforms ambiguous requirements into clear specifications",
       "keywords": ["requirements", "specification", "clarification"]
+    },
+    {
+      "name": "deep-clarify",
+      "source": "./plugins/deep-clarify",
+      "description": "A skill that autonomously researches requirements through codebase exploration and best practice analysis, only asking humans about genuinely subjective decisions",
+      "keywords": ["requirements", "clarification", "research", "sub-agents", "autonomous"]
     },
     {
       "name": "suggest-tidyings",

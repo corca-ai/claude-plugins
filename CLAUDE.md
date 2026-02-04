@@ -27,7 +27,7 @@ After implementing a plan, complete the full workflow without waiting for explic
 1. Mark plan.md as done (✅ on completed items)
 2. Update lessons.md with implementation learnings
 3. Run `/retro`
-4. For plugin changes: test locally with `/plugin install <name>@corca-plugins` before committing
+4. For plugin changes: use `/plugin-deploy` skill to automate version checks, marketplace sync, README updates, and local testing
 5. Commit and push
 6. After committing plugin changes, run `bash scripts/update-all.sh` to update the marketplace and all installed plugins
 

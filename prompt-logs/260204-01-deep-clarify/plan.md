@@ -220,15 +220,15 @@ Users choose based on need:
 
 ## Implementation Sequence
 
-1. [ ] Create `plugins/deep-clarify/.claude-plugin/plugin.json`
-2. [ ] Write reference guides in `plugins/deep-clarify/skills/deep-clarify/references/`:
+1. [x] Create `plugins/deep-clarify/.claude-plugin/plugin.json`
+2. [x] Write reference guides in `plugins/deep-clarify/skills/deep-clarify/references/`:
    - `codebase-research-guide.md`
    - `bestpractice-research-guide.md`
    - `aggregation-guide.md`
    - `advisory-guide.md`
-3. [ ] Write `plugins/deep-clarify/skills/deep-clarify/SKILL.md` (6-phase orchestrator)
-4. [ ] Update `.claude-plugin/marketplace.json` (add deep-clarify, bump version)
-5. [ ] Update `README.md` and `README.ko.md`
+3. [x] Write `plugins/deep-clarify/skills/deep-clarify/SKILL.md` (6-phase orchestrator)
+4. [x] Update `.claude-plugin/marketplace.json` (add deep-clarify, bump version)
+5. [x] Update `README.md` and `README.ko.md`
 6. [ ] Test locally: `claude --plugin-dir ./plugins/deep-clarify --dangerously-skip-permissions --resume`
 
 ## Verification

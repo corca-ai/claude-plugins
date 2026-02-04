@@ -41,6 +41,7 @@ bash scripts/update-all.sh
 | 플러그인 | 유형 | 설명 |
 |---------|------|------|
 | [clarify](#clarify) | Skill | 모호한 요구사항을 명확하게 정리 |
+| [deep-clarify](#deep-clarify) | Skill | 리서치 기반 요구사항 명확화 (자율 의사결정) |
 | [interview](#interview) | Skill | 구조화된 인터뷰로 요구사항 추출 |
 | [suggest-tidyings](#suggest-tidyings) | Skill | 안전한 리팩토링 기회 제안 |
 | [retro](#retro) | Skill | 세션 종료 시 포괄적 회고 수행 |
@@ -64,6 +65,25 @@ bash scripts/update-all.sh
 - 원본 요구사항 기록 후 체계적인 질문을 통해 모호함 해소
 - Before/After 비교로 명확해진 결과 제시
 - 명확해진 요구사항을 파일로 저장하는 옵션 제공. 필요시 이 문서를 Plan 모드에 넣어서 구현하면 됨
+
+### [deep-clarify](plugins/deep-clarify/skills/deep-clarify/SKILL.md)
+
+**설치**: `claude plugin install deep-clarify@corca-plugins` | **갱신**: `claude plugin update deep-clarify@corca-plugins`
+
+`clarify`의 리서치 중심 대안입니다. 모든 모호한 점을 사용자에게 물어보는 대신, 코드베이스 탐색과 베스트 프랙티스 분석을 통해 자율적으로 리서치한 뒤, 진정으로 주관적인 결정만 물어봅니다 — 두 개의 대립하는 관점에서 조언 의견을 함께 제공합니다.
+
+**사용법**: `/deep-clarify <요구사항>`
+
+**주요 기능**:
+- 병렬 서브에이전트: 코드베이스 리서처 + 베스트 프랙티스 리서처 (실존 전문가 관점 활용)
+- 3단계 분류: Tier 1 (코드베이스로 해결), Tier 2 (베스트 프랙티스로 해결), Tier 3 (사람이 결정)
+- Tier 3 항목에 대해 대립하는 관점의 자문 서브에이전트가 양측 의견 제시
+- 근거가 충돌하거나 본질적으로 주관적인 항목만 사람에게 질문
+- 모든 항목이 리서치로 해결 가능하면 자문 및 질문 단계를 완전히 건너뜀
+
+**clarify와의 차이**:
+- `/clarify` — 빠르고 가벼움, 모든 모호한 점을 질문
+- `/deep-clarify` — 철저한 자율 리서치 우선, 주관적 항목만 질문
 
 ### [interview](plugins/interview/skills/interview/SKILL.md)
 

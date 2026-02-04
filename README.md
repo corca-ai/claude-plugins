@@ -41,6 +41,7 @@ You can do the same from inside Claude Code (instead of your terminal):
 | Plugin | Type | Description |
 |---------|------|-------------|
 | [clarify](#clarify) | Skill | Turn ambiguous requirements into an actionable spec |
+| [deep-clarify](#deep-clarify) | Skill | Research-first requirement clarification with autonomous decision-making |
 | [interview](#interview) | Skill | Extract requirements through structured interviews |
 | [suggest-tidyings](#suggest-tidyings) | Skill | Suggest safe refactoring opportunities |
 | [retro](#retro) | Skill | Run a comprehensive end-of-session retrospective |
@@ -64,6 +65,25 @@ A skill that turns vague or unclear requirements into clear, executable specs th
 - Records the original request, then resolves ambiguity via structured questions
 - Shows a clear Before/After comparison
 - Optionally saves the clarified spec to a file (you can feed it into plan mode for implementation)
+
+### [deep-clarify](plugins/deep-clarify/skills/deep-clarify/SKILL.md)
+
+**Install**: `claude plugin install deep-clarify@corca-plugins` | **Update**: `claude plugin update deep-clarify@corca-plugins`
+
+A research-first alternative to `clarify`. Instead of asking the user about every ambiguity, deep-clarify autonomously researches via codebase exploration and best practice analysis, then only asks about genuinely subjective decisions — with informed advisory opinions from two opposing perspectives.
+
+**Usage**: `/deep-clarify <requirement>`
+
+**Key features**:
+- Parallel sub-agents: codebase researcher + best practice researcher (with named expert perspectives)
+- 3-tier classification: Tier 1 (codebase-resolved), Tier 2 (best-practice-resolved), Tier 3 (human decision)
+- Advisory sub-agents argue opposing perspectives for Tier 3 items
+- Only asks the human about items where evidence conflicts or the question is inherently subjective
+- Skips advisory and questioning phases entirely when all items are resolvable
+
+**How it differs from clarify**:
+- `/clarify` — quick, lightweight, asks about all ambiguities
+- `/deep-clarify` — thorough, autonomous research first, asks only subjective items
 
 ### [interview](plugins/interview/skills/interview/SKILL.md)
 

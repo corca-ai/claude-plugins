@@ -35,6 +35,7 @@ Accumulated context from retrospectives. Each session's retro may add to this do
 - **Hook-based tool redirect**: Use PreToolUse hooks with `permissionDecision: "deny"` to redirect built-in tools to custom skills (e.g., WebSearch → `/web-search`). Enables loose coupling between plugins.
 - **3-tier env loading**: Shell environment → `~/.claude/.env` → grep shell profiles (fallback). All credential-loading scripts must use this pattern.
 - **Local vs marketplace**: Repo-specific automation → `.claude/skills/` (e.g., plugin-deploy). Cross-project utility → `plugins/` marketplace.
+- **Sub-agent orchestration via SKILL.md**: For multi-phase skills, SKILL.md acts as a thin orchestrator (sequencer + data router) while reference guides in `references/` hold domain knowledge. Each guide follows: role statement → context → methodology → constraints → output format. Established by suggest-tidyings, extended by deep-clarify.
 
 ## Hook Configuration
 
@@ -46,6 +47,7 @@ Accumulated context from retrospectives. Each session's retro may add to this do
 
 ## Plugins
 
-- Contains skills (clarify, interview, suggest-tidyings, retro, gather-context, web-search), hooks (attention-hook, plan-and-lessons, smart-read), and supporting docs
+- Contains skills (clarify, deep-clarify, interview, suggest-tidyings, retro, gather-context, web-search), hooks (attention-hook, plan-and-lessons, smart-read), and supporting docs
+- `deep-clarify`: first multi-sub-agent skill — 4 sub-agents (codebase researcher, best practice researcher, Advisor α, Advisor β) orchestrated in a 6-phase workflow. Uses reference guides in `references/` directory with the role/context/methodology/constraints/output pattern.
 - `smart-read` hook: PreToolUse → Read, enforces file-size-aware reading (warn >500 lines, deny >2000 lines)
 - `web-search` hook: PreToolUse → WebSearch, redirects to `/web-search` skill
