@@ -50,6 +50,7 @@ bash scripts/update-all.sh
 | [attention-hook](#attention-hook) | Hook | 대기 상태일 때 Slack 알림 |
 | [plan-and-lessons](#plan-and-lessons) | Hook | Plan 모드 진입 시 Plan & Lessons Protocol 주입 |
 | [smart-read](#smart-read) | Hook | 파일 크기 기반 지능적 읽기 강제 |
+| [prompt-logger](#prompt-logger) | Hook | 대화 턴을 마크다운으로 자동 기록 (회고 분석용) |
 
 ## Skills
 
@@ -295,6 +296,34 @@ Read 도구 호출을 가로채서 파일 크기에 따라 지능적인 읽기�
 # ~/.claude/.env
 CLAUDE_CORCA_SMART_READ_WARN_LINES=500   # 이 줄 수 이상이면 additionalContext 추가 (기본값: 500)
 CLAUDE_CORCA_SMART_READ_DENY_LINES=2000  # 이 줄 수 이상이면 읽기 차단 (기본값: 2000)
+```
+
+### [prompt-logger](plugins/prompt-logger/README.md)
+
+**설치**: `claude plugin install prompt-logger@corca-plugins` | **갱신**: `claude plugin update prompt-logger@corca-plugins`
+
+매 대화 턴을 마크다운 파일로 자동 기록하는 훅입니다. `Stop`과 `SessionEnd` 훅을 사용하여 턴이 완료될 때마다 증분 방식으로 캡처합니다. 모델 개입 없이 순수 bash + jq로 처리합니다.
+
+**동작 방식**:
+- `Stop` 훅: Claude 응답 완료 시 발동 → 완료된 턴을 기록
+- `SessionEnd` 훅: 종료/클리어 시 발동 → 미기록 콘텐츠 캡처
+- 두 훅 모두 동일한 멱등성 스크립트를 호출 (오프셋 기반 증분 처리)
+
+**출력**: 세션당 하나의 마크다운 파일 (`{cwd}/prompt-logs/sessions/{date}-{hash}.md`)
+- 세션 메타데이터 (모델, 브랜치, CWD, Claude Code 버전)
+- 각 턴의 타임스탬프, 소요 시간, 토큰 사용량
+- 전체 사용자 프롬프트 (이미지는 `[Image]`로 대체)
+- 축약된 어시스턴트 응답 (임계값 초과 시 처음 5줄 + 마지막 5줄)
+- 도구 호출 요약 (도구명 + 핵심 파라미터)
+
+**설정** (선택):
+
+`~/.claude/.env`에서 설정:
+```bash
+# ~/.claude/.env
+CLAUDE_CORCA_PROMPT_LOGGER_DIR="/custom/path"        # 출력 디렉토리 (기본값: {cwd}/prompt-logs/sessions)
+CLAUDE_CORCA_PROMPT_LOGGER_ENABLED=false              # 로깅 비활성화 (기본값: true)
+CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE=20                # 축약 임계값 (줄 수, 기본값: 10)
 ```
 
 ## 삭제된 스킬

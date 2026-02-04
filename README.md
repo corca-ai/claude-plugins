@@ -50,6 +50,7 @@ You can do the same from inside Claude Code (instead of your terminal):
 | [attention-hook](#attention-hook) | Hook | Send a Slack notification when idle/waiting |
 | [plan-and-lessons](#plan-and-lessons) | Hook | Inject the Plan & Lessons Protocol when entering plan mode |
 | [smart-read](#smart-read) | Hook | Enforce intelligent file reading based on file size |
+| [prompt-logger](#prompt-logger) | Hook | Auto-log conversation turns to markdown for retrospective analysis |
 
 ## Skills
 
@@ -295,6 +296,34 @@ Set thresholds in `~/.claude/.env`:
 # ~/.claude/.env
 CLAUDE_CORCA_SMART_READ_WARN_LINES=500   # Lines above which additionalContext is added (default: 500)
 CLAUDE_CORCA_SMART_READ_DENY_LINES=2000  # Lines above which read is denied (default: 2000)
+```
+
+### [prompt-logger](plugins/prompt-logger/README.md)
+
+**Install**: `claude plugin install prompt-logger@corca-plugins` | **Update**: `claude plugin update prompt-logger@corca-plugins`
+
+A hook that auto-logs every conversation turn to markdown files. Uses `Stop` and `SessionEnd` hooks to incrementally capture turns as they happen — no model involvement, pure bash + jq processing.
+
+**How it works**:
+- `Stop` hook fires when Claude finishes responding → logs the completed turn
+- `SessionEnd` hook fires on exit/clear → catches any unlogged final content
+- Both call the same idempotent script with offset-based incremental processing
+
+**Output**: One markdown file per session at `{cwd}/prompt-logs/sessions/{date}-{hash}.md`, containing:
+- Session metadata (model, branch, CWD, Claude Code version)
+- Each turn with timestamps, duration, and token usage
+- Full user prompts (with `[Image]` placeholders for images)
+- Truncated assistant responses (first 5 + last 5 lines if > threshold)
+- Tool call summaries (tool name + key parameter)
+
+**Configuration** (optional):
+
+Set in `~/.claude/.env`:
+```bash
+# ~/.claude/.env
+CLAUDE_CORCA_PROMPT_LOGGER_DIR="/custom/path"        # Output directory (default: {cwd}/prompt-logs/sessions)
+CLAUDE_CORCA_PROMPT_LOGGER_ENABLED=false              # Disable logging (default: true)
+CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE=20                # Truncation threshold in lines (default: 10)
 ```
 
 ## Removed skills

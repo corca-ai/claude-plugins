@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "A collection of Claude Code plugins for AI-Native Product Teams",
-    "version": "1.10.0"
+    "version": "1.11.0"
   },
   "plugins": [
     {
@@ -68,6 +68,12 @@
       "source": "./plugins/smart-read",
       "description": "A hook that enforces intelligent file reading based on file size",
       "keywords": ["read", "file-size", "context", "hook", "guard"]
+    },
+    {
+      "name": "prompt-logger",
+      "source": "./plugins/prompt-logger",
+      "description": "A hook that auto-logs every conversation turn to markdown files for retrospective analysis",
+      "keywords": ["logging", "transcript", "prompt", "retrospective", "hook"]
     }
   ]
 }

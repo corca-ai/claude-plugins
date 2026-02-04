@@ -54,3 +54,4 @@ Accumulated context from retrospectives. Each session's retro may add to this do
 - `deep-clarify`: first multi-sub-agent skill — 4 sub-agents (codebase researcher, best practice researcher, Advisor α, Advisor β) orchestrated in a 6-phase workflow. Uses reference guides in `references/` directory with the role/context/methodology/constraints/output pattern.
 - `smart-read` hook: PreToolUse → Read, enforces file-size-aware reading (warn >500 lines, deny >2000 lines)
 - `web-search` hook: PreToolUse → WebSearch, redirects to `/web-search` skill
+- `prompt-logger` hook: Stop + SessionEnd → incremental transcript-to-markdown logger. Uses `/tmp/` state files (offset, turn_num) with session hash for incremental processing. Atomic `mkdir` lock prevents race between concurrent Stop/SessionEnd hooks.
