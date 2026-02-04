@@ -15,6 +15,9 @@ if [ -z "$SESSION_ID" ] || [ -z "$TRANSCRIPT_PATH" ] || [ ! -f "$TRANSCRIPT_PATH
     exit 0
 fi
 
+# ── Wait for transcript flush (async hook may race with file writes) ─────────
+sleep 0.3
+
 # ── Load config ──────────────────────────────────────────────────────────────
 # 1. Shell env (already set)
 # 2. ~/.claude/.env
@@ -58,7 +61,9 @@ fi
 TOTAL_LINES=$(wc -l < "$TRANSCRIPT_PATH" | tr -d ' ')
 
 if [ "$TOTAL_LINES" -lt "$LAST_OFFSET" ]; then
-    # Transcript was truncated (e.g., user rewound with Esc+Esc) — reset offset
+    # Transcript was truncated (e.g., user rewound with Esc+Esc)
+    # Re-read everything; we'll skip already-logged turns and only log new ones
+    REWOUND=true
     LAST_OFFSET=0
 elif [ "$TOTAL_LINES" -eq "$LAST_OFFSET" ]; then
     exit 0
@@ -149,11 +154,32 @@ Started: ${STARTED} | Claude Code v${VERSION}
 EOF
 fi
 
+# ── Handle rewind: mark and skip already-logged turns ────────────────────────
+FIRST_TURN_IDX=0
+if [ "${REWOUND:-}" = "true" ]; then
+    if [ -f "$OUT_FILE" ]; then
+        REWIND_TS=$(date "+%H:%M:%S")
+        {
+            echo ""
+            echo "---"
+            echo "## ⟲ Rewind [${REWIND_TS}] (after Turn $((TURN_START - 1)))"
+        } >> "$OUT_FILE"
+    fi
+    # Skip already-logged turns; at minimum, log the last turn (the new one)
+    ALREADY_LOGGED=$((TURN_START - 1))
+    if [ "$ALREADY_LOGGED" -ge "$TURN_COUNT" ]; then
+        FIRST_TURN_IDX=$((TURN_COUNT - 1))
+    else
+        FIRST_TURN_IDX="$ALREADY_LOGGED"
+    fi
+    # Keep TURN_START unchanged — new turns continue the sequence
+fi
+
 # ── Format and append each turn ───────────────────────────────────────────────
-TURN_IDX=0
+TURN_IDX=$FIRST_TURN_IDX
 while [ "$TURN_IDX" -lt "$TURN_COUNT" ]; do
     TURN=$(echo "$TURNS_JSON" | jq ".[$TURN_IDX]")
-    CURRENT_TURN_NUM=$((TURN_START + TURN_IDX))
+    CURRENT_TURN_NUM=$((TURN_START + TURN_IDX - FIRST_TURN_IDX))
 
     # ── Timestamps ────────────────────────────────────────────────────────
     USER_TS=$(echo "$TURN" | jq -r '.user.timestamp // empty')
@@ -233,6 +259,8 @@ while [ "$TURN_IDX" -lt "$TURN_COUNT" ]; do
       [.assistants[].message.content[] |
         select(.type == "text") | .text
       ] | join("\n")
+      # Strip leading/trailing blank lines
+      | gsub("^[\\s\\n]+"; "") | gsub("[\\s\\n]+$"; "")
     ')
 
     if [ -n "$ASSISTANT_TEXT" ]; then
@@ -325,6 +353,6 @@ done
 
 # ── Update state ──────────────────────────────────────────────────────────────
 echo "$TOTAL_LINES" > "$OFFSET_FILE"
-echo "$((TURN_START + TURN_COUNT))" > "$TURN_NUM_FILE"
+echo "$((TURN_START + TURN_COUNT - FIRST_TURN_IDX))" > "$TURN_NUM_FILE"
 
 exit 0

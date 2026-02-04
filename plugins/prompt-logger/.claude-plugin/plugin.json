@@ -1,7 +1,7 @@
 {
   "name": "prompt-logger",
   "description": "A hook that auto-logs every conversation turn to markdown files for retrospective analysis",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": {
     "name": "Corca",
     "url": "https://www.corca.ai/"

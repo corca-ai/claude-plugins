@@ -23,3 +23,11 @@
 8. **플러그인 간 방어적 연동**: 플러그인 A가 B의 출력을 참조할 때, B 미설치 환경에서도 A가 정상 동작해야 함. 디렉토리 존재 조건부 체크로 구현 (예: retro가 `prompt-logs/sessions/` 존재 여부로 prompt-logger 설치 여부 판단).
 
 9. **SessionEnd 훅에서 모델 활용 불가**: 세션 종료 후 발동하므로 `type: "command"`(bash)만 실행 가능. 모델 기반 의사결정(제목 생성 등)이 필요하면 Stop 훅 또는 스킬(retro 등)에서 처리해야 함.
+
+10. **async hook의 transcript flush race condition**: `async: true` hook은 Stop 이벤트 즉시 실행되나, transcript JSONL의 마지막 라인이 flush되기 전일 수 있음. `sleep 0.3`으로 완화. 이 패턴은 모든 async hook에서 transcript를 읽는 경우에 해당.
+
+11. **Claude 응답의 빈 text 블록**: thinking 후 첫 text content block이 `"\n\n"`만 포함하는 패턴 존재. jq에서 `gsub("^[\\s\\n]+"; "")`로 strip 필요.
+
+12. **커밋 시 독단적 파일 변경 금지**: 에이전트가 retro v1.5.0 커밋에서 유저 동의 없이 `.gitignore`에 `prompt-logs/sessions/`를 추가하여 prompt-logger의 핵심 목적(repo에 기록)을 무효화. 커밋 시 유저가 요청하지 않은 설정 파일 변경을 포함하지 말 것.
+
+13. **Rewind 감지 한계**: offset 기반(`TOTAL_LINES < LAST_OFFSET`)은 새 응답이 제거분보다 길면 감지 실패. 완벽한 감지는 라인 해시 비교 필요하나, 실용적 범위에서 마커만 남기는 것으로 충분 (유저 판단).
