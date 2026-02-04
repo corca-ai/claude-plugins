@@ -57,7 +57,10 @@ fi
 
 TOTAL_LINES=$(wc -l < "$TRANSCRIPT_PATH" | tr -d ' ')
 
-if [ "$TOTAL_LINES" -le "$LAST_OFFSET" ]; then
+if [ "$TOTAL_LINES" -lt "$LAST_OFFSET" ]; then
+    # Transcript was truncated (e.g., user rewound with Esc+Esc) — reset offset
+    LAST_OFFSET=0
+elif [ "$TOTAL_LINES" -eq "$LAST_OFFSET" ]; then
     exit 0
 fi
 

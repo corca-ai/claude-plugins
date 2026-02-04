@@ -43,6 +43,7 @@ After implementing a plan, complete the full workflow without waiting for explic
 - When creating new skills or automation tools, first evaluate: marketplace plugin (`plugins/`, general-purpose, usable in any project) vs local skill (`.claude/skills/`, repo-specific). Prefer local skill unless the tool has clear cross-project utility.
 - After large multi-file changes, consider running parallel sub-agent reviews before committing — give each agent a different review perspective (content integrity, missed opportunities, structural analysis) along with session lessons/retro as context.
 - In design discussions, provide honest counterarguments and trade-off analysis. Do not just agree.
+- When integrating across plugins, use defensive checks: plugin A referencing plugin B's output must work when B is not installed (gate on directory/file existence).
 
 ## Language
 
