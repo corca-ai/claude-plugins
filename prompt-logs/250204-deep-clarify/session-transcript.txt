@@ -1,0 +1,944 @@
+
+ ▐▛███▜▌   Claude Code v2.1.31
+▝▜█████▛▘  Opus 4.5 · Claude Max
+  ▘▘ ▝▝    ~/codes/corca/claude-plugins
+
+❯ clarify skill을 개선하고 싶습니다. 에이전트가 지능적으로 충분히 알 수     
+  있는 사실도 질문을 하는 일들이 있기 때문입니다. 저는 코드베이스를         
+  탐색해보면 알 수 있는 모호함에 대한 의사결정은 스스로 해서 알려주고, 또한 
+   코드베이스/요청 안에는 없지만 베스트 프랙티스를 따르면 충분히 할 수 있는 
+   결정 또한 스스로 (WebSearch를 이용한 충분한 탐색 이후에) 할 수 있을      
+  거라고 봅니다. 그래서 결과적으로 사람이 내려야만 하는 (특히 정답이 특별히 
+   정해져있지 않은) 것들을 물어봐주면 좋겠습니다. 어떻게 생각하시나요?      
+  당신의 솔직한 의견이 듣고 싶습니다.                                       
+
+⏺ 좋은 관점입니다. 의견을 드리기 전에 현재 clarify 스킬의 구현을 먼저
+  확인하겠습니다.
+
+⏺ Explore(Explore clarify skill implementation)
+  ⎿  Done (5 tool uses · 15.4k tokens · 17s)
+
+⏺ 현재 스킬을 확인했습니다. 솔직한 의견을 드리겠습니다.
+
+  ---
+  방향성 자체에 동의합니다. 현재 스킬의 핵심 규칙인 "No assumptions: Ask, don't
+  assume"는 지나치게 보수적입니다. 모든 모호함을 동등하게 취급하고 있어서,
+  에이전트가 코드베이스에서 grep 한 번이면 알 수 있는 것도 사람에게 질문하게
+  됩니다.
+
+  다만 한 가지 주의점이 있습니다. 자율 결정을 "묻지 않는 것"으로 구현하면 
+  위험합니다. 에이전트가 틀린 판단을 내렸을 때 사용자가 이를 인지하지 못한 채
+  구현이 진행될 수 있습니다. 그래서 저는 3단계 모델을 제안합니다:
+  단계: 코드베이스에서 확인 가능
+  해결 방법: Explore/Read로 탐색 후 자율 결정
+  출력 형태: "X로 결정 (근거: src/auth/...에서 기존 패턴 확인)"
+  ────────────────────────────────────────
+  단계: 베스트 프랙티스로 결정 가능
+  해결 방법: WebSearch로 조사 후 자율 결정
+  출력 형태: "X로 결정 (근거: [출처]에 따른 권장 방식)"
+  ────────────────────────────────────────
+  단계: 사람만 결정 가능
+  해결 방법: AskUserQuestion
+  출력 형태: 기존처럼 질문
+  핵심은 1, 2단계에서도 결정 내용과 근거를 명시적으로 보고하되, blocking
+  question이 아닌 statement로 제시하는 것입니다. 사용자가 이의가 있으면 바로잡을
+   수 있지만, 기본적으로 흐름이 멈추지 않습니다.
+
+  "사람만 결정 가능"의 기준도 명확히 해야 합니다. 제가 보기에 이 카테고리에
+  해당하는 것은:
+  - 제품/비즈니스 방향 (어떤 기능을 먼저 할 것인가)
+  - 동등한 트레이드오프 사이의 선택 (성능 vs 가독성 등)
+  - 사용자 경험/미적 판단
+  - 코드에도 관례에도 없는, 순수한 의사결정
+
+  이 방향으로 개선을 진행할까요?
+
+✻ Brewed for 58s
+
+❯ 전반적으로 동의합니다. 제시하신 3단계도 제가 의도한 바와 부합합니다.      
+  그런데 3단계에서 사람만 결정 가능하다의 기준을 명확히 하는 것의           
+  트레이드오프가 있을듯합니다. 경험상, '이러저러한 것'을 예로 들면 모델의   
+  창의성이 제약되곤 했습니다. 지금 당신이 스스로 '사람만 결정 가능한 것은   
+  이것들이다'라고 쓸 수 있었던 것처럼, clarify skill 이 사용되는 당시에도   
+  가능하지 않을까요? 어떻게 생각하세요?                                     
+
+⏺ 맞는 지적입니다. 제가 예시를 나열한 것 자체가, 제가 비판한 문제를 그대로
+  재현할 뻔한 셈입니다.
+
+  솔직히 말하면, 예시를 명시하면 모델이 그 예시에 앵커링됩니다. "제품/비즈니스
+  방향, 트레이드오프, UX 판단..."이라고 쓰면, 그 목록에 매칭되는지를 먼저 보게
+  되고, 목록에 없는 새로운 유형의 주관적 판단은 놓칠 수 있습니다. 반면 원칙만
+  주면 매번 first principles에서 추론하게 되니 더 유연합니다.
+
+  결론적으로, 원칙 하나면 충분하다고 봅니다:
+
+  코드베이스 탐색이나 베스트 프랙티스 조사로 도달할 수 있는 답이면 스스로 
+  결정하라. 합리적인 사람들이 서로 다른 답을 낼 수 있고, 어떤 조사로도 정답이 
+  정해지지 않을 때만 사람에게 물어라.
+
+  리스크는 하나 있습니다. 예시 없이 원칙만 주면 세션마다 판단 기준의 분산이 커질
+   수 있습니다. 어떤 때는 너무 많이 물어보고, 어떤 때는 너무 적게 물어볼 수
+  있죠. 하지만 이건 프롬프트 튜닝으로 조정할 수 있는 문제이고, 예시로 인한
+  창의성 제약보다는 낫다고 생각합니다.
+
+  구현을 진행할까요?
+
+❯ 흠... 시간이나 토큰은 조금 더 들어갈 수도 있겠지만, 각 단계를             
+  서브에이전트가 실행하고 취합하는 식으로 진행한다면 건설적인 difference가  
+  더 발현되지 않을까 싶은데 어떠신가요? 트레이드오프가 있을텐데 솔직한      
+  의견이 궁금합니다.                                                        
+                                                                            
+  그리고 이쯤 되니 이건 clarify를 개선하는 게 아니라 새로운 스킬인가 싶기도 
+   한데. major 버전 업데이트가 필요하겠네요. 예전의 간단한 버전을 원한다면  
+  v1을 써라 같은?                                                           
+
+⏺ 서브에이전트 아이디어에 대한 솔직한 생각부터 말씀드리겠습니다.
+
+  "건설적 차이"에 대해서는 설득력이 있습니다. 단일 에이전트가 코드베이스를 먼저
+  보고 나서 웹을 검색하면, 코드베이스에서 본 것에 앵커링됩니다. 반면 독립적으로
+  탐색한 서브에이전트들이 각각 돌아오면:
+
+  - 코드베이스 에이전트: "이 프로젝트는 X 패턴을 씀"
+  - 베스트 프랙티스 에이전트: "업계 권장은 Y"
+
+  이 긴장 자체가 가치 있는 정보입니다. 단일 에이전트였다면 먼저 발견한 쪽으로
+  기울었을 내용이, 서브에이전트 구조에서는 명시적 충돌로 드러납니다. 취합
+  에이전트가 이걸 보고 "기존 패턴을 따를지, 전환할지"를 사람에게 물을 수
+  있습니다. 이건 진짜 사람이 내려야 할 판단이죠.
+
+  하지만 트레이드오프도 분명합니다:
+
+  - 토큰 비용 2-3배
+  - 단순한 요구사항에도 서브에이전트를 돌리면 overkill
+  - 취합 단계의 프롬프트 복잡도
+
+  현실적인 접근은 adaptive하게 가는 것일 수 있습니다. 요구사항의 복잡도를 먼저
+  판단해서, 단순하면 단일 에이전트로, 복잡하면 서브에이전트를 fan-out하는
+  식으로요. 다만 이 "복잡도 판단" 자체가 또 하나의 모호한 결정이라, 처음부터
+  넣으면 스킬이 과도하게 복잡해질 수 있습니다. v2는 항상 서브에이전트 구조로 
+  가고, 사용자가 간단한 걸 원하면 v1을 쓰게 하는 게 더 깔끔할 수 있습니다.
+
+  버전 분리에는 동의합니다. v1과 v2는 철학이 다릅니다:
+  ┌─────────────┬────────────────────────────┬────────────────────────────────┐
+  │             │             v1             │               v2               │
+  ├─────────────┼────────────────────────────┼────────────────────────────────┤
+  │ 철학        │ 모든 모호함을 물어봄       │ 조사 먼저, 사람에게는 최소한만 │
+  ├─────────────┼────────────────────────────┼────────────────────────────────┤
+  │ 구조        │ 단일 에이전트              │ 서브에이전트 fan-out + 취합    │
+  ├─────────────┼────────────────────────────┼────────────────────────────────┤
+  │ 비용        │ 낮음                       │ 높음                           │
+  ├─────────────┼────────────────────────────┼────────────────────────────────┤
+  │ 적합한 상황 │ 빠른 확인, 간단한 요구사항 │ 복잡한 기능, 아키텍처 결정     │
+  └─────────────┴────────────────────────────┴────────────────────────────────┘
+  구현을 진행할까요? 진행한다면 plan mode로 들어가서 구체적인 구조를 잡겠습니다.
+
+✻ Sautéed for 45s
+
+❯ 좋아요. adaptive 에 대한 고려를 어딘가에 남겨둔 채, v2 진행해봅시다. 플랜 
+   작성해주세요. (plan-and-lesson protocol) 플랜을 보고 또 의견             
+  드리겠습니다.                                                             
+
+⏺ Entered plan mode
+  Claude is now exploring and designing an implementation approach.
+
+⏺ 먼저 프로토콜과 관련 파일들을 확인하겠습니다.
+
+⏺ Read 3 files (ctrl+o to expand)
+
+⏺ 이제 코드베이스를 탐색하겠습니다. 서브에이전트 패턴, 기존 스킬 구조, 그리고
+  플러그인 버전 관리를 확인합니다.
+
+⏺ 2 Explore agents finished (ctrl+o to expand)
+   ├─ Explore sub-agent patterns in skills · 45 tool uses · 41.9k tokens
+   │  ⎿  Done
+   └─ Explore plugin versioning and marketplace · 17 tool uses · 27.5k tokens
+      ⎿  Done
+
+⏺ 좋습니다. 이제 prior art search와 핵심 참고 파일을 확인하겠습니다.
+
+⏺ Skill(web-search)
+  ⎿  Successfully loaded skill · 1 tool allowed
+
+⏺ Read 1 file (ctrl+o to expand)
+
+⏺ Bash(/Users/ted/.claude/plugins/cache/corca-plugins/web-search/2.0.1/skills/we
+      b-search/scripts/search.sh --deep "AI agent autonomous decision making vs
+      asking user c…)
+  ⎿ ## Search Results: AI agent autonomous decision making vs asking user c
+    larification frameworks best practices 2025
+    … +242 lines (ctrl+o to expand)
+
+  ⎿  (timeout 30s)
+
+⏺
+
+⏺ Bash(/Users/ted/.claude/plugins/cache/corca-plugins/web-search/2.0.1/skills/we
+      b-search/scripts/search.sh --deep "LLM agent when to ask user vs decide
+      autonomously co…)
+  ⎿ ## Search Results: LLM agent when to ask user vs decide autonomously co
+    nfidence threshold requirements elicitation
+    … +255 lines (ctrl+o to expand)
+
+  ⎿  (timeout 30s)
+
+⏺ Let me also look at one more specific resource - the actual Knight First
+  Amendment paper on levels of autonomy.
+
+  But let me also think about the overall design now. I have enough context to
+  write the plan. Let me now use the Plan agent to design the implementation.
+
+  Key insights from research:
+  1. There's a concept of "Levels of Autonomy" (Knight First Amendment) - agents
+   can be designed at different levels of autonomy
+  2. The concept of confidence thresholds for when to ask vs decide
+  3. Multi-agent patterns exist in suggest-tidyings (fan-out with aggregation)
+  4. No existing implementation of fan-out in the codebase
+
+  Now let me design the plan using a Plan agent.
+
+
+  좋습니다. 충분한 탐색이 완료되었습니다. 이제 Plan 에이전트로 구체적인 설계를
+  하겠습니다.
+
+⏺ Plan(Design clarify v2 skill architecture)
+  ⎿  Done (19 tool uses · 44.4k tokens · 2m 9s)
+
+⏺ Let me read a few more files to validate the plan, then write it.
+
+
+  Plan 에이전트의 설계를 검증하기 위해 몇 가지 핵심 파일을 확인하겠습니다.
+
+⏺ Read 3 files (ctrl+o to expand)
+
+⏺ 1. Create prompt-logs/250204-clarify-v2/plan.md
+  2. Create prompt-logs/250204-clarify-v2/lessons.md
+
+  Actually wait - the protocol says to write the plan to the plan file at
+  /Users/ted/.claude/plans/virtual-honking-badger.md. But the plan-and-lessons
+  protocol says to create prompt-logs/{YYMMDD}-{title}/plan.md. Let me do both -
+   write the system plan file and also the protocol plan file.
+
+  Wait, actually re-reading the plan mode instructions: "You should build your
+  plan incrementally by writing to or editing this file. NOTE that this is the
+  only file you are allowed to edit". So I can only write to the plan file at
+  /Users/ted/.claude/plans/virtual-honking-badger.md. I can't create other
+  files. Let me just write the plan there, and note that prompt-logs/ files
+  should be created during implementation.
+
+  Actually, let me re-read the instructions more carefully: "No plan file exists
+   yet. You should create your plan at
+  /Users/ted/.claude/plans/virtual-honking-badger.md using the Write tool."
+
+  And the protocol says: "Create the plan document when entering plan mode,
+  before implementation begins." at prompt-logs/{YYMMDD}-{title}/plan.md.
+
+  The system says I can only edit the plan file. But the plan-and-lessons
+  protocol says to create in prompt-logs/. Let me create the system plan file
+  with all the content, and note that prompt-logs/ will be created as a deferred
+   action when implementation starts.
+
+  Let me write the plan now.
+
+
+  모든 탐색이 완료되었습니다. 이제 최종 플랜을 작성하겠습니다.
+
+⏺ Updated plan
+  ⎿  /plan to preview
+
+⏺ 플랜 작성을 완료했습니다. 핵심 포인트를 요약하면:
+
+  구조: 5단계 (Capture → Fan-out Research → Aggregate & Classify → Human
+  Questions → Output)
+
+  서브에이전트: 2개 병렬 실행
+  - A: 코드베이스 탐색 (Glob/Grep/Read)
+  - B: 베스트 프랙티스 조사 (WebSearch)
+
+  분류 원칙: 예시 열거 없이 단일 원칙으로 — "조사로 답에 도달할 수 있으면 스스로
+   결정. 합리적인 사람들이 서로 다른 답을 낼 수 있고 어떤 조사로도 정해지지 않을
+   때만 물어라."
+
+  건설적 긴장: 코드베이스와 베스트 프랙티스가 충돌하면 → Tier 3로 분류하여
+  양쪽을 사람에게 제시
+
+  v1 보존: clarify-legacy로 별도 플러그인 생성
+
+  SKILL.md 크기: ~230줄 (한도 500줄). 무거운 로직은 references/ 3개 파일로 분리
+  ⎿ Tool use rejected with user message: 코드베이스 탐색은 더 많은 
+    서브에이전트로 할 수 있지 않나요? 베스트 프랙티스도 영역을 나누면 더 많이 할
+     수 있을 거고요. 또한 인간이 결정할 사항의 의견을 ㅈ주는 것도 2개 
+    서브에이전트가 생각하게 할 수도 있을 것 같습니다. 어떻게 생각하세요?
+  ⎿  Interrupted · What should Claude do instead?
+
+❯ 추가. 베스트 프랙티스를 그냥 찾는 게 아니라, 해당 문제 도메인의 실존하는  
+  전문가들이라면 어떻게 했을지 찾는 것은 어떤가 싶습니다. '실존' 전문가라고 
+   한 이유는 그냥 도메인 익스퍼트를 토큰에 넣었을 때랑,                     
+    전문가의 이름을 넣었을 때 모델의 응답이 굉장히 차이나기 때문입니다.     
+    그러니까 베스트 프랙티스 탐색이, 단순히 웹서치만 하는 게 아니라 "특정   
+    전문가의 이름으로 생각하게 하기" 또한 될 수도 있다는 생각입니다. 모두   
+  제 생각에 불과하니 건설적으로 토론해봅시다.                               
+
+⏺ 좋은 아이디어들입니다. 하나씩 솔직하게 제 생각을 말씀드리겠습니다.
+
+  ---
+  1. 코드베이스 탐색에 더 많은 서브에이전트
+
+  이건 효과 대비 비용이 맞지 않다고 봅니다. Glob/Grep/Read를 가진 에이전트
+  하나가 프로젝트 전체를 탐색할 수 있습니다. 영역을 나눠서 탐색하려면 "어떤
+  영역이 관련 있는지"를 먼저 알아야 하는데, 그걸 알려면 이미 탐색을 해야 합니다.
+   모노레포 수준이 아닌 이상, 하나면 충분합니다.
+
+  2. 베스트 프랙티스에 더 많은 서브에이전트 (도메인 분할)
+
+  비슷한 문제입니다. 어떤 도메인이 관련 있는지는 Phase 1 이후에야 알 수
+  있습니다. 동적으로 서브에이전트 수를 정하는 건 강력하지만, v2에서 구현하기엔
+  복잡도가 높습니다.
+
+  3. 실존 전문가 이름으로 사고하게 하기
+
+  이건 가장 흥미로운 아이디어입니다. 모델이 "보안 전문가"보다 "Bruce Schneier"로
+   프롬프팅했을 때 더 구체적이고 차별화된 답변을 내는 건 실제로 관찰되는
+  현상입니다.
+
+  다만 우려가 하나 있습니다. 실존 인물의 입장을 모델이 fabricate할 수 있습니다.
+  "Kent Beck이라면 이렇게 했을 것이다"가 실제 Kent Beck의 입장이 아닐 수 있죠.
+  그래서 이렇게 구현하면 어떨까요:
+
+  - 베스트 프랙티스 리서처가 먼저 웹 검색으로 실제 출처를 찾고
+  - 그 과정에서 해당 주제에 대해 발언/저술한 실존 전문가 2-3명을 식별하고
+  - 그 전문가들의 published 관점을 기반으로 reasoning
+
+  이러면 별도 서브에이전트를 늘리지 않고도, 베스트 프랙티스 리서처의 방법론
+  안에서 해결됩니다. reference guide에 이 방법론을 넣으면 됩니다.
+
+  4. Tier 3 항목에 대해 2개 서브에이전트가 의견 제시
+
+  이건 가치가 분명합니다. 현재 설계에서 Tier 3는 "질문만 던지고 끝"인데, 두
+  에이전트가 서로 다른 관점에서 의견을 제시하면 사람이 훨씬 나은 판단을 내릴 수
+  있습니다. 그리고 Tier 3 항목은 원래 소수일 것이므로 토큰 비용도 bounded입니다.
+
+  ---
+  정리하면, 플랜에 반영할 변경사항은:
+  아이디어: 코드베이스 에이전트 증가
+  판단: 불필요
+  반영 방식: 유지 (1개)
+  ────────────────────────────────────────
+  아이디어: 베스트 프랙티스 도메인 분할
+  판단: v2에서는 과도
+  반영 방식: Deferred Actions에 기록
+  ────────────────────────────────────────
+  아이디어: 실존 전문가 페르소나
+  판단: 채택
+  반영 방식: 베스트 프랙티스 guide의 방법론으로
+  ────────────────────────────────────────
+  아이디어: Tier 3 advisory 에이전트
+  판단: 채택
+  반영 방식: Phase 3.5 추가 (2개 서브에이전트)
+  이 방향으로 플랜을 업데이트할까요, 아니면 다른 의견이 있으시면 더
+  토론해봅시다.
+
+✻ Cooked for 1m 11s
+
+❯ 좋은 의견입니다. 그 방향으로 플랜을 업데이트해봅시다. 
+
+⏺ Read 1 file (ctrl+o to expand)
+
+⏺ 플랜을 업데이트하겠습니다. 변경점: Phase 3.5 (Advisory) 추가, 전문가 페르소나
+  방법론 반영, 새 reference 파일 추가.
+
+⏺ Updated plan
+  ⎿  /plan to preview
+
+⏺ Updated plan
+  ⎿  /plan to preview
+
+⏺ Updated plan
+  ⎿  /plan to preview
+
+⏺ Updated plan
+  ⎿  /plan to preview
+
+⏺ 이제 Detailed Design 섹션을 업데이트합니다.
+
+⏺ Updated plan
+  ⎿  /plan to preview
+
+⏺ Updated plan
+  ⎿  /plan to preview
+
+⏺ Updated plan
+  ⎿  /plan to preview
+
+⏺ Updated plan
+  ⎿  /plan to preview
+
+⏺ Updated plan
+  ⎿  /plan to preview
+
+⏺ 업데이트가 완료되었습니다. 주요 변경사항 요약:
+
+  - Phase 3.5 (Advisory) 추가: Tier 3 항목에 대해 2개 advisory 서브에이전트가
+  각각 다른 관점에서 의견 제시
+  - 전문가 페르소나 방법론: 베스트 프랙티스 리서처가 웹 검색 → 실존 전문가 식별
+  → 그들의 published 관점 기반 reasoning
+  - advisory-guide.md 신규 reference 파일 추가
+  - Deferred Actions: 동적 서브에이전트 수 (도메인 분할) 기록
+  ⎿  Tool use rejected with user message: 다 괜찮은데, clarify-legacy로 
+     리네임하기보다는 이 스킬만의 별도 이름이 좋겠습니다. 이름 제안해주세요.
+
+⏺ User answered Claude's questions:
+  ⎿  · v1 스킬의 독립적인 이름으로 어떤 것이 좋을까요? → 조금 길어도 
+     괜찮은데, 자율적으로 많은 걸 찾고 나서 물어본다는 성격이 반영되면 면 
+     좋겠습니다.
+
+⏺ 확인합니다 — "자율적으로 많은 걸 찾고 나서 물어본다"는 v2의 성격이니, v2에 새
+  이름을 주고 v1은 clarify로 유지하는 게 맞을까요? 그렇다면 기존 사용자에게도
+  breaking change가 없습니다.
+
+⏺ User answered Claude's questions:
+  ⎿  · v2에 새 이름을 주고, v1은 clarify로 유지하는 게 맞을까요? → v2에 새 
+     이름 (Recommended)
+     · v2 이름으로 어떤 것이 좋을까요? (자율적 조사 후 질문하는 성격 반영) →
+      deep-clarify
+
+⏺ deep-clarify로 결정. v1 clarify는 그대로 유지하니 플랜이 상당히 단순해집니다.
+  업데이트하겠습니다.
+
+⏺ Updated plan
+  ⎿  /plan to preview
+
+⏺ Updated plan
+  ⎿  /plan to preview
+
+⏺ Updated plan
+  ⎿  /plan to preview
+
+⏺ Updated plan
+  ⎿  /plan to preview
+
+⏺ Updated plan
+  ⎿  /plan to preview
+
+⏺ Updated plan
+  ⎿  /plan to preview
+
+⏺ Updated plan
+  ⎿  /plan to preview
+
+⏺ 플랜 업데이트 완료. deep-clarify는 새 독립 플러그인이므로 기존 clarify에 대한
+  수정이 전혀 없어졌고, 구현도 단순해졌습니다.
+
+⏺ User approved Claude's plan
+  ⎿  Plan saved to: ~/.claude/plans/virtual-honking-badger.md · /plan to 
+     edit
+     deep-clarify: Research-First Requirement Clarification
+
+     Summary
+
+     New plugin deep-clarify — a research-first alternative to clarify.
+     Instead of
+     asking the user about all ambiguities (clarify v1 approach),
+     deep-clarify autonomously
+     researches via codebase exploration and best practice analysis, then
+     only asks humans
+     about genuinely subjective decisions — with informed advisory opinions
+     from two
+     opposing perspectives. The existing clarify plugin remains unchanged.
+
+     Success Criteria
+
+     Given a vague requirement like "Add authentication to the app"
+     When the user triggers /clarify
+     Then the agent decomposes the requirement into decision points,
+       launches two parallel sub-agents (codebase + best practice),
+       makes autonomous decisions for items with clear evidence,
+       and only asks the human about genuinely subjective items.
+
+     Given a project using JWT auth with Express middleware
+     When clarifying "Add a logout feature"
+     Then the codebase researcher finds JWT + Express patterns,
+       the agent autonomously decides to follow existing patterns,
+       and reports this decision with file-path evidence.
+
+     Given conflicting evidence (codebase uses pattern X, best practice says
+      Y)
+     When aggregating sub-agent results
+     Then the conflict is surfaced as a Tier 3 item and the human is asked
+     to decide.
+
+     Given all ambiguities are resolvable via research
+     When no Tier 3 items exist
+     Then Phase 3.5 and Phase 4 are skipped entirely.
+
+     Given a Tier 3 item about choosing between REST vs GraphQL
+     When advisory sub-agents are launched
+     Then Advisor α argues for one side with reasoning,
+       Advisor β argues for the other side with reasoning,
+       and the human receives both perspectives alongside the question.
+
+     Given the best practice researcher finds sources by Martin Fowler on
+     the topic
+     When reasoning about recommendations
+     Then the researcher explicitly adopts Fowler's documented perspective
+       (grounded in published work, not fabricated positions).
+
+     Architecture
+
+     User triggers /clarify "Add auth to the app"
+              │
+         Phase 1: Capture & Decompose
+         (list decision points)
+              │
+         Phase 2: Fan-out ──┬── Sub-agent A: Codebase Researcher
+                            │   (Glob, Grep, Read → evidence per decision
+     point)
+                            │
+                            └── Sub-agent B: Best Practice Researcher
+                                (WebSearch → find sources → identify named
+     experts
+                                 → reason from their published perspectives)
+              │
+         Phase 3: Aggregate & Classify
+         (Tier 1: codebase-resolved, Tier 2: best-practice-resolved, Tier 3:
+      ask human)
+              │
+         Phase 3.5: Advisory (Tier 3 items only, skip if empty)
+         Fan-out ──┬── Advisor α: argues one perspective
+                   └── Advisor β: argues the opposing perspective
+              │
+         Phase 4: Human Questions (Tier 3 only, with advisory opinions
+     attached)
+              │
+         Phase 5: Output (decisions table + clarified spec + save option)
+
+     File Changes
+
+     New files
+
+
+     File: plugins/deep-clarify/.claude-plugin/plugin.json
+     Purpose: Plugin metadata (v1.0.0)
+     ────────────────────────────────────────
+     File: plugins/deep-clarify/skills/deep-clarify/SKILL.md
+     Purpose: 6-phase orchestrator (~270 lines)
+     ────────────────────────────────────────
+     File: plugins/deep-clarify/skills/deep-clarify/references/codebase-rese
+     arch-guide.md
+     Purpose: Sub-agent A instructions (~70 lines)
+     ────────────────────────────────────────
+     File: plugins/deep-clarify/skills/deep-clarify/references/bestpractice-
+     research-guide.md
+     Purpose: Sub-agent B instructions (~80 lines)
+     ────────────────────────────────────────
+     File: plugins/deep-clarify/skills/deep-clarify/references/aggregation-g
+     uide.md
+     Purpose: Tier classification rules + output format (~80 lines)
+     ────────────────────────────────────────
+     File:
+     plugins/deep-clarify/skills/deep-clarify/references/advisory-guide.md
+     Purpose: Tier 3 advisory sub-agent instructions (~60 lines)
+     Modified files
+     File: .claude-plugin/marketplace.json
+     Change: Add deep-clarify entry, bump metadata version
+     ────────────────────────────────────────
+     File: README.md
+     Change: Add deep-clarify to table + detail section
+     ────────────────────────────────────────
+     File: README.ko.md
+     Change: Same changes in Korean
+     Unchanged files
+     ┌─────────────────────────────────────┬────────────────────────────────
+     ──┐
+     │                File                 │               Note
+       │
+     ├─────────────────────────────────────┼────────────────────────────────
+     ──┤
+     │ plugins/clarify/ (entire directory) │ v1 stays as-is, no
+     modifications │
+     └─────────────────────────────────────┴────────────────────────────────
+     ──┘
+
+     Detailed Design
+
+     SKILL.md (~270 lines)
+
+     Frontmatter:
+     ---
+     name: deep-clarify
+     description: |
+       Research-first requirement clarification. Autonomously resolves 
+     ambiguities
+       through codebase exploration and best practice research. Only asks 
+     the human
+       about genuinely subjective decisions — with informed advisory 
+     opinions.
+       Triggers: "/deep-clarify", or when requirements need deep 
+     clarification.
+     allowed-tools:
+       - Task
+       - Read
+       - Glob
+       - Grep
+       - Write
+       - AskUserQuestion
+     ---
+
+     Phase 1: Capture & Decompose — Record requirement verbatim, list
+     concrete
+     decision points (questions, not categories). This list drives Phase 2.
+
+     Phase 2: Parallel Research — Launch two sub-agents simultaneously via
+     Task tool
+     (subagent_type: general-purpose):
+     - Sub-agent A reads {SKILL_DIR}/references/codebase-research-guide.md,
+     explores
+     codebase with Glob/Grep/Read, reports evidence per decision point
+     - Sub-agent B reads
+     {SKILL_DIR}/references/bestpractice-research-guide.md:
+       a. Searches web for authoritative sources per decision point
+       b. Identifies 2-3 named experts who have published on the topic
+       c. Reasons from those experts' documented perspectives (grounded in
+     actual work)
+
+     Phase 3: Aggregate & Classify — Read
+     {SKILL_DIR}/references/aggregation-guide.md.
+     For each decision point, classify using the guiding principle:
+
+     If you could arrive at a defensible answer through codebase exploration
+      or best
+     practice research, make the decision yourself. Only ask the human when 
+     reasonable
+     people could disagree and no external evidence would settle it.
+
+     Classification rules:
+     - Tier 1: Codebase has clear evidence → decide, cite file paths
+     - Tier 2: Best practice has clear consensus (codebase silent) → decide,
+      cite sources
+     - Tier 3: Evidence conflicts, both silent, or inherently subjective →
+     queue for advisory + human
+
+     Constructive tension: When codebase and best practice conflict, that
+     tension
+     itself is Tier 3 — present both sides to the human.
+
+     Phase 3.5: Advisory — If Tier 3 items exist, launch two advisory
+     sub-agents
+     in parallel via Task tool (subagent_type: general-purpose):
+     - Both read {SKILL_DIR}/references/advisory-guide.md
+     - Both receive: the Tier 3 decision points + all research context from
+     Phase 2
+     - Advisor α: assigned to argue for one perspective (the guide instructs
+      how to pick)
+     - Advisor β: assigned to argue for the opposing perspective
+     - Each returns: a concise position statement with reasoning for each
+     Tier 3 item
+     - If zero Tier 3 items, skip this phase entirely.
+
+     The advisory opinions are NOT decisions — they are informed
+     perspectives to help
+     the human decide. The value is in the constructive difference between
+     the two.
+
+     Phase 4: Human Questions — AskUserQuestion for Tier 3 items only. Each
+     question
+     includes:
+     - The research context from Phase 2 (what codebase shows, what best
+     practice says)
+     - Advisory α's position and reasoning
+     - Advisory β's position and reasoning
+     - The question itself with options
+
+     Phase 5: Output — Structured summary:
+     1. Agent decisions table (Tier + decision + evidence)
+     2. Human decisions table (with advisory context that informed the
+     choice)
+     3. Clarified requirement spec (Goal, Scope, Constraints, Key Decisions)
+     4. Save-to-file option
+
+     Sub-agent Reference Guides
+
+     Each guide follows the pattern established by
+     suggest-tidyings/references/tidying-guide.md
+     (at plugins/suggest-tidyings/skills/suggest-tidyings/references/tidying
+     -guide.md):
+     role statement → context → methodology → constraints → output format.
+
+     codebase-research-guide.md (~70 lines): Instructs sub-agent to explore
+     project
+     structure, find relevant patterns/conventions/implementations, report
+     evidence +
+     confidence level per decision point. Reports evidence, does NOT make
+     final decisions.
+
+     bestpractice-research-guide.md (~80 lines): Instructs sub-agent to:
+     1. Search web for authoritative sources per decision point
+     2. Identify 2-3 named, real experts who have published/spoken on the
+     topic
+     3. Reason from those experts' documented perspectives — grounded in
+     actual
+     published work, not fabricated positions
+     4. Report: sources found, experts identified, each expert's likely
+     position
+     (with citation), overall consensus level, noted disagreements
+     Uses WebSearch directly (web-search plugin hook redirect is transparent
+      if present).
+
+     Why named experts? LLMs produce more specific, distinctive outputs when
+      reasoning
+     from a named expert's perspective vs. a generic "domain expert" role.
+     The key
+     constraint is grounding: the guide explicitly requires citing published
+      work to
+     prevent hallucinating positions.
+
+     aggregation-guide.md (~80 lines): Contains the guiding principle
+     (verbatim),
+     classification rules (Tier 1/2/3 conditions), conflict handling
+     instructions, and
+     the output format for the final summary. This is the most critical
+     reference file —
+     it encodes the decision-making philosophy without enumerating examples.
+
+     advisory-guide.md (~60 lines): Instructs advisory sub-agents for Tier 3
+      items.
+     - Role: "You are an advisor presenting one perspective on a subjective
+     decision."
+     - Each advisor is assigned a side (α = first perspective, β = opposing
+     perspective)
+     - Methodology: build the strongest honest case for your assigned
+     perspective,
+     acknowledge trade-offs, do NOT strawman the other side
+     - Output format per Tier 3 item: position statement (1-2 sentences),
+     key arguments
+     (2-3 bullets), acknowledged trade-offs (1-2 bullets)
+     - Constraint: present informed opinions, not decisions. The human
+     decides.
+
+     Relationship to clarify v1
+
+     deep-clarify is a new, independent plugin. clarify remains unchanged.
+     Users choose based on need:
+     - /clarify — quick, lightweight, asks about all ambiguities
+     - /deep-clarify — thorough, autonomous research first, asks only
+     subjective items
+
+     Implementation Sequence
+
+     1. Create prompt-logs/250204-deep-clarify/plan.md and lessons.md
+     2. Create plugins/deep-clarify/.claude-plugin/plugin.json
+     3. Write reference guides in
+     plugins/deep-clarify/skills/deep-clarify/references/:
+       - codebase-research-guide.md
+       - bestpractice-research-guide.md
+       - aggregation-guide.md
+       - advisory-guide.md
+     4. Write plugins/deep-clarify/skills/deep-clarify/SKILL.md (6-phase
+     orchestrator)
+     5. Update .claude-plugin/marketplace.json (add deep-clarify, bump
+     version)
+     6. Update README.md and README.ko.md
+     7. Test locally: claude --plugin-dir ./plugins/deep-clarify 
+     --dangerously-skip-permissions --resume
+
+     Verification
+
+     1. Structure check: Confirm SKILL.md < 500 lines, all reference guides
+     < 100 lines each
+     2. Local test: Install plugin, trigger /clarify "Add user 
+     authentication" on a
+     sample project, verify Phase 2 sub-agents launch in parallel
+     3. Tier classification: Verify that codebase-evident decisions are
+     auto-resolved,
+     best-practice decisions cite sources and named experts, only subjective
+      items go to Phase 3.5+4
+     4. Advisory test: Verify Phase 3.5 launches two advisors for Tier 3
+     items,
+     each presenting a different perspective with reasoning
+     5. Edge case — zero Tier 3: Test with a highly constrained requirement
+     where
+     everything is resolvable; confirm Phase 3.5 and Phase 4 are both
+     skipped
+     6. Edge case — conflict: Test where codebase pattern conflicts with
+     best practice;
+     confirm advisors argue both sides, human receives full context
+     7. Expert grounding: Verify best practice researcher cites actual
+     published work,
+     not fabricated expert positions
+     8. Coexistence: Confirm clarify (v1) is unaffected by deep-clarify
+     installation
+
+     Deferred Actions
+
+     - Adaptive mode: auto-detect requirement complexity to decide whether
+     sub-agents
+     are needed (noted during design discussion, deferred to future
+     iteration)
+     - Dynamic sub-agent count: split best practice research by domain
+     (e.g., security,
+     performance, UX each get their own researcher) based on Phase 1
+     decomposition
+     (discussed, deferred — requires knowing domains before research begins)
+     - Create prompt-logs/250204-deep-clarify/plan.md and lessons.md
+     (received during plan mode)
+
+     Prior Art
+
+     - Levels of Autonomy for AI Agents (Knight First Amendment Institute):
+     Defines L1-L5
+     autonomy levels. Clarify v2 operates at ~L3 — agent acts autonomously
+     but surfaces
+     decisions for human override. Relevant insight: autonomy level should
+     match task
+     complexity, not be fixed.
+     - suggest-tidyings plugin: Established the fan-out sub-agent pattern in
+      this codebase
+     (Task tool with subagent_type: general-purpose, parallel dispatch,
+     aggregation).
+
+
+
+
+
+
+
+
+
+
+
+
+
+  ⎿  Interrupted · What should Claude do instead?
+
+❯ 구현 시작하기 전에, 이번 세션만으로 충분히 좋은 논의를 많이 한 것         
+  같습니다. 이걸 별도의 prompt-logs 에 lesson과 retro로 기록하고, 다음      
+  세션에서 그 plan으로 구현 시작하고 싶습니다. 이해하셨나요?                
+
+⏺ 네, 이해했습니다. 이번 세션의 산출물을 정리하겠습니다:
+
+  1. prompt-logs/250204-deep-clarify/plan.md — 승인된 플랜 복사
+  2. prompt-logs/250204-deep-clarify/lessons.md — 논의에서 나온 학습 기록
+  3. /retro — 세션 회고
+
+⏺ Bash(mkdir -p
+      /Users/ted/codes/corca/claude-plugins/prompt-logs/250204-deep-clarify)
+  ⎿  (No content)
+
+⏺ Read 1 file (ctrl+o to expand)
+
+⏺ Write(prompt-logs/250204-deep-clarify/plan.md)
+  ⎿  Wrote 267 lines to prompt-logs/250204-deep-clarify/plan.md
+      1 # deep-clarify: Research-First Requirement Clarification
+      2 
+      3 ## Summary
+      4 
+      5 New plugin `deep-clarify` — a research-first alternative to `clar
+        ify`. Instead of
+      6 asking the user about all ambiguities (clarify v1 approach), deep
+        -clarify autonomously
+      7 researches via codebase exploration and best practice analysis, t
+        hen only asks humans
+      8 about genuinely subjective decisions — with informed advisory opi
+        nions from two
+      9 opposing perspectives. The existing `clarify` plugin remains unch
+        anged.
+     … +257 lines (ctrl+o to expand)
+
+⏺ Write(prompt-logs/250204-deep-clarify/lessons.md)
+  ⎿  Wrote 46 lines to prompt-logs/250204-deep-clarify/lessons.md
+      1 # Lessons: deep-clarify 설계 세션
+      2 
+      3 ## 원칙 기반 vs 예시 기반 프롬프팅
+      4 
+      5 - **Expected**: Tier 3 (사람만 결정 가능한 항목)의 기준을 명확히 
+        하기 위해 예시를 나열하면 좋을 것
+      6 - **Actual**: 예시를 나열하면 모델이 앵커링되어 창의성이 제약됨. 
+        단일 원칙만으로도 모델이 매 상황에서 first principles로 추론 가능
+      7 - **Takeaway**: 프롬프트에서 행동 기준을 정의할 때, 구체적 예시보
+        다 판단 원칙을 주는 것이 더 유연한 결과를 낳음
+      8 
+      9 When 스킬 프롬프트에서 판단 기준을 정의할 때 → 예시 나열 대신 원
+        칙 하나로 표현하라
+     … +36 lines (ctrl+o to expand)
+
+⏺ plan.md와 lessons.md를 작성했습니다. 이제 retro를 실행하겠습니다.
+
+⏺ Skill(retro)
+  ⎿  Successfully loaded skill · 6 tools allowed
+
+⏺ 1. Locate output directory - we already have prompt-logs/250204-deep-clarify/
+  2. Read existing artifacts - plan.md, lessons.md, CLAUDE.md,
+  project-context.md
+  3. Draft retro
+  4. Write retro.md
+  5. Persist findings
+
+  Let me read the existing artifacts first.
+
+⏺ Recalled 1 memory, read 3 files (ctrl+o to expand)
+
+⏺ 이제 Section 4 (학습 자료)를 위한 웹 검색을 하고, retro를 작성하겠습니다.
+
+⏺ Bash(/Users/ted/.claude/plugins/cache/corca-plugins/web-search/2.0.1/skills/we
+      b-search/scripts/search.sh "multi-agent debate adversarial collaboration
+      LLM decision m…)
+  ⎿ ## Search Results: multi-agent debate adversarial collaboration LLM dec
+    ision making research 2025
+    … +131 lines (ctrl+o to expand)
+
+  ⎿  (timeout 30s)
+
+⏺ Bash(/Users/ted/.claude/plugins/cache/corca-plugins/web-search/2.0.1/skills/we
+      b-search/scripts/search.sh "prompt engineering named persona expert
+      identity LLM output…)
+  ⎿ ## Search Results: prompt engineering named persona expert identity LLM
+     output quality research
+    … +130 lines (ctrl+o to expand)
+
+
+⏺
+
+⏺ Write(prompt-logs/250204-deep-clarify/retro.md)
+  ⎿  Wrote 44 lines to prompt-logs/250204-deep-clarify/retro.md
+       1 # Retro: deep-clarify 설계
+       2 
+       3 > Session date: 2025-02-04
+       4 
+       5 ## 1. Context Worth Remembering
+       6 
+       7 - 사용자는 LLM 프롬프팅의 미세한 차이가 출력 품질에 미치는 영향
+         을 실무적으로 잘 이해하고 있음 (예시 앵커링 문제, 실존 전문가 이
+         름의 효과 등)
+       8 - 스킬 설계에서 "모델의 창의성을 제약하지 않는 것"을 높이 가치 
+         있게 봄 — 규칙을 최소화하고 원칙으로 유도하는 방향을 선호
+       9 - 서브에이전트 아키텍처에 대한 관심이 높음 — 단순히 병렬화가 아
+         니라 "건설적 차이(constructive difference)"를 통한 품질 향상에 
+         주목
+      10 - 기존 사용자에게 영향을 주지 않는 변경 전략을 선호 (v2 업데이트
+         보다 별도 플러그인 분리)
+     … +34 lines (ctrl+o to expand)
+
+⏺ retro.md 작성 완료. Section 2에서 CLAUDE.md 업데이트 제안이 있습니다.
+
+⏺ User answered Claude's questions:
+  ⎿  · CLAUDE.md Collaboration Style에 다음을 추가할까요?
+
+     "설계 토론 세션에서는 에이전트의 솔직한 반론과 트레이드오프 분석을 
+     기대함. 동의만 하지 말 것." → 추가
+
+⏺ Wrote 1 memory (ctrl+o to expand)
+
+⏺ 완료. 이번 세션의 산출물 정리:
+  파일: prompt-logs/250204-deep-clarify/plan.md
+  내용: 승인된 구현 플랜 (6-phase, 서브에이전트 아키텍처)
+  ────────────────────────────────────────
+  파일: prompt-logs/250204-deep-clarify/lessons.md
+  내용: 6개 학습 (원칙 vs 예시, 건설적 차이, 전문가 페르소나 등)
+  ────────────────────────────────────────
+  파일: prompt-logs/250204-deep-clarify/retro.md
+  내용: 세션 회고 (5개 섹션)
+  ────────────────────────────────────────
+  파일: CLAUDE.md
+  내용: Collaboration Style에 "설계 토론 시 솔직한 반론" 추가
+  다음 세션에서 plan.md를 참조하여 deep-clarify 구현을 시작하면 됩니다.
+
+✻ Cogitated for 2m 47s

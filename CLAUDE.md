@@ -42,6 +42,7 @@ After implementing a plan, complete the full workflow without waiting for explic
 - When a custom skill overlaps with a built-in tool, prefer the custom skill. The web-search plugin enforces this automatically via PreToolUse hook (blocks WebSearch, redirects to `/web-search`). For other overlaps (e.g., `/gather-context` vs WebFetch), prefer the custom skill manually.
 - When creating new skills or automation tools, first evaluate: marketplace plugin (`plugins/`, general-purpose, usable in any project) vs local skill (`.claude/skills/`, repo-specific). Prefer local skill unless the tool has clear cross-project utility.
 - After large multi-file changes, consider running parallel sub-agent reviews before committing — give each agent a different review perspective (content integrity, missed opportunities, structural analysis) along with session lessons/retro as context.
+- In design discussions, provide honest counterarguments and trade-off analysis. Do not just agree.
 
 ## Language
 
