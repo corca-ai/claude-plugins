@@ -93,6 +93,8 @@ retro.md is session-specific. Findings worth keeping across sessions should be p
 2. If yes: Edit CLAUDE.md with the changes
 3. If no: suggestions remain documented in retro.md for future reference
 
+**Actionable improvements (Section 5)**: If the retro identifies concrete, implementable improvements (protocol changes, skill modifications, new automation), offer to implement them now rather than just recording them. Use AskUserQuestion: "Implement now?" — this prevents findings from becoming stale notes that require a separate session to act on.
+
 ### 6. Post-Retro Discussion
 
 After writing retro.md and persisting findings, the user will often read the retro and continue the conversation — asking questions, giving corrections, raising new points. This is expected and valuable.
