@@ -6,9 +6,18 @@ Protocol for persisting planning artifacts and session learnings.
 
 ### Location
 
-`prompt-logs/{YYMMDD}-{title}/plan.md`
+`prompt-logs/{YYMMDD}-{NN}-{title}/plan.md`
 
-The `{title}` must reflect the current session's task, not a previous session's. Even if the input spec or reference document lives in an existing `prompt-logs/` directory, always create a new directory named after the current task.
+**Date**: Run `date +%y%m%d` to get the system date. Do not infer the date from
+your training data or conversation context — always use the system command.
+
+**Sequence number**: Scan existing `prompt-logs/` directories matching today's
+date (`{YYMMDD}-*`) and pick the next number. If none exist, start at `01`.
+Examples: `260204-01-auth-design`, `260204-02-auth-impl`.
+
+The `{title}` must reflect the current session's task, not a previous session's.
+Even if the input spec or reference document lives in an existing `prompt-logs/`
+directory, always create a new directory named after the current task.
 
 Determine the path from the user's request. If the user specifies a path, use it.
 
@@ -54,7 +63,7 @@ Create the plan document when entering plan mode, before implementation begins.
 
 ### Location
 
-`prompt-logs/{YYMMDD}-{title}/lessons.md` — same directory as the plan.
+`prompt-logs/{YYMMDD}-{NN}-{title}/lessons.md` — same directory as the plan.
 
 ### What to Record
 
@@ -87,6 +96,6 @@ Accumulate incrementally throughout the session. Record learnings as they emerge
 
 ## Retro Document (optional)
 
-`prompt-logs/{YYMMDD}-{title}/retro.md` — produced by the `/retro` skill at session end.
+`prompt-logs/{YYMMDD}-{NN}-{title}/retro.md` — produced by the `/retro` skill at session end.
 
 While lessons are accumulated incrementally during a session, the retro is a comprehensive end-of-session review covering: user/org context, collaboration preferences, prompting feedback, learning resources, and skill discovery. See the `/retro` skill for details if available.

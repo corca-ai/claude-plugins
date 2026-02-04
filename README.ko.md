@@ -147,7 +147,7 @@ Kent Beck의 "Tidy First?" 철학에 기반하여 최근 커밋들을 분석하�
 - 워크플로우에 도움될 스킬 탐색 또는 새 스킬 제작 제안
 
 **출력물**:
-- `prompt-logs/{YYMMDD}-{title}/retro.md` — plan.md, lessons.md와 같은 디렉토리에 저장
+- `prompt-logs/{YYMMDD}-{NN}-{title}/retro.md` — plan.md, lessons.md와 같은 디렉토리에 저장
 
 ### [gather-context](plugins/gather-context/skills/gather-context/SKILL.md)
 
@@ -254,7 +254,7 @@ CLAUDE_ATTENTION_DELAY=30  # AskUserQuestion 알림 지연 시간 (초, 기본�
 
 **설치**: `claude plugin install plan-and-lessons@corca-plugins` | **갱신**: `claude plugin update plan-and-lessons@corca-plugins`
 
-Claude Code가 Plan 모드에 진입할 때(`EnterPlanMode` 도구 호출 시) Plan & Lessons Protocol을 자동으로 주입하는 훅입니다. 프로토콜은 `prompt-logs/{YYMMDD}-{title}/` 디렉토리에 plan.md와 lessons.md를 생성하는 워크플로우를 정의합니다.
+Claude Code가 Plan 모드에 진입할 때(`EnterPlanMode` 도구 호출 시) Plan & Lessons Protocol을 자동으로 주입하는 훅입니다. 프로토콜은 `prompt-logs/{YYMMDD}-{NN}-{title}/` 디렉토리에 plan.md와 lessons.md를 생성하는 워크플로우를 정의합니다.
 
 **동작 방식**:
 - `PreToolUse` → `EnterPlanMode` 매처로 plan 모드 진입을 감지

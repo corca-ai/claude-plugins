@@ -147,7 +147,7 @@ A skill that runs a comprehensive retrospective at the end of a session. If `les
 - Searches for relevant workflow skills or suggests creating new ones
 
 **Outputs**:
-- `prompt-logs/{YYMMDD}-{title}/retro.md` — saved alongside plan.md and lessons.md
+- `prompt-logs/{YYMMDD}-{NN}-{title}/retro.md` — saved alongside plan.md and lessons.md
 
 ### [gather-context](plugins/gather-context/skills/gather-context/SKILL.md)
 
@@ -253,7 +253,7 @@ CLAUDE_ATTENTION_DELAY=30  # AskUserQuestion notification delay in seconds (defa
 
 **Install**: `claude plugin install plan-and-lessons@corca-plugins` | **Update**: `claude plugin update plan-and-lessons@corca-plugins`
 
-A hook that automatically injects the Plan & Lessons Protocol when Claude Code enters plan mode (via the `EnterPlanMode` tool call). The protocol defines a workflow that creates plan.md and lessons.md under `prompt-logs/{YYMMDD}-{title}/`.
+A hook that automatically injects the Plan & Lessons Protocol when Claude Code enters plan mode (via the `EnterPlanMode` tool call). The protocol defines a workflow that creates plan.md and lessons.md under `prompt-logs/{YYMMDD}-{NN}-{title}/`.
 
 **How it works**:
 - Uses a `PreToolUse` → `EnterPlanMode` matcher to detect plan-mode entry
