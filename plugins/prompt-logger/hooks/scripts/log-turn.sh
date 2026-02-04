@@ -4,6 +4,9 @@ set -euo pipefail
 # prompt-logger: Log conversation turns to markdown files
 # Called by Stop and SessionEnd hooks (async)
 # Idempotent — safe to call multiple times per turn
+# SessionEnd passes "session_end" arg to trigger auto-commit
+
+HOOK_TYPE="${1:-stop}"
 
 # ── Read hook input ──────────────────────────────────────────────────────────
 INPUT=$(cat)
@@ -29,6 +32,8 @@ sleep 0.3
     eval "$(grep -sh '^export CLAUDE_CORCA_PROMPT_LOGGER_ENABLED=' ~/.zshrc ~/.bashrc 2>/dev/null)" || true
 [ -z "${CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE:-}" ] && \
     eval "$(grep -sh '^export CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE=' ~/.zshrc ~/.bashrc 2>/dev/null)" || true
+[ -z "${CLAUDE_CORCA_PROMPT_LOGGER_AUTO_COMMIT:-}" ] && \
+    eval "$(grep -sh '^export CLAUDE_CORCA_PROMPT_LOGGER_AUTO_COMMIT=' ~/.zshrc ~/.bashrc 2>/dev/null)" || true
 
 ENABLED="${CLAUDE_CORCA_PROMPT_LOGGER_ENABLED:-true}"
 if [ "$ENABLED" != "true" ]; then
@@ -37,6 +42,7 @@ fi
 
 LOG_DIR="${CLAUDE_CORCA_PROMPT_LOGGER_DIR:-${CWD}/prompt-logs/sessions}"
 TRUNCATE_THRESHOLD="${CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE:-10}"
+AUTO_COMMIT="${CLAUDE_CORCA_PROMPT_LOGGER_AUTO_COMMIT:-true}"
 
 # ── Session hash & state ─────────────────────────────────────────────────────
 HASH=$(echo -n "$SESSION_ID" | shasum -a 256 | cut -c1-8)
@@ -354,5 +360,16 @@ done
 # ── Update state ──────────────────────────────────────────────────────────────
 echo "$TOTAL_LINES" > "$OFFSET_FILE"
 echo "$((TURN_START + TURN_COUNT - FIRST_TURN_IDX))" > "$TURN_NUM_FILE"
+
+# ── Auto-commit session log on SessionEnd ────────────────────────────────────
+if [ "$HOOK_TYPE" = "session_end" ] && [ "$AUTO_COMMIT" = "true" ] && [ -f "$OUT_FILE" ]; then
+    if git -C "$CWD" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        # Only proceed if no pre-existing staged changes (don't interfere)
+        if git -C "$CWD" diff --cached --quiet 2>/dev/null; then
+            git -C "$CWD" add -- "$OUT_FILE" 2>/dev/null && \
+            git -C "$CWD" commit --no-verify -m "prompt-log: $(basename "$OUT_FILE" .md)" 2>/dev/null || true
+        fi
+    fi
+fi
 
 exit 0

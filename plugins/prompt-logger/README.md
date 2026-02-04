@@ -52,6 +52,7 @@ last 5 lines...
 - **Image handling** — image content replaced with `[Image]`
 - **Thinking blocks** — skipped entirely
 - **Race-safe** — atomic mkdir lock prevents concurrent Stop/SessionEnd conflicts
+- **Auto-commit** — session log is committed automatically at session end (no untracked leftovers)
 
 ## Configuration
 
@@ -60,6 +61,7 @@ last 5 lines...
 | `CLAUDE_CORCA_PROMPT_LOGGER_DIR` | `{cwd}/prompt-logs/sessions` | Output directory |
 | `CLAUDE_CORCA_PROMPT_LOGGER_ENABLED` | `true` | Enable/disable logging |
 | `CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE` | `10` | Line threshold for assistant text truncation |
+| `CLAUDE_CORCA_PROMPT_LOGGER_AUTO_COMMIT` | `true` | Auto-commit session log at session end |
 
 Set in `~/.claude/.env` or shell profile:
 
