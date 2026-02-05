@@ -51,7 +51,8 @@ Instead:
 1. Review the session summary (Sections 1-4 provided by the orchestrator)
 2. Identify 2-3 moments most relevant to your expert's framework
 3. Analyze those moments through the expert's published methodology
-4. Provide 1-2 concrete, actionable recommendations grounded in the framework
+4. For each key moment, describe what you would have done differently and why, grounded in your framework
+5. Provide 1-2 concrete, actionable recommendations grounded in the framework
 
 ## Constraints
 

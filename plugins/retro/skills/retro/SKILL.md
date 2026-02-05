@@ -74,9 +74,11 @@ Condition: Does the session contain decisions that domain experts would analyze 
 
 **Execution**: Launch Expert alpha and Expert beta in parallel via Task tool. Each sub-agent prompt: "Read `{SKILL_DIR}/references/expert-lens-guide.md`. You are Expert {alpha|beta}. Session summary: {Sections 1-4 summary}. Deep-clarify experts: {names or 'not available'}. Analyze through your framework. Use web search to verify expert identity and cite published work." Integrate both results into Section 5.
 
-#### Section 6: Learning Resources
+#### Section 6: Learning Resources (conditional)
 
-Search the web for 2-3 resources calibrated to the user's knowledge level, focusing on topics where the session revealed gaps or curiosity. For each: title + URL, 2-3 sentence summary of key takeaways, and why it matters for the user's work.
+Condition: Does the session contain topics where the user showed knowledge gaps or genuine curiosity? If the session is too lightweight (simple config changes, routine tasks), skip this section with a brief note.
+
+Search the web for 2-3 resources calibrated to the user's knowledge level. For each: title + URL, 2-3 sentence summary of key takeaways, and why it matters for the user's work.
 
 #### Section 7: Relevant Skills
 
@@ -154,3 +156,4 @@ Write retro.md in the user's language. Detect from conversation, not from this s
 5. If early session context is unavailable due to conversation length, focus on what is visible and note the limitation
 6. CDM analysis (Section 4) is unconditional — every session has decisions to analyze
 7. Expert Lens (Section 5) is conditional — skip for lightweight sessions with no non-trivial decisions
+8. Learning Resources (Section 6) is conditional — skip for lightweight sessions with no knowledge gaps or curiosity signals
