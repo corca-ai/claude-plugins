@@ -48,13 +48,14 @@
     {
       "name": "gather-context",
       "source": "./plugins/gather-context",
-      "description": "A skill that auto-detects URLs and gathers external content from Google Docs, Slack, Notion, and web pages",
-      "keywords": ["url", "export", "google", "slack", "notion", "gather", "context"]
+      "description": "Unified information acquisition: URL auto-detect (Google/Slack/Notion/GitHub/web), web search, and local codebase exploration",
+      "keywords": ["url", "export", "google", "slack", "notion", "github", "gather", "context", "search", "tavily", "exa", "code-search"]
     },
     {
       "name": "web-search",
       "source": "./plugins/web-search",
-      "description": "A skill that provides web search, code search, and URL content extraction via Tavily and Exa APIs",
+      "description": "DEPRECATED — use gather-context v2 instead. Web search, code search, and URL content extraction via Tavily and Exa APIs",
+      "deprecated": true,
       "keywords": ["search", "web-search", "tavily", "exa", "code-search", "extract"]
     },
     {

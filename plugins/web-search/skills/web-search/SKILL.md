@@ -8,6 +8,10 @@ allowed-tools:
   - Bash
 ---
 
+> **DEPRECATED**: This plugin is deprecated. Use `/gather-context --search` instead.
+> All web search, code search, and URL extraction functionality has been absorbed into [gather-context](../../../gather-context/skills/gather-context/SKILL.md) v2.
+> To migrate: `claude plugin install gather-context@corca-plugins && claude plugin update gather-context@corca-plugins`
+
 # Web Search (/web-search)
 
 Call Tavily/Exa REST APIs via wrapper scripts for web search, code search, and URL content extraction.

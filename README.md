@@ -45,8 +45,8 @@ You can do the same from inside Claude Code (instead of your terminal):
 | [interview](#interview) | Skill | Extract requirements through structured interviews |
 | [suggest-tidyings](#suggest-tidyings) | Skill | Suggest safe refactoring opportunities |
 | [retro](#retro) | Skill | Run a comprehensive end-of-session retrospective with CDM analysis and expert lens |
-| [gather-context](#gather-context) | Skill | Auto-detect URLs and gather external content via built-in scripts |
-| [web-search](#web-search) | Skill + Hook | Web search, code search, and URL content extraction |
+| [gather-context](#gather-context) | Skill + Hook | Unified information acquisition: URL auto-detect, web search, local code exploration |
+| [web-search](#web-search) | ~~Skill + Hook~~ | **Deprecated** — use gather-context v2 |
 | [attention-hook](#attention-hook) | Hook | Send a Slack notification when idle/waiting |
 | [plan-and-lessons](#plan-and-lessons) | Hook | Inject the Plan & Lessons Protocol when entering plan mode |
 | [smart-read](#smart-read) | Hook | Enforce intelligent file reading based on file size |
@@ -156,60 +156,59 @@ A skill that runs a comprehensive retrospective at the end of a session. If `les
 
 **Install**: `claude plugin install gather-context@corca-plugins` | **Update**: `claude plugin update gather-context@corca-plugins`
 
-An integrated skill that detects URL types and gathers external content into local files. It includes built-in converters, so it can gather Google Docs, Slack, and Notion content with a single plugin **without installing separate skills**. It combines the functionality of [`slack-to-md`](https://www.stdy.blog/1p1w-01-slack-to-md/), [`g-export`](https://www.stdy.blog/1p1w-02-g-export/), and `notion-to-md`.
+Unified information acquisition layer with three modes: URL auto-detect, web search, and local codebase exploration. Absorbs all `web-search` functionality — a single plugin for all external information needs. Built-in converters for Google Docs, Slack, Notion, and GitHub content. Uses Tavily and Exa APIs for search.
 
 **Usage**:
-- Explicit invocation: `/gather-context <url>`
-- URL detection: if the agent encounters a supported service URL, it automatically runs the right converter
+- URL gathering: `/gather-context <url>` (auto-detects Google, Slack, Notion, GitHub, or generic web)
+- Web search: `/gather-context --search <query>` (Tavily)
+- Code search: `/gather-context --search code <query>` (Exa)
+- News/deep: `/gather-context --search --news <query>`, `/gather-context --search --deep <query>`
+- Local exploration: `/gather-context --local <topic>`
+- Help: `/gather-context` or `/gather-context help`
 
-**Supported services**:
+**Supported URL services**:
 
 | URL pattern | Handler |
 |----------|--------|
 | `docs.google.com/{document,presentation,spreadsheets}/d/*` | Google Export (built-in script) |
 | `*.slack.com/archives/*/p*` | Slack to MD (built-in script) |
 | `*.notion.site/*`, `www.notion.so/*` | Notion to MD (built-in script) |
-| Other URLs | WebFetch fallback |
+| `github.com/*/pull/*`, `github.com/*/issues/*` | GitHub (`gh` CLI) |
+| Other URLs | Tavily extract → WebFetch fallback |
 
-**Output directory**: default `./gathered/` (override with `CLAUDE_CORCA_GATHER_CONTEXT_OUTPUT_DIR`; you can also set per-service env vars)
-
-**Note**:
-- If you need information lookup, consider using `/web-search`.
-
-### [web-search](plugins/web-search/skills/web-search/SKILL.md)
-
-**Install**: `claude plugin install web-search@corca-plugins` | **Update**: `claude plugin update web-search@corca-plugins`
-
-A skill that uses the Tavily and Exa REST APIs for web search, code search, and URL content extraction. Uses the **script delegation pattern**: SKILL.md handles command parsing and query intelligence, wrapper scripts handle API execution.
-
-**Usage**:
-- Web search: `/web-search <query>`
-- News search: `/web-search --news <query>`
-- Advanced depth: `/web-search --deep <query>`
-- Code/technical search: `/web-search code <query>`
-- URL extraction: `/web-search extract <url> [query]`
-
-**Key features**:
-- General web search via Tavily (summary + sources)
-- Query intelligence: auto-detects temporal intent and topic to set script parameters
-- Optional modifiers: `--news` for news topic, `--deep` for advanced search depth
-- Specialized code/technical search via Exa with dynamic token allocation
-- URL extraction with optional relevance reranking via query parameter
-- Self-contained scripts (`search.sh`, `code-search.sh`, `extract.sh`) handle env loading, JSON building, curl, and response formatting
-- Includes a Sources section in results
+**Output directory**: default `./gathered/` (override with `CLAUDE_CORCA_GATHER_CONTEXT_OUTPUT_DIR`; per-service env vars also supported)
 
 **Requirements**:
-- `TAVILY_API_KEY` — required for web search and URL extraction ([get a key](https://app.tavily.com/home))
-- `EXA_API_KEY` — required for code search ([get a key](https://dashboard.exa.ai/api-keys))
+- `TAVILY_API_KEY` — web search and URL extraction ([get a key](https://app.tavily.com/home))
+- `EXA_API_KEY` — code search ([get a key](https://dashboard.exa.ai/api-keys))
 - Set keys in `~/.zshrc` or `~/.claude/.env`
 
 **Built-in WebSearch redirect** (Hook):
-- Installing this plugin also registers a `PreToolUse` hook that blocks Claude's built-in `WebSearch` tool and redirects to `/web-search`.
-- This ensures all web searches go through the Tavily/Exa APIs with proper key management.
-- The redirect is automatic and requires no additional configuration.
+- Installing this plugin registers a `PreToolUse` hook that blocks Claude's built-in `WebSearch` tool and redirects to `/gather-context --search`.
 
 **Caution**:
-- Your queries are sent to external search services. Do not include confidential code or sensitive information in search queries.
+- Search queries are sent to external services. Do not include confidential code or sensitive information.
+
+### [web-search](plugins/web-search/skills/web-search/SKILL.md)
+
+> **DEPRECATED**: This plugin has been superseded by [gather-context](#gather-context) v2, which includes all web search, code search, and URL extraction functionality.
+
+**Migration**:
+```bash
+claude plugin install gather-context@corca-plugins
+claude plugin update gather-context@corca-plugins
+# Optionally remove web-search to avoid duplicate hooks:
+# claude plugin uninstall web-search@corca-plugins
+```
+
+**Command mapping**:
+| Old (web-search) | New (gather-context) |
+|---|---|
+| `/web-search <query>` | `/gather-context --search <query>` |
+| `/web-search code <query>` | `/gather-context --search code <query>` |
+| `/web-search --news <query>` | `/gather-context --search --news <query>` |
+| `/web-search --deep <query>` | `/gather-context --search --deep <query>` |
+| `/web-search extract <url>` | `/gather-context <url>` |
 
 ## Hooks
 
