@@ -24,6 +24,7 @@ This is separate from the system plan file — create `prompt-logs/` directory w
 For non-trivial implementation tasks (new plugins, multi-file changes, architectural decisions), proactively use `EnterPlanMode` even when the user does not explicitly request it.
 
 After implementing a plan, complete the full workflow without waiting for explicit reminders:
+0. At session start, create `prompt-logs/{YYMMDD}-{NN}-{title}/` and `lessons.md` — even if plan.md was written in a prior session
 1. Mark plan.md as done (✅ on completed items)
 2. Update lessons.md with implementation learnings
 3. Run `/retro`
