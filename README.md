@@ -44,7 +44,7 @@ You can do the same from inside Claude Code (instead of your terminal):
 | [deep-clarify](#deep-clarify) | ~~Skill~~ | **Deprecated** — use clarify v2 |
 | [interview](#interview) | ~~Skill~~ | **Deprecated** — use clarify v2 |
 | [suggest-tidyings](#suggest-tidyings) | Skill | Suggest safe refactoring opportunities |
-| [retro](#retro) | Skill | Run a comprehensive end-of-session retrospective with CDM analysis and expert lens |
+| [retro](#retro) | Skill | Adaptive session retrospective — light by default, deep (`--deep`) with expert lens |
 | [gather-context](#gather-context) | Skill + Hook | Unified information acquisition: URL auto-detect, web search, local code exploration |
 | [web-search](#web-search) | ~~Skill + Hook~~ | **Deprecated** — use gather-context v2 |
 | [attention-hook](#attention-hook) | Hook | Send a Slack notification when idle/waiting |
@@ -142,20 +142,25 @@ A skill based on Kent Beck's "Tidy First?" philosophy. It analyzes recent commit
 
 **Install**: `claude plugin install retro@corca-plugins` | **Update**: `claude plugin update retro@corca-plugins`
 
-A skill that runs a comprehensive retrospective at the end of a session. If `lessons.md` in the [Plan & Lessons Protocol](plugins/plan-and-lessons/protocol.md) is a progressively accumulated learning log, `retro` is a "full-session, bird's-eye" retrospective.
+Adaptive session retrospective. If `lessons.md` in the [Plan & Lessons Protocol](plugins/plan-and-lessons/protocol.md) is a progressively accumulated learning log, `retro` is a "full-session, bird's-eye" retrospective. Light by default (fast, low cost); use `--deep` for full expert analysis.
 
 **Usage**:
-- End of a session: `/retro`
+- End of a session (light): `/retro`
+- Full analysis with expert lens: `/retro --deep`
 - With a specific directory: `/retro prompt-logs/260130-my-session`
+
+**Modes**:
+- **Light** (default): Sections 1-4 + 7. No sub-agents, no web search. Agent auto-selects based on session weight.
+- **Deep** (`--deep`): Full 7 sections including Expert Lens (parallel sub-agents) and Learning Resources (web search).
 
 **Key features**:
 - Documents user/org/project context that will help future work
 - Observes working style and collaboration patterns and suggests CLAUDE.md updates (applies only with user approval)
-- Suggests prompting habit improvements (with concrete examples from the session)
+- Waste Reduction analysis: identifies wasted turns, over-engineering, missed shortcuts, context waste, and communication inefficiencies
 - Analyzes critical decisions using Gary Klein's CDM (Critical Decision Method) with session-specific probes
-- Expert Lens: parallel sub-agents adopt real expert identities to analyze the session through contrasting frameworks (with verified citations)
-- Shares learning resources tailored to the user's knowledge/experience level
-- Searches for relevant workflow skills or suggests creating new ones
+- Expert Lens (deep only): parallel sub-agents adopt real expert identities to analyze the session through contrasting frameworks
+- Learning Resources (deep only): web-searched resources tailored to the user's knowledge level
+- Scans installed skills for relevance before suggesting external skill discovery
 
 **Outputs**:
 - `prompt-logs/{YYMMDD}-{NN}-{title}/retro.md` — saved alongside plan.md and lessons.md
