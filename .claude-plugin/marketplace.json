@@ -12,13 +12,14 @@
     {
       "name": "clarify",
       "source": "./plugins/clarify",
-      "description": "A skill that transforms ambiguous requirements into clear specifications",
-      "keywords": ["requirements", "specification", "clarification"]
+      "description": "Unified requirement clarification: research-first with autonomous decision-making, or lightweight direct Q&A",
+      "keywords": ["requirements", "specification", "clarification", "research", "sub-agents", "autonomous"]
     },
     {
       "name": "deep-clarify",
       "source": "./plugins/deep-clarify",
-      "description": "A skill that autonomously researches requirements through codebase exploration and best practice analysis, only asking humans about genuinely subjective decisions",
+      "description": "DEPRECATED — use clarify v2 instead. Research-first requirement clarification with autonomous decision-making",
+      "deprecated": true,
       "keywords": ["requirements", "clarification", "research", "sub-agents", "autonomous"]
     },
     {
@@ -36,7 +37,8 @@
     {
       "name": "interview",
       "source": "./plugins/interview",
-      "description": "A skill that conducts structured interviews to extract requirements, constraints, and design decisions",
+      "description": "DEPRECATED — use clarify v2 instead. Structured interviews to extract requirements, constraints, and design decisions",
+      "deprecated": true,
       "keywords": ["interview", "requirements", "discovery", "specification"]
     },
     {

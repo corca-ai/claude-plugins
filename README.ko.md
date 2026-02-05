@@ -40,9 +40,9 @@ bash scripts/update-all.sh
 
 | 플러그인 | 유형 | 설명 |
 |---------|------|------|
-| [clarify](#clarify) | Skill | 모호한 요구사항을 명확하게 정리 |
-| [deep-clarify](#deep-clarify) | Skill | 리서치 기반 요구사항 명확화 (자율 의사결정) |
-| [interview](#interview) | Skill | 구조화된 인터뷰로 요구사항 추출 |
+| [clarify](#clarify) | Skill | 통합 요구사항 명확화: 리서치 기반 또는 경량 Q&A |
+| [deep-clarify](#deep-clarify) | ~~Skill~~ | **지원 중단** — clarify v2 사용 |
+| [interview](#interview) | ~~Skill~~ | **지원 중단** — clarify v2 사용 |
 | [suggest-tidyings](#suggest-tidyings) | Skill | 안전한 리팩토링 기회 제안 |
 | [retro](#retro) | Skill | 세션 종료 시 CDM 분석과 전문가 렌즈를 포함한 포괄적 회고 수행 |
 | [gather-context](#gather-context) | Skill + Hook | 통합 정보 수집: URL 자동 감지, 웹 검색, 로컬 코드 탐색 |
@@ -58,55 +58,63 @@ bash scripts/update-all.sh
 
 **설치**: `claude plugin install clarify@corca-plugins` | **갱신**: `claude plugin update clarify@corca-plugins`
 
-모호하거나 불명확한 요구사항을 반복적인 질문을 통해 명확하고 실행 가능한 사양으로 변환하는 스킬입니다. [Team Attention](https://github.com/team-attention)에서 만든 [Clarify 스킬](https://github.com/team-attention/plugins-for-claude-natives/blob/main/plugins/clarify/SKILL.md)을 가져와서 커스터마이즈했습니다. (사용법 참조: 정구봉님 [링크드인 포스트](https://www.linkedin.com/posts/gb-jeong_%ED%81%B4%EB%A1%9C%EB%93%9C%EC%BD%94%EB%93%9C%EA%B0%80-%EA%B0%9D%EA%B4%80%EC%8B%9D%EC%9C%BC%EB%A1%9C-%EC%A7%88%EB%AC%B8%ED%95%98%EA%B2%8C-%ED%95%98%EB%8A%94-skills%EB%A5%BC-%EC%82%AC%EC%9A%A9%ED%95%B4%EB%B3%B4%EC%84%B8%EC%9A%94-clarify-activity-7413349697022570496-qLts))
+clarify v1, deep-clarify, interview의 장점을 하나로 합친 통합 요구사항 명확화 스킬입니다. 리서치 기반(기본)과 경량 Q&A(`--light`) 두 가지 모드를 제공합니다. Team Attention의 [Clarify 스킬](https://github.com/team-attention/plugins-for-claude-natives/blob/main/plugins/clarify/SKILL.md)에서 출발했습니다.
 
-**사용법**: "다음 요구사항을 명확하게 해줘", "clarify the following:" 등으로 트리거
+**사용법**:
+- `/clarify <요구사항>` — 리서치 기반 (기본)
+- `/clarify <요구사항> --light` — 직접 Q&A, 서브에이전트 없음
+
+**기본 모드** (리서치 기반):
+1. 요구사항 캡처 및 결정 포인트 분해
+2. 병렬 리서치: 코드베이스 탐색 + 웹/베스트 프랙티스 리서치 (gather-context 설치 시 활용, 미설치 시 내장 도구 폴백)
+3. 티어 분류: T1 (코드베이스 해결) → 자동 결정, T2 (베스트 프랙티스 해결) → 자동 결정, T3 (주관적) → 사람에게 질문
+4. T3 항목에 대해 대립하는 관점의 자문 서브에이전트가 의견 제시
+5. Why-digging과 긴장 감지를 활용한 끈질긴 질문
+6. 출력: 결정 테이블 + 명확화된 요구사항
+
+**--light 모드** (직접 Q&A):
+- AskUserQuestion을 통한 반복 질문
+- 피상적 답변에 대한 Why-digging
+- 답변 간 긴장 감지
+- Before/After 비교 출력
 
 **주요 기능**:
-- 원본 요구사항 기록 후 체계적인 질문을 통해 모호함 해소
-- Before/After 비교로 명확해진 결과 제시
-- 명확해진 요구사항을 파일로 저장하는 옵션 제공. 필요시 이 문서를 Plan 모드에 넣어서 구현하면 됨
+- 질문 전 자율 리서치 — 진정으로 주관적인 결정만 질문
+- gather-context와 통합 (미설치 시 우아하게 폴백)
+- 끈질긴 질문: 2-3단계 why-digging, 모순 감지
+- 모든 항목이 리서치로 해결되면 자문/질문 단계 완전 생략
+- 사용자 언어 자동 적응 (한국어/영어)
 
 ### [deep-clarify](plugins/deep-clarify/skills/deep-clarify/SKILL.md)
 
-**설치**: `claude plugin install deep-clarify@corca-plugins` | **갱신**: `claude plugin update deep-clarify@corca-plugins`
+> **지원 중단**: 이 플러그인은 [clarify](#clarify) v2로 대체되었습니다. 리서치 기반 기능과 끈질긴 질문이 모두 clarify v2에 통합되었습니다.
 
-`clarify`의 리서치 중심 대안입니다. 모든 모호한 점을 사용자에게 물어보는 대신, 코드베이스 탐색과 베스트 프랙티스 분석을 통해 자율적으로 리서치한 뒤, 진정으로 주관적인 결정만 물어봅니다 — 두 개의 대립하는 관점에서 조언 의견을 함께 제공합니다.
+**마이그레이션**:
+```bash
+claude plugin install clarify@corca-plugins
+claude plugin update clarify@corca-plugins
+```
 
-**사용법**: `/deep-clarify <요구사항>`
-
-**주요 기능**:
-- 병렬 서브에이전트: 코드베이스 리서처 + 베스트 프랙티스 리서처 (실존 전문가 관점 활용)
-- 3단계 분류: Tier 1 (코드베이스로 해결), Tier 2 (베스트 프랙티스로 해결), Tier 3 (사람이 결정)
-- Tier 3 항목에 대해 대립하는 관점의 자문 서브에이전트가 양측 의견 제시
-- 근거가 충돌하거나 본질적으로 주관적인 항목만 사람에게 질문
-- 모든 항목이 리서치로 해결 가능하면 자문 및 질문 단계를 완전히 건너뜀
-
-**clarify와의 차이**:
-- `/clarify` — 빠르고 가벼움, 모든 모호한 점을 질문
-- `/deep-clarify` — 철저한 자율 리서치 우선, 주관적 항목만 질문
+**명령어 매핑**:
+| 기존 (deep-clarify) | 신규 (clarify) |
+|---|---|
+| `/deep-clarify <요구사항>` | `/clarify <요구사항>` |
 
 ### [interview](plugins/interview/skills/interview/SKILL.md)
 
-**설치**: `claude plugin install interview@corca-plugins` | **갱신**: `claude plugin update interview@corca-plugins`
+> **지원 중단**: 이 플러그인은 [clarify](#clarify) v2로 대체되었습니다. 인터뷰의 끈질긴 질문 방법론(why-digging, 긴장 감지)이 clarify v2에 통합되었습니다.
 
-코르카의 AX 컨설턴트 [최정혁님](https://denoiser.club/)이 본인의 취향에 맞게 만드신 스킬입니다. 목적은 Clarify와 유사합니다. 구조화된 인터뷰를 통해 요구사항, 제약사항, 설계 결정을 추출하는 스킬입니다. 대화를 통해 프로젝트의 핵심 요구사항을 발견하고 문서화합니다.
+**마이그레이션**:
+```bash
+claude plugin install clarify@corca-plugins
+claude plugin update clarify@corca-plugins
+```
 
-**사용법**:
-- `/interview <topic>` - 새 인터뷰 시작 (예: `/interview auth-system`)
-- `/interview <topic> --ref <path>` - 참조 파일을 기반으로 인터뷰
-- `/interview <topic> --workspace <dir>` - 작업 디렉토리 지정
-
-**주요 기능**:
-- 한 번에 하나의 질문으로 집중된 대화 진행
-- 실시간으로 SCRATCHPAD.md에 메모 기록
-- 인터뷰 종료 시 SYNTHESIS.md로 요약 문서 생성
-- 사용자 언어 자동 감지 및 적응 (한국어/영어)
-
-**출력물**:
-- `SCRATCHPAD.md` - 인터뷰 중 실시간 메모
-- `SYNTHESIS.md` - 정리된 요구사항 종합 문서
-- `JUST_IN_CASE.md` - 미래 에이전트를 위한 추가 맥락 (선택)
+**명령어 매핑**:
+| 기존 (interview) | 신규 (clarify) |
+|---|---|
+| `/interview <topic>` | `/clarify <요구사항>` (기본 모드) |
+| `/interview <topic>` (간편) | `/clarify <요구사항> --light` |
 
 ### [suggest-tidyings](plugins/suggest-tidyings/skills/suggest-tidyings/SKILL.md)
 
