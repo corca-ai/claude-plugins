@@ -44,7 +44,7 @@ bash scripts/update-all.sh
 | [deep-clarify](#deep-clarify) | ~~Skill~~ | **지원 중단** — clarify v2 사용 |
 | [interview](#interview) | ~~Skill~~ | **지원 중단** — clarify v2 사용 |
 | [suggest-tidyings](#suggest-tidyings) | Skill | 안전한 리팩토링 기회 제안 |
-| [retro](#retro) | Skill | 세션 종료 시 CDM 분석과 전문가 렌즈를 포함한 포괄적 회고 수행 |
+| [retro](#retro) | Skill | 적응형 세션 회고 — 기본은 경량, `--deep`으로 전문가 렌즈 포함 전체 분석 |
 | [gather-context](#gather-context) | Skill + Hook | 통합 정보 수집: URL 자동 감지, 웹 검색, 로컬 코드 탐색 |
 | [web-search](#web-search) | ~~Skill + Hook~~ | **지원 중단** — gather-context v2 사용 |
 | [attention-hook](#attention-hook) | Hook | 대기 상태일 때 Slack 알림 |
@@ -142,20 +142,25 @@ Kent Beck의 "Tidy First?" 철학에 기반하여 최근 커밋들을 분석하�
 
 **설치**: `claude plugin install retro@corca-plugins` | **갱신**: `claude plugin update retro@corca-plugins`
 
-세션 종료 시점에 포괄적인 회고를 수행하는 스킬입니다. [Plan & Lessons Protocol](plugins/plan-and-lessons/protocol.md)의 `lessons.md`가 세션 중 점진적으로 쌓이는 학습 기록이라면, `retro`는 세션 전체를 조감하는 종합 회고입니다.
+적응형 세션 회고 스킬입니다. [Plan & Lessons Protocol](plugins/plan-and-lessons/protocol.md)의 `lessons.md`가 세션 중 점진적으로 쌓이는 학습 기록이라면, `retro`는 세션 전체를 조감하는 종합 회고입니다. 기본은 경량 모드(빠르고 저비용), `--deep`으로 전문가 분석을 포함한 전체 회고를 수행합니다.
 
 **사용법**:
-- 세션 종료 시: `/retro`
+- 세션 종료 시 (경량): `/retro`
+- 전문가 렌즈 포함 전체 분석: `/retro --deep`
 - 특정 디렉토리 지정: `/retro prompt-logs/260130-my-session`
+
+**모드**:
+- **경량** (기본): 섹션 1-4 + 7. 서브에이전트 없음, 웹 검색 없음. 세션 무게에 따라 에이전트가 자동 선택.
+- **심층** (`--deep`): Expert Lens(병렬 서브에이전트)와 Learning Resources(웹 검색) 포함 전체 7개 섹션.
 
 **주요 기능**:
 - 유저/조직/프로젝트에 대한 정보 중 이후 작업에 도움될 내용 문서화
 - 업무 스타일·협업 방식 관찰 후 CLAUDE.md 업데이트 제안 (유저 승인 후 적용)
-- 프롬프팅 습관 개선점 제안 (세션의 구체적 사례와 함께)
+- 낭비 분석(Waste Reduction): 허비된 턴, 과설계, 놓친 지름길, 컨텍스트 낭비, 커뮤니케이션 비효율 식별
 - Gary Klein의 CDM(Critical Decision Method)으로 세션의 핵심 의사결정 분석
-- Expert Lens: 병렬 서브에이전트가 실존 전문가의 관점에서 세션을 분석 (검증된 인용 포함)
-- 유저의 지식/경험 수준에 맞춘 학습자료 링크 제공
-- 워크플로우에 도움될 스킬 탐색 또는 새 스킬 제작 제안
+- Expert Lens (심층만): 병렬 서브에이전트가 실존 전문가의 관점에서 세션을 분석
+- Learning Resources (심층만): 유저의 지식 수준에 맞춘 웹 검색 학습자료 제공
+- 설치된 스킬 스캔 후 관련성 분석, 이후 외부 스킬 탐색 제안
 
 **출력물**:
 - `prompt-logs/{YYMMDD}-{NN}-{title}/retro.md` — plan.md, lessons.md와 같은 디렉토리에 저장

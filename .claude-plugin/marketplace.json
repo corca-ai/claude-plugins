@@ -44,7 +44,7 @@
     {
       "name": "retro",
       "source": "./plugins/retro",
-      "description": "A skill that performs comprehensive session retrospectives with CDM analysis and expert lens",
+      "description": "Adaptive session retrospective — light by default, deep on request — with CDM analysis, expert lens, and installed skills scan",
       "keywords": ["retrospective", "session-review", "learning", "improvement", "cdm", "expert-analysis"]
     },
     {
