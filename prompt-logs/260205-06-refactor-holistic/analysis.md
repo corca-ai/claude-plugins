@@ -110,24 +110,81 @@
 
 **Assessment**: Current approach is pragmatic. Adding session ID would couple two independent plugins. Not worth the coupling cost. Keep as-is.
 
-## Decided Actions
+## Marketplace v2 Architecture (decided)
 
-From discussion with user (this session):
+### Workflow-Ordered Plugin Map
 
-| Priority | Action | Effort | Affected |
-|----------|--------|--------|----------|
-| 1 | gather-context absorbs web-search: URL patterns (+ GitHub via gh), `--research`, `--codebase`, `--code` subcommands. Major version bump. | large | gather-context, web-search (deprecated) |
-| 2 | deep-clarify uses gather-context for research + absorbs interview strengths (scratchpad, why-dig) | medium | deep-clarify |
-| 3 | retro Section 3: replace "misunderstanding" lens with "waste reduction" (fewer tokens/turns for same+ quality) | small | retro |
-| 4 | retro Section 7: scan installed skills, suggest usage (not just installation) | small | retro |
-| 5 | Language adaptation: add to clarify, suggest-tidyings, gather-context | small | 3 plugins |
-| 6 | Usage messages: add no-args help to clarify, gather-context, suggest-tidyings | small | 3 plugins |
-| 7 | README: group clarify/deep-clarify/interview as "pick one" | small | README |
+| Stage | Plugin | Status | Description |
+|-------|--------|--------|-------------|
+| 1. Context | **gather-context v2** | major rewrite | Unified info acquisition: URL auto-detect + `--local` + `--search` |
+| 2. Clarify | **clarify v2** | major rewrite | deep-clarify + interview → unified. `--light` for Q&A only |
+| 3. Plan | plan-and-lessons | unchanged | EnterPlanMode hook |
+| 4. Implement | (Claude Code itself) | — | — |
+| 5. Reflect | **retro v2** | minor update | waste lens, installed skills awareness |
+| 6. Refactor | **refactor** (new) | new plugin | `--code`, `--skill`, `--docs`, `--holistic` |
+| Infra | smart-read, attention-hook, prompt-logger | unchanged | — |
+
+**Deprecated**: web-search (→ gather-context), clarify v1 (→ clarify v2), deep-clarify (→ clarify v2), interview (→ clarify v2), suggest-tidyings (→ refactor --code)
+
+### gather-context v2
+
+```
+<url>              → auto-detect: Google/Slack/Notion/GitHub(gh cli)/generic(Tavily extract, fallback WebFetch)
+--local <query>    → local codebase exploration
+--search <query>   → web search (query intelligence auto-routes: general/news/code/best-practice)
+```
+
+- `--search` replaces all of web-search's subcommands via query intelligence (already proven in web-search)
+- WebSearch hook moves from web-search plugin to gather-context
+- 2 flags + URL auto-detect. Simple interface, smart routing.
+
+### clarify v2
+
+```
+/clarify <requirement>         → default: gather-context로 리서치 → Tier 분류 → 끈질기게 질문
+/clarify <requirement> --light → 리서치 없이 바로 Q&A (old clarify 수준)
+```
+
+- deep-clarify의 핵심: Tier 분류 (T1/T2 자동 결정, T3만 질문), advisory sub-agents
+- interview의 장점을 기본 동작에 흡수 (flag 없이): scratchpad, why 2-3번 파기, tension detection
+- 사용자와 토론이 필요한 건 끈질기게 하는 것이 기본 태도
+- gather-context 미설치 시 self-contained fallback (자체 리서치)
+
+### retro v2
+
+- Section 3: "misunderstanding prevention" → **"waste reduction"** 렌즈. 렌즈만 지정, 포맷은 자유.
+- Section 7: find-skills 전에 **installed skills scan** 추가. "이 세션에서 썼으면 좋았을 것" + "앞으로 써볼 만한 것" 제안.
+
+### refactor (new marketplace plugin)
+
+```
+/refactor --code [branch]        → 커밋 분석, 안전한 코드 tidying (suggest-tidyings 계승)
+/refactor --code --{level} [br]  → 더 큰 리팩토링 (이름 TBD, 미래 확장)
+/refactor --skill [name]         → single skill 리뷰 (Progressive Disclosure 기준)
+/refactor --skill --holistic     → cross-plugin 분석
+/refactor --docs                 → CLAUDE.md, project-context, README 리뷰
+/refactor                        → quick scan all
+```
+
+- refactor-skill (local) → refactor (marketplace) 승격
+- suggest-tidyings 흡수: `--code` flag, tidying-guide.md 이관
+- `--code`의 기본은 tidying. 더 큰 리팩토링 레벨은 미래 확장 영역.
+
+## Implementation Order
+
+| Phase | Work | Dependencies |
+|-------|------|-------------|
+| 1 | gather-context v2 | 기반 레이어. 다른 플러그인이 이걸 사용 |
+| 2 | clarify v2 | gather-context v2 사용 |
+| 3 | retro v2 | 독립적 (Section 3, 7 수정) |
+| 4 | refactor plugin | 독립적 (local skill → marketplace 승격 + suggest-tidyings 흡수) |
+| 5 | README v2 | 워크플로우 기반 재구성. 모든 v2 완료 후 |
+| 6 | Deprecation | 이전 플러그인 deprecated 마킹, marketplace.json 정리 |
 
 ## Notes
 
-- Interview was not created by the user — changes to clarify and interview are deferred
 - web-search hook (WebSearch → redirect) moves to gather-context after absorption
-- All cross-plugin connections must be defensive (gate on plugin existence)
-- gather-context subcommand design: `--research` replaces `/web-search`, `--codebase` for code exploration, `--code` for Exa code search. URLs auto-detected by pattern (Google/Slack/Notion/GitHub/generic)
-- find-skills is kept for marketplace discovery; installed skills scan is a new preceding step in retro
+- All cross-plugin dependencies must be defensive (gate on plugin existence)
+- clarify v2의 interview 장점은 flag 없이 기본 동작에 흡수 — 끈질기게 파는 것이 default
+- refactor --code의 tidying 이상 레벨은 이름 미정 (--deep은 직관적이지 않음), 미래 확장
+- find-skills는 유지 (marketplace 탐색용); installed skills scan은 retro의 새 preceding step
