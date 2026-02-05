@@ -80,7 +80,11 @@ Search the web for 2-3 resources calibrated to the user's knowledge level, focus
 
 #### Section 7: Relevant Skills
 
-Assess whether the session reveals a workflow gap or repetitive pattern. If yes: search for existing solutions and report. If a needed skill does not exist: briefly describe what it would do. If no clear gap: state "No skill gaps identified."
+Assess whether the session reveals a workflow gap or repetitive pattern. If no clear gap: state "No skill gaps identified." Otherwise:
+
+- **Finding existing skills**: Use `/find-skills` to search for existing solutions and report findings.
+- **Creating new skills**: If no existing skill fits, use `/skill-creator` to describe and scaffold the needed skill.
+- **Prerequisite check**: If `find-skills` (by Vercel) or `skill-creator` (by Anthropic) are not installed, recommend installing them from https://skills.sh/ before proceeding.
 
 ### 4. Write retro.md
 
