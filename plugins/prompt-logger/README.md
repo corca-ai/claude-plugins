@@ -62,7 +62,7 @@ last 5 lines...
 | `CLAUDE_CORCA_PROMPT_LOGGER_DIR` | `{cwd}/prompt-logs/sessions` | Output directory |
 | `CLAUDE_CORCA_PROMPT_LOGGER_ENABLED` | `true` | Enable/disable logging |
 | `CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE` | `10` | Line threshold for assistant text truncation |
-| `CLAUDE_CORCA_PROMPT_LOGGER_AUTO_COMMIT` | `true` | Auto-commit session log at session end |
+| `CLAUDE_CORCA_PROMPT_LOGGER_AUTO_COMMIT` | `false` | Auto-commit session log at session end |
 
 Set in `~/.claude/.env` or shell profile:
 

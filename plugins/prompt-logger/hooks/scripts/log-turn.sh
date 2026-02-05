@@ -42,7 +42,7 @@ fi
 
 LOG_DIR="${CLAUDE_CORCA_PROMPT_LOGGER_DIR:-${CWD}/prompt-logs/sessions}"
 TRUNCATE_THRESHOLD="${CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE:-10}"
-AUTO_COMMIT="${CLAUDE_CORCA_PROMPT_LOGGER_AUTO_COMMIT:-true}"
+AUTO_COMMIT="${CLAUDE_CORCA_PROMPT_LOGGER_AUTO_COMMIT:-false}"
 
 # ── Timezone helpers (transcript timestamps are UTC) ─────────────────────────
 LOCAL_TZ=$(date +%Z)
