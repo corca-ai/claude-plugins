@@ -40,9 +40,9 @@ You can do the same from inside Claude Code (instead of your terminal):
 
 | Plugin | Type | Description |
 |---------|------|-------------|
-| [clarify](#clarify) | Skill | Turn ambiguous requirements into an actionable spec |
-| [deep-clarify](#deep-clarify) | Skill | Research-first requirement clarification with autonomous decision-making |
-| [interview](#interview) | Skill | Extract requirements through structured interviews |
+| [clarify](#clarify) | Skill | Unified requirement clarification: research-first or lightweight Q&A |
+| [deep-clarify](#deep-clarify) | ~~Skill~~ | **Deprecated** — use clarify v2 |
+| [interview](#interview) | ~~Skill~~ | **Deprecated** — use clarify v2 |
 | [suggest-tidyings](#suggest-tidyings) | Skill | Suggest safe refactoring opportunities |
 | [retro](#retro) | Skill | Run a comprehensive end-of-session retrospective with CDM analysis and expert lens |
 | [gather-context](#gather-context) | Skill + Hook | Unified information acquisition: URL auto-detect, web search, local code exploration |
@@ -58,55 +58,63 @@ You can do the same from inside Claude Code (instead of your terminal):
 
 **Install**: `claude plugin install clarify@corca-plugins` | **Update**: `claude plugin update clarify@corca-plugins`
 
-A skill that turns vague or unclear requirements into clear, executable specs through iterative questioning. It is based on Team Attention's [Clarify skill](https://github.com/team-attention/plugins-for-claude-natives/blob/main/plugins/clarify/SKILL.md) and customized for our workflow. (Usage reference: Jeong Gubong's [LinkedIn post](https://www.linkedin.com/posts/gb-jeong_%ED%81%B4%EB%A1%9C%EB%93%9C%EC%BD%94%EB%93%9C%EA%B0%80-%EA%B0%9D%EA%B4%80%EC%8B%9D%EC%9C%BC%EB%A1%9C-%EC%A7%88%EB%AC%B8%ED%95%98%EA%B2%8C-%ED%95%98%EB%8A%94-skills%EB%A5%BC-%EC%82%AC%EC%9A%A9%ED%95%B4%EB%B3%B4%EC%84%B8%EC%9A%94-clarify-activity-7413349697022570496-qLts))
+Unified requirement clarification that merges the best of clarify v1, deep-clarify, and interview into a single skill. Two modes: research-first (default) and lightweight direct Q&A (`--light`). Originally based on Team Attention's [Clarify skill](https://github.com/team-attention/plugins-for-claude-natives/blob/main/plugins/clarify/SKILL.md).
 
-**How to use**: trigger with phrases like "clarify the following:" / "Please clarify this requirement"
+**Usage**:
+- `/clarify <requirement>` — research-first (default)
+- `/clarify <requirement> --light` — direct Q&A, no sub-agents
+
+**Default mode** (research-first):
+1. Capture & decompose requirement into decision points
+2. Parallel research: codebase exploration + web/best-practice research (uses gather-context if installed, falls back to built-in tools)
+3. Tier classification: T1 (codebase-resolved) → auto-decide, T2 (best-practice-resolved) → auto-decide, T3 (subjective) → ask human
+4. Advisory sub-agents argue opposing perspectives for T3 items
+5. Persistent questioning with why-digging and tension detection
+6. Output: decision table + clarified requirement
+
+**--light mode** (direct Q&A):
+- Iterative questioning via AskUserQuestion
+- Why-digging on surface-level answers
+- Tension detection between answers
+- Before/After comparison output
 
 **Key features**:
-- Records the original request, then resolves ambiguity via structured questions
-- Shows a clear Before/After comparison
-- Optionally saves the clarified spec to a file (you can feed it into plan mode for implementation)
+- Researches autonomously before asking — only asks about genuinely subjective decisions
+- Integrates with gather-context for research (graceful fallback when not installed)
+- Persistent questioning: why-digs 2-3 levels, detects contradictions
+- Skips advisory and questioning phases entirely when all items are resolvable
+- Adapts to user's language (Korean/English)
 
 ### [deep-clarify](plugins/deep-clarify/skills/deep-clarify/SKILL.md)
 
-**Install**: `claude plugin install deep-clarify@corca-plugins` | **Update**: `claude plugin update deep-clarify@corca-plugins`
+> **DEPRECATED**: This plugin has been superseded by [clarify](#clarify) v2, which includes all research-first functionality plus persistent questioning.
 
-A research-first alternative to `clarify`. Instead of asking the user about every ambiguity, deep-clarify autonomously researches via codebase exploration and best practice analysis, then only asks about genuinely subjective decisions — with informed advisory opinions from two opposing perspectives.
+**Migration**:
+```bash
+claude plugin install clarify@corca-plugins
+claude plugin update clarify@corca-plugins
+```
 
-**Usage**: `/deep-clarify <requirement>`
-
-**Key features**:
-- Parallel sub-agents: codebase researcher + best practice researcher (with named expert perspectives)
-- 3-tier classification: Tier 1 (codebase-resolved), Tier 2 (best-practice-resolved), Tier 3 (human decision)
-- Advisory sub-agents argue opposing perspectives for Tier 3 items
-- Only asks the human about items where evidence conflicts or the question is inherently subjective
-- Skips advisory and questioning phases entirely when all items are resolvable
-
-**How it differs from clarify**:
-- `/clarify` — quick, lightweight, asks about all ambiguities
-- `/deep-clarify` — thorough, autonomous research first, asks only subjective items
+**Command mapping**:
+| Old (deep-clarify) | New (clarify) |
+|---|---|
+| `/deep-clarify <requirement>` | `/clarify <requirement>` |
 
 ### [interview](plugins/interview/skills/interview/SKILL.md)
 
-**Install**: `claude plugin install interview@corca-plugins` | **Update**: `claude plugin update interview@corca-plugins`
+> **DEPRECATED**: This plugin has been superseded by [clarify](#clarify) v2, which incorporates interview's persistent questioning methodology (why-digging, tension detection).
 
-A skill created by Corca AX consultant [Jeonghyeok Choi](https://denoiser.club/) to match his preferred workflow. Its goal is similar to Clarify: it runs a structured interview to extract requirements, constraints, and design decisions, and documents the project's core requirements via conversation.
+**Migration**:
+```bash
+claude plugin install clarify@corca-plugins
+claude plugin update clarify@corca-plugins
+```
 
-**Usage**:
-- `/interview <topic>` - start a new interview (e.g., `/interview auth-system`)
-- `/interview <topic> --ref <path>` - interview based on a reference file
-- `/interview <topic> --workspace <dir>` - set the working directory
-
-**Key features**:
-- One question at a time for focused conversation
-- Real-time notes written to `SCRATCHPAD.md`
-- Generates a summarized `SYNTHESIS.md` at the end
-- Automatically detects and adapts to the user's language (Korean/English)
-
-**Outputs**:
-- `SCRATCHPAD.md` - real-time notes during the interview
-- `SYNTHESIS.md` - consolidated requirements synthesis
-- `JUST_IN_CASE.md` - extra context for future agents (optional)
+**Command mapping**:
+| Old (interview) | New (clarify) |
+|---|---|
+| `/interview <topic>` | `/clarify <requirement>` (default mode) |
+| `/interview <topic>` (quick) | `/clarify <requirement> --light` |
 
 ### [suggest-tidyings](plugins/suggest-tidyings/skills/suggest-tidyings/SKILL.md)
 
