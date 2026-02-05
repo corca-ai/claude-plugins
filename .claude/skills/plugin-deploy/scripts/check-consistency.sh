@@ -128,6 +128,23 @@ if [[ "$has_skill" == "false" && "$has_hooks" == "false" ]]; then
   gaps+=("No SKILL.md or hooks.json found — plugin has no entry point")
 fi
 
+# --- 6b. SKILL.md size check (skill-type plugins) ---
+skill_md_words=0
+skill_md_severity="ok"
+if [[ "$has_skill" == "true" && -n "$skill_md" ]]; then
+  skill_md_full="$REPO_ROOT/$skill_md"
+  if [[ -f "$skill_md_full" ]]; then
+    skill_md_words=$(wc -w < "$skill_md_full" | tr -d ' ')
+    if [[ "$skill_md_words" -gt 5000 ]]; then
+      skill_md_severity="error"
+      gaps+=("skill_md_large: SKILL.md is ${skill_md_words} words (>5000) — consider running /refactor-skill $PLUGIN_NAME")
+    elif [[ "$skill_md_words" -gt 3000 ]]; then
+      skill_md_severity="warning"
+      gaps+=("skill_md_large: SKILL.md is ${skill_md_words} words (>3000) — consider running /refactor-skill $PLUGIN_NAME")
+    fi
+  fi
+fi
+
 # --- 7. Plugin type detection ---
 plugin_type="unknown"
 if [[ "$has_skill" == "true" && "$has_hooks" == "true" ]]; then
@@ -168,6 +185,8 @@ cat <<EOF
   "has_skill": $has_skill,
   "has_hooks": $has_hooks,
   "skill_md": $(json_str "$skill_md"),
+  "skill_md_words": $skill_md_words,
+  "skill_md_severity": "$skill_md_severity",
   "hooks_json": $(json_str "$hooks_json"),
   "gap_count": ${#gaps[@]},
   "gaps": $gaps_json
