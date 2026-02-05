@@ -83,4 +83,32 @@
 이번 세션에서 refactor-skill의 `--holistic` 모드를 만들었고, 첫 분석 결과를 생성함. 스킬 격차보다는 기존 스킬의 사용 확대가 포인트:
 
 - **이번 세션에서 활용했으면 좋았을 것**: 없음. 설계 토론은 에이전트와 직접 대화가 가장 효과적이었음.
-- **앞으로 써볼 만한 것**: `/refactor-skill --holistic`을 주기적으로 실행해서 플러그인 생태계 건강 상태를 체크. 특히 gather-context 리팩터 이후.
+- **앞으로 써볼 만한 것**: `/refactor-skill --holistic`을 주기적으로 실행해서 플러그인 생태계 건강 상태를 체크. 특히 marketplace v2 리팩터 과정에서.
+
+---
+
+### Post-Retro Findings
+
+첫 retro 이후 3라운드의 추가 설계 토론이 발생. holistic 분석이 촉매가 되어 marketplace v2 아키텍처 전체가 결정됨.
+
+#### 추가 CDM: clarify + deep-clarify + interview 통합 결정
+
+| Probe | Analysis |
+|-------|----------|
+| **Cues** | gather-context가 리서치를 흡수하면 deep-clarify의 핵심이 "Tier 분류 + 질문 설계"만 남음 → 별도 플러그인 정당성 약해짐 |
+| **Goals** | 사용자 혼란 해소 (3개 → 1개) vs 각 스킬의 고유 가치 보존 |
+| **Options** | (A) 3개 유지 + README 그룹핑, (B) deep-clarify에 interview 흡수, (C) 전부 합쳐서 clarify v2 |
+| **Basis** | 사용자: "유저와 토론이 필요한 건 끈질기게 하는 게 좋은 것 같아서" — interview의 핵심이 별도 모드가 아니라 기본 태도여야 함 |
+
+**핵심 교훈**: 기능 흡수 시, flag로 분리할지 기본 동작에 녹일지의 판단 기준은 "이것이 모드인가 태도인가." 끈질기게 파는 것은 모드가 아니라 태도.
+
+#### 추가 발견: retro 자체의 light/deep 패턴
+
+이 세션에서 두 번 retro를 했는데, 둘 다 "간략하게"를 요청. 실제 사용 패턴이 retro --deep 플래그의 필요성을 증명. light retro(Section 1-4, 7)만으로도 세션 가치 캡처에 충분하고, expert lens와 learning resources는 정말 큰 세션에서만 가치가 있음.
+
+#### marketplace v2 전체 그림
+
+`prompt-logs/260205-06-refactor-holistic/analysis.md`에 최종 아키텍처 기록됨:
+- 11개 → 7개 플러그인
+- 워크플로우 순서: Context → Clarify → Plan → Implement → Reflect → Refactor
+- 구현 순서: gather-context v2 → clarify v2 → retro v2 → refactor → README v2

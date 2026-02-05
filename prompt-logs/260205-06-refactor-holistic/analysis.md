@@ -152,6 +152,14 @@
 
 ### retro v2
 
+```
+/retro              → 에이전트 판단 (대부분 light, 큰 세션이면 --deep 제안)
+/retro --deep       → 강제 full (expert lens sub-agents + learning resources + 웹 리서치)
+```
+
+- Light (default): Section 1-4 + Section 7 (installed skills scan only). 외부 리서치 없음.
+- Deep (--deep): 전체 7 sections. Expert Lens sub-agents (웹 검색 + citation), Learning Resources (웹 검색).
+- 명시적 요청 없으면 에이전트가 세션 무게에 따라 판단.
 - Section 3: "misunderstanding prevention" → **"waste reduction"** 렌즈. 렌즈만 지정, 포맷은 자유.
 - Section 7: find-skills 전에 **installed skills scan** 추가. "이 세션에서 썼으면 좋았을 것" + "앞으로 써볼 만한 것" 제안.
 
