@@ -45,8 +45,8 @@ bash scripts/update-all.sh
 | [interview](#interview) | Skill | 구조화된 인터뷰로 요구사항 추출 |
 | [suggest-tidyings](#suggest-tidyings) | Skill | 안전한 리팩토링 기회 제안 |
 | [retro](#retro) | Skill | 세션 종료 시 CDM 분석과 전문가 렌즈를 포함한 포괄적 회고 수행 |
-| [gather-context](#gather-context) | Skill | URL 자동 감지 후 외부 콘텐츠를 자체 스크립트로 수집 |
-| [web-search](#web-search) | Skill + Hook | 웹 검색, 코드 검색, URL 콘텐츠 추출 |
+| [gather-context](#gather-context) | Skill + Hook | 통합 정보 수집: URL 자동 감지, 웹 검색, 로컬 코드 탐색 |
+| [web-search](#web-search) | ~~Skill + Hook~~ | **지원 중단** — gather-context v2 사용 |
 | [attention-hook](#attention-hook) | Hook | 대기 상태일 때 Slack 알림 |
 | [plan-and-lessons](#plan-and-lessons) | Hook | Plan 모드 진입 시 Plan & Lessons Protocol 주입 |
 | [smart-read](#smart-read) | Hook | 파일 크기 기반 지능적 읽기 강제 |
@@ -156,47 +156,27 @@ Kent Beck의 "Tidy First?" 철학에 기반하여 최근 커밋들을 분석하�
 
 **설치**: `claude plugin install gather-context@corca-plugins` | **갱신**: `claude plugin update gather-context@corca-plugins`
 
-URL 유형을 자동 감지하여 외부 콘텐츠를 로컬 파일로 수집하는 통합 스킬입니다. 변환 스크립트가 내장되어 있어 **별도의 스킬 설치 없이** 하나의 플러그인으로 Google Docs, Slack, Notion 콘텐츠를 모두 수집할 수 있습니다. 기존의 [`slack-to-md`](https://www.stdy.blog/1p1w-01-slack-to-md/), [`g-export`](https://www.stdy.blog/1p1w-02-g-export/), `notion-to-md`를 통합한 스킬입니다.
+URL 자동 감지, 웹 검색, 로컬 코드 탐색 3가지 모드를 제공하는 통합 정보 수집 레이어입니다. `web-search`의 모든 기능을 흡수하여 하나의 플러그인으로 모든 외부 정보 수집을 처리합니다. Google Docs, Slack, Notion, GitHub 콘텐츠를 위한 내장 변환기를 포함하며, 검색에는 Tavily와 Exa API를 사용합니다.
 
 **사용법**:
-- 명시적 호출: `/gather-context <url>`
-- URL 감지: 지원되는 서비스의 URL을 에이전트가 발견하면 자동으로 적절한 변환기 실행
+- URL 수집: `/gather-context <url>` (Google, Slack, Notion, GitHub, 일반 웹 자동 감지)
+- 웹 검색: `/gather-context --search <query>` (Tavily)
+- 코드 검색: `/gather-context --search code <query>` (Exa)
+- 뉴스/심층: `/gather-context --search --news <query>`, `/gather-context --search --deep <query>`
+- 로컬 탐색: `/gather-context --local <topic>`
+- 도움말: `/gather-context` 또는 `/gather-context help`
 
-**지원 서비스**:
+**지원 URL 서비스**:
 
 | URL 패턴 | 핸들러 |
 |----------|--------|
 | `docs.google.com/{document,presentation,spreadsheets}/d/*` | Google Export (내장 스크립트) |
 | `*.slack.com/archives/*/p*` | Slack to MD (내장 스크립트) |
 | `*.notion.site/*`, `www.notion.so/*` | Notion to MD (내장 스크립트) |
-| 기타 URL | WebFetch 폴백 |
+| `github.com/*/pull/*`, `github.com/*/issues/*` | GitHub (`gh` CLI) |
+| 기타 URL | Tavily 추출 → WebFetch 폴백 |
 
 **저장 위치**: 통합 기본값 `./gathered/` (환경변수 `CLAUDE_CORCA_GATHER_CONTEXT_OUTPUT_DIR`로 변경 가능, 서비스별 환경변수로 개별 지정도 가능)
-
-**참고**:
-- 정보 검색이 필요한 경우 `/web-search` 사용을 제안합니다.
-
-### [web-search](plugins/web-search/skills/web-search/SKILL.md)
-
-**설치**: `claude plugin install web-search@corca-plugins` | **갱신**: `claude plugin update web-search@corca-plugins`
-
-Tavily와 Exa REST API를 활용하여 웹 검색, 코드 검색, URL 콘텐츠 추출을 수행하는 스킬입니다. **스크립트 위임 패턴** 사용: SKILL.md가 커맨드 파싱과 쿼리 인텔리전스를 담당하고, 래퍼 스크립트가 API 실행을 처리합니다.
-
-**사용법**:
-- 웹 검색: `/web-search <query>`
-- 뉴스 검색: `/web-search --news <query>`
-- 심층 검색: `/web-search --deep <query>`
-- 코드/기술 검색: `/web-search code <query>`
-- URL 콘텐츠 추출: `/web-search extract <url> [query]`
-
-**주요 기능**:
-- Tavily API를 통한 일반 웹 검색 (답변 요약 + 소스 목록)
-- 쿼리 인텔리전스: 시간적 의도와 토픽을 자동 감지하여 스크립트 파라미터 설정
-- 선택적 모디파이어: `--news`로 뉴스 토픽, `--deep`으로 심층 검색
-- Exa API를 통한 코드/기술 전문 검색 (동적 토큰 할당)
-- URL 추출 시 쿼리 파라미터로 관련성 기반 재정렬 지원
-- 독립 실행 가능한 스크립트 (`search.sh`, `code-search.sh`, `extract.sh`)가 환경 변수 로딩, JSON 빌드, curl, 응답 포맷팅 처리
-- 검색 결과에 Sources 섹션 포함
 
 **필수 조건**:
 - `TAVILY_API_KEY` — 웹 검색과 URL 추출에 필요 ([발급](https://app.tavily.com/home))
@@ -204,12 +184,31 @@ Tavily와 Exa REST API를 활용하여 웹 검색, 코드 검색, URL 콘텐츠 
 - API 키는 `~/.zshrc` 또는 `~/.claude/.env`에 설정
 
 **빌트인 WebSearch 리다이렉트** (Hook):
-- 이 플러그인을 설치하면 Claude의 빌트인 `WebSearch` 도구를 차단하고 `/web-search`로 리다이렉트하는 `PreToolUse` 훅이 함께 등록됩니다.
-- 모든 웹 검색이 Tavily/Exa API를 통해 적절한 키 관리 하에 이루어지도록 보장합니다.
-- 리다이렉트는 자동이며 추가 설정이 필요 없습니다.
+- 이 플러그인을 설치하면 Claude의 빌트인 `WebSearch` 도구를 차단하고 `/gather-context --search`로 리다이렉트하는 `PreToolUse` 훅이 등록됩니다.
 
 **주의사항**:
-- 쿼리가 외부 검색 서비스로 전송됩니다. 기밀 코드나 민감한 정보를 검색 쿼리에 포함하지 마세요.
+- 검색 쿼리가 외부 서비스로 전송됩니다. 기밀 코드나 민감한 정보를 포함하지 마세요.
+
+### [web-search](plugins/web-search/skills/web-search/SKILL.md)
+
+> **지원 중단**: 이 플러그인은 [gather-context](#gather-context) v2로 대체되었습니다. 웹 검색, 코드 검색, URL 추출 기능이 모두 gather-context에 통합되었습니다.
+
+**마이그레이션**:
+```bash
+claude plugin install gather-context@corca-plugins
+claude plugin update gather-context@corca-plugins
+# 중복 훅 방지를 위해 web-search 제거 (선택):
+# claude plugin uninstall web-search@corca-plugins
+```
+
+**명령어 매핑**:
+| 기존 (web-search) | 신규 (gather-context) |
+|---|---|
+| `/web-search <query>` | `/gather-context --search <query>` |
+| `/web-search code <query>` | `/gather-context --search code <query>` |
+| `/web-search --news <query>` | `/gather-context --search --news <query>` |
+| `/web-search --deep <query>` | `/gather-context --search --deep <query>` |
+| `/web-search extract <url>` | `/gather-context <url>` |
 
 ## Hooks
 

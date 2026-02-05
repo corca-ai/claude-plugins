@@ -1,62 +1,66 @@
 ---
 name: gather-context
 description: |
-  Gather external content from URLs into local files.
-  Auto-detects URL types and runs the appropriate bundled converter
-  (Google Docs, Slack threads, Notion pages) or falls back to WebFetch.
-
-  **IMPORTANT: Use this skill INSTEAD OF WebFetch** when you encounter
-  Google document URLs (docs.google.com/*). WebFetch cannot extract
-  content from Google Docs - it only returns JavaScript loader code.
+  Unified information acquisition: URL auto-detect (Google/Slack/Notion/GitHub/web),
+  web search (Tavily/Exa), and local codebase exploration.
 
   Trigger on:
   - "/gather-context" command
   - When the user provides external content URLs matching supported services
   - When a reference file contains URLs that need to be fetched
+  - When the user requests web search or code search
 allowed-tools:
   - Bash
-  - WebSearch
+  - Glob
+  - Grep
+  - Read
+  - Task
+  - WebFetch
 ---
 
 # Gather Context (/gather-context)
 
-Auto-detect URL types and gather external content into local files.
+Unified information acquisition — gather URLs, search the web, or explore local code.
 
-## URL Detection
+**Language**: Adapt all user-facing output to match the user's prompt language.
 
-Match URLs in this order (most specific first):
+## Quick Reference
 
-| URL Pattern | Handler | Script |
-|-------------|---------|--------|
-| `docs.google.com/{document,presentation,spreadsheets}/d/*` | Google Export | `scripts/g-export.sh` |
-| `*.slack.com/archives/*/p*` | Slack to MD | `scripts/slack-api.mjs` + `scripts/slack-to-md.sh` |
-| `*.notion.site/*`, `www.notion.so/*` | Notion to MD | `scripts/notion-to-md.py` |
-| Any other URL | WebFetch | (built-in tool) |
+```
+/gather-context <url>                  URL auto-detect → download to OUTPUT_DIR
+/gather-context <url1> <url2> ...      Multiple URLs
+/gather-context --search <query>       Web search (Tavily)
+/gather-context --search --news <q>    News search (Tavily)
+/gather-context --search --deep <q>    Advanced depth search (Tavily)
+/gather-context --search code <query>  Code/technical search (Exa)
+/gather-context --local <query>        Local codebase exploration
+/gather-context                        Usage guide
+/gather-context help                   Usage guide
+```
 
 ## Workflow
 
-1. **Scan** user input for ALL URLs.
-2. **Classify** each URL by the pattern table above.
-3. **Execute** the appropriate handler for each URL (see handler sections below).
-4. **Report** all gathered files to the user.
-5. **Suggest** `/web-search` if the user appears to need search rather than export of a specific URL.
-
-## Configuration
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `CLAUDE_CORCA_GATHER_CONTEXT_OUTPUT_DIR` | `./gathered` | Unified default output directory |
-| `CLAUDE_CORCA_G_EXPORT_OUTPUT_DIR` | _(falls back to unified)_ | Google-specific override |
-| `CLAUDE_CORCA_SLACK_TO_MD_OUTPUT_DIR` | _(falls back to unified)_ | Slack-specific override |
-| `CLAUDE_CORCA_NOTION_TO_MD_OUTPUT_DIR` | _(falls back to unified)_ | Notion-specific override |
-
-**Priority**: CLI argument > service-specific env var > `CLAUDE_CORCA_GATHER_CONTEXT_OUTPUT_DIR` > hardcoded default
-
-When a service-specific env var is not set, pass the unified output dir as a CLI argument to the handler script.
+1. **Parse** args → mode (URL | `--search` | `--local` | help)
+2. **No args or "help"** → print [usage message](#usage-message) and stop
+3. **Execute** the appropriate handler (see sections below)
+4. **Save** results to `OUTPUT_DIR` (URL and `--local` modes)
+5. **Suggest** follow-up: after URL gathering, suggest `--search` for supplementary research if helpful
 
 ---
 
-## Google Export
+## URL Auto-Detect
+
+Scan input for all URLs. Classify each by pattern table (most specific first):
+
+| URL Pattern | Handler | Script / Tool |
+|-------------|---------|---------------|
+| `docs.google.com/{document,presentation,spreadsheets}/d/*` | Google Export | `scripts/g-export.sh` |
+| `*.slack.com/archives/*/p*` | Slack to MD | `scripts/slack-api.mjs` + `scripts/slack-to-md.sh` |
+| `*.notion.site/*`, `www.notion.so/*` | Notion to MD | `scripts/notion-to-md.py` |
+| `github.com/*` | GitHub | `gh` CLI |
+| Any other URL | Generic | `scripts/extract.sh` → WebFetch fallback |
+
+### Google Export
 
 ```bash
 {SKILL_DIR}/scripts/g-export.sh <url> [format] [output-dir]
@@ -65,9 +69,7 @@ When a service-specific env var is not set, pass the unified output dir as a CLI
 **Prerequisites**: Public documents only (Share > Publish to web).
 Sheets default to TOON format — see [references/TOON.md](references/TOON.md). Details: [references/google-export.md](references/google-export.md)
 
----
-
-## Slack Export
+### Slack Export
 
 **URL format**: `https://{workspace}.slack.com/archives/{channel_id}/p{timestamp}`
 
@@ -84,9 +86,7 @@ After conversion, rename to a meaningful name from the first message (lowercase,
 **Prerequisites**: Node.js 18+, Slack Bot (`channels:history`, `channels:join`, `users:read`, `files:read`), `SLACK_BOT_TOKEN` in `~/.claude/.env`.
 Details: [references/slack-export.md](references/slack-export.md)
 
----
-
-## Notion Export
+### Notion Export
 
 ```bash
 python3 {SKILL_DIR}/scripts/notion-to-md.py "$URL" "$OUTPUT_PATH"
@@ -96,25 +96,166 @@ python3 {SKILL_DIR}/scripts/notion-to-md.py "$URL" "$OUTPUT_PATH"
 **Limitations**: Sub-pages → `<!-- missing block -->`, images URL-only (S3 expires), no database views.
 Details: [references/notion-export.md](references/notion-export.md)
 
----
+### GitHub
 
-## WebFetch Fallback
+For `github.com` URLs, use the `gh` CLI to extract content as markdown.
+
+**Prerequisite check**: Verify `command -v gh` first. If `gh` is not available, fall through to Generic handler.
+
+| URL type | Command |
+|----------|---------|
+| PR (`/pull/N`) | `gh pr view <url> --json title,body,state,author,comments --template '...'` |
+| Issue (`/issues/N`) | `gh issue view <url> --json title,body,state,author,comments --template '...'` |
+| Repository (`owner/repo`) | `gh repo view <url> --json name,description,readme` |
+| Other GitHub URL | Fall through to Generic handler |
+
+Save output to `{OUTPUT_DIR}/{type}-{owner}-{repo}-{number}.md`.
+
+**Template for PR/Issue** (pass to `--template`):
+```
+# {{.title}}
+State: {{.state}} | Author: {{.author.login}}
+
+{{.body}}
+
+{{range .comments}}---
+**{{.author.login}}** ({{.createdAt}}):
+{{.body}}
+{{end}}
+```
+
+### Generic URL
 
 For URLs that don't match any known service:
 
-1. Use WebFetch to download the page content.
-2. Save the result as markdown to `{OUTPUT_DIR}/{sanitized-title}.md`.
-3. Sanitize the title: lowercase, spaces to hyphens, remove special characters, max 50 chars.
+1. **Try `extract.sh`** (Tavily extract) if `TAVILY_API_KEY` is likely set:
+   ```bash
+   {SKILL_DIR}/scripts/extract.sh "<url>"
+   ```
+   If extraction succeeds, save to `{OUTPUT_DIR}/{sanitized-title}.md`.
+
+2. **Fallback to WebFetch** if no `TAVILY_API_KEY` or extraction fails:
+   - Use WebFetch tool to download the page content.
+   - Save the result as markdown to `{OUTPUT_DIR}/{sanitized-title}.md`.
+
+Sanitize title: lowercase, spaces to hyphens, remove special characters, max 50 chars.
+
+---
+
+## --search Mode
+
+Web and code search via external APIs.
+
+**Read [references/query-intelligence.md](references/query-intelligence.md)** before executing search — it contains the routing logic and parameter tables.
+
+### Subcommands
+
+| Command | Backend | Script |
+|---------|---------|--------|
+| `--search <query>` | Tavily | `scripts/search.sh` |
+| `--search --news <query>` | Tavily (topic: news) | `scripts/search.sh --topic news` |
+| `--search --deep <query>` | Tavily (advanced) | `scripts/search.sh --deep` |
+| `--search code <query>` | Exa | `scripts/code-search.sh` |
+
+### Execution
+
+1. Read [query-intelligence.md](references/query-intelligence.md) for routing and parameter decisions
+2. Route: `code` prefix or auto-detected code context → `code-search.sh`; otherwise → `search.sh`
+3. Apply query intelligence (temporal, topic, token allocation) per reference
+4. Call script via Bash:
+   ```bash
+   {SKILL_DIR}/scripts/search.sh [--topic news|finance] [--time-range day|week|month|year] [--deep] "<query>"
+   {SKILL_DIR}/scripts/code-search.sh [--tokens NUM] "<query>"
+   ```
+5. Display results to user (scripts output formatted markdown)
+
+**Graceful degradation**: If API key is missing, scripts print setup instructions to stderr. Display the error message to the user. See [references/search-api-reference.md](references/search-api-reference.md).
+
+### Data Privacy
+
+Queries are sent to external search services. Do not include confidential code or sensitive information in search queries.
+
+---
+
+## --local Mode
+
+Explore the local codebase for a topic and save structured results.
+
+### Execution
+
+1. Launch a sub-agent:
+   ```
+   Task(subagent_type="general-purpose", prompt="Explore this codebase for: <query>. Use Glob, Grep, and Read to find relevant code, patterns, and architecture. Return a structured markdown summary with: ## Overview, ## Key Files, ## Code Patterns, ## Notable Details. Be thorough but concise.")
+   ```
+2. Save sub-agent output to `{OUTPUT_DIR}/local-{sanitized-query}.md`
+3. Report file location to user
+
+Sanitize query for filename: lowercase, spaces to hyphens, remove special characters, max 50 chars.
+
+---
+
+## Configuration
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `CLAUDE_CORCA_GATHER_CONTEXT_OUTPUT_DIR` | `./gathered` | Unified default output directory |
+| `CLAUDE_CORCA_G_EXPORT_OUTPUT_DIR` | _(falls back to unified)_ | Google-specific override |
+| `CLAUDE_CORCA_SLACK_TO_MD_OUTPUT_DIR` | _(falls back to unified)_ | Slack-specific override |
+| `CLAUDE_CORCA_NOTION_TO_MD_OUTPUT_DIR` | _(falls back to unified)_ | Notion-specific override |
+| `TAVILY_API_KEY` | — | Required for `--search` and generic URL extract |
+| `EXA_API_KEY` | — | Required for `--search code` |
+
+**Output dir priority**: CLI argument > service-specific env var > `CLAUDE_CORCA_GATHER_CONTEXT_OUTPUT_DIR` > hardcoded default (`./gathered`)
+
+When a service-specific env var is not set, pass the unified output dir as a CLI argument to the handler script.
 
 ---
 
 ## Supplementary Research
 
-After gathering content, if best practices, reference documentation, or supplementary context would help the user, use the **WebSearch** tool to look them up autonomously.
+After gathering URL content, if best practices, reference documentation, or supplementary context would help the user, use the search scripts directly via Bash (not the WebSearch tool):
+
+```bash
+{SKILL_DIR}/scripts/search.sh "<query>"
+```
 
 Examples:
-- Gathered a Google Doc describing a migration plan → search for best practices on that migration
-- Gathered a Slack thread about an unfamiliar library → search for its official docs or common patterns
-- Gathered a Notion page with a technical spec → search for related implementation examples
+- Gathered a Google Doc describing a migration plan → search for best practices
+- Gathered a Slack thread about an unfamiliar library → search for official docs
+- Gathered a Notion page with a technical spec → search for implementation examples
 
-The user's environment determines how WebSearch is fulfilled (built-in or redirected to an external search skill via hook). This skill does not need to know the details.
+---
+
+## Usage Message
+
+Print when no args or "help":
+
+```
+Gather Context — Unified Information Acquisition
+
+Usage:
+  /gather-context <url>                  Gather content from URL (auto-detect service)
+  /gather-context --search <query>       Web search (Tavily)
+  /gather-context --search --news <q>    News search
+  /gather-context --search --deep <q>    Deep search
+  /gather-context --search code <query>  Code/technical search (Exa)
+  /gather-context --local <query>        Explore local codebase
+
+Supported URL services:
+  Google Docs/Slides/Sheets, Slack threads, Notion pages, GitHub PRs/issues, generic web
+
+Environment variables:
+  TAVILY_API_KEY    Web search and URL extraction (https://app.tavily.com)
+  EXA_API_KEY       Code search (https://dashboard.exa.ai)
+```
+
+---
+
+## References
+
+- [references/google-export.md](references/google-export.md) — Google Docs/Slides/Sheets export details
+- [references/slack-export.md](references/slack-export.md) — Slack thread export details
+- [references/notion-export.md](references/notion-export.md) — Notion page export details
+- [references/TOON.md](references/TOON.md) — TOON format for spreadsheets
+- [references/search-api-reference.md](references/search-api-reference.md) — Tavily/Exa API parameters
+- [references/query-intelligence.md](references/query-intelligence.md) — Search routing and query enrichment
