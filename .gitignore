@@ -5,3 +5,4 @@ work-in-progress
 # Plugin secrets
 .env.local
 .cache/
+**/__pycache__/
