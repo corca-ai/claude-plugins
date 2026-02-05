@@ -77,7 +77,8 @@ if ! mkdir "$LOCK_DIR" 2>/dev/null; then
     # Another instance is running — exit silently
     exit 0
 fi
-trap 'rmdir "$LOCK_DIR" 2>/dev/null' EXIT
+TEMP_ENTRIES=$(mktemp)
+trap 'rm -f "$TEMP_ENTRIES"; rmdir "$LOCK_DIR" 2>/dev/null' EXIT
 
 # ── Incremental offset ───────────────────────────────────────────────────────
 OFFSET_FILE="${STATE_DIR}/offset"
@@ -108,12 +109,12 @@ elif [ "$TOTAL_LINES" -eq "$LAST_OFFSET" ]; then
     exit 0
 fi
 
-# ── Read new JSONL entries ────────────────────────────────────────────────────
-NEW_ENTRIES=$(tail -n +"$((LAST_OFFSET + 1))" "$TRANSCRIPT_PATH")
+# ── Read new JSONL entries (use temp file to avoid bash null-byte stripping) ──
+tail -n +"$((LAST_OFFSET + 1))" "$TRANSCRIPT_PATH" > "$TEMP_ENTRIES"
 
 # ── Parse turns with jq ──────────────────────────────────────────────────────
 # Group entries into turns: user message → assistant messages until next user
-TURNS_JSON=$(echo "$NEW_ENTRIES" | jq -s '
+TURNS_JSON=$(jq -s '
   # Filter to user/assistant entries only (skip snapshots, etc.)
   [ .[] | select(.type == "user" or .type == "assistant") ] |
 
@@ -140,7 +141,7 @@ TURNS_JSON=$(echo "$NEW_ENTRIES" | jq -s '
   ) |
   # Flush final turn
   if .cur then .turns + [.cur] else .turns end
-' 2>/dev/null || echo '[]')
+' < "$TEMP_ENTRIES" 2>/dev/null || echo '[]')
 
 TURN_COUNT=$(echo "$TURNS_JSON" | jq 'length')
 if [ "$TURN_COUNT" -eq 0 ]; then
@@ -166,16 +167,16 @@ OUT_FILE="${LOG_DIR}/${DATE_STR}-${HASH}.md"
 # ── Write session header if first write ───────────────────────────────────────
 if [ ! -f "$OUT_FILE" ]; then
     # Extract metadata from first assistant entry
-    MODEL=$(echo "$NEW_ENTRIES" | jq -r 'select(.type == "assistant") | .message.model // empty' | head -1)
+    MODEL=$(jq -rs '[.[] | select(.type == "assistant") | .message.model // empty] | first // empty' < "$TEMP_ENTRIES")
     [ -z "$MODEL" ] && MODEL="unknown"
 
-    BRANCH=$(echo "$NEW_ENTRIES" | jq -r 'select(.gitBranch) | .gitBranch // empty' | head -1)
+    BRANCH=$(jq -rs '[.[] | select(.gitBranch) | .gitBranch // empty] | first // empty' < "$TEMP_ENTRIES")
     [ -z "$BRANCH" ] && BRANCH="unknown"
 
-    VERSION=$(echo "$NEW_ENTRIES" | jq -r 'select(.version) | .version // empty' | head -1)
+    VERSION=$(jq -rs '[.[] | select(.version) | .version // empty] | first // empty' < "$TEMP_ENTRIES")
     [ -z "$VERSION" ] && VERSION="unknown"
 
-    FIRST_TS=$(echo "$NEW_ENTRIES" | jq -r 'select(.timestamp) | .timestamp // empty' | head -1)
+    FIRST_TS=$(jq -rs '[.[] | select(.timestamp) | .timestamp // empty] | first // empty' < "$TEMP_ENTRIES")
     if [ -n "$FIRST_TS" ]; then
         STARTED=$(utc_to_local "$FIRST_TS" "%Y-%m-%d %H:%M:%S")
         [ -z "$STARTED" ] && STARTED="$FIRST_TS"
