@@ -42,8 +42,8 @@
     {
       "name": "retro",
       "source": "./plugins/retro",
-      "description": "A skill that performs comprehensive session retrospectives",
-      "keywords": ["retrospective", "session-review", "learning", "improvement"]
+      "description": "A skill that performs comprehensive session retrospectives with CDM analysis and expert lens",
+      "keywords": ["retrospective", "session-review", "learning", "improvement", "cdm", "expert-analysis"]
     },
     {
       "name": "gather-context",

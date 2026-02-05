@@ -44,7 +44,7 @@ You can do the same from inside Claude Code (instead of your terminal):
 | [deep-clarify](#deep-clarify) | Skill | Research-first requirement clarification with autonomous decision-making |
 | [interview](#interview) | Skill | Extract requirements through structured interviews |
 | [suggest-tidyings](#suggest-tidyings) | Skill | Suggest safe refactoring opportunities |
-| [retro](#retro) | Skill | Run a comprehensive end-of-session retrospective |
+| [retro](#retro) | Skill | Run a comprehensive end-of-session retrospective with CDM analysis and expert lens |
 | [gather-context](#gather-context) | Skill | Auto-detect URLs and gather external content via built-in scripts |
 | [web-search](#web-search) | Skill + Hook | Web search, code search, and URL content extraction |
 | [attention-hook](#attention-hook) | Hook | Send a Slack notification when idle/waiting |
@@ -144,6 +144,8 @@ A skill that runs a comprehensive retrospective at the end of a session. If `les
 - Documents user/org/project context that will help future work
 - Observes working style and collaboration patterns and suggests CLAUDE.md updates (applies only with user approval)
 - Suggests prompting habit improvements (with concrete examples from the session)
+- Analyzes critical decisions using Gary Klein's CDM (Critical Decision Method) with session-specific probes
+- Expert Lens: parallel sub-agents adopt real expert identities to analyze the session through contrasting frameworks (with verified citations)
 - Shares learning resources tailored to the user's knowledge/experience level
 - Searches for relevant workflow skills or suggests creating new ones
 

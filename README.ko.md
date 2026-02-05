@@ -44,7 +44,7 @@ bash scripts/update-all.sh
 | [deep-clarify](#deep-clarify) | Skill | 리서치 기반 요구사항 명확화 (자율 의사결정) |
 | [interview](#interview) | Skill | 구조화된 인터뷰로 요구사항 추출 |
 | [suggest-tidyings](#suggest-tidyings) | Skill | 안전한 리팩토링 기회 제안 |
-| [retro](#retro) | Skill | 세션 종료 시 포괄적 회고 수행 |
+| [retro](#retro) | Skill | 세션 종료 시 CDM 분석과 전문가 렌즈를 포함한 포괄적 회고 수행 |
 | [gather-context](#gather-context) | Skill | URL 자동 감지 후 외부 콘텐츠를 자체 스크립트로 수집 |
 | [web-search](#web-search) | Skill + Hook | 웹 검색, 코드 검색, URL 콘텐츠 추출 |
 | [attention-hook](#attention-hook) | Hook | 대기 상태일 때 Slack 알림 |
@@ -144,6 +144,8 @@ Kent Beck의 "Tidy First?" 철학에 기반하여 최근 커밋들을 분석하�
 - 유저/조직/프로젝트에 대한 정보 중 이후 작업에 도움될 내용 문서화
 - 업무 스타일·협업 방식 관찰 후 CLAUDE.md 업데이트 제안 (유저 승인 후 적용)
 - 프롬프팅 습관 개선점 제안 (세션의 구체적 사례와 함께)
+- Gary Klein의 CDM(Critical Decision Method)으로 세션의 핵심 의사결정 분석
+- Expert Lens: 병렬 서브에이전트가 실존 전문가의 관점에서 세션을 분석 (검증된 인용 포함)
 - 유저의 지식/경험 수준에 맞춘 학습자료 링크 제공
 - 워크플로우에 도움될 스킬 탐색 또는 새 스킬 제작 제안
 

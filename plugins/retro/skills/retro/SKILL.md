@@ -10,6 +10,7 @@ allowed-tools:
   - Bash
   - WebSearch
   - Skill
+  - Task
   - AskUserQuestion
 ---
 
@@ -39,48 +40,47 @@ Resolution order:
 
 ### 2. Read Existing Artifacts
 
-- `plan.md` and `lessons.md` in the target directory (if they exist) — understand session goals, avoid duplicating captured learnings
-- `CLAUDE.md` from project root — needed for Section 2
-- Project context document (if one exists, e.g. `docs/project-context.md`) — avoid repeating already-persisted context in Section 1
+Read `plan.md`, `lessons.md` (if they exist in target dir), `CLAUDE.md` from project root, and project context document (e.g. `docs/project-context.md`) — to understand session goals and avoid duplicating content.
 
 ### 3. Draft Retro
 
-Analyze the full conversation to produce five sections. Draft everything internally before writing to file.
+Analyze the full conversation to produce seven sections. Draft everything internally before writing to file.
 
 #### Section 1: Context Worth Remembering
 
-User, organization, and project facts that future sessions would benefit from:
-- Domain knowledge, tech stack, conventions discovered
-- Organizational context, team structure, decision-making patterns
-- Only include what is genuinely useful for future work
+User, org, and project facts useful for future sessions: domain knowledge, tech stack, conventions, team structure, decision-making patterns. Only genuinely useful items.
 
 #### Section 2: Collaboration Preferences
 
-- Work style and communication observations; compare against current CLAUDE.md
-- If warranted, draft `### Suggested CLAUDE.md Updates` as a bullet list (omit if none)
-- **Right-placement check**: Before suggesting a CLAUDE.md change, check if the learning belongs to a document that CLAUDE.md already references (e.g., protocol.md, skills-guide.md). If so, suggest updating that document instead — CLAUDE.md should stay as a concise pointer, not restate referenced content.
+Work style and communication observations; compare against current CLAUDE.md. If warranted, draft `### Suggested CLAUDE.md Updates` as a bullet list (omit if none). **Right-placement check**: if a learning belongs to a doc that CLAUDE.md already references, suggest updating that doc instead.
 
 #### Section 3: Prompting Habits
 
 Patterns that caused misunderstandings, with specific examples and improved alternatives. Frame constructively.
 
-#### Section 4: Learning Resources
+#### Section 4: Critical Decision Analysis (CDM)
 
-- Search the web to find 2–3 relevant resources
-- Calibrate to user's apparent knowledge level
-- Focus on topics where the session revealed knowledge gaps or curiosity
-- For each resource, fetch the content and provide:
-  - Title + URL
-  - 2–3 sentence summary of key takeaways relevant to this session
-  - Why this matters for the user's work
-- Prefer fewer high-quality resources with good summaries over many links
+Read `{SKILL_DIR}/references/cdm-guide.md` for methodology.
 
-#### Section 5: Relevant Skills
+Identify 2-4 critical decision moments from the session. Apply CDM probes to each. This section is unconditional — every retro-worthy session has decisions worth analyzing.
 
-- Assess whether the session reveals a workflow gap or repetitive pattern
-- If yes: search the marketplace or web for existing solutions, report relevant results
-- If a needed skill does not exist: briefly describe what it would do and suggest creating one
-- If no clear gap: state "No skill gaps identified in this session"
+#### Section 5: Expert Lens (conditional)
+
+Condition: Does the session contain decisions that domain experts would analyze differently? If the session is too lightweight (simple config changes, routine tasks), skip this section with a brief note.
+
+**Expert selection**:
+1. Scan the conversation for `/deep-clarify` invocations. If found, extract expert names and use them as preferred starting points.
+2. If no deep-clarify experts available, select independently per `{SKILL_DIR}/references/expert-lens-guide.md`.
+
+**Execution**: Launch Expert alpha and Expert beta in parallel via Task tool. Each sub-agent prompt: "Read `{SKILL_DIR}/references/expert-lens-guide.md`. You are Expert {alpha|beta}. Session summary: {Sections 1-4 summary}. Deep-clarify experts: {names or 'not available'}. Analyze through your framework. Use web search to verify expert identity and cite published work." Integrate both results into Section 5.
+
+#### Section 6: Learning Resources
+
+Search the web for 2-3 resources calibrated to the user's knowledge level, focusing on topics where the session revealed gaps or curiosity. For each: title + URL, 2-3 sentence summary of key takeaways, and why it matters for the user's work.
+
+#### Section 7: Relevant Skills
+
+Assess whether the session reveals a workflow gap or repetitive pattern. If yes: search for existing solutions and report. If a needed skill does not exist: briefly describe what it would do. If no clear gap: state "No skill gaps identified."
 
 ### 4. Write retro.md
 
@@ -89,44 +89,31 @@ Write to `{output-dir}/retro.md` using the format below.
 ### 5. Link Session Log
 
 If `prompt-logs/sessions/` exists (prompt-logger plugin installed):
-1. List files in `prompt-logs/sessions/` matching today's date (`{YYMMDD}-*.md`)
-2. Filter out files already symlinked from any `prompt-logs/{YYMMDD}-*/session.md`
-3. For each remaining candidate, read a sample of the file and verify it matches the current session (user prompts, tool calls, or topics should be recognizable — note: the latest turns may not yet be written due to async logging)
-4. If verified and `{output-dir}/session.md` does not exist, create a relative symlink:
+1. List files matching today's date (`{YYMMDD}-*.md`), filter out already-symlinked ones
+2. Read a sample of each candidate to verify it matches the current session
+3. If verified and `{output-dir}/session.md` does not exist, create a relative symlink:
    ```bash
    ln -s "../sessions/{filename}" "{output-dir}/session.md"
    ```
-5. If no candidates or `prompt-logs/sessions/` does not exist, skip silently
-
-This step is defensive — it does nothing if prompt-logger is not installed.
+4. If no candidates or directory does not exist, skip silently
 
 ### 6. Persist Findings
 
-retro.md is session-specific. Findings worth keeping across sessions should be persisted to project-level documents.
+retro.md is session-specific. Persist findings to project-level documents:
 
-**Context (Section 1)**: If new context was identified, offer to append it to the project context document. If no such document exists, offer to create one.
-
-**Collaboration & CLAUDE.md (Section 2)**: If collaboration style observations or explicit CLAUDE.md suggestions were produced:
-1. AskUserQuestion: "Apply the suggested CLAUDE.md changes?" — Yes / No
-2. If yes: Edit CLAUDE.md with the changes
-3. If no: suggestions remain documented in retro.md for future reference
-
-**Actionable improvements (Section 5)**: If the retro identifies concrete, implementable improvements (protocol changes, skill modifications, new automation), offer to implement them now rather than just recording them. Use AskUserQuestion: "Implement now?" — this prevents findings from becoming stale notes that require a separate session to act on.
+- **Context (Section 1)**: Offer to append new context to project-context.md (or create it)
+- **CLAUDE.md (Section 2)**: If suggestions exist, AskUserQuestion "Apply?" — edit on approval
+- **Actionable improvements (Section 7)**: If concrete improvements identified, AskUserQuestion "Implement now?" to prevent findings from becoming stale
 
 ### 7. Post-Retro Discussion
 
-After writing retro.md and persisting findings, the user will often read the retro and continue the conversation — asking questions, giving corrections, raising new points. This is expected and valuable.
+The user may continue the conversation after the retro. During post-retro discussion:
+- Update `retro.md` — append under `### Post-Retro Findings`
+- Update `lessons.md` with new learnings
+- **Persistence check** — for each new learning, evaluate: CLAUDE.md? Skills/protocol docs? project-context.md?
+- If plugin code was changed, follow normal release procedures (version bump, CHANGELOG)
 
-During any post-retro conversation:
-- Update `retro.md` — append learnings under `### Post-Retro Findings`
-- Update `lessons.md` — add new learnings from the discussion
-- **Persistence check** — for each new learning, evaluate where it belongs beyond the session:
-  - `CLAUDE.md`: new collaboration pattern or workflow change?
-  - Skills/protocol docs: does a skill's instructions or behavior need updating?
-  - `project-context.md`: new architecture pattern, convention, or design intent?
-- If plugin code was changed (SKILL.md, scripts, hooks, protocol docs), follow normal release procedures: update `plugin.json` version and `CHANGELOG.md`
-
-Do not prompt the user to start this discussion. Simply stay aware that conversation after the retro may produce learnings worth capturing.
+Do not prompt the user to start this discussion.
 
 ## Output Format
 
@@ -139,9 +126,16 @@ Do not prompt the user to start this discussion. Simply stay aware that conversa
 ## 2. Collaboration Preferences
 ### Suggested CLAUDE.md Updates
 ## 3. Prompting Habits
-## 4. Learning Resources
-## 5. Relevant Skills
+## 4. Critical Decision Analysis (CDM)
+## 5. Expert Lens
+## 6. Learning Resources
+## 7. Relevant Skills
 ```
+
+## References
+
+- `{SKILL_DIR}/references/cdm-guide.md` — CDM probe methodology and output format
+- `{SKILL_DIR}/references/expert-lens-guide.md` — Expert identity, grounding, and analysis format
 
 ## Language
 
@@ -154,3 +148,5 @@ Write retro.md in the user's language. Detect from conversation, not from this s
 3. Keep each section focused — if nothing to say, state that briefly
 4. CLAUDE.md changes require explicit user approval
 5. If early session context is unavailable due to conversation length, focus on what is visible and note the limitation
+6. CDM analysis (Section 4) is unconditional — every session has decisions to analyze
+7. Expert Lens (Section 5) is conditional — skip for lightweight sessions with no non-trivial decisions

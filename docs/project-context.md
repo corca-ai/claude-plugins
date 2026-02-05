@@ -44,6 +44,7 @@ Accumulated context from retrospectives. Each session's retro may add to this do
 - EnterPlanMode hook is now provided by the `plan-and-lessons` plugin (no longer in `.claude/settings.json`)
 - `type: prompt` hooks work with any hook event and are simpler for context injection (no JSON formatting needed)
 - Hooks are **snapshots at session start** — no hot-reload. Requires new session or `/hooks` review to pick up changes.
+- **Skill loading is cache-based**: Skills (SKILL.md content + allowed-tools) are loaded from `~/.claude/plugins/cache/{marketplace}/{plugin}/{version}/`, not from the source directory. Source modifications require `claude plugin update` or `scripts/update-all.sh` to propagate to the cache. Both hooks and skills are effectively session-start snapshots tied to the cache state.
 - **sync vs async rule of thumb**: If a hook only calls external services (Slack, logging) and doesn't need to modify Claude's behavior → use async. Sync hooks with empty stdout can corrupt conversation history on some event types.
 - **System tool matching**: Internal tools (`EnterPlanMode`, `ExitPlanMode`, `AskUserQuestion`) can be matched via `PreToolUse`/`PostToolUse` matchers — no dedicated hook events needed.
 - **Async race conditions**: Async hooks that check-then-create state files need atomic locking (e.g., `mkdir`). Multiple async instances of the same hook can run concurrently.
@@ -54,6 +55,7 @@ Accumulated context from retrospectives. Each session's retro may add to this do
 
 - Contains skills (clarify, deep-clarify, interview, suggest-tidyings, retro, gather-context, web-search), hooks (attention-hook, plan-and-lessons, smart-read), and supporting docs
 - `deep-clarify`: first multi-sub-agent skill — 4 sub-agents (codebase researcher, best practice researcher, Advisor α, Advisor β) orchestrated in a 6-phase workflow. Uses reference guides in `references/` directory with the role/context/methodology/constraints/output pattern.
+- `retro` v1.6.0: Added CDM analysis (Section 4, unconditional) and Expert Lens (Section 5, conditional parallel sub-agents). CDM runs in main agent (needs full conversation context); Expert Lens launches alpha/beta sub-agents with web search for citation verification. Deep-clarify experts reused via conversation scanning (no file system dependency). Methodology details in `references/` following the sub-agent orchestration pattern.
 - `smart-read` hook: PreToolUse → Read, enforces file-size-aware reading (warn >500 lines, deny >2000 lines)
 - `web-search` hook: PreToolUse → WebSearch, redirects to `/web-search` skill
 - `prompt-logger` hook: Stop + SessionEnd → incremental transcript-to-markdown logger. Uses `/tmp/` state files (offset, turn_num) with session hash for incremental processing. Atomic `mkdir` lock prevents race between concurrent Stop/SessionEnd hooks. SessionEnd auto-commits the session log file (`--no-verify`, only if no pre-existing staged changes) to avoid untracked leftovers after session close.
