@@ -37,6 +37,7 @@ After implementing a plan, complete the full workflow without waiting for explic
 - The user communicates in Korean. Respond in Korean for conversation, English for code and docs (per Language rules below).
 - The user expects protocols in CLAUDE.md to be followed without explicit reminders.
 - Prefer short, precise feedback loops — ask for intent confirmation before large implementations.
+- When executing a pre-designed plan: if a discrepancy between the plan and actual code is discovered during implementation, record it in lessons.md, report immediately, and ask the user for a decision before proceeding.
 - When researching Claude Code features (hooks, settings, plugins), always verify against the official docs (https://code.claude.com/docs/en/) via WebFetch. Do not rely solely on claude-code-guide agent responses.
 - When testing hooks or infrastructure, verify incrementally — test one path first, then expand to others.
 - When testing scripts, do not manually set up the environment (e.g., `source ~/.zshrc`) before running tests. Test in a clean environment to reproduce real-world conditions.

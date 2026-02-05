@@ -54,8 +54,9 @@ Accumulated context from retrospectives. Each session's retro may add to this do
 
 ## Plugins
 
-- Contains skills (clarify, deep-clarify, interview, suggest-tidyings, retro, gather-context, web-search), hooks (attention-hook, plan-and-lessons, smart-read), and supporting docs
-- `deep-clarify`: first multi-sub-agent skill — 4 sub-agents (codebase researcher, best practice researcher, Advisor α, Advisor β) orchestrated in a 6-phase workflow. Uses reference guides in `references/` directory with the role/context/methodology/constraints/output pattern.
+- Contains skills (clarify, suggest-tidyings, retro, gather-context), deprecated skills (deep-clarify, interview, web-search), hooks (attention-hook, plan-and-lessons, smart-read, prompt-logger), and supporting docs
+- `clarify` v2: unified requirement clarification — merges clarify v1, deep-clarify, and interview. Default mode: research-first (gather-context integration with fallback) → tier classification → advisory → persistent questioning. `--light` mode: direct Q&A. 4 reference guides (aggregation, advisory, research, questioning) with SKILL.md as thin orchestrator (309 lines). Defensive gather-context detection via system prompt inspection.
+- `deep-clarify` (deprecated): first multi-sub-agent skill — 4 sub-agents (codebase researcher, best practice researcher, Advisor α, Advisor β) orchestrated in a 6-phase workflow. Functionality absorbed into clarify v2.
 - `retro` v1.6.0: Added CDM analysis (Section 4, unconditional) and Expert Lens (Section 5, conditional parallel sub-agents). CDM runs in main agent (needs full conversation context); Expert Lens launches alpha/beta sub-agents with web search for citation verification. Deep-clarify experts reused via conversation scanning (no file system dependency). Methodology details in `references/` following the sub-agent orchestration pattern.
 - `smart-read` hook: PreToolUse → Read, enforces file-size-aware reading (warn >500 lines, deny >2000 lines)
 - `web-search` hook: PreToolUse → WebSearch, redirects to `/web-search` skill
