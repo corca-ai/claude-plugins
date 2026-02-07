@@ -61,28 +61,28 @@
       "name": "suggest-tidyings",
       "source": "./plugins/suggest-tidyings",
       "description": "DEPRECATED — use refactor --code instead. Suggests safe refactoring opportunities based on Kent Beck's Tidy First? philosophy",
-      "deprecated": true,
+
       "keywords": ["refactoring", "tidying", "code-quality", "tidy-first"]
     },
     {
       "name": "deep-clarify",
       "source": "./plugins/deep-clarify",
       "description": "DEPRECATED — use clarify v2 instead. Research-first requirement clarification with autonomous decision-making",
-      "deprecated": true,
+
       "keywords": ["requirements", "clarification", "research", "sub-agents", "autonomous"]
     },
     {
       "name": "interview",
       "source": "./plugins/interview",
       "description": "DEPRECATED — use clarify v2 instead. Structured interviews to extract requirements, constraints, and design decisions",
-      "deprecated": true,
+
       "keywords": ["interview", "requirements", "discovery", "specification"]
     },
     {
       "name": "web-search",
       "source": "./plugins/web-search",
       "description": "DEPRECATED — use gather-context v2 instead. Web search, code search, and URL content extraction via Tavily and Exa APIs",
-      "deprecated": true,
+
       "keywords": ["search", "web-search", "tavily", "exa", "code-search", "extract"]
     }
   ]
