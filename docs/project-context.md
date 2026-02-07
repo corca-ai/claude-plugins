@@ -36,6 +36,7 @@ Accumulated context from retrospectives. Each session's retro may add to this do
 - **Hook-based tool redirect**: Use PreToolUse hooks with `permissionDecision: "deny"` to redirect built-in tools to custom skills (e.g., WebSearch → `/web-search`). Enables loose coupling between plugins.
 - **3-tier env loading**: Shell environment → `~/.claude/.env` → grep shell profiles (fallback). All credential-loading scripts must use this pattern.
 - **Local vs marketplace**: Repo-specific automation → `.claude/skills/` (e.g., plugin-deploy). Cross-project utility → `plugins/` marketplace.
+- **Deprecated plugin policy**: Set `deprecated: true` in plugin.json → remove entry from marketplace.json. Do NOT keep both with a "deprecated" flag in marketplace — the plugin should simply not be listed. check-consistency.sh detects this as a gap.
 - **Sub-agent orchestration via SKILL.md**: For multi-phase skills, SKILL.md acts as a thin orchestrator (sequencer + data router) while reference guides in `references/` hold domain knowledge. Each guide follows: role statement → context → methodology → constraints → output format. Established by suggest-tidyings, extended by deep-clarify, matured in refactor (multi-mode routing + parallel sub-agents).
 - **Defensive cross-plugin integration**: When plugin A references plugin B's output, A must work normally when B is not installed. Use directory/file existence checks as the gate (e.g., retro checks for `prompt-logs/sessions/` before attempting to link prompt-logger output).
 

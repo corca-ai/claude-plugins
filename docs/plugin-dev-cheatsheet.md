@@ -112,6 +112,14 @@ Naming: `CLAUDE_CORCA_{PLUGIN_NAME}_{SETTING}`
 - Minimal deps: prefer bash + curl, minimize python3/node
 - Use `#!/usr/bin/env bash` and `set -euo pipefail`
 - Bash gotcha: `((var++))` returns exit code 1 when var is 0, failing under `set -e`. Use `var=$((var + 1))` instead.
+- curl in `set -e` scripts: wrap with `set +e` / `set -e` to capture exit codes:
+  ```bash
+  set +e
+  HTTP_CODE=$(curl -s ... -o "$TMPFILE" -w "%{http_code}")
+  CURL_EXIT=$?
+  set -e
+  ```
+- Empty array iteration under `set -u`: `"${arr[@]}"` on an empty array causes "unbound variable". Guard with `if [[ ${#arr[@]} -gt 0 ]]; then ... fi`.
 
 ## Testing
 
