@@ -25,6 +25,14 @@ claude plugin update <plugin-name>@corca-plugins   # update
 
 Restart Claude Code after installing/updating for changes to take effect.
 
+Or install by category using the installer script:
+```bash
+bash scripts/install.sh --all        # all 8 plugins
+bash scripts/install.sh --workflow   # workflow stages 1-6 only
+bash scripts/install.sh --infra     # attention-hook + prompt-logger
+bash scripts/install.sh --context --clarify  # combine stages
+```
+
 To update the marketplace and **all** installed plugins at once:
 ```bash
 bash scripts/update-all.sh
@@ -283,44 +291,20 @@ CLAUDE_CORCA_PROMPT_LOGGER_ENABLED=false              # Disable logging (default
 CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE=20                # Truncation threshold in lines (default: 10)
 ```
 
-## Deprecated & Removed Plugins
+## Removed Plugins
 
-### Deprecated plugins
+The following plugins were removed from the marketplace. Source code remains in `plugins/` for reference.
 
-| Plugin | Status | Replacement | Migration |
-|--------|--------|-------------|-----------|
-| [suggest-tidyings](plugins/suggest-tidyings/skills/suggest-tidyings/SKILL.md) | Deprecated in v2.0.0 | [refactor](#refactor) `--code` | `claude plugin install refactor@corca-plugins` |
-| [deep-clarify](plugins/deep-clarify/skills/deep-clarify/SKILL.md) | Deprecated in v1.9.0 | [clarify](#clarify) | `claude plugin install clarify@corca-plugins` |
-| [interview](plugins/interview/skills/interview/SKILL.md) | Deprecated in v1.9.0 | [clarify](#clarify) | `claude plugin install clarify@corca-plugins` |
-| [web-search](plugins/web-search/skills/web-search/SKILL.md) | Deprecated in v1.10.0 | [gather-context](#gather-context) | `claude plugin install gather-context@corca-plugins` |
+### Removed in v2.0.0
 
-**suggest-tidyings → refactor command mapping**:
-| Old (suggest-tidyings) | New (refactor) |
-|---|---|
-| `/suggest-tidyings` | `/refactor --code` |
-| `/suggest-tidyings <branch>` | `/refactor --code <branch>` |
+| Removed plugin | Replacement | Command mapping |
+|------------|------|------|
+| `suggest-tidyings` | [refactor](#refactor) `--code` | `/suggest-tidyings` → `/refactor --code` |
+| `deep-clarify` | [clarify](#clarify) | `/deep-clarify <req>` → `/clarify <req>` |
+| `interview` | [clarify](#clarify) | `/interview <topic>` → `/clarify <req>` |
+| `web-search` | [gather-context](#gather-context) | `/web-search <q>` → `/gather-context --search <q>` |
 
-**deep-clarify → clarify command mapping**:
-| Old (deep-clarify) | New (clarify) |
-|---|---|
-| `/deep-clarify <requirement>` | `/clarify <requirement>` |
-
-**interview → clarify command mapping**:
-| Old (interview) | New (clarify) |
-|---|---|
-| `/interview <topic>` | `/clarify <requirement>` (default mode) |
-| `/interview <topic>` (quick) | `/clarify <requirement> --light` |
-
-**web-search → gather-context command mapping**:
-| Old (web-search) | New (gather-context) |
-|---|---|
-| `/web-search <query>` | `/gather-context --search <query>` |
-| `/web-search code <query>` | `/gather-context --search code <query>` |
-| `/web-search --news <query>` | `/gather-context --search --news <query>` |
-| `/web-search --deep <query>` | `/gather-context --search --deep <query>` |
-| `/web-search extract <url>` | `/gather-context <url>` |
-
-### Removed plugins (v1.8.0)
+### Removed in v1.8.0
 
 | Removed plugin | Replacement |
 |------------|------|

@@ -25,6 +25,14 @@ claude plugin update <plugin-name>@corca-plugins   # 기존 플러그인 업데�
 
 설치/업데이트 후 Claude Code를 재시작하면 적용됩니다.
 
+또는 설치 스크립트를 사용하여 카테고리별로 설치할 수 있습니다:
+```bash
+bash scripts/install.sh --all        # 전체 8개 플러그인
+bash scripts/install.sh --workflow   # 워크플로우 단계 1-6만
+bash scripts/install.sh --infra     # attention-hook + prompt-logger
+bash scripts/install.sh --context --clarify  # 단계 조합 가능
+```
+
 마켓플레이스와 설치된 **모든** 플러그인을 한번에 업데이트하려면:
 ```bash
 bash scripts/update-all.sh
@@ -283,44 +291,20 @@ CLAUDE_CORCA_PROMPT_LOGGER_ENABLED=false              # 로깅 비활성화 (기
 CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE=20                # 축약 임계값 (줄 수, 기본값: 10)
 ```
 
-## Deprecated & Removed 플러그인
+## 삭제된 플러그인
 
-### 지원 중단 플러그인
+다음 플러그인들은 마켓플레이스에서 삭제되었습니다. 소스 코드는 `plugins/`에 참조용으로 남아 있습니다.
 
-| 플러그인 | 상태 | 대체 | 마이그레이션 |
-|---------|------|------|------------|
-| [suggest-tidyings](plugins/suggest-tidyings/skills/suggest-tidyings/SKILL.md) | v2.0.0에서 지원 중단 | [refactor](#refactor) `--code` | `claude plugin install refactor@corca-plugins` |
-| [deep-clarify](plugins/deep-clarify/skills/deep-clarify/SKILL.md) | v1.9.0에서 지원 중단 | [clarify](#clarify) | `claude plugin install clarify@corca-plugins` |
-| [interview](plugins/interview/skills/interview/SKILL.md) | v1.9.0에서 지원 중단 | [clarify](#clarify) | `claude plugin install clarify@corca-plugins` |
-| [web-search](plugins/web-search/skills/web-search/SKILL.md) | v1.10.0에서 지원 중단 | [gather-context](#gather-context) | `claude plugin install gather-context@corca-plugins` |
+### v2.0.0에서 삭제
 
-**suggest-tidyings → refactor 명령어 매핑**:
-| 기존 (suggest-tidyings) | 신규 (refactor) |
-|---|---|
-| `/suggest-tidyings` | `/refactor --code` |
-| `/suggest-tidyings <branch>` | `/refactor --code <branch>` |
+| 삭제된 플러그인 | 대체 | 명령어 매핑 |
+|------------|------|------|
+| `suggest-tidyings` | [refactor](#refactor) `--code` | `/suggest-tidyings` → `/refactor --code` |
+| `deep-clarify` | [clarify](#clarify) | `/deep-clarify <요구사항>` → `/clarify <요구사항>` |
+| `interview` | [clarify](#clarify) | `/interview <topic>` → `/clarify <요구사항>` |
+| `web-search` | [gather-context](#gather-context) | `/web-search <q>` → `/gather-context --search <q>` |
 
-**deep-clarify → clarify 명령어 매핑**:
-| 기존 (deep-clarify) | 신규 (clarify) |
-|---|---|
-| `/deep-clarify <요구사항>` | `/clarify <요구사항>` |
-
-**interview → clarify 명령어 매핑**:
-| 기존 (interview) | 신규 (clarify) |
-|---|---|
-| `/interview <topic>` | `/clarify <요구사항>` (기본 모드) |
-| `/interview <topic>` (간편) | `/clarify <요구사항> --light` |
-
-**web-search → gather-context 명령어 매핑**:
-| 기존 (web-search) | 신규 (gather-context) |
-|---|---|
-| `/web-search <query>` | `/gather-context --search <query>` |
-| `/web-search code <query>` | `/gather-context --search code <query>` |
-| `/web-search --news <query>` | `/gather-context --search --news <query>` |
-| `/web-search --deep <query>` | `/gather-context --search --deep <query>` |
-| `/web-search extract <url>` | `/gather-context <url>` |
-
-### 삭제된 플러그인 (v1.8.0)
+### v1.8.0에서 삭제
 
 | 삭제된 플러그인 | 대체 |
 |------------|------|

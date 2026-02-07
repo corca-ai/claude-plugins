@@ -1,172 +1,128 @@
 #!/usr/bin/env bash
-# Install corca-plugins by category.
-# Usage: bash scripts/install.sh [--all | --workflow | --<stage> | --infra]
+# install.sh: Install corca-plugins by category.
 #
-# Categories:
-#   --all        Install all plugins (workflow + infra)
-#   --workflow   Install all workflow plugins (stages 1-6)
-#   --context    Stage 1: gather-context
-#   --clarify    Stage 2: clarify
-#   --plan       Stage 3: plan-and-lessons
-#   --implement  Stage 4: smart-read
-#   --reflect    Stage 5: retro
-#   --refactor   Stage 6: refactor
-#   --infra      Infrastructure: attention-hook, prompt-logger
+# Usage:
+#   install.sh --all                  Install all active plugins
+#   install.sh --workflow             Install all workflow-stage plugins (1-6)
+#   install.sh --context              Stage 1: gather-context
+#   install.sh --clarify              Stage 2: clarify
+#   install.sh --plan                 Stage 3: plan-and-lessons
+#   install.sh --implement            Stage 4: smart-read
+#   install.sh --reflect              Stage 5: retro
+#   install.sh --refactor             Stage 6: refactor
+#   install.sh --infra                Install infra plugins (attention-hook, prompt-logger)
+#   install.sh <name> [<name>...]     Install specific plugin(s) by name
 #
-# Multiple flags can be combined: bash scripts/install.sh --workflow --infra
-# No args prints usage.
+# Prerequisite: marketplace must be added first:
+#   claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
 
 set -euo pipefail
 
 MARKETPLACE="corca-plugins"
-MARKETPLACE_URL="https://github.com/corca-ai/claude-plugins.git"
 
-# --- plugin registry (ordered by workflow stage) ---
+# --- Plugin definitions by stage ---
+STAGE_1_CONTEXT=(gather-context)
+STAGE_2_CLARIFY=(clarify)
+STAGE_3_PLAN=(plan-and-lessons)
+STAGE_4_IMPLEMENT=(smart-read)
+STAGE_5_REFLECT=(retro)
+STAGE_6_REFACTOR=(refactor)
+INFRA=(attention-hook prompt-logger)
 
-declare -A STAGE_PLUGINS=(
-  [context]="gather-context"
-  [clarify]="clarify"
-  [plan]="plan-and-lessons"
-  [implement]="smart-read"
-  [reflect]="retro"
-  [refactor]="refactor"
-)
+ALL_WORKFLOW=("${STAGE_1_CONTEXT[@]}" "${STAGE_2_CLARIFY[@]}" "${STAGE_3_PLAN[@]}" "${STAGE_4_IMPLEMENT[@]}" "${STAGE_5_REFLECT[@]}" "${STAGE_6_REFACTOR[@]}")
+ALL_PLUGINS=("${ALL_WORKFLOW[@]}" "${INFRA[@]}")
 
-WORKFLOW_ORDER=(context clarify plan implement reflect refactor)
-INFRA_PLUGINS=(attention-hook prompt-logger)
-
-# --- helpers ---
-
+# --- Helpers ---
 usage() {
-  cat <<'USAGE'
-Install corca-plugins by category.
+  cat <<'EOF'
+corca-plugins installer
 
-Usage: bash scripts/install.sh [flags]
+Usage:
+  install.sh --all                  Install all active plugins
+  install.sh --workflow             Install all workflow-stage plugins (1-6)
+  install.sh --context              Stage 1: gather-context
+  install.sh --clarify              Stage 2: clarify
+  install.sh --plan                 Stage 3: plan-and-lessons
+  install.sh --implement            Stage 4: smart-read
+  install.sh --reflect              Stage 5: retro
+  install.sh --refactor             Stage 6: refactor
+  install.sh --infra                Infra: attention-hook, prompt-logger
+  install.sh <name> [<name>...]     Install specific plugin(s) by name
 
-Flags:
-  --all        Install all plugins (workflow + infra)
-  --workflow   Install all workflow plugins (stages 1-6)
-  --context    Stage 1: gather-context
-  --clarify    Stage 2: clarify
-  --plan       Stage 3: plan-and-lessons
-  --implement  Stage 4: smart-read
-  --reflect    Stage 5: retro
-  --refactor   Stage 6: refactor
-  --infra      Infrastructure: attention-hook, prompt-logger
+Flags can be combined: install.sh --context --clarify --infra
 
-Multiple flags can be combined.
-Example: bash scripts/install.sh --workflow --infra
-USAGE
+Prerequisite:
+  claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
+EOF
 }
 
-install_plugin() {
-  local name="$1"
-  echo "--- ${name}@${MARKETPLACE}"
-  if claude plugin install "${name}@${MARKETPLACE}"; then
-    echo "  OK"
-  else
-    echo "  FAILED" >&2
-    fail=$((fail + 1))
-  fi
-  total=$((total + 1))
-  echo ""
+install_plugins() {
+  local plugins=("$@")
+  local success=0
+  local fail=0
+
+  for plugin in "${plugins[@]}"; do
+    echo "--- ${plugin}@${MARKETPLACE}"
+    if claude plugin install "${plugin}@${MARKETPLACE}"; then
+      success=$((success + 1))
+    else
+      fail=$((fail + 1))
+    fi
+    echo ""
+  done
+
+  echo "==> ${success} installed, ${fail} failed."
 }
 
-# --- parse args ---
-
+# --- Main ---
 if [[ $# -eq 0 ]]; then
   usage
   exit 0
 fi
 
-do_workflow=false
-do_infra=false
-do_stages=()
+# Ensure marketplace is registered
+if ! claude plugin marketplace list 2>/dev/null | grep -q "$MARKETPLACE"; then
+  echo "Marketplace '${MARKETPLACE}' not found. Adding..."
+  claude plugin marketplace add "https://github.com/corca-ai/claude-plugins.git"
+  echo ""
+fi
+
+# Collect plugins to install
+declare -A seen
+to_install=()
+
+add_plugins() {
+  for p in "$@"; do
+    if [[ -z "${seen[$p]:-}" ]]; then
+      seen[$p]=1
+      to_install+=("$p")
+    fi
+  done
+}
 
 for arg in "$@"; do
   case "$arg" in
-    --all)
-      do_workflow=true
-      do_infra=true
-      ;;
-    --workflow)
-      do_workflow=true
-      ;;
-    --infra)
-      do_infra=true
-      ;;
-    --context|--clarify|--plan|--implement|--reflect|--refactor)
-      do_stages+=("${arg#--}")
-      ;;
-    --help|-h)
-      usage
-      exit 0
-      ;;
-    *)
-      echo "Unknown flag: $arg" >&2
-      usage
-      exit 1
-      ;;
+    --all)        add_plugins "${ALL_PLUGINS[@]}" ;;
+    --workflow)   add_plugins "${ALL_WORKFLOW[@]}" ;;
+    --context)    add_plugins "${STAGE_1_CONTEXT[@]}" ;;
+    --clarify)    add_plugins "${STAGE_2_CLARIFY[@]}" ;;
+    --plan)       add_plugins "${STAGE_3_PLAN[@]}" ;;
+    --implement)  add_plugins "${STAGE_4_IMPLEMENT[@]}" ;;
+    --reflect)    add_plugins "${STAGE_5_REFLECT[@]}" ;;
+    --refactor)   add_plugins "${STAGE_6_REFACTOR[@]}" ;;
+    --infra)      add_plugins "${INFRA[@]}" ;;
+    -h|--help)    usage; exit 0 ;;
+    -*)           echo "Unknown flag: $arg"; usage; exit 1 ;;
+    *)            add_plugins "$arg" ;;
   esac
 done
 
-# --- ensure marketplace ---
-
-echo "==> Ensuring marketplace: ${MARKETPLACE}"
-if claude plugin marketplace update "$MARKETPLACE" 2>/dev/null; then
-  echo "  Marketplace updated."
-else
-  echo "  Marketplace not found, adding..."
-  claude plugin marketplace add "$MARKETPLACE_URL"
+if [[ ${#to_install[@]} -eq 0 ]]; then
+  echo "No plugins selected."
+  exit 0
 fi
+
+echo "==> Installing ${#to_install[@]} plugin(s): ${to_install[*]}"
 echo ""
-
-# --- build install list (deduplicated, ordered) ---
-
-declare -A seen
-plugins_to_install=()
-
-add_plugin() {
-  local name="$1"
-  if [[ -z "${seen[$name]:-}" ]]; then
-    seen[$name]=1
-    plugins_to_install+=("$name")
-  fi
-}
-
-# Workflow stages
-if [[ "$do_workflow" == "true" ]]; then
-  for stage in "${WORKFLOW_ORDER[@]}"; do
-    add_plugin "${STAGE_PLUGINS[$stage]}"
-  done
-fi
-
-# Individual stages
-for stage in "${do_stages[@]}"; do
-  add_plugin "${STAGE_PLUGINS[$stage]}"
-done
-
-# Infra
-if [[ "$do_infra" == "true" ]]; then
-  for p in "${INFRA_PLUGINS[@]}"; do
-    add_plugin "$p"
-  done
-fi
-
-# --- install ---
-
-total=0
-fail=0
-
-echo "==> Installing ${#plugins_to_install[@]} plugin(s)..."
-echo ""
-
-for plugin in "${plugins_to_install[@]}"; do
-  install_plugin "$plugin"
-done
-
-echo "==> Done. $((total - fail))/${total} installed successfully."
-if [[ $fail -gt 0 ]]; then
-  echo "  ${fail} failed. Check output above."
-fi
+install_plugins "${to_install[@]}"
 echo "Restart Claude Code for changes to take effect."

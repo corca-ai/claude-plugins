@@ -31,3 +31,11 @@ When 함수 내부 코드를 스크립트 scope로 추출할 때 → `local` 키
 - **Takeaway**: 샌드박스 환경에서 tracked 파일 삭제는 `git rm` 사용
 
 When 샌드박스에서 git-tracked 파일/디렉토리 삭제할 때 → `git rm -rf` 사용
+
+### marketplace.json `deprecated` 키 미지원
+
+- **Expected**: marketplace.json에 `"deprecated": true`를 넣으면 Claude Code가 인식
+- **Actual**: Claude Code 2.1.32 스키마 검증이 인식되지 않는 키를 거부 → marketplace add 실패
+- **Takeaway**: marketplace.json은 `name`, `source`, `description`, `keywords`만 허용. deprecation은 엔트리 자체를 제거 (gather-context가 slack-to-md 등을 흡수했을 때와 동일 패턴)
+
+When 플러그인 폐기 시 → marketplace.json에서 엔트리 자체를 제거 (소스 코드는 plugins/에 유지)
