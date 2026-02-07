@@ -56,34 +56,6 @@
       "source": "./plugins/prompt-logger",
       "description": "A hook that auto-logs every conversation turn to markdown files for retrospective analysis",
       "keywords": ["logging", "transcript", "prompt", "retrospective", "hook"]
-    },
-    {
-      "name": "suggest-tidyings",
-      "source": "./plugins/suggest-tidyings",
-      "description": "DEPRECATED — use refactor --code instead. Suggests safe refactoring opportunities based on Kent Beck's Tidy First? philosophy",
-
-      "keywords": ["refactoring", "tidying", "code-quality", "tidy-first"]
-    },
-    {
-      "name": "deep-clarify",
-      "source": "./plugins/deep-clarify",
-      "description": "DEPRECATED — use clarify v2 instead. Research-first requirement clarification with autonomous decision-making",
-
-      "keywords": ["requirements", "clarification", "research", "sub-agents", "autonomous"]
-    },
-    {
-      "name": "interview",
-      "source": "./plugins/interview",
-      "description": "DEPRECATED — use clarify v2 instead. Structured interviews to extract requirements, constraints, and design decisions",
-
-      "keywords": ["interview", "requirements", "discovery", "specification"]
-    },
-    {
-      "name": "web-search",
-      "source": "./plugins/web-search",
-      "description": "DEPRECATED — use gather-context v2 instead. Web search, code search, and URL content extraction via Tavily and Exa APIs",
-
-      "keywords": ["search", "web-search", "tavily", "exa", "code-search", "extract"]
     }
   ]
 }
