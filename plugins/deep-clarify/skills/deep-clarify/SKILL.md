@@ -24,7 +24,7 @@ about genuinely subjective decisions.
 
 ## Quick Start
 
-```
+```text
 /deep-clarify <requirement>
 ```
 
@@ -57,7 +57,7 @@ Launch two sub-agents **simultaneously** using the Task tool:
 
 #### Sub-agent A: Codebase Researcher
 
-```
+```yaml
 Task tool:
   subagent_type: general-purpose
   prompt: |
@@ -72,7 +72,7 @@ Task tool:
 
 #### Sub-agent B: Best Practice Researcher
 
-```
+```yaml
 Task tool:
   subagent_type: general-purpose
   prompt: |
@@ -130,7 +130,7 @@ If Tier 3 items exist, launch two advisory sub-agents **simultaneously**:
 
 #### Advisor α
 
-```
+```yaml
 Task tool:
   subagent_type: general-purpose
   prompt: |
@@ -149,7 +149,7 @@ Task tool:
 
 #### Advisor β
 
-```
+```yaml
 Task tool:
   subagent_type: general-purpose
   prompt: |

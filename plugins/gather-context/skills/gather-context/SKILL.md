@@ -26,7 +26,7 @@ Unified information acquisition — gather URLs, search the web, or explore loca
 
 ## Quick Reference
 
-```
+```text
 /gather-context <url>                  URL auto-detect → download to OUTPUT_DIR
 /gather-context <url1> <url2> ...      Multiple URLs
 /gather-context --search <query>       Web search (Tavily)
@@ -112,7 +112,7 @@ For `github.com` URLs, use the `gh` CLI to extract content as markdown.
 Save output to `{OUTPUT_DIR}/{type}-{owner}-{repo}-{number}.md`.
 
 **Template for PR/Issue** (pass to `--template`):
-```
+```text
 # {{.title}}
 State: {{.state}} | Author: {{.author.login}}
 
@@ -184,7 +184,7 @@ Explore the local codebase for a topic and save structured results.
 ### Execution
 
 1. Launch a sub-agent:
-   ```
+   ```text
    Task(subagent_type="general-purpose", prompt="Explore this codebase for: <query>. Use Glob, Grep, and Read to find relevant code, patterns, and architecture. Return a structured markdown summary with: ## Overview, ## Key Files, ## Code Patterns, ## Notable Details. Be thorough but concise.")
    ```
 2. Save sub-agent output to `{OUTPUT_DIR}/local-{sanitized-query}.md`
@@ -230,7 +230,7 @@ Examples:
 
 Print when no args or "help":
 
-```
+```text
 Gather Context — Unified Information Acquisition
 
 Usage:

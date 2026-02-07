@@ -22,7 +22,7 @@ Multi-mode code and skill review tool.
 
 ## Quick Reference
 
-```
+```text
 /refactor                        Quick scan all marketplace skills
 /refactor --code [branch]        Commit-based tidying (parallel sub-agents)
 /refactor --skill <name>         Deep review of a single skill
@@ -84,7 +84,7 @@ bash {SKILL_DIR}/scripts/tidy-target-commits.sh 5 [branch]
 
 For each commit hash, launch a **parallel sub-agent** using Task tool:
 
-```
+```yaml
 Task tool with subagent_type: general-purpose
 ```
 
@@ -148,7 +148,7 @@ Apply each criterion from review-criteria.md:
 
 Output a structured report:
 
-```
+```markdown
 ## Refactor Review: <name>
 
 ### Summary

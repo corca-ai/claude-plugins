@@ -24,7 +24,7 @@ Turn vague requirements into precise, actionable specifications.
 
 ## Quick Start
 
-```
+```text
 /clarify <requirement>          # Research-first (default)
 /clarify <requirement> --light  # Direct Q&A, no sub-agents
 ```
@@ -59,9 +59,9 @@ Launch two sub-agents **simultaneously** using the Task tool.
 **Path A — gather-context available** (check if `/gather-context` appears in
 available skills in the system prompt):
 
-#### Sub-agent A: Codebase Researcher
+#### Sub-agent A: Codebase Researcher (Path A)
 
-```
+```yaml
 Task tool:
   subagent_type: Explore
   prompt: |
@@ -74,9 +74,9 @@ Task tool:
     {list from Phase 1}
 ```
 
-#### Sub-agent B: Web Researcher
+#### Sub-agent B: Web Researcher (Path A)
 
-```
+```yaml
 Task tool:
   subagent_type: general-purpose
   prompt: |
@@ -93,9 +93,9 @@ Task tool:
 
 **Path B — gather-context NOT available** (fallback):
 
-#### Sub-agent A: Codebase Researcher
+#### Sub-agent A: Codebase Researcher (Path B)
 
-```
+```yaml
 Task tool:
   subagent_type: Explore
   prompt: |
@@ -106,9 +106,9 @@ Task tool:
     {list from Phase 1}
 ```
 
-#### Sub-agent B: Web Researcher
+#### Sub-agent B: Web Researcher (Path B)
 
-```
+```yaml
 Task tool:
   subagent_type: general-purpose
   prompt: |
@@ -158,7 +158,7 @@ Launch two advisory sub-agents **simultaneously**:
 
 #### Advisor α
 
-```
+```yaml
 Task tool:
   subagent_type: general-purpose
   model: haiku
@@ -177,7 +177,7 @@ Task tool:
 
 #### Advisor β
 
-```
+```yaml
 Task tool:
   subagent_type: general-purpose
   model: haiku
@@ -255,7 +255,7 @@ Read `{SKILL_DIR}/references/questioning-guide.md` for methodology.
 
 Loop using `AskUserQuestion`:
 
-```
+```text
 while ambiguities remain:
     pick most critical ambiguity
     ask with 2-4 concrete options

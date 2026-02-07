@@ -43,7 +43,7 @@ implementations, and constraints.
 
 Return a structured report. For each decision point:
 
-```
+```markdown
 ### Decision Point: {question}
 
 **Evidence found**: Yes / No / Partial

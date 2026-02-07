@@ -20,7 +20,7 @@ Call Tavily/Exa REST APIs via wrapper scripts for web search, code search, and U
 
 ## Commands
 
-```
+```text
 /web-search                         → Usage guide
 /web-search help                    → Usage guide
 /web-search <query>                 → General web search (Tavily)
@@ -77,7 +77,7 @@ Assess query complexity → set tokensNum:
 
 ## Usage Message (no args or "help")
 
-```
+```text
 Web Search Skill
 
 Usage:

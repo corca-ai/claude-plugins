@@ -95,7 +95,7 @@ Result: Campaign created with confirmation link
 ### Be Specific and Actionable
 
 ✅ **Good:**
-```
+```text
 Run `python scripts/validate.py --input {filename}` to check data format.
 If validation fails, common issues include:
 - Missing required fields (add them to the CSV)
@@ -103,13 +103,13 @@ If validation fails, common issues include:
 ```
 
 ❌ **Bad:**
-```
+```text
 Validate the data before proceeding.
 ```
 
 ### Reference Bundled Resources Clearly
 
-```
+```text
 Before writing queries, consult `references/api-patterns.md` for:
 - Rate limiting guidance
 - Pagination patterns

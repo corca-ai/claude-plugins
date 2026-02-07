@@ -42,7 +42,7 @@ You are assigned a side: **Advisor α** (first perspective) or **Advisor β**
 
 For each Tier 3 decision point:
 
-```
+```markdown
 ### {Decision Point}
 
 **Position**: {1-2 sentence statement of your perspective}

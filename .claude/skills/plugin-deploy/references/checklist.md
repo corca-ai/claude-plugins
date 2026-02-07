@@ -52,6 +52,16 @@ claude plugin update {name}@corca-plugins
 **Key features**: ...
 ```
 
+## Deprecation Checklist
+
+When a plugin is deprecated:
+
+- [ ] Set `"deprecated": true` in `plugin.json`
+- [ ] Remove entry from `marketplace.json`
+- [ ] Clear local plugin cache: `claude plugin uninstall {name}@corca-plugins`
+- [ ] Update README.md / README.ko.md — remove from overview table and detail section
+- [ ] Commit with message: `chore: deprecate {name} plugin`
+
 ## Edge Cases
 
 - **Plugin with scripts but no SKILL.md/hooks.json**: invalid — needs entry point

@@ -9,7 +9,7 @@ Conduct one-on-one interviews to extract requirements, constraints, and decision
 
 ## Invocation
 
-```
+```text
 /interview <topic> [--ref <path>] [--workspace <dir>]
 ```
 

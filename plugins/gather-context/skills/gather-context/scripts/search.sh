@@ -11,10 +11,18 @@ QUERY=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --topic)      TOPIC="$2"; shift 2 ;;
-    --time-range) TIME_RANGE="$2"; shift 2 ;;
-    --deep)       SEARCH_DEPTH="advanced"; shift ;;
-    *)            QUERY="$1"; shift ;;
+    --topic)
+      if [[ -z "${2:-}" || "$2" == --* ]]; then
+        echo "Error: --topic requires a value." >&2; exit 1
+      fi
+      TOPIC="$2"; shift 2 ;;
+    --time-range)
+      if [[ -z "${2:-}" || "$2" == --* ]]; then
+        echo "Error: --time-range requires a value." >&2; exit 1
+      fi
+      TIME_RANGE="$2"; shift 2 ;;
+    --deep) SEARCH_DEPTH="advanced"; shift ;;
+    *)      QUERY="$1"; shift ;;
   esac
 done
 
@@ -72,6 +80,7 @@ fi
 TMPFILE=$(mktemp)
 trap 'rm -f "$TMPFILE"' EXIT INT TERM
 
+set +e
 HTTP_CODE=$(curl -s --max-time 30 --connect-timeout 10 \
   -X POST "https://api.tavily.com/search" \
   -H "Content-Type: application/json" \
@@ -79,6 +88,7 @@ HTTP_CODE=$(curl -s --max-time 30 --connect-timeout 10 \
   -d "$PAYLOAD" \
   -o "$TMPFILE" -w "%{http_code}")
 CURL_EXIT=$?
+set -e
 
 # --- Check errors ---
 if [ "$CURL_EXIT" -ne 0 ] || [ "$HTTP_CODE" = "000" ]; then

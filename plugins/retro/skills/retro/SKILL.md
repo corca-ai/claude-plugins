@@ -22,7 +22,7 @@ Produces `retro.md` alongside `plan.md` and `lessons.md` in the session's prompt
 
 ## Invocation
 
-```
+```text
 /retro [path]            # adaptive (light by default)
 /retro --deep [path]     # full analysis with expert lens
 ```

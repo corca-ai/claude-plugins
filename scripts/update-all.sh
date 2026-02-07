@@ -39,7 +39,11 @@ if [[ -n "$current_branch" && "$current_branch" != "main" && "$current_branch" !
   echo "⚠  Current branch is '$current_branch', not main."
   echo "   Marketplace update pulls from the default branch — local changes on this branch won't be reflected."
   echo "   Merge to main first, or press Enter to continue anyway."
-  read -r
+  if [[ -t 0 ]]; then
+    read -r
+  else
+    echo "   (non-interactive shell — continuing automatically)"
+  fi
 fi
 
 echo "==> Updating marketplace: ${MARKETPLACE}"

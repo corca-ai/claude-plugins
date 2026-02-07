@@ -4,7 +4,7 @@ Logic for routing and enriching search queries before calling scripts. Applied t
 
 ## Routing Decision Tree
 
-```
+```text
 Is query prefixed with "code" or --search code?
   YES → code-search.sh (Exa)
   NO  → Does query match code context keywords?

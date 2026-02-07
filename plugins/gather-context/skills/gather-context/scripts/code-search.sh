@@ -1,5 +1,5 @@
 #!/bin/bash
-# Exa code context search — called by the web-search skill
+# Exa code context search — called by the gather-context skill
 # Usage: code-search.sh [--tokens NUM] "<query>"
 set -euo pipefail
 
@@ -9,8 +9,12 @@ QUERY=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --tokens) TOKENS_NUM="$2"; shift 2 ;;
-    *)        QUERY="$1"; shift ;;
+    --tokens)
+      if [[ -z "${2:-}" || "$2" == --* ]]; then
+        echo "Error: --tokens requires a numeric value." >&2; exit 1
+      fi
+      TOKENS_NUM="$2"; shift 2 ;;
+    *)  QUERY="$1"; shift ;;
   esac
 done
 
@@ -57,6 +61,7 @@ fi
 TMPFILE=$(mktemp)
 trap 'rm -f "$TMPFILE"' EXIT INT TERM
 
+set +e
 HTTP_CODE=$(curl -s --max-time 30 --connect-timeout 10 \
   -X POST "https://api.exa.ai/context" \
   -H "Content-Type: application/json" \
@@ -64,6 +69,7 @@ HTTP_CODE=$(curl -s --max-time 30 --connect-timeout 10 \
   -d "$PAYLOAD" \
   -o "$TMPFILE" -w "%{http_code}")
 CURL_EXIT=$?
+set -e
 
 # --- Check errors ---
 if [ "$CURL_EXIT" -ne 0 ] || [ "$HTTP_CODE" = "000" ]; then

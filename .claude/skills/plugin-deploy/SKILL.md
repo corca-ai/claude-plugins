@@ -22,7 +22,7 @@ Automate the plugin lifecycle after creation or modification. Ensures no step is
 
 ## Commands
 
-```
+```text
 /plugin-deploy <name>              Full lifecycle
 /plugin-deploy <name> --new        Force new-plugin flow
 /plugin-deploy <name> --dry-run    Check only, no modifications
@@ -55,7 +55,7 @@ Process each `gaps[]` item:
 |-----|--------|
 | Version not bumped (`version_match: true`) | AskUserQuestion: patch/minor/major → edit plugin.json |
 | marketplace.json mismatch/missing | Edit marketplace.json (add entry or sync version) |
-| Deprecated flag mismatch | Sync deprecated flag between marketplace.json and plugin.json |
+| Deprecated but still in marketplace | Remove entry from marketplace.json; clear local plugin cache |
 | README.md missing mention | Add table row + detail section (EN), same for README.ko.md (KO) |
 | AI_NATIVE not mentioning (new only) | Evaluate fit → suggest link if appropriate, skip if not |
 | No entry point | Error — stop |
@@ -80,7 +80,7 @@ Report: plugin name, type, version change, files modified, remaining manual step
 
 ## Usage Message
 
-```
+```text
 Plugin Deploy — Automate the plugin lifecycle
 
 Usage:

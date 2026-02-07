@@ -35,7 +35,7 @@ All notifications from a single session are grouped into one Slack thread, keepi
    - **Note**: Do NOT use your self-DM channel ID — use the DM channel between you and the bot
 
 6. **Invite the bot** to the channel (skip for DM):
-   ```
+   ```text
    /invite @Claude Code
    ```
 
@@ -67,7 +67,7 @@ Restart Claude Code after installing.
 
 ### Message flow
 
-```
+```text
 User enters first prompt
   → track-user-input.sh posts parent message to Slack
   → Saves message ts for threading

@@ -85,26 +85,18 @@ if [[ "$in_marketplace" == "true" && -n "$plugin_json_version" ]]; then
   fi
 fi
 
-# --- 3b. Deprecated flag consistency ---
-if [[ "$in_marketplace" == "true" ]]; then
-  marketplace_deprecated=false
-  plugin_json_deprecated=false
+# --- 3b. Deprecated plugin still in marketplace ---
+plugin_json_deprecated=false
+if [[ -f "$PLUGIN_JSON" ]]; then
   if command -v jq &>/dev/null; then
-    marketplace_deprecated=$(jq -r --arg name "$PLUGIN_NAME" '.plugins[] | select(.name == $name) | .deprecated // false' "$MARKETPLACE_JSON" 2>/dev/null || echo "false")
-    if [[ -f "$PLUGIN_JSON" ]]; then
-      plugin_json_deprecated=$(jq -r '.deprecated // false' "$PLUGIN_JSON" 2>/dev/null || echo "false")
-    fi
-  else
-    if grep -A5 "\"name\": \"$PLUGIN_NAME\"" "$MARKETPLACE_JSON" | grep -q '"deprecated": true'; then
-      marketplace_deprecated=true
-    fi
-    if [[ -f "$PLUGIN_JSON" ]] && grep -q '"deprecated": true' "$PLUGIN_JSON"; then
-      plugin_json_deprecated=true
-    fi
+    plugin_json_deprecated=$(jq -r '.deprecated // false' "$PLUGIN_JSON" 2>/dev/null || echo "false")
+  elif grep -q '"deprecated": true' "$PLUGIN_JSON" 2>/dev/null; then
+    plugin_json_deprecated=true
   fi
-  if [[ "$marketplace_deprecated" != "$plugin_json_deprecated" ]]; then
-    gaps+=("Deprecated flag mismatch: marketplace.json=$marketplace_deprecated, plugin.json=$plugin_json_deprecated")
-  fi
+fi
+
+if [[ "$plugin_json_deprecated" == "true" && "$in_marketplace" == "true" ]]; then
+  gaps+=("Deprecated plugin still listed in marketplace.json — remove entry and clear cache")
 fi
 
 # --- 4. README checks ---

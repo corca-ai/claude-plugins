@@ -6,7 +6,7 @@ Before writing any code, identify 2–3 concrete use cases your skill should ena
 
 **Good use case definition:**
 
-```
+```text
 Use Case: Project Sprint Planning
 Trigger: User says "help me plan this sprint" or "create sprint tasks"
 Steps:

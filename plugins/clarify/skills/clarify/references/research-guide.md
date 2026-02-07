@@ -39,7 +39,7 @@ report what you find.
 
 ### Output Format
 
-```
+```text
 ### Decision Point: {question}
 
 **Evidence found**: Yes / No / Partial
@@ -92,9 +92,9 @@ decisions — you report what you find.
 - If a decision point is too project-specific for general best practices
   to apply, say so explicitly.
 
-### Output Format
+### Output Format (Web Research)
 
-```
+```text
 ### Decision Point: {question}
 
 **Sources found**:

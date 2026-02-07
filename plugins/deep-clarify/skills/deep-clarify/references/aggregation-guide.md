@@ -60,7 +60,7 @@ Classify such items as Tier 3 and present both sides.
 
 ### Decisions Summary
 
-```
+```markdown
 ## Agent Decisions
 
 | # | Decision Point | Tier | Decision | Evidence |
@@ -77,7 +77,7 @@ Classify such items as Tier 3 and present both sides.
 
 ### Clarified Spec (after all decisions are made)
 
-```
+```markdown
 ## Clarified Requirement
 
 **Goal**: {precise description}

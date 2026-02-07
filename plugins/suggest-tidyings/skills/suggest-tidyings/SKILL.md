@@ -26,7 +26,7 @@ Run the script to get recent non-tidying commits:
 
 For each commit hash, launch a **parallel sub-agent** using Task tool:
 
-```
+```yaml
 Task tool with subagent_type: general-purpose
 ```
 

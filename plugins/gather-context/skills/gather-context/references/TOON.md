@@ -53,7 +53,7 @@ rows[3]{"","",Person1,Person2}:
 ```
 
 Hierarchical labels (empty cells inherit from above):
-```
+```csv
 MainTopic,,Person1,Person2
 ,SubTopic,Opinion1,Opinion2
 ,,Opinion3,

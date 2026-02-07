@@ -2,7 +2,7 @@
 
 ## File Structure
 
-```
+```text
 your-skill-name/
 ├── SKILL.md              # Required - main skill file
 ├── scripts/              # Optional - executable code

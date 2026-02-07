@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-REPO_ROOT="${1:-$(git rev-parse --show-toplevel 2>/dev/null || cd "$(dirname "$0")/../../../../.." && pwd)}"
+REPO_ROOT="${1:-$(git rev-parse --show-toplevel 2>/dev/null || { cd "$(dirname "$0")/../../../../.." && pwd; })}"
 
 # Collect results
 results=()
@@ -133,10 +133,12 @@ print(len(d.get('description', '')))
   fi
 
   # Add Anthropic flags
-  for af in "${anthropic_flags[@]}"; do
-    flags+=("anthropic: $af")
-    warn_count=$((warn_count + 1))
-  done
+  if [[ ${#anthropic_flags[@]} -gt 0 ]]; then
+    for af in "${anthropic_flags[@]}"; do
+      flags+=("anthropic: $af")
+      warn_count=$((warn_count + 1))
+    done
+  fi
 
   # Build JSON for this skill
   local flags_json="["

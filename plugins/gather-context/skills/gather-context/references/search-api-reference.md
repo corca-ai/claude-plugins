@@ -23,14 +23,14 @@ Only check the key required for the invoked subcommand. Do not require both keys
 ### Setup Instructions (for user-facing messages)
 
 **Tavily** (web search + extract):
-```
+```text
 Get your API key: https://app.tavily.com/home
 Then add to ~/.claude/.env or ~/.zshrc:
   export TAVILY_API_KEY="your-key-here"
 ```
 
 **Exa** (code search):
-```
+```text
 Get your API key: https://dashboard.exa.ai/api-keys
 Then add to ~/.claude/.env or ~/.zshrc:
   export EXA_API_KEY="your-key-here"

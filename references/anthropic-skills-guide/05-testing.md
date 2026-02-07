@@ -23,7 +23,7 @@ Test cases:
 
 Example test suite:
 
-```
+```text
 Should trigger:
 - "Help me set up a new ProjectHub workspace"
 - "I need to create a project in ProjectHub"
@@ -47,7 +47,7 @@ Test cases:
 
 Example:
 
-```
+```text
 Test: Create project with 5 tasks
 Given: Project name "Q4 Planning", 5 task descriptions
 When: Skill executes workflow
@@ -93,7 +93,7 @@ The skill-creator skill — available in Claude.ai via plugin directory or downl
 - Example: "Use the issues & solution identified in this chat to improve how the skill handles [specific edge case]"
 
 **To use:**
-```
+```text
 "Use the skill-creator skill to help me build a skill for [your use case]"
 ```
 

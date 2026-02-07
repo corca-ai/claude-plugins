@@ -46,7 +46,7 @@ For each one, research what the industry consensus and expert opinions say.
 
 Return a structured report. For each decision point:
 
-```
+```markdown
 ### Decision Point: {question}
 
 **Sources found**:

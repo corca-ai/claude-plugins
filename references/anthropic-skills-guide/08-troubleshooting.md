@@ -121,7 +121,7 @@ name: my-cool-skill
    - Repeat key points if needed
 
 3. **Ambiguous language**
-   ```
+   ```text
    # Bad
    Make sure to validate things properly
 
