@@ -145,6 +145,7 @@ retro.md is session-specific. Persist findings to project-level documents:
 
 - **Context (Section 1)**: Offer to append new context to project-context.md (or create it)
 - **CLAUDE.md (Section 2)**: If suggestions exist, AskUserQuestion "Apply?" — edit on approval
+- **Process improvements (Section 3)**: If waste reduction identifies repeatable process improvements (not one-off observations), suggest updating CLAUDE.md, protocol docs, or project-context.md. Right-placement check applies.
 - **Actionable improvements (Section 7)**: If concrete improvements identified, AskUserQuestion "Implement now?" to prevent findings from becoming stale
 
 ### 8. Post-Retro Discussion
