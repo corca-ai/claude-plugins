@@ -293,7 +293,7 @@ CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE=20                # Truncation threshold in 
 
 ## Removed Plugins
 
-The following plugins were removed from the marketplace. Source code remains in `plugins/` for reference.
+The following plugins were removed from the marketplace. Source code is available in commit `238f82d` for reference.
 
 ### Removed in v2.0.0
 

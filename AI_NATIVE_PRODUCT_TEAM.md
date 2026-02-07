@@ -35,11 +35,11 @@ We distinguish between what AI does well and where humans must be involved. Fina
 
 A cycle of **research → spec writing → spec refinement → spec review → implementation instruction → retrospective → code review** becomes established.
 
-1. **Research**: information needed to write a spec is already prepared in an LLM-friendly form, or tools exist to collect it (MCP, scripts, custom prompts, etc.). For example, with [gather-context](./plugins/gather-context) you can provide a URL and it auto-detects the service and gathers Google Docs/Slack/Notion content via built-in scripts; with [web-search](./plugins/web-search) you can gather external information via web search and code/technical search. We provide these base materials to a research agent and receive a report.
+1. **Research**: information needed to write a spec is already prepared in an LLM-friendly form, or tools exist to collect it (MCP, scripts, custom prompts, etc.). For example, with [gather-context](./plugins/gather-context) you can provide a URL and it auto-detects the service and gathers Google Docs/Slack/Notion content via built-in scripts; with `gather-context --search` you can gather external information via web search and code/technical search. We provide these base materials to a research agent and receive a report.
 
 2. **Spec writing**: we process the report into a spec and write it in Jira tickets/GitHub issues (ideally as pair work).
 
-3. **Spec refinement**: tools that refine the spec (e.g., [Clarify](./plugins/clarify), [Interview](./plugins/interview)) are available. We run them locally or automate them via GitHub Actions, and (ideally with teammates) iterate with the tool to sharpen the spec.
+3. **Spec refinement**: tools that refine the spec (e.g., [Clarify](./plugins/clarify)) are available. We run them locally or automate them via GitHub Actions, and (ideally with teammates) iterate with the tool to sharpen the spec.
 
 4. **Spec review**: we review the refined spec and produce a final version. If we lack the ability to review it ourselves, we proactively learn. With AI and with teammates, we deepen our understanding of domain knowledge, the codebase, and the rationale behind decisions.
 
@@ -84,7 +84,7 @@ New teammates who are unfamiliar with AI-native ways of working learn via pair p
 
 ### Invest in code quality
 
-Everyone actively invests in the main product's code quality. We understand that higher-quality codebases make coding agents work better. Code quality metrics are managed on dashboards and establish a steadily improving practice (e.g., using the [tidying](./plugins/suggest-tidyings) skill daily). With strong E2E tests, large refactors are not scary.
+Everyone actively invests in the main product's code quality. We understand that higher-quality codebases make coding agents work better. Code quality metrics are managed on dashboards and establish a steadily improving practice (e.g., using the [refactor](./plugins/refactor) skill daily). With strong E2E tests, large refactors are not scary.
 
 ### Fix papercuts
 

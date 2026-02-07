@@ -20,7 +20,7 @@ plugins/{name}/
     ├── hooks.json
     └── scripts/
 
-# Hybrid (e.g., web-search, gather-context)
+# Hybrid (e.g., gather-context)
 plugins/{name}/
 ├── .claude-plugin/plugin.json
 ├── hooks/

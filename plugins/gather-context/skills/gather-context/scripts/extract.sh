@@ -1,5 +1,5 @@
 #!/bin/bash
-# Tavily URL content extraction — called by the web-search skill
+# Tavily URL content extraction — called by the gather-context skill
 # Usage: extract.sh "<url>" [--query "<relevance_query>"]
 set -euo pipefail
 
@@ -27,7 +27,7 @@ fi
 # --- Validate URL ---
 if [[ ! "$URL" =~ ^https?:// ]]; then
   echo "Error: Invalid URL. Must start with http:// or https://" >&2
-  echo "Did you mean: /web-search $URL?" >&2
+  echo "Did you mean: /gather-context --search $URL?" >&2
   exit 1
 fi
 

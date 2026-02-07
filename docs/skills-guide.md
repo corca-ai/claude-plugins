@@ -32,7 +32,7 @@ In this marketplace, skills are located within `plugins/{name}/skills/{name}/`.
 ## Skill Categories
 
 - **Instruction-only** (plan-and-lessons, retro): SKILL.md alone — no execution needed
-- **Execution-heavy** (web-search, gather-context): SKILL.md + `scripts/`
+- **Execution-heavy** (gather-context): SKILL.md + `scripts/`
 - **Hybrid** (clarify): SKILL.md with occasional Bash
 
 **Execution-heavy skills** (API calls, file processing) should delegate to wrapper scripts. SKILL.md handles intent analysis and parameter decisions; scripts handle reliable execution. This matches the hook pattern (both use scripts) and reduces context cost.

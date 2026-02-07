@@ -1,5 +1,5 @@
 #!/bin/bash
-# Tavily web search — called by the web-search skill
+# Tavily web search — called by the gather-context skill
 # Usage: search.sh [--topic news|finance] [--time-range day|week|month|year] [--deep] "<query>"
 set -euo pipefail
 

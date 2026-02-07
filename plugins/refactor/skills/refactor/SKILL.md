@@ -270,6 +270,16 @@ Check alignment between:
 
 Present findings as a prioritized list of inconsistencies with suggested fixes.
 
+### 5. Document Design Quality
+
+Read `{SKILL_DIR}/references/docs-criteria.md` Section 5 and evaluate:
+- Orphaned documents unreachable from entry points
+- Circular references or deep navigation paths (>3 hops)
+- Inline overload (substantive content that should be a separate doc)
+- Auto-generated files committed to git
+- Non-obvious decisions lacking documented rationale
+- Self-evident instructions wasting reader attention
+
 ---
 
 ## References
