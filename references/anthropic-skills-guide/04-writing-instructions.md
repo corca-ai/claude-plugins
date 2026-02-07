@@ -46,7 +46,8 @@ After the frontmatter, write the actual instructions in Markdown.
 
 Adapt this template for your skill. Replace bracketed sections with your specific content.
 
-```markdown
+<!-- markdownlint-disable MD040 -->
+````
 ---
 name: your-skill
 description: [...]
@@ -88,7 +89,8 @@ Result: Campaign created with confirmation link
 **Solution:** [How to fix]
 
 (Add more error cases as needed)
-```
+````
+<!-- markdownlint-enable MD040 -->
 
 ## Best Practices for Instructions
 

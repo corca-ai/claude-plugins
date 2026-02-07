@@ -27,9 +27,9 @@ claude plugin update <plugin-name>@corca-plugins   # 기존 플러그인 업데�
 
 또는 설치 스크립트를 사용하여 카테고리별로 설치할 수 있습니다:
 ```bash
-bash scripts/install.sh --all        # 전체 8개 플러그인
+bash scripts/install.sh --all        # 전체 9개 플러그인
 bash scripts/install.sh --workflow   # 워크플로우 단계 1-6만
-bash scripts/install.sh --infra     # attention-hook + prompt-logger
+bash scripts/install.sh --infra     # attention-hook + prompt-logger + markdown-guard
 bash scripts/install.sh --context --clarify  # 단계 조합 가능
 ```
 
@@ -39,7 +39,7 @@ bash scripts/update-all.sh
 ```
 
 터미널 대신 Claude Code 내에서도 동일한 작업이 가능합니다:
-```
+```text
 /plugin marketplace add corca-ai/claude-plugins
 /plugin marketplace update
 ```
@@ -56,6 +56,7 @@ bash scripts/update-all.sh
 | [refactor](#refactor) | Skill | 6. 리팩토링 | 다중 모드 코드/스킬 리뷰: 퀵 스캔, 심층 리뷰, 티디잉, 문서 검사 |
 | [attention-hook](#attention-hook) | Hook | 인프라 | 대기 상태일 때 Slack 알림 |
 | [prompt-logger](#prompt-logger) | Hook | 인프라 | 대화 턴을 마크다운으로 자동 기록 (회고 분석용) |
+| [markdown-guard](#markdown-guard) | Hook | 인프라 | Write/Edit 후 마크다운 검증 — 린트 위반 시 자동 수정 유도 |
 
 ## Skills
 
@@ -290,6 +291,23 @@ CLAUDE_CORCA_PROMPT_LOGGER_DIR="/custom/path"        # 출력 디렉토리 (기�
 CLAUDE_CORCA_PROMPT_LOGGER_ENABLED=false              # 로깅 비활성화 (기본값: true)
 CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE=20                # 축약 임계값 (줄 수, 기본값: 10)
 ```
+
+### [markdown-guard](plugins/markdown-guard/hooks/hooks.json)
+
+**설치**: `claude plugin install markdown-guard@corca-plugins` | **갱신**: `claude plugin update markdown-guard@corca-plugins`
+
+모든 Write/Edit 작업 후 마크다운 파일을 검증하는 PostToolUse 훅입니다. `markdownlint-cli2`가 위반 사항(코드 펜스 언어 누락, 제목 주변 빈 줄 누락 등)을 감지하면 작업을 차단하고 이슈를 보고하여 Claude가 즉시 자체 수정할 수 있게 합니다.
+
+**동작 방식**:
+- `PostToolUse` → `Write|Edit` 매처(정규식)로 마크다운 쓰기를 가로챔
+- 작성된 파일에 `npx markdownlint-cli2` 실행 (`.markdownlint.json` 설정 적용)
+- 위반 발견 시: 린트 출력 내용과 함께 차단
+- 정상 시: 조용히 통과
+
+**주의사항**:
+- `.md` 파일이 아니거나 `prompt-logs/` 경로는 자동으로 건너뜀
+- `npx`나 `markdownlint-cli2`가 없으면 우아하게 건너뜀
+- `markdownlint-cli2` 필요 (`npx`로 자동 설치)
 
 ## 삭제된 플러그인
 

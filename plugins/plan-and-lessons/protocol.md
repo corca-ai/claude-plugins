@@ -25,7 +25,8 @@ Determine the path from the user's request. If the user specifies a path, use it
 
 **Success Criteria** — BDD-style acceptance tests using Given/When/Then:
 
-```markdown
+<!-- markdownlint-disable MD040 -->
+````
 ## Success Criteria
 
 ```gherkin
@@ -33,7 +34,8 @@ Given [context]
 When [action]
 Then [expected outcome]
 ```
-```
+````
+<!-- markdownlint-enable MD040 -->
 
 **Deferred Actions** — requests received during plan mode that cannot be handled immediately:
 

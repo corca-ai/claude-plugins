@@ -68,3 +68,4 @@ Structural health of the documentation graph. Reference: [Software project docum
 | Auto-generated files in git | Files that can be regenerated (build output, compiled docs) are version-controlled |
 | Undocumented non-obvious decisions | Non-obvious technical choices (e.g., "no Tailwind", "no mock objects") lack explicit rationale anywhere in docs |
 | Obvious instructions | Docs include self-evident guidance (e.g., "write clean code", "follow best practices") that wastes reader attention |
+| Bare code fences | Code blocks missing language specifier (` ```bash `, ` ```text `, etc.) — run `npx markdownlint-cli2` to verify |

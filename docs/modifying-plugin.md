@@ -54,7 +54,7 @@ Plugins are copied to cache on installation, so you must reinstall after making 
 ## 4. Deploy
 
 Once modifications are complete, commit & push. Inform users as follows:
-```
+```text
 The plugin has been updated. To apply:
 1. /plugin marketplace update
 2. /plugin install <plugin-name>@corca-plugins

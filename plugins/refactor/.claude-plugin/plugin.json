@@ -1,7 +1,7 @@
 {
   "name": "refactor",
   "description": "Multi-mode code and skill review: quick scan, deep skill review, holistic cross-plugin analysis, commit-based tidying, and docs consistency check",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "author": {
     "name": "Corca",
     "url": "https://www.corca.ai/"

@@ -104,6 +104,7 @@ Note: skill-creator helps you design and refine skills but does not execute auto
 Skills are living documents. Plan to iterate based on:
 
 ### Undertriggering Signals
+
 - Skill doesn't load when it should
 - Users manually enabling it
 - Support questions about when to use it
@@ -111,6 +112,7 @@ Skills are living documents. Plan to iterate based on:
 **Solution:** Add more detail and nuance to the description — this may include keywords particularly for technical terms.
 
 ### Overtriggering Signals
+
 - Skill loads for irrelevant queries
 - Users disabling it
 - Confusion about purpose
@@ -118,6 +120,7 @@ Skills are living documents. Plan to iterate based on:
 **Solution:** Add negative triggers, be more specific.
 
 ### Execution Issues
+
 - Inconsistent results
 - API call failures
 - User corrections needed

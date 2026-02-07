@@ -4,7 +4,7 @@ Quick reference for adding and modifying plugins. For full details, see [adding-
 
 ## Directory Patterns
 
-```
+```text
 # Skill-only (e.g., clarify, retro)
 plugins/{name}/
 ├── .claude-plugin/plugin.json

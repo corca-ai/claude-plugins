@@ -77,21 +77,25 @@ Flag mismatches: e.g., a fragile deployment script described only in prose (need
 Check alignment with Claude Code plugin best practices:
 
 ### Folder naming
+
 - Plugin folder must use kebab-case (e.g., `gather-context`, not `gatherContext` or `gather_context`)
 - Skill folder under `skills/` must also use kebab-case
 
 ### SKILL.md metadata
+
 - Frontmatter must contain only `name`, `description`, and optionally `allowed-tools`
 - No XML tags in frontmatter values
 - `name` must match the skill folder name
 
 ### Description quality
+
 - Description must be ≤ 1024 characters
 - Should follow the pattern: [What it does] + [When to use it] + [Key capabilities]
 - Must include trigger phrases (e.g., "Use when user says...")
 - Should differentiate from similar skills
 
 ### Composability
+
 - Skills should not duplicate functionality available in other installed skills
 - Cross-skill references should use defensive checks (gate on file/directory existence)
 - Output format should be consumable by other skills when applicable

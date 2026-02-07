@@ -27,9 +27,9 @@ Restart Claude Code after installing/updating for changes to take effect.
 
 Or install by category using the installer script:
 ```bash
-bash scripts/install.sh --all        # all 8 plugins
+bash scripts/install.sh --all        # all 9 plugins
 bash scripts/install.sh --workflow   # workflow stages 1-6 only
-bash scripts/install.sh --infra     # attention-hook + prompt-logger
+bash scripts/install.sh --infra     # attention-hook + prompt-logger + markdown-guard
 bash scripts/install.sh --context --clarify  # combine stages
 ```
 
@@ -39,7 +39,7 @@ bash scripts/update-all.sh
 ```
 
 You can do the same from inside Claude Code (instead of your terminal):
-```
+```text
 /plugin marketplace add corca-ai/claude-plugins
 /plugin marketplace update
 ```
@@ -56,6 +56,7 @@ You can do the same from inside Claude Code (instead of your terminal):
 | [refactor](#refactor) | Skill | 6. Refactor | Multi-mode code and skill review: quick scan, deep review, tidying, docs check |
 | [attention-hook](#attention-hook) | Hook | Infra | Send a Slack notification when idle/waiting |
 | [prompt-logger](#prompt-logger) | Hook | Infra | Auto-log conversation turns to markdown for retrospective analysis |
+| [markdown-guard](#markdown-guard) | Hook | Infra | Validate markdown after Write/Edit — lint violations trigger self-correction |
 
 ## Skills
 
@@ -290,6 +291,23 @@ CLAUDE_CORCA_PROMPT_LOGGER_DIR="/custom/path"        # Output directory (default
 CLAUDE_CORCA_PROMPT_LOGGER_ENABLED=false              # Disable logging (default: true)
 CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE=20                # Truncation threshold in lines (default: 10)
 ```
+
+### [markdown-guard](plugins/markdown-guard/hooks/hooks.json)
+
+**Install**: `claude plugin install markdown-guard@corca-plugins` | **Update**: `claude plugin update markdown-guard@corca-plugins`
+
+A PostToolUse hook that validates markdown files after every Write or Edit operation. When `markdownlint-cli2` detects violations (bare code fences, missing blank lines around headings, etc.), the hook blocks the operation and reports the issues so Claude can self-correct immediately.
+
+**How it works**:
+- Uses a `PostToolUse` → `Write|Edit` matcher (regex) to intercept markdown writes
+- Runs `npx markdownlint-cli2` on the written file (respects `.markdownlint.json` config)
+- If violations found: blocks with a reason containing the lint output
+- If clean: passes silently
+
+**Notes**:
+- Skips non-`.md` files and `prompt-logs/` paths automatically
+- Gracefully skips if `npx` or `markdownlint-cli2` is not available
+- Requires `markdownlint-cli2` (installed automatically via `npx`)
 
 ## Removed Plugins
 

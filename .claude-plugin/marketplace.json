@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "A collection of Claude Code plugins for AI-Native Product Teams",
-    "version": "2.0.0"
+    "version": "2.1.0"
   },
   "plugins": [
     {
@@ -56,6 +56,12 @@
       "source": "./plugins/prompt-logger",
       "description": "A hook that auto-logs every conversation turn to markdown files for retrospective analysis",
       "keywords": ["logging", "transcript", "prompt", "retrospective", "hook"]
+    },
+    {
+      "name": "markdown-guard",
+      "source": "./plugins/markdown-guard",
+      "description": "A hook that validates markdown files after Write/Edit — reports lint violations so Claude self-corrects",
+      "keywords": ["markdown", "lint", "quality", "hook", "guard"]
     }
   ]
 }

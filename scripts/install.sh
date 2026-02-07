@@ -10,7 +10,7 @@
 #   install.sh --implement            Stage 4: smart-read
 #   install.sh --reflect              Stage 5: retro
 #   install.sh --refactor             Stage 6: refactor
-#   install.sh --infra                Install infra plugins (attention-hook, prompt-logger)
+#   install.sh --infra                Install infra plugins (attention-hook, prompt-logger, markdown-guard)
 #   install.sh <name> [<name>...]     Install specific plugin(s) by name
 #
 # Prerequisite: marketplace must be added first:
@@ -27,7 +27,7 @@ STAGE_3_PLAN=(plan-and-lessons)
 STAGE_4_IMPLEMENT=(smart-read)
 STAGE_5_REFLECT=(retro)
 STAGE_6_REFACTOR=(refactor)
-INFRA=(attention-hook prompt-logger)
+INFRA=(attention-hook prompt-logger markdown-guard)
 
 ALL_WORKFLOW=("${STAGE_1_CONTEXT[@]}" "${STAGE_2_CLARIFY[@]}" "${STAGE_3_PLAN[@]}" "${STAGE_4_IMPLEMENT[@]}" "${STAGE_5_REFLECT[@]}" "${STAGE_6_REFACTOR[@]}")
 ALL_PLUGINS=("${ALL_WORKFLOW[@]}" "${INFRA[@]}")
@@ -46,7 +46,7 @@ Usage:
   install.sh --implement            Stage 4: smart-read
   install.sh --reflect              Stage 5: retro
   install.sh --refactor             Stage 6: refactor
-  install.sh --infra                Infra: attention-hook, prompt-logger
+  install.sh --infra                Infra: attention-hook, prompt-logger, markdown-guard
   install.sh <name> [<name>...]     Install specific plugin(s) by name
 
 Flags can be combined: install.sh --context --clarify --infra

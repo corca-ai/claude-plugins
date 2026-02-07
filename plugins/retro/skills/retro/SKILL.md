@@ -222,3 +222,4 @@ Write retro.md in the user's language. Detect from conversation, not from this s
 7. Expert Lens (Section 5) is deep-mode only — in light mode, output a one-line pointer to `--deep`
 8. Learning Resources (Section 6) is deep-mode only — in light mode, output a one-line pointer to `--deep`
 9. Section 7 always scans installed skills first, before suggesting external skill discovery
+10. When writing code fences in retro.md or any markdown output, always include a language specifier (`bash`, `json`, `yaml`, `text`, `markdown`, etc.). Never use bare code fences.

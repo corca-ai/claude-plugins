@@ -62,6 +62,10 @@ When a plugin is deprecated:
 - [ ] Update README.md / README.ko.md — remove from overview table and detail section
 - [ ] Commit with message: `chore: deprecate {name} plugin`
 
+## Markdown Quality
+
+- When adding code blocks to README or other markdown files, always include a language specifier on code fences (`bash`, `json`, `text`, `yaml`, etc.). Never use bare `` ``` ``.
+
 ## Edge Cases
 
 - **Plugin with scripts but no SKILL.md/hooks.json**: invalid — needs entry point

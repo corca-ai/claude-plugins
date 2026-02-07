@@ -2,7 +2,7 @@
 
 ## Skill Structure
 
-```
+```text
 .claude/skills/{skill-name}/
 ├── SKILL.md              # Required. Core instructions only (<500 lines)
 ├── references/           # Optional. Detailed docs
@@ -43,7 +43,7 @@ In this marketplace, skills are located within `plugins/{name}/skills/{name}/`.
 
 For skills distributed via [corca-ai/claude-plugins](https://github.com/corca-ai/claude-plugins):
 
-```
+```text
 CLAUDE_CORCA_<SKILL_NAME>_<SETTING>
 ```
 
