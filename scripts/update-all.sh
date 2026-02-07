@@ -33,6 +33,15 @@ if [[ ! -f "$SETTINGS_FILE" ]]; then
   exit 1
 fi
 
+# Warn if not on main branch (marketplace update pulls from default branch)
+current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)
+if [[ -n "$current_branch" && "$current_branch" != "main" && "$current_branch" != "master" ]]; then
+  echo "⚠  Current branch is '$current_branch', not main."
+  echo "   Marketplace update pulls from the default branch — local changes on this branch won't be reflected."
+  echo "   Merge to main first, or press Enter to continue anyway."
+  read -r
+fi
+
 echo "==> Updating marketplace: ${MARKETPLACE}"
 claude plugin marketplace update "$MARKETPLACE"
 echo ""

@@ -55,6 +55,7 @@ Process each `gaps[]` item:
 |-----|--------|
 | Version not bumped (`version_match: true`) | AskUserQuestion: patch/minor/major → edit plugin.json |
 | marketplace.json mismatch/missing | Edit marketplace.json (add entry or sync version) |
+| Deprecated flag mismatch | Sync deprecated flag between marketplace.json and plugin.json |
 | README.md missing mention | Add table row + detail section (EN), same for README.ko.md (KO) |
 | AI_NATIVE not mentioning (new only) | Evaluate fit → suggest link if appropriate, skip if not |
 | No entry point | Error — stop |
