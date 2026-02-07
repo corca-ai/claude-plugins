@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "A collection of Claude Code plugins for AI-Native Product Teams",
-    "version": "1.11.0"
+    "version": "2.0.0"
   },
   "plugins": [
     {
@@ -16,36 +16,16 @@
       "keywords": ["requirements", "specification", "clarification", "research", "sub-agents", "autonomous"]
     },
     {
-      "name": "deep-clarify",
-      "source": "./plugins/deep-clarify",
-      "description": "DEPRECATED — use clarify v2 instead. Research-first requirement clarification with autonomous decision-making",
-      "deprecated": true,
-      "keywords": ["requirements", "clarification", "research", "sub-agents", "autonomous"]
-    },
-    {
-      "name": "suggest-tidyings",
-      "source": "./plugins/suggest-tidyings",
-      "description": "A skill that suggests safe refactoring opportunities based on Kent Beck's Tidy First? philosophy",
-      "keywords": ["refactoring", "tidying", "code-quality", "tidy-first"]
-    },
-    {
-      "name": "attention-hook",
-      "source": "./plugins/attention-hook",
-      "description": "A hook that sends Slack notifications when Claude Code is waiting",
-      "keywords": ["notification", "slack", "hook"]
-    },
-    {
-      "name": "interview",
-      "source": "./plugins/interview",
-      "description": "DEPRECATED — use clarify v2 instead. Structured interviews to extract requirements, constraints, and design decisions",
-      "deprecated": true,
-      "keywords": ["interview", "requirements", "discovery", "specification"]
-    },
-    {
       "name": "retro",
       "source": "./plugins/retro",
       "description": "Adaptive session retrospective — light by default, deep on request — with CDM analysis, expert lens, and installed skills scan",
       "keywords": ["retrospective", "session-review", "learning", "improvement", "cdm", "expert-analysis"]
+    },
+    {
+      "name": "refactor",
+      "source": "./plugins/refactor",
+      "description": "Multi-mode code and skill review: quick scan, deep skill review, holistic cross-plugin analysis, commit-based tidying, and docs consistency check",
+      "keywords": ["refactoring", "review", "tidying", "code-quality", "tidy-first", "skill-review", "docs"]
     },
     {
       "name": "gather-context",
@@ -54,11 +34,10 @@
       "keywords": ["url", "export", "google", "slack", "notion", "github", "gather", "context", "search", "tavily", "exa", "code-search"]
     },
     {
-      "name": "web-search",
-      "source": "./plugins/web-search",
-      "description": "DEPRECATED — use gather-context v2 instead. Web search, code search, and URL content extraction via Tavily and Exa APIs",
-      "deprecated": true,
-      "keywords": ["search", "web-search", "tavily", "exa", "code-search", "extract"]
+      "name": "attention-hook",
+      "source": "./plugins/attention-hook",
+      "description": "A hook that sends Slack notifications when Claude Code is waiting",
+      "keywords": ["notification", "slack", "hook"]
     },
     {
       "name": "plan-and-lessons",
@@ -77,6 +56,34 @@
       "source": "./plugins/prompt-logger",
       "description": "A hook that auto-logs every conversation turn to markdown files for retrospective analysis",
       "keywords": ["logging", "transcript", "prompt", "retrospective", "hook"]
+    },
+    {
+      "name": "suggest-tidyings",
+      "source": "./plugins/suggest-tidyings",
+      "description": "DEPRECATED — use refactor --code instead. Suggests safe refactoring opportunities based on Kent Beck's Tidy First? philosophy",
+      "deprecated": true,
+      "keywords": ["refactoring", "tidying", "code-quality", "tidy-first"]
+    },
+    {
+      "name": "deep-clarify",
+      "source": "./plugins/deep-clarify",
+      "description": "DEPRECATED — use clarify v2 instead. Research-first requirement clarification with autonomous decision-making",
+      "deprecated": true,
+      "keywords": ["requirements", "clarification", "research", "sub-agents", "autonomous"]
+    },
+    {
+      "name": "interview",
+      "source": "./plugins/interview",
+      "description": "DEPRECATED — use clarify v2 instead. Structured interviews to extract requirements, constraints, and design decisions",
+      "deprecated": true,
+      "keywords": ["interview", "requirements", "discovery", "specification"]
+    },
+    {
+      "name": "web-search",
+      "source": "./plugins/web-search",
+      "description": "DEPRECATED — use gather-context v2 instead. Web search, code search, and URL content extraction via Tavily and Exa APIs",
+      "deprecated": true,
+      "keywords": ["search", "web-search", "tavily", "exa", "code-search", "extract"]
     }
   ]
 }

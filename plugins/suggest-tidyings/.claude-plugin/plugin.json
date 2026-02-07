@@ -1,10 +1,11 @@
 {
   "name": "suggest-tidyings",
-  "description": "A skill that suggests safe refactoring opportunities based on Kent Beck's Tidy First? philosophy",
+  "description": "DEPRECATED — use refactor --code instead. A skill that suggests safe refactoring opportunities based on Kent Beck's Tidy First? philosophy",
   "version": "1.0.0",
+  "deprecated": true,
   "author": {
     "name": "Corca",
     "url": "https://www.corca.ai/"
   },
-  "repository": "https://github.com/corca-ai/public-agents-and-skills"
+  "repository": "https://github.com/corca-ai/claude-plugins"
 }

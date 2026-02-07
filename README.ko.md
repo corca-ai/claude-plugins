@@ -38,132 +38,18 @@ bash scripts/update-all.sh
 
 ### 2. 플러그인 오버뷰
 
-| 플러그인 | 유형 | 설명 |
-|---------|------|------|
-| [clarify](#clarify) | Skill | 통합 요구사항 명확화: 리서치 기반 또는 경량 Q&A |
-| [deep-clarify](#deep-clarify) | ~~Skill~~ | **지원 중단** — clarify v2 사용 |
-| [interview](#interview) | ~~Skill~~ | **지원 중단** — clarify v2 사용 |
-| [suggest-tidyings](#suggest-tidyings) | Skill | 안전한 리팩토링 기회 제안 |
-| [retro](#retro) | Skill | 적응형 세션 회고 — 기본은 경량, `--deep`으로 전문가 렌즈 포함 전체 분석 |
-| [gather-context](#gather-context) | Skill + Hook | 통합 정보 수집: URL 자동 감지, 웹 검색, 로컬 코드 탐색 |
-| [web-search](#web-search) | ~~Skill + Hook~~ | **지원 중단** — gather-context v2 사용 |
-| [attention-hook](#attention-hook) | Hook | 대기 상태일 때 Slack 알림 |
-| [plan-and-lessons](#plan-and-lessons) | Hook | Plan 모드 진입 시 Plan & Lessons Protocol 주입 |
-| [smart-read](#smart-read) | Hook | 파일 크기 기반 지능적 읽기 강제 |
-| [prompt-logger](#prompt-logger) | Hook | 대화 턴을 마크다운으로 자동 기록 (회고 분석용) |
+| 플러그인 | 유형 | 단계 | 설명 |
+|---------|------|------|------|
+| [gather-context](#gather-context) | Skill + Hook | 1. 컨텍스트 | 통합 정보 수집: URL 자동 감지, 웹 검색, 로컬 코드 탐색 |
+| [clarify](#clarify) | Skill | 2. 명확화 | 통합 요구사항 명확화: 리서치 기반 또는 경량 Q&A |
+| [plan-and-lessons](#plan-and-lessons) | Hook | 3. 계획 | Plan 모드 진입 시 Plan & Lessons Protocol 주입 |
+| [smart-read](#smart-read) | Hook | 4. 구현 | 파일 크기 기반 지능적 읽기 강제 |
+| [retro](#retro) | Skill | 5. 회고 | 적응형 세션 회고 — 기본은 경량, `--deep`으로 전문가 렌즈 포함 전체 분석 |
+| [refactor](#refactor) | Skill | 6. 리팩토링 | 다중 모드 코드/스킬 리뷰: 퀵 스캔, 심층 리뷰, 티디잉, 문서 검사 |
+| [attention-hook](#attention-hook) | Hook | 인프라 | 대기 상태일 때 Slack 알림 |
+| [prompt-logger](#prompt-logger) | Hook | 인프라 | 대화 턴을 마크다운으로 자동 기록 (회고 분석용) |
 
 ## Skills
-
-### [clarify](plugins/clarify/skills/clarify/SKILL.md)
-
-**설치**: `claude plugin install clarify@corca-plugins` | **갱신**: `claude plugin update clarify@corca-plugins`
-
-clarify v1, deep-clarify, interview의 장점을 하나로 합친 통합 요구사항 명확화 스킬입니다. 리서치 기반(기본)과 경량 Q&A(`--light`) 두 가지 모드를 제공합니다. Team Attention의 [Clarify 스킬](https://github.com/team-attention/plugins-for-claude-natives/blob/main/plugins/clarify/SKILL.md)에서 출발했습니다.
-
-**사용법**:
-- `/clarify <요구사항>` — 리서치 기반 (기본)
-- `/clarify <요구사항> --light` — 직접 Q&A, 서브에이전트 없음
-
-**기본 모드** (리서치 기반):
-1. 요구사항 캡처 및 결정 포인트 분해
-2. 병렬 리서치: 코드베이스 탐색 + 웹/베스트 프랙티스 리서치 (gather-context 설치 시 활용, 미설치 시 내장 도구 폴백)
-3. 티어 분류: T1 (코드베이스 해결) → 자동 결정, T2 (베스트 프랙티스 해결) → 자동 결정, T3 (주관적) → 사람에게 질문
-4. T3 항목에 대해 대립하는 관점의 자문 서브에이전트가 의견 제시
-5. Why-digging과 긴장 감지를 활용한 끈질긴 질문
-6. 출력: 결정 테이블 + 명확화된 요구사항
-
-**--light 모드** (직접 Q&A):
-- AskUserQuestion을 통한 반복 질문
-- 피상적 답변에 대한 Why-digging
-- 답변 간 긴장 감지
-- Before/After 비교 출력
-
-**주요 기능**:
-- 질문 전 자율 리서치 — 진정으로 주관적인 결정만 질문
-- gather-context와 통합 (미설치 시 우아하게 폴백)
-- 끈질긴 질문: 2-3단계 why-digging, 모순 감지
-- 모든 항목이 리서치로 해결되면 자문/질문 단계 완전 생략
-- 사용자 언어 자동 적응 (한국어/영어)
-
-### [deep-clarify](plugins/deep-clarify/skills/deep-clarify/SKILL.md)
-
-> **지원 중단**: 이 플러그인은 [clarify](#clarify) v2로 대체되었습니다. 리서치 기반 기능과 끈질긴 질문이 모두 clarify v2에 통합되었습니다.
-
-**마이그레이션**:
-```bash
-claude plugin install clarify@corca-plugins
-claude plugin update clarify@corca-plugins
-```
-
-**명령어 매핑**:
-| 기존 (deep-clarify) | 신규 (clarify) |
-|---|---|
-| `/deep-clarify <요구사항>` | `/clarify <요구사항>` |
-
-### [interview](plugins/interview/skills/interview/SKILL.md)
-
-> **지원 중단**: 이 플러그인은 [clarify](#clarify) v2로 대체되었습니다. 인터뷰의 끈질긴 질문 방법론(why-digging, 긴장 감지)이 clarify v2에 통합되었습니다.
-
-**마이그레이션**:
-```bash
-claude plugin install clarify@corca-plugins
-claude plugin update clarify@corca-plugins
-```
-
-**명령어 매핑**:
-| 기존 (interview) | 신규 (clarify) |
-|---|---|
-| `/interview <topic>` | `/clarify <요구사항>` (기본 모드) |
-| `/interview <topic>` (간편) | `/clarify <요구사항> --light` |
-
-### [suggest-tidyings](plugins/suggest-tidyings/skills/suggest-tidyings/SKILL.md)
-
-**설치**: `claude plugin install suggest-tidyings@corca-plugins` | **갱신**: `claude plugin update suggest-tidyings@corca-plugins`
-
-Kent Beck의 "Tidy First?" 철학에 기반하여 최근 커밋들을 분석하고 안전한 리팩토링 기회를 찾아주는 스킬입니다. Sub-agent를 병렬로 활용하여 여러 커밋을 동시에 분석합니다.
-
-**사용법**:
-- 현재 브랜치 분석: `/suggest-tidyings`
-- 특정 브랜치 분석: `/suggest-tidyings develop`
-
-**주요 기능**:
-- 최근 non-tidying 커밋에서 tidying 기회 탐색
-- 각 커밋별 병렬 분석 (Task tool + sub-agents)
-- Guard Clauses, Dead Code Removal, Extract Helper 등 8가지 tidying 기법 적용
-- 안전성 검증: HEAD에서 이미 변경된 코드는 제외
-- `파일:라인범위 — 설명 (이유: ...)` 형식의 실행 가능한 제안
-
-**핵심 원칙**:
-- 로직 변경 없이 가독성만 개선하는 안전한 변경
-- 한 커밋으로 분리 가능한 원자적 수정
-- 누구나 쉽게 리뷰할 수 있는 간단한 diff
-
-### [retro](plugins/retro/skills/retro/SKILL.md)
-
-**설치**: `claude plugin install retro@corca-plugins` | **갱신**: `claude plugin update retro@corca-plugins`
-
-적응형 세션 회고 스킬입니다. [Plan & Lessons Protocol](plugins/plan-and-lessons/protocol.md)의 `lessons.md`가 세션 중 점진적으로 쌓이는 학습 기록이라면, `retro`는 세션 전체를 조감하는 종합 회고입니다. 기본은 경량 모드(빠르고 저비용), `--deep`으로 전문가 분석을 포함한 전체 회고를 수행합니다.
-
-**사용법**:
-- 세션 종료 시 (경량): `/retro`
-- 전문가 렌즈 포함 전체 분석: `/retro --deep`
-- 특정 디렉토리 지정: `/retro prompt-logs/260130-my-session`
-
-**모드**:
-- **경량** (기본): 섹션 1-4 + 7. 서브에이전트 없음, 웹 검색 없음. 세션 무게에 따라 에이전트가 자동 선택.
-- **심층** (`--deep`): Expert Lens(병렬 서브에이전트)와 Learning Resources(웹 검색) 포함 전체 7개 섹션.
-
-**주요 기능**:
-- 유저/조직/프로젝트에 대한 정보 중 이후 작업에 도움될 내용 문서화
-- 업무 스타일·협업 방식 관찰 후 CLAUDE.md 업데이트 제안 (유저 승인 후 적용)
-- 낭비 분석(Waste Reduction): 허비된 턴, 과설계, 놓친 지름길, 컨텍스트 낭비, 커뮤니케이션 비효율 식별
-- Gary Klein의 CDM(Critical Decision Method)으로 세션의 핵심 의사결정 분석
-- Expert Lens (심층만): 병렬 서브에이전트가 실존 전문가의 관점에서 세션을 분석
-- Learning Resources (심층만): 유저의 지식 수준에 맞춘 웹 검색 학습자료 제공
-- 설치된 스킬 스캔 후 관련성 분석, 이후 외부 스킬 탐색 제안
-
-**출력물**:
-- `prompt-logs/{YYMMDD}-{NN}-{title}/retro.md` — plan.md, lessons.md와 같은 디렉토리에 저장
 
 ### [gather-context](plugins/gather-context/skills/gather-context/SKILL.md)
 
@@ -202,26 +88,83 @@ URL 자동 감지, 웹 검색, 로컬 코드 탐색 3가지 모드를 제공하�
 **주의사항**:
 - 검색 쿼리가 외부 서비스로 전송됩니다. 기밀 코드나 민감한 정보를 포함하지 마세요.
 
-### [web-search](plugins/web-search/skills/web-search/SKILL.md)
+### [clarify](plugins/clarify/skills/clarify/SKILL.md)
 
-> **지원 중단**: 이 플러그인은 [gather-context](#gather-context) v2로 대체되었습니다. 웹 검색, 코드 검색, URL 추출 기능이 모두 gather-context에 통합되었습니다.
+**설치**: `claude plugin install clarify@corca-plugins` | **갱신**: `claude plugin update clarify@corca-plugins`
 
-**마이그레이션**:
-```bash
-claude plugin install gather-context@corca-plugins
-claude plugin update gather-context@corca-plugins
-# 중복 훅 방지를 위해 web-search 제거 (선택):
-# claude plugin uninstall web-search@corca-plugins
-```
+clarify v1, deep-clarify, interview의 장점을 하나로 합친 통합 요구사항 명확화 스킬입니다. 리서치 기반(기본)과 경량 Q&A(`--light`) 두 가지 모드를 제공합니다. Team Attention의 [Clarify 스킬](https://github.com/team-attention/plugins-for-claude-natives/blob/main/plugins/clarify/SKILL.md)에서 출발했습니다.
 
-**명령어 매핑**:
-| 기존 (web-search) | 신규 (gather-context) |
-|---|---|
-| `/web-search <query>` | `/gather-context --search <query>` |
-| `/web-search code <query>` | `/gather-context --search code <query>` |
-| `/web-search --news <query>` | `/gather-context --search --news <query>` |
-| `/web-search --deep <query>` | `/gather-context --search --deep <query>` |
-| `/web-search extract <url>` | `/gather-context <url>` |
+**사용법**:
+- `/clarify <요구사항>` — 리서치 기반 (기본)
+- `/clarify <요구사항> --light` — 직접 Q&A, 서브에이전트 없음
+
+**기본 모드** (리서치 기반):
+1. 요구사항 캡처 및 결정 포인트 분해
+2. 병렬 리서치: 코드베이스 탐색 + 웹/베스트 프랙티스 리서치 (gather-context 설치 시 활용, 미설치 시 내장 도구 폴백)
+3. 티어 분류: T1 (코드베이스 해결) → 자동 결정, T2 (베스트 프랙티스 해결) → 자동 결정, T3 (주관적) → 사람에게 질문
+4. T3 항목에 대해 대립하는 관점의 자문 서브에이전트가 의견 제시
+5. Why-digging과 긴장 감지를 활용한 끈질긴 질문
+6. 출력: 결정 테이블 + 명확화된 요구사항
+
+**--light 모드** (직접 Q&A):
+- AskUserQuestion을 통한 반복 질문
+- 피상적 답변에 대한 Why-digging
+- 답변 간 긴장 감지
+- Before/After 비교 출력
+
+**주요 기능**:
+- 질문 전 자율 리서치 — 진정으로 주관적인 결정만 질문
+- gather-context와 통합 (미설치 시 우아하게 폴백)
+- 끈질긴 질문: 2-3단계 why-digging, 모순 감지
+- 모든 항목이 리서치로 해결되면 자문/질문 단계 완전 생략
+- 사용자 언어 자동 적응 (한국어/영어)
+
+### [retro](plugins/retro/skills/retro/SKILL.md)
+
+**설치**: `claude plugin install retro@corca-plugins` | **갱신**: `claude plugin update retro@corca-plugins`
+
+적응형 세션 회고 스킬입니다. [Plan & Lessons Protocol](plugins/plan-and-lessons/protocol.md)의 `lessons.md`가 세션 중 점진적으로 쌓이는 학습 기록이라면, `retro`는 세션 전체를 조감하는 종합 회고입니다. 기본은 경량 모드(빠르고 저비용), `--deep`으로 전문가 분석을 포함한 전체 회고를 수행합니다.
+
+**사용법**:
+- 세션 종료 시 (경량): `/retro`
+- 전문가 렌즈 포함 전체 분석: `/retro --deep`
+- 특정 디렉토리 지정: `/retro prompt-logs/260130-my-session`
+
+**모드**:
+- **경량** (기본): 섹션 1-4 + 7. 서브에이전트 없음, 웹 검색 없음. 세션 무게에 따라 에이전트가 자동 선택.
+- **심층** (`--deep`): Expert Lens(병렬 서브에이전트)와 Learning Resources(웹 검색) 포함 전체 7개 섹션.
+
+**주요 기능**:
+- 유저/조직/프로젝트에 대한 정보 중 이후 작업에 도움될 내용 문서화
+- 업무 스타일·협업 방식 관찰 후 CLAUDE.md 업데이트 제안 (유저 승인 후 적용)
+- 낭비 분석(Waste Reduction): 허비된 턴, 과설계, 놓친 지름길, 컨텍스트 낭비, 커뮤니케이션 비효율 식별
+- Gary Klein의 CDM(Critical Decision Method)으로 세션의 핵심 의사결정 분석
+- Expert Lens (심층만): 병렬 서브에이전트가 실존 전문가의 관점에서 세션을 분석
+- Learning Resources (심층만): 유저의 지식 수준에 맞춘 웹 검색 학습자료 제공
+- 설치된 스킬 스캔 후 관련성 분석, 이후 외부 스킬 탐색 제안
+
+**출력물**:
+- `prompt-logs/{YYMMDD}-{NN}-{title}/retro.md` — plan.md, lessons.md와 같은 디렉토리에 저장
+
+### [refactor](plugins/refactor/skills/refactor/SKILL.md)
+
+**설치**: `claude plugin install refactor@corca-plugins` | **갱신**: `claude plugin update refactor@corca-plugins`
+
+다중 모드 코드 및 스킬 리뷰 도구입니다. 빠른 구조 스캔부터 크로스 플러그인 분석까지 5가지 모드를 제공합니다. suggest-tidyings의 커밋 기반 티디잉 워크플로우를 흡수했습니다.
+
+**사용법**:
+- `/refactor` — 모든 마켓플레이스 스킬 퀵 스캔
+- `/refactor --code [branch]` — 커밋 기반 티디잉 (병렬 서브에이전트)
+- `/refactor --skill <name>` — 단일 스킬 심층 리뷰
+- `/refactor --skill --holistic` — 크로스 플러그인 분석
+- `/refactor --docs` — 문서 일관성 리뷰
+
+**모드**:
+- **퀵 스캔** (인자 없음): 모든 마켓플레이스 SKILL.md의 구조적 검사 — 단어/줄 수, 미참조 리소스, Anthropic 컴플라이언스(kebab-case, description 길이). 플래그와 함께 요약 테이블 출력.
+- **코드 티디잉** (`--code`): 최근 non-tidying 커밋을 분석하여 안전한 리팩토링 기회를 찾습니다. 병렬 서브에이전트가 Kent Beck의 "Tidy First?" 철학에서 가져온 8가지 티디잉 기법(guard clauses, dead code, explaining variables 등)을 적용합니다.
+- **심층 리뷰** (`--skill <name>`): 단일 스킬을 Progressive Disclosure 기준 + Anthropic 컴플라이언스로 평가합니다. 우선순위가 지정된 리팩토링 제안을 포함한 구조화된 보고서를 생성합니다.
+- **전체적 분석** (`--skill --holistic`): 세 가지 차원(패턴 전파, 경계 이슈, 누락된 연결)에 걸친 크로스 플러그인 분석. 보고서를 `prompt-logs/`에 저장합니다.
+- **문서 리뷰** (`--docs`): CLAUDE.md, README, project-context.md, marketplace.json, plugin.json 간의 일관성을 점검합니다. 깨진 링크, 오래된 참조, 구조적 불일치를 플래그합니다.
 
 ## Hooks
 
@@ -340,20 +283,50 @@ CLAUDE_CORCA_PROMPT_LOGGER_ENABLED=false              # 로깅 비활성화 (기
 CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE=20                # 축약 임계값 (줄 수, 기본값: 10)
 ```
 
-## 삭제된 스킬
+## Deprecated & Removed 플러그인
 
-다음 스킬들은 v1.8.0에서 삭제되었습니다. 동일한 기능이 [gather-context](#gather-context)에 내장되어 있습니다.
+### 지원 중단 플러그인
 
-| 삭제된 스킬 | 대체 |
+| 플러그인 | 상태 | 대체 | 마이그레이션 |
+|---------|------|------|------------|
+| [suggest-tidyings](plugins/suggest-tidyings/skills/suggest-tidyings/SKILL.md) | v2.0.0에서 지원 중단 | [refactor](#refactor) `--code` | `claude plugin install refactor@corca-plugins` |
+| [deep-clarify](plugins/deep-clarify/skills/deep-clarify/SKILL.md) | v1.9.0에서 지원 중단 | [clarify](#clarify) | `claude plugin install clarify@corca-plugins` |
+| [interview](plugins/interview/skills/interview/SKILL.md) | v1.9.0에서 지원 중단 | [clarify](#clarify) | `claude plugin install clarify@corca-plugins` |
+| [web-search](plugins/web-search/skills/web-search/SKILL.md) | v1.10.0에서 지원 중단 | [gather-context](#gather-context) | `claude plugin install gather-context@corca-plugins` |
+
+**suggest-tidyings → refactor 명령어 매핑**:
+| 기존 (suggest-tidyings) | 신규 (refactor) |
+|---|---|
+| `/suggest-tidyings` | `/refactor --code` |
+| `/suggest-tidyings <branch>` | `/refactor --code <branch>` |
+
+**deep-clarify → clarify 명령어 매핑**:
+| 기존 (deep-clarify) | 신규 (clarify) |
+|---|---|
+| `/deep-clarify <요구사항>` | `/clarify <요구사항>` |
+
+**interview → clarify 명령어 매핑**:
+| 기존 (interview) | 신규 (clarify) |
+|---|---|
+| `/interview <topic>` | `/clarify <요구사항>` (기본 모드) |
+| `/interview <topic>` (간편) | `/clarify <요구사항> --light` |
+
+**web-search → gather-context 명령어 매핑**:
+| 기존 (web-search) | 신규 (gather-context) |
+|---|---|
+| `/web-search <query>` | `/gather-context --search <query>` |
+| `/web-search code <query>` | `/gather-context --search code <query>` |
+| `/web-search --news <query>` | `/gather-context --search --news <query>` |
+| `/web-search --deep <query>` | `/gather-context --search --deep <query>` |
+| `/web-search extract <url>` | `/gather-context <url>` |
+
+### 삭제된 플러그인 (v1.8.0)
+
+| 삭제된 플러그인 | 대체 |
 |------------|------|
 | `g-export` | `gather-context` (Google Docs/Slides/Sheets 내장) |
 | `slack-to-md` | `gather-context` (Slack 스레드 변환 내장) |
 | `notion-to-md` | `gather-context` (Notion 페이지 변환 내장) |
-
-**마이그레이션**:
-```bash
-claude plugin install gather-context@corca-plugins
-```
 
 ## 라이선스
 

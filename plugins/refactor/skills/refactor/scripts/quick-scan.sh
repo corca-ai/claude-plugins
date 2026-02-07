@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # quick-scan.sh: Scan all plugins' SKILL.md files for structural issues.
-# Checks word count, line count, and unreferenced resource files.
+# Checks word count, line count, unreferenced resource files, and Anthropic compliance.
 #
 # Usage: quick-scan.sh [repo-root]
 # Output: JSON report with per-skill results and summary
 
 set -euo pipefail
 
-REPO_ROOT="${1:-$(cd "$(dirname "$0")/../../../.." && pwd)}"
+REPO_ROOT="${1:-$(git rev-parse --show-toplevel 2>/dev/null || cd "$(dirname "$0")/../../../../.." && pwd)}"
 
 # Collect results
 results=()
@@ -70,6 +70,39 @@ scan_skill() {
     done < <(find "$skill_dir/references" -maxdepth 1 -type f -name '*.md' -print0 2>/dev/null)
   fi
 
+  # Anthropic compliance checks
+  local anthropic_flags=()
+
+  # Check folder naming (kebab-case)
+  if [[ "$plugin_name" =~ [A-Z_] ]]; then
+    anthropic_flags+=("folder_not_kebab_case: $plugin_name")
+  fi
+  if [[ "$skill_name" =~ [A-Z_] ]]; then
+    anthropic_flags+=("skill_folder_not_kebab_case: $skill_name")
+  fi
+
+  # Check description length from plugin.json
+  local plugin_json="$REPO_ROOT/plugins/$plugin_name/.claude-plugin/plugin.json"
+  if [[ -f "$plugin_json" ]]; then
+    local desc_len
+    desc_len=$(python3 -c "
+import json, sys
+with open('$plugin_json') as f:
+    d = json.load(f)
+print(len(d.get('description', '')))
+" 2>/dev/null || echo "0")
+    if [[ "$desc_len" -gt 1024 ]]; then
+      anthropic_flags+=("description_too_long: ${desc_len} chars (max 1024)")
+    fi
+  fi
+
+  # Check frontmatter description length in SKILL.md
+  local skill_desc
+  skill_desc=$(sed -n '/^---$/,/^---$/p' "$skill_md" | grep -A 100 'description:' | grep -v 'description:' | grep -v '^---$' | sed '/^[a-z]/q' | head -n -1 | tr -d '\n' | wc -c | tr -d ' ')
+  if [[ "$skill_desc" -gt 1024 ]]; then
+    anthropic_flags+=("skill_description_too_long: ${skill_desc} chars")
+  fi
+
   # Build flags array
   local flags=()
   if [[ "$size_severity" == "warning" ]]; then
@@ -98,6 +131,12 @@ scan_skill() {
     done
     warn_count=$((warn_count + 1))
   fi
+
+  # Add Anthropic flags
+  for af in "${anthropic_flags[@]}"; do
+    flags+=("anthropic: $af")
+    warn_count=$((warn_count + 1))
+  done
 
   # Build JSON for this skill
   local flags_json="["
@@ -131,12 +170,22 @@ scan_skill() {
   total_skills=$((total_skills + 1))
 }
 
-# Scan marketplace plugins
+# Scan marketplace plugins (skip deprecated)
 for skill_md in "$REPO_ROOT"/plugins/*/skills/*/SKILL.md; do
   [[ -f "$skill_md" ]] || continue
+
   # Extract plugin name and skill name from path
   local_path="${skill_md#"$REPO_ROOT"/plugins/}"
   plugin_name="${local_path%%/*}"
+
+  # Skip deprecated plugins
+  pjson="$REPO_ROOT/plugins/$plugin_name/.claude-plugin/plugin.json"
+  if [[ -f "$pjson" ]]; then
+    if python3 -c "import json; d=json.load(open('$pjson')); exit(0 if d.get('deprecated') else 1)" 2>/dev/null; then
+      continue
+    fi
+  fi
+
   skill_name="$(basename "$(dirname "$skill_md")")"
   scan_skill "$plugin_name" "$skill_name" "$skill_md"
 done
@@ -147,7 +196,6 @@ results_json="["
 for i in "${!results[@]}"; do
   if [[ $i -gt 0 ]]; then results_json+=","; fi
   results_json+="${results[$i]}"
-  # Count flagged (flag_count > 0) by checking if the result contains non-zero flag_count
   if echo "${results[$i]}" | grep -qP '"flag_count": [1-9]'; then
     flagged_count=$((flagged_count + 1))
   fi
