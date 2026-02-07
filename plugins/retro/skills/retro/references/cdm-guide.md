@@ -11,6 +11,10 @@ direction. Look for:
 - Assumption-based decisions (e.g., "this must be a platform issue")
 - Direction changes triggered by new information
 - Trade-off resolutions (e.g., workaround vs root cause fix)
+- **Intent-result gaps**: Moments where the intended approach diverged from what
+  actually happened (e.g., planned to use a tool but ended up not using it,
+  delegated a task but the delegate couldn't fulfill it). These silent failures
+  often reveal structural constraints worth persisting.
 
 Trivial choices (variable naming, formatting) are NOT critical decisions.
 

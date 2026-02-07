@@ -80,6 +80,14 @@ Identify all forms of wasted effort in the session. Broader than prompting habit
 
 Format: free-form analysis citing specific session moments. No table required. Frame constructively with actionable suggestions.
 
+**Root cause drill-down (5 Whys)**: For each significant waste item, don't stop at the symptom. Ask "why did this happen?" repeatedly until you reach a structural or systemic cause. The goal is to distinguish:
+- **One-off mistake** (no action needed beyond noting it)
+- **Knowledge gap** (persist as context or learning resource)
+- **Process gap** (suggest tool, checklist, or protocol change)
+- **Structural constraint** (persist to project-context or CLAUDE.md)
+
+Shallow analysis (stopping at "we should have done X") misses persist-worthy structural insights. Always drill to the level where you can recommend a durable fix.
+
 #### Section 4: Critical Decision Analysis (CDM)
 
 Read `{SKILL_DIR}/references/cdm-guide.md` for methodology.
@@ -145,6 +153,7 @@ retro.md is session-specific. Persist findings to project-level documents:
 
 - **Context (Section 1)**: Offer to append new context to project-context.md (or create it)
 - **CLAUDE.md (Section 2)**: If suggestions exist, AskUserQuestion "Apply?" — edit on approval
+- **Root causes (Section 3)**: For each structural root cause identified via 5 Whys, evaluate its future job: "What recurring situation will this learning prevent?" (JTBD lens). If the answer is clear, it belongs in a persistent doc. Use right-placement check: CLAUDE.md for behavioral rules, project-context.md for architectural patterns, protocol/skill docs for process changes.
 - **Process improvements (Section 3)**: If waste reduction identifies repeatable process improvements (not one-off observations), suggest updating CLAUDE.md, protocol docs, or project-context.md. Right-placement check applies.
 - **Actionable improvements (Section 7)**: If concrete improvements identified, AskUserQuestion "Implement now?" to prevent findings from becoming stale
 
