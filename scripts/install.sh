@@ -88,13 +88,19 @@ if ! claude plugin marketplace list 2>/dev/null | grep -q "$MARKETPLACE"; then
 fi
 
 # Collect plugins to install
-declare -A seen
 to_install=()
 
 add_plugins() {
   for p in "$@"; do
-    if [[ -z "${seen[$p]:-}" ]]; then
-      seen[$p]=1
+    # Deduplicate using linear search (Bash 3 compatible)
+    local dup=0
+    for existing in "${to_install[@]+"${to_install[@]}"}"; do
+      if [[ "$existing" == "$p" ]]; then
+        dup=1
+        break
+      fi
+    done
+    if [[ $dup -eq 0 ]]; then
       to_install+=("$p")
     fi
   done

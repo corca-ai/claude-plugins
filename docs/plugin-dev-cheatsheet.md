@@ -108,7 +108,7 @@ Naming: `CLAUDE_CORCA_{PLUGIN_NAME}_{SETTING}`
 
 ## Script Guidelines
 
-- Cross-platform (macOS + Linux): avoid `sed -i ''` (macOS-only)
+- Cross-platform (macOS + Linux): avoid `sed -i ''` (macOS-only); avoid Bash 4+ features (`declare -A`, nameref `${!var}`, `|&`) — macOS ships Bash 3.2
 - Minimal deps: prefer bash + curl, minimize python3/node
 - Use `#!/usr/bin/env bash` and `set -euo pipefail`
 - Bash gotcha: `((var++))` returns exit code 1 when var is 0, failing under `set -e`. Use `var=$((var + 1))` instead.
