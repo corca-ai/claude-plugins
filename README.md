@@ -38,132 +38,18 @@ You can do the same from inside Claude Code (instead of your terminal):
 
 ### 2. Plugin overview
 
-| Plugin | Type | Description |
-|---------|------|-------------|
-| [clarify](#clarify) | Skill | Unified requirement clarification: research-first or lightweight Q&A |
-| [deep-clarify](#deep-clarify) | ~~Skill~~ | **Deprecated** — use clarify v2 |
-| [interview](#interview) | ~~Skill~~ | **Deprecated** — use clarify v2 |
-| [suggest-tidyings](#suggest-tidyings) | Skill | Suggest safe refactoring opportunities |
-| [retro](#retro) | Skill | Adaptive session retrospective — light by default, deep (`--deep`) with expert lens |
-| [gather-context](#gather-context) | Skill + Hook | Unified information acquisition: URL auto-detect, web search, local code exploration |
-| [web-search](#web-search) | ~~Skill + Hook~~ | **Deprecated** — use gather-context v2 |
-| [attention-hook](#attention-hook) | Hook | Send a Slack notification when idle/waiting |
-| [plan-and-lessons](#plan-and-lessons) | Hook | Inject the Plan & Lessons Protocol when entering plan mode |
-| [smart-read](#smart-read) | Hook | Enforce intelligent file reading based on file size |
-| [prompt-logger](#prompt-logger) | Hook | Auto-log conversation turns to markdown for retrospective analysis |
+| Plugin | Type | Stage | Description |
+|---------|------|-------|-------------|
+| [gather-context](#gather-context) | Skill + Hook | 1. Context | Unified information acquisition: URL auto-detect, web search, local code exploration |
+| [clarify](#clarify) | Skill | 2. Clarify | Unified requirement clarification: research-first or lightweight Q&A |
+| [plan-and-lessons](#plan-and-lessons) | Hook | 3. Plan | Inject the Plan & Lessons Protocol when entering plan mode |
+| [smart-read](#smart-read) | Hook | 4. Implement | Enforce intelligent file reading based on file size |
+| [retro](#retro) | Skill | 5. Reflect | Adaptive session retrospective — light by default, deep with expert lens |
+| [refactor](#refactor) | Skill | 6. Refactor | Multi-mode code and skill review: quick scan, deep review, tidying, docs check |
+| [attention-hook](#attention-hook) | Hook | Infra | Send a Slack notification when idle/waiting |
+| [prompt-logger](#prompt-logger) | Hook | Infra | Auto-log conversation turns to markdown for retrospective analysis |
 
 ## Skills
-
-### [clarify](plugins/clarify/skills/clarify/SKILL.md)
-
-**Install**: `claude plugin install clarify@corca-plugins` | **Update**: `claude plugin update clarify@corca-plugins`
-
-Unified requirement clarification that merges the best of clarify v1, deep-clarify, and interview into a single skill. Two modes: research-first (default) and lightweight direct Q&A (`--light`). Originally based on Team Attention's [Clarify skill](https://github.com/team-attention/plugins-for-claude-natives/blob/main/plugins/clarify/SKILL.md).
-
-**Usage**:
-- `/clarify <requirement>` — research-first (default)
-- `/clarify <requirement> --light` — direct Q&A, no sub-agents
-
-**Default mode** (research-first):
-1. Capture & decompose requirement into decision points
-2. Parallel research: codebase exploration + web/best-practice research (uses gather-context if installed, falls back to built-in tools)
-3. Tier classification: T1 (codebase-resolved) → auto-decide, T2 (best-practice-resolved) → auto-decide, T3 (subjective) → ask human
-4. Advisory sub-agents argue opposing perspectives for T3 items
-5. Persistent questioning with why-digging and tension detection
-6. Output: decision table + clarified requirement
-
-**--light mode** (direct Q&A):
-- Iterative questioning via AskUserQuestion
-- Why-digging on surface-level answers
-- Tension detection between answers
-- Before/After comparison output
-
-**Key features**:
-- Researches autonomously before asking — only asks about genuinely subjective decisions
-- Integrates with gather-context for research (graceful fallback when not installed)
-- Persistent questioning: why-digs 2-3 levels, detects contradictions
-- Skips advisory and questioning phases entirely when all items are resolvable
-- Adapts to user's language (Korean/English)
-
-### [deep-clarify](plugins/deep-clarify/skills/deep-clarify/SKILL.md)
-
-> **DEPRECATED**: This plugin has been superseded by [clarify](#clarify) v2, which includes all research-first functionality plus persistent questioning.
-
-**Migration**:
-```bash
-claude plugin install clarify@corca-plugins
-claude plugin update clarify@corca-plugins
-```
-
-**Command mapping**:
-| Old (deep-clarify) | New (clarify) |
-|---|---|
-| `/deep-clarify <requirement>` | `/clarify <requirement>` |
-
-### [interview](plugins/interview/skills/interview/SKILL.md)
-
-> **DEPRECATED**: This plugin has been superseded by [clarify](#clarify) v2, which incorporates interview's persistent questioning methodology (why-digging, tension detection).
-
-**Migration**:
-```bash
-claude plugin install clarify@corca-plugins
-claude plugin update clarify@corca-plugins
-```
-
-**Command mapping**:
-| Old (interview) | New (clarify) |
-|---|---|
-| `/interview <topic>` | `/clarify <requirement>` (default mode) |
-| `/interview <topic>` (quick) | `/clarify <requirement> --light` |
-
-### [suggest-tidyings](plugins/suggest-tidyings/skills/suggest-tidyings/SKILL.md)
-
-**Install**: `claude plugin install suggest-tidyings@corca-plugins` | **Update**: `claude plugin update suggest-tidyings@corca-plugins`
-
-A skill based on Kent Beck's "Tidy First?" philosophy. It analyzes recent commits and finds safe refactoring opportunities. It uses parallel sub-agents to review multiple commits at once.
-
-**Usage**:
-- Analyze the current branch: `/suggest-tidyings`
-- Analyze a specific branch: `/suggest-tidyings develop`
-
-**Key features**:
-- Finds tidying opportunities from recent non-tidying commits
-- Parallel per-commit analysis (Task tool + sub-agents)
-- Applies 8 tidying techniques (guard clauses, dead code removal, extract helper, etc.)
-- Safety check: excludes code that has already changed on HEAD
-- Actionable suggestions in the format `file:line-range — description (reason: ...)`
-
-**Core principles**:
-- Safe changes that only improve readability (no logic changes)
-- Atomic edits that can be separated into a single commit
-- Simple diffs that are easy for anyone to review
-
-### [retro](plugins/retro/skills/retro/SKILL.md)
-
-**Install**: `claude plugin install retro@corca-plugins` | **Update**: `claude plugin update retro@corca-plugins`
-
-Adaptive session retrospective. If `lessons.md` in the [Plan & Lessons Protocol](plugins/plan-and-lessons/protocol.md) is a progressively accumulated learning log, `retro` is a "full-session, bird's-eye" retrospective. Light by default (fast, low cost); use `--deep` for full expert analysis.
-
-**Usage**:
-- End of a session (light): `/retro`
-- Full analysis with expert lens: `/retro --deep`
-- With a specific directory: `/retro prompt-logs/260130-my-session`
-
-**Modes**:
-- **Light** (default): Sections 1-4 + 7. No sub-agents, no web search. Agent auto-selects based on session weight.
-- **Deep** (`--deep`): Full 7 sections including Expert Lens (parallel sub-agents) and Learning Resources (web search).
-
-**Key features**:
-- Documents user/org/project context that will help future work
-- Observes working style and collaboration patterns and suggests CLAUDE.md updates (applies only with user approval)
-- Waste Reduction analysis: identifies wasted turns, over-engineering, missed shortcuts, context waste, and communication inefficiencies
-- Analyzes critical decisions using Gary Klein's CDM (Critical Decision Method) with session-specific probes
-- Expert Lens (deep only): parallel sub-agents adopt real expert identities to analyze the session through contrasting frameworks
-- Learning Resources (deep only): web-searched resources tailored to the user's knowledge level
-- Scans installed skills for relevance before suggesting external skill discovery
-
-**Outputs**:
-- `prompt-logs/{YYMMDD}-{NN}-{title}/retro.md` — saved alongside plan.md and lessons.md
 
 ### [gather-context](plugins/gather-context/skills/gather-context/SKILL.md)
 
@@ -202,26 +88,83 @@ Unified information acquisition layer with three modes: URL auto-detect, web sea
 **Caution**:
 - Search queries are sent to external services. Do not include confidential code or sensitive information.
 
-### [web-search](plugins/web-search/skills/web-search/SKILL.md)
+### [clarify](plugins/clarify/skills/clarify/SKILL.md)
 
-> **DEPRECATED**: This plugin has been superseded by [gather-context](#gather-context) v2, which includes all web search, code search, and URL extraction functionality.
+**Install**: `claude plugin install clarify@corca-plugins` | **Update**: `claude plugin update clarify@corca-plugins`
 
-**Migration**:
-```bash
-claude plugin install gather-context@corca-plugins
-claude plugin update gather-context@corca-plugins
-# Optionally remove web-search to avoid duplicate hooks:
-# claude plugin uninstall web-search@corca-plugins
-```
+Unified requirement clarification that merges the best of clarify v1, deep-clarify, and interview into a single skill. Two modes: research-first (default) and lightweight direct Q&A (`--light`). Originally based on Team Attention's [Clarify skill](https://github.com/team-attention/plugins-for-claude-natives/blob/main/plugins/clarify/SKILL.md).
 
-**Command mapping**:
-| Old (web-search) | New (gather-context) |
-|---|---|
-| `/web-search <query>` | `/gather-context --search <query>` |
-| `/web-search code <query>` | `/gather-context --search code <query>` |
-| `/web-search --news <query>` | `/gather-context --search --news <query>` |
-| `/web-search --deep <query>` | `/gather-context --search --deep <query>` |
-| `/web-search extract <url>` | `/gather-context <url>` |
+**Usage**:
+- `/clarify <requirement>` — research-first (default)
+- `/clarify <requirement> --light` — direct Q&A, no sub-agents
+
+**Default mode** (research-first):
+1. Capture & decompose requirement into decision points
+2. Parallel research: codebase exploration + web/best-practice research (uses gather-context if installed, falls back to built-in tools)
+3. Tier classification: T1 (codebase-resolved) → auto-decide, T2 (best-practice-resolved) → auto-decide, T3 (subjective) → ask human
+4. Advisory sub-agents argue opposing perspectives for T3 items
+5. Persistent questioning with why-digging and tension detection
+6. Output: decision table + clarified requirement
+
+**--light mode** (direct Q&A):
+- Iterative questioning via AskUserQuestion
+- Why-digging on surface-level answers
+- Tension detection between answers
+- Before/After comparison output
+
+**Key features**:
+- Researches autonomously before asking — only asks about genuinely subjective decisions
+- Integrates with gather-context for research (graceful fallback when not installed)
+- Persistent questioning: why-digs 2-3 levels, detects contradictions
+- Skips advisory and questioning phases entirely when all items are resolvable
+- Adapts to user's language (Korean/English)
+
+### [retro](plugins/retro/skills/retro/SKILL.md)
+
+**Install**: `claude plugin install retro@corca-plugins` | **Update**: `claude plugin update retro@corca-plugins`
+
+Adaptive session retrospective. If `lessons.md` in the [Plan & Lessons Protocol](plugins/plan-and-lessons/protocol.md) is a progressively accumulated learning log, `retro` is a "full-session, bird's-eye" retrospective. Light by default (fast, low cost); use `--deep` for full expert analysis.
+
+**Usage**:
+- End of a session (light): `/retro`
+- Full analysis with expert lens: `/retro --deep`
+- With a specific directory: `/retro prompt-logs/260130-my-session`
+
+**Modes**:
+- **Light** (default): Sections 1-4 + 7. No sub-agents, no web search. Agent auto-selects based on session weight.
+- **Deep** (`--deep`): Full 7 sections including Expert Lens (parallel sub-agents) and Learning Resources (web search).
+
+**Key features**:
+- Documents user/org/project context that will help future work
+- Observes working style and collaboration patterns and suggests CLAUDE.md updates (applies only with user approval)
+- Waste Reduction analysis: identifies wasted turns, over-engineering, missed shortcuts, context waste, and communication inefficiencies
+- Analyzes critical decisions using Gary Klein's CDM (Critical Decision Method) with session-specific probes
+- Expert Lens (deep only): parallel sub-agents adopt real expert identities to analyze the session through contrasting frameworks
+- Learning Resources (deep only): web-searched resources tailored to the user's knowledge level
+- Scans installed skills for relevance before suggesting external skill discovery
+
+**Outputs**:
+- `prompt-logs/{YYMMDD}-{NN}-{title}/retro.md` — saved alongside plan.md and lessons.md
+
+### [refactor](plugins/refactor/skills/refactor/SKILL.md)
+
+**Install**: `claude plugin install refactor@corca-plugins` | **Update**: `claude plugin update refactor@corca-plugins`
+
+Multi-mode code and skill review tool. Five modes for different review scopes — from a quick structural scan to full cross-plugin analysis. Absorbs suggest-tidyings' commit-based tidying workflow.
+
+**Usage**:
+- `/refactor` — quick scan all marketplace skills
+- `/refactor --code [branch]` — commit-based tidying (parallel sub-agents)
+- `/refactor --skill <name>` — deep review of a single skill
+- `/refactor --skill --holistic` — cross-plugin analysis
+- `/refactor --docs` — documentation consistency review
+
+**Modes**:
+- **Quick scan** (no args): Runs structural checks on all marketplace SKILL.md files — word/line count, unreferenced resources, Anthropic compliance (kebab-case, description length). Outputs a summary table with flags.
+- **Code tidying** (`--code`): Analyzes recent non-tidying commits for safe refactoring opportunities. Parallel sub-agents apply 8 tidying techniques (guard clauses, dead code, explaining variables, etc.) from Kent Beck's "Tidy First?" philosophy.
+- **Deep review** (`--skill <name>`): Evaluates a single skill against Progressive Disclosure criteria + Anthropic compliance. Produces a structured report with prioritized refactoring suggestions.
+- **Holistic** (`--skill --holistic`): Cross-plugin analysis across three dimensions — pattern propagation, boundary issues, missing connections. Saves report to `prompt-logs/`.
+- **Docs review** (`--docs`): Checks consistency between CLAUDE.md, README, project-context.md, marketplace.json, and plugin.json files. Flags dead links, stale references, and structural mismatches.
 
 ## Hooks
 
@@ -340,20 +283,50 @@ CLAUDE_CORCA_PROMPT_LOGGER_ENABLED=false              # Disable logging (default
 CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE=20                # Truncation threshold in lines (default: 10)
 ```
 
-## Removed skills
+## Deprecated & Removed Plugins
 
-The following skills were removed in v1.8.0. The same functionality is now built into [gather-context](#gather-context).
+### Deprecated plugins
 
-| Removed skill | Replacement |
+| Plugin | Status | Replacement | Migration |
+|--------|--------|-------------|-----------|
+| [suggest-tidyings](plugins/suggest-tidyings/skills/suggest-tidyings/SKILL.md) | Deprecated in v2.0.0 | [refactor](#refactor) `--code` | `claude plugin install refactor@corca-plugins` |
+| [deep-clarify](plugins/deep-clarify/skills/deep-clarify/SKILL.md) | Deprecated in v1.9.0 | [clarify](#clarify) | `claude plugin install clarify@corca-plugins` |
+| [interview](plugins/interview/skills/interview/SKILL.md) | Deprecated in v1.9.0 | [clarify](#clarify) | `claude plugin install clarify@corca-plugins` |
+| [web-search](plugins/web-search/skills/web-search/SKILL.md) | Deprecated in v1.10.0 | [gather-context](#gather-context) | `claude plugin install gather-context@corca-plugins` |
+
+**suggest-tidyings → refactor command mapping**:
+| Old (suggest-tidyings) | New (refactor) |
+|---|---|
+| `/suggest-tidyings` | `/refactor --code` |
+| `/suggest-tidyings <branch>` | `/refactor --code <branch>` |
+
+**deep-clarify → clarify command mapping**:
+| Old (deep-clarify) | New (clarify) |
+|---|---|
+| `/deep-clarify <requirement>` | `/clarify <requirement>` |
+
+**interview → clarify command mapping**:
+| Old (interview) | New (clarify) |
+|---|---|
+| `/interview <topic>` | `/clarify <requirement>` (default mode) |
+| `/interview <topic>` (quick) | `/clarify <requirement> --light` |
+
+**web-search → gather-context command mapping**:
+| Old (web-search) | New (gather-context) |
+|---|---|
+| `/web-search <query>` | `/gather-context --search <query>` |
+| `/web-search code <query>` | `/gather-context --search code <query>` |
+| `/web-search --news <query>` | `/gather-context --search --news <query>` |
+| `/web-search --deep <query>` | `/gather-context --search --deep <query>` |
+| `/web-search extract <url>` | `/gather-context <url>` |
+
+### Removed plugins (v1.8.0)
+
+| Removed plugin | Replacement |
 |------------|------|
 | `g-export` | `gather-context` (built-in Google Docs/Slides/Sheets) |
 | `slack-to-md` | `gather-context` (built-in Slack thread export) |
 | `notion-to-md` | `gather-context` (built-in Notion page export) |
-
-**Migration**:
-```bash
-claude plugin install gather-context@corca-plugins
-```
 
 ## License
 

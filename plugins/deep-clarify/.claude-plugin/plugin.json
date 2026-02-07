@@ -1,7 +1,11 @@
 {
   "name": "deep-clarify",
-  "description": "A skill that autonomously researches requirements through codebase exploration and best practice analysis, only asking humans about genuinely subjective decisions",
+  "description": "DEPRECATED — use clarify v2 instead. Research-first requirement clarification with autonomous decision-making",
   "version": "1.0.0",
-  "author": { "name": "Corca", "url": "https://www.corca.ai/" },
+  "deprecated": true,
+  "author": {
+    "name": "Corca",
+    "url": "https://www.corca.ai/"
+  },
   "repository": "https://github.com/corca-ai/claude-plugins"
 }
