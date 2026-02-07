@@ -85,6 +85,28 @@ if [[ "$in_marketplace" == "true" && -n "$plugin_json_version" ]]; then
   fi
 fi
 
+# --- 3b. Deprecated flag consistency ---
+if [[ "$in_marketplace" == "true" ]]; then
+  marketplace_deprecated=false
+  plugin_json_deprecated=false
+  if command -v jq &>/dev/null; then
+    marketplace_deprecated=$(jq -r --arg name "$PLUGIN_NAME" '.plugins[] | select(.name == $name) | .deprecated // false' "$MARKETPLACE_JSON" 2>/dev/null || echo "false")
+    if [[ -f "$PLUGIN_JSON" ]]; then
+      plugin_json_deprecated=$(jq -r '.deprecated // false' "$PLUGIN_JSON" 2>/dev/null || echo "false")
+    fi
+  else
+    if grep -A5 "\"name\": \"$PLUGIN_NAME\"" "$MARKETPLACE_JSON" | grep -q '"deprecated": true'; then
+      marketplace_deprecated=true
+    fi
+    if [[ -f "$PLUGIN_JSON" ]] && grep -q '"deprecated": true' "$PLUGIN_JSON"; then
+      plugin_json_deprecated=true
+    fi
+  fi
+  if [[ "$marketplace_deprecated" != "$plugin_json_deprecated" ]]; then
+    gaps+=("Deprecated flag mismatch: marketplace.json=$marketplace_deprecated, plugin.json=$plugin_json_deprecated")
+  fi
+fi
+
 # --- 4. README checks ---
 readme_en_mentioned=false
 if grep -qi "$PLUGIN_NAME" "$README_EN" 2>/dev/null; then
@@ -137,10 +159,10 @@ if [[ "$has_skill" == "true" && -n "$skill_md" ]]; then
     skill_md_words=$(wc -w < "$skill_md_full" | tr -d ' ')
     if [[ "$skill_md_words" -gt 5000 ]]; then
       skill_md_severity="error"
-      gaps+=("skill_md_large: SKILL.md is ${skill_md_words} words (>5000) — consider running /refactor-skill $PLUGIN_NAME")
+      gaps+=("skill_md_large: SKILL.md is ${skill_md_words} words (>5000) — consider running /refactor --skill $PLUGIN_NAME")
     elif [[ "$skill_md_words" -gt 3000 ]]; then
       skill_md_severity="warning"
-      gaps+=("skill_md_large: SKILL.md is ${skill_md_words} words (>3000) — consider running /refactor-skill $PLUGIN_NAME")
+      gaps+=("skill_md_large: SKILL.md is ${skill_md_words} words (>3000) — consider running /refactor --skill $PLUGIN_NAME")
     fi
   fi
 fi
