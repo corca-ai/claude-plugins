@@ -9,5 +9,5 @@
 - [x] 4. project-context.md version sync and S1 convention reference
 - [x] 5. README review — no content issues (fence fixes were unnecessary)
 - [x] 6. Run markdownlint validation — 0 errors across 37 files
-- [ ] 7. `/plugin-deploy` for attention-hook (version bump 2.1.1 → 2.2.0)
-- [ ] 8. Commit, push, `bash scripts/update-all.sh`
+- [x] 7. `/plugin-deploy` for attention-hook — 0 gaps, 48/48 tests passed
+- [x] 8. Commit, push, `bash scripts/update-all.sh` — 9/9 plugins updated

@@ -89,3 +89,21 @@ bare fence 수정을 위해 6개의 서브에이전트를 병렬 실행했지만
 ### Skill Gaps
 
 추가 스킬 갭 없음. 이번 세션은 기존 도구로 충분히 커버됨.
+
+---
+
+### Post-Retro Findings
+
+**next-session.md 핸드오프 chain 끊어짐**
+
+S2 완료 후 S3용 `next-session.md`가 생성되지 않았음. 후속 세션에서 발견.
+
+**5 Whys:**
+1. 왜 next-session.md를 안 만들었나? → S2의 plan과 CLAUDE.md 워크플로우에 해당 단계가 없었기 때문
+2. 왜 plan에 포함되지 않았나? → S1이 작성한 S2용 next-session.md에 "After Completion" 섹션이 없었기 때문
+3. 왜 S1의 핸드오프에는 있고 S2에는 없었나? → S0의 next-session.md에만 명시적 체크리스트가 있었고, S1이 S2용을 작성할 때 해당 패턴을 전파하지 않았기 때문
+4. 왜 프로토콜에 포함되지 않았나? → 핸드오프 컨벤션이 master-plan.md에만 존재하고, 매 세션이 자동으로 참조하는 문서(CLAUDE.md, retro, plan-and-lessons)에는 없기 때문
+
+**분류**: 프로세스 갭 — 컨벤션이 참조 문서에만 있고, 실행 프로토콜에 포함되지 않아 전파가 끊어짐.
+
+**해결**: S3용 next-session.md에 "After Completion" 체크리스트를 명시적으로 포함하여 chain 유지. CLAUDE.md 추가는 보류 (master plan 방식을 계속 쓸지 미정).
