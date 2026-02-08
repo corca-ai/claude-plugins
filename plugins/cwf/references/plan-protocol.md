@@ -55,7 +55,7 @@ Write the plan in English. The plan is primarily for the agent, not the user.
 
 Before finalizing the plan, search for frameworks, methodologies, or prior art relevant to the task. Someone has likely thought about this problem before. The cost of a quick search is low; the potential value of discovering a better approach is high.
 
-Use `/gather-context --search` or equivalent to find: established frameworks, best practices, common patterns, or cautionary tales related to the task domain.
+Use `cwf:gather --search` or equivalent to find: established frameworks, best practices, common patterns, or cautionary tales related to the task domain.
 
 ### Timing
 

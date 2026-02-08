@@ -99,6 +99,13 @@ sessions:
     completed_at: "2026-02-08"
     summary: "Created machine-readable SSOT for session history, updated handoff template"
 
+  - id: S7
+    title: "Migrate gather-context → cwf:gather"
+    dir: prompt-logs/260208-15-s7-cwf-gather-migration
+    branch: marketplace-v3
+    completed_at: "2026-02-08"
+    summary: "Copied gather-context skill into CWF as cwf:gather (8 scripts, 6 references, adapted SKILL.md), activated WebSearch redirect hook"
+
 # External tool availability (detected by cwf:setup)
 tools:
   codex: available
