@@ -1,108 +1,118 @@
-# S14 Handoff — Integration Test & Merge to Main
+# S14 Handoff — Master Plan Review + Integration & Merge
 
 ## Context Files to Read
 
 1. `CLAUDE.md` — project rules and protocols
 2. `docs/plugin-dev-cheatsheet.md` — plugin development patterns
 3. `cwf-state.yaml` — session history and project state
-4. `prompt-logs/260208-03-cwf-v3-master-plan/master-plan.md` — architecture decisions, session roadmap
+4. `prompt-logs/260208-03-cwf-v3-master-plan/master-plan.md` — architecture decisions, target inventory, session roadmap
 5. `plugins/cwf/.claude-plugin/plugin.json` — current version (0.7.0)
 6. `plugins/cwf/hooks/hooks.json` — hook definitions
-7. `prompt-logs/260208-23-s13-holistic-refactor/plan.md` — S13 review results (all PASS)
-8. `prompt-logs/260208-23-s13-holistic-refactor/lessons.md` — S13 learnings
+7. `plugins/cwf/references/skill-conventions.md` — shared skill structure conventions
+8. `prompt-logs/260208-23-s13-holistic-refactor/plan.md` — S13 review results
+9. All `prompt-logs/*/lessons.md` and `prompt-logs/*/retro.md` — accumulated learnings (S11a-S13 highest priority)
 
 ## Task Scope
 
-Final integration: migrate `cwf:review` into CWF plugin, deprecate old plugins,
-run end-to-end workflow test, update all docs, and merge `marketplace-v3` to `main`.
+Two-phase session: (A) comprehensive review against master plan, then (B) integration and merge.
 
-### What to Do
+### Phase A: Master Plan Review (`cwf:review`)
 
-1. **Migrate cwf:review**: Copy `plugins/review/` skill into `plugins/cwf/skills/review/`
-   with SKILL.md, references, and scripts. Adapt to CWF patterns (Language declaration,
-   Rules section, reference links using `../../references/`).
+Use `cwf:review --mode code` (or appropriate mode) to evaluate the entire CWF plugin
+and marketplace structure against the master plan.
 
-2. **End-to-end test**: Run the full CWF workflow in a test scenario:
-   - `cwf:setup` → detect tools, generate hook config
-   - `cwf:gather` → test URL and search modes
-   - `cwf:clarify` → test with a sample requirement
-   - `cwf:plan` → generate a plan
-   - `cwf:review --mode plan` → review the plan
-   - Verify all hooks fire correctly (lint, read guard, plan protocol)
+#### A1. Inventory Gap Analysis
 
-3. **Deprecate old plugins**: Mark all pre-CWF plugins as deprecated:
-   - `plugins/gather-context/`
-   - `plugins/clarify/`
-   - `plugins/plan-and-lessons/`
-   - `plugins/retro/`
-   - `plugins/refactor/`
-   - `plugins/review/`
-   - `plugins/attention-hook/`
-   - `plugins/smart-read/`
-   - `plugins/prompt-logger/`
-   - `plugins/markdown-guard/`
-   Update their `plugin.json` with deprecation notice.
+Compare master-plan target inventory against actual implementation:
 
-4. **Update marketplace.json**: Add `cwf` entry, mark deprecated plugins.
+- **10 target skills** (master-plan "Skill & Hook Inventory"): which are in `plugins/cwf/skills/`? which are missing?
+  - Expected: setup, update, gather, clarify, plan, impl, review, retro, refactor, handoff
+  - Known gap: `cwf:review` is still at `plugins/review/` (separate plugin), not in CWF
+- **7 hook groups** (master-plan "Infrastructure"): all present in hooks.json?
+- **Cross-cutting components**: cwf-state.yaml, cwf-hooks-enabled.sh, hooks.json, plugin.json, skill-conventions.md, agent-patterns.md, plan-protocol.md
+- Flag anything **extra** that wasn't in the master plan (scope creep)
 
-5. **Update README.md and README.ko.md**: New plugin table, install commands,
+#### A2. Lessons & Retro Audit
+
+Scan all `lessons.md` and `retro.md` from S0-S13. For each:
+
+- **Deferred Actions** (`- [ ]` items): have they been resolved or are they still open?
+- **Takeaway rules** (`When X → do Y`): are they reflected in CLAUDE.md, skill-conventions.md, or skill Rules sections?
+- **Weight by recency**: S11a-S13 items are highest priority (most recent, most likely to be unresolved)
+
+Produce a checklist:
+
+```text
+| Session | Item | Status | Where Reflected |
+|---------|------|--------|-----------------|
+| S12 | ExitPlanMode hook for lessons.md | Open | Not implemented |
+| S12 | impl → retro auto-chaining | Open | Not implemented |
+| S13 | 3+ pattern → extract to reference | Done | skill-conventions.md |
+```
+
+#### A3. Structural Consistency
+
+- marketplace.json ↔ plugin.json descriptions
+- README plugin tables ↔ actual plugins
+- cwf-state.yaml session entries ↔ actual prompt-logs/ directories
+- All reference links in all SKILL.md files resolve
+
+### Phase B: Integration & Merge
+
+After review findings are addressed:
+
+1. **Migrate cwf:review**: Copy `plugins/review/` skill into `plugins/cwf/skills/review/`.
+   Adapt to CWF conventions (see `skill-conventions.md`).
+
+2. **Deprecate old plugins**: Mark pre-CWF plugins as deprecated in their plugin.json.
+
+3. **Update marketplace.json**: Add `cwf` entry, mark deprecated plugins.
+
+4. **Update README.md and README.ko.md**: New plugin table, install commands,
    migration guide from individual plugins to cwf.
 
-6. **Version bump**: Update `plugin.json` to `1.0.0` (major: breaking change
-   from individual plugins to unified cwf).
+5. **Version bump**: `plugin.json` to `1.0.0` (major: breaking change).
 
-7. **Convert `.claude/skills/`**: If any local dev skills exist, convert to
-   plugin structure under `plugins/cwf/`.
-
-8. **Merge to main**: Create PR from `marketplace-v3` → `main`.
+6. **Merge to main**: Create PR from `marketplace-v3` → `main`.
 
 ### Key Design Points
 
-- This is the breaking change described in master-plan Decision #2
-- Old plugins are fully deprecated, not removed (users may need to uninstall)
-- `scripts/install.sh` already handles legacy flags with deprecation warnings
-- `scripts/update-all.sh` already handles the cwf-only workflow
+- **Review before merge**: Phase A findings may require fixes before Phase B proceeds
+- Phase A uses cwf:review as a dogfooding exercise (the tool reviews itself)
+- Old plugins are deprecated, not removed (users may need to uninstall)
+- `scripts/install.sh` and `scripts/update-all.sh` already handle cwf-only workflow
 
 ## Don't Touch
 
-- `prompt-logs/` — session history is read-only
-- Architecture decisions in `master-plan.md` — not up for debate in S14
-- Other non-CWF plugins (e.g., `plugin-deploy`, `claude-dashboard`)
+- `prompt-logs/` — session history is read-only (read for audit, don't modify)
+- Architecture decisions in `master-plan.md` — not up for debate
+- Non-CWF plugins (e.g., `plugin-deploy`, `claude-dashboard`)
 
 ## Lessons from Prior Sessions
 
 1. **Reference link depth** (S13): From `skills/{name}/SKILL.md`, shared references are at `../../references/`. Copy from setup or handoff as template.
-2. **Rules section required** (S13): Every skill must have `## Rules` before `## References`.
-3. **Language declaration pattern** (S13): `**Language**: Write {artifact type} in English. Communicate with the user in their prompt language.`
-4. **Never Write over existing files** (S12): Use Edit for appending to existing files.
-5. **Dogfooding rule in CLAUDE.md** (S12): Dynamic discovery via `skills/` directory, no hardcoded lists.
-6. **Linter config is reasonable** (S13): `.markdownlint.json` already disables friction rules. shellcheck runs at default severity. Toggle via cwf:setup.
+2. **Skill conventions** (S13): All skills must follow `skill-conventions.md` — frontmatter, Language, Rules, References sections.
+3. **Pattern extraction** (S13): 3+ skills repeating same pattern → extract to shared reference.
+4. **Never Write over existing files** (S12): Use Edit for appending. Write replaces entire contents.
+5. **impl → retro gap** (S12): check-session.sh --impl validates artifacts but doesn't prompt retro. Still open.
+6. **ExitPlanMode lessons.md check** (S12): No hook validates lessons.md exists before plan approval. Still open.
+7. **Linter config is reasonable** (S13): 48/55 markdownlint rules active. shellcheck at default severity. Toggle via cwf:setup.
+8. **eval > state > doc hierarchy** (S11a): Prefer automated checks over doc rules.
 
 ## Success Criteria
 
 ```gherkin
-Given cwf:review skill is migrated into plugins/cwf/skills/review/
+Given master plan defines 10 skills and 7 hook groups
+When inventory gap analysis is run
+Then each item is accounted for (present, migrated, or explicitly deferred)
+
+Given S0-S13 have lessons.md and retro.md files
+When deferred actions are audited
+Then each is marked resolved, open, or intentionally deferred with reason
+
+Given cwf:review is migrated into plugins/cwf/skills/review/
 When markdownlint is run on the new SKILL.md
-Then 0 errors reported
-And reference links resolve correctly
-
-Given all old plugins are deprecated
-When their plugin.json files are checked
-Then each has a deprecation notice
-
-Given marketplace.json is updated
-When cwf entry is present
-Then description, version, and keywords are correct
-And deprecated plugins are marked
-
-Given README.md is updated
-When the plugin table is checked
-Then cwf is listed as the primary plugin
-And install commands reference cwf only
-
-Given the full workflow is tested end-to-end
-When cwf:setup, cwf:gather, cwf:clarify, cwf:plan, cwf:review are invoked
-Then each produces expected output without errors
+Then 0 errors reported and reference links resolve correctly
 
 Given marketplace-v3 is merged to main
 When update-all.sh is run on main
@@ -111,7 +121,7 @@ Then cwf plugin installs successfully
 
 ## Dependencies
 
-- Requires: S13 completed (all cross-cutting issues resolved)
+- Requires: S13 completed (holistic refactor, all cross-cutting issues resolved)
 - Blocks: Nothing (S14 is the final session)
 
 ## Dogfooding
@@ -123,7 +133,9 @@ instead of manual execution.
 ## Start Command
 
 ```text
-Read the context files listed above. Migrate cwf:review into the CWF plugin.
-Run end-to-end workflow test. Deprecate old plugins, update marketplace.json
-and READMEs. Version bump to 1.0.0. Merge marketplace-v3 to main.
+Read the context files listed above, especially master-plan.md and all
+lessons.md/retro.md files from S0-S13. Run cwf:review to audit the CWF
+plugin against the master plan. Produce the gap analysis and lessons audit
+checklist. Fix issues found. Then proceed to Phase B: migrate cwf:review,
+deprecate old plugins, update docs, version bump 1.0.0, merge to main.
 ```
