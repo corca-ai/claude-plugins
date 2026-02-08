@@ -118,3 +118,62 @@ When splitting work across agents, divide by **perspective** not by module:
 | Security/risk | Vulnerabilities, data exposure, auth issues |
 
 This prevents blind spots that occur when agents only review "their" files.
+
+## Review Synthesis Format
+
+`cwf:review` outputs structured narrative — not numerical scores.
+Numerical scoring creates false precision and invites mechanical thresholds
+("77% so it passes"). Narrative preserves context and trusts intelligent agents.
+
+### Verdict Levels
+
+| Verdict | Meaning |
+|---------|---------|
+| **Pass** | No concerns. Safe to proceed. |
+| **Conditional Pass** | Minor concerns that should be addressed, but not blocking. |
+| **Revise** | Significant concerns. Must address before proceeding. |
+
+### Output Template
+
+```text
+## Review Synthesis
+
+### Verdict: [Pass | Conditional Pass | Revise]
+[1-2 sentence summary of overall assessment]
+
+### Concerns (must address)
+- [Reviewer name: specific concern with context]
+
+### Suggestions (optional)
+- [Reviewer name: improvement idea]
+
+### Confidence Note
+[Note any disagreements between reviewers, or areas where confidence is low]
+```
+
+### Verification Input
+
+When `--mode plan` or `--mode code` is used, `cwf:review` receives
+the plan's success criteria as verification input:
+
+- **Behavioral criteria** (BDD-style Given/When/Then): checked as a pass/fail list
+- **Qualitative criteria** (narrative): addressed in the verdict prose
+
+## Design Principles
+
+### Deliberate Naivete
+
+From StrongDM's SW Factory: challenge internalized cost assumptions.
+Never reduce review depth, agent count, or verification thoroughness
+because "it costs too many tokens." If the design calls for 4 reviewers,
+run 4 reviewers. The question is "does this improve quality?" not
+"is this expensive?"
+
+### Shift Work
+
+Separate interactive work (human refining intent) from autonomous work
+(agent executing on fixed spec). `cwf-state.yaml` encodes this via
+`auto: true/false` per stage:
+
+- **Interactive** (auto: false): gather, clarify, plan — human in the loop
+- **Autonomous** (auto: true): impl → review → retro → commit — agent chains automatically
