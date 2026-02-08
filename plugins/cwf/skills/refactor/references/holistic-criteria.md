@@ -1,5 +1,7 @@
 # Holistic Analysis Framework
 
+<!-- Provenance: written at 5 skills, 7 hooks (S11a). Updated at 9 skills, 14 hooks (S13). -->
+
 Three dimensions for cross-plugin analysis. Apply each to the full plugin inventory.
 
 ## 1. Pattern Propagation

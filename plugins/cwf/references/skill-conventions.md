@@ -110,6 +110,27 @@ If the skill uses sub-agents, declare the pattern in the References section:
 Pattern names: Single, Adaptive, Agent team, 4 parallel.
 Must match the pattern declared in `agent-patterns.md`.
 
+## Reporting Principle
+
+When a skill produces quantitative output (counts, scores, coverage, violations), **provide enough context for the reader to assess significance without external knowledge.**
+
+The reader should never need to look up a denominator, baseline, or total to understand whether a number is good or bad.
+
+Examples:
+
+```text
+Bad:  "7 rules disabled"          → reader must know the total to judge
+Good: "7/55 rules disabled (13%)" → reader can judge immediately
+
+Bad:  "4 skills have broken refs" → is that a lot?
+Good: "4/9 skills (44%) have broken refs" → clearly significant
+
+Bad:  "3 errors found"            → compared to what?
+Good: "3 errors found (down from 12 in last review)" → trend is clear
+```
+
+This applies to analysis reports, quick scans, review summaries, and any skill output that includes numbers.
+
 ## Checklist for New Skills
 
 - [ ] Frontmatter: name, description (with Triggers), allowed-tools
@@ -129,3 +150,11 @@ Must match the pattern declared in `agent-patterns.md`.
 - [ ] Shared reference paths use `../../references/` (not `../references/` or `../../../references/`)
 - [ ] Agent pattern matches declaration in agent-patterns.md
 - [ ] No repeated patterns that should be extracted to shared references
+
+## Future Consideration: Self-Healing Criteria
+
+Reference guides and analysis criteria can become stale as the system grows. Proven case: `holistic-criteria.md` was written for 5 skills but missed analysis dimensions relevant to 9 skills (S13).
+
+**Idea**: Each guide/criteria file carries provenance metadata (system state at creation time). Skills check provenance against current state before applying the criteria. If significantly different, flag to the user before proceeding.
+
+This concept needs more failure cases before generalizing. Track occurrences and revisit post-v1.0 when usage data accumulates. See `holistic-criteria.md` for the first provenance implementation.
