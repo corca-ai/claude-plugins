@@ -36,7 +36,7 @@
     {
       "name": "attention-hook",
       "source": "./plugins/attention-hook",
-      "description": "A hook that sends Slack notifications when Claude Code is waiting",
+      "description": "Slack notifications with threading when Claude Code is waiting — idle alerts, AskUserQuestion prompts, plan mode approval, and periodic heartbeat status updates",
       "keywords": ["notification", "slack", "hook"]
     },
     {
@@ -48,7 +48,7 @@
     {
       "name": "smart-read",
       "source": "./plugins/smart-read",
-      "description": "A hook that enforces intelligent file reading based on file size",
+      "description": "A hook that enforces intelligent file reading based on file size — warns on medium files, blocks full reads on large files",
       "keywords": ["read", "file-size", "context", "hook", "guard"]
     },
     {

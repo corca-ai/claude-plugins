@@ -31,7 +31,7 @@ if [ -z "$THREAD_TS" ]; then
 fi
 
 # Check 2: Has user been idle long enough?
-IDLE_THRESHOLD="${CLAUDE_ATTENTION_HEARTBEAT_USER_IDLE:-300}"
+IDLE_THRESHOLD="${CLAUDE_CORCA_ATTENTION_HEARTBEAT_USER_IDLE:-${CLAUDE_ATTENTION_HEARTBEAT_USER_IDLE:-300}}"
 LAST_USER_FILE=$(slack_state_file "$HASH" "last-user-ts")
 if [ ! -f "$LAST_USER_FILE" ]; then
     exit 0
@@ -45,7 +45,7 @@ if [ "$IDLE_SECONDS" -lt "$IDLE_THRESHOLD" ]; then
 fi
 
 # Check 3: Has enough time passed since last heartbeat?
-HEARTBEAT_INTERVAL="${CLAUDE_ATTENTION_HEARTBEAT_INTERVAL:-300}"
+HEARTBEAT_INTERVAL="${CLAUDE_CORCA_ATTENTION_HEARTBEAT_INTERVAL:-${CLAUDE_ATTENTION_HEARTBEAT_INTERVAL:-300}}"
 HEARTBEAT_FILE=$(slack_state_file "$HASH" "heartbeat-ts")
 if [ -f "$HEARTBEAT_FILE" ]; then
     LAST_HEARTBEAT=$(cat "$HEARTBEAT_FILE")

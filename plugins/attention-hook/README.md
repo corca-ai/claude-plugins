@@ -114,9 +114,9 @@ Each session uses isolated state files at `/tmp/claude-attention-{hash}-*`:
 | `SLACK_BOT_TOKEN` | — | Bot token (`xoxb-...`) for Web API |
 | `SLACK_CHANNEL_ID` | — | Channel ID for `chat.postMessage` |
 | `SLACK_WEBHOOK_URL` | — | Legacy webhook (fallback, no threading) |
-| `CLAUDE_ATTENTION_DELAY` | `30` | AskUserQuestion / plan mode notification delay (seconds) |
-| `CLAUDE_ATTENTION_HEARTBEAT_USER_IDLE` | `300` | User idle time before heartbeat activates (seconds) |
-| `CLAUDE_ATTENTION_HEARTBEAT_INTERVAL` | `300` | Minimum interval between heartbeats (seconds) |
+| `CLAUDE_CORCA_ATTENTION_DELAY` | `30` | AskUserQuestion / plan mode notification delay (seconds). Old name `CLAUDE_ATTENTION_DELAY` still works as fallback. |
+| `CLAUDE_CORCA_ATTENTION_HEARTBEAT_USER_IDLE` | `300` | User idle time before heartbeat activates (seconds). Old name `CLAUDE_ATTENTION_HEARTBEAT_USER_IDLE` still works as fallback. |
+| `CLAUDE_CORCA_ATTENTION_HEARTBEAT_INTERVAL` | `300` | Minimum interval between heartbeats (seconds). Old name `CLAUDE_ATTENTION_HEARTBEAT_INTERVAL` still works as fallback. |
 
 ## Requirements
 

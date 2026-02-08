@@ -186,7 +186,7 @@ Claude Code가 입력을 기다릴 때 Slack 스레드로 알림을 보내는 �
 **주요 기능**:
 - **스레드 그룹화**: 첫 사용자 프롬프트가 부모 메시지를 생성하고, 이후 알림은 스레드 답글로 표시
 - **대기 알림**: 사용자 입력을 60초 이상 기다릴 때 (`idle_prompt`)
-- **AskUserQuestion 알림**: Claude가 질문 후 30초 이상 응답이 없을 때 (`CLAUDE_ATTENTION_DELAY`)
+- **AskUserQuestion 알림**: Claude가 질문 후 30초 이상 응답이 없을 때 (`CLAUDE_CORCA_ATTENTION_DELAY`)
 - **Plan 모드 알림**: Claude가 Plan 모드 진입/종료를 요청하고 30초 이상 응답이 없을 때
 - **하트비트 상태**: 장시간 자율 작업 중 주기적 상태 업데이트 (5분 이상 유휴)
 - **하위 호환**: `SLACK_WEBHOOK_URL`만 설정된 경우 스레딩 없이 기존 방식으로 동작
@@ -206,7 +206,7 @@ Claude Code가 입력을 기다릴 때 Slack 스레드로 알림을 보내는 �
 # ~/.claude/.env
 SLACK_BOT_TOKEN="xoxb-your-bot-token"
 SLACK_CHANNEL_ID="D0123456789"  # 봇 DM 채널 (또는 C...로 시작하는 채널 ID)
-CLAUDE_ATTENTION_DELAY=30  # AskUserQuestion 알림 지연 시간 (초, 기본값: 30)
+CLAUDE_CORCA_ATTENTION_DELAY=30  # AskUserQuestion 알림 지연 시간 (초, 기본값: 30)
 ```
 
 레거시 웹훅 설정(스레딩 없음)은 `SLACK_WEBHOOK_URL`을 대신 설정하세요. 자세한 내용은 [플러그인 README](plugins/attention-hook/README.md)를 참조하세요.

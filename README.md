@@ -186,7 +186,7 @@ Slack notifications with threading when Claude Code is waiting for input. All no
 **Key features**:
 - **Thread grouping**: first user prompt creates a parent message; subsequent notifications appear as thread replies
 - **Idle notification**: when Claude waits 60+ seconds for input (`idle_prompt`)
-- **AskUserQuestion notification**: when Claude asks a question and gets no response for 30+ seconds (`CLAUDE_ATTENTION_DELAY`)
+- **AskUserQuestion notification**: when Claude asks a question and gets no response for 30+ seconds (`CLAUDE_CORCA_ATTENTION_DELAY`)
 - **Plan mode notification**: when Claude enters or exits plan mode and gets no response for 30+ seconds
 - **Heartbeat status**: periodic updates during long autonomous operations (5+ min idle)
 - **Backward compatible**: falls back to webhook (no threading) if only `SLACK_WEBHOOK_URL` is set
@@ -206,7 +206,7 @@ Slack notifications with threading when Claude Code is waiting for input. All no
 # ~/.claude/.env
 SLACK_BOT_TOKEN="xoxb-your-bot-token"
 SLACK_CHANNEL_ID="D0123456789"  # Bot DM channel (or C... for channels)
-CLAUDE_ATTENTION_DELAY=30  # AskUserQuestion notification delay in seconds (default: 30)
+CLAUDE_CORCA_ATTENTION_DELAY=30  # AskUserQuestion notification delay in seconds (default: 30)
 ```
 
 For legacy webhook setup (no threading), set `SLACK_WEBHOOK_URL` instead. See [plugin README](plugins/attention-hook/README.md) for details.

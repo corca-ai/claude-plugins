@@ -26,7 +26,7 @@ else
 fi
 
 # Configurable delay (seconds)
-DELAY_SECONDS="${CLAUDE_ATTENTION_DELAY:-30}"
+DELAY_SECONDS="${CLAUDE_CORCA_ATTENTION_DELAY:-${CLAUDE_ATTENTION_DELAY:-30}}"
 
 # Debug: log that this script was called
 echo "$(date): start-timer.sh called (session: ${SESSION_ID:-unknown})" >> "$DEBUG_LOG"
