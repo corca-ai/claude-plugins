@@ -149,6 +149,18 @@ sessions:
     summary: "Created cwf:impl skill with 4-phase orchestration (Load Plan → Analyze & Decompose → Execute 3a/3b → Verify), adaptive team sizing, domain signal table"
     artifacts: [plan.md, lessons.md, retro.md, next-session.md]
 
+  - id: S11a
+    title: "Migrate retro → cwf:retro"
+    dir: prompt-logs/260208-20-s11a-cwf-retro
+    branch: marketplace-v3
+    completed_at: "2026-02-08"
+    summary: "Migrated retro v2.0.2 into CWF as cwf:retro with 2-batch parallel sub-agent design for deep mode and eval>state>doc persist hierarchy"
+
+  - id: S11b
+    title: "Migrate refactor → cwf:refactor"
+    dir: prompt-logs/260208-21-s11b-cwf-refactor
+    branch: marketplace-v3
+
 # External tool availability (detected by cwf:setup)
 tools:
   codex: available
