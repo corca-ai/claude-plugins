@@ -1,0 +1,9 @@
+target: holistic-criteria.md
+written_session: S11a
+last_reviewed: S13.5
+skill_count: 9
+hook_count: 13
+designed_for:
+  - "Cross-plugin analysis across 9 CWF skills with single-mode routing"
+  - "13 hook scripts in 7 functional groups"
+  - "Pattern propagation, boundary, and connection dimensions"

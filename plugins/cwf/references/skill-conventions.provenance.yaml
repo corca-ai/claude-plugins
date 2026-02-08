@@ -1,0 +1,8 @@
+target: skill-conventions.md
+written_session: S13
+last_reviewed: S13.5
+skill_count: 9
+hook_count: 13
+designed_for:
+  - "Structural conventions for 9 CWF skills"
+  - "Checklist covers frontmatter, language, phases, rules, references"

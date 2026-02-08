@@ -1,0 +1,8 @@
+target: project-context.md
+written_session: S7
+last_reviewed: S13.5
+skill_count: 9
+hook_count: 13
+designed_for:
+  - "Accumulated architecture patterns and conventions across S0-S13"
+  - "Plugin listing, hook configuration, process heuristics"
