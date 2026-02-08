@@ -23,3 +23,9 @@ When migrating sourced utilities → copy verbatim, no gate needed.
 
 - **Expected**: Per cheatsheet, `&&` chains under `set -e` are problematic
 - **Actual**: Changed to `if [ -z "$CWD" ]; then CWD="$PWD"; fi` pattern during migration for safety under `set -e`
+
+### Handoff gap: master-plan.md roadmap not updated after S5a/S5b
+
+- **Expected**: Each session marks its roadmap entry as "(done)" before handoff
+- **Actual**: S5a and S5b completed but master-plan.md roadmap still showed them unmarked. Next session agent (S6b) had to guess project status from branch state.
+- **Takeaway**: The handoff template says "edit THIS master-plan.md" but doesn't enforce roadmap status updates. Two fixes needed: (1) always mark session as "(done)" in roadmap before committing, (2) implement `cwf-state.yaml` as machine-readable SSOT so agents don't depend on scanning markdown for status. This is scheduled as the next session task.

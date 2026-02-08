@@ -377,10 +377,10 @@ Source: `prompt-logs/260208-01-refactor-review/`
 | **S4** (done) | marketplace-v3 | Scaffold `plugins/cwf/`, plugin.json, hooks.json, `cwf-hook-gate.sh`, `cwf-state.yaml` | Verify plugin loads in clean session. |
 | **S4.5** (done) | marketplace-v3 | Improve `/ship` skill — Korean templates, decision extraction, autonomous merge | Test: full ship cycle with new templates. |
 | **S4.6** (done) | marketplace-v3 | SW Factory analysis — scenario-driven verification, narrative verdicts, progressive disclosure index | Analysis documented in master-plan.md decisions #16–#20. |
-| **S5a** | feat/cwf-review | Build `cwf:review` — internal reviewers (security + ux via Task) | Test with sample plan/code input. |
-| **S5b** | feat/cwf-review | `cwf:review` — external CLI integration (codex + gemini) + fallback | Test with/without CLIs installed. **Gemini**: test error handling first (not logged in) → login → test normal flow. |
+| **S5a** (done) | feat/cwf-review | Build `cwf:review` — internal reviewers (security + ux via Task) | Test with sample plan/code input. |
+| **S5b** (done) | feat/cwf-review | `cwf:review` — external CLI integration (codex + gemini) + fallback | Test with/without CLIs installed. **Gemini**: test error handling first (not logged in) → login → test normal flow. |
 | **S6a** (done) | marketplace-v3 | Migrate simple infra hooks (read, log, lint-markdown) into cwf stubs | 8/8 tests pass, byte-identical diff verified. |
-| **S6b** | feat/cwf-infra | Migrate attention-hook (8 scripts, complex state) + add check-shell.sh | Test all attention-hook event paths. |
+| **S6b** (done) | feat/cwf-infra | Migrate attention-hook (8 scripts, complex state) + add check-shell.sh + enter-plan-mode + check-shell | Test all attention-hook event paths. |
 | **S7** | feat/cwf-gather | Migrate gather-context → `cwf:gather` with adaptive team | Test single + team modes. |
 | **S8** | feat/cwf-clarify | Migrate clarify → `cwf:clarify` + `cwf:review --mode clarify` integration | End-to-end clarify → review flow. |
 | **S9** | feat/cwf-plan | Migrate plan-and-lessons hook + new plan skill with agent team | Test plan drafting + review. |
