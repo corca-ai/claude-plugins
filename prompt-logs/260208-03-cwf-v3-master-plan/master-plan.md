@@ -21,7 +21,7 @@ Reference: compound-engineering (16 skills, v2.30.0) and superpowers
 |---|----------|--------|
 | 1 | Single `cwf` plugin | All skills + hooks in `plugins/cwf/`. Required for `cwf:*` naming. |
 | 2 | Breaking change | Old plugins fully deprecated at merge. Migration script in final session. |
-| 3 | Umbrella branch | `marketplace-v3` branch + feature branches per task → main merge |
+| 3 | Umbrella branch | `marketplace-v3` branch + feature branches per task → main merge. **Dev as repo-level skills** (`.claude/skills/`) for dogfooding; convert to plugin structure at merge. |
 | 4 | Hook selective activation | Dual-file: `cwf-config.json` (skills read) + `cwf-hooks-enabled.sh` (hooks source). `cwf:setup` generates both. |
 | 5 | Infra = hooks + setup subcommands | No standalone infra skills. `cwf:setup` manages hook config. |
 | 6 | setup + update separated | `cwf:setup` = initial config + hook selection. `cwf:update` = version update + changelog. |
@@ -244,40 +244,43 @@ Source: `prompt-logs/260208-01-refactor-review/`
 
 | Session | Branch | Task | Review/Test/Docs |
 |---------|--------|------|------------------|
-| **S0** (this) | main | Clarify + master plan | Plan reviewed by 2 sub-agents |
-| **S1** | main | Refactor: critical fixes + `set -euo pipefail` + shebang | Test each fixed script. Update project-context.md. |
+| **S0** (done) | main | Clarify + master plan | Plan reviewed by 2 sub-agents |
+| **S1** (done) | main | Refactor: critical fixes + `set -euo pipefail` + shebang | Test each fixed script. Update project-context.md. |
 | **S2** | main | Refactor: bare code fences + env var migration + description sync + CLAUDE.md/project-context.md refactoring | `/refactor --docs` for validation. Update READMEs if affected. |
-| **S3** | marketplace-v3 | Scaffold `plugins/cwf/`, plugin.json, hooks.json, `cwf-hook-gate.sh`, `cwf-state.yaml` | Verify plugin loads in clean session. |
-| **S4a** | feat/cwf-review | Build `cwf:review` — internal reviewers (security + ux via Task) | Test with sample plan/code input. |
-| **S4b** | feat/cwf-review | `cwf:review` — external CLI integration (codex + gemini) + fallback | Test with/without CLIs installed. |
-| **S5a** | feat/cwf-infra | Migrate simple infra hooks (read, log, lint-markdown) + `cwf-hook-gate.sh` wiring | Test hook enable/disable via config. |
-| **S5b** | feat/cwf-infra | Migrate attention-hook (8 scripts, complex state) + add check-shell.sh | Test all attention-hook event paths. |
-| **S6** | feat/cwf-gather | Migrate gather-context → `cwf:gather` with adaptive team | Test single + team modes. |
-| **S7** | feat/cwf-clarify | Migrate clarify → `cwf:clarify` + `cwf:review --mode clarify` integration | End-to-end clarify → review flow. |
-| **S8** | feat/cwf-plan | Migrate plan-and-lessons hook + new plan skill with agent team | Test plan drafting + review. |
-| **S9** | feat/cwf-impl | Build `cwf:impl` (domain experts → decompose → team) | Test with a real small task. |
-| **S10a** | feat/cwf-retro | Migrate retro with parallel sub-agent enhancement | Compare output quality vs v2. |
-| **S10b** | feat/cwf-refactor | Migrate refactor with parallel sub-agent enhancement | Compare output quality vs v2. |
-| **S11** | feat/cwf-setup | Build `cwf:setup` + `cwf:update` + `cwf:handoff`. Rewrite `install.sh` + `update-all.sh`. Migration script. | Full setup flow on clean machine (or simulated). |
-| **S12** | marketplace-v3 | Holistic refactor review on entire cwf plugin | Use `cwf:refactor --holistic` on itself. |
-| **S13** | marketplace-v3 | Integration test, deprecate old plugins, final docs, merge to main | Full workflow end-to-end test. |
+| **S3** | marketplace-v3 | **Build `/ship` skill** — gh CLI workflow automation: issue creation (purpose/success criteria), PR creation (lessons/CDM/review checklist), auto-merge on approval. Repo-level skill (`.claude/skills/ship/`). | Test: create issue → branch → PR → merge cycle. |
+| **S4** | marketplace-v3 | Scaffold `plugins/cwf/`, plugin.json, hooks.json, `cwf-hook-gate.sh`, `cwf-state.yaml` | Verify plugin loads in clean session. |
+| **S5a** | feat/cwf-review | Build `cwf:review` — internal reviewers (security + ux via Task) | Test with sample plan/code input. |
+| **S5b** | feat/cwf-review | `cwf:review` — external CLI integration (codex + gemini) + fallback | Test with/without CLIs installed. **Gemini**: test error handling first (not logged in) → login → test normal flow. |
+| **S6a** | feat/cwf-infra | Migrate simple infra hooks (read, log, lint-markdown) + `cwf-hook-gate.sh` wiring | Test hook enable/disable via config. |
+| **S6b** | feat/cwf-infra | Migrate attention-hook (8 scripts, complex state) + add check-shell.sh | Test all attention-hook event paths. |
+| **S7** | feat/cwf-gather | Migrate gather-context → `cwf:gather` with adaptive team | Test single + team modes. |
+| **S8** | feat/cwf-clarify | Migrate clarify → `cwf:clarify` + `cwf:review --mode clarify` integration | End-to-end clarify → review flow. |
+| **S9** | feat/cwf-plan | Migrate plan-and-lessons hook + new plan skill with agent team | Test plan drafting + review. |
+| **S10** | feat/cwf-impl | Build `cwf:impl` (domain experts → decompose → team) | Test with a real small task. |
+| **S11a** | feat/cwf-retro | Migrate retro with parallel sub-agent enhancement | Compare output quality vs v2. |
+| **S11b** | feat/cwf-refactor | Migrate refactor with parallel sub-agent enhancement | Compare output quality vs v2. |
+| **S12** | feat/cwf-setup | Build `cwf:setup` + `cwf:update` + `cwf:handoff`. Rewrite `install.sh` + `update-all.sh`. Migration script. | Full setup flow on clean machine (or simulated). |
+| **S13** | marketplace-v3 | Holistic refactor review on entire cwf plugin | Use `cwf:refactor --holistic` on itself. |
+| **S14** | marketplace-v3 | Integration test, deprecate old plugins, final docs, convert `.claude/skills/` → `plugins/cwf/`, merge to main | Full workflow end-to-end test. |
 
 ### Session Dependencies
 
 ```text
-S1 → S2 → S3 (scaffold)
+S1 → S2 → S3 (ship skill — enables workflow for all v3 sessions)
               ↓
-         S4a → S4b (review must exist first)
+         S4 (scaffold)
               ↓
-         S5a → S5b (infra hooks)
+         S5a → S5b (review must exist first)
               ↓
-         S6 → S7 → S8 → S9 (workflow stages, review available)
+         S6a → S6b (infra hooks)
               ↓
-         S10a, S10b (can be parallel)
+         S7 → S8 → S9 → S10 (workflow stages, review available)
               ↓
-         S11 (setup/update/handoff, needs all skills)
+         S11a, S11b (can be parallel)
               ↓
-         S12 → S13
+         S12 (setup/update/handoff, needs all skills)
+              ↓
+         S13 → S14
 ```
 
 ## Handoff Template (for S1+)
