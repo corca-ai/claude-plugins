@@ -372,9 +372,11 @@ Source: `prompt-logs/260208-01-refactor-review/`
 |---------|--------|------|------------------|
 | **S0** (done) | main | Clarify + master plan | Plan reviewed by 2 sub-agents |
 | **S1** (done) | main | Refactor: critical fixes + `set -euo pipefail` + shebang | Test each fixed script. Update project-context.md. |
-| **S2** | main | Refactor: bare code fences + env var migration + description sync + CLAUDE.md/project-context.md refactoring | `/refactor --docs` for validation. Update READMEs if affected. |
-| **S3** | marketplace-v3 | **Build `/ship` skill** — gh CLI workflow automation: issue creation (purpose/success criteria), PR creation (lessons/CDM/review checklist), auto-merge on approval. Repo-level skill (`.claude/skills/ship/`). | Test: create issue → branch → PR → merge cycle. |
-| **S4** | marketplace-v3 | Scaffold `plugins/cwf/`, plugin.json, hooks.json, `cwf-hook-gate.sh`, `cwf-state.yaml` | Verify plugin loads in clean session. |
+| **S2** (done) | main | Refactor: bare code fences + env var migration + description sync + CLAUDE.md/project-context.md refactoring | `/refactor --docs` for validation. Update READMEs if affected. |
+| **S3** (done) | marketplace-v3 | **Build `/ship` skill** — gh CLI workflow automation: issue creation (purpose/success criteria), PR creation (lessons/CDM/review checklist), auto-merge on approval. Repo-level skill (`.claude/skills/ship/`). | Test: create issue → branch → PR → merge cycle. |
+| **S4** (done) | marketplace-v3 | Scaffold `plugins/cwf/`, plugin.json, hooks.json, `cwf-hook-gate.sh`, `cwf-state.yaml` | Verify plugin loads in clean session. |
+| **S4.5** (done) | marketplace-v3 | Improve `/ship` skill — Korean templates, decision extraction, autonomous merge | Test: full ship cycle with new templates. |
+| **S4.6** (done) | marketplace-v3 | SW Factory analysis — scenario-driven verification, narrative verdicts, progressive disclosure index | Analysis documented in master-plan.md decisions #16–#20. |
 | **S5a** | feat/cwf-review | Build `cwf:review` — internal reviewers (security + ux via Task) | Test with sample plan/code input. |
 | **S5b** | feat/cwf-review | `cwf:review` — external CLI integration (codex + gemini) + fallback | Test with/without CLIs installed. **Gemini**: test error handling first (not logged in) → login → test normal flow. |
 | **S6a** | feat/cwf-infra | Migrate simple infra hooks (read, log, lint-markdown) + `cwf-hook-gate.sh` wiring | Test hook enable/disable via config. |
