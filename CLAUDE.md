@@ -28,7 +28,8 @@ After implementing a plan, complete the full workflow autonomously — do not wa
 1. Mark plan.md as done (✅ on completed items)
 2. Update lessons.md with implementation learnings
 3. Run `/retro` autonomously
-4. Run `scripts/check-session.sh` to verify completion
+4. Write next-session.md handoff and register session in `cwf-state.yaml`
+5. Run `scripts/check-session.sh` to verify completion — fix any FAIL items before finishing
 
 ## Collaboration Style
 

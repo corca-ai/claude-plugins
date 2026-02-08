@@ -2,7 +2,7 @@
 # Git-tracked, per-project. Read/written by cwf skills.
 
 workflow:
-  current_stage: build
+  current_stage: harden
   started_at: "2026-02-08"
   stages:
     clarify: "S0"
@@ -139,6 +139,14 @@ sessions:
     branch: marketplace-v3
     completed_at: "2026-02-08"
     summary: "Created cwf:plan skill with 2-agent research + synthesizer pattern, synced plan-protocol.md Handoff Document section"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md]
+
+  - id: S10
+    title: "Build cwf:impl"
+    dir: prompt-logs/260208-19-s10-cwf-impl
+    branch: marketplace-v3
+    completed_at: "2026-02-08"
+    summary: "Created cwf:impl skill with 4-phase orchestration (Load Plan → Analyze & Decompose → Execute 3a/3b → Verify), adaptive team sizing, domain signal table"
     artifacts: [plan.md, lessons.md, retro.md, next-session.md]
 
 # External tool availability (detected by cwf:setup)

@@ -13,6 +13,7 @@ Accumulated context from retrospectives. Each session's retro may add to this do
 - CLAUDE.md is for Claude's behavior, not user instructions
 - Progressive disclosure: CLAUDE.md is concise, details live in docs/
 - Dogfooding: new tools are tested in the session that creates them
+- Deterministic validation over behavioral instruction: When preventing recurring mistakes, prefer scripts/checks that always run and produce pass/fail over adding more rules to CLAUDE.md. Behavioral instructions degrade (unread, misinterpreted, diminishing returns as rules accumulate); deterministic checks scale. Example: `check-session.sh` + `session_defaults` catches missing artifacts reliably, whereas "remember to create next-session.md" failed across S8→S10.
 
 ## Process Heuristics
 

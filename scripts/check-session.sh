@@ -4,7 +4,7 @@ set -euo pipefail
 # check-session.sh — Verify session completion artifacts
 # Usage: check-session.sh [session-id]
 # If no session-id, checks the most recent session in cwf-state.yaml
-# Reads expected artifacts from cwf-state.yaml, verifies file existence + non-empty
+# Reads expected artifacts from session entry or session_defaults
 # Exit 0 = all good, Exit 1 = missing/empty artifacts
 
 STATE_FILE="cwf-state.yaml"
@@ -17,6 +17,50 @@ if [[ ! -f "$STATE_FILE" ]]; then
   echo -e "${RED}Error: $STATE_FILE not found${NC}" >&2
   exit 1
 fi
+
+# Parse session_defaults from cwf-state.yaml
+# Extracts session_defaults.artifacts.always and .milestone lists
+parse_defaults() {
+  local in_defaults=false
+  local in_artifacts=false
+  DEFAULTS_ALWAYS=""
+  DEFAULTS_MILESTONE=""
+
+  while IFS= read -r line; do
+    if [[ "$line" =~ ^session_defaults: ]]; then
+      in_defaults=true
+      continue
+    fi
+    # Exit defaults block on next top-level key
+    if [[ "$in_defaults" == "true" ]] && [[ "$line" =~ ^[a-z] ]]; then
+      break
+    fi
+    if [[ "$in_defaults" == "true" ]]; then
+      if [[ "$line" =~ ^[[:space:]]*artifacts: ]]; then
+        in_artifacts=true
+        continue
+      fi
+      if [[ "$in_artifacts" == "true" ]]; then
+        if [[ "$line" =~ ^[[:space:]]*always: ]]; then
+          DEFAULTS_ALWAYS=$(echo "$line" | sed 's/.*always:\s*//')
+        fi
+        if [[ "$line" =~ ^[[:space:]]*milestone: ]]; then
+          DEFAULTS_MILESTONE=$(echo "$line" | sed 's/.*milestone:\s*//')
+        fi
+      fi
+    fi
+  done < "$STATE_FILE"
+}
+
+# Parse inline YAML list [a, b, c] into space-separated string
+parse_yaml_list() {
+  local raw="$1"
+  raw="${raw#\[}"
+  raw="${raw%\]}"
+  echo "$raw" | tr ',' '\n' | xargs
+}
+
+parse_defaults
 
 SESSION_ID="${1:-}"
 
@@ -32,7 +76,7 @@ if [[ -z "$SESSION_ID" ]]; then
   echo -e "${YELLOW}No session ID specified, checking most recent: ${SESSION_ID}${NC}"
 fi
 
-# Extract session dir — find the id line, then the next dir line
+# Extract session dir and artifacts
 SESSION_DIR=""
 ARTIFACTS_LINE=""
 found=false
@@ -65,18 +109,22 @@ if [[ -z "$SESSION_DIR" ]]; then
   exit 1
 fi
 
+# Determine artifacts to check:
+# If session has explicit artifacts → use those
+# Otherwise → use session_defaults.always + session_defaults.milestone
 if [[ -z "$ARTIFACTS_LINE" ]]; then
-  echo -e "${RED}Error: No artifacts defined for session '$SESSION_ID'${NC}" >&2
-  echo "Add an 'artifacts:' line to the session entry in $STATE_FILE"
-  exit 1
+  if [[ -z "$DEFAULTS_ALWAYS" ]] && [[ -z "$DEFAULTS_MILESTONE" ]]; then
+    echo -e "${RED}Error: No artifacts defined for session '$SESSION_ID' and no session_defaults found${NC}" >&2
+    exit 1
+  fi
+  # Merge always + milestone defaults
+  always_items=$(parse_yaml_list "$DEFAULTS_ALWAYS")
+  milestone_items=$(parse_yaml_list "$DEFAULTS_MILESTONE")
+  all_items="$always_items $milestone_items"
+  echo -e "${YELLOW}No explicit artifacts — using session_defaults (always + milestone)${NC}"
+else
+  all_items=$(parse_yaml_list "$ARTIFACTS_LINE")
 fi
-
-# Parse artifacts from YAML inline list: [plan.md, lessons.md, retro.md]
-# Remove brackets, split by comma
-ARTIFACTS_LINE="${ARTIFACTS_LINE#\[}"
-ARTIFACTS_LINE="${ARTIFACTS_LINE%\]}"
-
-IFS=',' read -ra ARTIFACTS <<< "$ARTIFACTS_LINE"
 
 echo "Session: $SESSION_ID"
 echo "Directory: $SESSION_DIR"
@@ -85,9 +133,7 @@ echo "---"
 pass_count=0
 fail_count=0
 
-for artifact in "${ARTIFACTS[@]}"; do
-  # Trim whitespace
-  artifact=$(echo "$artifact" | xargs)
+for artifact in $all_items; do
   filepath="$SESSION_DIR/$artifact"
 
   if [[ -f "$filepath" ]] && [[ -s "$filepath" ]]; then
