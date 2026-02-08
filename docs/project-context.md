@@ -20,6 +20,8 @@ Accumulated context from retrospectives. Each session's retro may add to this do
 - **Structural fix over instruction fix**: When a behavioral error recurs, prefer removing the structural asymmetry that caused it over adding more instructions. Adding rules has diminishing returns; changing structure is more durable.
 - **Agent team review — perspective-based division**: When running parallel agent reviews, divide by perspective (code quality / documentation / tooling research) rather than by module (plugin A / plugin B). Perspective-based division catches systemic cross-cutting issues (e.g., "all scripts missing `set -euo pipefail`") that module-based division would miss.
 - **Agent results require spot-checks**: When consolidating agent team findings, verify at least the critical issues against actual source code before incorporating into plans. Agents may report incorrect line numbers or misinterpret code. "Trust but verify" applies to agent collaboration.
+- **Tool-first verification for bulk changes**: Before spawning agents for mass file edits, run the relevant lint/validation tool first (e.g., `npx markdownlint-cli2` for MD040). A single tool invocation can confirm whether changes are actually needed, avoiding wasted agent turns. Discovered in S2: plan reported 93 bare fences, but `markdownlint-cli2` showed 0 violations.
+- **Full-codebase grep on rename/migration**: When renaming variables, functions, or env vars, always `grep -r OLD_NAME` across the entire codebase — not just the files listed in the plan. README examples, config snippets, and docs may reference the old name outside the core implementation files.
 
 ## Documentation Intent
 
