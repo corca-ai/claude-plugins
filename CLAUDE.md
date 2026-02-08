@@ -41,7 +41,9 @@ After implementing a plan, complete the full workflow without waiting for explic
 - When researching Claude Code features (hooks, settings, plugins), always verify against the official docs (https://code.claude.com/docs/en/) via WebFetch. Do not rely solely on claude-code-guide agent responses.
 - When testing hooks or infrastructure, verify incrementally — test one path first, then expand to others.
 - When testing scripts, do not manually set up the environment (e.g., `source ~/.zshrc`) before running tests. Test in a clean environment to reproduce real-world conditions.
+- When requirements are ambiguous or large in scope, start with `/clarify` before analysis or implementation. Do not manually ask clarification questions when the clarify skill can handle it.
 - When a custom skill overlaps with a built-in tool, prefer the custom skill. The gather-context plugin enforces this automatically via PreToolUse hook (blocks WebSearch, redirects to `/gather-context --search`). For other overlaps (e.g., `/gather-context` vs WebFetch), prefer the custom skill manually.
+- Never delete user-created files without explicit confirmation. Prefer `mv` over `rm`. Untracked files cannot be restored via git.
 - When creating new skills or automation tools, first evaluate: marketplace plugin (`plugins/`, general-purpose, usable in any project) vs local skill (`.claude/skills/`, repo-specific). Prefer local skill unless the tool has clear cross-project utility.
 - After large multi-file changes, consider running parallel sub-agent reviews before committing — give each agent a different review perspective (content integrity, missed opportunities, structural analysis) along with session lessons/retro as context.
 - In design discussions, provide honest counterarguments and trade-off analysis. Do not just agree.
