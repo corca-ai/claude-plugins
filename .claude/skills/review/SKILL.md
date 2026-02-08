@@ -29,6 +29,19 @@ Universal review with narrative verdicts via 4 parallel reviewers (2 internal + 
 /review --mode clarify  Requirement review
 ```
 
+## External CLI Setup (one-time)
+
+For full 4-reviewer coverage, authenticate external CLIs:
+
+```bash
+codex auth login          # OpenAI Codex
+npx @google/gemini-cli    # Google Gemini (interactive first-run setup)
+```
+
+Both are optional — the skill falls back to Claude Task agents when CLIs
+are missing or unauthenticated. But real CLI reviews provide diverse model
+perspectives beyond Claude.
+
 ## Mode Routing
 
 | Input | Mode |
@@ -300,7 +313,8 @@ Output to the conversation (do NOT write to a file unless the user asks):
 - Areas where reviewer confidence was low
 - Malformed reviewer outputs that required interpretation
 - Missing success criteria (if no plan was found)
-- External CLI fallbacks used (which tools were unavailable, why)
+- External CLI fallbacks used (which tools were unavailable, why).
+  Include setup hint: "Run `codex auth login` / `npx @google/gemini-cli` to enable."
 - Perspective differences between real CLI output and fallback interpretation
 
 ### Reviewer Provenance
