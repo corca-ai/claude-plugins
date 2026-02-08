@@ -117,6 +117,17 @@ fi
 - Cross-platform (macOS + Linux): avoid `sed -i ''` (macOS-only); avoid Bash 4+ features (`declare -A`, nameref `${!var}`, `|&`) — macOS ships Bash 3.2
 - Minimal deps: prefer bash + curl, minimize python3/node
 - Use `#!/usr/bin/env bash` and `set -euo pipefail`
+- Sourced scripts (e.g., `slack-send.sh`): do NOT add `set -euo pipefail` at top level — it propagates to all callers. If the script is both sourced and executed directly, put strict mode inside the `BASH_SOURCE` guard:
+  ```bash
+  # Functions here (sourced by test scripts, other scripts)
+  my_func() { ... }
+
+  # Main logic (only when executed directly)
+  if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+      set -euo pipefail
+      # ...
+  fi
+  ```
 - Bash gotcha: `((var++))` returns exit code 1 when var is 0, failing under `set -e`. Use `var=$((var + 1))` instead.
 - curl in `set -e` scripts: wrap with `set +e` / `set -e` to capture exit codes:
   ```bash
