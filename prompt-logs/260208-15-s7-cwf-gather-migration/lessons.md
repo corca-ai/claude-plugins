@@ -12,6 +12,14 @@ When Python 스크립트 디렉토리 복사 → `cp` exit code를 검증하되,
 - **Actual**: `.py` 파일은 원본에서도 실행 권한 없었음 → 수동으로 `chmod +x` 필요
 - **Takeaway**: 원본 권한과 무관하게, 스크립트로 사용될 파일은 명시적으로 실행 권한 확인
 
+### 예시 기반 작성 vs 템플릿 기반 작성
+
+- **Expected**: next-session.md를 최신 컨벤션에 맞게 작성
+- **Actual**: S6b의 next-session.md(cwf-state.yaml 도입 전 작성)를 복사해서 수동 상태 테이블 중복. 사용자가 지적할 때까지 발견 못함.
+- **Takeaway**: 최근 예시 ≠ canonical 템플릿. 컨벤션이 변경된 후에는 이전 예시가 stale. 항상 master-plan.md의 템플릿 섹션을 먼저 확인.
+
+When 핸드오프 작성 → master-plan.md § "Handoff Template" 먼저 읽기. 최근 예시는 참고용.
+
 ### 스텁 → 실제 구현 전환
 
 - **Expected**: redirect-websearch.sh 스텁을 실제 deny JSON으로 교체

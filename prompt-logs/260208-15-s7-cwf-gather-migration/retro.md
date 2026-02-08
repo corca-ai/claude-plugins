@@ -17,15 +17,28 @@
 
 ### Suggested CLAUDE.md Updates
 
-- 없음. 기존 CLAUDE.md 업데이트(line 51)는 구현 중 완료됨.
+- 핸드오프(next-session.md) 작성 시: 최근 예시가 아닌 master-plan.md의 canonical 템플릿을 먼저 참조할 것. 컨벤션 변경 후 이전 예시는 stale할 수 있음.
 
 ## 3. Waste Reduction
 
-이 세션에서 낭비는 거의 없었음. 사전 설계된 플랜이 정확했고, 구현 과정에서 불일치가 발견되지 않았음.
+### 핸드오프에서 stale 패턴 복제 (사용자 지적으로 발견)
 
-유일한 마이너 이슈:
+next-session.md 작성 시 `cwf-state.yaml`이 SSOT라고 선언하면서, 바로 아래에 수동 상태 테이블을 중복 작성. 사용자가 지적하기 전까지 에이전트가 자체적으로 발견하지 못함.
+
+**근본 원인 (5 Whys)**:
+1. 왜 수동 테이블을 넣었나? → S6b next-session.md를 참고했으니까
+2. 왜 S6b를 참고했나? → "가장 최근 예시 = 최신 컨벤션"이라 가정
+3. 왜 그 가정이 틀렸나? → S7-prep에서 cwf-state.yaml 도입으로 컨벤션이 변경됨
+4. 왜 변경을 인지 못했나? → cwf-state.yaml에 엔트리는 추가하면서, 핸드오프 작성 시에는 canonical 템플릿(master-plan.md line 414)을 재확인하지 않음
+5. 왜 재확인하지 않았나? → **예시 기반 작성이 습관화** — 실제 예시 복사가 템플릿 참조보다 빠르다는 편향
+
+**분류**: 프로세스 갭 (구조적)
+**수정**: 핸드오프 작성 시 반드시 master-plan.md의 canonical 템플릿을 먼저 읽을 것. 최근 예시는 참고용이지 템플릿이 아님. 특히 컨벤션이 최근 변경된 경우 이전 예시는 stale.
+
+### 마이너: `cp *`에서 `__pycache__`
+
 - `cp *`에서 `__pycache__` 디렉토리 때문에 exit 1 반환 → 실제 문제 없음, 하지만 CI/CD 환경에서는 `set -e` 스크립트에서 실패할 수 있음.
-- **근본 원인 (5 Whys)**: `__pycache__`는 Python 스크립트를 직접 실행한 적이 있어서 생성됨 → 소스 디렉토리에 `.gitignore`에 `__pycache__/`가 없거나 무시됨 → 일회성 문제, 구조적 수정 불필요.
+- **근본 원인**: 일회성 문제, 구조적 수정 불필요.
 
 ## 4. Critical Decision Analysis (CDM)
 
