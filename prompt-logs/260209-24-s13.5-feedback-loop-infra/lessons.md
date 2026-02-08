@@ -85,3 +85,62 @@ When 스킬 규칙 작성 → 근거가 명확하지 않은 규칙은 "rationale
 - **Takeaway**: 핸드오프의 브랜치 워크플로우 섹션이 세션 시작 시 체크리스트로 기능하지 않음. 세션 시작 프로토콜에 "브랜치 확인" 단계가 필요
 
 When 세션 시작 → 핸드오프 문서의 브랜치 워크플로우 섹션을 명시적으로 확인하고 실행
+
+### Plan mode 쓰기 제약으로 세션 plan.md 생성 불가
+
+- **Expected**: EnterPlanMode hook이 plan-protocol.md를 주입하므로, plan mode에서 `prompt-logs/` 경로에 `plan.md`를 생성할 것
+- **Actual**: plan mode는 `~/.claude/plans/` 파일만 쓰기 허용. hook이 프로토콜을 주입해도 `prompt-logs/{session}/plan.md`에 쓸 수 없는 구조적 deadlock
+- **Takeaway**: plan mode의 쓰기 제약과 CWF plan-protocol의 파일 위치 기대가 충돌. plan mode 종료 후 plan.md를 세션 디렉토리에 복사/생성하는 단계가 필요
+
+**Deferred action**: ExitPlanMode PostToolUse hook에서 `~/.claude/plans/` 의 plan 내용을 `prompt-logs/{session}/plan.md`로 복사하거나, plan mode 종료 직후 cwf:plan 스킬이 세션 plan.md를 자동 생성하는 워크플로우 추가
+
+### Retro의 session symlink가 단일 파일만 지원 — 팀 런 미대응
+
+- **Expected**: agent team 실행 시 여러 에이전트의 세션 로그가 각각 생성되고, retro에서 이들을 모두 연결
+- **Actual**: prompt-logger는 이미 팀 런을 지원 (에이전트별 개별 .md 생성 + 팀 메타데이터 태깅 + 다중 파일 일괄 커밋). 그러나 retro 스킬은 `session.md` symlink를 하나만 생성 — 팀 리더의 로그만 연결되고 나머지 에이전트 로그는 누락
+- **Takeaway**: prompt-logger(생산 측)는 다중 로그 준비 완료이나, retro/handoff 등 소비 측이 미대응. symlink를 `session.md` (리더) + `session-{agent-name}.md` (팀원) 패턴으로 확장 필요
+
+**Deferred action**: retro 스킬의 session symlink 로직을 팀 런 대응으로 업데이트 — 같은 날짜의 동일 팀 세션 로그를 모두 symlink로 연결
+
+### Deep retro의 컨텍스트 효율화 — sub-agent 위임 확대
+
+- **Expected**: deep retro가 메인 에이전트의 컨텍스트를 적게 쓰면서도 품질 높은 분석을 할 것
+- **Actual**: 현재 메인 에이전트가 sections 1-4, 7을 직접 작성하고, sections 5-6만 sub-agent에 위임. 메인 에이전트의 컨텍스트 부담이 커서 deep retro를 항상 하기 부담스러움
+- **Takeaway**: CDM(section 4)과 Waste Reduction(section 3)은 분석이 무거운 섹션. 이것들을 sub-agent에 위임하면 메인 에이전트의 역할이 "session facts 추출 + 합성"으로 축소됨
+
+**설계 방향**:
+1. 메인 에이전트: session facts 추출 (분석이 아닌 데이터 수집) → structured summary 생성
+2. Sub-agent batch 1: CDM 분석 + Waste 분석 (병렬)
+3. Sub-agent batch 2: Expert α + Expert β (병렬, 현재와 동일)
+4. Sub-agent batch 3: Learning Resources (현재와 동일)
+5. 메인 에이전트: sections 1-2 (경량) + section 7 (스킬 스캔) + 전체 합성
+
+**추가 요구사항**: light retro가 존재하더라도 deep retro는 처음부터 재분석해야 함. 기존 sections 1-4를 재활용하는 것이 아니라 sub-agents가 독립적으로 분석
+
+**Deferred action**: retro 스킬 deep mode를 sub-agent 위임 구조로 개편 — 메인 에이전트의 역할을 "session summary 생성 + 합성"으로 축소
+
+### Retro용 session summary를 compact 전에 파일로 보존
+
+- **Expected**: compact 후에도 retro sub-agents에 충분한 입력을 제공할 수 있을 것
+- **Actual**: compact은 정보 손실. prompt-logger는 에이전트 응답을 앞뒤 5줄만 보존하므로 session log도 불충분
+- **Takeaway**: prompt-logger 확장(전문 보존)은 저장 비용 대비 정보 밀도가 나쁨. 대신 retro 스킬이 분석 시작 시 "structured session summary"를 파일로 저장하면, compact이 일어나도 sub-agents의 입력이 보존됨. 이것은 retro sub-agent 위임 구조의 자연스러운 부산물
+
+When retro 시작 → structured session summary를 세션 디렉토리에 파일로 저장 (sub-agent 입력 + compact 대비)
+
+### 중간 산출물 파일 보존 패턴 — retro를 넘어 전 스킬 적용 가능
+
+- **패턴**: multi-phase 스킬에서 "수집 → sub-agent 위임" 구조일 때, 수집 결과를 파일로 보존하면 (1) sub-agent 입력 품질 보장, (2) compact/세션 경계 생존, (3) 디버깅/재실행 가능
+- **해당 스킬**: retro (session summary), review (diff/target), refactor (inventory), clarify (research results), impl (plan decomposition)
+- **연결**: S13.6 CWF protocol 설계에서 스테이지 간 자동 체이닝의 "중간 산출물 형태와 보존"이 핵심 설계 포인트
+
+**Deferred action**: S13.6에서 CWF protocol 설계 시, 각 스킬의 수집 phase 산출물을 파일로 보존하는 패턴을 일괄 적용할지 분석
+
+### 핸드오프는 브랜치 구조와 무관하게 항상 작성
+
+- **Expected**: 매 세션 종료 시 next-session.md를 작성 (S0부터 일관된 프로토콜)
+- **Actual**: sub-branch(workstream A)에서 작업했으므로 "핸드오프는 umbrella branch에서 해야 한다"고 잘못 판단. 세션 경계와 브랜치 경계를 혼동
+- **Takeaway**: 세션은 항상 다음 세션을 위한 핸드오프를 남겨야 한다. 브랜치가 sub-branch든 umbrella든 main이든 무관. "어디서 작업했는가"가 아니라 "이 세션이 끝나면 다음 세션이 무엇을 해야 하는가"가 핸드오프의 기준
+
+**Deferred action**: handoff SKILL.md에 "핸드오프는 브랜치 구조와 무관하게 매 세션 종료 시 작성" 규칙 추가
+
+When 세션 종료 → next-session.md 작성 여부 판단 시 브랜치 구조가 아니라 세션 경계를 기준으로
