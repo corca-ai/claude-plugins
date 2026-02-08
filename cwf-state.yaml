@@ -1,0 +1,33 @@
+# cwf-state.yaml — Corca Workflow Framework project state
+# Git-tracked, per-project. Read/written by cwf skills.
+
+workflow:
+  current_stage: scaffold
+  started_at: "2025-02-08"
+
+# Session history (populated by cwf:retro and cwf:handoff)
+# Format:
+#   - id: "S4"
+#     title: "Scaffold cwf plugin"
+#     stage: scaffold
+#     completed_at: "2025-02-08"
+#     summary: "Created plugin directory, hooks, gate, state file"
+sessions: []
+
+# External tool availability (detected by cwf:setup)
+tools:
+  codex: unknown
+  gemini: unknown
+  tavily: unknown
+  exa: unknown
+
+# Hook group toggle state (mirrors ~/.claude/cwf-hooks-enabled.sh)
+# Default: all enabled — hooks work without cwf:setup
+hooks:
+  attention: true
+  log: true
+  read: true
+  lint_markdown: true
+  lint_shell: true
+  websearch_redirect: true
+  plan_protocol: true
