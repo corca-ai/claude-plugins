@@ -1,23 +1,11 @@
 # Handoff: Next Session (S8 — Migrate clarify → cwf:clarify)
 
-## Project Status
-
-SSOT: `cwf-state.yaml`
-
-| Session | Status | Summary |
-|---------|--------|---------|
-| S0–S6b | done | Clarify, refactor, scaffold, review, hooks migration |
-| S7 | done | Migrate gather-context → `cwf:gather` (8 scripts, 6 refs, WebSearch redirect hook activated) |
-| S8 | **not started** | Migrate clarify → `cwf:clarify` + `cwf:review --mode clarify` integration |
-| S9–S14 | not started | Remaining build/harden/launch sessions |
-
-Current branch: `marketplace-v3`
-
 ## Context
 
-- Read: `cwf-state.yaml` (project state SSOT)
+- Read: `cwf-state.yaml` (project state SSOT — session history, current stage, tool/hook status)
 - Read: `prompt-logs/260208-03-cwf-v3-master-plan/master-plan.md` (architecture, agent team strategy)
 - Read: `prompt-logs/260208-15-s7-cwf-gather-migration/lessons.md` (S7 migration learnings)
+- Branch: `marketplace-v3`
 
 ## Task
 
