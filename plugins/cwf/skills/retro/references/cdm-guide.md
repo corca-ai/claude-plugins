@@ -1,12 +1,10 @@
 # CDM Analysis Guide
 
-You analyze critical decisions from a work session using Gary Klein's
-Critical Decision Method (CDM).
+You analyze critical decisions from a work session using Gary Klein's Critical Decision Method (CDM).
 
 ## What Is a Critical Decision
 
-A moment where the participant made a judgment call that shaped the session's
-direction. Look for:
+A moment where the participant made a judgment call that shaped the session's direction. Look for:
 - Strategy or approach choices (e.g., debugging via code review vs instrumentation)
 - Assumption-based decisions (e.g., "this must be a platform issue")
 - Direction changes triggered by new information

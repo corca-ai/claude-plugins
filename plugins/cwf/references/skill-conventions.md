@@ -1,8 +1,7 @@
 # CWF Skill Conventions
 
 Shared structural conventions for all skills in the CWF plugin.
-Use this as a template when creating new skills and as a checklist
-when reviewing existing ones.
+Use this as a template when creating new skills and as a checklist when reviewing existing ones.
 
 ## SKILL.md Structure
 
@@ -55,8 +54,7 @@ Place immediately after the 1-2 line description, before any sections.
 **Language**: Write {artifact type} in English. Communicate with the user in their prompt language.
 ```
 
-**Exception**: Skills producing user-facing artifacts in the user's language
-(e.g., retro) may use:
+**Exception**: Skills producing user-facing artifacts in the user's language (e.g., retro) may use:
 
 ```text
 **Language**: Write {artifact} in the user's language. Communicate with the user in their prompt language.
@@ -76,8 +74,7 @@ These rules apply to all CWF skills. Include them verbatim:
 
 ### Skill-specific rules
 
-Add rules specific to the skill's domain (e.g., "Research first, ask later"
-for clarify, "Plan is the contract" for impl).
+Add rules specific to the skill's domain (e.g., "Research first, ask later" for clarify, "Plan is the contract" for impl).
 
 ## References Section
 

@@ -39,3 +39,25 @@ When 반복 패턴 3+ 스킬 → shared reference 추출 제안 (holistic criter
 - **Expected**: cwf:refactor --holistic 스킬 지시대로 3개 병렬 서브에이전트 실행
 - **Actual**: 이미 모든 파일을 읽은 상태에서 서브에이전트를 실행하면 컨텍스트 손실. 인라인 분석이 더 효율적
 - **Takeaway**: 서브에이전트 패턴은 데이터 수집과 분석이 분리될 때 유용. 이미 데이터가 컨텍스트에 있으면 인라인이 나음
+
+### "Rule of three" vs 피드백 루프 존재 여부
+
+- **Expected**: "사례가 1건뿐이니 일반화를 연기하자"가 합리적 판단
+- **Actual**: Meadows — 피드백 루프 부재 문제에서 "사례를 더 모으자"는 루프 없이는 사례 감지도 불가능하므로 Drift to Low Performance를 촉진. Woods — graceful extensibility는 특정 장애 유형의 반복을 기다리는 것이 아님
+- **Takeaway**: 판단 기준을 "사례 수"에서 "피드백 루프의 존재 여부"로 전환. 루프가 없는 실패는 사례 수에 관계없이 즉시 루프를 설치해야 한다
+
+When 구조적 실패 1건 발견 + 피드백 루프 부재 → 사례 축적을 기다리지 말고 즉시 루프 설치
+
+### 정량적 보고에서 독자의 외부 지식 의존 최소화
+
+- **Expected**: "7개 규칙 비활성화"로 사실을 전달
+- **Actual**: 유저가 전체 규칙 수(55개)를 모르는 상태에서 "대부분 해제"로 해석
+- **Takeaway**: 모든 정량적 보고에 독자가 해석에 필요한 맥락(분모, 비율, 추세)을 포함. skill-conventions.md Reporting Principle로 성문화 완료
+
+When 수치 보고 → "X/Y (Z%)" 형식 + 맥락 제공
+
+### Markdown 산문에서 hard wrap 금지
+
+- **Expected**: MD013(line length) 비활성화 = 줄바꿈 불필요
+- **Actual**: 작성 습관으로 80자 hard wrap이 16/29 파일에 잔존. 문장이 의미 단위가 아닌 글자수 단위로 끊겨 가독성 저하
+- **Takeaway**: 산문은 한 문장 = 한 줄. 코드 블록, 테이블, 리스트는 기존대로. 린터 규칙은 비활성화되어 있지만 작성 습관이 전파되고 있었음

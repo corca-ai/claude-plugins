@@ -19,11 +19,9 @@ allowed-tools:
 
 # Plan
 
-Turn a task description into a structured, research-backed plan with BDD success
-criteria.
+Turn a task description into a structured, research-backed plan with BDD success criteria.
 
-**Language**: Write all plan artifacts in English. Communicate with the user in
-their prompt language.
+**Language**: Write all plan artifacts in English. Communicate with the user in their prompt language.
 
 ## Quick Start
 
@@ -100,9 +98,7 @@ Both sub-agents run in parallel. Wait for both to complete.
 
 ## Phase 3: Plan Drafting
 
-Synthesize research from both sub-agents into a structured plan. Read
-`{SKILL_DIR}/../../references/plan-protocol.md` for protocol rules on
-location, sections, and format.
+Synthesize research from both sub-agents into a structured plan. Read `{SKILL_DIR}/../../references/plan-protocol.md` for protocol rules on location, sections, and format.
 
 ### Required Plan Sections
 
@@ -160,9 +156,7 @@ Then [expected outcome]
 Always use the **two-layer format**:
 
 1. **Behavioral (BDD)** — concrete, testable scenarios in Given/When/Then
-2. **Qualitative** — non-functional qualities that are important but harder to
-   test mechanically (e.g., "Plan is understandable without prior context",
-   "Solution follows existing codebase patterns")
+2. **Qualitative** — non-functional qualities that are important but harder to test mechanically (e.g., "Plan is understandable without prior context", "Solution follows existing codebase patterns")
 
 ### Research Integration
 
@@ -198,8 +192,7 @@ Initialize with any learnings from the planning process:
 - **Takeaway**: {key insight}
 ```
 
-If no learnings yet, create with a header and note that learnings will be
-accumulated during implementation.
+If no learnings yet, create with a header and note that learnings will be accumulated during implementation.
 
 ## Phase 5: Review Offer
 
@@ -216,10 +209,7 @@ For a multi-perspective review before implementation, run:
 
 ## Interaction with plan-protocol Hook
 
-The `enter-plan-mode.sh` hook fires when `EnterPlanMode` is triggered and
-injects the Plan & Lessons Protocol passively. The `cwf:plan` skill provides
-**active** agent-assisted plan drafting invoked explicitly by the user. They are
-complementary:
+The `enter-plan-mode.sh` hook fires when `EnterPlanMode` is triggered and injects the Plan & Lessons Protocol passively. The `cwf:plan` skill provides **active** agent-assisted plan drafting invoked explicitly by the user. They are complementary:
 
 - **Hook** (passive): Ensures protocol is available whenever plan mode is entered
 - **Skill** (active): Provides research-backed, structured plan creation
@@ -228,15 +218,11 @@ The skill follows the same protocol the hook references, ensuring consistency.
 
 ## Rules
 
-1. **Research before drafting**: Always complete parallel research before writing
-   the plan
-2. **Two-layer criteria**: Success criteria must include both BDD and qualitative
-   layers
-3. **Cite evidence**: Reference specific files, URLs, or sources for plan
-   decisions
+1. **Research before drafting**: Always complete parallel research before writing the plan
+2. **Two-layer criteria**: Success criteria must include both BDD and qualitative layers
+3. **Cite evidence**: Reference specific files, URLs, or sources for plan decisions
 4. **Follow protocol**: Adhere to plan-protocol.md for format and location
-5. **Don't over-plan**: Keep steps actionable and concrete, avoid excessive
-   detail
+5. **Don't over-plan**: Keep steps actionable and concrete, avoid excessive detail
 6. **Preserve task intent**: Refine the approach, don't redirect the goal
 
 ## References

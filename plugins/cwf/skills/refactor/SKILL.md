@@ -68,8 +68,7 @@ Suggest: "Run `cwf:refactor --skill <name>` for a deep review."
 
 ## Code Tidying Mode (`--code [branch]`)
 
-Analyze recent commits for safe tidying opportunities — guard clauses, dead code removal,
-explaining variables. Based on Kent Beck's "Tidy First?" philosophy.
+Analyze recent commits for safe tidying opportunities — guard clauses, dead code removal, explaining variables. Based on Kent Beck's "Tidy First?" philosophy.
 
 ### 1. Get Target Commits
 
@@ -188,8 +187,7 @@ Ask the user if they want to apply any suggestions. If yes, implement the refact
 
 ## Holistic Mode (`--skill --holistic` or `--holistic`)
 
-Cross-plugin analysis for global optimization. Read ALL skills and hooks, then analyze
-inter-plugin relationships.
+Cross-plugin analysis for global optimization. Read ALL skills and hooks, then analyze inter-plugin relationships.
 
 ### 1. Inventory
 
@@ -234,8 +232,7 @@ All 3 agents analyze and report; none modify files.
 
 ### 4. Produce report
 
-Merge 3 agents' outputs into a unified report. Save to `{REPO_ROOT}/prompt-logs/{YYMMDD}-refactor-holistic/analysis.md`. Create the
-directory if it doesn't exist (use next sequence number if date prefix already exists).
+Merge 3 agents' outputs into a unified report. Save to `{REPO_ROOT}/prompt-logs/{YYMMDD}-refactor-holistic/analysis.md`. Create the directory if it doesn't exist (use next sequence number if date prefix already exists).
 
 Report structure:
 
@@ -263,8 +260,7 @@ Report structure:
 
 ### 5. Discuss
 
-Present the report summary. The user may want to discuss findings, adjust priorities,
-or plan implementation sessions. Update the report with discussion outcomes.
+Present the report summary. The user may want to discuss findings, adjust priorities, or plan implementation sessions. Update the report with discussion outcomes.
 
 ---
 

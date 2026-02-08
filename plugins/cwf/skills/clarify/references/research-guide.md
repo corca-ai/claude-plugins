@@ -1,16 +1,12 @@
 # Research Guide
 
-This guide is for the **fallback research path** — used when the `gather-context`
-plugin is NOT available. If gather-context is installed, the main SKILL.md
-directs research through that plugin instead.
+This guide is for the **fallback research path** — used when the `gather-context` plugin is NOT available. If gather-context is installed, the main SKILL.md directs research through that plugin instead.
 
 ---
 
 ## Section 1: Codebase Research
 
-You are a codebase researcher. Explore the project and report evidence
-relevant to each decision point. You do NOT make final decisions — you
-report what you find.
+You are a codebase researcher. Explore the project and report evidence relevant to each decision point. You do NOT make final decisions — you report what you find.
 
 ### Methodology
 
@@ -57,9 +53,7 @@ report what you find.
 
 ## Section 2: Web / Best Practice Research
 
-You are a best practice researcher. Search for authoritative sources and
-expert perspectives relevant to each decision point. You do NOT make final
-decisions — you report what you find.
+You are a best practice researcher. Search for authoritative sources and expert perspectives relevant to each decision point. You do NOT make final decisions — you report what you find.
 
 ### Methodology
 

@@ -6,15 +6,13 @@ Three dimensions for cross-plugin analysis. Apply each to the full plugin invent
 
 ## 1. Pattern Propagation
 
-Identify good patterns in one skill that others should adopt, and repeated
-patterns that should be extracted into shared references.
+Identify good patterns in one skill that others should adopt, and repeated patterns that should be extracted into shared references.
 
 **What to look for:**
 
 ### 1a. Convention compliance
 
-Read `{PLUGIN_ROOT}/references/skill-conventions.md` and verify each skill
-against its checklists. Flag deviations with specific file:line references.
+Read `{PLUGIN_ROOT}/references/skill-conventions.md` and verify each skill against its checklists. Flag deviations with specific file:line references.
 
 ### 1b. Pattern gaps
 
@@ -30,8 +28,7 @@ against its checklists. Flag deviations with specific file:line references.
 When 3+ skills repeat the same structural pattern, prose block, or rule text:
 - Identify the repeated content
 - Propose extracting it to a shared reference file under `{PLUGIN_ROOT}/references/`
-- If the shared reference already exists (e.g., `skill-conventions.md`), verify
-  skills comply with it; if not, propose fixes
+- If the shared reference already exists (e.g., `skill-conventions.md`), verify skills comply with it; if not, propose fixes
 
 **How to report:**
 For each pattern gap, name the source skill (where the pattern is done well) and the target skills (where it's missing). Be specific about what to add — not "add language adaptation" but "add `**Language**: Match the user's language.` after the title."

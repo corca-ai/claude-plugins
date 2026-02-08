@@ -1,8 +1,6 @@
 # Questioning Guide
 
-Methodology for persistent, structured questioning of humans during
-requirement clarification. Used in Phase 4 (default mode, T3 items)
-and Phase 2 (--light mode, all ambiguities).
+Methodology for persistent, structured questioning of humans during requirement clarification. Used in Phase 4 (default mode, T3 items) and Phase 2 (--light mode, all ambiguities).
 
 ---
 
@@ -18,9 +16,7 @@ and Phase 2 (--light mode, all ambiguities).
 
 ## Why-Digging
 
-When a user gives a surface-level answer, dig 2-3 levels deeper to uncover
-the real requirement. Adapted from Toyota's "5 Whys" — scaled to 2-3 for
-requirement context where full root-cause depth is rarely needed.
+When a user gives a surface-level answer, dig 2-3 levels deeper to uncover the real requirement. Adapted from Toyota's "5 Whys" — scaled to 2-3 for requirement context where full root-cause depth is rarely needed.
 
 ### When to Why-Dig
 
@@ -47,9 +43,7 @@ requirement context where full root-cause depth is rarely needed.
 
 ## Tension Detection
 
-Watch for contradictions between stated requirements. Tensions are signals,
-not problems — they reveal where the user hasn't fully thought through
-trade-offs.
+Watch for contradictions between stated requirements. Tensions are signals, not problems — they reveal where the user hasn't fully thought through trade-offs.
 
 ### Common Tension Patterns
 
@@ -77,8 +71,7 @@ trade-offs.
 
 ## Ambiguity Categories
 
-Common types of ambiguity to probe. Use as a checklist, not a script —
-only ask about categories relevant to the specific requirement.
+Common types of ambiguity to probe. Use as a checklist, not a script — only ask about categories relevant to the specific requirement.
 
 | Category | Probe Questions |
 |----------|----------------|
@@ -129,9 +122,7 @@ In Phase 4 of the default workflow, include advisory context before the question
 
 ## New Ambiguity Detection
 
-After each answer, check whether the response reveals NEW ambiguities
-that weren't in the original decomposition. This is common — clarifying
-one aspect often exposes previously hidden questions.
+After each answer, check whether the response reveals NEW ambiguities that weren't in the original decomposition. This is common — clarifying one aspect often exposes previously hidden questions.
 
 ### Process
 
@@ -156,5 +147,4 @@ Stop questioning when:
 - No new ambiguities emerge from recent answers
 - Remaining items are implementation details (not requirement decisions)
 
-Do NOT over-question. If the user gives clear, deliberate answers,
-accept them and move on.
+Do NOT over-question. If the user gives clear, deliberate answers, accept them and move on.

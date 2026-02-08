@@ -20,8 +20,7 @@ allowed-tools:
 
 Orchestrate autonomous implementation from a structured plan.
 
-**Language**: Write all implementation artifacts in English. Communicate with the
-user in their prompt language.
+**Language**: Write all implementation artifacts in English. Communicate with the user in their prompt language.
 
 ## Quick Start
 
@@ -103,8 +102,7 @@ For each step, identify the primary domain by matching:
 
 ### 2.2 Dependency Analysis
 
-Read `{SKILL_DIR}/references/agent-prompts.md` Section "Dependency Detection
-Heuristics".
+Read `{SKILL_DIR}/references/agent-prompts.md` Section "Dependency Detection Heuristics".
 
 Analyze step-to-step dependencies:
 - **File overlap**: Steps touching the same file must be sequential
@@ -156,8 +154,7 @@ Show the decomposition before executing:
 - {files from plan's Don't Touch section}
 ```
 
-If Agent Team mode: use `AskUserQuestion` with "Execute", "Adjust grouping",
-"Cancel". If Direct mode: proceed without confirmation.
+If Agent Team mode: use `AskUserQuestion` with "Execute", "Adjust grouping", "Cancel". If Direct mode: proceed without confirmation.
 
 ---
 
@@ -179,9 +176,7 @@ For complex plans requiring parallel work.
 
 ### 3b.1 Prompt Construction
 
-For each work item, build an agent prompt using the template from
-`{SKILL_DIR}/references/agent-prompts.md` Section "Implementation Agent Prompt
-Template". The prompt includes:
+For each work item, build an agent prompt using the template from `{SKILL_DIR}/references/agent-prompts.md` Section "Implementation Agent Prompt Template". The prompt includes:
 
 - The specific steps assigned to this agent
 - The file list (create/modify) for these steps
@@ -191,8 +186,7 @@ Template". The prompt includes:
 
 ### 3b.2 Parallel Launch
 
-Launch agents for parallel-safe work items in a **single message** with multiple
-Task tool calls:
+Launch agents for parallel-safe work items in a **single message** with multiple Task tool calls:
 
 ```yaml
 # All parallel items in one message
@@ -218,8 +212,7 @@ If some work items depend on others:
 3. Launch dependent items in batch 2 (include batch 1 results as context)
 4. Repeat until all batches complete
 
-Between batches, briefly verify that prior batch outputs exist and are valid
-before launching the next batch.
+Between batches, briefly verify that prior batch outputs exist and are valid before launching the next batch.
 
 ### 3b.4 Result Collection
 
@@ -249,8 +242,7 @@ For each BDD scenario from the plan:
 
 ### 4.2 Qualitative Assessment
 
-For each qualitative criterion, briefly note how the implementation addresses it
-(or flag if it doesn't).
+For each qualitative criterion, briefly note how the implementation addresses it (or flag if it doesn't).
 
 ### 4.3 Completion Summary
 
@@ -307,19 +299,13 @@ the plan's success criteria, run:
 
 ## Rules
 
-1. **Plan is the contract**: Implement what the plan says. Do not add features,
-   refactor unrelated code, or reinterpret the goal
-2. **Don't Touch means don't touch**: Never modify files in the Don't Touch list,
-   even for "improvements"
-3. **Parallel when safe, sequential when needed**: Only parallelize items with no
-   file overlap or output dependencies
-4. **No idle agents**: Size the team to the work. One agent with real work beats
-   three agents where two wait
-5. **Fail forward**: If one agent fails, collect its error and continue with
-   others. Report all failures in Phase 4
+1. **Plan is the contract**: Implement what the plan says. Do not add features, refactor unrelated code, or reinterpret the goal
+2. **Don't Touch means don't touch**: Never modify files in the Don't Touch list, even for "improvements"
+3. **Parallel when safe, sequential when needed**: Only parallelize items with no file overlap or output dependencies
+4. **No idle agents**: Size the team to the work. One agent with real work beats three agents where two wait
+5. **Fail forward**: If one agent fails, collect its error and continue with others. Report all failures in Phase 4
 6. **Verify against criteria**: Every BDD scenario must be checked, not assumed
-7. **Preserve existing patterns**: Follow codebase conventions visible in existing
-   files. Do not introduce new patterns without plan justification
+7. **Preserve existing patterns**: Follow codebase conventions visible in existing files. Do not introduce new patterns without plan justification
 8. **Markdown discipline**: All code fences must have a language specifier
 
 ## References

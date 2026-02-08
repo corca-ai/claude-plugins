@@ -6,8 +6,7 @@ Prompt template, domain detection, and dependency heuristics for cwf:impl.
 
 ## Implementation Agent Prompt Template
 
-Use this template when constructing prompts for each implementation agent in
-Phase 3b. Replace all `{placeholders}` with actual values.
+Use this template when constructing prompts for each implementation agent in Phase 3b. Replace all `{placeholders}` with actual values.
 
 ````markdown
 You are an implementation agent. Your job is to execute the assigned steps from
@@ -63,8 +62,7 @@ circumstances:
 
 ## Domain Signal Table
 
-Map file patterns and step keywords to implementation domains. Use this to assign
-domain expertise descriptions when constructing agent prompts.
+Map file patterns and step keywords to implementation domains. Use this to assign domain expertise descriptions when constructing agent prompts.
 
 | File Pattern | Keywords | Domain | Agent Expertise |
 |-------------|----------|--------|-----------------|
@@ -79,9 +77,7 @@ domain expertise descriptions when constructing agent prompts.
 | `SKILL.md` + `references/` | "skill", "phase", "workflow" | Skill Development | CWF skill patterns, phase structure, frontmatter |
 | `tests/`, `*.test.*` | "test", "verify", "assert" | Testing | Test frameworks, assertion patterns, coverage |
 
-When a step spans multiple domains, use the **primary domain** (the one with
-the most files) for the agent expertise description. Mention secondary domains
-in the context section.
+When a step spans multiple domains, use the **primary domain** (the one with the most files) for the agent expertise description. Mention secondary domains in the context section.
 
 ---
 
@@ -111,9 +107,7 @@ Step 3: Write validation logic that imports config.json schema
 → Sequential: Step 3 needs Step 1's output
 ```
 
-Signals: "using the X from step N", "import from", "based on the output of",
-file path mentioned in a prior step's "Files to Create" appears in a later
-step's description.
+Signals: "using the X from step N", "import from", "based on the output of", file path mentioned in a prior step's "Files to Create" appears in a later step's description.
 
 ### Ordering Keywords
 
@@ -149,5 +143,4 @@ A plan qualifies for **Direct Execution (Phase 3a)** when ALL of these hold:
 
 If any condition fails, use **Agent Team Execution (Phase 3b)**.
 
-When in doubt, prefer Agent Team — the overhead of 2 agents is small compared
-to the risk of a complex plan going wrong in direct execution.
+When in doubt, prefer Agent Team — the overhead of 2 agents is small compared to the risk of a complex plan going wrong in direct execution.

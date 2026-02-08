@@ -8,16 +8,13 @@ Protocol for persisting planning artifacts and session learnings.
 
 `prompt-logs/{YYMMDD}-{NN}-{title}/plan.md`
 
-**Date**: Run `date +%y%m%d` to get the system date. Do not infer the date from
-your training data or conversation context — always use the system command.
+**Date**: Run `date +%y%m%d` to get the system date. Do not infer the date from your training data or conversation context — always use the system command.
 
-**Sequence number**: Scan existing `prompt-logs/` directories matching today's
-date (`{YYMMDD}-*`) and pick the next number. If none exist, start at `01`.
+**Sequence number**: Scan existing `prompt-logs/` directories matching today's date (`{YYMMDD}-*`) and pick the next number. If none exist, start at `01`.
 Examples: `260204-01-auth-design`, `260204-02-auth-impl`.
 
 The `{title}` must reflect the current session's task, not a previous session's.
-Even if the input spec or reference document lives in an existing `prompt-logs/`
-directory, always create a new directory named after the current task.
+Even if the input spec or reference document lives in an existing `prompt-logs/` directory, always create a new directory named after the current task.
 
 Determine the path from the user's request. If the user specifies a path, use it.
 
@@ -107,7 +104,6 @@ While lessons are accumulated incrementally during a session, the retro is a com
 `prompt-logs/{YYMMDD}-{NN}-{title}/next-session.md` — context transfer for the next session.
 
 Create when the current session is part of a tracked sequence (e.g., sessions in `cwf-state.yaml`).
-Include: context files to read, task scope, don't-touch boundaries, lessons from prior sessions,
-success criteria, and a start command.
+Include: context files to read, task scope, don't-touch boundaries, lessons from prior sessions, success criteria, and a start command.
 
 If using `cwf-state.yaml`, add `next-session.md` to the session's `artifacts` list.

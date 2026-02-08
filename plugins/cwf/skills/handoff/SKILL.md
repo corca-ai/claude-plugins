@@ -16,12 +16,9 @@ allowed-tools:
 
 # Handoff
 
-Auto-generate session handoff documents (`next-session.md`) from project
-state and session artifacts. Reads `cwf-state.yaml` for session history and
-`master-plan.md` (when available) for next session scope.
+Auto-generate session handoff documents (`next-session.md`) from project state and session artifacts. Reads `cwf-state.yaml` for session history and `master-plan.md` (when available) for next session scope.
 
-**Language**: Write handoff documents in English. Communicate with the user
-in their prompt language.
+**Language**: Write handoff documents in English. Communicate with the user in their prompt language.
 
 ## Quick Start
 
@@ -82,15 +79,13 @@ Fall back to `cwf-state.yaml` stages and user input:
    - Task scope description
    - Key files to modify
 
-`master-plan.md` is preferred but optional — the skill must work generically
-for any project using CWF.
+`master-plan.md` is preferred but optional — the skill must work generically for any project using CWF.
 
 ---
 
 ## Phase 3: Generate next-session.md
 
-Write `next-session.md` in the current session's prompt-logs directory.
-Follow the format defined in `plan-protocol.md` (Handoff Document section).
+Write `next-session.md` in the current session's prompt-logs directory. Follow the format defined in `plan-protocol.md` (Handoff Document section).
 
 ### 8 Required Sections
 
@@ -107,9 +102,7 @@ List files the next session agent must read before starting:
 4. {task-specific files from master-plan or plan.md}
 ```
 
-Always include `CLAUDE.md`, `docs/plugin-dev-cheatsheet.md`, and
-`cwf-state.yaml` as standard entries. Add task-specific files based on the
-next session's scope.
+Always include `CLAUDE.md`, `docs/plugin-dev-cheatsheet.md`, and `cwf-state.yaml` as standard entries. Add task-specific files based on the next session's scope.
 
 #### 2. Task Scope
 
@@ -168,8 +161,7 @@ Then {expected outcome}
 ```
 ````
 
-Use BDD Given/When/Then format. Criteria must be concrete — reference actual
-files, features, or behaviors. Avoid vague criteria like "code is clean."
+Use BDD Given/When/Then format. Criteria must be concrete — reference actual files, features, or behaviors. Avoid vague criteria like "code is clean."
 
 #### 6. Dependencies
 
@@ -192,8 +184,7 @@ the trigger list in skill descriptions. Use CWF skills for workflow stages
 instead of manual execution.
 ```
 
-Reference the discovery mechanism from `CLAUDE.md` Dogfooding section.
-Do not hardcode a list of specific skills.
+Reference the discovery mechanism from `CLAUDE.md` Dogfooding section. Do not hardcode a list of specific skills.
 
 #### 8. Start Command
 
@@ -219,8 +210,7 @@ If the current session entry exists in `cwf-state.yaml`:
 
 ### 4.2 Register-Only Mode
 
-When `--register` flag is used, skip Phase 3 (generation) and only update
-the session entry in `cwf-state.yaml`.
+When `--register` flag is used, skip Phase 3 (generation) and only update the session entry in `cwf-state.yaml`.
 
 ---
 
@@ -228,8 +218,7 @@ the session entry in `cwf-state.yaml`.
 
 ### 5.1 Stage Checkpoints
 
-Add `handoff` to `cwf-state.yaml` current session's `stage_checkpoints`
-list.
+Add `handoff` to `cwf-state.yaml` current session's `stage_checkpoints` list.
 
 ### 5.2 Run Verification
 
@@ -245,23 +234,14 @@ Report results. If any artifacts are missing, list them and suggest fixes.
 
 ## Rules
 
-1. **Canonical template over recent example**: Read `plan-protocol.md`
-   Handoff Document section for format. Do not copy-paste a recent
-   `next-session.md` — derive from the protocol.
-2. **master-plan.md is preferred but optional**: The skill must work
-   for projects without a master plan by falling back to user input.
-3. **Lessons aggregation is selective**: Only include lessons relevant to the
-   next session's task. Do not dump all historical lessons.
-4. **Dogfooding section references discovery mechanism**: Point to `skills/`
-   directory, not a hardcoded skill list.
-5. **Don't Touch inference is conservative**: When uncertain, include the
-   boundary. Better to over-protect than under-protect.
-6. **BDD criteria are concrete**: Reference actual files, features, or
-   behaviors — not abstract qualities.
+1. **Canonical template over recent example**: Read `plan-protocol.md` Handoff Document section for format. Do not copy-paste a recent `next-session.md` — derive from the protocol.
+2. **master-plan.md is preferred but optional**: The skill must work for projects without a master plan by falling back to user input.
+3. **Lessons aggregation is selective**: Only include lessons relevant to the next session's task. Do not dump all historical lessons.
+4. **Dogfooding section references discovery mechanism**: Point to `skills/` directory, not a hardcoded skill list.
+5. **Don't Touch inference is conservative**: When uncertain, include the boundary. Better to over-protect than under-protect.
+6. **BDD criteria are concrete**: Reference actual files, features, or behaviors — not abstract qualities.
 7. **cwf-state.yaml is SSOT**: Read before modifying. Edit, do not overwrite.
-8. **Never overwrite existing files**: When a file already exists (e.g.,
-   `next-session.md` from a prior run), use Edit to update — not Write.
-   Write replaces entire file contents and destroys prior work.
+8. **Never overwrite existing files**: When a file already exists (e.g., `next-session.md` from a prior run), use Edit to update — not Write. Write replaces entire file contents and destroys prior work.
 9. **All code fences must have language specifier**: Never use bare fences.
 
 ## References

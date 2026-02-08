@@ -36,8 +36,7 @@ cwf:clarify <requirement> --light  # Direct Q&A, no sub-agents
 ### Phase 1: Capture & Decompose
 
 1. Record the original requirement verbatim
-2. Decompose into concrete **decision points** — specific questions that need
-   answers before implementation can begin
+2. Decompose into concrete **decision points** — specific questions that need answers before implementation can begin
    - Frame as questions, not categories ("Which auth library?" not "Authentication")
    - Focus on decisions that affect implementation
 3. Present the decision points to the user before proceeding
@@ -56,8 +55,7 @@ cwf:clarify <requirement> --light  # Direct Q&A, no sub-agents
 
 Launch two sub-agents **simultaneously** using the Task tool.
 
-**Path A — cwf:gather available** (check if `cwf:gather` or `/gather-context`
-appears in available skills in the system prompt):
+**Path A — cwf:gather available** (check if `cwf:gather` or `/gather-context` appears in available skills in the system prompt):
 
 #### Sub-agent A: Codebase Researcher (Path A)
 
@@ -237,15 +235,13 @@ After each answer:
 Then ask: "Save this clarified requirement to a file?"
 If yes: save to a project-appropriate location with a descriptive filename.
 
-**Follow-up**: If the CWF plugin is loaded, suggest running `cwf:review --mode clarify`
-to get a multi-perspective review of the clarified requirement before implementation.
+**Follow-up**: If the CWF plugin is loaded, suggest running `cwf:review --mode clarify` to get a multi-perspective review of the clarified requirement before implementation.
 
 ---
 
 ## --light Mode
 
-Fast, direct clarification without sub-agents. The original clarify behavior
-with added persistence.
+Fast, direct clarification without sub-agents. The original clarify behavior with added persistence.
 
 ### Phase 1: Capture
 
