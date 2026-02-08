@@ -246,7 +246,7 @@ Source: `prompt-logs/260208-01-refactor-review/`
 |---------|--------|------|------------------|
 | **S0** (this) | main | Clarify + master plan | Plan reviewed by 2 sub-agents |
 | **S1** | main | Refactor: critical fixes + `set -euo pipefail` + shebang | Test each fixed script. Update project-context.md. |
-| **S2** | main | Refactor: bare code fences + env var migration + description sync + CLAUDE.md/project-context.md refactoring | Lint check. Update READMEs if affected. |
+| **S2** | main | Refactor: bare code fences + env var migration + description sync + CLAUDE.md/project-context.md refactoring | `/refactor --docs` for validation. Update READMEs if affected. |
 | **S3** | marketplace-v3 | Scaffold `plugins/cwf/`, plugin.json, hooks.json, `cwf-hook-gate.sh`, `cwf-state.yaml` | Verify plugin loads in clean session. |
 | **S4a** | feat/cwf-review | Build `cwf:review` — internal reviewers (security + ux via Task) | Test with sample plan/code input. |
 | **S4b** | feat/cwf-review | `cwf:review` — external CLI integration (codex + gemini) + fallback | Test with/without CLIs installed. |
