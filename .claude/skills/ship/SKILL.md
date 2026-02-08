@@ -14,7 +14,7 @@ allowed-tools:
 
 Automate the GitHub issue → PR → merge cycle for cwf sessions.
 
-**Language**: Match the user's language.
+**Language**: Issue/PR body는 한글로 작성. Code blocks, file paths, commit hashes, CLI output은 원문 유지.
 
 ## Commands
 
@@ -60,8 +60,9 @@ Create a GitHub issue for the current session and optionally a feature branch.
 2. **Compose issue body**:
    - Read `{SKILL_DIR}/references/issue-template.md`
    - Substitute variables from session context:
-     - `{PURPOSE}` — from plan.md or ask the user
-     - `{SUCCESS_CRITERIA}` — from plan.md or ask the user
+     - `{BACKGROUND}` — why this work is needed; extract from plan.md context/motivation section, or summarize from session history
+     - `{PROBLEM}` — specific problem being solved; from plan.md or ask the user
+     - `{GOAL}` — desired outcome; from plan.md objectives or ask the user
      - `{SCOPE}` — files/areas from plan.md or summarize
      - `{BRANCH}` — the feature branch name to be created
      - `{BASE}` — the base branch
@@ -113,8 +114,24 @@ Create a pull request from the current feature branch.
    - If no match found, proceed without issue link (warn the user)
 
 3. **Build PR body** from `{SKILL_DIR}/references/pr-template.md`:
-   - `{SUMMARY}` — `git log {base}..HEAD --oneline` formatted as bullet list
    - `{ISSUE_LINK}` — `Closes #{N}` if issue found, otherwise omit
+   - `{PURPOSE}` — synthesize from `git log {base}..HEAD --oneline` and plan.md;
+     describe **why** this change exists, not what files changed
+   - `{DECISIONS}` — extract key decisions from:
+     - `prompt-logs/{session}/lessons.md` takeaways
+     - `prompt-logs/{session}/retro.md` CDM section
+     - `prompt-logs/{session}/plan.md` decision points
+     - Format as markdown table: `| 결정 | 근거 | 대안 |`
+     - If no decisions found, write `_세션 중 주요 결정사항 없음._`
+   - `{VERIFICATION}` — concrete, reproducible verification steps:
+     - Include exact commands to run (e.g., `claude --plugin-dir ... -p "..."`)
+     - Describe expected output/behavior
+     - Cover both happy path and edge cases if relevant
+   - `{HUMAN_JUDGMENT}` — agent self-assessment of items needing human review:
+     - Architecture changes, UX decisions, security implications, breaking changes
+     - If none, write `없음` (this enables autonomous merge — see `/ship merge`)
+   - `{SYSTEM_IMPACT}` — behavioral changes visible to end users or dependent systems
+   - `{FUTURE_IMPACT}` — impact on future development (new patterns, constraints, tech debt)
    - `{GIT_DIFF_STAT}` — output of `git diff {base}...HEAD --stat`
      wrapped in a `` ```text `` code fence
    - `{LESSONS}` — extract from `prompt-logs/{session}/lessons.md` if exists,
@@ -164,11 +181,24 @@ Check PR status and merge if ready.
 
    - If no PR found for current branch, report and stop
 
-2. **Assess readiness** — all must be true:
+2. **Assess readiness**:
+
+   **Core checks** (always required):
    - `state` = `OPEN`
-   - `reviewDecision` = `APPROVED`
    - All status checks passed (parse `statusCheckRollup`)
    - `mergeable` = `MERGEABLE`
+
+   **Review requirement** (conditional):
+   - Parse the PR body for `## 인간 판단 필요 사항` section
+   - Check branch protection: `gh api repos/{owner}/{repo}/branches/{base}/protection 2>&1`
+
+   Decision matrix:
+
+   | Human judgment | Branch protected | Review required |
+   |---|---|---|
+   | `없음` or empty | No | **Skip** — autonomous merge |
+   | `없음` or empty | Yes | `reviewDecision` = `APPROVED` required |
+   | Items listed | Any | Report items, **stop** — do not merge |
 
    If not ready, report which conditions are blocking and stop.
    Do not attempt to merge.

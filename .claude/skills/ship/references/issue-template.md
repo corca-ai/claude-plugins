@@ -6,19 +6,23 @@ The agent reads this file and substitutes `{VARIABLES}` to compose the issue bod
 
 <!-- BEGIN TEMPLATE -->
 
-## Purpose
+## 배경
 
-{PURPOSE}
+{BACKGROUND}
 
-## Success Criteria
+## 문제
 
-{SUCCESS_CRITERIA}
+{PROBLEM}
 
-## Scope
+## 목표
+
+{GOAL}
+
+## 작업 범위
 
 {SCOPE}
 
-## Session Info
+## 세션 정보
 
 - **Branch**: `{BRANCH}`
 - **Base**: `{BASE}`

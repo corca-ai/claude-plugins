@@ -23,13 +23,13 @@ This is separate from the system plan file — create `prompt-logs/` directory w
 
 For non-trivial implementation tasks (new plugins, multi-file changes, architectural decisions), proactively use `EnterPlanMode` even when the user does not explicitly request it.
 
-After implementing a plan, complete the full workflow without waiting for explicit reminders:
+After implementing a plan, complete the full workflow autonomously — do not wait for explicit reminders or confirmations between steps:
 0. At session start, create `prompt-logs/{YYMMDD}-{NN}-{title}/` and `lessons.md` — even if plan.md was written in a prior session
 1. Mark plan.md as done (✅ on completed items)
 2. Update lessons.md with implementation learnings
-3. Run `/retro`
+3. Run `/retro` autonomously
 4. For plugin changes: use `/plugin-deploy` skill to automate version checks, marketplace sync, README updates, and local testing
-5. Commit and push (push is required before step 6 — `update-all.sh` pulls from the remote)
+5. Commit and push autonomously (push is required before step 6 — `update-all.sh` pulls from the remote)
 6. After committing plugin changes, run `bash scripts/update-all.sh` to update the marketplace and all installed plugins
 
 ## Collaboration Style
