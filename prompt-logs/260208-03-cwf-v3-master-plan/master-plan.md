@@ -389,7 +389,9 @@ Source: `prompt-logs/260208-01-refactor-review/`
 | **S11b** | feat/cwf-refactor | Migrate refactor with parallel sub-agent enhancement | Compare output quality vs v2. |
 | **S12** | feat/cwf-setup | Build `cwf:setup` + `cwf:update` + `cwf:handoff`. Rewrite `install.sh` + `update-all.sh`. Migration script. | Full setup flow on clean machine (or simulated). |
 | **S13** | marketplace-v3 | Holistic refactor review on entire cwf plugin | Use `cwf:refactor --holistic` on itself. |
-| **S14** | marketplace-v3 | Integration test, deprecate old plugins, final docs, convert `.claude/skills/` → `plugins/cwf/`, merge to main | Full workflow end-to-end test. |
+| **S13.5** | s13.5-feedback-loop-infra | Self-healing criteria, expert-in-the-loop, project-context slimming, hook module abstraction | Provenance check triggers on stale criteria. |
+| **S13.6** | s13.6-cwf-protocol | Full CWF protocol design: auto-chaining gather→clarify→plan→review→impl→retro→ship | Single `cwf` invocation chains full cycle. |
+| **S14** | marketplace-v3 | Integration test, deprecate old plugins, final docs, merge to main. **Produce `docs/v3-migration-decisions.md`** — synthesize all key decisions and lessons from S0-S14 into a single document. PR body gets the summary, doc gets the details. | Full workflow end-to-end test. |
 
 ### Session Dependencies
 
