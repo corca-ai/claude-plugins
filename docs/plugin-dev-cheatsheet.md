@@ -119,6 +119,13 @@ Naming: `CLAUDE_CORCA_{PLUGIN_NAME}_{SETTING}`
   CURL_EXIT=$?
   set -e
   ```
+- `&&` chains under `set -e`: `[ -f "$f" ] && VAR="$f" && break` exits the script if `[ -f ]` fails (exit code 1). Use `if/then` blocks instead:
+  ```bash
+  # BAD: exits under set -e when condition is false
+  [ -f "$f" ] && RESULT="$f" && break
+  # GOOD: if/then is safe
+  if [ -f "$f" ]; then RESULT="$f"; break; fi
+  ```
 - Empty array iteration under `set -u`: `"${arr[@]}"` on an empty array causes "unbound variable". Guard with `if [[ ${#arr[@]} -gt 0 ]]; then ... fi`.
 
 ## Testing

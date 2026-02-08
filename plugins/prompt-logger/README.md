@@ -15,11 +15,12 @@ Both hooks call the same idempotent script. If `Stop` already logged everything,
 
 ## Output
 
-Each session produces one markdown file at `{cwd}/prompt-logs/sessions/{date}-{hash}.md`:
+Each session produces one markdown file at `{cwd}/prompt-logs/sessions/{yymmdd}-{hhmm}-{hash}.md`:
 
 ```markdown
 # Session: abc12345
 Model: claude-opus-4-5-20251101 | Branch: main
+Team: my-project (researcher)
 CWD: /Users/ted/codes/project
 Started: 2026-02-04 14:30:00 KST | Claude Code v2.1.31
 
@@ -52,8 +53,10 @@ last 5 lines...
 - **Image handling** — image content replaced with `[Image]`
 - **Thinking blocks** — skipped entirely
 - **Local timezone** — UTC transcript timestamps converted to local time (e.g., KST)
+- **Team detection** — agent team sessions tagged with team name and role (e.g., `Team: my-project (researcher)`)
+- **Time-stamped filenames** — `{yymmdd}-{hhmm}-{hash}.md` for easy chronological sorting
 - **Race-safe** — atomic mkdir lock prevents concurrent Stop/SessionEnd conflicts
-- **Auto-commit** — session log is committed automatically at session end (no untracked leftovers)
+- **Auto-commit** — all session logs (including sub-agent sessions from team runs) are committed together at session end
 
 ## Configuration
 

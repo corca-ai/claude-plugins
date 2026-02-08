@@ -80,6 +80,76 @@ fi
 TEMP_ENTRIES=$(mktemp)
 trap 'rm -f "$TEMP_ENTRIES"; rmdir "$LOCK_DIR" 2>/dev/null' EXIT
 
+# ── Resolve output file path ────────────────────────────────────────────────
+# Filename format: {yymmdd}-{hhmm}-{hash}.md
+# Session start time is used for {hhmm}, cached in state for consistency
+OUT_FILE_STATE="${STATE_DIR}/out_file"
+mkdir -p "$LOG_DIR"
+
+if [ -f "$OUT_FILE_STATE" ]; then
+    OUT_FILE=$(cat "$OUT_FILE_STATE")
+else
+    # Check for existing file with this hash (handles process restart)
+    EXISTING=""
+    for f in "$LOG_DIR"/*-"${HASH}.md"; do
+        if [ -f "$f" ]; then
+            EXISTING="$f"
+            break
+        fi
+    done
+
+    if [ -n "$EXISTING" ]; then
+        OUT_FILE="$EXISTING"
+    else
+        # Compute start time from first transcript entry
+        START_TIME=""
+        FIRST_TS=$(jq -rs '[.[] | select(.timestamp) | .timestamp // empty] | first // empty' < "$TRANSCRIPT_PATH" 2>/dev/null || true)
+        if [ -n "${FIRST_TS:-}" ]; then
+            START_TIME=$(utc_to_local "$FIRST_TS" "%H%M")
+        fi
+        [ -z "${START_TIME:-}" ] && START_TIME=$(date +%H%M)
+        DATE_STR=$(date +%y%m%d)
+        OUT_FILE="${LOG_DIR}/${DATE_STR}-${START_TIME}-${HASH}.md"
+    fi
+    echo "$OUT_FILE" > "$OUT_FILE_STATE"
+fi
+
+# ── Detect team membership ──────────────────────────────────────────────────
+# Strategy:
+#   1. Check cached state (subsequent invocations)
+#   2. Read transcript first line for teamName/agentName (teammates have these)
+#   3. Fallback: check team configs for leadSessionId match (leader detection)
+TEAM_NAME=""
+TEAM_ROLE=""
+TEAM_INFO_FILE="${STATE_DIR}/team_info"
+if [ -f "$TEAM_INFO_FILE" ]; then
+    TEAM_NAME=$(head -1 "$TEAM_INFO_FILE")
+    TEAM_ROLE=$(sed -n '2p' "$TEAM_INFO_FILE")
+else
+    # Transcript entries have teamName and agentName fields
+    TEAM_NAME=$(head -1 "$TRANSCRIPT_PATH" | jq -r '.teamName // empty' 2>/dev/null || true)
+    if [ -n "${TEAM_NAME:-}" ]; then
+        TEAM_ROLE=$(head -1 "$TRANSCRIPT_PATH" | jq -r '.agentName // "member"' 2>/dev/null || true)
+    else
+        # Leader's transcript has teamName=null; match via leadSessionId in configs
+        if [ -d "$HOME/.claude/teams" ]; then
+            for config in "$HOME/.claude/teams"/*/config.json; do
+                [ -f "$config" ] || continue
+                LEAD_SID=$(jq -r '.leadSessionId // empty' "$config" 2>/dev/null || true)
+                if [ "${LEAD_SID:-}" = "$SESSION_ID" ]; then
+                    TEAM_NAME=$(jq -r '.name // empty' "$config" 2>/dev/null || true)
+                    TEAM_ROLE="leader"
+                    break
+                fi
+            done
+        fi
+    fi
+    # Cache for subsequent invocations
+    if [ -n "${TEAM_NAME:-}" ]; then
+        printf '%s\n%s\n' "$TEAM_NAME" "$TEAM_ROLE" > "$TEAM_INFO_FILE"
+    fi
+fi
+
 # ── Incremental offset ───────────────────────────────────────────────────────
 OFFSET_FILE="${STATE_DIR}/offset"
 LAST_OFFSET=0
@@ -97,12 +167,20 @@ if [ "$TOTAL_LINES" -lt "$LAST_OFFSET" ]; then
 elif [ "$TOTAL_LINES" -eq "$LAST_OFFSET" ]; then
     # No new lines — but SessionEnd still needs to auto-commit the existing log
     if [ "$HOOK_TYPE" = "session_end" ] && [ "$AUTO_COMMIT" = "true" ]; then
-        DATE_STR=$(date +%y%m%d)
-        OUT_FILE="${LOG_DIR}/${DATE_STR}-${HASH}.md"
-        if [ -f "$OUT_FILE" ] && git -C "$CWD" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        if git -C "$CWD" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
             if git -C "$CWD" diff --cached --quiet 2>/dev/null; then
-                git -C "$CWD" add -- "$OUT_FILE" 2>/dev/null && \
-                git -C "$CWD" commit --no-verify -m "prompt-log: $(basename "$OUT_FILE" .md)" 2>/dev/null || true
+                # Collect ALL session log .md files (untracked + modified)
+                SESSION_FILES=$(git -C "$CWD" ls-files --others --modified -- "$LOG_DIR/*.md" 2>/dev/null)
+                if [ -n "$SESSION_FILES" ]; then
+                    echo "$SESSION_FILES" | xargs -I{} git -C "$CWD" add -- "{}" 2>/dev/null
+                    FILE_COUNT=$(echo "$SESSION_FILES" | wc -l | tr -d ' ')
+                    if [ "$FILE_COUNT" -eq 1 ]; then
+                        COMMIT_MSG="prompt-log: $(basename "$OUT_FILE" .md)"
+                    else
+                        COMMIT_MSG="prompt-log: ${FILE_COUNT} sessions ($(basename "$OUT_FILE" .md))"
+                    fi
+                    git -C "$CWD" commit --no-verify -m "$COMMIT_MSG" 2>/dev/null || true
+                fi
             fi
         fi
     fi
@@ -157,13 +235,6 @@ if [ -f "$TURN_NUM_FILE" ]; then
     TURN_START=$(cat "$TURN_NUM_FILE")
 fi
 
-# ── Ensure output directory exists ────────────────────────────────────────────
-mkdir -p "$LOG_DIR"
-
-# ── Determine output file ────────────────────────────────────────────────────
-DATE_STR=$(date +%y%m%d)
-OUT_FILE="${LOG_DIR}/${DATE_STR}-${HASH}.md"
-
 # ── Write session header if first write ───────────────────────────────────────
 if [ ! -f "$OUT_FILE" ]; then
     # Extract metadata from first assistant entry
@@ -184,12 +255,13 @@ if [ ! -f "$OUT_FILE" ]; then
         STARTED=$(date "+%Y-%m-%d %H:%M:%S")
     fi
 
-    cat > "$OUT_FILE" <<EOF
-# Session: ${HASH}
-Model: ${MODEL} | Branch: ${BRANCH}
-CWD: ${CWD}
-Started: ${STARTED} ${LOCAL_TZ} | Claude Code v${VERSION}
-EOF
+    {
+        echo "# Session: ${HASH}"
+        echo "Model: ${MODEL} | Branch: ${BRANCH}"
+        [ -n "$TEAM_NAME" ] && echo "Team: ${TEAM_NAME} (${TEAM_ROLE})"
+        echo "CWD: ${CWD}"
+        echo "Started: ${STARTED} ${LOCAL_TZ} | Claude Code v${VERSION}"
+    } > "$OUT_FILE"
 fi
 
 # ── Handle rewind: mark and skip already-logged turns ────────────────────────
@@ -387,8 +459,19 @@ if [ "$HOOK_TYPE" = "session_end" ] && [ "$AUTO_COMMIT" = "true" ] && [ -f "$OUT
     if git -C "$CWD" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
         # Only proceed if no pre-existing staged changes (don't interfere)
         if git -C "$CWD" diff --cached --quiet 2>/dev/null; then
-            git -C "$CWD" add -- "$OUT_FILE" 2>/dev/null && \
-            git -C "$CWD" commit --no-verify -m "prompt-log: $(basename "$OUT_FILE" .md)" 2>/dev/null || true
+            # Collect ALL session log .md files (untracked + modified)
+            # This ensures sub-agent session logs (from team runs) are included
+            SESSION_FILES=$(git -C "$CWD" ls-files --others --modified -- "$LOG_DIR/*.md" 2>/dev/null)
+            if [ -n "$SESSION_FILES" ]; then
+                echo "$SESSION_FILES" | xargs -I{} git -C "$CWD" add -- "{}" 2>/dev/null
+                FILE_COUNT=$(echo "$SESSION_FILES" | wc -l | tr -d ' ')
+                if [ "$FILE_COUNT" -eq 1 ]; then
+                    COMMIT_MSG="prompt-log: $(basename "$OUT_FILE" .md)"
+                else
+                    COMMIT_MSG="prompt-log: ${FILE_COUNT} sessions ($(basename "$OUT_FILE" .md))"
+                fi
+                git -C "$CWD" commit --no-verify -m "$COMMIT_MSG" 2>/dev/null || true
+            fi
         fi
     fi
 fi
