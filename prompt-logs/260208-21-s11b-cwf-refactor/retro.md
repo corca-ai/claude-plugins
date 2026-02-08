@@ -17,7 +17,7 @@
 
 ### Suggested CLAUDE.md Updates
 
-- `Collaboration Style`에 추가 제안: "세션 완료 시 next-session.md 작성과 master plan 확인은 자동으로 수행. 유저가 'next'라고 하면 다음 세션 핸드오프까지 완성한 뒤 보고."
+- ~~`Collaboration Style`에 추가 제안~~ → **구조적 해결로 대체됨** (아래 Post-Retro Findings 참조)
 
 ## 3. Waste Reduction
 
@@ -32,7 +32,7 @@
 
 **분류**: Process gap — CLAUDE.md에 "After implementation" 체크리스트가 불완전.
 
-**권장 조치**: CLAUDE.md `Plan Mode` 섹션을 확장하여 핸드오프 문서 작성을 명시. 또는 더 나은 방법: check-session.sh가 next-session.md FAIL을 내므로, "Fix all FAIL items" 지시를 제대로 따르면 자연히 해결됨. 이번에는 check-session.sh의 FAIL을 "세션 진행 중이라 예상된 결과"로 무시한 것이 문제. 실제로는 next-session.md를 작성하고 나서 check-session.sh를 돌려야 함.
+**권장 조치**: ~~CLAUDE.md 규칙 추가~~ → **구조적 해결 적용됨**: check-session.sh에 `--impl` 플래그 추가 (Post-Retro Findings 참조). 구현 직후 `--impl`을 돌리면 retro.md 없이도 next-session.md 누락을 명확히 잡음.
 
 ## 4. Critical Decision Analysis (CDM)
 
@@ -45,7 +45,7 @@
 | **Options** | (A) FAIL을 "세션 진행 중" 사유로 수용, (B) retro.md/next-session.md를 먼저 작성 후 재실행 |
 | **Basis** | retro와 next-session은 세션 종료 시점 산출물이므로 구현 중 없는 것이 정상이라고 판단 |
 | **Situation Assessment** | 부분적으로 맞음 — retro.md는 세션 끝에 생성하지만, next-session.md는 구현 완료 직후 작성 가능하고 작성해야 함 |
-| **Aiding** | check-session.sh를 2단계로 분리하면 도움: (1) 구현 완료 체크 (plan.md, lessons.md), (2) 세션 종료 체크 (retro.md, next-session.md) |
+| **Aiding** | check-session.sh를 2단계로 분리하면 도움 → **적용됨**: `--impl` 플래그로 impl_complete(plan.md, lessons.md, next-session.md) 체크 분리 |
 | **Hypothesis** | 옵션 B를 택했다면 next-session.md를 먼저 작성하고, 유저의 "next" 요청에 바로 핸드오프를 제시할 수 있었음 |
 
 **Key lesson**: check-session.sh FAIL은 무시 대상이 아님. "세션 진행 중"이라는 사유는 retro.md에만 적용 가능하고, next-session.md는 구현 직후 작성할 수 있으므로 FAIL 발생 시 가능한 항목부터 해결해야 함.
@@ -80,3 +80,15 @@
 ### Skill Gaps
 
 cwf:handoff가 S12에서 구현되면 핸드오프 자동화 갭이 해소됨. 추가 스킬 갭은 식별되지 않음.
+
+### Post-Retro Findings
+
+**check-session.sh `--impl` 플래그 구현** (retro 논의에서 도출):
+
+유저가 "이대로면 다음에도 똑같은 실수를 할 것"이라고 지적. retro의 "FAIL을 제대로 처리하면 됨"은 사실상 행동 규칙이므로 프로젝트 원칙("deterministic validation over behavioral instruction")에 위배. 구조적 해결 적용:
+
+- `cwf-state.yaml` session_defaults에 `impl_complete: [plan.md, lessons.md, next-session.md]` 추가
+- `check-session.sh --impl` → impl_complete 아티팩트만 체크 (retro.md 제외)
+- `CLAUDE.md` Plan Mode: `check-session.sh` → `check-session.sh --impl`으로 변경
+
+이로써 구현 직후 `--impl`을 돌릴 때 retro.md 부재 뒤에 next-session.md 누락이 숨을 수 없음. "세션 진행 중이라 FAIL은 정상" 합리화가 구조적으로 차단됨.
