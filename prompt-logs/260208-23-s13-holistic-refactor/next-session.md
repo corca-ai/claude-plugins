@@ -17,7 +17,7 @@ Three workstreams, unified theme: **feedback loop infrastructure for agent auton
 
 ### A. Self-Healing Criteria Design + Implementation
 
-Design and implement provenance-based self-healing for criteria/guide files.
+Design and implement self-healing for ALL documents and code that agents rely on — not just skill criteria files. Provenance metadata (holistic-criteria.md) is one PoC, not the mandated pattern. The design phase should explore what self-healing looks like for different artifact types (SKILL.md, reference docs, project-context.md, CLAUDE.md, hook scripts, conventions docs). Each may need different metadata and different staleness signals.
 
 #### A1. Design (use cwf:clarify)
 
@@ -51,7 +51,15 @@ Key design questions:
 
 Pick one stage (likely cwf:clarify or cwf:review) and implement expert-in-the-loop as a proof of concept. Validate that the feedback loop is actually shorter and more useful than post-hoc retro analysis.
 
-### C. Hook Infrastructure Improvements
+### C. project-context.md Slimming
+
+`project-context.md` is accumulating good principles but risks becoming too long, overfitted, and siloed. It is itself a self-healing target:
+- Audit: which entries are still actionable vs. historical?
+- Are entries duplicated across project-context.md, CLAUDE.md, and skill-conventions.md?
+- Should some entries graduate to skill-specific Rules sections and be removed from the central doc?
+- Apply the same "does this document know when it's stale?" question to project-context.md itself
+
+### D. Hook Infrastructure Improvements
 
 #### C1. Attention hook Slack threading
 
@@ -92,6 +100,10 @@ Then the skill flags staleness to the user before proceeding
 Given expert-in-the-loop is prototyped in one workflow stage
 When the stage is executed
 Then expert feedback is integrated during the stage (not post-hoc)
+
+Given project-context.md is audited for staleness and duplication
+When slimming is applied
+Then no entry is duplicated across project-context.md, CLAUDE.md, and skill-conventions.md
 
 Given attention hook blank line issue is identified
 When shared module is extracted
