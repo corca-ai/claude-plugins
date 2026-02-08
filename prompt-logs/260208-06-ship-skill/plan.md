@@ -29,7 +29,7 @@ This is the first session on `marketplace-v3` branch.
 - [x] 3. Write `references/pr-template.md`
 - [x] 4. Write `SKILL.md`
 - [x] 5. Test: `/ship`, `/ship status`, `/ship issue`, `/ship pr`
-- [ ] 6. Session wrap-up: lessons.md, next-session.md, `/retro`, commit & push
+- [x] 6. Session wrap-up: lessons.md, next-session.md, `/retro`, commit & push
 
 ## Success Criteria
 
