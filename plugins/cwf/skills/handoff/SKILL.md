@@ -52,11 +52,8 @@ Determine the current session by:
 Read the current session's artifacts (if they exist):
 
 - `plan.md` — session scope and goals
-  - Extract `## Deferred Actions` section if present (unchecked items: `- [ ]`)
 - `lessons.md` — accumulated learnings
-  - Identify entries with unimplemented proposals (keywords: "구현은 별도 세션", "스코프 밖", "future", "deferred", "separate session", "out of scope")
 - `retro.md` — retrospective (if available)
-  - Identify action items not yet addressed
 
 ---
 
@@ -217,41 +214,6 @@ When `--register` flag is used, skip Phase 3 (generation) and only update the se
 
 ---
 
-## Phase 4b: Unresolved Items
-
-Propagate unresolved items from the current session to `next-session.md` to prevent context loss across session boundaries.
-
-### Sources
-
-1. **From Deferred Actions** (`plan.md`): Extract unchecked items (`- [ ]`) from the `## Deferred Actions` section
-2. **From Lessons** (`lessons.md`): Identify entries with unimplemented resolution proposals (keywords: "구현은 별도 세션", "스코프 밖", "future", "deferred", "separate session", "out of scope")
-3. **From Retro** (`retro.md`): Identify action items not yet addressed in this session
-
-### Output Format
-
-Add a section to `next-session.md` after "Lessons from Prior Sessions":
-
-```markdown
-## Unresolved Items from {current session ID}
-
-### From Deferred Actions
-
-- [ ] {item 1}
-- [ ] {item 2}
-
-### From Lessons
-
-- [ ] {lesson title}: {unimplemented proposal}
-```
-
-### Scoping Rules
-
-- Items relevant to the next session's scope: include directly
-- Items outside the next session's scope: mark as "carry-forward" (e.g., `- [ ] [carry-forward] {item}`)
-- If no unresolved items exist, omit this section entirely
-
----
-
 ## Phase 5: Lessons Checkpoint + Verify
 
 ### 5.1 Stage Checkpoints
@@ -281,7 +243,6 @@ Report results. If any artifacts are missing, list them and suggest fixes.
 7. **cwf-state.yaml is SSOT**: Read before modifying. Edit, do not overwrite.
 8. **Never overwrite existing files**: When a file already exists (e.g., `next-session.md` from a prior run), use Edit to update — not Write. Write replaces entire file contents and destroys prior work.
 9. **All code fences must have language specifier**: Never use bare fences.
-10. **Unresolved items MUST be propagated**: Deferred Actions and unimplemented lesson proposals from the current session must appear in next-session.md. This prevents context loss across session boundaries.
 
 ## References
 

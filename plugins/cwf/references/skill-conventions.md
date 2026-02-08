@@ -148,49 +148,10 @@ This applies to analysis reports, quick scans, review summaries, and any skill o
 - [ ] Agent pattern matches declaration in agent-patterns.md
 - [ ] No repeated patterns that should be extracted to shared references
 
-## Provenance Rule: Self-Healing Criteria
+## Future Consideration: Self-Healing Criteria
 
-System-state-dependent documents (criteria, conventions, architecture guides) require provenance tracking to detect staleness as the system grows.
+Reference guides and analysis criteria can become stale as the system grows. Proven case: `holistic-criteria.md` was written for 5 skills but missed analysis dimensions relevant to 9 skills (S13).
 
-### When to Create Provenance
+**Idea**: Each guide/criteria file carries provenance metadata (system state at creation time). Skills check provenance against current state before applying the criteria. If significantly different, flag to the user before proceeding.
 
-Create a `.provenance.yaml` sidecar file when a document:
-
-- Defines analysis criteria or review checklists that depend on the number of skills, hooks, or plugins
-- Describes architectural patterns that assume a specific system configuration
-- Serves as a reference guide that agents follow during automated analysis
-
-### Sidecar Format
-
-Place `{stem}.provenance.yaml` in the same directory as the target file:
-
-```yaml
-target: {filename}
-written_session: {session when first written}
-last_reviewed: {session when last reviewed}
-skill_count: {number of skills at review time}
-hook_count: {number of hooks at review time}
-designed_for:  # optional — scope declarations
-  - "{what system state this doc was designed for}"
-```
-
-### Staleness Detection
-
-Skills that consume provenance-tracked documents must:
-
-1. Read the `.provenance.yaml` sidecar before applying the document
-2. Compare `skill_count` and `hook_count` against the current system inventory
-3. If counts differ: warn the user with the specific delta before proceeding
-4. If counts match: proceed silently
-
-### Maintenance
-
-When modifying a provenance-tracked document:
-
-- Update `last_reviewed` to the current session
-- Update `skill_count` and `hook_count` to current values
-- Update `designed_for` if the document's scope changed
-
-### Validation
-
-Run `scripts/provenance-check.sh` to verify all provenance files against the current system state. Use `--json` for machine-readable output.
+This concept needs more failure cases before generalizing. Track occurrences and revisit post-v1.0 when usage data accumulates. See `holistic-criteria.md` for the first provenance implementation.

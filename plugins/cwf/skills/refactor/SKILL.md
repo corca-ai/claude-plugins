@@ -198,17 +198,6 @@ Read every SKILL.md and hooks.json across:
 
 Build a condensed inventory map: plugin name, type (skill/hook/hybrid), word count, capabilities, dependencies.
 
-### 1b. Provenance Check
-
-Before loading the analysis framework, verify its provenance:
-
-1. Read `{SKILL_DIR}/references/holistic-criteria.provenance.yaml`
-2. Compare `skill_count` and `hook_count` against the inventory from Phase 1
-3. If counts differ:
-   - Warn the user with specific delta (e.g., "holistic-criteria.md was reviewed at 9 skills, current system has 11")
-   - Use AskUserQuestion to ask whether to proceed with potentially stale criteria or pause for review
-4. If counts match: proceed silently
-
 ### 2. Load analysis framework
 
 Read `{SKILL_DIR}/references/holistic-criteria.md` for the three analysis dimensions.
@@ -342,4 +331,3 @@ Read `{SKILL_DIR}/references/docs-criteria.md` Section 5 and evaluate:
 6. Docs Review: inline, no sub-agents
 7. Sub-agents analyze and report; orchestrator merges. Sub-agents do not modify files
 8. All code fences must have a language specifier
-9. Holistic mode: check provenance before loading criteria. If counts differ from inventory, warn user before proceeding
