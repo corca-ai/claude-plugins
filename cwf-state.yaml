@@ -160,6 +160,9 @@ sessions:
     title: "Migrate refactor → cwf:refactor"
     dir: prompt-logs/260208-21-s11b-cwf-refactor
     branch: marketplace-v3
+    completed_at: "2026-02-08"
+    summary: "Migrated refactor v1.1.2 into CWF as cwf:refactor with 2-agent Deep Review and 3-agent Holistic parallel sub-agents"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md, session.md]
 
 # External tool availability (detected by cwf:setup)
 tools:
