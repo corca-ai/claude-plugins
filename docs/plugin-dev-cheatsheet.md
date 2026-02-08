@@ -176,4 +176,4 @@ claude --plugin-dir ./plugins/{name} --dangerously-skip-permissions --resume
 5. New plugins: check `AI_NATIVE_PRODUCT_TEAM.md` for link opportunities
 6. Test locally
 7. Commit and push
-8. Run `bash scripts/update-all.sh`
+8. On **main branch**: run `bash scripts/update-all.sh` (skip on feature branches — pulls from default branch only)

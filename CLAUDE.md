@@ -29,8 +29,8 @@ After implementing a plan, complete the full workflow autonomously — do not wa
 2. Update lessons.md with implementation learnings
 3. Run `/retro` autonomously
 4. For plugin changes: use `/plugin-deploy` skill to automate version checks, marketplace sync, README updates, and local testing
-5. Commit and push autonomously (push is required before step 6 — `update-all.sh` pulls from the remote)
-6. After committing plugin changes, run `bash scripts/update-all.sh` to update the marketplace and all installed plugins
+5. Commit and push autonomously
+6. After committing plugin changes on **main branch**: run `bash scripts/update-all.sh` to update the marketplace and all installed plugins. Skip on feature branches — `update-all.sh` pulls from the default branch, so changes on feature branches won't propagate.
 
 ## CWF State
 
