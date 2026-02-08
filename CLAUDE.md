@@ -36,6 +36,14 @@ After implementation, write `next-session.md`, register the session in `cwf-stat
 - In design discussions, provide honest counterarguments and trade-off analysis. Do not just agree.
 - When writing markdown (SKILL.md, references, READMEs), always include a language specifier on code fences (` ```bash `, ` ```text `, ` ```yaml `, etc.). Never use bare ` ``` `. See `.markdownlint.json` for enforced rules.
 
+## Dogfooding
+
+When a CWF skill exists for the task at hand, use it instead of doing it manually.
+Discover available skills via the plugin's `skills/` directory or trigger list.
+
+After completing each workflow stage, update lessons.md with learnings before
+moving to the next stage.
+
 ## Language
 
 Write all documentation in English by default.

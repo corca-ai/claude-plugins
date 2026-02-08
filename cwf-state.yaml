@@ -165,6 +165,12 @@ sessions:
     summary: "Migrated refactor v1.1.2 into CWF as cwf:refactor with 2-agent Deep Review and 3-agent Holistic parallel sub-agents"
     artifacts: [plan.md, lessons.md, retro.md, next-session.md, session.md]
 
+  - id: S12
+    title: "Build cwf:setup + cwf:update + cwf:handoff"
+    dir: prompt-logs/260208-22-s12-cwf-setup-update-handoff
+    branch: marketplace-v3
+    stage_checkpoints: []
+
 # External tool availability (detected by cwf:setup)
 tools:
   codex: available
