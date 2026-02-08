@@ -32,6 +32,12 @@ After implementing a plan, complete the full workflow autonomously — do not wa
 5. Commit and push autonomously (push is required before step 6 — `update-all.sh` pulls from the remote)
 6. After committing plugin changes, run `bash scripts/update-all.sh` to update the marketplace and all installed plugins
 
+## CWF State
+
+- `cwf-state.yaml` is the SSOT for CWF v3 project state (sessions, workflow stage, tools, hooks).
+- After completing any CWF session, update `cwf-state.yaml`: add session entry to `sessions[]`.
+- When starting a new session, read `cwf-state.yaml` to determine completed sessions and current state.
+
 ## Collaboration Style
 
 - The user communicates in Korean. Respond in Korean for conversation, English for code and docs (per Language rules below).

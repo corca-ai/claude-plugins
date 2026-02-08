@@ -2,22 +2,107 @@
 # Git-tracked, per-project. Read/written by cwf skills.
 
 workflow:
-  current_stage: scaffold
-  started_at: "2025-02-08"
+  current_stage: build
+  started_at: "2026-02-08"
+  stages:
+    clarify: "S0"
+    refactor: "S1–S2"
+    scaffold: "S3–S4.6"
+    review: "S5a–S5b"
+    build: "S6a–S10"
+    harden: "S11–S13"
+    launch: "S14–S15"
 
 # Session history (populated by cwf:retro and cwf:handoff)
-# Format:
-#   - id: "S4"
-#     title: "Scaffold cwf plugin"
-#     stage: scaffold
-#     completed_at: "2025-02-08"
-#     summary: "Created plugin directory, hooks, gate, state file"
-sessions: []
+sessions:
+  - id: S0
+    title: "Clarify + master plan"
+    dir: prompt-logs/260208-03-cwf-v3-master-plan
+    branch: main
+    completed_at: "2026-02-08"
+    summary: "Designed CWF v3 architecture with 15-session plan and single-plugin approach"
+
+  - id: S1
+    title: "Refactor critical issues"
+    dir: prompt-logs/260208-04-refactor-critical
+    branch: main
+    completed_at: "2026-02-08"
+    summary: "Fixed shebang/strict-mode/eval issues across 6 plugins, established JSON safety patterns"
+
+  - id: S2
+    title: "Refactor session 2"
+    dir: prompt-logs/260208-05-refactor-s2
+    branch: main
+    completed_at: "2026-02-08"
+    summary: "Aligned env var naming to CLAUDE_CORCA_{PLUGIN}_{SETTING} across attention-hook"
+
+  - id: S3
+    title: "Ship skill"
+    dir: prompt-logs/260208-06-ship-skill
+    branch: main
+    completed_at: "2026-02-08"
+    summary: "Built /ship local skill for GitHub workflow automation with templating system"
+
+  - id: S4
+    title: "CWF scaffold"
+    dir: prompt-logs/260208-04-cwf-scaffold
+    branch: main
+    completed_at: "2026-02-08"
+    summary: "Scaffolded CWF plugin with gate mechanism and 13 source/stub files for hooks"
+
+  - id: S4.5
+    title: "Ship skill improvements"
+    dir: prompt-logs/260208-07-ship-improve
+    branch: main
+    completed_at: "2026-02-08"
+    summary: "Enhanced /ship with Korean PR templates and 2x2 autonomous-merge decision matrix"
+
+  - id: S4.6
+    title: "SW Factory discussion"
+    dir: prompt-logs/260208-08-sw-factory-discussion
+    branch: main
+    completed_at: "2026-02-08"
+    summary: "Applied SW Factory concepts: sernarative review, progressive disclosure, BDD criteria"
+
+  - id: S5a
+    title: "CWF review — internal reviewers"
+    dir: prompt-logs/260208-09-cwf-review-internal
+    branch: main
+    completed_at: "2026-02-08"
+    summary: "Implemented /review skill with 2 internal parallel reviewers (Security, UX/DX)"
+
+  - id: S5b
+    title: "CWF review — external reviewers"
+    dir: prompt-logs/260208-03-s5b-external-reviewers
+    branch: main
+    completed_at: "2026-02-08"
+    summary: "Expanded /review to 4 reviewers with external CLIs (Codex, Gemini) and provenance format"
+
+  - id: S6a
+    title: "CWF infra hooks"
+    dir: prompt-logs/260208-11-cwf-infra-hooks
+    branch: main
+    completed_at: "2026-02-08"
+    summary: "Migrated 3 simple hooks (check-markdown, smart-read, log-turn) into CWF plugin"
+
+  - id: S6b
+    title: "CWF hook migration"
+    dir: prompt-logs/260208-12-s6b-cwf-migration
+    branch: marketplace-v3
+    completed_at: "2026-02-08"
+    summary: "Migrated attention-hook (5 scripts + 2 utilities) into CWF, added check-shell.sh"
+
+  - id: S7-prep
+    title: "Populate cwf-state.yaml + update handoff workflow"
+    dir: prompt-logs/260208-13-s7-prep-cwf-state
+    branch: marketplace-v3
+    completed_at: "2026-02-08"
+    summary: "Created machine-readable SSOT for session history, updated handoff template"
 
 # External tool availability (detected by cwf:setup)
 tools:
-  codex: unknown
-  gemini: unknown
+  codex: available
+  gemini: available
   tavily: unknown
   exa: unknown
 

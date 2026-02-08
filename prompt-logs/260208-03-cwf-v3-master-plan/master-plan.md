@@ -443,7 +443,8 @@ Each session's handoff should follow this structure:
 1. Create next session dir: `prompt-logs/{YYMMDD}-{NN}-{title}/`
 2. Write plan.md, lessons.md in that dir
 3. Write next-session.md (S{N+1} handoff) in that dir
-4. If architecture decisions changed, edit THIS master-plan.md and record in lessons.md
+4. Update `cwf-state.yaml`: add session entry, update `workflow.current_stage` if needed
+5. If architecture decisions changed, edit THIS master-plan.md and record in lessons.md
 
 ### Start Command
 @{previous session dir}/next-session.md 시작합니다
@@ -454,4 +455,5 @@ Each session's handoff should follow this structure:
 - **master-plan.md**: Single source of truth in this directory. Edited in place, tracked by git.
 - **next-session.md**: Created in each session's own directory. Next session @mentions only this file.
 - **Chain**: S0/next-session.md → S1/next-session.md → S2/next-session.md → ...
+- **cwf-state.yaml**: Machine-readable SSOT for session history. Updated at each session completion.
 - **Current**: See `next-session.md` in this directory (points to S1).
