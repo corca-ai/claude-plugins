@@ -42,6 +42,11 @@ Both are optional — the skill falls back to Claude Task agents when CLIs
 are missing or unauthenticated. But real CLI reviews provide diverse model
 perspectives beyond Claude.
 
+**Fallback latency**: If both external CLIs fail, the skill incurs a
+two-round-trip penalty — first the CLI attempts run (up to 280s timeout each),
+then fallback Task agents are launched sequentially. Worst case adds ~5-10 min
+wall-clock time compared to a fully-cached CLI run.
+
 ## Mode Routing
 
 | Input | Mode |

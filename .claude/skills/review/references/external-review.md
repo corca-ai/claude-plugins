@@ -148,7 +148,8 @@ npx @google/gemini-cli -o text < {prompt_file}
 Note: Uses stdin redirection (`< {prompt_file}`) instead of `-p "$(cat ...)"` to
 avoid shell injection (review targets may contain `$()` or backticks) and
 ARG_MAX limits on large diffs. The `--approval-mode` flag is omitted as it
-requires experimental settings.
+requires experimental settings. As of 2025-06, Gemini CLI has no `--prompt-file`
+flag; stdin redirection is the canonical file-based input method.
 
 ---
 
@@ -161,7 +162,9 @@ the same perspective:
 You are substituting for {tool} which was unavailable.
 Apply the {perspective} reviewer perspective.
 
-{Insert full role section + mode-specific checklist from above}
+{role_section}
+
+{mode_checklist}
 
 ## Review Target
 {the diff, plan content, or clarify artifact}
