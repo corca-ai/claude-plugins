@@ -20,7 +20,7 @@ allowed-tools:
 
 Turn vague requirements into precise, actionable specifications.
 
-**Language**: Match all output to the user's prompt language.
+**Language**: Write clarification artifacts in English. Communicate with the user in their prompt language.
 
 ## Quick Start
 

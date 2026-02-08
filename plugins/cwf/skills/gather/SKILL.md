@@ -22,7 +22,7 @@ allowed-tools:
 
 Unified information acquisition — gather URLs, search the web, or explore local code.
 
-**Language**: Adapt all user-facing output to match the user's prompt language.
+**Language**: Write gathered artifacts in English. Communicate with the user in their prompt language.
 
 ## Quick Reference
 
@@ -250,6 +250,15 @@ Environment variables:
 ```
 
 ---
+
+## Rules
+
+1. **URL auto-detect priority**: Match most specific pattern first (Google > Slack > Notion > GitHub > Generic)
+2. **Graceful degradation**: Missing API keys print setup instructions, don't crash
+3. **Output dir hierarchy**: CLI argument > service-specific env var > unified env var > `./gathered`
+4. **Data privacy**: Do not include confidential code or sensitive information in search queries
+5. **Sub-agent for --local**: Always use Task tool, never inline exploration
+6. **All code fences must have language specifier**: Never use bare fences
 
 ## References
 

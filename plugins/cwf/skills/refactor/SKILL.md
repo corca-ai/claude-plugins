@@ -20,7 +20,7 @@ allowed-tools:
 
 Multi-mode code and skill review tool.
 
-**Language**: Match the user's language.
+**Language**: Write review reports in English. Communicate with the user in their prompt language.
 
 ## Quick Reference
 
@@ -213,7 +213,8 @@ Launch **3 parallel sub-agents** in a single message using Task tool (`subagent_
 Prompt includes:
 - Condensed inventory map (name, type, word count, capabilities)
 - `{SKILL_DIR}/references/holistic-criteria.md` Section 1 content
-- Instructions: Identify good patterns one skill has that others should adopt. Read individual SKILL.md files for deeper investigation as needed. Return structured findings.
+- `{PLUGIN_ROOT}/references/skill-conventions.md` content (shared conventions checklist)
+- Instructions: Verify each skill against skill-conventions.md checklists. Identify good patterns one skill has that others should adopt. Detect repeated patterns across 3+ skills that should be extracted to shared references. Read individual SKILL.md files for deeper investigation as needed. Return structured findings.
 
 **Agent B — Boundary Issues**:
 
@@ -321,11 +322,12 @@ Read `{SKILL_DIR}/references/docs-criteria.md` Section 5 and evaluate:
 - Holistic analysis framework: [references/holistic-criteria.md](references/holistic-criteria.md)
 - Tidying techniques for --code mode: [references/tidying-guide.md](references/tidying-guide.md)
 - Docs review criteria: [references/docs-criteria.md](references/docs-criteria.md)
-- Shared agent patterns: [{SKILL_DIR}/../references/agent-patterns.md](../references/agent-patterns.md)
+- Shared agent patterns: [agent-patterns.md](../../references/agent-patterns.md)
+- Skill conventions checklist: [skill-conventions.md](../../references/skill-conventions.md)
 
 ## Rules
 
-1. Language: match the user's language
+1. Write review reports in English, communicate with user in their prompt language
 2. Deep Review and Holistic use perspective-based parallel sub-agents (not module-based)
 3. Deep Review: 2 agents (structural + quality), single batch
 4. Holistic: 3 agents (per dimension), single batch after inline inventory

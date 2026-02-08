@@ -169,6 +169,14 @@ sessions:
     title: "Build cwf:setup + cwf:update + cwf:handoff"
     dir: prompt-logs/260208-22-s12-cwf-setup-update-handoff
     branch: marketplace-v3
+    completed_at: "2026-02-08"
+    summary: "Built cwf:setup (hook toggle + tool detection + index.md), cwf:update (version check), cwf:handoff (state-based handoff generation). Rewrote install.sh and update-all.sh for single cwf plugin."
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md]
+
+  - id: S13
+    title: "Holistic refactor review on entire CWF plugin"
+    dir: prompt-logs/260208-23-s13-holistic-refactor
+    branch: marketplace-v3
     stage_checkpoints: []
 
 # External tool availability (detected by cwf:setup)

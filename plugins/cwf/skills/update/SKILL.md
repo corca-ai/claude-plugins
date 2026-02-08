@@ -15,7 +15,7 @@ allowed-tools:
 
 Check and update the CWF plugin to the latest version from the marketplace.
 
-**Language**: Communicate with the user in their prompt language.
+**Language**: Write artifacts in English. Communicate with the user in their prompt language.
 
 ## Quick Start
 

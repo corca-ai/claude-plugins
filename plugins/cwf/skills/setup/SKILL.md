@@ -19,7 +19,7 @@ allowed-tools:
 Initial CWF configuration. Interactive hook toggle, external tool detection,
 and progressive disclosure index generation.
 
-**Language**: Communicate with the user in their prompt language.
+**Language**: Write config files in English. Communicate with the user in their prompt language.
 
 ## Quick Start
 

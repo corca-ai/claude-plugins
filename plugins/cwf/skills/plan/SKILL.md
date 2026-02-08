@@ -101,7 +101,7 @@ Both sub-agents run in parallel. Wait for both to complete.
 ## Phase 3: Plan Drafting
 
 Synthesize research from both sub-agents into a structured plan. Read
-`{SKILL_DIR}/../../../references/plan-protocol.md` for protocol rules on
+`{SKILL_DIR}/../../references/plan-protocol.md` for protocol rules on
 location, sections, and format.
 
 ### Required Plan Sections
@@ -241,4 +241,4 @@ The skill follows the same protocol the hook references, ensuring consistency.
 
 ## References
 
-- [{SKILL_DIR}/../../../references/plan-protocol.md](../../../references/plan-protocol.md) — Plan & Lessons Protocol
+- [plan-protocol.md](../../references/plan-protocol.md) — Plan & Lessons Protocol

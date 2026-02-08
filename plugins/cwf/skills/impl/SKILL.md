@@ -123,7 +123,7 @@ Group steps into work items:
 
 ### 2.4 Adaptive Team Sizing
 
-Read `{SKILL_DIR}/../references/agent-patterns.md` for general agent principles.
+Read `{SKILL_DIR}/../../references/agent-patterns.md` for general agent principles.
 
 | Work Items | Agents | Strategy |
 |------------|--------|----------|
@@ -325,4 +325,4 @@ the plan's success criteria, run:
 ## References
 
 - [references/agent-prompts.md](references/agent-prompts.md) — Agent prompt template, domain signals, dependency heuristics
-- [{SKILL_DIR}/../references/agent-patterns.md](../references/agent-patterns.md) — Shared agent orchestration patterns
+- [agent-patterns.md](../../references/agent-patterns.md) — Shared agent orchestration patterns

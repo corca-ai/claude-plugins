@@ -22,6 +22,8 @@ allowed-tools:
 Adaptive end-of-session review. Light by default, deep on request.
 Produces `retro.md` alongside `plan.md` and `lessons.md` in the session's prompt-logs directory.
 
+**Language**: Write retro.md in the user's language. Communicate with the user in their prompt language.
+
 ## Invocation
 
 ```text
@@ -259,11 +261,7 @@ Do not prompt the user to start this discussion.
 
 - `{SKILL_DIR}/references/cdm-guide.md` — CDM probe methodology and output format
 - `{SKILL_DIR}/references/expert-lens-guide.md` — Expert identity, grounding, and analysis format
-- `{SKILL_DIR}/../references/agent-patterns.md` — Shared agent orchestration patterns
-
-## Language
-
-Write retro.md in the user's language. Detect from conversation, not from this skill file.
+- [agent-patterns.md](../../references/agent-patterns.md) — Shared agent orchestration patterns
 
 ## Rules
 
