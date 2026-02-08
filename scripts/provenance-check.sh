@@ -2,20 +2,33 @@
 set -euo pipefail
 
 # provenance-check.sh — Verify provenance sidecar files against current system state
-# Usage: provenance-check.sh [--level inform|warn|stop] [--json]
+# Usage: provenance-check.sh [--level inform|warn|stop] [--json] [-h|--help]
 #   --level   Response level threshold (default: warn)
 #             inform: report all, exit 0 even if stale
 #             warn:   report all, exit 1 if any stale
 #             stop:   report all, exit 1 if any stale (same as warn for scripts)
 #   --json    Output machine-readable JSON
+#   -h|--help Show this usage message
 # Exit 0 = all fresh, Exit 1 = stale detected (at warn/stop level)
+
+usage() {
+  sed -n '3,11p' "$0" | sed 's/^# \?//'
+  exit 0
+}
 
 LEVEL="warn"
 JSON_OUTPUT=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    -h|--help)
+      usage
+      ;;
     --level)
+      if [[ $# -lt 2 ]]; then
+        echo "Error: --level requires a value (inform|warn|stop)" >&2
+        exit 1
+      fi
       LEVEL="$2"
       shift 2
       ;;
@@ -24,7 +37,8 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     *)
-      echo "Unknown option: $1" >&2
+      echo "Error: Unknown option: $1" >&2
+      echo "Run with --help for usage." >&2
       exit 1
       ;;
   esac
@@ -39,11 +53,18 @@ case "$LEVEL" in
     ;;
 esac
 
-# Colors (only for non-JSON output)
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
+# Colors (disabled for non-TTY output and JSON mode)
+if [[ -t 1 ]]; then
+  RED='\033[0;31m'
+  GREEN='\033[0;32m'
+  YELLOW='\033[1;33m'
+  NC='\033[0m'
+else
+  RED=''
+  GREEN=''
+  YELLOW=''
+  NC=''
+fi
 
 # Find repo root
 REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
@@ -103,24 +124,44 @@ for pfile in "${PROVENANCE_FILES[@]}"; do
     esac
   done < "$pfile"
 
-  # Determine staleness
+  # Validate required fields — missing counts are treated as stale
   is_stale=false
   skill_delta=0
   hook_delta=0
   reasons=""
 
-  if [[ -n "$recorded_skills" ]] && [[ "$recorded_skills" != "$CURRENT_SKILLS" ]]; then
+  if [[ -z "$recorded_skills" ]]; then
+    is_stale=true
+    if [[ -n "$reasons" ]]; then reasons="$reasons, "; fi
+    reasons="${reasons}skill_count: missing"
+  elif ! [[ "$recorded_skills" =~ ^[0-9]+$ ]]; then
+    is_stale=true
+    if [[ -n "$reasons" ]]; then reasons="$reasons, "; fi
+    reasons="${reasons}skill_count: invalid (${recorded_skills})"
+  elif [[ "$recorded_skills" != "$CURRENT_SKILLS" ]]; then
     is_stale=true
     skill_delta=$((CURRENT_SKILLS - recorded_skills))
+    local_sign=""
+    if [[ $skill_delta -gt 0 ]]; then local_sign="+"; fi
     if [[ -n "$reasons" ]]; then reasons="$reasons, "; fi
-    reasons="${reasons}skills: ${recorded_skills} → ${CURRENT_SKILLS} (${skill_delta:+${skill_delta#+}})"
+    reasons="${reasons}skills: ${recorded_skills} → ${CURRENT_SKILLS} (${local_sign}${skill_delta})"
   fi
 
-  if [[ -n "$recorded_hooks" ]] && [[ "$recorded_hooks" != "$CURRENT_HOOKS" ]]; then
+  if [[ -z "$recorded_hooks" ]]; then
+    is_stale=true
+    if [[ -n "$reasons" ]]; then reasons="$reasons, "; fi
+    reasons="${reasons}hook_count: missing"
+  elif ! [[ "$recorded_hooks" =~ ^[0-9]+$ ]]; then
+    is_stale=true
+    if [[ -n "$reasons" ]]; then reasons="$reasons, "; fi
+    reasons="${reasons}hook_count: invalid (${recorded_hooks})"
+  elif [[ "$recorded_hooks" != "$CURRENT_HOOKS" ]]; then
     is_stale=true
     hook_delta=$((CURRENT_HOOKS - recorded_hooks))
+    local_sign=""
+    if [[ $hook_delta -gt 0 ]]; then local_sign="+"; fi
     if [[ -n "$reasons" ]]; then reasons="$reasons, "; fi
-    reasons="${reasons}hooks: ${recorded_hooks} → ${CURRENT_HOOKS} (${hook_delta:+${hook_delta#+}})"
+    reasons="${reasons}hooks: ${recorded_hooks} → ${CURRENT_HOOKS} (${local_sign}${hook_delta})"
   fi
 
   if [[ "$is_stale" == "true" ]]; then
@@ -133,8 +174,13 @@ for pfile in "${PROVENANCE_FILES[@]}"; do
   if [[ "$JSON_OUTPUT" == "true" ]]; then
     status="fresh"
     if [[ "$is_stale" == "true" ]]; then status="stale"; fi
+    # Escape double quotes and backslashes for JSON safety
+    json_file="${pfile_rel//\\/\\\\}"; json_file="${json_file//\"/\\\"}"
+    json_target="${target//\\/\\\\}"; json_target="${json_target//\"/\\\"}"
+    json_written="${written_session//\\/\\\\}"; json_written="${json_written//\"/\\\"}"
+    json_reviewed="${last_reviewed//\\/\\\\}"; json_reviewed="${json_reviewed//\"/\\\"}"
     entry=$(printf '{"file":"%s","target":"%s","written_session":"%s","last_reviewed":"%s","recorded_skills":%s,"recorded_hooks":%s,"status":"%s","skill_delta":%d,"hook_delta":%d}' \
-      "$pfile_rel" "$target" "$written_session" "$last_reviewed" \
+      "$json_file" "$json_target" "$json_written" "$json_reviewed" \
       "${recorded_skills:-null}" "${recorded_hooks:-null}" \
       "$status" "$skill_delta" "$hook_delta")
     if [[ -n "$json_files" ]]; then json_files="$json_files,"; fi
