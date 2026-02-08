@@ -7,7 +7,7 @@
 
 - `/review` 스킬은 4-리뷰어 구조로 확장됨: Security(Task), UX/DX(Task), Correctness(Codex CLI), Architecture(Gemini CLI). 외부 CLI 없으면 Task fallback으로 동일 관점 유지.
 - SKILL.md 500줄 제한 하에서 외부 리뷰어 상세는 `references/external-review.md`로 분리하는 패턴이 효과적.
-- Codex는 `codex review` (코드 모드) vs `codex exec` (plan/clarify 모드)로 명령어가 다름. Gemini는 `npx @google/gemini-cli`로 모드 무관 동일 명령어.
+- Codex는 `codex exec`로 통일 (리뷰 후 수정). Gemini는 `npx @google/gemini-cli -o text`로 stdin 기반.
 - Bash에서 외부 CLI 실행 시 `timeout 280` (inner) + `Bash(timeout=300000)` (outer) 이중 타임아웃 패턴으로 안전하게 시간 제한.
 
 ## 2. Collaboration Preferences
@@ -75,3 +75,24 @@
 ### Skill Gaps
 
 추가 스킬 갭 없음. 이 세션은 local skill 수정이므로 기존 워크플로우로 충분.
+
+---
+
+### Post-Retro Findings
+
+retro 이후 `/review` 첫 실행 → 12개 이슈 발견 → 수정 → Gemini 로그인 테스트까지 완료.
+
+**CDM 3: "구현 후 self-review"의 가치**
+
+| Probe | Analysis |
+|-------|----------|
+| **Cues** | 구현 직후 `/review`를 돌렸더니 critical 2개(shell injection, 따옴표 충돌) + moderate 5개 발견 |
+| **Options** | (a) 리뷰 없이 커밋 (b) 내부 리뷰어만 (c) 4-리뷰어 전체 (현재) |
+| **Basis** | Codex가 내부 리뷰어 2개가 놓친 따옴표 충돌(critical)을 잡음. 관점 다양성의 실제 증명 |
+| **Hypothesis** | 내부 리뷰어만 돌렸다면 Codex의 C1(wrapper 따옴표 충돌)을 놓쳤을 것 — 실제 실행 시 깨지는 버그 |
+
+**핵심 교훈**: 새로 만든 도구를 자기 자신에게 적용하는 것(dogfooding)이 가장 효과적인 검증. `/review` 스킬을 `/review`로 리뷰한 결과 실전 버그 12개를 잡음.
+
+**Waste observation**: Gemini 첫 실행이 `--approval-mode plan` 에러로 실패한 건 CLI 문서를 사전에 확인하지 않아서. 근본 원인: 외부 CLI 옵션은 실행 전에 `--help`로 검증하는 습관 필요 → CLAUDE.md에 추가할 수준은 아니고 일회성 교훈.
+
+**Gemini 테스트 결과**: 로그인 후 `npx @google/gemini-cli -o text < prompt.md` 패턴으로 49초에 정상 실행. 구조화된 출력(Concerns/Suggestions/Provenance) 준수 확인. 수정된 템플릿이 올바르게 작동함.
