@@ -18,18 +18,9 @@ Do NOT consider the task complete without updating related docs.
 
 ## Plan Mode
 
-When entering plan mode, follow the [Plan & Lessons Protocol](plugins/plan-and-lessons/protocol.md).
-This is separate from the system plan file — create `prompt-logs/` directory with plan.md and lessons.md regardless of where the system stores its plan.
+For non-trivial implementation tasks, proactively use `EnterPlanMode`.
 
-For non-trivial implementation tasks (new plugins, multi-file changes, architectural decisions), proactively use `EnterPlanMode` even when the user does not explicitly request it.
-
-After implementing a plan, complete the full workflow autonomously — do not wait for explicit reminders or confirmations between steps:
-0. At session start, create `prompt-logs/{YYMMDD}-{NN}-{title}/` and `lessons.md` — even if plan.md was written in a prior session
-1. Mark plan.md as done (✅ on completed items)
-2. Update lessons.md with implementation learnings
-3. Run `/retro` autonomously
-4. Write next-session.md handoff and register session in `cwf-state.yaml`
-5. Run `scripts/check-session.sh` to verify completion — fix any FAIL items before finishing
+After implementation, register the session in `cwf-state.yaml` and run `scripts/check-session.sh`. Fix all FAIL items before finishing.
 
 ## Collaboration Style
 

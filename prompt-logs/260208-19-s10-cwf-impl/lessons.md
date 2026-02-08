@@ -41,3 +41,9 @@
 - **Expected**: Adding "remember to create next-session.md" to CLAUDE.md would prevent future omissions
 - **Actual**: S8 already recorded this lesson, but it was not read in S10 — behavioral instructions failed across sessions. The fix that works: check-session.sh + session_defaults produces a deterministic FAIL when next-session.md is missing.
 - **Takeaway**: For recurring mistakes, prefer deterministic checks (scripts that always run, pass/fail output) over behavioral instructions (rules in docs that may not be read). Instructions degrade as they accumulate; scripts scale. Persisted to project-context.md Design Principles.
+
+### CLAUDE.md Plan Mode slimmed from 8 lines to 2
+
+- **Expected**: Post-impl workflow needs step-by-step instructions (steps 0-5)
+- **Actual**: enter-plan-mode.sh hook auto-injects protocol, session_defaults defines required artifacts, check-session.sh validates. The only non-automatable parts: "use EnterPlanMode for non-trivial tasks" (judgment) + "register in cwf-state.yaml" (bootstrap for eval) + "run check-session.sh" (the eval itself).
+- **Takeaway**: When hooks + eval already enforce behavior, CLAUDE.md instructions are redundant. Removing them reduces CLAUDE.md's overfitting to the current milestone and makes it project-agnostic.
