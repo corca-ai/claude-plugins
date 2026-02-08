@@ -121,17 +121,17 @@ Use CWF skills: `cwf:clarify` for design questions, `cwf:plan` for implementatio
 
 **`/ship` is mandatory this session.** Use it to create issues for design decisions, and a PR for the implementation. Key decisions to capture in GitHub: self-healing design choices, provenance schema, expert-in-the-loop pattern. `/ship` has been under-dogfooded — fix that here.
 
-## Future Direction: Full CWF Protocol
+## S13.6: Full CWF Protocol Design
 
-Long-term vision — a single `cwf` invocation chains the full cycle with automatic handoffs:
+Next session after S13.5. Design the auto-chaining protocol:
 
 ```text
 cwf → gather → clarify(+retro) → plan → review(+retro) → impl → review(+retro) → retro → ship
 ```
 
-Each stage produces artifacts that feed the next. Mid-stage retros shorten feedback loops. Expert-in-the-loop agents participate at each stage. This session's workstreams (self-healing, expert-in-the-loop) are building blocks toward this protocol.
+Each stage produces artifacts that feed the next. Mid-stage retros shorten feedback loops. Expert-in-the-loop agents participate at each stage. S13.5's workstreams (self-healing, expert-in-the-loop) are prerequisites for this protocol.
 
-Not in scope for S13.5, but the designs should be compatible with this direction.
+S13.5 designs should be compatible with this direction.
 
 ## Start Command
 
