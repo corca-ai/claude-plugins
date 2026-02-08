@@ -1,8 +1,9 @@
 ---
 name: review
 description: |
-  Universal review with narrative verdicts. Parallel internal reviewers
-  (Security, UX/DX) via Task tool. Modes: --mode clarify/plan/code.
+  Universal review with narrative verdicts. 4 parallel reviewers:
+  2 internal (Security, UX/DX) via Task + 2 external (Codex, Gemini) via CLI.
+  Graceful fallback when CLIs unavailable. Modes: --mode clarify/plan/code.
   Triggers: "/review"
 allowed-tools:
   - Task
@@ -16,7 +17,7 @@ allowed-tools:
 
 # Review (/review)
 
-Universal review with narrative verdicts via parallel internal reviewers.
+Universal review with narrative verdicts via 4 parallel reviewers (2 internal + 2 external CLI).
 
 **Language**: Match the user's language for synthesis. Reviewer prompts in English.
 
@@ -96,13 +97,14 @@ Search the associated plan.md for success criteria to use as verification input:
 
 ---
 
-## Phase 2: Launch Internal Reviewers
+## Phase 2: Launch All Reviewers
 
-Launch **two** parallel Task agents. Both in a **single message** (parallel execution).
+Launch **four** reviewers in parallel: 2 internal (Task agents) + 2 external (CLI or Task fallback).
+All launched in a **single message** for maximum parallelism.
 
-### Prompt construction
+### 2.1 Prepare prompts
 
-For each reviewer:
+For **internal** reviewers (Security, UX/DX):
 
 1. Read `{SKILL_DIR}/references/prompts.md`
 2. Extract the reviewer's Role section + mode-specific checklist
@@ -134,27 +136,115 @@ IMPORTANT:
 - Include the Provenance block at the end.
 ```
 
-### Launch
+For **external** reviewers (Codex, Gemini):
+
+1. Read `{SKILL_DIR}/references/external-review.md`
+2. Extract the reviewer's Role section + mode-specific checklist
+3. Create temp dir: `mktemp -d /tmp/claude-review-XXXXXX`
+4. Write prompt files to temp dir: `codex-prompt.md` and `gemini-prompt.md`
+   - Same structure as internal reviewer prompts (role + mode checklist + review target + criteria + output format from prompts.md)
+
+### 2.2 Detect CLI availability
+
+Single Bash call to check both:
+
+```bash
+command -v codex && echo CODEX_OK; command -v npx && echo NPX_OK
+```
+
+Parse the output:
+- Contains `CODEX_OK` → Codex CLI available
+- Contains `NPX_OK` → Gemini CLI available (via npx)
+
+### 2.3 Launch all 4 in ONE message
+
+All 4 reviewers launch in a single message for parallel execution:
+
+**Slot 1 — Security (always Task):**
 
 ```text
 Task(subagent_type="general-purpose", name="security-reviewer", prompt="{security_prompt}")
+```
+
+**Slot 2 — UX/DX (always Task):**
+
+```text
 Task(subagent_type="general-purpose", name="uxdx-reviewer", prompt="{uxdx_prompt}")
 ```
 
-Both in the same message for parallel execution.
+**Slot 3 — Correctness (Codex or fallback):**
+
+If Codex available:
+
+```text
+Bash(timeout=300000, command="START_MS=$(date +%s%3N); timeout 280 {codex_command} > {tmp_dir}/codex-output.md 2>{tmp_dir}/codex-stderr.log; EXIT=$?; END_MS=$(date +%s%3N); echo \"EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > {tmp_dir}/codex-meta.txt")
+```
+
+Where `{codex_command}` is selected per mode from `external-review.md` CLI templates.
+
+If Codex NOT available:
+
+```text
+Task(subagent_type="general-purpose", name="codex-fallback", prompt="{codex_fallback_prompt}")
+```
+
+Using the fallback prompt template from `external-review.md` with the Correctness perspective.
+
+**Slot 4 — Architecture (Gemini or fallback):**
+
+If Gemini available:
+
+```text
+Bash(timeout=300000, command="START_MS=$(date +%s%3N); timeout 280 npx @google/gemini-cli --approval-mode plan -o text -p \"$(cat {tmp_dir}/gemini-prompt.md)\" > {tmp_dir}/gemini-output.md 2>{tmp_dir}/gemini-stderr.log; EXIT=$?; END_MS=$(date +%s%3N); echo \"EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > {tmp_dir}/gemini-meta.txt")
+```
+
+If Gemini NOT available:
+
+```text
+Task(subagent_type="general-purpose", name="gemini-fallback", prompt="{gemini_fallback_prompt}")
+```
+
+Using the fallback prompt template from `external-review.md` with the Architecture perspective.
 
 ---
 
-## Phase 3: Collect & Synthesize
+## Phase 3: Collect All Outputs
 
-### 1. Collect reviewer outputs
+### 3.1 Read all results
 
-Read both reviewer responses. If a response is malformed (missing sections),
-extract what you can by pattern matching and note in the Confidence Note.
+- **Internal reviewers** (Security, UX/DX): read Task agent return values directly.
+- **External Bash** (Codex, Gemini): read from temp dir:
+  - `{tmp_dir}/codex-output.md` or `{tmp_dir}/gemini-output.md` for review content
+  - `{tmp_dir}/codex-meta.txt` or `{tmp_dir}/gemini-meta.txt` for exit code and duration
+  - `{tmp_dir}/codex-stderr.log` or `{tmp_dir}/gemini-stderr.log` for error details
 
-### 2. Determine verdict
+### 3.2 Handle external failures
 
-Apply these rules in order:
+Check each external reviewer's result:
+
+| Exit code | Meaning | Action |
+|-----------|---------|--------|
+| 0 + non-empty output | Success | `source: REAL_EXECUTION` |
+| 124 | Timeout (280s exceeded) | `source: FAILED` → launch Task fallback |
+| 127 / "command not found" | CLI missing | `source: FAILED` → launch Task fallback |
+| Other non-zero | Auth error, config issue, etc. | `source: FAILED` → launch Task fallback |
+
+If fallbacks are needed, launch all needed fallback Task agents in **one message**,
+then read their results. Each fallback uses the fallback prompt template from
+`external-review.md` with the appropriate perspective (Correctness or Architecture).
+
+### 3.3 Assemble 4 review outputs
+
+Collect all 4 outputs (mix of `REAL_EXECUTION` and `FALLBACK` sources).
+Each output follows the standard reviewer output format from `prompts.md`.
+
+---
+
+## Phase 4: Synthesize
+
+### 1. Determine verdict
+
+Apply these rules in order (reviewer-count-agnostic — works with 2, 3, or 4 reviewers):
 
 | Condition | Verdict |
 |-----------|---------|
@@ -165,7 +255,7 @@ Apply these rules in order:
 
 Conservative default: when reviewers disagree, the stricter assessment wins.
 
-### 3. Render Review Synthesis
+### 2. Render Review Synthesis
 
 Output to the conversation (do NOT write to a file unless the user asks):
 
@@ -197,21 +287,21 @@ Output to the conversation (do NOT write to a file unless the user asks):
 - Areas where reviewer confidence was low
 - Malformed reviewer outputs that required interpretation
 - Missing success criteria (if no plan was found)
+- External CLI fallbacks used (which tools were unavailable, why)
+- Perspective differences between real CLI output and fallback interpretation
 
 ### Reviewer Provenance
-| Reviewer | Source | Tool |
-|----------|--------|------|
-| Security | REAL_EXECUTION | claude-task |
-| UX/DX | REAL_EXECUTION | claude-task |
+| Reviewer | Source | Tool | Duration |
+|----------|--------|------|----------|
+| Security | REAL_EXECUTION | claude-task | — |
+| UX/DX | REAL_EXECUTION | claude-task | — |
+| Correctness | {REAL_EXECUTION ∣ FALLBACK} | {codex ∣ claude-task-fallback} | {duration_ms} |
+| Architecture | {REAL_EXECUTION ∣ FALLBACK} | {gemini ∣ claude-task-fallback} | {duration_ms} |
 ```
 
----
-
-## Phase 4: External Reviewers (placeholder)
-
-Reserved for S5b. Will add Codex + Gemini as parallel external reviewers
-via Bash background processes. See `plugins/cwf/references/agent-patterns.md`
-for the execution pattern.
+The Provenance table adapts to actual results: if an external CLI succeeded,
+show `REAL_EXECUTION` with the CLI tool name and measured duration. If it fell
+back, show `FALLBACK` with `claude-task-fallback`.
 
 ---
 
@@ -224,13 +314,17 @@ for the execution pattern.
 | `--scenarios <path>` flag used | Holdout scenario validation (planned). Print "Not yet implemented. Proceeding without holdout scenarios." |
 | No git changes found (code mode) | AskUserQuestion: ask user to specify target |
 | No plan.md found (plan mode) | AskUserQuestion: ask user to specify target |
-| Both reviewers report no issues | Verdict = Pass. Note "clean review" in synthesis |
+| All reviewers report no issues | Verdict = Pass. Note "clean review" in synthesis |
+| Codex/Gemini CLI not found | Task agent fallback with same perspective. Mark `FALLBACK` in provenance. |
+| External CLI timeout (280s) | Mark `FAILED`. Spawn Task agent fallback. Note in Confidence Note. |
+| External CLI auth error | Mark `FAILED`. Spawn Task agent fallback. Note in Confidence Note. |
+| External output malformed | Extract by pattern matching. Note in Confidence Note. |
 
 ---
 
 ## Rules
 
-1. **Always run BOTH reviewers** — deliberate naivete. Never skip a reviewer
+1. **Always run ALL 4 reviewers** — deliberate naivete. Never skip a reviewer
    because the change "looks simple." Each perspective catches different issues.
 2. **Narrative only** — no numerical scores, no percentages, no letter grades.
    Verdicts are Pass / Conditional Pass / Revise.
@@ -243,10 +337,15 @@ for the execution pattern.
 6. **Criteria from plan** — review verifies plan criteria, it does not
    invent its own. If no criteria exist, review on general best practices
    and note the absence.
+7. **Graceful degradation** — external CLI failure (missing binary,
+   timeout, auth error) never blocks the review. Fall back to a Task
+   sub-agent with the same perspective. Always record the fallback in
+   the Provenance table and Confidence Note.
 
 ---
 
 ## References
 
-- Reviewer perspective prompts: [references/prompts.md](references/prompts.md)
+- Internal reviewer perspectives: [references/prompts.md](references/prompts.md)
+- External reviewer perspectives & CLI templates: [references/external-review.md](references/external-review.md)
 - Agent patterns (provenance, synthesis, execution): `plugins/cwf/references/agent-patterns.md`

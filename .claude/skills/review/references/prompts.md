@@ -35,6 +35,8 @@ Severity definitions:
 source: REAL_EXECUTION
 tool: claude-task
 reviewer: {Security | UX/DX}
+duration_ms: —
+command: —
 ```
 
 ---
