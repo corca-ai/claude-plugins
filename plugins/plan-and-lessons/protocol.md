@@ -101,3 +101,13 @@ Accumulate incrementally throughout the session. Record learnings as they emerge
 `prompt-logs/{YYMMDD}-{NN}-{title}/retro.md` — produced by the `/retro` skill at session end.
 
 While lessons are accumulated incrementally during a session, the retro is a comprehensive end-of-session review covering: user/org context, collaboration preferences, prompting feedback, learning resources, and skill discovery. See the `/retro` skill for details if available.
+
+## Handoff Document (milestone sessions)
+
+`prompt-logs/{YYMMDD}-{NN}-{title}/next-session.md` — context transfer for the next session.
+
+Create when the current session is part of a tracked sequence (e.g., sessions in `cwf-state.yaml`).
+Include: context files to read, task scope, don't-touch boundaries, lessons from prior sessions,
+success criteria, and a start command.
+
+If using `cwf-state.yaml`, add `next-session.md` to the session's `artifacts` list.

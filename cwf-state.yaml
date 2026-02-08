@@ -13,6 +13,12 @@ workflow:
     harden: "S11–S13"
     launch: "S14–S15"
 
+# Default artifact expectations for sessions
+session_defaults:
+  artifacts:
+    always: [plan.md, lessons.md, retro.md]
+    milestone: [next-session.md]
+
 # Session history (populated by cwf:retro and cwf:handoff)
 sessions:
   - id: S0
@@ -21,6 +27,7 @@ sessions:
     branch: main
     completed_at: "2026-02-08"
     summary: "Designed CWF v3 architecture with 15-session plan and single-plugin approach"
+    artifacts: [master-plan.md, initial-plan-req.md, lessons.md, retro.md, next-session.md, session.md]
 
   - id: S1
     title: "Refactor critical issues"
@@ -28,6 +35,7 @@ sessions:
     branch: main
     completed_at: "2026-02-08"
     summary: "Fixed shebang/strict-mode/eval issues across 6 plugins, established JSON safety patterns"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md, session.md]
 
   - id: S2
     title: "Refactor session 2"
@@ -35,6 +43,7 @@ sessions:
     branch: main
     completed_at: "2026-02-08"
     summary: "Aligned env var naming to CLAUDE_CORCA_{PLUGIN}_{SETTING} across attention-hook"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md]
 
   - id: S3
     title: "Ship skill"
@@ -42,6 +51,7 @@ sessions:
     branch: main
     completed_at: "2026-02-08"
     summary: "Built /ship local skill for GitHub workflow automation with templating system"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md, session.md]
 
   - id: S4
     title: "CWF scaffold"
@@ -49,6 +59,7 @@ sessions:
     branch: main
     completed_at: "2026-02-08"
     summary: "Scaffolded CWF plugin with gate mechanism and 13 source/stub files for hooks"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md, session.md]
 
   - id: S4.5
     title: "Ship skill improvements"
@@ -56,6 +67,7 @@ sessions:
     branch: main
     completed_at: "2026-02-08"
     summary: "Enhanced /ship with Korean PR templates and 2x2 autonomous-merge decision matrix"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md, session.md]
 
   - id: S4.6
     title: "SW Factory discussion"
@@ -63,6 +75,7 @@ sessions:
     branch: main
     completed_at: "2026-02-08"
     summary: "Applied SW Factory concepts: sernarative review, progressive disclosure, BDD criteria"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md, session.md]
 
   - id: S5a
     title: "CWF review — internal reviewers"
@@ -70,6 +83,7 @@ sessions:
     branch: main
     completed_at: "2026-02-08"
     summary: "Implemented /review skill with 2 internal parallel reviewers (Security, UX/DX)"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md]
 
   - id: S5b
     title: "CWF review — external reviewers"
@@ -77,6 +91,7 @@ sessions:
     branch: main
     completed_at: "2026-02-08"
     summary: "Expanded /review to 4 reviewers with external CLIs (Codex, Gemini) and provenance format"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md, session.md]
 
   - id: S6a
     title: "CWF infra hooks"
@@ -84,6 +99,7 @@ sessions:
     branch: main
     completed_at: "2026-02-08"
     summary: "Migrated 3 simple hooks (check-markdown, smart-read, log-turn) into CWF plugin"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md, session.md]
 
   - id: S6b
     title: "CWF hook migration"
@@ -91,6 +107,7 @@ sessions:
     branch: marketplace-v3
     completed_at: "2026-02-08"
     summary: "Migrated attention-hook (5 scripts + 2 utilities) into CWF, added check-shell.sh"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md]
 
   - id: S7-prep
     title: "Populate cwf-state.yaml + update handoff workflow"
@@ -98,6 +115,7 @@ sessions:
     branch: marketplace-v3
     completed_at: "2026-02-08"
     summary: "Created machine-readable SSOT for session history, updated handoff template"
+    artifacts: [plan.md, lessons.md, next-session.md]
 
   - id: S7
     title: "Migrate gather-context → cwf:gather"
@@ -105,6 +123,7 @@ sessions:
     branch: marketplace-v3
     completed_at: "2026-02-08"
     summary: "Copied gather-context skill into CWF as cwf:gather (8 scripts, 6 references, adapted SKILL.md), activated WebSearch redirect hook"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md, session.md]
 
   - id: S8
     title: "Migrate clarify → cwf:clarify"
@@ -112,6 +131,7 @@ sessions:
     branch: marketplace-v3
     completed_at: "2026-02-08"
     summary: "Copied clarify skill into CWF as cwf:clarify (SKILL.md + 4 reference files), updated Path A to use cwf:gather search script"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md]
 
 # External tool availability (detected by cwf:setup)
 tools:

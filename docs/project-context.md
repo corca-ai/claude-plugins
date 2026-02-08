@@ -77,3 +77,17 @@ Accumulated context from retrospectives. Each session's retro may add to this do
 - `plan-and-lessons` v1.3.1: EnterPlanMode hook that injects the Plan & Lessons Protocol — creates `prompt-logs/` session directories with plan.md and lessons.md.
 - `markdown-guard` v1.0.0: PostToolUse hook (Write|Edit matcher) that validates markdown files via `npx markdownlint-cli2`. Blocks on violations with lint output, skips non-.md files and `prompt-logs/` paths. Uses `{"decision": "block", "reason": "..."}` output format (PostToolUse schema differs from PreToolUse).
 - `refactor` v1.1.2: Multi-mode code and skill review — 5 modes routed by args: quick scan (no args, runs quick-scan.sh), `--code` (commit-based tidying via parallel sub-agents with tidying-guide.md), `--skill <name>` (deep review against review-criteria.md), `--skill --holistic` (cross-plugin analysis via holistic-criteria.md), `--docs` (documentation consistency via docs-criteria.md, including document design quality checks). Absorbs suggest-tidyings' commit analysis workflow. Promotes local refactor-skill to marketplace plugin.
+
+## Current Project Phase
+
+CWF v3 migration (S0-S14) on `marketplace-v3` branch. This section is temporal — update or remove when the migration completes.
+
+- `cwf-state.yaml` is the SSOT for project state (sessions, workflow stage, tools, hooks)
+- After completing any session tracked in cwf-state.yaml, update the session entry
+- When starting a new session, read cwf-state.yaml to determine current state
+- For plugin changes: use `/plugin-deploy` for version checks, marketplace sync, README updates
+- After committing plugin changes on **main branch**: run `bash scripts/update-all.sh`
+- Skip `update-all.sh` on feature branches (pulls from default branch only)
+- When a custom skill overlaps with a built-in tool, prefer the custom skill. The CWF plugin enforces this via PreToolUse hook (blocks WebSearch, redirects to `cwf:gather --search`). For other overlaps (e.g., `cwf:gather` vs WebFetch), prefer the custom skill manually.
+- When creating new skills or automation tools, first evaluate: marketplace plugin (`plugins/`, general-purpose) vs local skill (`.claude/skills/`, repo-specific). Prefer local skill unless the tool has clear cross-project utility.
+- After large multi-file changes, consider running parallel sub-agent reviews before committing — give each agent a different review perspective (content integrity, missed opportunities, structural analysis) along with session lessons/retro as context.
