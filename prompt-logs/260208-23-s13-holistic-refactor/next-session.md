@@ -119,7 +119,13 @@ Then both attention and prompt-logger use the same logic
 
 Use CWF skills: `cwf:clarify` for design questions, `cwf:plan` for implementation planning, `cwf:impl` for execution, `cwf:retro` for session review.
 
-**`/ship` is mandatory this session.** Use it to create issues for design decisions, and a PR for the implementation. Key decisions to capture in GitHub: self-healing design choices, provenance schema, expert-in-the-loop pattern. `/ship` has been under-dogfooded — fix that here.
+**`/ship` is mandatory this session.** Key decisions to capture in GitHub: self-healing design choices, provenance schema, expert-in-the-loop pattern. `/ship` has been under-dogfooded — fix that here.
+
+**Branch workflow for PR creation:**
+1. At session start, create a feature branch from `marketplace-v3`: `git checkout -b s13.5-feedback-loop-infra marketplace-v3`
+2. Do all work on this branch
+3. Use `/ship` to create a PR from `s13.5-feedback-loop-infra` → `marketplace-v3`
+4. Previous sessions committed directly to `marketplace-v3` which made PR creation impossible. Don't repeat that pattern.
 
 ## S13.6: Full CWF Protocol Design
 
