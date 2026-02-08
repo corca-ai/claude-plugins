@@ -196,4 +196,19 @@ v3 산출물 29개 파일 중 16개에 80자 hard wrap이 남아있었음. MD013
 
 ---
 
-> Deep retro 완료. Kent Beck/Don Norman + Donella Meadows/David Woods 4개 전문가 렌즈. 셀프 힐링 S13.5, 풀 프로토콜 S13.6으로 분리. GitHub #10.
+#### /ship이 촉발한 구조적 발견들
+
+`/ship`으로 이슈를 만드는 과정에서 연쇄적으로 발견:
+- `marketplace-v3`에 직접 커밋하는 패턴은 PR 생성을 불가능하게 만든다 → S13.5부터 세션별 브랜치 필수
+- S0-S14 전체 key decisions를 종합하는 문서가 없다 → S14에서 `docs/v3-migration-decisions.md` 산출물 추가
+- S13.5, S13.6이 master plan에 없다 → 로드맵 업데이트
+
+하나의 개밥먹기(/ship)가 3개의 프로세스 개선을 촉발. 개밥먹기의 가치를 다시 확인한 케이스.
+
+#### 로드맵 최종 상태
+
+S13.5 (셀프 힐링 + 전문가-인-더-루프 + 슬리밍 + 훅) → S13.6 (풀 CWF 프로토콜) → S14 (리뷰 + 종합 문서 + 머지)
+
+---
+
+> Deep retro 완료. 4개 전문가 렌즈(Beck/Norman/Meadows/Woods). /ship 개밥먹기가 브랜치 전략, 종합 문서, 로드맵 업데이트를 촉발. GitHub #10.
