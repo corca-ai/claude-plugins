@@ -20,7 +20,7 @@ Do NOT consider the task complete without updating related docs.
 
 For non-trivial implementation tasks, proactively use `EnterPlanMode`.
 
-After implementation, register the session in `cwf-state.yaml` and run `scripts/check-session.sh`. Fix all FAIL items before finishing.
+After implementation, write `next-session.md`, register the session in `cwf-state.yaml`, and run `scripts/check-session.sh --impl`. Fix all FAIL items before finishing.
 
 ## Collaboration Style
 

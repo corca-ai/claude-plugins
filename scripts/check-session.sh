@@ -2,10 +2,20 @@
 set -euo pipefail
 
 # check-session.sh — Verify session completion artifacts
-# Usage: check-session.sh [session-id]
+# Usage: check-session.sh [--impl] [session-id]
+#   --impl    Check impl_complete artifacts only (plan.md, lessons.md, next-session.md)
+#             Use after implementation, before retro. Prevents dismissing FAIL
+#             because "retro.md is expected to be missing at this stage."
+#   (default) Check all artifacts (always + milestone)
 # If no session-id, checks the most recent session in cwf-state.yaml
 # Reads expected artifacts from session entry or session_defaults
 # Exit 0 = all good, Exit 1 = missing/empty artifacts
+
+PHASE=""
+if [[ "${1:-}" == "--impl" ]]; then
+  PHASE="impl"
+  shift
+fi
 
 STATE_FILE="cwf-state.yaml"
 RED='\033[0;31m'
@@ -25,6 +35,7 @@ parse_defaults() {
   local in_artifacts=false
   DEFAULTS_ALWAYS=""
   DEFAULTS_MILESTONE=""
+  DEFAULTS_IMPL_COMPLETE=""
 
   while IFS= read -r line; do
     if [[ "$line" =~ ^session_defaults: ]]; then
@@ -41,6 +52,9 @@ parse_defaults() {
         continue
       fi
       if [[ "$in_artifacts" == "true" ]]; then
+        if [[ "$line" =~ ^[[:space:]]*impl_complete: ]]; then
+          DEFAULTS_IMPL_COMPLETE=$(echo "$line" | sed 's/.*impl_complete:\s*//')
+        fi
         if [[ "$line" =~ ^[[:space:]]*always: ]]; then
           DEFAULTS_ALWAYS=$(echo "$line" | sed 's/.*always:\s*//')
         fi
@@ -110,9 +124,17 @@ if [[ -z "$SESSION_DIR" ]]; then
 fi
 
 # Determine artifacts to check:
-# If session has explicit artifacts → use those
+# --impl flag → use session_defaults.impl_complete
+# Session has explicit artifacts → use those
 # Otherwise → use session_defaults.always + session_defaults.milestone
-if [[ -z "$ARTIFACTS_LINE" ]]; then
+if [[ "$PHASE" == "impl" ]]; then
+  if [[ -z "$DEFAULTS_IMPL_COMPLETE" ]]; then
+    echo -e "${RED}Error: No impl_complete defaults found in $STATE_FILE${NC}" >&2
+    exit 1
+  fi
+  all_items=$(parse_yaml_list "$DEFAULTS_IMPL_COMPLETE")
+  echo -e "${YELLOW}Phase: impl — checking impl_complete artifacts${NC}"
+elif [[ -z "$ARTIFACTS_LINE" ]]; then
   if [[ -z "$DEFAULTS_ALWAYS" ]] && [[ -z "$DEFAULTS_MILESTONE" ]]; then
     echo -e "${RED}Error: No artifacts defined for session '$SESSION_ID' and no session_defaults found${NC}" >&2
     exit 1

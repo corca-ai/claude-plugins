@@ -16,6 +16,7 @@ workflow:
 # Default artifact expectations for sessions
 session_defaults:
   artifacts:
+    impl_complete: [plan.md, lessons.md, next-session.md]
     always: [plan.md, lessons.md, retro.md]
     milestone: [next-session.md]
 
