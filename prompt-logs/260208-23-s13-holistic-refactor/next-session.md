@@ -119,11 +119,26 @@ Then both attention and prompt-logger use the same logic
 
 Use CWF skills: `cwf:clarify` for design questions, `cwf:plan` for implementation planning, `cwf:impl` for execution, `cwf:retro` for session review.
 
+**`/ship` is mandatory this session.** Use it to create issues for design decisions, and a PR for the implementation. Key decisions to capture in GitHub: self-healing design choices, provenance schema, expert-in-the-loop pattern. `/ship` has been under-dogfooded — fix that here.
+
+## Future Direction: Full CWF Protocol
+
+Long-term vision — a single `cwf` invocation chains the full cycle with automatic handoffs:
+
+```text
+cwf → gather → clarify(+retro) → plan → review(+retro) → impl → review(+retro) → retro → ship
+```
+
+Each stage produces artifacts that feed the next. Mid-stage retros shorten feedback loops. Expert-in-the-loop agents participate at each stage. This session's workstreams (self-healing, expert-in-the-loop) are building blocks toward this protocol.
+
+Not in scope for S13.5, but the designs should be compatible with this direction.
+
 ## Start Command
 
 ```text
 Read the context files listed above, especially the deep retro's Meadows/Woods analysis
 and the lessons.md "Rule of three vs feedback loop" entry. Start with workstream A
 (self-healing design) using cwf:clarify to resolve design questions. Then implement.
-Move to B (expert-in-the-loop) and C (hook improvements) based on time available.
+Move to B (expert-in-the-loop), C (project-context slimming), and D (hook improvements)
+based on time available. Use /ship to capture decisions in GitHub throughout.
 ```
