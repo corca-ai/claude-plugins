@@ -23,6 +23,7 @@ Migrate retro v2.0.2 into CWF as `cwf:retro` with parallel sub-agent enhancement
 2. **Enhance**: Add parallel sub-agent execution for analysis sections (per master-plan: "Parallel sub-agents per analysis section")
 3. **Integrate**: Ensure cwf:retro references `cwf-state.yaml` for session tracking
 4. **Adapt**: Follow CWF skill conventions (frontmatter, references path, rules)
+5. **Redesign persist step**: Replace document-first right-placement with mechanism-first hierarchy (see below)
 
 ### Key Design Points (from master-plan.md)
 
@@ -30,6 +31,21 @@ Migrate retro v2.0.2 into CWF as `cwf:retro` with parallel sub-agent enhancement
 - Sections that can run in parallel: CDM analysis, Expert Lens, Learning Resources
 - Deep mode already launches Expert α/β in parallel — extend pattern to other sections
 - Maintain backward compat with light/deep mode selection
+
+### Persist Step Redesign (S10 post-retro finding)
+
+Current retro persist asks "which doc to update?" (CLAUDE.md vs project-context.md vs protocol).
+This is document-first thinking. S10 showed that adding rules to docs is the weakest enforcement.
+
+New persist hierarchy — for each finding, ask "how to enforce?":
+
+1. **Eval/hook** (deterministic): Can this be caught by a script or hook? → Add to check-session.sh, session_defaults, or a hook. Strongest.
+2. **State** (structural): Does this change workflow state? → Update cwf-state.yaml schema.
+3. **Doc** (behavioral, last resort): Only if (1) and (2) are impossible → project-context.md for patterns, CLAUDE.md only for judgment calls that can't be automated.
+
+Example from S10:
+- "Create next-session.md" → was in CLAUDE.md (doc, weak) → moved to session_defaults (eval, strong)
+- "Use EnterPlanMode for non-trivial tasks" → stays in CLAUDE.md (judgment call, can't automate)
 
 ## Don't Touch
 
@@ -63,6 +79,10 @@ Then CDM, Expert Lens, and Learning Resources run in parallel
 Given cwf:retro completes
 When persist findings step runs
 Then cwf-state.yaml session history is consulted for context
+
+Given a retro finding that could recur
+When the persist step evaluates enforcement mechanism
+Then eval/hook is considered before state, and state before doc
 
 Given retro v2.0.2 behavior
 When compared with cwf:retro output
