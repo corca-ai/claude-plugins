@@ -125,12 +125,81 @@ PR 생성 시 세션 아티팩트에서 의사결정 정보 추출:
 
 1. Create session dir: `prompt-logs/{YYMMDD}-{NN}-ship-improve/`
 2. Write plan.md, lessons.md
-3. Write next-session.md (S5a 핸드오프)
+3. Write next-session.md (**S4.6** 핸드오프 — 아래 참조)
 4. `/retro`
 5. Commit & push
 
 ## Start Command
 
 ```text
-@prompt-logs/260208-04-cwf-scaffold/next-session.md 시작합니다
+@prompt-logs/260208-04-cwf-scaffold/next-session.md S4.5 시작합니다
+```
+
+---
+
+# Next Session: S4.6 — SW Factory 분석 + CWF v3 설계 논의
+
+## What This Is
+
+`cwf:review` 구현(S5a) 전에 SW Factory 분석을 함께 읽고,
+CWF v3에 반영할 개념들을 설계 토론하는 세션. **구현 세션이 아닌 논의 세션**.
+
+Full context: `prompt-logs/260208-03-cwf-v3-master-plan/master-plan.md`
+
+## Background
+
+StrongDM의 "Software Factories and the Agentic Moment" 분석(`references/sw-factory/analysis.md`,
+origin/main)이 CWF v3의 검증/리뷰 설계에 직접적으로 관련된다. 특히:
+
+- **시나리오 테스팅 + 홀드아웃 세트**: 에이전트가 접근할 수 없는 별도 폴더에 시나리오를
+  저장하여, 코드와 테스트의 공모(reward hacking)를 구조적으로 방지하는 전략
+- **만족도(satisfaction) 스펙트럼**: boolean pass/fail이 아닌 확률적 품질 판정
+- **Shift Work**: 대화형 vs 비대화형 작업 분리 — 스펙이 완전하면 에이전트가 자율 실행
+- **Pyramid Summaries**: 대규모 코드베이스의 컨텍스트 관리 전략
+- **의도적 순진함(deliberate naivete)**: 기존 관행의 자기검열을 벗어나는 것
+
+## Goal
+
+1. `references/sw-factory/analysis.md`를 함께 읽고 논의
+2. CWF v3 (특히 `cwf:review`, `agent-patterns.md`)에 반영할 개념 식별
+3. 시나리오 테스팅의 구체적 적용 방안 설계 토론
+   - 홀드아웃 세트 구조: 에이전트 접근 차단용 폴더 분리가 맞는 전략인가?
+   - 우리 맥락(플러그인 개발, 스킬 품질 검증)에서의 시나리오란 무엇인가?
+   - 만족도 측정을 어떻게 정의할 것인가?
+4. 논의 결과를 마스터 플랜 또는 `cwf:review` 설계에 반영하는 구체적 항목 도출
+
+## Scope
+
+- **읽기**: `references/sw-factory/analysis.md` (origin/main에서 checkout 또는 직접 읽기)
+- **논의**: 위 Goal의 3-4번 항목에 대한 설계 토론
+- **산출물**: 논의 결과 정리 문서 + 마스터 플랜/agent-patterns.md 업데이트 항목 목록
+- **구현 없음**: 코드 변경 없이 설계만
+
+## Don't Touch
+
+- `cwf:review` 구현 (S5a에서)
+- 기존 hook/skill 코드
+
+## Dependencies
+
+- Requires: S4.5 completed (/ship 개선)
+- Blocks: S5a (cwf:review — 이 논의 결과가 설계에 반영됨)
+
+## Known Issue
+
+`git fetch origin`이 Claude Code Bash 환경에서 hang될 수 있음 (S4에서 발생, 원인 미확인).
+hang 감지 시 "터미널에서 직접 `git fetch origin main`을 실행해주세요"로 안내하고 진행할 것.
+
+## After Completion
+
+1. Create session dir: `prompt-logs/{YYMMDD}-{NN}-sw-factory-discussion/`
+2. Write plan.md (논의 결과), lessons.md
+3. Write next-session.md (S5a 핸드오프 — cwf:review 구현)
+4. `/retro`
+5. Commit & push
+
+## Start Command
+
+```text
+@prompt-logs/{S4.5-session-dir}/next-session.md S4.6 시작합니다
 ```
