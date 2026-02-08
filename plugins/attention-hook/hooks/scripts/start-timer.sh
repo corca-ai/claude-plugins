@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 # Start a background timer that will send notification after delay
 # If user responds before timer expires, cancel-timer.sh will kill this process
 #
@@ -34,7 +35,7 @@ echo "$INPUT" > "$INPUT_FILE"
 
 # Kill any existing timer
 if [ -f "$TIMER_FILE" ]; then
-    kill $(cat "$TIMER_FILE") 2>/dev/null
+    kill "$(cat "$TIMER_FILE")" 2>/dev/null || true
     rm -f "$TIMER_FILE"
 fi
 

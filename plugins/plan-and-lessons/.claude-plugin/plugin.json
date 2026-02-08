@@ -1,7 +1,7 @@
 {
   "name": "plan-and-lessons",
   "description": "A hook that injects the Plan & Lessons Protocol when entering plan mode",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "author": {
     "name": "Corca",
     "url": "https://www.corca.ai/"

@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 # smart-read: PreToolUse hook for Read tool.
 # Checks file size before allowing full reads to prevent context waste.
 # - Small files (≤WARN): allowed silently
@@ -47,7 +48,7 @@ fi
 
 # --- Binary file detection ---
 # Read tool handles PDF, images, and notebooks natively — allow these through
-MIME_TYPE=$(file --mime-type -b "$FILE_PATH" 2>/dev/null)
+MIME_TYPE=$(file --mime-type -b "$FILE_PATH" 2>/dev/null) || true
 case "$MIME_TYPE" in
     application/pdf|application/octet-stream)
         exit 0
@@ -65,7 +66,7 @@ case "$FILE_PATH" in
 esac
 
 # --- Count lines ---
-LINE_COUNT=$(wc -l < "$FILE_PATH" 2>/dev/null)
+LINE_COUNT=$(wc -l < "$FILE_PATH" 2>/dev/null) || true
 LINE_COUNT=$(echo "$LINE_COUNT" | tr -d ' ')
 
 if [ -z "$LINE_COUNT" ] || [ "$LINE_COUNT" -eq 0 ] 2>/dev/null; then

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Parse Claude Code transcript and extract structured information
 #
 # Usage:
@@ -14,7 +14,7 @@
 #   eval "$(./parse-transcript.sh /path/to/transcript.jsonl)"
 #   echo "$PARSED_HUMAN_TEXT"
 
-set -e
+set -euo pipefail
 
 # === HELPER FUNCTIONS ===
 

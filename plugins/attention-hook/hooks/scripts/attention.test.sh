@@ -1,11 +1,11 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Test cases for attention.sh, parse-transcript.sh, and slack-send.sh
 # Run: ./hooks/scripts/attention.test.sh
 #
 # This test sources the actual scripts to test real functions,
 # ensuring tests fail when the implementation changes.
 
-set -e
+set -euo pipefail
 
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

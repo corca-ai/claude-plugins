@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Shared Slack API utility for attention-hook
 # Supports: Web API (chat.postMessage with threading) and Webhook (fallback, no threading)
 #

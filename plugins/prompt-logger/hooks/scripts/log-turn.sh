@@ -25,15 +25,21 @@ sleep 0.3
 # 1. Shell env (already set)
 # 2. ~/.claude/.env
 [ -f "$HOME/.claude/.env" ] && { set -a; source "$HOME/.claude/.env"; set +a; }
-# 3. Shell profiles (fallback)
-[ -z "${CLAUDE_CORCA_PROMPT_LOGGER_DIR:-}" ] && \
-    eval "$(grep -sh '^export CLAUDE_CORCA_PROMPT_LOGGER_DIR=' ~/.zshrc ~/.bashrc 2>/dev/null)" || true
-[ -z "${CLAUDE_CORCA_PROMPT_LOGGER_ENABLED:-}" ] && \
-    eval "$(grep -sh '^export CLAUDE_CORCA_PROMPT_LOGGER_ENABLED=' ~/.zshrc ~/.bashrc 2>/dev/null)" || true
-[ -z "${CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE:-}" ] && \
-    eval "$(grep -sh '^export CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE=' ~/.zshrc ~/.bashrc 2>/dev/null)" || true
-[ -z "${CLAUDE_CORCA_PROMPT_LOGGER_AUTO_COMMIT:-}" ] && \
-    eval "$(grep -sh '^export CLAUDE_CORCA_PROMPT_LOGGER_AUTO_COMMIT=' ~/.zshrc ~/.bashrc 2>/dev/null)" || true
+# 3. Shell profiles (fallback — safe extraction without eval)
+_safe_load() {
+  local _var="$1"; local _line
+  _line=$(grep -shm1 "^export ${_var}=" ~/.zshrc ~/.bashrc 2>/dev/null) || true
+  if [ -n "${_line:-}" ]; then
+    local _val="${_line#*=}"
+    _val="${_val#[\"\']}" ; _val="${_val%[\"\']}"
+    printf -v "$_var" '%s' "$_val"
+    export "$_var"
+  fi
+}
+[ -z "${CLAUDE_CORCA_PROMPT_LOGGER_DIR:-}" ] && _safe_load CLAUDE_CORCA_PROMPT_LOGGER_DIR
+[ -z "${CLAUDE_CORCA_PROMPT_LOGGER_ENABLED:-}" ] && _safe_load CLAUDE_CORCA_PROMPT_LOGGER_ENABLED
+[ -z "${CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE:-}" ] && _safe_load CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE
+[ -z "${CLAUDE_CORCA_PROMPT_LOGGER_AUTO_COMMIT:-}" ] && _safe_load CLAUDE_CORCA_PROMPT_LOGGER_AUTO_COMMIT
 
 ENABLED="${CLAUDE_CORCA_PROMPT_LOGGER_ENABLED:-true}"
 if [ "$ENABLED" != "true" ]; then

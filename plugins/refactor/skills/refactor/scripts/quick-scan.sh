@@ -140,31 +140,31 @@ print(len(d.get('description', '')))
     done
   fi
 
-  # Build JSON for this skill
-  local flags_json="["
-  for i in "${!flags[@]}"; do
-    if [[ $i -gt 0 ]]; then flags_json+=","; fi
-    local escaped="${flags[$i]//\"/\\\"}"
-    flags_json+="\"$escaped\""
-  done
-  flags_json+="]"
+  # Build JSON arrays with jq for safe escaping
+  local flags_json="[]"
+  if [[ ${#flags[@]} -gt 0 ]]; then
+    flags_json=$(printf '%s\n' "${flags[@]}" | jq -Rs '[split("\n")[:-1][]]')
+  fi
 
-  local unreferenced_json="["
-  for i in "${!unreferenced[@]}"; do
-    if [[ $i -gt 0 ]]; then unreferenced_json+=","; fi
-    unreferenced_json+="\"${unreferenced[$i]}\""
-  done
-  unreferenced_json+="]"
+  local unreferenced_json="[]"
+  if [[ ${#unreferenced[@]} -gt 0 ]]; then
+    unreferenced_json=$(printf '%s\n' "${unreferenced[@]}" | jq -Rs '[split("\n")[:-1][]]')
+  fi
+
+  local large_refs_json="[]"
+  if [[ ${#large_refs[@]} -gt 0 ]]; then
+    large_refs_json=$(printf '%s\n' "${large_refs[@]}" | jq -Rs '[split("\n")[:-1][]]')
+  fi
 
   results+=("{
-    \"plugin\": \"$plugin_name\",
-    \"skill\": \"$skill_name\",
+    \"plugin\": $(printf '%s' "$plugin_name" | jq -Rs .),
+    \"skill\": $(printf '%s' "$skill_name" | jq -Rs .),
     \"word_count\": $word_count,
     \"line_count\": $line_count,
     \"size_severity\": \"$size_severity\",
     \"resource_files\": $ref_count,
     \"unreferenced_files\": $unreferenced_json,
-    \"large_references\": $(if [[ "${#large_refs[@]}" -gt 0 ]]; then printf '['; for i in "${!large_refs[@]}"; do [[ $i -gt 0 ]] && printf ','; printf '"%s"' "${large_refs[$i]}"; done; printf ']'; else printf '[]'; fi),
+    \"large_references\": $large_refs_json,
     \"flag_count\": ${#flags[@]},
     \"flags\": $flags_json
   }")

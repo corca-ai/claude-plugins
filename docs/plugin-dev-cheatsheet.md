@@ -102,8 +102,14 @@ Naming: `CLAUDE_CORCA_{PLUGIN_NAME}_{SETTING}`
 # 1. Shell env (already set)
 # 2. ~/.claude/.env
 [ -f "$HOME/.claude/.env" ] && { set -a; source "$HOME/.claude/.env"; set +a; }
-# 3. Shell profiles (fallback: grep for exports in zsh/bash configs)
-[ -z "${VAR:-}" ] && eval "$(grep -sh '^export VAR=' ~/.zshrc ~/.bashrc)"
+# 3. Shell profiles (fallback: safe extraction without eval)
+if [ -z "${VAR:-}" ]; then
+  _line=$(grep -shm1 '^export VAR=' ~/.zshrc ~/.bashrc 2>/dev/null) || true
+  if [ -n "${_line:-}" ]; then
+    VAR="${_line#*=}"; VAR="${VAR#[\"\']}"; VAR="${VAR%[\"\']}"
+    export VAR
+  fi
+fi
 ```
 
 ## Script Guidelines

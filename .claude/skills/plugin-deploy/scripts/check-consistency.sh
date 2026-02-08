@@ -170,18 +170,13 @@ elif [[ "$has_hooks" == "true" ]]; then
 fi
 
 # --- Output JSON ---
-# Helper: output "value" or null for optional strings
-json_str() { if [[ -n "$1" ]]; then echo "\"$1\""; else echo "null"; fi; }
+# Helper: output "value" or null for optional strings (safe via jq)
+json_str() { if [[ -n "$1" ]]; then printf '%s' "$1" | jq -Rs .; else echo "null"; fi; }
 
-gaps_json="["
-for i in "${!gaps[@]}"; do
-  if [[ $i -gt 0 ]]; then
-    gaps_json+=","
-  fi
-  escaped="${gaps[$i]//\"/\\\"}"
-  gaps_json+="\"$escaped\""
-done
-gaps_json+="]"
+gaps_json="[]"
+if [[ ${#gaps[@]} -gt 0 ]]; then
+  gaps_json=$(printf '%s\n' "${gaps[@]}" | jq -Rs '[split("\n")[:-1][]]')
+fi
 
 cat <<EOF
 {

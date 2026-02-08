@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 # Periodic heartbeat status checker
 # Triggered by PreToolUse:* (async) - runs on every tool call, exits fast if no heartbeat needed
 #
@@ -65,8 +66,8 @@ TODO_STATUS=""
 if [ -n "$TRANSCRIPT_PATH" ] && [ -f "$TRANSCRIPT_PATH" ]; then
     PARSE_SCRIPT="$SCRIPT_DIR/parse-transcript.sh"
     if [ -x "$PARSE_SCRIPT" ]; then
-        eval "$("$PARSE_SCRIPT" "$TRANSCRIPT_PATH")"
-        TODO_STATUS="$PARSED_TODO_STATUS"
+        eval "$("$PARSE_SCRIPT" "$TRANSCRIPT_PATH")" || true
+        TODO_STATUS="${PARSED_TODO_STATUS:-}"
     fi
 fi
 

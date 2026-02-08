@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Claude Code notification script
 # Sends notification only after 60 seconds of inactivity (idle_prompt)
 # Includes task context: user request, Claude response, questions, and todo status
@@ -48,6 +48,8 @@ escape_json() {
 # === MAIN LOGIC ===
 # Only run when executed directly (not when sourced)
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    set -euo pipefail
+
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
     # Source shared Slack utility
@@ -131,9 +133,9 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
                      select(.type == "tool_use" and .name == "Write") |
                      .input.file_path // empty |
                      select(test("plans/|plan\\.md"))] | last // empty
-                ' "$TRANSCRIPT_PATH" 2>/dev/null)
-                if [ -n "$PLAN_FILE" ] && [ -f "$PLAN_FILE" ]; then
-                    PLAN_CONTENT=$(cat "$PLAN_FILE" 2>/dev/null)
+                ' "$TRANSCRIPT_PATH" 2>/dev/null) || true
+                if [ -n "${PLAN_FILE:-}" ] && [ -f "$PLAN_FILE" ]; then
+                    PLAN_CONTENT=$(cat "$PLAN_FILE" 2>/dev/null) || true
                 fi
             fi
             if [ -n "$PLAN_CONTENT" ]; then
@@ -157,8 +159,8 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     MESSAGE_HASH=$(echo "$MESSAGE" | shasum -a 256 | cut -d' ' -f1)
 
     if [ -f "$CACHE_FILE" ]; then
-        LAST_HASH=$(cat "$CACHE_FILE" 2>/dev/null)
-        if [ "$MESSAGE_HASH" = "$LAST_HASH" ]; then
+        LAST_HASH=$(cat "$CACHE_FILE" 2>/dev/null) || true
+        if [ "${LAST_HASH:-}" = "$MESSAGE_HASH" ]; then
             # Same message as before, skip notification
             exit 0
         fi

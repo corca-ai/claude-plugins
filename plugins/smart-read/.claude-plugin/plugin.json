@@ -1,7 +1,7 @@
 {
   "name": "smart-read",
   "description": "A hook that enforces intelligent file reading based on file size — warns on medium files, blocks full reads on large files",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": {
     "name": "Corca",
     "url": "https://www.corca.ai/"

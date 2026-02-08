@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 # Cancel the attention timer when user responds to AskUserQuestion
 # Called by PostToolUse hook after AskUserQuestion completes
 #
@@ -31,7 +32,7 @@ echo "$(date): cancel-timer.sh called (session: ${SESSION_ID:-unknown})" >> "$DE
 
 if [ -f "$TIMER_FILE" ]; then
     echo "$(date): Found timer file, killing PID $(cat "$TIMER_FILE")" >> "$DEBUG_LOG"
-    kill $(cat "$TIMER_FILE") 2>/dev/null
+    kill "$(cat "$TIMER_FILE")" 2>/dev/null || true
     rm -f "$TIMER_FILE" "$INPUT_FILE"
 else
     echo "$(date): No timer file found" >> "$DEBUG_LOG"

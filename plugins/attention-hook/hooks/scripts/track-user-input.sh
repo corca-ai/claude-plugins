@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 # Track user prompt submissions and create Slack thread parent
 # Triggered by UserPromptSubmit hook (async)
 #
@@ -31,7 +32,7 @@ date +%s > "$(slack_state_file "$HASH" "last-user-ts")"
 # Cancel any running timer (user responded via new prompt instead of PostToolUse)
 TIMER_FILE=$(slack_state_file "$HASH" "timer.pid")
 if [ -f "$TIMER_FILE" ]; then
-    kill $(cat "$TIMER_FILE") 2>/dev/null
+    kill "$(cat "$TIMER_FILE")" 2>/dev/null || true
     rm -f "$TIMER_FILE"
     rm -f "$(slack_state_file "$HASH" "input.json")"
 fi
@@ -39,8 +40,14 @@ fi
 # If no thread exists yet, create parent message with first prompt
 # Use mkdir as atomic lock to prevent race between concurrent async instances
 LOCK_DIR="/tmp/claude-attention-${HASH}-thread-lock"
+# Clean stale lock (older than 1 minute)
+if [ -d "$LOCK_DIR" ]; then
+    if [ -n "$(find "$LOCK_DIR" -maxdepth 0 -mmin +1 2>/dev/null)" ]; then
+        rmdir "$LOCK_DIR" 2>/dev/null || true
+    fi
+fi
 if mkdir "$LOCK_DIR" 2>/dev/null; then
-    trap 'rmdir "$LOCK_DIR" 2>/dev/null' EXIT
+    trap 'rmdir "$LOCK_DIR" 2>/dev/null' EXIT INT TERM
 
     THREAD_TS=$(slack_get_thread_ts "$HASH")
     if [ -z "$THREAD_TS" ]; then

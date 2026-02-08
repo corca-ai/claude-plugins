@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Tavily web search — called by the gather-context skill
 # Usage: search.sh [--topic news|finance] [--time-range day|week|month|year] [--deep] "<query>"
 set -euo pipefail
@@ -34,7 +34,15 @@ fi
 
 # --- Load API key: shell env → ~/.claude/.env → shell profiles ---
 [ -z "${TAVILY_API_KEY:-}" ] && [ -f ~/.claude/.env ] && source ~/.claude/.env 2>/dev/null
-[ -z "${TAVILY_API_KEY:-}" ] && eval "$(grep -sh '^export TAVILY_API_KEY=' ~/.zshenv ~/.zshrc ~/.bashrc ~/.bash_profile ~/.profile 2>/dev/null | head -1)"
+if [ -z "${TAVILY_API_KEY:-}" ]; then
+  _line=$(grep -shm1 '^export TAVILY_API_KEY=' ~/.zshenv ~/.zshrc ~/.bashrc ~/.bash_profile ~/.profile 2>/dev/null) || true
+  if [ -n "${_line:-}" ]; then
+    TAVILY_API_KEY="${_line#*=}"
+    TAVILY_API_KEY="${TAVILY_API_KEY#[\"\']}"
+    TAVILY_API_KEY="${TAVILY_API_KEY%[\"\']}"
+    export TAVILY_API_KEY
+  fi
+fi
 
 if [ -z "${TAVILY_API_KEY:-}" ]; then
   cat >&2 <<'MSG'

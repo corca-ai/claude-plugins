@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 # Blocks the built-in WebSearch tool and redirects to /gather-context --search.
 # Activates automatically when the gather-context plugin is installed.
 
