@@ -121,27 +121,34 @@ Review the implementation for architectural and pattern quality:
 
 ## CLI Invocation Templates
 
+All external CLIs use `exec` / prompt-based mode so that the role, checklist,
+and output format instructions are reliably delivered via stdin. This ensures
+structured output conforming to the reviewer output format.
+
 ### Codex
 
-**--mode code (review):**
+**All modes (exec via stdin):**
 
 ```bash
-codex review --base {base_branch} -c model_reasoning_effort="xhigh" - < {prompt_file}
+codex exec --sandbox read-only -c model_reasoning_effort='high' - < {prompt_file}
 ```
 
-**--mode plan / --mode clarify (exec):**
-
-```bash
-codex exec --sandbox read-only -c model_reasoning_effort="high" -o {output_file} - < {prompt_file}
-```
+Note: Always use single quotes around config values (`'high'`) to avoid
+double-quote conflicts inside the Bash wrapper's `command="..."` string.
+For `--mode code`, set `model_reasoning_effort='xhigh'` instead.
 
 ### Gemini
 
-**All modes:**
+**All modes (stdin):**
 
 ```bash
-npx @google/gemini-cli --approval-mode plan -o text -p "$(cat {prompt_file})"
+npx @google/gemini-cli -o text < {prompt_file}
 ```
+
+Note: Uses stdin redirection (`< {prompt_file}`) instead of `-p "$(cat ...)"` to
+avoid shell injection (review targets may contain `$()` or backticks) and
+ARG_MAX limits on large diffs. The `--approval-mode` flag is omitted as it
+requires experimental settings.
 
 ---
 
@@ -173,49 +180,48 @@ IMPORTANT:
 - Include the Provenance block at the end with:
   source: FALLBACK
   tool: claude-task-fallback
-  original_tool: {codex | gemini}
   reviewer: {Correctness | Architecture}
+  duration_ms: —
+  command: —
 ```
 
 ---
 
-## Output Format
+## External Provenance Variants
 
 External reviewers produce the **same output format** as internal reviewers
 (see `prompts.md` — Reviewer Output Format section). The only difference
-is in the Provenance block:
+is in the Provenance block. All variants use a **unified schema** (same
+fields, `—` for inapplicable values) to simplify synthesis parsing.
 
 **Real execution:**
 
 ```text
 ### Provenance
 source: REAL_EXECUTION
-tool: codex | gemini
-reviewer: Correctness | Architecture
-duration_ms: {actual duration}
+tool: codex / gemini
+reviewer: Correctness / Architecture
+duration_ms: {actual duration from meta file}
 command: {actual command executed}
 ```
 
-**Fallback:**
+**Fallback (replaces a failed CLI):**
 
 ```text
 ### Provenance
 source: FALLBACK
 tool: claude-task-fallback
-original_tool: codex | gemini
-reviewer: Correctness | Architecture
-duration_ms: {actual duration}
+reviewer: Correctness / Architecture
+duration_ms: —
 command: —
 ```
 
-**Failed (before fallback):**
+**Failed (intermediate — never shown in final synthesis):**
+
+This is recorded internally when a CLI fails, before the fallback replaces
+it. The final Provenance table shows the fallback's provenance, not this.
+Useful for the Confidence Note to explain why a fallback was used.
 
 ```text
-### Provenance
-source: FAILED
-tool: codex | gemini
-reviewer: Correctness | Architecture
-duration_ms: {duration before failure}
-command: {attempted command}
-error: {exit code or error summary}
+source: FAILED, tool: {codex / gemini}, exit_code: {code}, error: {summary}
 ```

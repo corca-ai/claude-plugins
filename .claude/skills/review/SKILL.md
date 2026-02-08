@@ -142,19 +142,23 @@ For **external** reviewers (Codex, Gemini):
 2. Extract the reviewer's Role section + mode-specific checklist
 3. Create temp dir: `mktemp -d /tmp/claude-review-XXXXXX`
 4. Write prompt files to temp dir: `codex-prompt.md` and `gemini-prompt.md`
-   - Same structure as internal reviewer prompts (role + mode checklist + review target + criteria + output format from prompts.md)
+   - Same structure as internal prompts (role + mode checklist + review target + criteria)
+   - Use the **external provenance format** from `external-review.md` (includes `duration_ms`, `command`)
 
 ### 2.2 Detect CLI availability
 
 Single Bash call to check both:
 
 ```bash
-command -v codex && echo CODEX_OK; command -v npx && echo NPX_OK
+command -v codex && echo CODEX_FOUND; command -v npx && echo NPX_FOUND
 ```
 
 Parse the output:
-- Contains `CODEX_OK` → Codex CLI available
-- Contains `NPX_OK` → Gemini CLI available (via npx)
+- Contains `CODEX_FOUND` → Codex CLI binary exists (auth assumed OK)
+- Contains `NPX_FOUND` → npx exists, Gemini CLI *may* be available
+
+Note: `NPX_FOUND` only confirms npx is installed, not that Gemini CLI is
+authenticated or cached. Runtime failures are handled in Phase 3.2.
 
 ### 2.3 Launch all 4 in ONE message
 
@@ -177,10 +181,11 @@ Task(subagent_type="general-purpose", name="uxdx-reviewer", prompt="{uxdx_prompt
 If Codex available:
 
 ```text
-Bash(timeout=300000, command="START_MS=$(date +%s%3N); timeout 280 {codex_command} > {tmp_dir}/codex-output.md 2>{tmp_dir}/codex-stderr.log; EXIT=$?; END_MS=$(date +%s%3N); echo \"EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > {tmp_dir}/codex-meta.txt")
+Bash(timeout=300000, command="START_MS=$(date +%s%3N); timeout 280 codex exec --sandbox read-only -c model_reasoning_effort='high' - < '{tmp_dir}/codex-prompt.md' > '{tmp_dir}/codex-output.md' 2>'{tmp_dir}/codex-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/codex-meta.txt'")
 ```
 
-Where `{codex_command}` is selected per mode from `external-review.md` CLI templates.
+For `--mode code`, use `model_reasoning_effort='xhigh'` instead.
+Single quotes around config values avoid double-quote conflicts in the Bash wrapper.
 
 If Codex NOT available:
 
@@ -195,8 +200,11 @@ Using the fallback prompt template from `external-review.md` with the Correctnes
 If Gemini available:
 
 ```text
-Bash(timeout=300000, command="START_MS=$(date +%s%3N); timeout 280 npx @google/gemini-cli --approval-mode plan -o text -p \"$(cat {tmp_dir}/gemini-prompt.md)\" > {tmp_dir}/gemini-output.md 2>{tmp_dir}/gemini-stderr.log; EXIT=$?; END_MS=$(date +%s%3N); echo \"EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > {tmp_dir}/gemini-meta.txt")
+Bash(timeout=300000, command="START_MS=$(date +%s%3N); timeout 280 npx @google/gemini-cli -o text < '{tmp_dir}/gemini-prompt.md' > '{tmp_dir}/gemini-output.md' 2>'{tmp_dir}/gemini-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/gemini-meta.txt'")
 ```
+
+Uses stdin redirection (`< prompt.md`) instead of `-p "$(cat ...)"` to prevent
+shell injection from review target content containing `$()` or backticks.
 
 If Gemini NOT available:
 
@@ -218,6 +226,10 @@ Using the fallback prompt template from `external-review.md` with the Architectu
   - `{tmp_dir}/codex-meta.txt` or `{tmp_dir}/gemini-meta.txt` for exit code and duration
   - `{tmp_dir}/codex-stderr.log` or `{tmp_dir}/gemini-stderr.log` for error details
 
+For successful external reviews, **override** the provenance `duration_ms` with
+the actual value from the meta file (not any value the CLI may have generated).
+Use the actual command executed for the `command` field.
+
 ### 3.2 Handle external failures
 
 Check each external reviewer's result:
@@ -225,8 +237,9 @@ Check each external reviewer's result:
 | Exit code | Meaning | Action |
 |-----------|---------|--------|
 | 0 + non-empty output | Success | `source: REAL_EXECUTION` |
+| 0 + empty output | Silent failure | `source: FAILED` → launch Task fallback |
 | 124 | Timeout (280s exceeded) | `source: FAILED` → launch Task fallback |
-| 127 / "command not found" | CLI missing | `source: FAILED` → launch Task fallback |
+| 126-127 | Permission denied / not found | `source: FAILED` → launch Task fallback |
 | Other non-zero | Auth error, config issue, etc. | `source: FAILED` → launch Task fallback |
 
 If fallbacks are needed, launch all needed fallback Task agents in **one message**,
@@ -295,13 +308,23 @@ Output to the conversation (do NOT write to a file unless the user asks):
 |----------|--------|------|----------|
 | Security | REAL_EXECUTION | claude-task | — |
 | UX/DX | REAL_EXECUTION | claude-task | — |
-| Correctness | {REAL_EXECUTION ∣ FALLBACK} | {codex ∣ claude-task-fallback} | {duration_ms} |
-| Architecture | {REAL_EXECUTION ∣ FALLBACK} | {gemini ∣ claude-task-fallback} | {duration_ms} |
+| Correctness | {REAL_EXECUTION / FALLBACK} | {codex / claude-task-fallback} | {duration_ms} |
+| Architecture | {REAL_EXECUTION / FALLBACK} | {gemini / claude-task-fallback} | {duration_ms} |
 ```
 
 The Provenance table adapts to actual results: if an external CLI succeeded,
 show `REAL_EXECUTION` with the CLI tool name and measured duration. If it fell
 back, show `FALLBACK` with `claude-task-fallback`.
+
+### 3. Cleanup
+
+After rendering the synthesis, remove the temp directory:
+
+```bash
+rm -rf {tmp_dir}
+```
+
+This prevents sensitive review content (diffs, plans) from persisting in `/tmp/`.
 
 ---
 
