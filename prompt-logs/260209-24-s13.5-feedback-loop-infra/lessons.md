@@ -144,3 +144,13 @@ When retro 시작 → structured session summary를 세션 디렉토리에 파�
 **Deferred action**: handoff SKILL.md에 "핸드오프는 브랜치 구조와 무관하게 매 세션 종료 시 작성" 규칙 추가
 
 When 세션 종료 → next-session.md 작성 여부 판단 시 브랜치 구조가 아니라 세션 경계를 기준으로
+
+### Ship 전 untracked 세션 아티팩트 커밋 누락
+
+- **Expected**: ship 전에 세션에서 생성된 모든 파일이 커밋되어 있을 것
+- **Actual**: clarify 산출물(`clarify-a-self-healing.md`)과 prompt-logger 세션 로그 2개가 untracked 상태로 남아 있었음. 유저가 지적한 후에야 커밋
+- **근본 원인**: 커밋을 "방금 내가 수정한 파일을 staging"으로 인식. `git status`의 untracked 파일을 체계적으로 점검하지 않음. (1) compact 후 clarify 산출물의 존재를 잊음 (2) prompt-logger 자동 생성 파일을 "내 책임"으로 인식하지 않음
+- **패턴**: retro Section 3의 "handoff SKILL.md 되돌림"과 동일 — 커밋 전 working tree 전체 상태 미확인
+- **Takeaway**: CLAUDE.md의 "specific files 선호" 규칙은 실수로 인한 포함을 방지하지만, 누락을 방지하지 못함. Ship 전 `git status`로 untracked 파일을 확인하고 세션 아티팩트인지 판별하는 단계가 필요
+
+When ship 전 → `git status`로 untracked 파일 확인, 세션 아티팩트를 식별하여 커밋
