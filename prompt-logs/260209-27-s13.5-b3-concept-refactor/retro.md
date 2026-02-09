@@ -179,3 +179,99 @@ PreToolUse DENY는 에이전트의 행동(3번 계층)과 무관하게 작동하
 ### Skill Gaps
 
 이 세션에서 발견된 워크플로우 갭: **hook 테스트 자동화**. 현재 hook 테스트는 수동 (`bash exit-plan-mode.sh < /dev/null`). Hook의 3가지 outcome을 자동 검증하는 테스트 프레임워크가 있으면 변경 시 regression 방지 가능. 다만 현시점에서 skill로 만들 만큼 반복적이지는 않음 — hook 수가 더 늘어나면 재고.
+
+---
+
+# Retro: S13.5-B3 Concept Refactor Implementation
+
+> Session date: 2026-02-09
+> Mode: light
+> Note: S13.5-B3의 3번째 세션 (계획 → hook 인프라 → **구현**)
+
+## 1. Context Worth Remembering
+
+- S13.5-B3 plan이 3개 세션에 걸쳐 완료됨. 계획 세션의 직교성 분석과 Form/Meaning/Function 발견이 핵심 설계 기여.
+- `/ship issue` deferred action이 3세션 연속 미실행 후 이번에 해결됨(issue #17). Deferred action 반복 실패 패턴의 종결.
+- `concept-map.md`는 프로젝트 최초의 concept-level 참조 문서. 향후 refactor 실행 시 deep review Agent B와 holistic Agent B가 소비하는 핵심 입력.
+- 사전 승인된 plan + phase-handoff의 순수 구현 세션. Plan mode 없이도 프로토콜을 수동으로 찾아 따르는 것이 가능하나, lessons 기록 의무를 놓칠 위험이 있음.
+
+## 2. Collaboration Preferences
+
+- 유저는 "지연 최소화" 지향 — plan mode 건너뛰기를 직접 지시하면서도 프로토콜 준수는 요구("지침을 찾아봐서 읽어보고 따르면서 구현").
+- 유저는 에이전트의 프로토콜 위반을 능동적으로 감지. Lessons 미기록을 구현 시작 직후에 발견하고 지적.
+- 작업 속도보다 프로토콜 준수가 우선한다는 일관된 패턴(S13.5-B → B2 → B3 모두 동일).
+
+### Suggested CLAUDE.md Updates
+
+없음. Lessons 기록 의무는 plan-protocol.md에 이미 명시되어 있으며, CLAUDE.md에 중복 추가보다는 기존 지침이 plan mode 외에도 발견되는 구조가 더 적절함.
+
+## 3. Waste Reduction
+
+### Lessons 기록 지연
+
+유저가 ship issue 실행 후 구현 시작을 지시했고, 에이전트는 TaskCreate 6개 + Step 1 착수로 직행. Lessons.md 기록을 빠뜨려 유저가 지적. 약 2턴 소모.
+
+**5 Whys**:
+
+1. 왜 lessons를 안 적었나? → plan mode에 진입하지 않아서 plan-protocol.md를 읽지 않음
+2. 왜 plan-protocol을 안 읽었나? → plan mode가 아니면 해당 프로토콜이 적용 안 된다고 판단
+3. 왜 그렇게 판단했나? → "plan-protocol"이라는 이름이 plan mode에만 해당하는 것으로 인지
+4. 왜 이름에 의존했나? → lessons 기록 의무가 plan-protocol 외에 다른 곳에 명시되지 않음
+5. 근본 원인: lessons 기록 의무가 plan-protocol.md 안에만 존재하여, plan mode를 거치지 않으면 발견되지 않는 **정보 은닉 문제**
+
+**근본 원인 유형**: Process gap. lessons 기록은 plan mode의 부산물이 아니라 모든 세션의 의무. 구조적으로는 세션 시작 시(plan mode 여부 무관) 자동으로 protocol을 노출하는 메커니즘이 필요하나, 현재는 유저의 수동 감시에 의존.
+
+### Markdown lint 수정
+
+review-criteria.md의 ordered list prefix(1/2/3 → 1/1/1). markdownlint hook이 즉시 감지하여 1턴만에 수정. 시스템이 의도대로 작동한 사례.
+
+## 4. Critical Decision Analysis (CDM)
+
+### CDM 1: Plan mode 건너뛰기 + 프로토콜 수동 준수
+
+| Probe | Analysis |
+|-------|----------|
+| **Cues** | 유저: "너무 지연됐으니 plan-mode에 실제로 들어가진 말고, 지침을 찾아봐서 읽어보고 따르면서 구현해주세요" |
+| **Goals** | 속도(3세션째 지연) vs 프로토콜 준수(lessons 기록 등) — 유저가 양쪽 모두 명시적으로 요구 |
+| **Options** | (a) Plan mode 진입 후 정상 워크플로우 (b) Plan mode 건너뛰되 프로토콜 수동 준수 (c) 프로토콜 무시하고 순수 구현만 |
+| **Basis** | 유저가 (b)를 직접 지시. Plan이 이미 승인됨 + phase-handoff 존재 → plan mode 재진입의 가치가 낮음 |
+| **Situation Assessment** | 정확했으나 불완전: plan-protocol.md를 찾아 읽었지만, "읽는 것"과 "즉시 따르는 것"의 갭이 존재. Lessons 기록을 바로 시작하지 않음 |
+| **Aiding** | 세션 시작 시 자동으로 protocol 의무를 노출하는 hook이 있었다면, plan mode 여부와 무관하게 lessons 의무가 인지됨 |
+
+**Key lesson**: Plan mode 건너뛰기는 plan의 "timing" 단계만 건너뛰는 것이지, protocol의 "what to record" 의무까지 면제하는 것이 아님. 프로토콜을 읽는 것과 그 안의 행동 지시를 이행하는 것은 별개 단계.
+
+### CDM 2: /ship issue 먼저 실행 여부를 유저에게 질문
+
+| Probe | Analysis |
+|-------|----------|
+| **Cues** | next-session.md에 "Consider running `/ship issue` before implementation" + lessons.md에 3회 반복 미실행 기록 |
+| **Goals** | (a) GitHub에 작업 공식 등록 (b) 구현 시작 지연 최소화 |
+| **Options** | (a) /ship issue 먼저 (b) 구현부터, issue는 나중에 (c) 건너뛰기 |
+| **Basis** | 에이전트가 단독 판단하지 않고 AskUserQuestion으로 유저 결정 요청 → 유저가 "먼저 실행" 선택 |
+| **Knowledge** | 3세션 연속 미실행 패턴을 lessons에서 인지. 이 패턴 인식이 "건너뛰어도 되겠다"는 판단 억제 |
+| **Hypothesis** | 유저에게 묻지 않고 구현부터 시작했다면, 4번째 미실행 재현 |
+
+**Key lesson**: Deferred action의 반복 미실행 패턴이 기록에 있을 때, 유저에게 명시적으로 확인하는 것이 안전한 전략. 에이전트의 단독 판단("이번엔 괜찮겠다")은 이미 증명된 실패 모드.
+
+## 5. Expert Lens
+
+> Run `/retro --deep` for expert analysis.
+
+## 6. Learning Resources
+
+> Run `/retro --deep` for learning resources.
+
+## 7. Relevant Skills
+
+### Installed Skills
+
+| Skill | 이 세션 관련성 |
+|-------|---------------|
+| `/ship` | issue #17 생성에 사용됨. 다음: `/ship pr`로 PR 생성 예정 |
+| `/refactor` | 이 세션의 주 대상 — holistic + deep review 프레임워크 재구성 완료. 다음: 실제 실행으로 검증 |
+| `/review` | PR 리뷰 시 사용 가능 |
+| `/plugin-deploy` | cwf 플러그인 변경 배포 시 필요. marketplace-v3 머지 후 |
+
+### Skill Gaps
+
+이 세션에서 별도의 skill gap은 식별되지 않음. 구현은 직접 파일 편집으로 진행. `/impl`을 사용할 수도 있었으나, 모든 대상 파일이 markdown reference 문서였기에 sub-agent 오케스트레이션보다 직접 편집이 더 효율적이었음.
