@@ -1,4 +1,4 @@
-# Next Session: S13.5 C2/D/E + S13.6
+# Next Session: S13.5 C2/D/E
 
 ## Context Files to Read
 
@@ -12,8 +12,8 @@
 
 ## Task Scope
 
-Complete the remaining S13.5 workstreams (C2, D, E) and S13.6 protocol design.
-Four workstreams in one session:
+Complete the remaining S13.5 workstreams (C2, D, E).
+Three workstreams in one session:
 
 ### C2: project-context.md Slimming
 
@@ -34,12 +34,12 @@ Four workstreams in one session:
 - Must not interfere with existing staged changes (same `git diff --cached --quiet` guard)
 - Context: this session discovered the gap when auto-compact fired mid-session and the session log was not committed
 
-### S13.6: CWF Full Protocol Auto-Chaining
+### Deferred to Separate Session: S13.6
 
+S13.6 (CWF Full Protocol Auto-Chaining) is scoped separately due to design complexity:
 - Design the `cwf` single invocation that chains: gather → clarify → plan → review → impl → retro → ship
-- Auto-transition rules from cwf-state.yaml `stages` (auto: true/false)
-- Human checkpoints at gather→clarify and plan→impl boundaries
-- Skill orchestration mechanism (skill calling skill, or SKILL.md as orchestrator)
+- Auto-transition rules, human checkpoints, skill orchestration mechanism
+- Should be done after C2/D/E stabilize the infrastructure layer
 
 ## Don't Touch
 
@@ -67,15 +67,12 @@ Given prompt-logger SessionStart(startup) hook is installed
 When a new session starts with uncommitted .md files in prompt-logs/sessions/
 Then orphaned files are auto-committed before the session proceeds
 
-Given cwf protocol design is complete
-When reading the S13.6 output document
-Then auto-chaining rules, human checkpoints, and skill orchestration are specified
 ```
 
 ## Dependencies
 
 - Requires: S29 (C1) completed — live state and compact recovery in place
-- Blocks: S14 (integration test + main merge)
+- Blocks: S13.6 (protocol auto-chaining) → S14 (integration test + main merge)
 
 ## Dogfooding
 
@@ -86,5 +83,5 @@ instead of manual execution.
 ## Start Command
 
 ```text
-@prompt-logs/260209-29-live-state-compact-recovery/next-session.md S13.5 C2/D/E + S13.6 시작합니다. cwf-state.yaml 읽고 현재 상태 파악 후 cwf:clarify 로 스코프 확정하세요.
+@prompt-logs/260209-29-live-state-compact-recovery/next-session.md S13.5 C2/D/E 시작합니다. cwf-state.yaml 읽고 현재 상태 파악 후 cwf:clarify 로 스코프 확정하세요.
 ```
