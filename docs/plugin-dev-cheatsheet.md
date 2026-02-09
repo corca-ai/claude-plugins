@@ -144,6 +144,7 @@ fi
   if [ -f "$f" ]; then RESULT="$f"; break; fi
   ```
 - Empty array iteration under `set -u`: `"${arr[@]}"` on an empty array causes "unbound variable". Guard with `if [[ ${#arr[@]} -gt 0 ]]; then ... fi`.
+- Bash regex: in `[[ =~ ]]`, `"?` makes `?` literal (quoted), not a regex quantifier. Use `\"?` for optional literal-quote matching. Bash and zsh have different regex semantics — always debug bash scripts with `bash -c` or `bash -x`, not directly in the Bash tool (which uses zsh).
 
 ## Testing
 

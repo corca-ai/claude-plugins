@@ -1,20 +1,20 @@
 ## Before You Start
 
 **IMPORTANT**: Before modifying ANY code, you MUST:
-1. Read the [Plugin Dev Cheat Sheet](docs/plugin-dev-cheatsheet.md) — covers directory patterns, schemas, testing, and deploy workflow
+1. Read the [Plugin Dev Cheat Sheet](docs/plugin-dev-cheatsheet.md) — directory patterns, schemas, deploy workflow, script guidelines
 2. Check if your changes affect `README.md` or `README.ko.md`
 
-For deeper reference (only when the cheat sheet isn't enough):
+Read what's relevant to your current task:
+- [Architecture Patterns](docs/architecture-patterns.md) — code patterns, hook configuration, plugin integration
+- [Project Context](docs/project-context.md) — project/org facts, design principles, process conventions
+- [Documentation Guide](docs/documentation-guide.md) — documentation principles for AI-era projects
 - [Modifying/Testing/Deploying Plugins](docs/modifying-plugin.md)
 - [Adding New Plugins](docs/adding-plugin.md)
 - [Skills Guide](docs/skills-guide.md)
 - [Marketplace Reference](docs/claude-marketplace.md)
-- [Project Context](docs/project-context.md) — accumulated architecture patterns and conventions
 
 Do NOT proceed with code changes until completing the above steps.
-
 After modifying code, update any affected documentation.
-Do NOT consider the task complete without updating related docs.
 
 ## Session State
 
@@ -48,6 +48,18 @@ Discover available skills via the plugin's `skills/` directory or trigger list.
 
 After completing each workflow stage, update lessons.md with learnings before
 moving to the next stage.
+
+## Persist Routing
+
+When graduating findings from lessons/retro to permanent docs:
+
+| Finding type | Target |
+|---|---|
+| Project/org fact, process convention | docs/project-context.md |
+| Code pattern, hook/integration pattern | docs/architecture-patterns.md |
+| Script gotcha, build/test tip | docs/plugin-dev-cheatsheet.md |
+| Claude behavior rule | this file (CLAUDE.md) |
+| Documentation principle | docs/documentation-guide.md |
 
 ## Language
 
