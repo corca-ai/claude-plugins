@@ -213,6 +213,14 @@ sessions:
     summary: "Designed and implemented Form/Meaning/Function restructuring of holistic + deep review frameworks. Created concept-map.md (6 concepts + 9×6 sync map). Restructured holistic-criteria.md (PP/BI/MC → Form/Meaning/Function) and review-criteria.md (merged 4+5, added Concept Integrity). Fixed exit-plan-mode.sh observability. GitHub issue #17."
     artifacts: [plan.md, phase-handoff.md, lessons.md, retro.md, next-session.md, session.md]
 
+  - id: post-B3
+    title: "Post S13.5-B3 housekeeping"
+    dir: prompt-logs/260209-28-post-b3-housekeeping
+    branch: marketplace-v3
+    completed_at: null
+    summary: "Provenance hook_count update, expert roster, master-plan B3 row, hook audit, next-prompt-dir script, plan mode protocol"
+    artifacts: [plan.md, lessons.md, next-session.md]
+
 # External tool availability (detected by cwf:setup)
 tools:
   codex: available
@@ -257,4 +265,16 @@ expert_roster:
     source: "Sources of Power: How People Make Decisions (MIT Press, 1998)"
     rationale: "Applied to agreement bias analysis and mental simulation protocols"
     introduced: "S13.5-B2"
+    usage_count: 1
+  - name: "James Reason"
+    domain: "organizational accidents, Swiss cheese model, defense-in-depth"
+    source: "Managing the Risks of Organizational Accidents (Ashgate, 1997)"
+    rationale: "Applied to hook chain defense layer analysis"
+    introduced: "S13.5-B3"
+    usage_count: 1
+  - name: "Sidney Dekker"
+    domain: "drift into failure, local rationality, just culture"
+    source: "Drift into Failure (Ashgate, 2011)"
+    rationale: "Applied to agent behavioral drift analysis"
+    introduced: "S13.5-B3"
     usage_count: 1

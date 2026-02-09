@@ -8,18 +8,15 @@ Protocol for persisting planning artifacts and session learnings.
 
 `prompt-logs/{YYMMDD}-{NN}-{title}/plan.md`
 
-**Date**: Run `date +%y%m%d` to get the system date. Do not infer the date from
-your training data or conversation context — always use the system command.
+**Automated**: Run `scripts/next-prompt-dir.sh <title>` to get the correct path.
+The script determines today's date, scans existing directories, and outputs the
+next available path (e.g., `prompt-logs/260204-03-auth-impl`).
 
-**Sequence number**: Scan existing `prompt-logs/` directories matching today's
-date (`{YYMMDD}-*`) and pick the next number. If none exist, start at `01`.
-Examples: `260204-01-auth-design`, `260204-02-auth-impl`.
+If the user specifies a path, use it instead of the script output.
 
 The `{title}` must reflect the current session's task, not a previous session's.
 Even if the input spec or reference document lives in an existing `prompt-logs/`
 directory, always create a new directory named after the current task.
-
-Determine the path from the user's request. If the user specifies a path, use it.
 
 ### Required Sections
 
@@ -59,7 +56,14 @@ Use `/gather-context --search` or equivalent to find: established frameworks, be
 
 ### Timing
 
-Create the plan document when entering plan mode, before implementation begins.
+Create the session directory and both files (plan.md, lessons.md) **before**
+entering plan mode. Use `scripts/next-prompt-dir.sh <title>` to determine the
+directory path.
+
+1. Run `scripts/next-prompt-dir.sh <title>` → get session dir path
+2. `mkdir -p` the directory
+3. Create empty `plan.md` and `lessons.md` with headers
+4. Enter plan mode — plan mode only validates structure, not creates it
 
 ## Lessons Document
 
@@ -92,9 +96,12 @@ Write lessons in the user's language.
 
 ### Timing
 
-Create lessons.md at the same time as plan.md — not after implementation. Learnings often emerge from pre-plan-mode conversation (e.g., corrected assumptions, revealed preferences), so the file must exist before implementation begins.
+Created alongside plan.md **before** entering plan mode (see Plan Document →
+Timing). Learnings often emerge from pre-plan-mode conversation (e.g., corrected
+assumptions, revealed preferences), so the file must exist before plan mode.
 
-Accumulate incrementally throughout the session. Record learnings as they emerge from conversation and implementation.
+Accumulate incrementally throughout the session. Record learnings as they emerge
+from conversation and implementation.
 
 ## Retro Document (optional)
 
