@@ -32,6 +32,7 @@ Project and organizational facts accumulated from retrospectives.
 - **Retro persist criterion**: JTBD lens ("What recurring situation will this learning prevent?") determines whether a finding deserves persistence beyond the session's lessons.md. See CLAUDE.md § Persist Routing for target file selection.
 - **Plan document ≠ current state**: master-plan.md and other plan documents are plans, not execution records. Always check cwf-state.yaml sessions list for actual completion status.
 - **Parallel sub-agent review after large changes**: After large multi-file changes, consider running parallel sub-agent reviews before committing — give each agent a different review perspective (content integrity, missed opportunities, structural analysis).
+- **Delegation criterion: exploration cost**: When a task requires understanding existing code structure before modifying it, delegate to a sub-agent or codex exec. When creating new files or making small edits with known context, execute directly. Decide before starting exploration — switching mid-exploration wastes the exploration context.
 
 ## Directory Classification Criteria
 

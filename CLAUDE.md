@@ -39,6 +39,7 @@ items before finishing.
 - When requirements are ambiguous or large in scope, use the clarification skill before analysis or implementation. Do not manually ask clarification questions when a clarification skill is available.
 - Never delete user-created files without explicit confirmation. Prefer `mv` over `rm`. Untracked files cannot be restored via git.
 - When the user proposes a choice where other reasonable alternatives exist (file locations, naming, structure, interfaces), provide honest counterarguments and trade-off analysis. Before agreeing, present at least one alternative axis the user hasn't mentioned. Do not just agree.
+- When the user provides external reference articles or research, read them before forming design opinions. Research → design, not design → research.
 - When writing markdown (SKILL.md, references, READMEs), always include a language specifier on code fences (` ```bash `, ` ```text `, ` ```yaml `, etc.). Never use bare ` ``` `. See `.markdownlint.json` for enforced rules.
 
 ## Dogfooding
