@@ -87,7 +87,8 @@ slack_send() {
 
         local payload="{\"channel\": \"${SLACK_CHANNEL_ID}\", \"text\": \"${escaped_text}\""
         if [ -n "$thread_ts" ]; then
-            payload+=", \"thread_ts\": \"${thread_ts}\", \"reply_broadcast\": true"
+            local broadcast="${CLAUDE_CORCA_ATTENTION_REPLY_BROADCAST:-true}"
+            payload+=", \"thread_ts\": \"${thread_ts}\", \"reply_broadcast\": ${broadcast}"
         fi
         payload+="}"
 
