@@ -389,9 +389,9 @@ Source: `prompt-logs/260208-01-refactor-review/`
 | **S11b** | feat/cwf-refactor | Migrate refactor with parallel sub-agent enhancement | Compare output quality vs v2. |
 | **S12** | feat/cwf-setup | Build `cwf:setup` + `cwf:update` + `cwf:handoff`. Rewrite `install.sh` + `update-all.sh`. Migration script. | Full setup flow on clean machine (or simulated). |
 | **S13** | marketplace-v3 | Holistic refactor review on entire cwf plugin | Use `cwf:refactor --holistic` on itself. |
-| **S13.5** | s13.5-feedback-loop-infra | Self-healing criteria, expert-in-the-loop, project-context slimming, hook module abstraction | Provenance check triggers on stale criteria. |
+| **S13.5** | s13.5-*-* | Self-healing criteria (A, done), expert-in-the-loop + phase handoff (B, done), concept distillation + README v3 (B2), project-context slimming (C), hook module abstraction (D) | Provenance check triggers on stale criteria. |
 | **S13.6** | s13.6-cwf-protocol | Full CWF protocol design: auto-chaining gather→clarify→plan→review→impl→retro→ship | Single `cwf` invocation chains full cycle. |
-| **S14** | marketplace-v3 | Integration test, deprecate old plugins, final docs, merge to main. **Produce `docs/v3-migration-decisions.md`** — synthesize all key decisions and lessons from S0-S14 into a single document. PR body gets the summary, doc gets the details. | Full workflow end-to-end test. |
+| **S14** | marketplace-v3 | Integration test, deprecate old plugins, merge to main. **Produce `docs/v3-migration-decisions.md`** — synthesize all key decisions and lessons from S0-S14 into a single document. PR body gets the summary, doc gets the details. README v3 philosophy moved to S13.5-B2. | Full workflow end-to-end test. |
 
 ### Session Dependencies
 
@@ -410,8 +410,18 @@ S1 → S2 → S3 (ship skill — enables workflow for all v3 sessions)
               ↓
          S12 (setup/update/handoff, needs all skills)
               ↓
-         S13 → S14
+         S13 → S13.5-A → S13.5-B → S13.5-B2 → S13.5-C/D → S13.6 → S14
 ```
+
+### S13.5 Workstream Details
+
+| Workstream | Branch | Scope | Status |
+|------------|--------|-------|--------|
+| **A** | s13.5-a-provenance | Self-healing provenance system | ✅ Done |
+| **B** | s13.5-b-expert-loop | Expert-in-the-loop (clarify, review, retro roster) + phase handoff (`--phase` mode) | ✅ Done |
+| **B2** | s13.5-b2-concept | Concept distillation across all skills using `references/essence-of-software/distillation.md`. README v3 philosophy overhaul (moved from S14). | Pending |
+| **C** | s13.5-c-context | project-context.md slimming (audit, dedup, graduation) | Pending |
+| **D** | s13.5-d-hooks | Hook infrastructure (Slack threading, shared module extraction) | Pending |
 
 ## Handoff Template (for S1+)
 

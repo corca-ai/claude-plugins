@@ -189,6 +189,14 @@ sessions:
     summary: "Implemented provenance sidecar pattern: 6 .provenance.yaml files, provenance-check.sh script, refactor holistic integration (Phase 1b), handoff unresolved items propagation (Phase 4b), skill-conventions Provenance Rule. Deep retro with Meadows/Woods expert analysis."
     artifacts: [lessons.md, retro.md, next-session.md]
 
+  - id: S13.5-B
+    title: "Expert-in-the-loop + phase handoff"
+    dir: prompt-logs/260209-25-s13.5-b-expert-loop
+    branch: s13.5-b-expert-loop
+    completed_at: "2026-02-09"
+    summary: "Expert-in-the-loop for clarify (Phase 2.5), review (Slots 5-6), retro (roster maintenance). Shared expert-advisor-guide.md. Phase handoff --phase mode for handoff/impl/clarify skills. Deep retro with Klein RPD + Argyris double-loop."
+    artifacts: [plan.md, lessons.md, retro.md, phase-handoff.md, next-session.md]
+
 # External tool availability (detected by cwf:setup)
 tools:
   codex: available

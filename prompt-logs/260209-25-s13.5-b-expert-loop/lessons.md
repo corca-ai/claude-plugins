@@ -42,3 +42,12 @@ When spec → impl 전환 시 맥락 전달 → phase handoff 문서로 HOW를 �
 - **Takeaway**: `--light`를 명시적으로 지정하지 않았으면 deep으로 가야 함. "When in doubt, choose light"가 아니라 "When in doubt, choose deep" — retro를 호출한 것 자체가 분석 의도의 신호
 
 When retro 모드 판단 → `--light` 명시가 없고 light하다고 판단하지 않았으면 deep. 비용 절감은 유저가 `--light`로 명시적으로 선택
+
+### Agent fabrication을 spot-check 없이 유저에게 전달
+
+- **Expected**: Explore agent의 로드맵 조사 결과를 유저에게 전달하기 전에 master-plan.md를 직접 확인
+- **Actual**: agent가 S15를 fabrication했고, 이를 검증 없이 그대로 전달. 유저가 "S15가 뭔가요?"라고 물어서야 master-plan.md를 확인하여 S15가 존재하지 않음을 발견
+- **근본 원인**: project-context.md에 "Agent results require spot-checks" 교훈이 이미 있음에도 적용하지 않음. 교훈을 아는 것과 적용하는 것 사이의 gap
+- **Takeaway**: agent 결과에 사실적 주장(세션 존재, 파일 경로, line number)이 포함되면, 최소 핵심 주장은 원본 소스와 대조해야 함
+
+When agent 결과를 유저에게 전달 → 사실적 주장(존재 여부, 수치, 경로)은 원본 파일과 대조한 후 전달

@@ -167,3 +167,29 @@ Plan-then-Execute 패턴을 체계적으로 분석. plan artifact에 steps + rea
 
 - **Phase handoff 메커니즘 부재**: clarify/spec 종료 시 HOW를 전달하는 도구가 없음. handoff 스킬에 `--phase` 모드로 해결 예정 (이 세션에서 설계, 구현은 이어서)
 - **세션 시작 시 이전 세션 lessons 자동 로딩**: 이전 세션 lessons/retro를 자동으로 읽는 메커니즘 부재. Phase handoff가 이 문제의 부분 해결책이 될 수 있음
+
+---
+
+### Post-Retro Findings
+
+> Context: deep retro 이후 context compact → `--phase` 모드 구현 완료
+
+#### Phase Handoff 구현 결과
+
+handoff SKILL.md(`--phase` 모드), impl SKILL.md(Phase 1.1b 소비), clarify SKILL.md(Phase 5 제안) 3개 파일 수정 완료. 핵심:
+
+- **handoff Phase 3b**: HOW 맥락을 6개 섹션(Context Files, Design Decisions, Protocols, Do NOT, Implementation Hints, Success Criteria)으로 구조화
+- **impl Phase 1.1b**: plan.md와 같은 디렉토리에서 `phase-handoff.md` 자동 감지. 발견 시 Protocols/Do NOT을 plan 제약과 동일 수준으로 적용
+- **clarify Phase 5**: `cwf:handoff --phase` 제안 추가. context clear 전 HOW 보존 안내
+
+#### Waste
+
+- context compact 후에도 phase-handoff.md 프로토타입이 있어 구현 방향이 명확했음 — phase handoff의 첫 번째 개밥먹기 성공
+- Plan agent가 상세 구현 계획을 잘 생성하여 구현은 기계적 편집으로 진행 가능했음. 낭비 거의 없음
+
+#### CDM: Phase 3b를 별도 섹션으로 vs Phase 3 내부 분기로
+
+- **Cues**: handoff SKILL.md에서 `--register`는 Phase 3을 skip하는 패턴. `--phase`는 Phase 3을 대체하는 패턴
+- **Options**: (A) Phase 3 내부 if/else 분기, (B) 독립 Phase 3b 섹션
+- **Basis**: Phase 3의 8개 필수 섹션과 Phase 3b의 6개 섹션은 구조가 완전히 다름. if/else로 넣으면 가독성이 크게 저하
+- **결정**: Phase 3b로 분리 — 관심사 분리가 문서 구조에도 적용됨

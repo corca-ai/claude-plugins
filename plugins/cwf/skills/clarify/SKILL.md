@@ -306,7 +306,12 @@ After each answer:
 Then ask: "Save this clarified requirement to a file?"
 If yes: save to a project-appropriate location with a descriptive filename.
 
-**Follow-up**: If the CWF plugin is loaded, suggest running `cwf:review --mode clarify` to get a multi-perspective review of the clarified requirement before implementation.
+**Follow-up suggestions** (when CWF plugin is loaded):
+
+1. `cwf:review --mode clarify` — Multi-perspective review of the clarified requirement before implementation
+2. `cwf:handoff --phase` — Generate a phase handoff document that captures HOW context (protocols, rules, must-read references, constraints) for the implementation phase. Recommended when context will be cleared before implementation, as `plan.md` carries WHAT but not HOW.
+
+Present both suggestions. If the user is about to enter plan mode or clear context, emphasize the phase handoff suggestion.
 
 ---
 
@@ -357,6 +362,8 @@ while ambiguities remain:
 ```
 
 Then offer to save.
+
+**Follow-up** (when CWF plugin is loaded): Suggest `cwf:handoff --phase` if the user plans to clear context before implementation.
 
 ---
 

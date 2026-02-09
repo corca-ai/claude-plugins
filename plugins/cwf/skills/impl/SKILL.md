@@ -49,6 +49,23 @@ If no plan is found, report to the user and stop:
 No plan.md found in prompt-logs/. Run cwf:plan first.
 ```
 
+### 1.1b Phase Handoff Discovery
+
+Check for a `phase-handoff.md` in the same directory as the discovered `plan.md`:
+
+1. Derive the directory from the plan path: `dirname {plan.md path}`
+2. Check if `phase-handoff.md` exists in that directory
+3. If found, read and parse all sections:
+   - **Context Files to Read**: Additional files the agent must read before implementation
+   - **Design Decision Summary**: Key choices with rationale — treat as binding context
+   - **Protocols to Follow**: Behavioral rules — treat as binding constraints alongside plan.md
+   - **Do NOT**: Prohibitions — append to plan's "Don't Touch" list as behavioral constraints
+   - **Implementation Hints**: Practical guidance — use during Phase 3 execution
+   - **Success Criteria**: Additional BDD criteria — merge with plan's criteria for Phase 4 verification
+4. If phase-handoff.md specifies "Context Files to Read", read each listed file before proceeding
+
+If `phase-handoff.md` is not found, proceed normally with plan.md only. Phase handoff is optional.
+
 ### 1.2 Section Extraction
 
 Read the plan and extract these sections (all optional except Steps):
@@ -79,6 +96,9 @@ Present a summary and confirm before proceeding:
 **Files**: {count} files to create/modify
 **BDD Criteria**: {count} scenarios
 **Don't Touch**: {list or "none specified"}
+**Phase Handoff**: {path to phase-handoff.md, or "not found (proceeding with plan only)"}
+**Phase Protocols**: {count} protocols to follow
+**Phase Do NOT**: {count} prohibitions
 
 Proceed with implementation?
 ```
@@ -166,7 +186,8 @@ For simple plans (1 work item, ≤3 files).
 2. Use Write, Edit, Bash, and other allowed tools directly
 3. Follow the plan's step descriptions precisely
 4. Respect the "Don't Touch" list — never modify those files
-5. After completion, proceed to Phase 4
+5. If phase-handoff.md was loaded, apply its Implementation Hints during execution and respect its "Do NOT" constraints
+6. After completion, proceed to Phase 4
 
 ---
 
@@ -183,6 +204,7 @@ For each work item, build an agent prompt using the template from `{SKILL_DIR}/r
 - Relevant BDD criteria that this agent's work should satisfy
 - The Don't Touch list (full list — every agent must respect it)
 - Context from the plan (Goal, relevant Context sections)
+- Phase handoff protocols, hints, and "Do NOT" constraints (if phase-handoff.md was loaded)
 
 ### 3b.2 Parallel Launch
 
@@ -231,7 +253,7 @@ Check implementation against the plan's success criteria.
 
 ### 4.1 BDD Criteria Checklist
 
-For each BDD scenario from the plan:
+For each BDD scenario from the plan (and from `phase-handoff.md` Success Criteria, if present):
 
 1. Determine which work item(s) should have addressed it
 2. Check if the relevant files were created/modified
@@ -307,6 +329,8 @@ the plan's success criteria, run:
 6. **Verify against criteria**: Every BDD scenario must be checked, not assumed
 7. **Preserve existing patterns**: Follow codebase conventions visible in existing files. Do not introduce new patterns without plan justification
 8. **Markdown discipline**: All code fences must have a language specifier
+9. **Phase handoff protocols are binding**: When `phase-handoff.md` is present, its "Protocols to Follow" and "Do NOT" sections carry the same weight as plan constraints. They are not suggestions.
+10. **Phase handoff is optional**: Impl works with `plan.md` alone. Phase handoff enriches but is never required.
 
 ## References
 

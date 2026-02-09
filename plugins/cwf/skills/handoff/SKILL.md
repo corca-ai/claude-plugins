@@ -1,9 +1,11 @@
 ---
 name: handoff
 description: |
-  Auto-generate session handoff documents from cwf-state.yaml
-  and session artifacts.
-  Triggers: "cwf:handoff", "handoff", "핸드오프", "다음 세션"
+  Auto-generate session or phase handoff documents from cwf-state.yaml
+  and session artifacts. --phase mode generates phase-to-phase context
+  transfer (HOW) separate from plan.md (WHAT).
+  Triggers: "cwf:handoff", "cwf:handoff --phase", "handoff", "핸드오프",
+  "다음 세션", "phase handoff"
 allowed-tools:
   - Read
   - Write
@@ -16,7 +18,7 @@ allowed-tools:
 
 # Handoff
 
-Auto-generate session handoff documents (`next-session.md`) from project state and session artifacts. Reads `cwf-state.yaml` for session history and `master-plan.md` (when available) for next session scope.
+Auto-generate session handoff documents (`next-session.md`) or phase handoff documents (`phase-handoff.md`) from project state and session artifacts. Reads `cwf-state.yaml` for session history and `master-plan.md` (when available) for next session scope.
 
 **Language**: Write handoff documents in English. Communicate with the user in their prompt language.
 
@@ -25,6 +27,7 @@ Auto-generate session handoff documents (`next-session.md`) from project state a
 ```text
 cwf:handoff                # Full: generate next-session.md + register
 cwf:handoff --register     # Register current session in cwf-state.yaml only
+cwf:handoff --phase        # Generate phase-handoff.md (HOW context for next phase)
 ```
 
 ---
@@ -201,6 +204,91 @@ Reference the discovery mechanism from `CLAUDE.md` Dogfooding section. Do not ha
 
 ---
 
+## Phase 3b: Generate phase-handoff.md (--phase mode)
+
+When `--phase` flag is used, generate a phase-to-phase context transfer document instead of `next-session.md`. Phase handoff captures HOW (protocols, rules, must-reads, constraints) while `plan.md` captures WHAT (spec, steps, files).
+
+**Prerequisite flow**: Phase 1.1 (Load Project State) and Phase 1.2 (Identify Current Session) execute normally. Phase 1.3 reads only `lessons.md` for protocol-relevant entries. Phase 2 is skipped entirely.
+
+### 3b.1 Determine Phase Transition
+
+Identify the source and target phases from context:
+
+- **Source phase**: The current workflow phase (typically clarify, gather, or design discussion)
+- **Target phase**: The next workflow phase (typically implementation)
+
+If ambiguous, use AskUserQuestion:
+
+```text
+What phase are you transitioning from and to?
+Example: "clarify + design → implementation"
+```
+
+### 3b.2 Gather HOW Context
+
+The agent executing this skill holds the clarify/gather context in its active conversation. Extract the following from conversation history and session artifacts:
+
+1. **Context Files**: Which files must the next phase agent read? Always include `CLAUDE.md` and `cwf-state.yaml`. Add files that emerged as critical during the clarify/gather phase
+2. **Design Decisions**: Key choices made during clarify/gather with rationale. Source from clarification summaries, user decisions, and discussion outcomes
+3. **Protocols**: Rules and behavioral protocols discovered or established during the current phase. Source from `lessons.md` entries and explicit user instructions
+4. **Prohibitions**: Explicit "do not" constraints. Source from user instructions, clarify decisions, and scope boundaries
+5. **Implementation Hints**: Practical guidance for the implementer — insertion points, patterns to follow, gotchas
+6. **Success Criteria**: BDD-format criteria. May reference `plan.md` criteria or add phase-specific ones
+
+### 3b.3 Generate phase-handoff.md
+
+Write to `prompt-logs/{session-dir}/phase-handoff.md`:
+
+````markdown
+# Phase Handoff: {source phase} → {target phase}
+
+> Source phase: {e.g., clarify + design discussion}
+> Target phase: {e.g., implementation}
+> Written: {date via `date +%Y-%m-%d`}
+
+## Context Files to Read
+
+1. `CLAUDE.md` — project rules and protocols
+2. `cwf-state.yaml` — current project state
+3. {additional files from 3b.2}
+
+## Design Decision Summary
+
+{Key design choices with rationale from 3b.2}
+
+## Protocols to Follow
+
+{Numbered list of rules and behavioral protocols from 3b.2}
+
+## Do NOT
+
+{Bulleted list of explicit prohibitions from 3b.2}
+
+## Implementation Hints
+
+{Practical guidance from 3b.2}
+
+## Success Criteria
+
+```gherkin
+{BDD criteria from 3b.2}
+```
+````
+
+### 3b.4 User Review
+
+Present the generated document to the user and ask for confirmation:
+
+```text
+Phase handoff generated. Review the document above.
+```
+
+Use `AskUserQuestion` with options: "Confirm", "Edit and regenerate", "Cancel".
+
+If "Edit and regenerate": apply user feedback, regenerate, and re-confirm.
+
+---
+
 ## Phase 4: Register in cwf-state.yaml
 
 ### 4.1 Update Current Session
@@ -210,6 +298,16 @@ If the current session entry exists in `cwf-state.yaml`:
 - Add `next-session.md` to the `artifacts` list
 - Update `summary` if not already set
 - Set `completed_at` to today's date (via `date +%Y-%m-%d`)
+
+### 4.1b Register Phase Handoff (--phase mode)
+
+When `--phase` flag is used:
+
+- Add `phase-handoff.md` to the current session's `artifacts` list in `cwf-state.yaml`
+- Do NOT set `completed_at` — the session continues into the next phase
+- Do NOT update `summary` — the session is not finished
+- Skip Phase 4b (Unresolved Items) — phase handoff is intra-session, not inter-session
+- Skip Phase 5 (Checkpoint + Verify) — `check-session.sh` checks session-end artifacts, not mid-session artifacts
 
 ### 4.2 Register-Only Mode
 
@@ -286,6 +384,10 @@ Report results. If any artifacts are missing, list them and suggest fixes.
 8. **Never overwrite existing files**: When a file already exists (e.g., `next-session.md` from a prior run), use Edit to update — not Write. Write replaces entire file contents and destroys prior work.
 9. **All code fences must have language specifier**: Never use bare fences.
 10. **Unresolved items MUST be propagated**: Deferred Actions, unimplemented lesson proposals, and unaddressed retro action items from the current session must appear in next-session.md. This prevents context loss across session boundaries.
+11. **Phase handoff captures HOW, not WHAT**: Do not duplicate plan.md content (steps, files to modify, goal). Focus on protocols, rules, constraints, and context files.
+12. **Phase handoff is written by the phase that has context**: The clarify/gather agent writes the phase handoff because it holds the HOW context. Do not defer to a later phase.
+13. **Phase handoff is intra-session**: It transfers context between phases within the same session. `completed_at` is not set and Phase 4b/5 are skipped.
+14. **Draft-then-review**: Always present the generated `phase-handoff.md` to the user for review before finalizing.
 
 ## References
 
