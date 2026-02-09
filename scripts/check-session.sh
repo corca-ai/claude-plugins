@@ -2,10 +2,13 @@
 set -euo pipefail
 
 # check-session.sh — Verify session completion artifacts
-# Usage: check-session.sh [--impl] [session-id]
+# Usage: check-session.sh [--impl|--live] [session-id]
 #   --impl    Check impl_complete artifacts only (plan.md, lessons.md, next-session.md)
 #             Use after implementation, before retro. Prevents dismissing FAIL
 #             because "retro.md is expected to be missing at this stage."
+#   --live    Check that cwf-state.yaml live section has required fields populated
+#             (session_id, dir, phase, task). Use to verify context is preserved
+#             for compact recovery.
 #   (default) Check all artifacts (always + milestone)
 # If no session-id, checks the most recent session in cwf-state.yaml
 # Reads expected artifacts from session entry or session_defaults
@@ -14,6 +17,9 @@ set -euo pipefail
 PHASE=""
 if [[ "${1:-}" == "--impl" ]]; then
   PHASE="impl"
+  shift
+elif [[ "${1:-}" == "--live" ]]; then
+  PHASE="live"
   shift
 fi
 
@@ -26,6 +32,64 @@ NC='\033[0m' # No Color
 if [[ ! -f "$STATE_FILE" ]]; then
   echo -e "${RED}Error: $STATE_FILE not found${NC}" >&2
   exit 1
+fi
+
+# --live: validate live section has required fields
+if [[ "$PHASE" == "live" ]]; then
+  echo "Checking cwf-state.yaml live section..."
+  echo "---"
+
+  live_pass=0
+  live_fail=0
+  in_live=false
+  live_session_id=""
+  live_dir=""
+  live_phase=""
+  live_task=""
+
+  while IFS= read -r line; do
+    if [[ "$line" =~ ^live: ]]; then
+      in_live=true
+      continue
+    fi
+    if $in_live && [[ "$line" =~ ^[a-z#] ]] && [[ ! "$line" =~ ^[[:space:]] ]]; then
+      break
+    fi
+    if $in_live; then
+      if [[ "$line" =~ ^[[:space:]]+session_id:[[:space:]]*\"?([^\"]*)\"? ]]; then
+        live_session_id="${BASH_REMATCH[1]}"
+      elif [[ "$line" =~ ^[[:space:]]+dir:[[:space:]]*(.+) ]]; then
+        live_dir="${BASH_REMATCH[1]}"
+      elif [[ "$line" =~ ^[[:space:]]+phase:[[:space:]]*(.+) ]]; then
+        live_phase="${BASH_REMATCH[1]}"
+      elif [[ "$line" =~ ^[[:space:]]+task:[[:space:]]*\"?([^\"]*)\"? ]]; then
+        live_task="${BASH_REMATCH[1]}"
+      fi
+    fi
+  done < "$STATE_FILE"
+
+  for field_name in session_id dir phase task; do
+    eval "val=\$live_${field_name}"
+    if [[ -n "$val" ]]; then
+      echo -e "  ${GREEN}✓${NC} ${field_name}: ${val}"
+      live_pass=$((live_pass + 1))
+    else
+      echo -e "  ${RED}✗${NC} ${field_name}: (empty)"
+      live_fail=$((live_fail + 1))
+    fi
+  done
+
+  echo "---"
+  total=$((live_pass + live_fail))
+  echo -e "Result: ${live_pass}/${total} live fields populated"
+
+  if [[ "$live_fail" -gt 0 ]]; then
+    echo -e "${RED}FAIL${NC}: ${live_fail} live field(s) empty — compact recovery will not work"
+    exit 1
+  else
+    echo -e "${GREEN}PASS${NC}: Live section ready for compact recovery"
+    exit 0
+  fi
 fi
 
 # Parse session_defaults from cwf-state.yaml

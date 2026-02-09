@@ -237,7 +237,27 @@ hooks:
   lint_markdown: true
   lint_shell: true
   websearch_redirect: true
-  plan_protocol: true
+  compact_recovery: true
+
+# Live session state — updated by CWF skills at phase transitions,
+# read by SessionStart(compact) hook for context recovery after auto-compact.
+# check-session.sh --live validates required fields are populated.
+live:
+  session_id: "S29"
+  dir: prompt-logs/260209-29-live-state-compact-recovery
+  branch: marketplace-v3
+  phase: impl
+  task: "Plan mode removal + live state + compact recovery hook"
+  key_files:
+    - cwf-state.yaml
+    - plugins/cwf/hooks/hooks.json
+    - plugins/cwf/hooks/scripts/compact-context.sh
+    - CLAUDE.md
+    - prompt-logs/260209-29-live-state-compact-recovery/plan.md
+  dont_touch:
+    - prompt-logs/sessions/
+    - plugins/cwf/skills/gather/
+    - plugins/cwf/skills/review/references/
 
 # Expert roster for domain expert sub-agents (used by clarify, review, retro)
 # Semi-automatic evolution: usage_count auto-incremented, new experts user-approved
