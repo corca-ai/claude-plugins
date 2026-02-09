@@ -33,7 +33,7 @@ After implementation, write `next-session.md`, register the session in `cwf-stat
 - When testing scripts, do not manually set up the environment (e.g., `source ~/.zshrc`) before running tests. Test in a clean environment to reproduce real-world conditions.
 - When requirements are ambiguous or large in scope, use the clarification skill before analysis or implementation. Do not manually ask clarification questions when a clarification skill is available.
 - Never delete user-created files without explicit confirmation. Prefer `mv` over `rm`. Untracked files cannot be restored via git.
-- In design discussions, provide honest counterarguments and trade-off analysis. Do not just agree.
+- When the user proposes a choice where other reasonable alternatives exist (file locations, naming, structure, interfaces), provide honest counterarguments and trade-off analysis. Before agreeing, present at least one alternative axis the user hasn't mentioned. Do not just agree.
 - When writing markdown (SKILL.md, references, READMEs), always include a language specifier on code fences (` ```bash `, ` ```text `, ` ```yaml `, etc.). Never use bare ` ``` `. See `.markdownlint.json` for enforced rules.
 
 ## Dogfooding

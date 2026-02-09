@@ -197,6 +197,14 @@ sessions:
     summary: "Expert-in-the-loop for clarify (Phase 2.5), review (Slots 5-6), retro (roster maintenance). Shared expert-advisor-guide.md. Phase handoff --phase mode for handoff/impl/clarify skills. Deep retro with Klein RPD + Argyris double-loop."
     artifacts: [plan.md, lessons.md, retro.md, phase-handoff.md, next-session.md]
 
+  - id: S13.5-B2
+    title: "Concept distillation + README v3"
+    dir: prompt-logs/260209-26-s13.5-b2-concept-distillation
+    branch: marketplace-v3
+    completed_at: "2026-02-09"
+    summary: "Applied Jackson's Essence of Software to analyze CWF into 6 generic + 9 application concepts. Rewrote README.md around CWF single-plugin structure (336→273 lines). Identified 3 refactor integration points for concept-based analysis (unimplemented)."
+    artifacts: [concept-distillation.md, lessons.md, retro.md, next-session.md, phase-handoff.md, session.md]
+
 # External tool availability (detected by cwf:setup)
 tools:
   codex: available
@@ -229,4 +237,16 @@ expert_roster:
     source: "The Theory of Graceful Extensibility (2018)"
     rationale: "Applied to agent boundary awareness and system resilience"
     introduced: "S13.5-A"
+    usage_count: 1
+  - name: "David Parnas"
+    domain: "information hiding, modular decomposition criteria"
+    source: "On the Criteria To Be Used in Decomposing Systems into Modules (CACM, 1972)"
+    rationale: "Applied to concept vs principle distinction and directory structure classification"
+    introduced: "S13.5-B2"
+    usage_count: 1
+  - name: "Gary Klein"
+    domain: "naturalistic decision-making, recognition-primed decision model"
+    source: "Sources of Power: How People Make Decisions (MIT Press, 1998)"
+    rationale: "Applied to agreement bias analysis and mental simulation protocols"
+    introduced: "S13.5-B2"
     usage_count: 1

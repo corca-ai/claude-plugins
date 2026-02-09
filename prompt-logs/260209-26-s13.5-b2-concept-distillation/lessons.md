@@ -32,3 +32,19 @@ When 문서 위치 결정 → consumer count + lifecycle 2축 판단. 세션 산
 - **Expected**: 기존 README처럼 Installation을 먼저 두고 plugin 설명을 나열하면 충분할 것
 - **Actual**: Concept distillation을 먼저 수행하고 그 결과를 README의 "Why CWF?"와 "Core Concepts" 섹션으로 변환하니, 9개 skill의 개별 설명이 반복적이지 않고 각각이 어떤 concept 조합인지로 차별화됨. 336줄 → 273줄로 19% 감소하면서도 정보 밀도는 증가
 - **Takeaway**: README 재작성 시 concept analysis를 먼저 수행하면, 개별 feature 나열이 아닌 concept composition으로 설명할 수 있어 중복 감소 + 이해도 향상
+
+### Concept distillation → refactor 스킬 통합 설계 방향 (미구현)
+
+- **Observation**: Concept distillation이 refactor의 분석 품질을 높일 수 있는 3가지 통합 지점 식별
+- **Integration Point 1 — Deep Review에 concept integrity 기준 추가**: 스킬이 주장하는 generic concept 조합이 실제 구현(phase 구조, sub-agent 패턴)과 일치하는지 검증. 예: Expert Advisor를 쓴다고 했으면 contrasting framework 강제 로직이 있는가?
+- **Integration Point 2 — Holistic에 synchronization analysis 차원 추가**: 같은 generic concept를 동기화하는 스킬들이 일관된 방식으로 구현하는가? Under-synchronization(빠뜨린 concept) / over-synchronization(불필요한 복잡도) 감지
+- **Integration Point 3 — criteria 문서에 concept map 내장**: holistic-criteria.md 또는 review-criteria.md에 synchronization map(9×6 테이블)을 reference로 포함. Provenance가 자연스럽게 작동 — concept map의 provenance가 스킬 추가/변경 시 staleness 감지
+- **설계 결정 필요**: concept-distillation.md를 references/로 승격할지, criteria 문서에 요약본을 내장할지
+- **Status**: 별도 세션에서 설계 + 구현 필요. 소스 문서: `prompt-logs/260209-26-s13.5-b2-concept-distillation/concept-distillation.md`
+
+### 유저 피드백에 대한 과도한 동의 — 독립적 판단 부족
+
+- **Expected**: 유저가 distillation 문서 위치를 `references/`로 제안했을 때, lifecycle 관점에서 반론을 제시해야 했음
+- **Actual**: 유저 제안에 바로 동의하고 위치를 변경함. 결과적으로 유저 스스로 `prompt-logs/`가 맞다고 재수정
+- **근본 원인**: CLAUDE.md의 "In design discussions, provide honest counterarguments and trade-off analysis. Do not just agree" 규칙이 있음에도, 유저의 판단에 즉시 순응하는 패턴. 특히 문서 위치처럼 "정답이 하나가 아닌" 설계 결정에서 반론 없이 동의하는 것은 유저에게 도움이 안 됨
+- **Takeaway**: 유저 제안이 합리적으로 보여도, 1) 현재 판단의 근거를 먼저 설명하고, 2) 유저 제안의 장점을 인정하되, 3) trade-off를 명시한 후 유저가 결정하게 할 것. "동의 후 수정"보다 "반론 후 합의"가 품질이 높음

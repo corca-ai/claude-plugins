@@ -30,6 +30,18 @@ Accumulated context from retrospectives. Each session's retro may add to this do
 - **Reference guide separation by consumer count**: When a reference guide has 1 consumer (specialized), keep it specialized. When N consumers need the same pattern, create a new shared guide rather than force-generalizing the specialized one. "Separate now, unify when stable" is safer than "unify now, separate on failure."
 - **Count-agnostic logic design**: When designing synthesis/verdict logic that may need to support more inputs in the future, use count-independent conditions (any/all/none) and annotate the design intent (e.g., "reviewer-count-agnostic"). This eliminates modification when expanding.
 
+## Directory Classification Criteria
+
+Document placement uses **lifecycle as primary axis**, consumer count as secondary:
+
+| Directory | Lifecycle | Change Trigger | Examples |
+|-----------|-----------|----------------|----------|
+| `docs/` | Project-scope (permanent) | Project conventions change | plugin-dev-cheatsheet.md, project-context.md |
+| `references/` | Project-scope (permanent) | External framework updates | essence-of-software/distillation.md (source texts) |
+| `prompt-logs/{session}/` | Session-scope (ephemeral) | Session ends; absorbed into deliverables | plan.md, retro.md, concept-distillation.md |
+
+Key distinction: `references/` holds **external framework source texts**, not analysis outputs that apply those frameworks. An analysis output (e.g., concept distillation) is a session artifact in `prompt-logs/` — its lifecycle ends when its deliverable (e.g., README) absorbs it. Discovery of session artifacts is via `cwf-state.yaml` session history.
+
 ## Documentation Intent
 
 - README per-plugin install/update commands are intentionally repeated for copy-paste UX — users jump directly to a plugin section. The `marketplace add` line is omitted (only needed once); each plugin has a one-line install + update.
