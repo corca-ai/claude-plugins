@@ -1,10 +1,10 @@
 ---
 name: review
 description: |
-  Universal review with narrative verdicts. 4 parallel reviewers:
-  2 internal (Security, UX/DX) via Task + 2 external (Codex, Gemini) via CLI.
-  Graceful fallback when CLIs unavailable. Modes: --mode clarify/plan/code.
-  Triggers: "/review"
+  Universal review with narrative verdicts. 6 parallel reviewers:
+  2 internal (Security, UX/DX) via Task + 2 external (Codex, Gemini) via CLI
+  + 2 domain experts via Task. Graceful fallback when CLIs unavailable.
+  Modes: --mode clarify/plan/code. Triggers: "/review"
 allowed-tools:
   - Task
   - Read
@@ -17,7 +17,7 @@ allowed-tools:
 
 # Review (/review)
 
-Universal review with narrative verdicts via 4 parallel reviewers (2 internal + 2 external CLI).
+Universal review with narrative verdicts via 6 parallel reviewers (2 internal + 2 external CLI + 2 domain experts).
 
 **Language**: Match the user's language for synthesis. Reviewer prompts in English.
 
@@ -117,7 +117,7 @@ Search the associated plan.md for success criteria to use as verification input:
 
 ## Phase 2: Launch All Reviewers
 
-Launch **four** reviewers in parallel: 2 internal (Task agents) + 2 external (CLI or Task fallback).
+Launch **six** reviewers in parallel: 2 internal (Task agents) + 2 external (CLI or Task fallback) + 2 domain experts (Task agents).
 All launched in a **single message** for maximum parallelism.
 
 ### 2.1 Prepare prompts
@@ -178,9 +178,9 @@ Parse the output:
 Note: `NPX_FOUND` only confirms npx is installed, not that Gemini CLI is
 authenticated or cached. Runtime failures are handled in Phase 3.2.
 
-### 2.3 Launch all 4 in ONE message
+### 2.3 Launch all 6 in ONE message
 
-All 4 reviewers launch in a single message for parallel execution:
+All 6 reviewers launch in a single message for parallel execution:
 
 **Slot 1 — Security (always Task):**
 
@@ -232,6 +232,52 @@ Task(subagent_type="general-purpose", name="gemini-fallback", prompt="{gemini_fa
 
 Using the fallback prompt template from `external-review.md` with the Architecture perspective.
 
+**Slot 5 — Expert α (always Task):**
+
+Expert selection: Read `expert_roster` from `cwf-state.yaml`. Analyze the review target
+for domain keywords; match against each roster entry's `domain` field. Select 2 experts
+with contrasting frameworks. If roster has < 2 matches, fill via independent selection.
+
+```text
+Task(subagent_type="general-purpose", name="expert-alpha", prompt="
+  Read {CWF_PLUGIN_DIR}/references/expert-advisor-guide.md.
+  You are Expert α, operating in **review mode**.
+
+  Your identity: {selected expert name}
+  Your framework: {expert's domain}
+
+  ## Review Target
+  {the diff, plan content, or clarify artifact}
+
+  ## Success Criteria to Verify
+  {behavioral criteria as checklist, qualitative criteria as narrative items}
+
+  Review through your published framework. Use web search to verify your expert identity
+  and cite published work. Output in the review mode format from the guide.
+")
+```
+
+**Slot 6 — Expert β (always Task):**
+
+```text
+Task(subagent_type="general-purpose", name="expert-beta", prompt="
+  Read {CWF_PLUGIN_DIR}/references/expert-advisor-guide.md.
+  You are Expert β, operating in **review mode**.
+
+  Your identity: {selected expert name — contrasting framework from Expert α}
+  Your framework: {expert's domain}
+
+  ## Review Target
+  {the diff, plan content, or clarify artifact}
+
+  ## Success Criteria to Verify
+  {behavioral criteria as checklist, qualitative criteria as narrative items}
+
+  Review through your published framework. Use web search to verify your expert identity
+  and cite published work. Output in the review mode format from the guide.
+")
+```
+
 ---
 
 ## Phase 3: Collect All Outputs
@@ -264,10 +310,12 @@ If fallbacks are needed, launch all needed fallback Task agents in **one message
 then read their results. Each fallback uses the fallback prompt template from
 `external-review.md` with the appropriate perspective (Correctness or Architecture).
 
-### 3.3 Assemble 4 review outputs
+### 3.3 Assemble 6 review outputs
 
-Collect all 4 outputs (mix of `REAL_EXECUTION` and `FALLBACK` sources).
-Each output follows the standard reviewer output format from `prompts.md`.
+Collect all 6 outputs (mix of `REAL_EXECUTION` and `FALLBACK` sources).
+Internal reviewers and expert reviewers follow the standard reviewer output
+format from `prompts.md`. Expert reviewers follow the review mode format
+from `expert-advisor-guide.md`.
 
 ---
 
@@ -329,6 +377,8 @@ Output to the conversation (do NOT write to a file unless the user asks):
 | UX/DX | REAL_EXECUTION | claude-task | — |
 | Correctness | {REAL_EXECUTION / FALLBACK} | {codex / claude-task-fallback} | {duration_ms} |
 | Architecture | {REAL_EXECUTION / FALLBACK} | {gemini / claude-task-fallback} | {duration_ms} |
+| Expert Alpha | REAL_EXECUTION | claude-task | — |
+| Expert Beta | REAL_EXECUTION | claude-task | — |
 ```
 
 The Provenance table adapts to actual results: if an external CLI succeeded,
@@ -356,7 +406,7 @@ This prevents sensitive review content (diffs, plans) from persisting in `/tmp/`
 | `--scenarios <path>` flag used | Holdout scenario validation (planned). Print "Not yet implemented. Proceeding without holdout scenarios." |
 | No git changes found (code mode) | AskUserQuestion: ask user to specify target |
 | No plan.md found (plan mode) | AskUserQuestion: ask user to specify target |
-| All reviewers report no issues | Verdict = Pass. Note "clean review" in synthesis |
+| All 6 reviewers report no issues | Verdict = Pass. Note "clean review" in synthesis |
 | Codex/Gemini CLI not found | Task agent fallback with same perspective. Mark `FALLBACK` in provenance. |
 | External CLI timeout (280s) | Mark `FAILED`. Spawn Task agent fallback. Note in Confidence Note. |
 | External CLI auth error | Mark `FAILED`. Spawn Task agent fallback. Note in Confidence Note. |
@@ -366,8 +416,9 @@ This prevents sensitive review content (diffs, plans) from persisting in `/tmp/`
 
 ## Rules
 
-1. **Always run ALL 4 reviewers** — deliberate naivete. Never skip a reviewer
+1. **Always run ALL 6 reviewers** — deliberate naivete. Never skip a reviewer
    because the change "looks simple." Each perspective catches different issues.
+   Expert reviewers complement, not replace — the 4 core reviewers always run.
 2. **Narrative only** — no numerical scores, no percentages, no letter grades.
    Verdicts are Pass / Conditional Pass / Revise.
 3. **Never inline review** — always use Task sub-agents. The main agent
@@ -391,3 +442,4 @@ This prevents sensitive review content (diffs, plans) from persisting in `/tmp/`
 - Internal reviewer perspectives: [references/prompts.md](references/prompts.md)
 - External reviewer perspectives & CLI templates: [references/external-review.md](references/external-review.md)
 - Agent patterns (provenance, synthesis, execution): `plugins/cwf/references/agent-patterns.md`
+- Expert advisor guide (expert sub-agent identity, grounding, review format): `plugins/cwf/references/expert-advisor-guide.md`

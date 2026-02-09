@@ -119,17 +119,80 @@ Task tool:
 
 Both sub-agents run in parallel. Wait for both to complete.
 
+### Phase 2.5: Expert Analysis
+
+Launch two domain expert sub-agents **simultaneously** using the Task tool.
+
+**Expert selection**:
+
+1. Read `expert_roster` from `cwf-state.yaml`
+2. Analyze decision points for domain keywords; match against each roster entry's `domain` field
+3. Select 2 experts with **contrasting frameworks** — different analytical lenses on the same problem
+4. If roster has < 2 domain matches, fill remaining slots via independent selection (prioritize well-known figures with contrasting methodological approaches)
+
+#### Expert α
+
+```yaml
+Task tool:
+  subagent_type: general-purpose
+  prompt: |
+    Read {CWF_PLUGIN_DIR}/references/expert-advisor-guide.md.
+    You are Expert α, operating in **clarify mode**.
+
+    Your identity: {selected expert name}
+    Your framework: {expert's domain from roster or independent selection}
+
+    Decision points:
+    {list from Phase 1}
+
+    Research findings summary:
+    {summarized outputs from Phase 2 codebase + web research}
+
+    Analyze which decisions are most critical through your published framework.
+    Use web search to verify your expert identity and cite published work.
+    Output your analysis in the clarify mode format from the guide.
+```
+
+#### Expert β
+
+```yaml
+Task tool:
+  subagent_type: general-purpose
+  prompt: |
+    Read {CWF_PLUGIN_DIR}/references/expert-advisor-guide.md.
+    You are Expert β, operating in **clarify mode**.
+
+    Your identity: {selected expert name — contrasting framework from Expert α}
+    Your framework: {expert's domain from roster or independent selection}
+
+    Decision points:
+    {list from Phase 1}
+
+    Research findings summary:
+    {summarized outputs from Phase 2 codebase + web research}
+
+    Analyze which decisions are most critical through your published framework.
+    Use web search to verify your expert identity and cite published work.
+    Output your analysis in the clarify mode format from the guide.
+```
+
+Both expert sub-agents run in parallel. Wait for both to complete.
+
+**--light mode**: Phase 2.5 is skipped (consistent with --light skipping all sub-agents).
+
 ### Phase 3: Classify & Decide
 
 Read `{SKILL_DIR}/references/aggregation-guide.md` for full classification rules.
 
-For each decision point, classify:
+For each decision point, classify using **three evidence sources**:
+codebase research (Phase 2), web research (Phase 2), and expert analysis (Phase 2.5).
 
 - **T1 (Codebase-resolved)** — codebase has clear evidence → decide autonomously, cite files
 - **T2 (Best-practice-resolved)** — best practice consensus → decide autonomously, cite sources
-- **T3 (Requires human)** — evidence conflicts, both silent, or subjective → queue
+- **T3 (Requires human)** — evidence conflicts, all silent, or subjective → queue
 
-**Constructive tension**: When codebase and best practice conflict, classify as T3.
+**Constructive tension**: When sources conflict, classify as T3. Expert analysis provides additional
+signal but does not override direct codebase or best-practice evidence.
 
 Present the classification:
 
@@ -223,6 +286,14 @@ After each answer:
 **Scope**: {what is included and excluded}
 **Constraints**: {limitations and requirements}
 
+### Expert Analysis
+(Only in default mode, omitted in --light)
+
+| Expert | Framework | Key Insight |
+|--------|-----------|-------------|
+| {Expert α name} | {framework} | {1-line summary of analysis} |
+| {Expert β name} | {framework} | {1-line summary of analysis} |
+
 ### All Decisions
 
 | # | Decision Point | Decision | Decided By | Evidence |
@@ -235,7 +306,12 @@ After each answer:
 Then ask: "Save this clarified requirement to a file?"
 If yes: save to a project-appropriate location with a descriptive filename.
 
-**Follow-up**: If the CWF plugin is loaded, suggest running `cwf:review --mode clarify` to get a multi-perspective review of the clarified requirement before implementation.
+**Follow-up suggestions** (when CWF plugin is loaded):
+
+1. `cwf:review --mode clarify` — Multi-perspective review of the clarified requirement before implementation
+2. `cwf:handoff --phase` — Generate a phase handoff document that captures HOW context (protocols, rules, must-read references, constraints) for the implementation phase. Recommended when context will be cleared before implementation, as `plan.md` carries WHAT but not HOW.
+
+Present both suggestions. If the user is about to enter plan mode or clear context, emphasize the phase handoff suggestion.
 
 ---
 
@@ -287,6 +363,8 @@ while ambiguities remain:
 
 Then offer to save.
 
+**Follow-up** (when CWF plugin is loaded): Suggest `cwf:handoff --phase` if the user plans to clear context before implementation.
+
 ---
 
 ## Rules
@@ -299,6 +377,7 @@ Then offer to save.
 6. **Preserve intent**: Refine the requirement, don't redirect it
 7. **Grounded experts**: Best practice research must cite real published work
 8. **Honest advisors**: Advisory opinions argue in good faith, not strawman
+9. **Expert evidence is supplementary**: Expert analysis enriches classification but does not override direct codebase or best-practice evidence
 
 ## References
 
@@ -306,3 +385,4 @@ Then offer to save.
 - [references/aggregation-guide.md](references/aggregation-guide.md) — Tier classification rules
 - [references/advisory-guide.md](references/advisory-guide.md) — Advisor α/β methodology
 - [references/questioning-guide.md](references/questioning-guide.md) — Persistent questioning
+- [expert-advisor-guide.md](../../references/expert-advisor-guide.md) — Expert sub-agent identity, grounding, and analysis format

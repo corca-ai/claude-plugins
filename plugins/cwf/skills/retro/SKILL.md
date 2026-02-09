@@ -56,9 +56,8 @@ Parse the `--deep` flag from the invocation arguments.
 **If `--deep` is present**: mode = deep (full 7 sections).
 
 **If `--deep` is absent**: assess session weight to decide mode:
-- **Light** (Sections 1-4 + 7): Session < 3 turns, OR routine/simple tasks (config changes, small fixes, doc edits)
-- **Deep suggestion**: Session has non-trivial architectural decisions, complex debugging, or multi-step implementations → output sections 1-4 + 7 in light mode, but append a note: "This session had significant decisions. Run `/retro --deep` for expert analysis and learning resources."
-- **Default bias**: Light. When in doubt, choose light (fast, low cost).
+- **Light** (Sections 1-4 + 7): Only when `--light` is explicitly specified, OR session < 3 turns with routine/simple tasks (config changes, small fixes, doc edits)
+- **Default bias**: Deep. Invoking retro is itself a signal that the session warrants analysis. Use `--light` to explicitly request lightweight mode when cost savings is desired.
 
 ### 4. Draft Retro
 
@@ -202,6 +201,24 @@ For each finding, evaluate enforcement mechanisms strongest-first:
 - **S3 Waste / Root causes** → For each 5 Whys structural cause, present: "**Finding**: X. **Recommended tier**: {1|2|3}. **Mechanism**: {specific change}." Right-placement check: CLAUDE.md for behavioral rules, project-context.md for architectural patterns, protocol/skill docs for process changes.
 - **S4 CDM** → Key lessons through tiers (most → Tier 3 `project-context.md`).
 - **S7 Skills** → AskUserQuestion "Implement now?" for actionable improvements.
+
+**Expert Roster Maintenance** (deep mode only, when Section 5 was produced):
+
+1. Extract expert names from Section 5 (Expert Lens) output
+2. Read `cwf-state.yaml` `expert_roster:`
+3. For each expert used in Section 5:
+   - If already in roster: increment `usage_count` by 1
+   - If new: prepare an addition entry with `name`, `domain`, `source`, `rationale`, `introduced: {current session}`, `usage_count: 1`
+4. Analyze the session's domain for roster gaps — are there frameworks or disciplines
+   that would have been valuable but are not represented in the roster?
+5. Present roster changes via AskUserQuestion:
+   - Auto-changes (usage_count increments): show for confirmation
+   - New additions: show with rationale, require explicit user approval
+   - Gap recommendations: suggest new experts with reasoning
+6. Write approved changes to `cwf-state.yaml` `expert_roster:` section
+
+This is semi-automatic: usage tracking is automated, but roster expansion requires
+user approval to maintain quality and relevance.
 
 ### 8. Post-Retro Discussion
 
