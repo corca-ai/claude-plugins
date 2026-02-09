@@ -181,6 +181,14 @@ sessions:
     summary: "Cross-cutting quality gate on 9 skills + 14 hooks. Fixed broken refs (4 skills), missing Rules (gather), Language inconsistency. Created skill-conventions.md. Deep retro surfaced self-healing criteria need (Meadows/Woods). Hard wrap cleanup on 16 files."
     artifacts: [plan.md, lessons.md, retro.md, next-session.md]
 
+  - id: S13.5-A
+    title: "Self-healing provenance system"
+    dir: prompt-logs/260209-24-s13.5-feedback-loop-infra
+    branch: s13.5-a-provenance
+    completed_at: "2026-02-09"
+    summary: "Implemented provenance sidecar pattern: 6 .provenance.yaml files, provenance-check.sh script, refactor holistic integration (Phase 1b), handoff unresolved items propagation (Phase 4b), skill-conventions Provenance Rule. Deep retro with Meadows/Woods expert analysis."
+    artifacts: [lessons.md, retro.md, next-session.md]
+
 # External tool availability (detected by cwf:setup)
 tools:
   codex: available
