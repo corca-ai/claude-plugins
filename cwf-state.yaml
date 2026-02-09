@@ -205,6 +205,14 @@ sessions:
     summary: "Applied Jackson's Essence of Software to analyze CWF into 6 generic + 9 application concepts. Rewrote README.md around CWF single-plugin structure (336→273 lines). Identified 3 refactor integration points for concept-based analysis (unimplemented)."
     artifacts: [concept-distillation.md, lessons.md, retro.md, next-session.md, phase-handoff.md, session.md]
 
+  - id: S13.5-B3
+    title: "Concept refactor plan + hook observability fix + implementation"
+    dir: prompt-logs/260209-27-s13.5-b3-concept-refactor
+    branch: feat/concept-refactor-integration
+    completed_at: "2026-02-09"
+    summary: "Designed and implemented Form/Meaning/Function restructuring of holistic + deep review frameworks. Created concept-map.md (6 concepts + 9×6 sync map). Restructured holistic-criteria.md (PP/BI/MC → Form/Meaning/Function) and review-criteria.md (merged 4+5, added Concept Integrity). Fixed exit-plan-mode.sh observability. GitHub issue #17."
+    artifacts: [plan.md, phase-handoff.md, lessons.md, retro.md, next-session.md, session.md]
+
 # External tool availability (detected by cwf:setup)
 tools:
   codex: available

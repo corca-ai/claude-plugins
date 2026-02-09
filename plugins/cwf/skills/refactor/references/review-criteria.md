@@ -39,30 +39,33 @@ Information should live in ONE place — either SKILL.md or references, not both
 - Flag paragraphs or sections that appear in both.
 - Preference: detailed info in `references/`, summary/pointer in SKILL.md.
 
-## 4. Reference File Health
+## 4. Resource Health
+
+Unified check for reference file quality and resource usage.
+
+### File quality
 
 | Check | Flag condition |
 |-------|---------------|
 | Reference file > 10k words | Needs grep patterns in SKILL.md |
 | Reference file > 100 lines | Needs table of contents at top |
-| Reference file not mentioned in SKILL.md | Unused — remove or add reference |
 | Deeply nested references (ref → ref) | Keep one level deep from SKILL.md |
 
-## 5. Unused Resources
+### Unused resources
 
 Scan for files in `scripts/`, `references/`, and `assets/` not referenced in SKILL.md:
 
 - A file is "referenced" if its filename (without path) appears in SKILL.md.
 - Unused files waste disk and confuse readers — flag for removal or add a reference.
 
-## 6. Writing Style
+## 5. Writing Style
 
 - Use imperative/infinitive form ("Run the script", not "You should run the script").
 - Avoid extraneous documentation (README.md, INSTALLATION_GUIDE.md, etc.).
 - Prefer concise examples over verbose explanations.
 - Only include information the agent doesn't already know.
 
-## 7. Degrees of Freedom
+## 6. Degrees of Freedom
 
 Evaluate whether instructions match the task's fragility:
 
@@ -72,7 +75,7 @@ Evaluate whether instructions match the task's fragility:
 
 Flag mismatches: e.g., a fragile deployment script described only in prose (needs low freedom).
 
-## 8. Anthropic Compliance
+## 7. Anthropic Compliance
 
 Check alignment with Claude Code plugin best practices:
 
@@ -100,3 +103,32 @@ Check alignment with Claude Code plugin best practices:
 - Cross-skill references should use defensive checks (gate on file/directory existence)
 - Output format should be consumable by other skills when applicable
 - Avoid hard dependencies on other plugins — prefer suggestions ("Consider running /X")
+
+> **Note**: For rigorous cross-skill duplication and composition analysis, see holistic Axis 2 (Concept Integrity). This per-skill check catches obvious cases; holistic mode performs systematic comparison.
+
+## 8. Concept Integrity
+
+Verify that the skill correctly composes its claimed generic concepts.
+
+**Input**: `{PLUGIN_ROOT}/references/concept-map.md`
+
+### Verification steps
+
+1. Look up the skill's **row** in the synchronization map (concept-map.md Section 2)
+1. For each concept the skill claims to compose (`x` in the map):
+
+| Check | What to verify | Flag condition |
+|-------|---------------|----------------|
+| Required behavior | Does the SKILL.md implement the concept's operational principle? | Concept claimed but behavior missing or contradicted |
+| Required state | Does the skill maintain the concept's state elements? | State element referenced in concept but absent from skill |
+| Required actions | Does the skill perform the concept's actions? | Action listed in concept but not present in skill workflow |
+
+1. Check for **unclaimed concepts**: does the skill exhibit behavior matching a concept it doesn't claim? (potential missing synchronization)
+
+### Example
+
+Reviewing `gather`:
+
+- Map shows: Agent Orchestration only
+- Verify: adaptive sizing (Single/Adaptive) ✓, parallel batch for broad queries ✓, output synthesis ✓
+- Check unclaimed: does gather route decisions by evidence? No → no missing sync
