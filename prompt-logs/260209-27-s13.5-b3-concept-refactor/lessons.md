@@ -156,3 +156,12 @@ When plan mode 없이 구현 세션 시작 시 → lessons.md 경로 확인 + �
 - **Takeaway**: provenance 시스템이 이 PR의 scope 경계를 명확히 보여줌. 기존 STALE 5개는 별도 유지보수 작업
 
 When 구현 완료 후 provenance check 결과에 기존 STALE이 보이면 → scope 안/밖 구분하여 보고. 기존 STALE을 이 PR에서 일괄 수정하면 scope creep
+
+### next-session.md를 이 세션의 요약으로 덮어씀 — 문서 역할 혼동
+
+- **Expected**: next-session.md는 "다음 세션을 위한 handoff 문서". 이전 세션이 작성한 원본은 이 세션의 입력 컨텍스트로서 보존되어야 함
+- **Actual**: 이 세션의 구현 결과를 "What happened this session" 형식으로 next-session.md에 덮어씀. 원본(이전 세션 → 이 세션의 handoff)이 유실됨
+- **근본 원인**: next-session.md의 두 가지 역할(이전 세션의 출력 / 다음 세션의 입력)을 혼동. "구현 완료 → 다음 세션을 위해 업데이트해야 함"이라고 판단했지만, 원본을 보존하지 않은 채 덮어쓰는 것은 히스토리 유실
+- **Takeaway**: next-session.md는 이전 세션이 작성한 handoff 문서. 이 세션이 다음 세션에 넘길 것이 있으면 별도 handoff를 만들거나, 원본을 보존한 채 추가해야 함. 덮어쓰기 금지
+
+When 세션 완료 시 next-session.md 업데이트가 필요하면 → 원본을 보존하고 별도 파일로 handoff 작성. 기존 문서는 히스토리이므로 변경하지 않음
