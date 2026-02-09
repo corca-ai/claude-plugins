@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# start-timer.sh — PreToolUse hook for AskUserQuestion/EnterPlanMode/ExitPlanMode
+# start-timer.sh — PreToolUse hook for AskUserQuestion
 # Starts background timer for attention notifications.
 # If user responds before timer expires, cancel-timer.sh will kill this process.
 #

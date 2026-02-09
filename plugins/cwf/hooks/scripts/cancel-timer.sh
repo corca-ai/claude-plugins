@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# cancel-timer.sh — PostToolUse hook for AskUserQuestion/EnterPlanMode/ExitPlanMode
+# cancel-timer.sh — PostToolUse hook for AskUserQuestion
 # Cancels attention timer when user responds.
 #
 # v2.0: Session-scoped state files + records user interaction timestamp

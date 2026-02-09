@@ -40,12 +40,6 @@
       "keywords": ["notification", "slack", "hook"]
     },
     {
-      "name": "plan-and-lessons",
-      "source": "./plugins/plan-and-lessons",
-      "description": "A hook that injects the Plan & Lessons Protocol when entering plan mode",
-      "keywords": ["plan", "lessons", "protocol", "plan-mode", "hook"]
-    },
-    {
       "name": "smart-read",
       "source": "./plugins/smart-read",
       "description": "A hook that enforces intelligent file reading based on file size — warns on medium files, blocks full reads on large files",

@@ -119,30 +119,6 @@ if [ -n "$TRANSCRIPT_PATH" ] && [ -f "$TRANSCRIPT_PATH" ]; then
         MESSAGE+=$'\n'"$TODO_STATUS"
     fi
 
-    # Detect plan mode from tool_name or transcript
-    if [ "$TOOL_NAME" = "EnterPlanMode" ]; then
-        MESSAGE=":clipboard: Requesting plan mode approval"$'\n\n'"$MESSAGE"
-    elif [ "$TOOL_NAME" = "ExitPlanMode" ]; then
-        # Try to extract plan content from transcript (last Write to a plans/ path)
-        PLAN_CONTENT=""
-        if [ -n "$TRANSCRIPT_PATH" ] && [ -f "$TRANSCRIPT_PATH" ]; then
-            PLAN_FILE=$(jq -r '
-                [.[] | select(.role == "assistant") | .content[]? |
-                 select(.type == "tool_use" and .name == "Write") |
-                 .input.file_path // empty |
-                 select(test("plans/|plan\\.md"))] | last // empty
-            ' "$TRANSCRIPT_PATH" 2>/dev/null) || true
-            if [ -n "${PLAN_FILE:-}" ] && [ -f "$PLAN_FILE" ]; then
-                PLAN_CONTENT=$(cat "$PLAN_FILE" 2>/dev/null) || true
-            fi
-        fi
-        if [ -n "$PLAN_CONTENT" ]; then
-            TRUNCATED_PLAN=$(truncate_text "$PLAN_CONTENT")
-            MESSAGE=":clipboard: Plan ready for review"$'\n\n'"$TRUNCATED_PLAN"
-        else
-            MESSAGE=":clipboard: Plan ready for review"$'\n\n'"$MESSAGE"
-        fi
-    fi
 else
     MESSAGE="Claude is waiting for your input"
 fi
