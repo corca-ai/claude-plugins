@@ -77,6 +77,7 @@ Pick one stage (likely cwf:review) and implement. Validate that in-stage expert 
 3. **impl → review → fix commit pattern** (S13.5-A): Self-documenting history as minimum unit
 4. **Deterministic validation > behavioral instruction** (S13): Scripts beat rules in CLAUDE.md
 5. **Handoff always required** (S13.5-A): Session boundary ≠ branch boundary. Every session creates next-session.md regardless of branch structure
+6. **Ship 전 untracked 확인** (S13.5-A): `git status`로 untracked 파일 중 세션 아티팩트를 식별하여 커밋. `/ship` 스킬 미사용으로 이슈 누락/PR 영어 작성 실수도 발생 — 스킬이 있으면 반드시 사용
 
 ## Success Criteria
 
