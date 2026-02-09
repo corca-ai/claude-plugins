@@ -427,7 +427,7 @@ while [ "$TURN_IDX" -lt "$TURN_COUNT" ]; do
               elif $name == "Skill" then
                 "Skill `\(.input.skill // "?")`"
               elif $name == "AskUserQuestion" then
-                "AskUserQuestion \"\(.input.questions[0].question // .input.questions[0].header // "?" | .[0:60])\""
+                "AskUserQuestion \"\(.input.questions[0].question // .input.questions[0].header // "?" | .[0:60])\" [\(.input.questions[0].options // [] | map(.label) | join(", ") | .[0:80])]"
               elif $name == "EnterPlanMode" then
                 "EnterPlanMode"
               elif $name == "ExitPlanMode" then
@@ -451,6 +451,25 @@ while [ "$TURN_IDX" -lt "$TURN_COUNT" ]; do
             echo "${TOOL_NUM}. ${TOOL_SUMMARY}" >> "$OUT_FILE"
             TOOL_IDX=$((TOOL_IDX + 1))
         done
+    fi
+
+    # ── AskUserQuestion answers (from tool_results in user content) ────
+    ASK_ANSWERS=$(echo "$TURN" | jq -r '
+      [.user.message.content // [] | .[] |
+        select(.type == "tool_result") |
+        .content |
+        if type == "string" then .
+        elif type == "array" then ([.[] | select(.type == "text") | .text] | join(""))
+        else "" end |
+        select(test("User has answered|user.*answered"))
+      ] | join("\n")
+    ' 2>/dev/null)
+    if [ -n "$ASK_ANSWERS" ]; then
+        {
+            echo ""
+            echo "### User Answers"
+            echo "$ASK_ANSWERS"
+        } >> "$OUT_FILE"
     fi
 
     TURN_IDX=$((TURN_IDX + 1))
