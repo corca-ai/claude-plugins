@@ -11,6 +11,14 @@ S13.5-B3 was split across two sessions:
    output, deny on missing Deferred Actions section). Concept refactor implementation
    deferred again.
 
+## What changed this session
+
+| File | Change |
+|------|--------|
+| `plugins/cwf/hooks/scripts/exit-plan-mode.sh` | Rewritten: PostToolUse → PreToolUse, 3 always-observable outcomes (DENY/WARN/PASS) |
+| `plugins/cwf/hooks/hooks.json` | Moved exit-plan-mode.sh from PostToolUse to PreToolUse:ExitPlanMode |
+| `docs/project-context.md` | Added "fail-visible validation hook" pattern to Architecture Patterns |
+
 ## What needs to happen next
 
 **Primary**: Implement the 6 steps in the approved plan. All steps remain pending.
@@ -37,3 +45,5 @@ S13.5-B3 was split across two sessions:
 ## Unresolved Items
 
 - [ ] `/ship issue` for the concept refactor work (deferred since S13.5-B3 planning session)
+- [ ] Expert roster update: consider adding James Reason and Sidney Dekker (used in S13.5-B3 retro)
+- [ ] Hook audit: scan all hook scripts for silent `exit 0` paths without observable output (Reason recommendation from retro)
