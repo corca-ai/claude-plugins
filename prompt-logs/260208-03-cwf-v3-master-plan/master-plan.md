@@ -390,14 +390,14 @@ Source: `prompt-logs/260208-01-refactor-review/`
 | **S5b** (done) | feat/cwf-review | `cwf:review` — external CLI integration (codex + gemini) + fallback | Test with/without CLIs installed. **Gemini**: test error handling first (not logged in) → login → test normal flow. |
 | **S6a** (done) | marketplace-v3 | Migrate simple infra hooks (read, log, lint-markdown) into cwf stubs | 8/8 tests pass, byte-identical diff verified. |
 | **S6b** (done) | feat/cwf-infra | Migrate attention-hook (8 scripts, complex state) + add check-shell.sh + enter-plan-mode + check-shell | Test all attention-hook event paths. |
-| **S7** | feat/cwf-gather | Migrate gather-context → `cwf:gather` with adaptive team | Test single + team modes. |
-| **S8** | feat/cwf-clarify | Migrate clarify → `cwf:clarify` + `cwf:review --mode clarify` integration | End-to-end clarify → review flow. |
-| **S9** | feat/cwf-plan | Migrate plan-and-lessons hook + new plan skill with agent team | Test plan drafting + review. |
-| **S10** | feat/cwf-impl | Build `cwf:impl` (domain experts → decompose → team) | Test with a real small task. |
-| **S11a** | feat/cwf-retro | Migrate retro with parallel sub-agent enhancement | Compare output quality vs v2. |
-| **S11b** | feat/cwf-refactor | Migrate refactor with parallel sub-agent enhancement | Compare output quality vs v2. |
-| **S12** | feat/cwf-setup | Build `cwf:setup` + `cwf:update` + `cwf:handoff`. Rewrite `install.sh` + `update-all.sh`. Migration script. | Full setup flow on clean machine (or simulated). |
-| **S13** | marketplace-v3 | Holistic refactor review on entire cwf plugin | Use `cwf:refactor --holistic` on itself. |
+| **S7** (done) | feat/cwf-gather | Migrate gather-context → `cwf:gather` with adaptive team | Test single + team modes. |
+| **S8** (done) | feat/cwf-clarify | Migrate clarify → `cwf:clarify` + `cwf:review --mode clarify` integration | End-to-end clarify → review flow. |
+| **S9** (done) | feat/cwf-plan | Migrate plan-and-lessons hook + new plan skill with agent team | Test plan drafting + review. |
+| **S10** (done) | feat/cwf-impl | Build `cwf:impl` (domain experts → decompose → team) | Test with a real small task. |
+| **S11a** (done) | feat/cwf-retro | Migrate retro with parallel sub-agent enhancement | Compare output quality vs v2. |
+| **S11b** (done) | feat/cwf-refactor | Migrate refactor with parallel sub-agent enhancement | Compare output quality vs v2. |
+| **S12** (done) | feat/cwf-setup | Build `cwf:setup` + `cwf:update` + `cwf:handoff`. Rewrite `install.sh` + `update-all.sh`. Migration script. | Full setup flow on clean machine (or simulated). |
+| **S13** (done) | marketplace-v3 | Holistic refactor review on entire cwf plugin | Use `cwf:refactor --holistic` on itself. |
 | **S13.5** | s13.5-*-* | Self-healing criteria (A, done), expert-in-the-loop + phase handoff (B, done), concept distillation + README v3 (B2), project-context slimming (C), hook module abstraction (D) | Provenance check triggers on stale criteria. |
 | **S13.6** | s13.6-cwf-protocol | Full CWF protocol design: auto-chaining gather→clarify→plan→review→impl→retro→ship | Single `cwf` invocation chains full cycle. |
 | **S14** | marketplace-v3 | Integration test, deprecate old plugins, merge to main. **Produce `docs/v3-migration-decisions.md`** — synthesize all key decisions and lessons from S0-S14 into a single document. PR body gets the summary, doc gets the details. README v3 philosophy moved to S13.5-B2. | Full workflow end-to-end test. |
@@ -430,9 +430,10 @@ S1 → S2 → S3 (ship skill — enables workflow for all v3 sessions)
 | **B** | s13.5-b-expert-loop | Expert-in-the-loop (clarify, review, retro roster) + phase handoff (`--phase` mode) | ✅ Done |
 | **B2** | marketplace-v3 (no feature branch — #15) | Concept distillation (6 generic + 9 application concepts) + README v3 rewrite. Identified 3 refactor integration points (unimplemented). #16 | ✅ Done |
 | **B3** | feat/concept-refactor-integration (→ marketplace-v3, PR #18) | Concept-based refactor integration: Form/Meaning/Function triadic framework, concept-map.md, exit-plan-mode.sh hook | ✅ Done |
-| **C1** | marketplace-v3 | Plan mode removal + live state + compact recovery hook (S29) | In Progress |
-| **C2** | s13.5-c-context | project-context.md slimming (audit, dedup, graduation) | Pending |
-| **D** | s13.5-d-hooks | Hook infrastructure (Slack threading, shared module extraction) | Pending |
+| **C1** | marketplace-v3 | Plan mode removal + live state + compact recovery hook (S29). Also: session log turn injection into compact recovery. | ✅ Done |
+| **C2** | marketplace-v3 | project-context.md slimming (audit, dedup, graduation) | Pending |
+| **D** | marketplace-v3 | Hook infrastructure (Slack threading, shared module extraction) | Pending |
+| **E** | marketplace-v3 | prompt-logger: orphaned session log recovery at SessionStart(startup) | Pending |
 
 ## Handoff Template (for S1+)
 

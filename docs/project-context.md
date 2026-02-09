@@ -89,6 +89,7 @@ Key distinction: `references/` holds **external framework source texts**, not an
 - **Env var backward-compat**: `attention-hook` supports legacy `CLAUDE_ATTENTION_*` alongside `CLAUDE_CORCA_ATTENTION_*`. New plugins should not add backward-compat — use `CLAUDE_CORCA_{PLUGIN}_{SETTING}` only.
 - **prompt-logger internals**: `/tmp/` state files with session hash for incremental processing. Atomic `mkdir` lock prevents Stop/SessionEnd race. When shared scripts short-circuit on no-new-lines, auto-commit logic must be duplicated in early-exit branch. Transcript timestamps are UTC — convert to local via epoch.
 - **Retro persist criterion**: JTBD lens ("What recurring situation will this learning prevent?") determines where a finding belongs (CLAUDE.md / project-context.md / cwf-state.yaml / lessons only).
+- **Plan document ≠ current state**: master-plan.md and other plan documents are plans, not execution records. Always check cwf-state.yaml sessions list for actual completion status. Plan documents may have stale status markers.
 
 ## Current Project Phase
 

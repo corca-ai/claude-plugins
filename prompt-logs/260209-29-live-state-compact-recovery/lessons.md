@@ -24,6 +24,12 @@
 - **Actual**: Session ID is preserved. SessionStart(compact) fires with the same session_id. Official docs confirm this.
 - **Takeaway**: When uncertain about Claude Code internals, verify against official docs first. Do not speculate about system behavior and present it as fact.
 
+### Plan document ≠ current state — always check SSOT
+
+- **Expected**: master-plan Session Roadmap reflects current completion status
+- **Actual**: S7+ entries lacked `(done)` markers; I treated plan document as state source instead of cwf-state.yaml
+- **Takeaway**: cwf-state.yaml is SSOT for session history. When checking project status, read cwf-state.yaml sessions list first. Plan documents are plans, not execution records.
+
 ### Unpublished plugin install path
 
 - **Expected**: `scripts/install.sh` would propagate CWF hooks

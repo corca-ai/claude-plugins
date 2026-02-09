@@ -217,9 +217,17 @@ sessions:
     title: "Post S13.5-B3 housekeeping"
     dir: prompt-logs/260209-28-post-b3-housekeeping
     branch: marketplace-v3
-    completed_at: null
+    completed_at: "2026-02-09"
     summary: "Provenance hook_count update, expert roster, master-plan B3 row, hook audit, next-prompt-dir script, plan mode protocol"
     artifacts: [plan.md, lessons.md, next-session.md]
+
+  - id: S29
+    title: "Plan mode removal + live state + compact recovery"
+    dir: prompt-logs/260209-29-live-state-compact-recovery
+    branch: marketplace-v3
+    completed_at: "2026-02-09"
+    summary: "Removed plan mode hooks, added cwf-state.yaml live section, built SessionStart(compact) hook with session log turn injection, deprecated plan-and-lessons plugin"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md, session.md]
 
 # External tool availability (detected by cwf:setup)
 tools:
@@ -243,21 +251,13 @@ hooks:
 # read by SessionStart(compact) hook for context recovery after auto-compact.
 # check-session.sh --live validates required fields are populated.
 live:
-  session_id: "S29"
-  dir: prompt-logs/260209-29-live-state-compact-recovery
-  branch: marketplace-v3
-  phase: impl
-  task: "Plan mode removal + live state + compact recovery hook"
-  key_files:
-    - cwf-state.yaml
-    - plugins/cwf/hooks/hooks.json
-    - plugins/cwf/hooks/scripts/compact-context.sh
-    - CLAUDE.md
-    - prompt-logs/260209-29-live-state-compact-recovery/plan.md
-  dont_touch:
-    - prompt-logs/sessions/
-    - plugins/cwf/skills/gather/
-    - plugins/cwf/skills/review/references/
+  session_id: ""
+  dir: ""
+  branch: ""
+  phase: ""
+  task: ""
+  key_files: []
+  dont_touch: []
 
 # Expert roster for domain expert sub-agents (used by clarify, review, retro)
 # Semi-automatic evolution: usage_count auto-incremented, new experts user-approved

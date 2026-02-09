@@ -160,8 +160,12 @@ ARTIFACTS_LINE=""
 found=false
 while IFS= read -r line; do
   if [[ "$found" == "true" ]]; then
-    # Check if we hit the next session entry (new "- id:" line)
+    # Check if we hit the next session entry or left the sessions block
     if [[ "$line" =~ ^[[:space:]]*-[[:space:]]*id: ]] && [[ "$line" != *"$SESSION_ID"* ]]; then
+      break
+    fi
+    # Top-level key (not indented) means we've left the sessions block
+    if [[ "$line" =~ ^[a-z#] ]]; then
       break
     fi
     if [[ "$line" =~ ^[[:space:]]*dir: ]]; then
@@ -171,7 +175,7 @@ while IFS= read -r line; do
       ARTIFACTS_LINE=$(echo "$line" | sed 's/.*artifacts:\s*//')
     fi
   fi
-  if [[ "$line" =~ ^[[:space:]]*-[[:space:]]*id:[[:space:]]*"?${SESSION_ID}"?$ ]] || \
+  if [[ "$line" =~ ^[[:space:]]*-[[:space:]]*id:[[:space:]]*\"?${SESSION_ID}\"?$ ]] || \
      [[ "$line" =~ ^[[:space:]]*-[[:space:]]*id:[[:space:]]*${SESSION_ID}[[:space:]]*$ ]]; then
     found=true
   fi
