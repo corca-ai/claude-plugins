@@ -136,21 +136,22 @@ Read `{SKILL_DIR}/references/review-criteria.md` for the evaluation checklist.
 
 Launch **2 parallel sub-agents** in a single message using Task tool (`subagent_type: general-purpose`):
 
-**Agent A — Structural Review** (Criteria 1–5):
+**Agent A — Structural Review** (Criteria 1–4):
 
 Prompt includes:
 - Target skill name and SKILL.md content
 - All reference file contents and resource file listing
-- `{SKILL_DIR}/references/review-criteria.md` criteria sections 1–5
-- Instructions: Evaluate Size, Progressive Disclosure, Duplication, Reference File Health, Unused Resources. Return structured findings per criterion.
+- `{SKILL_DIR}/references/review-criteria.md` criteria sections 1–4
+- Instructions: Evaluate Size, Progressive Disclosure, Duplication, Resource Health. Return structured findings per criterion.
 
-**Agent B — Quality Review** (Criteria 6–8):
+**Agent B — Quality + Concept Review** (Criteria 5–8):
 
 Prompt includes:
 - Target skill name and SKILL.md content
 - All reference file contents and resource file listing
-- `{SKILL_DIR}/references/review-criteria.md` criteria sections 6–8
-- Instructions: Evaluate Writing Style, Degrees of Freedom, Anthropic Compliance. Return structured findings per criterion.
+- `{SKILL_DIR}/references/review-criteria.md` criteria sections 5–8
+- `{PLUGIN_ROOT}/references/concept-map.md` (for Criterion 8: Concept Integrity)
+- Instructions: Evaluate Writing Style, Degrees of Freedom, Anthropic Compliance, Concept Integrity. Return structured findings per criterion.
 
 Both agents analyze and report; neither modifies files.
 
@@ -200,13 +201,13 @@ Build a condensed inventory map: plugin name, type (skill/hook/hybrid), word cou
 
 ### 2. Load analysis framework
 
-Read `{SKILL_DIR}/references/holistic-criteria.md` for the three analysis dimensions.
+Read `{SKILL_DIR}/references/holistic-criteria.md` for the three analysis axes.
 
 ### 3. Parallel Analysis with Sub-agents
 
 Launch **3 parallel sub-agents** in a single message using Task tool (`subagent_type: general-purpose`):
 
-**Agent A — Pattern Propagation**:
+**Agent A — Convention Compliance (Form)**:
 
 Prompt includes:
 - Condensed inventory map (name, type, word count, capabilities)
@@ -214,19 +215,20 @@ Prompt includes:
 - `{PLUGIN_ROOT}/references/skill-conventions.md` content (shared conventions checklist)
 - Instructions: Verify each skill against skill-conventions.md checklists. Identify good patterns one skill has that others should adopt. Detect repeated patterns across 3+ skills that should be extracted to shared references. Read individual SKILL.md files for deeper investigation as needed. Return structured findings.
 
-**Agent B — Boundary Issues**:
+**Agent B — Concept Integrity (Meaning)**:
 
 Prompt includes:
 - Condensed inventory map (name, type, word count, capabilities)
 - `{SKILL_DIR}/references/holistic-criteria.md` Section 2 content
-- Instructions: Identify overlapping roles, ambiguous triggers, unclear when-to-use boundaries. Read individual SKILL.md files for deeper investigation as needed. Return structured findings.
+- `{PLUGIN_ROOT}/references/concept-map.md` content (generic concepts + synchronization map)
+- Instructions: For each concept column in the synchronization map, compare how composing skills implement the same concept. Detect inconsistencies, under-synchronization, and over-synchronization. Read individual SKILL.md files for deeper investigation as needed. Return structured findings.
 
-**Agent C — Missing Connections**:
+**Agent C — Workflow Coherence (Function)**:
 
 Prompt includes:
 - Condensed inventory map (name, type, word count, capabilities)
 - `{SKILL_DIR}/references/holistic-criteria.md` Section 3 content
-- Instructions: Identify broken handoffs between skills, natural workflow transitions that aren't connected. Read individual SKILL.md files for deeper investigation as needed. Return structured findings.
+- Instructions: Check data flow completeness between skills, trigger clarity, and workflow automation opportunities. Read individual SKILL.md files for deeper investigation as needed. Return structured findings.
 
 All 3 agents analyze and report; none modify files.
 
@@ -245,14 +247,14 @@ Report structure:
 ## Plugin Map
 (table: name, type, words, key capabilities)
 
-## 1. Pattern Propagation
-(good patterns one skill has that others should adopt)
+## 1. Convention Compliance (Form)
+(structural consistency, pattern gaps, extraction opportunities)
 
-## 2. Boundary Issues
-(overlapping roles, ambiguous triggers, unclear when-to-use)
+## 2. Concept Integrity (Meaning)
+(concept consistency, under/over-synchronization)
 
-## 3. Missing Connections
-(natural handoffs between skills that are currently broken)
+## 3. Workflow Coherence (Function)
+(data flow, trigger clarity, automation opportunities)
 
 ## Prioritized Actions
 (table: priority, action, effort, impact, affected plugins)
@@ -316,6 +318,7 @@ Read `{SKILL_DIR}/references/docs-criteria.md` Section 5 and evaluate:
 
 - Review criteria for deep review: [references/review-criteria.md](references/review-criteria.md)
 - Holistic analysis framework: [references/holistic-criteria.md](references/holistic-criteria.md)
+- Concept synchronization map: [concept-map.md](../../references/concept-map.md)
 - Tidying techniques for --code mode: [references/tidying-guide.md](references/tidying-guide.md)
 - Docs review criteria: [references/docs-criteria.md](references/docs-criteria.md)
 - Shared agent patterns: [agent-patterns.md](../../references/agent-patterns.md)
@@ -325,8 +328,8 @@ Read `{SKILL_DIR}/references/docs-criteria.md` Section 5 and evaluate:
 
 1. Write review reports in English, communicate with user in their prompt language
 2. Deep Review and Holistic use perspective-based parallel sub-agents (not module-based)
-3. Deep Review: 2 agents (structural + quality), single batch
-4. Holistic: 3 agents (per dimension), single batch after inline inventory
+3. Deep Review: 2 agents (structural 1-4 + quality/concept 5-8), single batch
+4. Holistic: 3 agents (Convention Compliance, Concept Integrity, Workflow Coherence), single batch after inline inventory
 5. Code Tidying: 1 agent per commit, all in one message
 6. Docs Review: inline, no sub-agents
 7. Sub-agents analyze and report; orchestrator merges. Sub-agents do not modify files

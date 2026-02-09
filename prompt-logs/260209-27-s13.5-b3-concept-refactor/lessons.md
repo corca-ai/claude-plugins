@@ -136,3 +136,23 @@ When 검증/게이트 hook 작성 시 → silent exit 0 금지. 항상 additiona
 - **Takeaway**: hook이 `[x]` vs `[ ]`로 판단하므로 체크 상태의 정확성이 시스템 신뢰성에 직결됨. 미완료 항목은 반드시 `[ ]` 상태 유지
 
 When deferred action 상태 변경 시 → 실제 실행 여부와 체크 상태를 일치시킬 것. "인지했지만 미실행"은 `[ ]`로 유지하고 코멘트로 사유 기록
+
+---
+
+> 아래는 S13.5-B3 구현 세션 (concept refactor implementation)에서 추가된 lessons
+
+### Plan mode 없이 구현할 때도 lessons 기록 의무는 동일
+
+- **Expected**: Plan mode에 진입하지 않더라도, plan-protocol.md의 "Accumulate incrementally throughout the session" 지침에 따라 lessons 기록 시작
+- **Actual**: ship issue 실행 → TaskCreate 6개 → 바로 구현 착수. Lessons 기록 없이 진행하다 유저 지적
+- **Takeaway**: lessons 기록은 plan mode의 부산물이 아니라 독립적 의무. 세션 시작 시 lessons.md 위치를 확인하고 첫 작업 완료 후 바로 기록 시작
+
+When plan mode 없이 구현 세션 시작 시 → lessons.md 경로 확인 + 첫 작업 후 즉시 기록 시작. Plan mode 진입 여부와 무관
+
+### 기존 STALE provenance는 scope 경계를 표시해줌
+
+- **Expected**: provenance-check.sh 실행 시 수정한 3개 파일만 FRESH로 표시
+- **Actual**: 정확히 concept-map, holistic-criteria, review-criteria 3개가 FRESH. 나머지 5개는 hook_count 13→14 불일치로 STALE (이전 세션에서 exit-plan-mode.sh 추가 후 미업데이트)
+- **Takeaway**: provenance 시스템이 이 PR의 scope 경계를 명확히 보여줌. 기존 STALE 5개는 별도 유지보수 작업
+
+When 구현 완료 후 provenance check 결과에 기존 STALE이 보이면 → scope 안/밖 구분하여 보고. 기존 STALE을 이 PR에서 일괄 수정하면 scope creep
