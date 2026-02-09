@@ -15,8 +15,9 @@ HOOK_GROUP="compact_recovery"
 # shellcheck source=cwf-hook-gate.sh
 source "$(dirname "${BASH_SOURCE[0]}")/cwf-hook-gate.sh"
 
-# Consume stdin (required for hook protocol)
-cat > /dev/null
+# Read stdin to extract session_id for session log lookup
+INPUT=$(cat)
+HOOK_SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty' 2>/dev/null || true)
 
 # Find cwf-state.yaml relative to project root
 STATE_FILE="${CLAUDE_PROJECT_DIR:-.}/cwf-state.yaml"
@@ -109,9 +110,51 @@ Do NOT modify:"
     done
 fi
 
+# ── Append recent turns from prompt-logger session log (if available) ─────────
+# Provides conversational context alongside structural metadata from live section.
+# Gracefully skips if prompt-logger is not installed or no log exists.
+MAX_TURNS=3
+MAX_LINES=100
+recent_turns=""
+
+if [[ -n "$HOOK_SESSION_ID" ]]; then
+    # prompt-logger stores session log path in /tmp/claude-prompt-logger-{session_id}/out_file
+    PL_STATE_DIR="/tmp/claude-prompt-logger-${HOOK_SESSION_ID}"
+    if [[ -f "$PL_STATE_DIR/out_file" ]]; then
+        SESSION_LOG=$(cat "$PL_STATE_DIR/out_file")
+        if [[ -f "$SESSION_LOG" ]]; then
+            # Extract last N turns: turns are separated by "---" lines,
+            # each starting with "## Turn N".
+            # Strategy: split by "---", take last MAX_TURNS turn blocks, cap at MAX_LINES.
+            recent_turns=$(awk -v max_turns="$MAX_TURNS" '
+                /^---$/ { block_count++; next }
+                /^## Turn [0-9]/ { turn_start = 1 }
+                turn_start {
+                    blocks[block_count] = blocks[block_count] (blocks[block_count] ? "\n" : "") $0
+                }
+                END {
+                    start = block_count - max_turns + 1
+                    if (start < 1) start = 1
+                    for (i = start; i <= block_count; i++) {
+                        if (blocks[i] != "") print blocks[i]
+                        if (i < block_count) print "---"
+                    }
+                }
+            ' "$SESSION_LOG" | tail -n "$MAX_LINES")
+        fi
+    fi
+fi
+
 context="${context}
 
 Read cwf-state.yaml and the plan file in the session dir to restore full context."
+
+if [[ -n "$recent_turns" ]]; then
+    context="${context}
+
+Recent conversation (last ${MAX_TURNS} turns before compact):
+${recent_turns}"
+fi
 
 # Output JSON with additionalContext
 jq -n --arg ctx "$context" \
