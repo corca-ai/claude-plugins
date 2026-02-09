@@ -31,6 +31,10 @@ cwf:plan <task description>
 
 ---
 
+## Phase 0: Update Live State
+
+Edit `cwf-state.yaml` `live` section: set `phase: plan`, `task` to the task summary.
+
 ## Phase 1: Parse & Scope
 
 1. Record the task description verbatim
@@ -206,15 +210,6 @@ For a multi-perspective review before implementation, run:
 ```
 
 ---
-
-## Interaction with plan-protocol Hook
-
-The `enter-plan-mode.sh` hook fires when `EnterPlanMode` is triggered and injects the Plan & Lessons Protocol passively. The `cwf:plan` skill provides **active** agent-assisted plan drafting invoked explicitly by the user. They are complementary:
-
-- **Hook** (passive): Ensures protocol is available whenever plan mode is entered
-- **Skill** (active): Provides research-backed, structured plan creation
-
-The skill follows the same protocol the hook references, ensuring consistency.
 
 ## Rules
 

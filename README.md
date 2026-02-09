@@ -79,7 +79,7 @@ cwf:update
 
 ### Standalone plugins (legacy)
 
-CWF consolidates all functionality from the standalone plugins (gather-context, clarify, retro, refactor, attention-hook, plan-and-lessons, smart-read, prompt-logger, markdown-guard). If you are using standalone plugins, uninstall them and install `cwf` instead. The standalone plugins remain in the marketplace for backward compatibility but receive no new features.
+CWF consolidates all functionality from the standalone plugins (gather-context, clarify, retro, refactor, attention-hook, smart-read, prompt-logger, markdown-guard). If you are using standalone plugins, uninstall them and install `cwf` instead. The standalone plugins remain in the marketplace for backward compatibility but receive no new features. The `plan-and-lessons` plugin is deprecated — plan mode hooks have been removed in favor of session-state-based context management.
 
 ## Skills Reference
 
@@ -212,13 +212,13 @@ CWF includes 7 hook groups that run automatically. All are enabled by default; u
 
 | Group | Hook Type | What It Does |
 |-------|-----------|-------------|
-| `attention` | Notification, Pre/PostToolUse | Slack notifications on idle, AskUserQuestion, plan mode |
+| `attention` | Notification, Pre/PostToolUse | Slack notifications on idle and AskUserQuestion |
 | `log` | Stop, SessionEnd | Auto-log conversation turns to markdown |
 | `read` | PreToolUse → Read | File-size aware reading guard (warn >500 lines, block >2000) |
 | `lint_markdown` | PostToolUse → Write\|Edit | Markdown validation — lint violations trigger self-correction |
 | `lint_shell` | PostToolUse → Write\|Edit | ShellCheck validation for shell scripts |
 | `websearch_redirect` | PreToolUse → WebSearch | Redirect Claude's WebSearch to `cwf:gather --search` |
-| `plan_protocol` | PreToolUse → EnterPlanMode | Inject Plan & Lessons Protocol on plan mode entry |
+| `compact_recovery` | SessionStart → compact | Inject live session state after auto-compact for context recovery |
 
 Notification examples:
 

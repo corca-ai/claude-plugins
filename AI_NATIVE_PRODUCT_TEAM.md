@@ -43,7 +43,7 @@ A cycle of **research → spec writing → spec refinement → spec review → i
 
 4. **Spec review**: we review the refined spec and produce a final version. If we lack the ability to review it ourselves, we proactively learn. With AI and with teammates, we deepen our understanding of domain knowledge, the codebase, and the rationale behind decisions.
 
-5. **Implementation instruction**: we hand the final spec to a coding agent to implement. We trust that with a good PLAN document (e.g., the Plan & Lessons Protocol from the [plan-and-lessons](./plugins/plan-and-lessons) plugin) and test cases, we can get the desired feature in a single turn—and we work to make that true.
+5. **Implementation instruction**: we hand the final spec to a coding agent to implement. We trust that with a good plan document and test cases, we can get the desired feature in a single turn—and we work to make that true.
 
 6. **Retrospective**: if we don't get the desired result in one shot, we run a retrospective (e.g., [retro](./plugins/retro)). We ask the agent: "It didn't work out for these reasons—what should we have done up front to get the desired result?" Then we experiment by implementing again following that answer. This becomes part of the team's knowledge assets.
 

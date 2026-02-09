@@ -67,7 +67,7 @@ Reference: compound-engineering (16 skills, v2.30.0) and superpowers
 | lint-markdown | markdown-guard | PostToolUse:Write/Edit | Markdown validation |
 | lint-shell | **New** (from shell-guard) | PostToolUse:Write/Edit | ShellCheck integration for `.sh` files |
 | websearch-redirect | gather-context | PreToolUse:WebSearch | Block built-in → cwf:gather |
-| plan-protocol | plan-and-lessons | PreToolUse:EnterPlanMode | Inject Plan & Lessons Protocol |
+| compact-recovery | **New** | SessionStart:compact | Inject live state after auto-compact |
 
 ### Cross-Cutting
 
@@ -118,7 +118,16 @@ hooks:
   lint_markdown: true
   lint_shell: true
   websearch_redirect: true
-  plan_protocol: true
+  compact_recovery: true
+
+live:
+  session_id: ""             # Current active session
+  dir: ""                    # prompt-logs directory
+  branch: ""                 # Git branch
+  phase: ""                  # clarify | plan | impl | review | retro | freeform
+  task: ""                   # One-line summary
+  key_files: []              # Files to read after compact
+  dont_touch: []             # Modification boundaries
 ```
 
 Skills read/write this file. `cwf:handoff` generates handoff documents from it.
@@ -298,7 +307,7 @@ plugins/cwf/
 │       ├── cwf-hook-gate.sh       # Shared: source cwf-hooks-enabled.sh, exit if disabled
 │       ├── redirect-websearch.sh
 │       ├── smart-read.sh
-│       ├── enter-plan-mode.sh
+│       ├── compact-context.sh       # NEW: context recovery after auto-compact
 │       ├── log-turn.sh
 │       ├── check-markdown.sh
 │       ├── check-shell.sh         # NEW: shellcheck integration
@@ -421,7 +430,8 @@ S1 → S2 → S3 (ship skill — enables workflow for all v3 sessions)
 | **B** | s13.5-b-expert-loop | Expert-in-the-loop (clarify, review, retro roster) + phase handoff (`--phase` mode) | ✅ Done |
 | **B2** | marketplace-v3 (no feature branch — #15) | Concept distillation (6 generic + 9 application concepts) + README v3 rewrite. Identified 3 refactor integration points (unimplemented). #16 | ✅ Done |
 | **B3** | feat/concept-refactor-integration (→ marketplace-v3, PR #18) | Concept-based refactor integration: Form/Meaning/Function triadic framework, concept-map.md, exit-plan-mode.sh hook | ✅ Done |
-| **C** | s13.5-c-context | project-context.md slimming (audit, dedup, graduation) | Pending |
+| **C1** | marketplace-v3 | Plan mode removal + live state + compact recovery hook (S29) | In Progress |
+| **C2** | s13.5-c-context | project-context.md slimming (audit, dedup, graduation) | Pending |
 | **D** | s13.5-d-hooks | Hook infrastructure (Slack threading, shared module extraction) | Pending |
 
 ## Handoff Template (for S1+)

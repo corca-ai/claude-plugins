@@ -36,6 +36,10 @@ Produces `retro.md` alongside `plan.md` and `lessons.md` in the session's prompt
 
 ## Workflow
 
+### 0. Update Live State
+
+Edit `cwf-state.yaml` `live` section: set `phase: retro`.
+
 ### 1. Locate Output Directory
 
 Resolution order:

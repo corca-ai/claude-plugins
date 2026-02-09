@@ -13,7 +13,7 @@ plugins/{name}/
     ├── references/          # optional
     └── scripts/             # optional
 
-# Hook-only (e.g., smart-read, plan-and-lessons)
+# Hook-only (e.g., smart-read, prompt-logger)
 plugins/{name}/
 ├── .claude-plugin/plugin.json
 └── hooks/

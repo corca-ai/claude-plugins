@@ -33,6 +33,10 @@ cwf:clarify <requirement> --light  # Direct Q&A, no sub-agents
 
 ## Default Mode
 
+### Phase 0: Update Live State
+
+Edit `cwf-state.yaml` `live` section: set `phase: clarify`, `task` to the requirement summary, and `key_files` to files relevant to the requirement.
+
 ### Phase 1: Capture & Decompose
 
 1. Record the original requirement verbatim
@@ -311,7 +315,7 @@ If yes: save to a project-appropriate location with a descriptive filename.
 1. `cwf:review --mode clarify` — Multi-perspective review of the clarified requirement before implementation
 2. `cwf:handoff --phase` — Generate a phase handoff document that captures HOW context (protocols, rules, must-read references, constraints) for the implementation phase. Recommended when context will be cleared before implementation, as `plan.md` carries WHAT but not HOW.
 
-Present both suggestions. If the user is about to enter plan mode or clear context, emphasize the phase handoff suggestion.
+Present both suggestions. If context is getting large or the user is about to clear context, emphasize the phase handoff suggestion.
 
 ---
 

@@ -50,7 +50,6 @@ bash scripts/update-all.sh
 |---------|------|------|------|
 | [gather-context](#gather-context) | Skill + Hook | 1. 컨텍스트 | 통합 정보 수집: URL 자동 감지, 웹 검색, 로컬 코드 탐색 |
 | [clarify](#clarify) | Skill | 2. 명확화 | 통합 요구사항 명확화: 리서치 기반 또는 경량 Q&A |
-| [plan-and-lessons](#plan-and-lessons) | Hook | 3. 계획 | Plan 모드 진입 시 Plan & Lessons Protocol 주입 |
 | [smart-read](#smart-read) | Hook | 4. 구현 | 파일 크기 기반 지능적 읽기 강제 |
 | [retro](#retro) | Skill | 5. 회고 | 적응형 세션 회고 — 기본은 경량, `--deep`으로 전문가 렌즈 포함 전체 분석 |
 | [refactor](#refactor) | Skill | 6. 리팩토링 | 다중 모드 코드/스킬 리뷰: 퀵 스캔, 심층 리뷰, 티디잉, 문서 검사 |
@@ -132,7 +131,7 @@ clarify v1, deep-clarify, interview의 장점을 하나로 합친 통합 요구�
 
 **설치**: `claude plugin install retro@corca-plugins` | **갱신**: `claude plugin update retro@corca-plugins`
 
-적응형 세션 회고 스킬입니다. [Plan & Lessons Protocol](plugins/plan-and-lessons/protocol.md)의 `lessons.md`가 세션 중 점진적으로 쌓이는 학습 기록이라면, `retro`는 세션 전체를 조감하는 종합 회고입니다. 기본은 경량 모드(빠르고 저비용), `--deep`으로 전문가 분석을 포함한 전체 회고를 수행합니다.
+적응형 세션 회고 스킬입니다. `lessons.md`가 세션 중 점진적으로 쌓이는 학습 기록이라면, `retro`는 세션 전체를 조감하는 종합 회고입니다. 기본은 경량 모드(빠르고 저비용), `--deep`으로 전문가 분석을 포함한 전체 회고를 수행합니다.
 
 **사용법**:
 - 세션 종료 시 (경량): `/retro`
@@ -223,21 +222,6 @@ CLAUDE_CORCA_ATTENTION_DELAY=30  # AskUserQuestion 알림 지연 시간 (초, �
 <img src="assets/attention-hook-normal-response.png" alt="Slack 알림 예시 1 - 일반적인 응답" width="600">
 
 <img src="assets/attention-hook-AskUserQuestion.png" alt="Slack 알림 예시 2 - AskUserQuestion" width="600">
-
-### [plan-and-lessons](plugins/plan-and-lessons/hooks/hooks.json)
-
-**설치**: `claude plugin install plan-and-lessons@corca-plugins` | **갱신**: `claude plugin update plan-and-lessons@corca-plugins`
-
-Claude Code가 Plan 모드에 진입할 때(`EnterPlanMode` 도구 호출 시) Plan & Lessons Protocol을 자동으로 주입하는 훅입니다. 프로토콜은 `prompt-logs/{YYMMDD}-{NN}-{title}/` 디렉토리에 plan.md와 lessons.md를 생성하는 워크플로우를 정의합니다.
-
-**동작 방식**:
-- `PreToolUse` → `EnterPlanMode` 매처로 plan 모드 진입을 감지
-- `additionalContext`로 프로토콜 문서 경로를 주입
-- Claude가 프로토콜을 읽고 따름
-
-**주의사항**:
-- `/plan`이나 Shift+Tab으로 직접 plan 모드에 진입하는 경우에는 훅이 발동되지 않음 (CLI 모드 토글이라 도구 호출 없음)
-- 커버리지를 위해 CLAUDE.md에 프로토콜 참조를 병행 설정하는 것을 권장
 
 ### [smart-read](plugins/smart-read/hooks/hooks.json)
 

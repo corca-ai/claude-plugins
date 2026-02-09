@@ -298,6 +298,7 @@ If the current session entry exists in `cwf-state.yaml`:
 - Add `next-session.md` to the `artifacts` list
 - Update `summary` if not already set
 - Set `completed_at` to today's date (via `date +%Y-%m-%d`)
+- Clear `live` section: set all scalar fields to `""` and lists to `[]`
 
 ### 4.1b Register Phase Handoff (--phase mode)
 

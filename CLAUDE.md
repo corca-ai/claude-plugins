@@ -16,11 +16,15 @@ Do NOT proceed with code changes until completing the above steps.
 After modifying code, update any affected documentation.
 Do NOT consider the task complete without updating related docs.
 
-## Plan Mode
+## Session State
 
-For non-trivial implementation tasks, proactively use `EnterPlanMode`.
+When starting a new task or switching context, update the `live` section
+in `cwf-state.yaml` (session_id, dir, branch, phase, task, key_files).
+CWF skills update this automatically at phase transitions.
 
-After implementation, write `next-session.md`, register the session in `cwf-state.yaml`, and run `scripts/check-session.sh --impl`. Fix all FAIL items before finishing.
+After implementation, write `next-session.md`, register the session in
+`cwf-state.yaml`, and run `scripts/check-session.sh --impl`. Fix all FAIL
+items before finishing.
 
 ## Collaboration Style
 

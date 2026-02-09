@@ -56,7 +56,7 @@ Use `cwf:gather --search` or equivalent to find: established frameworks, best pr
 
 ### Timing
 
-Create the plan document when entering plan mode, before implementation begins.
+Create the plan document at session start, before implementation begins.
 
 ## Lessons Document
 
@@ -89,7 +89,7 @@ Write lessons in the user's language.
 
 ### Timing
 
-Create lessons.md at the same time as plan.md — not after implementation. Learnings often emerge from pre-plan-mode conversation (e.g., corrected assumptions, revealed preferences), so the file must exist before implementation begins.
+Create lessons.md at the same time as plan.md — not after implementation. Learnings often emerge from pre-implementation conversation (e.g., corrected assumptions, revealed preferences), so the file must exist before implementation begins.
 
 Accumulate incrementally throughout the session. Record learnings as they emerge from conversation and implementation.
 

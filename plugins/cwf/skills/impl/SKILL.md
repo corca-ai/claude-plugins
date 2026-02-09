@@ -31,6 +31,10 @@ cwf:impl <path/to/plan.md>  # Explicit plan path
 
 ---
 
+## Phase 0: Update Live State
+
+Edit `cwf-state.yaml` `live` section: set `phase: impl`, `task` to the plan's goal summary, and `key_files` to the plan's key files list.
+
 ## Phase 1: Load Plan
 
 Find and parse the plan that drives implementation.

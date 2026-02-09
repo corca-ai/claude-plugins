@@ -31,7 +31,7 @@ In this marketplace, skills are located within `plugins/{name}/skills/{name}/`.
 
 ## Skill Categories
 
-- **Instruction-only** (plan-and-lessons, retro): SKILL.md alone — no execution needed
+- **Instruction-only** (retro): SKILL.md alone — no execution needed
 - **Execution-heavy** (gather-context): SKILL.md + `scripts/`
 - **Hybrid** (clarify): SKILL.md with occasional Bash
 

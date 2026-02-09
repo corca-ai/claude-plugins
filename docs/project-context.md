@@ -71,7 +71,7 @@ Key distinction: `references/` holds **external framework source texts**, not an
 ## Hook Configuration
 
 - Project hooks go in `.claude/settings.json` under the `"hooks"` key — NOT `.claude/hooks.json` (which is plugin-only format)
-- EnterPlanMode hook is now provided by the `plan-and-lessons` plugin (no longer in `.claude/settings.json`)
+- **Compact recovery**: `SessionStart(compact)` hook reads `cwf-state.yaml` `live` section and injects context after auto-compact. CWF skills update `live` at phase transitions; `check-session.sh --live` validates required fields.
 - `type: prompt` hooks work with any hook event and are simpler for context injection (no JSON formatting needed)
 - Hooks are **snapshots at session start** — no hot-reload. Requires new session or `/hooks` review to pick up changes.
 - **Skill loading is cache-based**: Skills (SKILL.md content + allowed-tools) are loaded from `~/.claude/plugins/cache/{marketplace}/{plugin}/{version}/`, not from the source directory. Source modifications require `claude plugin update` or `scripts/update-all.sh` to propagate to the cache. Both hooks and skills are effectively session-start snapshots tied to the cache state.

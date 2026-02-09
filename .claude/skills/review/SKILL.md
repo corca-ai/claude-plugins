@@ -405,7 +405,7 @@ This prevents sensitive review content (diffs, plans) from persisting in `/tmp/`
 | Reviewer output malformed | Extract by pattern matching, note in Confidence Note |
 | `--scenarios <path>` flag used | Holdout scenario validation (planned). Print "Not yet implemented. Proceeding without holdout scenarios." |
 | No git changes found (code mode) | AskUserQuestion: ask user to specify target |
-| No plan.md found (plan mode) | AskUserQuestion: ask user to specify target |
+| No plan.md found | AskUserQuestion: ask user to specify target |
 | All 6 reviewers report no issues | Verdict = Pass. Note "clean review" in synthesis |
 | Codex/Gemini CLI not found | Task agent fallback with same perspective. Mark `FALLBACK` in provenance. |
 | External CLI timeout (280s) | Mark `FAILED`. Spawn Task agent fallback. Note in Confidence Note. |
