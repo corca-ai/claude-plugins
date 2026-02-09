@@ -30,6 +30,12 @@
 - **Actual**: S7+ entries lacked `(done)` markers; I treated plan document as state source instead of cwf-state.yaml
 - **Takeaway**: cwf-state.yaml is SSOT for session history. When checking project status, read cwf-state.yaml sessions list first. Plan documents are plans, not execution records.
 
+### Shell YAML parser: section boundary + regex quoting
+
+- **Expected**: check-session.sh `while read` loop correctly extracts `dir` for the last session entry (S29)
+- **Actual**: Two compounding bugs — (1) loop lacked top-level key break condition (`^[a-z#]`), so it continued past `sessions:` into `live:` section where `dir: ""` overwrote the already-extracted `SESSION_DIR`; (2) `"?${VAR}"?$` regex in bash `[[ =~ ]]` treats `?` as literal (quoted), not as regex quantifier — `\"?` is the correct escape
+- **Takeaway**: Hand-rolled YAML parsers need explicit section boundary guards (break on top-level keys). In bash `[[ =~ ]]`, unescaped `"` around regex quantifiers suppresses their special meaning — always use `\"` for literal quote matching in regex patterns. The last entry in a list is the most vulnerable to boundary bugs because there's no subsequent sibling to trigger break.
+
 ### Unpublished plugin install path
 
 - **Expected**: `scripts/install.sh` would propagate CWF hooks

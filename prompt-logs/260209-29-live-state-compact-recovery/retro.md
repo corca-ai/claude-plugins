@@ -95,3 +95,46 @@
 ### Skill Gaps
 
 No additional skill gaps identified. The session's workflow (clarify → plan → impl → retro) was well-served by existing CWF skills. The compact recovery hook fills the primary gap (context loss on auto-compact) that motivated this session.
+
+---
+
+### Post-Retro Findings
+
+#### check-session.sh YAML 파서 버그 — 복합 원인 분석
+
+핸드오프 검증 단계에서 `check-session.sh --impl S29`가 실패. S29 엔트리를 찾았지만(`found=true`) `dir` 추출에 실패(`SESSION_DIR=""`)하는 증상.
+
+**원인 1 — 섹션 경계 미처리**: S29가 `sessions:` 블록의 마지막 엔트리이므로 다음 `- id:` 줄이 없어 break 조건이 발동하지 않음. 루프가 `tools:`, `hooks:`, `live:` 섹션까지 계속 진행하면서 `live:` 섹션의 `dir: ""`가 `^[[:space:]]*dir:` 패턴에 매칭되어 이미 설정된 `SESSION_DIR`을 빈 문자열로 덮어씀.
+
+**원인 2 — bash regex quoting**: `"?${SESSION_ID}"?$`에서 unescaped `"`가 bash `[[ =~ ]]`에서 `?`를 리터럴로 만들어 의도한 "optional quote" 매칭이 동작하지 않음. Pattern 1은 사실상 죽은 코드였고 Pattern 2만으로 동작하고 있었음.
+
+**수정**: top-level 키(`^[a-z#]`) break 조건 추가 + `\"?`로 escape.
+
+**다른 스크립트 영향 점검**: `compact-context.sh`, `check-session.sh --live`, `parse_defaults`, `provenance-check.sh` 모두 이미 적절한 섹션 경계 처리가 있어 동일 버그 없음. `\"?` 패턴도 모두 올바르게 escaped되어 있음.
+
+#### CDM: 디버깅 시 셸 환경 불일치
+
+| Probe | Analysis |
+|-------|----------|
+| **Cues** | 최초 디버그 트레이스에서 `S2`가 `S29` 패턴에 매칭된다고 보고됨. 그러나 개별 테스트에서는 매칭되지 않아 혼란 발생. |
+| **Situation Assessment** | Claude Code의 Bash 도구는 zsh에서 실행되고, 스크립트는 `#!/usr/bin/env bash`로 bash에서 실행됨. zsh와 bash의 `[[ =~ ]]` 정규식 해석이 다름 — zsh에서는 `"?`를 리터럴 `"`로 해석하여 S2 매칭, bash에서는 quoting으로 해석하여 매칭 안 됨. |
+| **Options** | (A) zsh 환경에서 계속 디버깅 (B) `bash -c`로 실제 환경 재현 (C) `bash -x`로 스크립트 자체를 트레이스 |
+| **Basis** | (B)+(C) 조합으로 전환 후 실제 원인 발견. `bash -x` 트레이스에서 `grep "SESSION_DIR="`로 3번의 할당(초기화 → 올바른 값 → 빈 값 덮어쓰기)을 확인하여 원인 특정. |
+| **Aiding** | "스크립트의 shebang과 동일한 셸에서 디버깅"이라는 규칙이 있었다면 초기 혼란을 회피할 수 있었음. |
+
+**Key lesson**: 셸 스크립트 디버깅 시 실행 환경(shebang)과 동일한 셸에서 테스트할 것. Claude Code Bash 도구는 zsh를 사용하므로, bash 스크립트 디버깅은 반드시 `bash -c '...'` 또는 `bash -x script.sh`로 실행.
+
+#### 폐기물 분석
+
+**zsh/bash 환경 혼동 (3턴 낭비)**: 최초 디버그 루프를 zsh에서 실행하여 S2 매칭이라는 잘못된 단서를 얻음 → 개별 테스트에서 불일치 확인 → `bash -c`로 재테스트하여 실제 동작 확인. zsh에서의 결과가 "S2가 매칭된다"는 red herring이 되어 regex quoting 문제에 과도하게 집중하게 만듦.
+
+- 5 Whys: 왜 zsh에서 실행했나? → Bash 도구 기본 셸이 zsh → 왜 인지하지 못했나? → `$BASH_VERSION` 체크를 하지 않음 → **구조적 원인**: 스크립트 디버깅 시 실행 셸 확인 단계가 프로토콜에 없음.
+- 분류: **프로세스 갭** — project-context.md에 "bash 스크립트 디버깅 시 `bash -c` 사용" 패턴 추가 권장.
+
+#### Persist 후보
+
+| 항목 | 대상 | 이유 |
+|------|------|------|
+| YAML 파서 섹션 경계 | project-context.md | 모든 hand-rolled YAML 파서에 적용되는 구조적 패턴 |
+| bash `[[ =~ ]]` quoting | project-context.md | `\"?` vs `"?` 차이가 미묘하고 반복 가능한 실수 |
+| bash 스크립트는 `bash -c`로 디버깅 | CLAUDE.md (Collaboration Style) | 세션마다 반복 가능한 행동 규칙 |
