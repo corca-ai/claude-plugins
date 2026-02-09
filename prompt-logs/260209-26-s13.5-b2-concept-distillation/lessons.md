@@ -48,3 +48,23 @@ When 문서 위치 결정 → consumer count + lifecycle 2축 판단. 세션 산
 - **Actual**: 유저 제안에 바로 동의하고 위치를 변경함. 결과적으로 유저 스스로 `prompt-logs/`가 맞다고 재수정
 - **근본 원인**: CLAUDE.md의 "In design discussions, provide honest counterarguments and trade-off analysis. Do not just agree" 규칙이 있음에도, 유저의 판단에 즉시 순응하는 패턴. 특히 문서 위치처럼 "정답이 하나가 아닌" 설계 결정에서 반론 없이 동의하는 것은 유저에게 도움이 안 됨
 - **Takeaway**: 유저 제안이 합리적으로 보여도, 1) 현재 판단의 근거를 먼저 설명하고, 2) 유저 제안의 장점을 인정하되, 3) trade-off를 명시한 후 유저가 결정하게 할 것. "동의 후 수정"보다 "반론 후 합의"가 품질이 높음
+
+### "필요한 조치"의 범위 해석 — 자기 답변에 anchoring하지 말 것
+
+- **Expected**: 유저가 "필요한 조치 모두 해주세요"라고 했을 때, 유저의 원래 질문("별도 세션에서 설계해서 구현할 수 있는 상태인가요?")의 맥락에서 handoff 문서(next-session.md) 생성이 당연히 포함되어야 했음
+- **Actual**: 에이전트가 직전 자기 답변에서 나열한 3가지(cwf-state 등록, lessons persist, 위치 유지)만을 "필요한 조치"로 해석. 유저가 명시적으로 재요청해야 했음
+- **Takeaway**: 유저가 "모두" "전부" 같은 포괄적 지시를 할 때, 자기 답변에 나열한 항목에 anchoring하지 말고 유저의 원래 질문/의도까지 거슬러 올라가서 범위를 판단할 것
+
+### 세션 이슈 생성은 /ship 패턴을 따를 것
+
+- **Expected**: 유저가 "이슈라도 남깁시다"라고 했을 때, 기존 /ship 패턴(#10, #13, #14)을 따라 세션 전체의 design decisions + commits + persisted principles를 정리한 이슈를 만들어야 했음
+- **Actual**: 워크플로우 자동화(branch 문제)에 대한 이슈(#15)만 만들고, 세션 작업 이슈는 유저가 #10을 참조로 제시한 후에야 만듦(#16)
+- **근본 원인**: /ship 스킬의 이슈 생성 패턴이 이미 확립되어 있었는데, 에이전트가 유저의 "이슈"라는 단어를 좁게 해석(branch 문제 이슈)하여 기존 세션 이슈 관행을 놓침
+- **Takeaway**: 이슈 생성 요청 시, 기존 세션 이슈 패턴(#10 형식: session summary, key decisions, commits, persisted principles)이 기본값. 특정 기술 이슈는 추가로 만들되, 세션 이슈를 대체하지 않음
+
+### Feature branch 누락 — behavioral instruction의 반복적 실패
+
+- **Expected**: 마스터 플랜 Decision #3에 "feature branches per task"가 명시되어 있으므로 세션 시작 시 feature branch를 생성해야 했음
+- **Actual**: S7 이후 대부분의 세션이 feature branch 없이 marketplace-v3에 직접 커밋. S13.5-A, S13.5-B는 지켰지만 B2는 다시 누락
+- **근본 원인**: project-context.md에 이미 기록된 "Deterministic validation over behavioral instruction" 원칙의 정확한 실증. 규칙으로만 존재하면 degradation됨. 자동화(hook, script)가 없으면 지속 불가
+- **Takeaway**: 반복적으로 깨지는 behavioral instruction은 이슈로 남기고(#15), 자동화로 전환해야 함. "다음엔 잘 하겠다"는 해결책이 아님
