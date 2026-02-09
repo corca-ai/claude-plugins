@@ -419,7 +419,7 @@ S1 → S2 → S3 (ship skill — enables workflow for all v3 sessions)
 |------------|--------|-------|--------|
 | **A** | s13.5-a-provenance | Self-healing provenance system | ✅ Done |
 | **B** | s13.5-b-expert-loop | Expert-in-the-loop (clarify, review, retro roster) + phase handoff (`--phase` mode) | ✅ Done |
-| **B2** | s13.5-b2-concept | Concept distillation across all skills using `references/essence-of-software/distillation.md`. README v3 philosophy overhaul (moved from S14). | Pending |
+| **B2** | marketplace-v3 (no feature branch — see #15) | Concept distillation (6 generic + 9 application concepts) + README v3 rewrite. Identified 3 refactor integration points (unimplemented). | ✅ Done |
 | **C** | s13.5-c-context | project-context.md slimming (audit, dedup, graduation) | Pending |
 | **D** | s13.5-d-hooks | Hook infrastructure (Slack threading, shared module extraction) | Pending |
 
