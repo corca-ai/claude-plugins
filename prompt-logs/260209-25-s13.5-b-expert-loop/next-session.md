@@ -48,7 +48,7 @@ Distill the conceptual model of CWF skills using the Essence of Software framewo
 - [ ] [carry-forward] Review skill Rule 5: save review results as files in session directory
 - [ ] [carry-forward] Review skill `--base <branch>` flag for umbrella branch pattern
 - [ ] [carry-forward] Review skill individual reviewer files as default behavior
-- [ ] [carry-forward] Plan mode → session plan.md deadlock: ExitPlanMode hook to copy plan
+- [ ] [carry-forward] Plan mode → session plan.md deadlock: ExitPlanMode hook to copy plan (cwf:plan 스킬 소관 — PostToolUse:ExitPlanMode hook으로 ~/.claude/plans/ 최신 파일을 prompt-logs/{session}/plan.md로 자동 복사)
 - [ ] [carry-forward] Retro session symlink: team run support
 - [ ] [carry-forward] EnterPlanMode lessons.md enforcement hook
 

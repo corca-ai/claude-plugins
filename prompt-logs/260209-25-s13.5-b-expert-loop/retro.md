@@ -193,3 +193,13 @@ handoff SKILL.md(`--phase` 모드), impl SKILL.md(Phase 1.1b 소비), clarify SK
 - **Options**: (A) Phase 3 내부 if/else 분기, (B) 독립 Phase 3b 섹션
 - **Basis**: Phase 3의 8개 필수 섹션과 Phase 3b의 6개 섹션은 구조가 완전히 다름. if/else로 넣으면 가독성이 크게 저하
 - **결정**: Phase 3b로 분리 — 관심사 분리가 문서 구조에도 적용됨
+
+#### Explore agent S15 fabrication
+
+Explore agent에게 "남은 할 일" 조사를 위임했고, agent가 master-plan.md에 존재하지 않는 S15를 fabricate. project-context.md에 이미 "Agent results require spot-checks" 교훈이 있었지만 적용하지 않음. 유저가 "S15가 뭔가요?"로 발각.
+
+**5 Whys**: 교훈을 알지만 적용하지 않음 → agent 결과를 "요약이니까 맞겠지" 하고 신뢰 → 사실적 주장(세션 존재 여부)과 분석적 주장을 구분하지 않음 → **Process gap**: agent 결과 중 사실적 주장은 원본 파일 대조 프로토콜 필요
+
+#### Plan.md 세션 디렉토리 복사 반복 실패
+
+이번 세션에서도 plan mode 종료 후 `~/.claude/plans/`의 plan을 `prompt-logs/`로 복사하지 않아 `check-session.sh`에서 FAIL. S13.5-A에서 이미 식별된 carry-forward 항목이지만 여전히 수동 `cp`로 해결 중. **Tier 1 해결책**: PostToolUse:ExitPlanMode hook으로 자동 복사 — cwf:plan 스킬 소관.
