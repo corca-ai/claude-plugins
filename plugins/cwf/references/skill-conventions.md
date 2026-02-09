@@ -86,6 +86,7 @@ Every skill MUST have a `## References` section as the final section.
 |-----------|------|-------------|
 | Agent patterns | `../../references/agent-patterns.md` | Skills using Task tool or sub-agents |
 | Plan protocol | `../../references/plan-protocol.md` | Skills producing plan/lesson artifacts |
+| Expert advisor | `../../references/expert-advisor-guide.md` | Skills using expert sub-agents |
 | Skill conventions | `../../references/skill-conventions.md` | (for refactor validation, not in individual skills) |
 
 ### Skill-specific references

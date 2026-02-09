@@ -206,3 +206,19 @@ hooks:
   lint_shell: true
   websearch_redirect: true
   plan_protocol: true
+
+# Expert roster for domain expert sub-agents (used by clarify, review, retro)
+# Semi-automatic evolution: usage_count auto-incremented, new experts user-approved
+expert_roster:
+  - name: "Donella Meadows"
+    domain: "systems thinking, feedback loops, leverage points"
+    source: "Thinking in Systems (2008)"
+    rationale: "Applied to provenance system design — feedback loops for self-healing"
+    introduced: "S13.5-A"
+    usage_count: 1
+  - name: "David Woods"
+    domain: "resilience engineering, graceful extensibility"
+    source: "The Theory of Graceful Extensibility (2018)"
+    rationale: "Applied to agent boundary awareness and system resilience"
+    introduced: "S13.5-A"
+    usage_count: 1
