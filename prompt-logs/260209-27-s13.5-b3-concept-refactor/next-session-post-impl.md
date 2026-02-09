@@ -8,6 +8,14 @@ S13.5-B3 concept refactor **구현 완료**. PR #18 open (`feat/concept-refactor
 - Issue: #17 (PR merges → auto-close)
 - 인간 판단 필요 사항 2개가 PR에 기재됨 (아래 참조)
 
+## How to start
+
+**반드시 plan mode로 진입**하여 작업할 것. `EnterPlanMode`을 사용하여 plan을 작성하고
+`ExitPlanMode`으로 승인받은 뒤 구현을 진행한다.
+
+이유: exit-plan-mode.sh hook (PreToolUse:ExitPlanMode)이 Deferred Actions 섹션 존재를
+검증하는 기능이 S13.5-B3에서 구현되었으며, fresh context에서 정상 작동하는지 테스트 필요.
+
 ## What needs to happen next
 
 ### 1. PR #18 리뷰 및 머지
