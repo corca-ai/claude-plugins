@@ -1,334 +1,272 @@
-# corca-plugins
+# CWF (Corca Workflow Framework)
 
 [한국어](README.ko.md)
 
-A Claude Code plugin marketplace maintained by Corca for the [AI-Native Product Team](AI_NATIVE_PRODUCT_TEAM.md).
+A Claude Code plugin that turns structured development sessions into a repeatable workflow — from gathering context through retrospective analysis. Maintained by [Corca](https://www.corca.ai/) for [AI-Native Product Teams](AI_NATIVE_PRODUCT_TEAM.md).
+
+## Why CWF?
+
+AI coding sessions lose context at every boundary. When a session ends, the next one starts from scratch. When requirements shift from clarification to implementation, protocols and constraints are forgotten. When quality criteria are written for a five-skill system, they silently become irrelevant as the system grows to nine.
+
+CWF addresses this with six building-block concepts that compose across nine skills. Rather than nine independent tools, CWF is one integrated plugin where each skill synchronizes the same underlying behavioral patterns — expert advisors surface blind spots in both requirement clarification and session retrospectives; tier classification routes decisions to evidence or humans consistently; agent orchestration parallelizes work from research through implementation.
+
+The result: one plugin (`cwf`), nine skills, seven hook groups. Context survives session boundaries. Decisions are evidence-backed. Quality criteria evolve with the system.
+
+## Core Concepts
+
+Six reusable behavioral patterns that CWF skills compose. Understanding these explains why the skills work together, not just what each one does.
+
+**Expert Advisor** — Reduce blind spots by introducing contrasting expert frameworks. Two domain experts with different analytical lenses evaluate problems independently; their disagreements surface hidden assumptions.
+
+**Tier Classification** — Route decisions to the right authority. Codebase evidence (T1) and best-practice consensus (T2) are resolved autonomously; genuinely subjective decisions (T3) are queued for the human.
+
+**Agent Orchestration** — Parallelize work without sacrificing quality. The orchestrator assesses complexity, spawns the minimum agents needed, executes in dependency-respecting batches, and synthesizes results.
+
+**Decision Point** — Capture ambiguity explicitly. Requirements are decomposed into concrete questions before anyone decides, ensuring every choice has recorded evidence and rationale.
+
+**Handoff** — Preserve context across boundaries. Session handoffs carry task scope and lessons; phase handoffs carry protocols and constraints. The next agent starts informed, not blank.
+
+**Provenance** — Detect criteria staleness. Reference documents carry metadata about the system state when they were written; skills check this before applying outdated standards.
+
+## The Workflow
+
+CWF skills follow a natural arc from context gathering to learning extraction:
+
+```text
+gather → clarify → plan → impl → retro
+```
+
+| # | Skill | Trigger | What It Does |
+|---|-------|---------|-------------|
+| 1 | [gather](#gather) | `cwf:gather` | Acquire information — URLs, web search, local code exploration |
+| 2 | [clarify](#clarify) | `cwf:clarify` | Turn vague requirements into precise specs via research + tier classification |
+| 3 | [plan](#plan) | `cwf:plan` | Draft a research-backed implementation plan with BDD success criteria |
+| 4 | [impl](#impl) | `cwf:impl` | Orchestrate parallel implementation from a plan |
+| 5 | [retro](#retro) | `cwf:retro` | Extract durable learnings through CDM analysis and expert lens |
+| 6 | [refactor](#refactor) | `cwf:refactor` | Multi-mode code and skill review — scan, tidy, deep review, holistic |
+| 7 | [handoff](#handoff) | `cwf:handoff` | Generate session or phase handoff documents |
+| 8 | [setup](#setup) | `cwf:setup` | Configure hook groups, detect tools, generate project index |
+| 9 | [update](#update) | `cwf:update` | Check and apply CWF plugin updates |
+
+**Concept composition**: gather, clarify, plan, impl, retro, and refactor all synchronize Agent Orchestration. clarify is the richest composition — it synchronizes Expert Advisor, Tier Classification, Agent Orchestration, and Decision Point in a single workflow. handoff is the primary instantiation of the Handoff concept. refactor activates Provenance in holistic mode.
 
 ## Installation
 
-### 1. Add and update the marketplace
+### Quick start
 
 ```bash
+# Add the marketplace
 claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
+
+# Install CWF
+claude plugin install cwf@corca-plugins
+
+# Restart Claude Code for hooks to take effect
 ```
 
-When new plugins are added or existing plugins are updated, update the marketplace first:
+### Update
+
 ```bash
 claude plugin marketplace update corca-plugins
+claude plugin update cwf@corca-plugins
 ```
 
-Then install or update the plugin you need:
-```bash
-claude plugin install <plugin-name>@corca-plugins  # install
-claude plugin update <plugin-name>@corca-plugins   # update
-```
+Or from inside Claude Code:
 
-Restart Claude Code after installing/updating for changes to take effect.
-
-Or install by category using the installer script:
-```bash
-bash scripts/install.sh --all        # all 9 plugins
-bash scripts/install.sh --workflow   # workflow stages 1-6 only
-bash scripts/install.sh --infra     # attention-hook + prompt-logger + markdown-guard
-bash scripts/install.sh --context --clarify  # combine stages
-```
-
-To update the marketplace and **all** installed plugins at once:
-```bash
-bash scripts/update-all.sh
-```
-
-You can do the same from inside Claude Code (instead of your terminal):
 ```text
-/plugin marketplace add corca-ai/claude-plugins
-/plugin marketplace update
+cwf:update
 ```
 
-### 2. Plugin overview
+### Standalone plugins (legacy)
 
-| Plugin | Type | Stage | Description |
-|---------|------|-------|-------------|
-| [gather-context](#gather-context) | Skill + Hook | 1. Context | Unified information acquisition: URL auto-detect, web search, local code exploration |
-| [clarify](#clarify) | Skill | 2. Clarify | Unified requirement clarification: research-first or lightweight Q&A |
-| [plan-and-lessons](#plan-and-lessons) | Hook | 3. Plan | Inject the Plan & Lessons Protocol when entering plan mode |
-| [smart-read](#smart-read) | Hook | 4. Implement | Enforce intelligent file reading based on file size |
-| [retro](#retro) | Skill | 5. Reflect | Adaptive session retrospective — light by default, deep with expert lens |
-| [refactor](#refactor) | Skill | 6. Refactor | Multi-mode code and skill review: quick scan, deep review, tidying, docs check |
-| [attention-hook](#attention-hook) | Hook | Infra | Send a Slack notification when idle/waiting |
-| [prompt-logger](#prompt-logger) | Hook | Infra | Auto-log conversation turns to markdown for retrospective analysis |
-| [markdown-guard](#markdown-guard) | Hook | Infra | Validate markdown after Write/Edit — lint violations trigger self-correction |
+CWF consolidates all functionality from the standalone plugins (gather-context, clarify, retro, refactor, attention-hook, plan-and-lessons, smart-read, prompt-logger, markdown-guard). If you are using standalone plugins, uninstall them and install `cwf` instead. The standalone plugins remain in the marketplace for backward compatibility but receive no new features.
 
-## Skills
+## Skills Reference
 
-### [gather-context](plugins/gather-context/skills/gather-context/SKILL.md)
+### gather
 
-**Install**: `claude plugin install gather-context@corca-plugins` | **Update**: `claude plugin update gather-context@corca-plugins`
+Unified information acquisition — URLs, web search, local code exploration.
 
-Unified information acquisition layer with three modes: URL auto-detect, web search, and local codebase exploration. Absorbs all `web-search` functionality — a single plugin for all external information needs. Built-in converters for Google Docs, Slack, Notion, and GitHub content. Uses Tavily and Exa APIs for search.
+```text
+cwf:gather <url>                  # Auto-detect service (Google/Slack/Notion/GitHub/web)
+cwf:gather --search <query>       # Web search (Tavily)
+cwf:gather --search code <query>  # Code search (Exa)
+cwf:gather --local <topic>        # Explore local codebase
+```
 
-**Usage**:
-- URL gathering: `/gather-context <url>` (auto-detects Google, Slack, Notion, GitHub, or generic web)
-- Web search: `/gather-context --search <query>` (Tavily)
-- Code search: `/gather-context --search code <query>` (Exa)
-- News/deep: `/gather-context --search --news <query>`, `/gather-context --search --deep <query>`
-- Local exploration: `/gather-context --local <topic>`
-- Help: `/gather-context` or `/gather-context help`
+Auto-detects Google Docs/Slides/Sheets, Slack threads, Notion pages, GitHub PRs/issues, and generic web URLs. Built-in WebSearch redirect hook routes Claude's WebSearch to `cwf:gather --search`.
 
-**Supported URL services**:
+Full reference: [SKILL.md](plugins/cwf/skills/gather/SKILL.md)
 
-| URL pattern | Handler |
-|----------|--------|
-| `docs.google.com/{document,presentation,spreadsheets}/d/*` | Google Export (built-in script) |
-| `*.slack.com/archives/*/p*` | Slack to MD (built-in script) |
-| `*.notion.site/*`, `www.notion.so/*` | Notion to MD (built-in script) |
-| `github.com/*/pull/*`, `github.com/*/issues/*` | GitHub (`gh` CLI) |
-| Other URLs | Tavily extract → WebFetch fallback |
+### clarify
 
-**Output directory**: default `./gathered/` (override with `CLAUDE_CORCA_GATHER_CONTEXT_OUTPUT_DIR`; per-service env vars also supported)
+Research-first requirement clarification with autonomous decision-making.
 
-**Requirements**:
-- `TAVILY_API_KEY` — web search and URL extraction ([get a key](https://app.tavily.com/home))
-- `EXA_API_KEY` — code search ([get a key](https://dashboard.exa.ai/api-keys))
-- Set keys in `~/.zshrc` or `~/.claude/.env`
+```text
+cwf:clarify <requirement>          # Research-first (default)
+cwf:clarify <requirement> --light  # Direct Q&A, no sub-agents
+```
 
-**Built-in WebSearch redirect** (Hook):
-- Installing this plugin registers a `PreToolUse` hook that blocks Claude's built-in `WebSearch` tool and redirects to `/gather-context --search`.
+Default mode: decomposes requirements into decision points → parallel research (codebase + web) → expert analysis → tier classification (T1/T2 auto-decide, T3 ask human) → persistent questioning with why-digging. Light mode: iterative Q&A without sub-agents.
 
-**Caution**:
-- Search queries are sent to external services. Do not include confidential code or sensitive information.
+Full reference: [SKILL.md](plugins/cwf/skills/clarify/SKILL.md)
 
-### [clarify](plugins/clarify/skills/clarify/SKILL.md)
+### plan
 
-**Install**: `claude plugin install clarify@corca-plugins` | **Update**: `claude plugin update clarify@corca-plugins`
+Agent-assisted plan drafting with parallel research and BDD success criteria.
 
-Unified requirement clarification that merges the best of clarify v1, deep-clarify, and interview into a single skill. Two modes: research-first (default) and lightweight direct Q&A (`--light`). Originally based on Team Attention's [Clarify skill](https://github.com/team-attention/plugins-for-claude-natives/blob/main/plugins/clarify/SKILL.md).
+```text
+cwf:plan <task description>
+```
 
-**Usage**:
-- `/clarify <requirement>` — research-first (default)
-- `/clarify <requirement> --light` — direct Q&A, no sub-agents
+Parallel prior art + codebase research → structured plan with steps, files, success criteria (BDD + qualitative) → saved to `prompt-logs/` session directory.
 
-**Default mode** (research-first):
-1. Capture & decompose requirement into decision points
-2. Parallel research: codebase exploration + web/best-practice research (uses gather-context if installed, falls back to built-in tools)
-3. Tier classification: T1 (codebase-resolved) → auto-decide, T2 (best-practice-resolved) → auto-decide, T3 (subjective) → ask human
-4. Advisory sub-agents argue opposing perspectives for T3 items
-5. Persistent questioning with why-digging and tension detection
-6. Output: decision table + clarified requirement
+Full reference: [SKILL.md](plugins/cwf/skills/plan/SKILL.md)
 
-**--light mode** (direct Q&A):
-- Iterative questioning via AskUserQuestion
-- Why-digging on surface-level answers
-- Tension detection between answers
-- Before/After comparison output
+### impl
 
-**Key features**:
-- Researches autonomously before asking — only asks about genuinely subjective decisions
-- Integrates with gather-context for research (graceful fallback when not installed)
-- Persistent questioning: why-digs 2-3 levels, detects contradictions
-- Skips advisory and questioning phases entirely when all items are resolvable
-- Adapts to user's language (Korean/English)
+Implementation orchestration from a structured plan.
 
-### [retro](plugins/retro/skills/retro/SKILL.md)
+```text
+cwf:impl                    # Auto-detect most recent plan.md
+cwf:impl <path/to/plan.md>  # Explicit plan path
+```
 
-**Install**: `claude plugin install retro@corca-plugins` | **Update**: `claude plugin update retro@corca-plugins`
+Loads plan (+ phase handoff if present) → decomposes into work items by domain and dependency → sizes agent team adaptively (1-4 agents) → executes in parallel batches → verifies against BDD criteria.
 
-Adaptive session retrospective. If `lessons.md` in the [Plan & Lessons Protocol](plugins/plan-and-lessons/protocol.md) is a progressively accumulated learning log, `retro` is a "full-session, bird's-eye" retrospective. Light by default (fast, low cost); use `--deep` for full expert analysis.
+Full reference: [SKILL.md](plugins/cwf/skills/impl/SKILL.md)
 
-**Usage**:
-- End of a session (light): `/retro`
-- Full analysis with expert lens: `/retro --deep`
-- With a specific directory: `/retro prompt-logs/260130-my-session`
+### retro
 
-**Modes**:
-- **Light** (default): Sections 1-4 + 7. No sub-agents, no web search. Agent auto-selects based on session weight.
-- **Deep** (`--deep`): Full 7 sections including Expert Lens (parallel sub-agents) and Learning Resources (web search).
+Adaptive session retrospective — light by default, deep on request.
 
-**Key features**:
-- Documents user/org/project context that will help future work
-- Observes working style and collaboration patterns and suggests CLAUDE.md updates (applies only with user approval)
-- Waste Reduction analysis: identifies wasted turns, over-engineering, missed shortcuts, context waste, and communication inefficiencies
-- Analyzes critical decisions using Gary Klein's CDM (Critical Decision Method) with session-specific probes
-- Expert Lens (deep only): parallel sub-agents adopt real expert identities to analyze the session through contrasting frameworks
-- Learning Resources (deep only): web-searched resources tailored to the user's knowledge level
-- Scans installed skills for relevance before suggesting external skill discovery
+```text
+cwf:retro            # Adaptive (deep by default)
+cwf:retro --deep     # Full analysis with expert lens
+cwf:retro --light    # Sections 1-4 + 7 only, no sub-agents
+```
 
-**Outputs**:
-- `prompt-logs/{YYMMDD}-{NN}-{title}/retro.md` — saved alongside plan.md and lessons.md
+Sections: Context Worth Remembering, Collaboration Preferences, Waste Reduction (5 Whys), Critical Decision Analysis (CDM), Expert Lens (deep), Learning Resources (deep), Relevant Skills. Persists findings to project-level documents.
 
-### [refactor](plugins/refactor/skills/refactor/SKILL.md)
+Full reference: [SKILL.md](plugins/cwf/skills/retro/SKILL.md)
 
-**Install**: `claude plugin install refactor@corca-plugins` | **Update**: `claude plugin update refactor@corca-plugins`
+### refactor
 
-Multi-mode code and skill review tool. Five modes for different review scopes — from a quick structural scan to full cross-plugin analysis. Absorbs suggest-tidyings' commit-based tidying workflow.
+Multi-mode code and skill review with five operating modes.
 
-**Usage**:
-- `/refactor` — quick scan all marketplace skills
-- `/refactor --code [branch]` — commit-based tidying (parallel sub-agents)
-- `/refactor --skill <name>` — deep review of a single skill
-- `/refactor --skill --holistic` — cross-plugin analysis
-- `/refactor --docs` — documentation consistency review
+```text
+cwf:refactor                        # Quick scan all skills
+cwf:refactor --code [branch]        # Commit-based tidying
+cwf:refactor --skill <name>         # Deep review of a single skill
+cwf:refactor --skill --holistic     # Cross-plugin analysis
+cwf:refactor --docs                 # Documentation consistency review
+```
 
-**Modes**:
-- **Quick scan** (no args): Runs structural checks on all marketplace SKILL.md files — word/line count, unreferenced resources, Anthropic compliance (kebab-case, description length). Outputs a summary table with flags.
-- **Code tidying** (`--code`): Analyzes recent non-tidying commits for safe refactoring opportunities. Parallel sub-agents apply 8 tidying techniques (guard clauses, dead code, explaining variables, etc.) from Kent Beck's "Tidy First?" philosophy.
-- **Deep review** (`--skill <name>`): Evaluates a single skill against Progressive Disclosure criteria + Anthropic compliance. Produces a structured report with prioritized refactoring suggestions.
-- **Holistic** (`--skill --holistic`): Cross-plugin analysis across three dimensions — pattern propagation, boundary issues, missing connections. Saves report to `prompt-logs/`.
-- **Docs review** (`--docs`): Checks consistency between CLAUDE.md, README, project-context.md, marketplace.json, and plugin.json files. Flags dead links, stale references, and structural mismatches.
+Quick scan runs structural checks. Code tidying analyzes commits for safe refactoring (Kent Beck's "Tidy First?"). Deep review evaluates against progressive disclosure criteria. Holistic mode detects cross-plugin pattern issues. Docs mode checks cross-document consistency.
+
+Full reference: [SKILL.md](plugins/cwf/skills/refactor/SKILL.md)
+
+### handoff
+
+Generate session or phase handoff documents from project state and artifacts.
+
+```text
+cwf:handoff                # Generate next-session.md + register
+cwf:handoff --register     # Register session in cwf-state.yaml only
+cwf:handoff --phase        # Generate phase-handoff.md (HOW context)
+```
+
+Session handoffs carry task scope, lessons, and unresolved items for the next session. Phase handoffs carry protocols, rules, and constraints for the next workflow phase (HOW), complementing plan.md (WHAT).
+
+Full reference: [SKILL.md](plugins/cwf/skills/handoff/SKILL.md)
+
+### setup
+
+Initial CWF configuration.
+
+```text
+cwf:setup                # Full setup (hooks + tools + index)
+cwf:setup --hooks        # Hook group selection only
+cwf:setup --tools        # External tool detection only
+cwf:setup --index        # Generate project index.md
+```
+
+Interactive hook group toggle, external AI CLI and API key detection (Codex, Gemini, Tavily, Exa), and progressive disclosure index generation. CWF hooks work without running setup — this skill is for customization.
+
+Full reference: [SKILL.md](plugins/cwf/skills/setup/SKILL.md)
+
+### update
+
+Check and apply CWF plugin updates.
+
+```text
+cwf:update               # Check + update if newer version exists
+cwf:update --check       # Version check only
+```
+
+Full reference: [SKILL.md](plugins/cwf/skills/update/SKILL.md)
 
 ## Hooks
 
-### [attention-hook](plugins/attention-hook/README.md)
+CWF includes 7 hook groups that run automatically. All are enabled by default; use `cwf:setup --hooks` to toggle individual groups.
 
-**Install**: `claude plugin install attention-hook@corca-plugins` | **Update**: `claude plugin update attention-hook@corca-plugins`
+| Group | Hook Type | What It Does |
+|-------|-----------|-------------|
+| `attention` | Notification, Pre/PostToolUse | Slack notifications on idle, AskUserQuestion, plan mode |
+| `log` | Stop, SessionEnd | Auto-log conversation turns to markdown |
+| `read` | PreToolUse → Read | File-size aware reading guard (warn >500 lines, block >2000) |
+| `lint_markdown` | PostToolUse → Write\|Edit | Markdown validation — lint violations trigger self-correction |
+| `lint_shell` | PostToolUse → Write\|Edit | ShellCheck validation for shell scripts |
+| `websearch_redirect` | PreToolUse → WebSearch | Redirect Claude's WebSearch to `cwf:gather --search` |
+| `plan_protocol` | PreToolUse → EnterPlanMode | Inject Plan & Lessons Protocol on plan mode entry |
 
-Slack notifications with threading when Claude Code is waiting for input. All notifications from a single session are grouped into one Slack thread, keeping your channel clean. Useful when running on a remote server. (Background: [blog post](https://www.stdy.blog/1p1w-03-attention-hook/))
+Notification examples:
 
-**Key features**:
-- **Thread grouping**: first user prompt creates a parent message; subsequent notifications appear as thread replies
-- **Idle notification**: when Claude waits 60+ seconds for input (`idle_prompt`)
-- **AskUserQuestion notification**: when Claude asks a question and gets no response for 30+ seconds (`CLAUDE_CORCA_ATTENTION_DELAY`)
-- **Plan mode notification**: when Claude enters or exits plan mode and gets no response for 30+ seconds
-- **Heartbeat status**: periodic updates during long autonomous operations (5+ min idle)
-- **Backward compatible**: falls back to webhook (no threading) if only `SLACK_WEBHOOK_URL` is set
+<img src="assets/attention-hook-normal-response.png" alt="Slack notification — normal response" width="600">
 
-> **Compatibility note**: this script parses Claude Code's internal transcript structure using `jq`. It may break when Claude Code updates. See the script comments for the tested version info.
+<img src="assets/attention-hook-AskUserQuestion.png" alt="Slack notification — AskUserQuestion" width="600">
 
-**Requirements**:
-- `jq` installed (for JSON parsing)
-- Slack App with `chat:write` + `im:write` scopes (recommended) or Incoming Webhook URL
+## Configuration
 
-**Setup** (Slack App — enables threading):
+Set environment variables in `~/.claude/.env`:
 
-1. Create a Slack App at [api.slack.com/apps](https://api.slack.com/apps), add `chat:write` and `im:write` scopes, install to workspace
-2. Get the channel ID: open a DM with your bot → click the bot name → copy the Channel ID (starts with `D`). For channels, use `/invite @YourBotName` first.
-3. Create `~/.claude/.env`:
+### Slack notifications (attention hook)
+
 ```bash
-# ~/.claude/.env
-SLACK_BOT_TOKEN="xoxb-your-bot-token"
-SLACK_CHANNEL_ID="D0123456789"  # Bot DM channel (or C... for channels)
-CLAUDE_CORCA_ATTENTION_DELAY=30  # AskUserQuestion notification delay in seconds (default: 30)
+SLACK_BOT_TOKEN="xoxb-your-bot-token"       # Slack App with chat:write + im:write scopes
+SLACK_CHANNEL_ID="D0123456789"               # Bot DM channel ID (or C... for channels)
+CLAUDE_CORCA_ATTENTION_DELAY=30              # AskUserQuestion notification delay (seconds)
 ```
 
-For legacy webhook setup (no threading), set `SLACK_WEBHOOK_URL` instead. See [plugin README](plugins/attention-hook/README.md) for details.
+For legacy webhook setup (no threading), set `SLACK_WEBHOOK_URL` instead.
 
-**Notification contents**:
-- 📝 User request (first/last 5 lines, truncated)
-- 🤖 Claude response (first/last 5 lines, truncated)
-- ❓ Waiting on a question: AskUserQuestion prompt + choices (if any)
-- ✅ Todo: counts of done/in-progress/pending items and their text
-- 💓 Heartbeat: periodic status with todo progress during long tasks
+### Search APIs (gather skill)
 
-**Examples**:
-
-<img src="assets/attention-hook-normal-response.png" alt="Slack notification example 1 - normal response" width="600">
-
-<img src="assets/attention-hook-AskUserQuestion.png" alt="Slack notification example 2 - AskUserQuestion" width="600">
-
-### [plan-and-lessons](plugins/plan-and-lessons/hooks/hooks.json)
-
-**Install**: `claude plugin install plan-and-lessons@corca-plugins` | **Update**: `claude plugin update plan-and-lessons@corca-plugins`
-
-A hook that automatically injects the Plan & Lessons Protocol when Claude Code enters plan mode (via the `EnterPlanMode` tool call). The protocol defines a workflow that creates plan.md and lessons.md under `prompt-logs/{YYMMDD}-{NN}-{title}/`.
-
-**How it works**:
-- Uses a `PreToolUse` → `EnterPlanMode` matcher to detect plan-mode entry
-- Injects the protocol document path via `additionalContext`
-- Claude reads the protocol and follows it
-
-**Notes**:
-- If you enter plan mode directly via `/plan` or Shift+Tab, the hook won't fire (CLI mode toggle; no tool call happens)
-- For better coverage, also referencing the protocol from `CLAUDE.md` is recommended
-
-### [smart-read](plugins/smart-read/hooks/hooks.json)
-
-**Install**: `claude plugin install smart-read@corca-plugins` | **Update**: `claude plugin update smart-read@corca-plugins`
-
-A hook that intercepts Read tool calls and enforces intelligent file reading based on file size. Prevents context waste by warning on medium files and blocking full reads on large files, guiding Claude to use offset/limit or Grep instead.
-
-**How it works**:
-- Uses a `PreToolUse` → `Read` matcher to intercept file reads
-- Checks file size (line count) before allowing full reads
-- Small files (≤500 lines): allowed silently
-- Medium files (500-2000 lines): allowed with `additionalContext` showing line count
-- Large files (>2000 lines): denied with guidance to use `offset`/`limit` or `Grep`
-- Binary files (PDF, images, notebooks): always allowed (Read handles these natively)
-
-**Bypass**: Claude can bypass the deny by setting `offset` or `limit` explicitly — the hook only blocks when both are absent, so intentional partial reads always go through.
-
-**Configuration** (optional):
-
-Set thresholds in `~/.claude/.env`:
 ```bash
-# ~/.claude/.env
-CLAUDE_CORCA_SMART_READ_WARN_LINES=500   # Lines above which additionalContext is added (default: 500)
-CLAUDE_CORCA_SMART_READ_DENY_LINES=2000  # Lines above which read is denied (default: 2000)
+TAVILY_API_KEY="tvly-..."                    # Web search and URL extraction (https://app.tavily.com)
+EXA_API_KEY="..."                            # Code search (https://dashboard.exa.ai)
 ```
 
-### [prompt-logger](plugins/prompt-logger/README.md)
+### Gather output
 
-**Install**: `claude plugin install prompt-logger@corca-plugins` | **Update**: `claude plugin update prompt-logger@corca-plugins`
-
-A hook that auto-logs every conversation turn to markdown files. Uses `Stop` and `SessionEnd` hooks to incrementally capture turns as they happen — no model involvement, pure bash + jq processing.
-
-**How it works**:
-- `Stop` hook fires when Claude finishes responding → logs the completed turn
-- `SessionEnd` hook fires on exit/clear → catches any unlogged final content
-- Both call the same idempotent script with offset-based incremental processing
-
-**Output**: One markdown file per session at `{cwd}/prompt-logs/sessions/{date}-{hash}.md`, containing:
-- Session metadata (model, branch, CWD, Claude Code version)
-- Each turn with timestamps, duration, and token usage
-- Full user prompts (with `[Image]` placeholders for images)
-- Truncated assistant responses (first 5 + last 5 lines if > threshold)
-- Tool call summaries (tool name + key parameter)
-
-**Configuration** (optional):
-
-Set in `~/.claude/.env`:
 ```bash
-# ~/.claude/.env
-CLAUDE_CORCA_PROMPT_LOGGER_DIR="/custom/path"        # Output directory (default: {cwd}/prompt-logs/sessions)
-CLAUDE_CORCA_PROMPT_LOGGER_ENABLED=false              # Disable logging (default: true)
-CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE=20                # Truncation threshold in lines (default: 10)
+CLAUDE_CORCA_GATHER_CONTEXT_OUTPUT_DIR="./gathered"  # Default output directory
 ```
 
-### [markdown-guard](plugins/markdown-guard/hooks/hooks.json)
+### Smart-read thresholds
 
-**Install**: `claude plugin install markdown-guard@corca-plugins` | **Update**: `claude plugin update markdown-guard@corca-plugins`
+```bash
+CLAUDE_CORCA_SMART_READ_WARN_LINES=500      # Lines above which a warning is shown (default: 500)
+CLAUDE_CORCA_SMART_READ_DENY_LINES=2000     # Lines above which full read is blocked (default: 2000)
+```
 
-A PostToolUse hook that validates markdown files after every Write or Edit operation. When `markdownlint-cli2` detects violations (bare code fences, missing blank lines around headings, etc.), the hook blocks the operation and reports the issues so Claude can self-correct immediately.
+### Prompt logger
 
-**How it works**:
-- Uses a `PostToolUse` → `Write|Edit` matcher (regex) to intercept markdown writes
-- Runs `npx markdownlint-cli2` on the written file (respects `.markdownlint.json` config)
-- If violations found: blocks with a reason containing the lint output
-- If clean: passes silently
-
-**Notes**:
-- Skips non-`.md` files and `prompt-logs/` paths automatically
-- Gracefully skips if `npx` or `markdownlint-cli2` is not available
-- Requires `markdownlint-cli2` (installed automatically via `npx`)
-
-## Removed Plugins
-
-The following plugins were removed from the marketplace. Source code is available in commit `238f82d` for reference.
-
-### Removed in v2.0.0
-
-| Removed plugin | Replacement | Command mapping |
-|------------|------|------|
-| `suggest-tidyings` | [refactor](#refactor) `--code` | `/suggest-tidyings` → `/refactor --code` |
-| `deep-clarify` | [clarify](#clarify) | `/deep-clarify <req>` → `/clarify <req>` |
-| `interview` | [clarify](#clarify) | `/interview <topic>` → `/clarify <req>` |
-| `web-search` | [gather-context](#gather-context) | `/web-search <q>` → `/gather-context --search <q>` |
-
-### Removed in v1.8.0
-
-| Removed plugin | Replacement |
-|------------|------|
-| `g-export` | `gather-context` (built-in Google Docs/Slides/Sheets) |
-| `slack-to-md` | `gather-context` (built-in Slack thread export) |
-| `notion-to-md` | `gather-context` (built-in Notion page export) |
+```bash
+CLAUDE_CORCA_PROMPT_LOGGER_DIR="/custom/path"  # Output directory (default: {cwd}/prompt-logs/sessions)
+CLAUDE_CORCA_PROMPT_LOGGER_ENABLED=false       # Disable logging (default: true)
+CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE=20         # Truncation threshold in lines (default: 10)
+```
 
 ## License
 
