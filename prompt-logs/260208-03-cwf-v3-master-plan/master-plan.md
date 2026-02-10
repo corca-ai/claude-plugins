@@ -20,7 +20,7 @@ Reference: compound-engineering (16 skills, v2.30.0) and superpowers
 | # | Decision | Detail |
 |---|----------|--------|
 | 1 | Single `cwf` plugin | All skills + hooks in `plugins/cwf/`. Required for `cwf:*` naming. |
-| 2 | Breaking change | Old plugins fully deprecated at merge. Migration script in final session. |
+| 2 | Breaking change | Old plugins deleted from marketplace-v3 (S32). marketplace.json v3.0.0 with CWF only. |
 | 3 | Umbrella branch | `marketplace-v3` branch + feature branches per task → main merge. **Dev as repo-level skills** (`.claude/skills/`) for dogfooding; convert to plugin structure at merge. |
 | 4 | Hook selective activation | Dual-file: `cwf-config.json` (skills read) + `cwf-hooks-enabled.sh` (hooks source). `cwf:setup` generates both. |
 | 5 | Infra = hooks + setup subcommands | No standalone infra skills. `cwf:setup` manages hook config. |
@@ -42,7 +42,7 @@ Reference: compound-engineering (16 skills, v2.30.0) and superpowers
 
 ## Skill & Hook Inventory (Target)
 
-### Workflow Stage Skills (10 skills)
+### Workflow Stage Skills (11 skills)
 
 | Trigger | Source | Type | Notes |
 |---------|--------|------|-------|
@@ -56,6 +56,7 @@ Reference: compound-engineering (16 skills, v2.30.0) and superpowers
 | `cwf:retro` | retro | Skill | Enhanced: parallel sub-agents per analysis section |
 | `cwf:refactor` | refactor | Skill | Enhanced: parallel sub-agents per review perspective |
 | `cwf:handoff` | **New** | Skill | Auto-generate session handoff from `cwf-state.yaml` + artifacts |
+| `cwf:ship` | `/ship` repo skill | Skill | GitHub workflow automation: issue creation, PR with lessons/CDM/checklist, merge management |
 
 ### Infrastructure (hooks only, managed by `cwf:setup`)
 
@@ -146,6 +147,7 @@ Skills read/write this file. `cwf:handoff` generates handoff documents from it.
 | `cwf:retro` | **Parallel sub-agents** | Per analysis section (collaboration, waste, CDM, expert lens) |
 | `cwf:refactor` | **Parallel sub-agents** | Per review perspective (code quality, docs, structure) |
 | `cwf:handoff` | Single | State file reader + doc generator |
+| `cwf:ship` | Single | GitHub workflow automation (issue → PR → merge) |
 
 ### Shared Agent Patterns Reference
 
@@ -347,7 +349,9 @@ plugins/cwf/
 │   │   ├── SKILL.md
 │   │   ├── references/
 │   │   └── scripts/
-│   └── handoff/
+│   ├── handoff/
+│   │   └── SKILL.md
+│   └── ship/
 │       └── SKILL.md
 └── README.md
 ```
@@ -398,7 +402,8 @@ Source: `prompt-logs/260208-01-refactor-review/`
 | **S11b** (done) | feat/cwf-refactor | Migrate refactor with parallel sub-agent enhancement | Compare output quality vs v2. |
 | **S12** (done) | feat/cwf-setup | Build `cwf:setup` + `cwf:update` + `cwf:handoff`. Rewrite `install.sh` + `update-all.sh`. Migration script. | Full setup flow on clean machine (or simulated). |
 | **S13** (done) | marketplace-v3 | Holistic refactor review on entire cwf plugin | Use `cwf:refactor --holistic` on itself. |
-| **S13.5** | s13.5-*-* | Self-healing criteria (A, done), expert-in-the-loop + phase handoff (B, done), concept distillation + README v3 (B2), project-context slimming (C), hook module abstraction (D) | Provenance check triggers on stale criteria. |
+| **S13.5** (done) | s13.5-*-* | Self-healing criteria (A), expert-in-the-loop + phase handoff (B), concept distillation + README v3 (B2), concept-refactor integration (B3), plan mode removal + live state + compact recovery (C1), docs restructure + hook infra + orphan recovery (C2DE). All 7 workstreams complete. | Provenance check triggers on stale criteria. |
+| **S32** (done) | marketplace-v3 | **Docs overhaul W1-W9**: CLAUDE.md rewrite (66→44), cheatsheet merge (5 docs→1), project-context + architecture-patterns trim, standalone plugin deletion (9 dirs), marketplace v3.0.0, clarify Path B removal, refactor --docs enhancement, cwf-state auto-init, README sync (EN+KO) | markdownlint 0 errors. 93 files, -7479/+446 lines. |
 | **S13.6** | s13.6-cwf-protocol | Full CWF protocol design: auto-chaining gather→clarify→plan→review→impl→retro→ship | Single `cwf` invocation chains full cycle. |
 | **S14** | marketplace-v3 | Integration test, deprecate old plugins, merge to main. **Produce `docs/v3-migration-decisions.md`** — synthesize all key decisions and lessons from S0-S14 into a single document. PR body gets the summary, doc gets the details. README v3 philosophy moved to S13.5-B2. | Full workflow end-to-end test. |
 
@@ -419,7 +424,7 @@ S1 → S2 → S3 (ship skill — enables workflow for all v3 sessions)
               ↓
          S12 (setup/update/handoff, needs all skills)
               ↓
-         S13 → S13.5-A → S13.5-B → S13.5-B2 → S13.5-C/D → S13.6 → S14
+         S13 → S13.5-A → S13.5-B → S13.5-B2 → S13.5-C/D/E → S32 (docs overhaul) → S13.6 → S14
 ```
 
 ### S13.5 Workstream Details
@@ -431,9 +436,9 @@ S1 → S2 → S3 (ship skill — enables workflow for all v3 sessions)
 | **B2** | marketplace-v3 (no feature branch — #15) | Concept distillation (6 generic + 9 application concepts) + README v3 rewrite. Identified 3 refactor integration points (unimplemented). #16 | ✅ Done |
 | **B3** | feat/concept-refactor-integration (→ marketplace-v3, PR #18) | Concept-based refactor integration: Form/Meaning/Function triadic framework, concept-map.md, exit-plan-mode.sh hook | ✅ Done |
 | **C1** | marketplace-v3 | Plan mode removal + live state + compact recovery hook (S29). Also: session log turn injection into compact recovery. | ✅ Done |
-| **C2** | marketplace-v3 | project-context.md slimming (audit, dedup, graduation) | Pending |
-| **D** | marketplace-v3 | Hook infrastructure (Slack threading, shared module extraction) | Pending |
-| **E** | marketplace-v3 | prompt-logger: orphaned session log recovery at SessionStart(startup) | Pending |
+| **C2** | s13.5-c2de-docs-infra | project-context.md slimming (audit, dedup, graduation) | ✅ Done |
+| **D** | s13.5-c2de-docs-infra | Hook infrastructure (Slack reply_broadcast env) | ✅ Done |
+| **E** | s13.5-c2de-docs-infra | prompt-logger: orphaned session log recovery + AskUserQuestion logging | ✅ Done |
 
 ## Handoff Template (for S1+)
 

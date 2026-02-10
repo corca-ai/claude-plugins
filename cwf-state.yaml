@@ -251,22 +251,23 @@ hooks:
 # read by SessionStart(compact) hook for context recovery after auto-compact.
 # check-session.sh --live validates required fields are populated.
 live:
-  session_id: "S13.5-C2DE"
-  dir: "prompt-logs/260209-30-s13.5-c2de-docs-infra"
-  branch: "s13.5-c2de-docs-infra"
+  session_id: "S32"
+  dir: "prompt-logs/260210-03-docs-overhaul-impl"
+  branch: "marketplace-v3"
   phase: "impl"
-  task: "C2(docs restructure) + D(reply_broadcast env) + E(orphan recovery + AskUserQuestion logging)"
+  task: "Docs overhaul W1-W9: CLAUDE.md rewrite, docs 9→5, CWF cleanup, standalone delete"
   key_files:
-    - docs/project-context.md
-    - docs/plugin-dev-cheatsheet.md
     - CLAUDE.md
-    - plugins/prompt-logger/hooks/scripts/log-turn.sh
-    - plugins/cwf/hooks/scripts/slack-send.sh
-  dont_touch:
-    - plugins/cwf/skills/gather/
-    - plugins/cwf/skills/review/references/
-    - prompt-logs/sessions/
-    - plugins/cwf/hooks/scripts/compact-context.sh
+    - docs/plugin-dev-cheatsheet.md
+    - docs/architecture-patterns.md
+    - docs/project-context.md
+    - docs/documentation-guide.md
+    - .claude-plugin/marketplace.json
+  decisions:
+    - "P3 priority: CWF strong coupling, cwf-state.yaml mandatory"
+    - "Standalone plugins: clean break (delete dirs + marketplace entries)"
+    - "Docs merge: 9→5, cheatsheet absorbs 4 files (~280 lines)"
+    - "W8 already done, W6 deferred to after W2"
 
 # Expert roster for domain expert sub-agents (used by clarify, review, retro)
 # Semi-automatic evolution: usage_count auto-incremented, new experts user-approved
