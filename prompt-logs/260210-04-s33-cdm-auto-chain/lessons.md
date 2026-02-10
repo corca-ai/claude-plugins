@@ -30,6 +30,12 @@
 - **Actual**: S32's commit strategy lesson (CDM 2) recurred in S33 — user had to intervene with "Do commit in proper units." SKILL.md structural changes (cross-cutting gate, fail-fast classification) did not recur.
 - **Takeaway**: Lessons that only exist as conventions ("remember to do X") are fragile. To prevent recurrence, escalate to structure: required template sections, workflow phases, or automated gates. Applied: plan template now requires Commit Strategy section.
 
+### Web research protocol must be shared, not local
+
+- **Expected**: Expert sub-agents (retro Batch 2) would efficiently verify expert identities via web search and write output files
+- **Actual**: Both agents exhausted max_turns hitting 404s on guessed URLs (deming.org, kainexus.com, mindtools.com, etc.) and never reached the Write step. Meanwhile, clarify/SKILL.md's Web Researcher prompt already has the exact solution: "Use WebSearch to discover valid URLs first. If WebFetch returns 404, skip that domain entirely."
+- **Takeaway**: A web research protocol that exists in one sub-agent prompt but not others is a local convention, not a shared structure. Extracted to `agent-patterns.md` "Web Research Protocol" section so all sub-agents that do web research can reference it. Same pattern as the cross-cutting gate: identical logic in 3+ places → shared reference.
+
 ### Rules in docs get ignored; rules in workflow get followed
 
 - **Expected**: CLAUDE.md rule "run check-session.sh --impl" would be followed

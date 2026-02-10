@@ -53,6 +53,9 @@ The following were applied in S33 retro. Verify they work correctly:
    triggers Step 0 extraction suggestion
 4. **check-session.sh gate** (impl/SKILL.md Phase 4.5, run/SKILL.md Phase 3):
    Forced function, not optional memory
+5. **Web Research Protocol** (agent-patterns.md): Shared protocol for all
+   sub-agents doing web research — discover before fetch, skip 404 domains,
+   budget turns for output writing
 
 ## Success Criteria — Behavioral (BDD)
 

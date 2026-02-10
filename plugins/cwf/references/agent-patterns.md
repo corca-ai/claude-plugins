@@ -156,6 +156,18 @@ When `--mode plan` or `--mode code` is used, `cwf:review` receives the plan's su
 - **Behavioral criteria** (BDD-style Given/When/Then): checked as a pass/fail list
 - **Qualitative criteria** (narrative): addressed in the verdict prose
 
+## Web Research Protocol
+
+All sub-agents that use WebSearch/WebFetch must follow these rules to avoid wasting turns on invalid URLs:
+
+1. **Discover before fetching**: Use WebSearch to find valid URLs first. NEVER construct URLs from memory or training data — they may be outdated or nonexistent.
+2. **Skip failed domains**: If a WebFetch returns 404 or 429, skip that domain entirely. Move to the next source.
+3. **Stop when sufficient**: Find 3-5 authoritative sources. Stop when sufficient evidence is collected — do NOT exhaustively search.
+4. **Prefer official sources**: Official documentation and primary sources over blog posts.
+5. **Budget turns**: Reserve at least 2-3 turns for writing output. If `max_turns` is 12, stop researching by turn 9-10.
+
+Include this protocol (or reference this section) in every sub-agent prompt that involves web research. Failure to include it causes agents to exhaust `max_turns` on 404 retries without producing output.
+
 ## Design Principles
 
 ### Deliberate Naivete
