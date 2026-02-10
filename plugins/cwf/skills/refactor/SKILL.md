@@ -83,10 +83,20 @@ bash {SKILL_DIR}/scripts/tidy-target-commits.sh 5 [branch]
 
 ### 2. Parallel Analysis with Sub-agents
 
-For each commit hash, launch a **parallel sub-agent** using Task tool:
+**Resolve session directory**: Read `cwf-state.yaml` → `live.dir` to get the current session directory path.
 
 ```yaml
-Task tool with subagent_type: general-purpose
+session_dir: "{live.dir value from cwf-state.yaml}"
+```
+
+Apply the [context recovery protocol](../../references/context-recovery-protocol.md) — for each commit N (1-indexed), check `{session_dir}/refactor-tidy-commit-{N}.md`.
+
+For each commit hash that needs analysis, launch a **parallel sub-agent** using Task tool:
+
+```yaml
+Task tool:
+  subagent_type: general-purpose
+  max_turns: 12
 ```
 
 Each sub-agent prompt:
@@ -95,10 +105,11 @@ Each sub-agent prompt:
 2. Analyze commit diff: `git show {commit_hash}`
 3. Check if changes still exist: `git diff {commit_hash}..HEAD -- {file}` (skip modified regions)
 4. Return suggestions or "No tidying opportunities"
+5. **Output Persistence**: Write your complete analysis to: `{session_dir}/refactor-tidy-commit-{N}.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`
 
 ### 3. Aggregate Results
 
-Collect all sub-agent results and present:
+Read all result files from the session directory (`{session_dir}/refactor-tidy-commit-{N}.md` for each commit) and present:
 
 ```markdown
 # Tidying Analysis Results
@@ -134,7 +145,20 @@ Read `{SKILL_DIR}/references/review-criteria.md` for the evaluation checklist.
 
 ### 4. Parallel Evaluation with Sub-agents
 
-Launch **2 parallel sub-agents** in a single message using Task tool (`subagent_type: general-purpose`):
+**Resolve session directory**: Read `cwf-state.yaml` → `live.dir` to get the current session directory path.
+
+```yaml
+session_dir: "{live.dir value from cwf-state.yaml}"
+```
+
+Apply the [context recovery protocol](../../references/context-recovery-protocol.md) to these files:
+
+| Agent | Output file |
+|-------|-------------|
+| Structural Review | `{session_dir}/refactor-deep-structural.md` |
+| Quality + Concept Review | `{session_dir}/refactor-deep-quality.md` |
+
+Launch **2 parallel sub-agents** in a single message using Task tool (`subagent_type: general-purpose`, `max_turns: 12`) — only for agents whose result files are missing or invalid:
 
 **Agent A — Structural Review** (Criteria 1–4):
 
@@ -143,6 +167,7 @@ Prompt includes:
 - All reference file contents and resource file listing
 - `{SKILL_DIR}/references/review-criteria.md` criteria sections 1–4
 - Instructions: Evaluate Size, Progressive Disclosure, Duplication, Resource Health. Return structured findings per criterion.
+- **Output Persistence**: Write your complete findings to: `{session_dir}/refactor-deep-structural.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`
 
 **Agent B — Quality + Concept Review** (Criteria 5–8):
 
@@ -152,12 +177,13 @@ Prompt includes:
 - `{SKILL_DIR}/references/review-criteria.md` criteria sections 5–8
 - `{PLUGIN_ROOT}/references/concept-map.md` (for Criterion 8: Concept Integrity)
 - Instructions: Evaluate Writing Style, Degrees of Freedom, Anthropic Compliance, Concept Integrity. Return structured findings per criterion.
+- **Output Persistence**: Write your complete findings to: `{session_dir}/refactor-deep-quality.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`
 
 Both agents analyze and report; neither modifies files.
 
 ### 5. Produce report
 
-Merge both agents' findings into a unified report:
+Read result files from the session directory (`{session_dir}/refactor-deep-structural.md`, `{session_dir}/refactor-deep-quality.md`). Merge both agents' findings into a unified report:
 
 ```markdown
 ## Refactor Review: <name>
@@ -205,7 +231,21 @@ Read `{SKILL_DIR}/references/holistic-criteria.md` for the three analysis axes.
 
 ### 3. Parallel Analysis with Sub-agents
 
-Launch **3 parallel sub-agents** in a single message using Task tool (`subagent_type: general-purpose`):
+**Resolve session directory**: Read `cwf-state.yaml` → `live.dir` to get the current session directory path.
+
+```yaml
+session_dir: "{live.dir value from cwf-state.yaml}"
+```
+
+Apply the [context recovery protocol](../../references/context-recovery-protocol.md) to these files:
+
+| Agent | Output file |
+|-------|-------------|
+| Convention Compliance | `{session_dir}/refactor-holistic-convention.md` |
+| Concept Integrity | `{session_dir}/refactor-holistic-concept.md` |
+| Workflow Coherence | `{session_dir}/refactor-holistic-workflow.md` |
+
+Launch **3 parallel sub-agents** in a single message using Task tool (`subagent_type: general-purpose`, `max_turns: 12`) — only for agents whose result files are missing or invalid:
 
 **Agent A — Convention Compliance (Form)**:
 
@@ -214,6 +254,7 @@ Prompt includes:
 - `{SKILL_DIR}/references/holistic-criteria.md` Section 1 content
 - `{PLUGIN_ROOT}/references/skill-conventions.md` content (shared conventions checklist)
 - Instructions: Verify each skill against skill-conventions.md checklists. Identify good patterns one skill has that others should adopt. Detect repeated patterns across 3+ skills that should be extracted to shared references. Read individual SKILL.md files for deeper investigation as needed. Return structured findings.
+- **Output Persistence**: Write your complete findings to: `{session_dir}/refactor-holistic-convention.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`
 
 **Agent B — Concept Integrity (Meaning)**:
 
@@ -222,6 +263,7 @@ Prompt includes:
 - `{SKILL_DIR}/references/holistic-criteria.md` Section 2 content
 - `{PLUGIN_ROOT}/references/concept-map.md` content (generic concepts + synchronization map)
 - Instructions: For each concept column in the synchronization map, compare how composing skills implement the same concept. Detect inconsistencies, under-synchronization, and over-synchronization. Read individual SKILL.md files for deeper investigation as needed. Return structured findings.
+- **Output Persistence**: Write your complete findings to: `{session_dir}/refactor-holistic-concept.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`
 
 **Agent C — Workflow Coherence (Function)**:
 
@@ -229,12 +271,13 @@ Prompt includes:
 - Condensed inventory map (name, type, word count, capabilities)
 - `{SKILL_DIR}/references/holistic-criteria.md` Section 3 content
 - Instructions: Check data flow completeness between skills, trigger clarity, and workflow automation opportunities. Read individual SKILL.md files for deeper investigation as needed. Return structured findings.
+- **Output Persistence**: Write your complete findings to: `{session_dir}/refactor-holistic-workflow.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`
 
 All 3 agents analyze and report; none modify files.
 
 ### 4. Produce report
 
-Merge 3 agents' outputs into a unified report. Save to `{REPO_ROOT}/prompt-logs/{YYMMDD}-refactor-holistic/analysis.md`. Create the directory if it doesn't exist (use next sequence number if date prefix already exists).
+Read result files from the session directory (`{session_dir}/refactor-holistic-convention.md`, `{session_dir}/refactor-holistic-concept.md`, `{session_dir}/refactor-holistic-workflow.md`). Merge 3 agents' outputs into a unified report. Save to `{REPO_ROOT}/prompt-logs/{YYMMDD}-refactor-holistic/analysis.md`. Create the directory if it doesn't exist (use next sequence number if date prefix already exists).
 
 Report structure:
 

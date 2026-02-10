@@ -255,19 +255,26 @@ live:
   dir: "prompt-logs/260210-03-docs-overhaul-impl"
   branch: "marketplace-v3"
   phase: "impl"
-  task: "Docs overhaul W1-W9: CLAUDE.md rewrite, docs 9→5, CWF cleanup, standalone delete"
+  task: "Implement L1-L3+L9: impl git awareness, clarify completion gate, sub-agent file persistence (5 skills), log-turn.sh fix, review error observability"
   key_files:
-    - CLAUDE.md
-    - docs/plugin-dev-cheatsheet.md
-    - docs/architecture-patterns.md
-    - docs/project-context.md
-    - docs/documentation-guide.md
-    - .claude-plugin/marketplace.json
+    - plugins/cwf/skills/impl/SKILL.md
+    - plugins/cwf/skills/clarify/SKILL.md
+    - plugins/cwf/skills/plan/SKILL.md
+    - plugins/cwf/skills/review/SKILL.md
+    - plugins/cwf/skills/retro/SKILL.md
+    - plugins/cwf/skills/refactor/SKILL.md
+    - plugins/cwf/hooks/scripts/log-turn.sh
+    - cwf-state.yaml
+    - prompt-logs/260210-03-docs-overhaul-impl/plan.md
   decisions:
-    - "P3 priority: CWF strong coupling, cwf-state.yaml mandatory"
-    - "Standalone plugins: clean break (delete dirs + marketplace entries)"
-    - "Docs merge: 9→5, cheatsheet absorbs 4 files (~280 lines)"
-    - "W8 already done, W6 deferred to after W2"
+    - "Always feature branch (hard gate, not warn)"
+    - "Fine-grained per-work-item commits + lesson-driven commits"
+    - "Hard-block impl if clarify not completed (--skip-clarify override)"
+    - "Maximize file persistence for clarify sub-agent results"
+    - "cwf-state.yaml schema: extend live section, no breaking changes"
+  # Added by cwf:clarify Phase 5 — read by cwf:impl Phase 1.0
+  clarify_completed_at: ""    # ISO 8601 timestamp, empty = not completed
+  clarify_result_file: ""     # Path to clarify summary file
 
 # Expert roster for domain expert sub-agents (used by clarify, review, retro)
 # Semi-automatic evolution: usage_count auto-incremented, new experts user-approved

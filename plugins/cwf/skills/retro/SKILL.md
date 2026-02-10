@@ -74,19 +74,36 @@ Analyze the full conversation to produce sections 1-4 and 7 inline. No sub-agent
 
 Draft sections 1-3 inline (these require full conversation access), then launch parallel sub-agents in two batches.
 
-**Batch 1** — launch in a single message with 2 parallel Task calls:
+**Resolve session directory**: Read `cwf-state.yaml` → `live.dir` to get the current session directory path.
 
-- **Agent A — CDM Analysis**: `subagent_type: general-purpose`. Prompt: "Read `{SKILL_DIR}/references/cdm-guide.md`. Analyze the following session summary using CDM methodology. Session summary: {Sections 1-3 summary}. cwf-state context: {relevant cwf-state.yaml content}. Output Section 4 content."
-- **Agent B — Learning Resources**: `subagent_type: general-purpose`. Prompt: "Based on the following session summary, search the web for 2-3 learning resources calibrated to the user's knowledge level. Session summary: {Sections 1-3 summary}. For each resource: title + URL, 2-3 sentence summary of key takeaways, and why it matters for the user's work. Output Section 6 content."
+```yaml
+session_dir: "{live.dir value from cwf-state.yaml}"
+```
 
-Wait for Batch 1 to complete.
+Apply the [context recovery protocol](../../references/context-recovery-protocol.md) to these files before launching each batch:
 
-**Batch 2** — launch in a single message with 2 parallel Task calls (after Batch 1):
+| Batch | Agent | Output file |
+|-------|-------|-------------|
+| 1 | CDM Analysis | `{session_dir}/retro-cdm-analysis.md` |
+| 1 | Learning Resources | `{session_dir}/retro-learning-resources.md` |
+| 2 | Expert α | `{session_dir}/retro-expert-alpha.md` |
+| 2 | Expert β | `{session_dir}/retro-expert-beta.md` |
 
-- **Agent C — Expert alpha**: `subagent_type: general-purpose`. Prompt: "Read `{SKILL_DIR}/references/expert-lens-guide.md`. You are Expert alpha. Session summary: {Sections 1-4 summary, including CDM results from Agent A}. Deep-clarify experts: {names or 'not available'}. Analyze through your framework. Use web search to verify expert identity and cite published work. Output your Expert alpha section."
-- **Agent D — Expert beta**: `subagent_type: general-purpose`. Prompt: "Read `{SKILL_DIR}/references/expert-lens-guide.md`. You are Expert beta. Session summary: {Sections 1-4 summary, including CDM results from Agent A}. Deep-clarify experts: {names or 'not available'}. Analyze through your framework. Use web search to verify expert identity and cite published work. Output your Expert beta section."
+**Batch 1** — launch in a single message with 2 parallel Task calls (only for agents whose result files are missing or invalid):
 
-After Batch 2: draft Section 7 inline (skills scan), then integrate all results into retro.md.
+- **Agent A — CDM Analysis**: `subagent_type: general-purpose`, `max_turns: 12`. Prompt: "Read `{SKILL_DIR}/references/cdm-guide.md`. Analyze the following session summary using CDM methodology. Session summary: {Sections 1-3 summary}. cwf-state context: {relevant cwf-state.yaml content}. Output Section 4 content. **Output Persistence**: Write your complete analysis to: `{session_dir}/retro-cdm-analysis.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`"
+- **Agent B — Learning Resources**: `subagent_type: general-purpose`, `max_turns: 20`. Prompt: "Based on the following session summary, search the web for 2-3 learning resources calibrated to the user's knowledge level. Session summary: {Sections 1-3 summary}. For each resource: title + URL, 2-3 sentence summary of key takeaways, and why it matters for the user's work. Output Section 6 content. **Output Persistence**: Write your complete findings to: `{session_dir}/retro-learning-resources.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`"
+
+Wait for Batch 1 to complete. Read output files from session directory:
+- `{session_dir}/retro-cdm-analysis.md` — CDM analysis (needed by Batch 2 experts)
+- `{session_dir}/retro-learning-resources.md` — Learning resources
+
+**Batch 2** — launch in a single message with 2 parallel Task calls (after Batch 1, only for agents whose result files are missing or invalid):
+
+- **Agent C — Expert alpha**: `subagent_type: general-purpose`, `max_turns: 12`. Prompt: "Read `{SKILL_DIR}/references/expert-lens-guide.md`. You are Expert alpha. Session summary: {Sections 1-4 summary, including CDM results from Agent A}. Deep-clarify experts: {names or 'not available'}. Analyze through your framework. Use web search to verify expert identity and cite published work. Output your Expert alpha section. **Output Persistence**: Write your complete analysis to: `{session_dir}/retro-expert-alpha.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`"
+- **Agent D — Expert beta**: `subagent_type: general-purpose`, `max_turns: 12`. Prompt: "Read `{SKILL_DIR}/references/expert-lens-guide.md`. You are Expert beta. Session summary: {Sections 1-4 summary, including CDM results from Agent A}. Deep-clarify experts: {names or 'not available'}. Analyze through your framework. Use web search to verify expert identity and cite published work. Output your Expert beta section. **Output Persistence**: Write your complete analysis to: `{session_dir}/retro-expert-beta.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`"
+
+After Batch 2: read output files from session directory (`{session_dir}/retro-expert-alpha.md`, `{session_dir}/retro-expert-beta.md`). Draft Section 7 inline (skills scan), then integrate all results into retro.md.
 
 **Rationale for 2-batch design**: Expert Lens requires CDM results ("Sections 1-4 provided by orchestrator" per expert-lens-guide.md). CDM and Learning Resources are independent → Batch 1 parallel. Expert alpha and Expert beta both need CDM results → Batch 2 after Batch 1.
 

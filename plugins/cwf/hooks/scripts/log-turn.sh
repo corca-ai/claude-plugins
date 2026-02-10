@@ -234,6 +234,13 @@ TURN_COUNT=$(echo "$TURNS_JSON" | jq 'length')
 if [ "$TURN_COUNT" -eq 0 ]; then
     # Update offset even if no turns (skip meta/snapshot entries)
     echo "$TOTAL_LINES" > "$OFFSET_FILE"
+    # Persist turn number so next invocation doesn't restart from Turn 1
+    TURN_NUM_FILE="${STATE_DIR}/turn_num"
+    TURN_START=1
+    if [ -f "$TURN_NUM_FILE" ]; then
+        TURN_START=$(cat "$TURN_NUM_FILE")
+    fi
+    echo "$TURN_START" > "$TURN_NUM_FILE"
     exit 0
 fi
 
@@ -458,15 +465,20 @@ while [ "$TURN_IDX" -lt "$TURN_COUNT" ]; do
 
     # ── AskUserQuestion answers (from tool_results in user content) ────
     ASK_ANSWERS=$(echo "$TURN" | jq -r '
-      [.user.message.content // [] | .[] |
+      [
+        (
+          .user.message.content |
+          if type == "array" then . else [] end
+        )[] |
         select(.type == "tool_result") |
         .content |
         if type == "string" then .
-        elif type == "array" then ([.[] | select(.type == "text") | .text] | join(""))
+        elif type == "array" then
+          ([.[] | select(type == "object" and .type == "text") | .text] | join(""))
         else "" end |
         select(test("User has answered|user.*answered"))
       ] | join("\n")
-    ' 2>/dev/null)
+    ' 2>/dev/null || true)
     if [ -n "$ASK_ANSWERS" ]; then
         {
             echo ""

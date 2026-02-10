@@ -28,6 +28,7 @@ cwf:setup                # Full setup (hooks + tools + index)
 cwf:setup --hooks        # Hook group selection only
 cwf:setup --tools        # External tool detection only
 cwf:setup --codex        # Sync CWF skills into Codex user scope (~/.agents/skills)
+cwf:setup --codex-wrapper # Optional Codex wrapper install for session log sync
 cwf:setup --index        # Generate index.md only
 ```
 
@@ -167,6 +168,60 @@ Report:
 - Number of linked skills
 - Destination paths (`~/.agents/skills`, `~/.agents/references`)
 - Whether legacy `~/.codex/skills` was moved and backup path
+
+---
+
+## Phase 2.6: Codex Wrapper Opt-In (Optional)
+
+Use this phase when:
+- User runs `cwf:setup --codex-wrapper`
+- Full setup and user wants Codex session logs auto-synced into repo artifacts
+
+### 2.6.1 Ask for Opt-In
+
+Use AskUserQuestion before making shell-level changes:
+
+```text
+Enable Codex wrapper for automatic session log sync?
+```
+
+If user declines, skip this phase.
+
+### 2.6.2 Install Wrapper (Approved Only)
+
+Run:
+
+```bash
+bash {SKILL_DIR}/../../../../scripts/codex/install-wrapper.sh --enable --add-path
+```
+
+This installs a wrapper symlink at `~/.local/bin/codex` pointing to:
+
+```text
+{repo}/scripts/codex/codex-with-log.sh
+```
+
+The wrapper preserves normal Codex behavior and runs:
+
+```bash
+bash {SKILL_DIR}/../../../../scripts/codex/sync-session-logs.sh --cwd "$PWD"
+```
+
+after each Codex run to persist markdown + raw JSONL under `prompt-logs/sessions-codex/`.
+
+### 2.6.3 Report and Reversal
+
+Report current status:
+
+```bash
+bash {SKILL_DIR}/../../../../scripts/codex/install-wrapper.sh --status
+```
+
+Provide rollback command:
+
+```bash
+bash {SKILL_DIR}/../../../../scripts/codex/install-wrapper.sh --disable
+```
 
 ---
 

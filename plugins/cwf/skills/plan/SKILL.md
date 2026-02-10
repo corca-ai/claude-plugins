@@ -56,13 +56,35 @@ Edit `cwf-state.yaml` `live` section: set `phase: plan`, `task` to the task summ
 
 ## Phase 2: Parallel Research
 
-Launch two sub-agents **simultaneously** using the Task tool.
+### 2.0 Resolve session directory
 
-### Sub-agent A: Prior Art Researcher
+Read `cwf-state.yaml` → `live.dir` to get the current session directory path.
+
+```yaml
+session_dir: "{live.dir value from cwf-state.yaml}"
+```
+
+### 2.1 Context recovery check
+
+Apply the [context recovery protocol](../../references/context-recovery-protocol.md) to these files:
+
+| Agent | Output file |
+|-------|-------------|
+| Prior Art Researcher | `{session_dir}/plan-prior-art-research.md` |
+| Codebase Analyst | `{session_dir}/plan-codebase-analysis.md` |
+
+Skip to Phase 3 if both files are valid.
+
+### 2.2 Launch sub-agents
+
+Launch sub-agents **simultaneously** using the Task tool — only for agents whose result files are missing or invalid.
+
+#### Sub-agent A: Prior Art Researcher
 
 ```yaml
 Task tool:
   subagent_type: general-purpose
+  max_turns: 20
   prompt: |
     Research best practices, frameworks, and prior art relevant to this task.
     Use WebSearch and WebFetch to find:
@@ -76,13 +98,19 @@ Task tool:
 
     Key decisions:
     {decisions from Phase 1}
+
+    ## Output Persistence
+    Write your complete findings to: {session_dir}/plan-prior-art-research.md
+    At the very end of the file, append this sentinel marker on its own line:
+    <!-- AGENT_COMPLETE -->
 ```
 
-### Sub-agent B: Codebase Analyst
+#### Sub-agent B: Codebase Analyst
 
 ```yaml
 Task tool:
   subagent_type: Explore
+  max_turns: 20
   prompt: |
     Analyze the codebase for patterns, dependencies, and constraints relevant
     to this task. For each finding:
@@ -96,9 +124,23 @@ Task tool:
 
     Key decisions:
     {decisions from Phase 1}
+
+    ## Output Persistence
+    Write your complete findings to: {session_dir}/plan-codebase-analysis.md
+    At the very end of the file, append this sentinel marker on its own line:
+    <!-- AGENT_COMPLETE -->
 ```
 
-Both sub-agents run in parallel. Wait for both to complete.
+Wait for all launched sub-agents to complete.
+
+### 2.3 Read output files
+
+After sub-agents complete, read the result files from the session directory (not in-memory return values):
+
+- `{session_dir}/plan-prior-art-research.md` — Prior art research findings
+- `{session_dir}/plan-codebase-analysis.md` — Codebase analysis findings
+
+Use these file contents as input for Phase 3 synthesis.
 
 ## Phase 3: Plan Drafting
 

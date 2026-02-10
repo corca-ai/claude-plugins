@@ -120,6 +120,27 @@ Search the associated plan.md for success criteria to use as verification input:
 Launch **six** reviewers in parallel: 2 internal (Task agents) + 2 external (CLI or Task fallback) + 2 domain experts (Task agents).
 All launched in a **single message** for maximum parallelism.
 
+### 2.0 Resolve session directory and context recovery
+
+Read `cwf-state.yaml` → `live.dir` to get the current session directory path.
+
+```yaml
+session_dir: "{live.dir value from cwf-state.yaml}"
+```
+
+Apply the [context recovery protocol](../../references/context-recovery-protocol.md) to these files:
+
+| Slot | Reviewer | Output file |
+|------|----------|-------------|
+| 1 | Security | `{session_dir}/review-security.md` |
+| 2 | UX/DX | `{session_dir}/review-ux-dx.md` |
+| 3 | Correctness | `{session_dir}/review-correctness.md` |
+| 4 | Architecture | `{session_dir}/review-architecture.md` |
+| 5 | Expert α | `{session_dir}/review-expert-alpha.md` |
+| 6 | Expert β | `{session_dir}/review-expert-beta.md` |
+
+Skip to Phase 3 if all 6 files are valid. In recovery mode (all files cached), skip Phase 2.1–2.3 entirely — proceed directly to Phase 3. Note that temp-dir metadata (`{tmp_dir}/*-meta.txt`) will not exist in recovery; use `duration_ms: —` and `source: CACHED` in provenance for recovered slots.
+
 ### 2.1 Prepare prompts
 
 For **internal** reviewers (Security, UX/DX):
@@ -185,13 +206,27 @@ All 6 reviewers launch in a single message for parallel execution:
 **Slot 1 — Security (always Task):**
 
 ```text
-Task(subagent_type="general-purpose", name="security-reviewer", prompt="{security_prompt}")
+Task(subagent_type="general-purpose", name="security-reviewer", max_turns=12, prompt="
+  {security_prompt}
+
+  ## Output Persistence
+  Write your complete review verdict to: {session_dir}/review-security.md
+  At the very end of the file, append this sentinel marker on its own line:
+  <!-- AGENT_COMPLETE -->
+")
 ```
 
 **Slot 2 — UX/DX (always Task):**
 
 ```text
-Task(subagent_type="general-purpose", name="uxdx-reviewer", prompt="{uxdx_prompt}")
+Task(subagent_type="general-purpose", name="uxdx-reviewer", max_turns=12, prompt="
+  {uxdx_prompt}
+
+  ## Output Persistence
+  Write your complete review verdict to: {session_dir}/review-ux-dx.md
+  At the very end of the file, append this sentinel marker on its own line:
+  <!-- AGENT_COMPLETE -->
+")
 ```
 
 **Slot 3 — Correctness (Codex or fallback):**
@@ -199,16 +234,31 @@ Task(subagent_type="general-purpose", name="uxdx-reviewer", prompt="{uxdx_prompt
 If Codex available:
 
 ```text
-Bash(timeout=300000, command="START_MS=$(date +%s%3N); timeout 280 codex exec --sandbox read-only -c model_reasoning_effort='high' - < '{tmp_dir}/codex-prompt.md' > '{tmp_dir}/codex-output.md' 2>'{tmp_dir}/codex-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/codex-meta.txt'")
+Bash(timeout=300000, command="START_MS=$(date +%s%3N); CODEX_RUNNER='./scripts/codex/codex-with-log.sh'; [ -x \"$CODEX_RUNNER\" ] || CODEX_RUNNER='codex'; timeout 280 \"$CODEX_RUNNER\" exec --sandbox read-only -c model_reasoning_effort='high' - < '{tmp_dir}/codex-prompt.md' > '{tmp_dir}/codex-output.md' 2>'{tmp_dir}/codex-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/codex-meta.txt'")
 ```
 
 For `--mode code`, use `model_reasoning_effort='xhigh'` instead.
 Single quotes around config values avoid double-quote conflicts in the Bash wrapper.
 
+After successful Codex execution (exit 0 + non-empty output), copy output to session dir:
+
+```bash
+cp '{tmp_dir}/codex-output.md' '{session_dir}/review-correctness.md'
+echo '' >> '{session_dir}/review-correctness.md'
+echo '<!-- AGENT_COMPLETE -->' >> '{session_dir}/review-correctness.md'
+```
+
 If Codex NOT available:
 
 ```text
-Task(subagent_type="general-purpose", name="codex-fallback", prompt="{codex_fallback_prompt}")
+Task(subagent_type="general-purpose", name="codex-fallback", max_turns=12, prompt="
+  {codex_fallback_prompt}
+
+  ## Output Persistence
+  Write your complete review verdict to: {session_dir}/review-correctness.md
+  At the very end of the file, append this sentinel marker on its own line:
+  <!-- AGENT_COMPLETE -->
+")
 ```
 
 Using the fallback prompt template from `external-review.md` with the Correctness perspective.
@@ -224,10 +274,25 @@ Bash(timeout=300000, command="START_MS=$(date +%s%3N); timeout 280 npx @google/g
 Uses stdin redirection (`< prompt.md`) instead of `-p "$(cat ...)"` to prevent
 shell injection from review target content containing `$()` or backticks.
 
+After successful Gemini execution (exit 0 + non-empty output), copy output to session dir:
+
+```bash
+cp '{tmp_dir}/gemini-output.md' '{session_dir}/review-architecture.md'
+echo '' >> '{session_dir}/review-architecture.md'
+echo '<!-- AGENT_COMPLETE -->' >> '{session_dir}/review-architecture.md'
+```
+
 If Gemini NOT available:
 
 ```text
-Task(subagent_type="general-purpose", name="gemini-fallback", prompt="{gemini_fallback_prompt}")
+Task(subagent_type="general-purpose", name="gemini-fallback", max_turns=12, prompt="
+  {gemini_fallback_prompt}
+
+  ## Output Persistence
+  Write your complete review verdict to: {session_dir}/review-architecture.md
+  At the very end of the file, append this sentinel marker on its own line:
+  <!-- AGENT_COMPLETE -->
+")
 ```
 
 Using the fallback prompt template from `external-review.md` with the Architecture perspective.
@@ -239,7 +304,7 @@ for domain keywords; match against each roster entry's `domain` field. Select 2 
 with contrasting frameworks. If roster has < 2 matches, fill via independent selection.
 
 ```text
-Task(subagent_type="general-purpose", name="expert-alpha", prompt="
+Task(subagent_type="general-purpose", name="expert-alpha", max_turns=12, prompt="
   Read {CWF_PLUGIN_DIR}/references/expert-advisor-guide.md.
   You are Expert α, operating in **review mode**.
 
@@ -254,13 +319,18 @@ Task(subagent_type="general-purpose", name="expert-alpha", prompt="
 
   Review through your published framework. Use web search to verify your expert identity
   and cite published work. Output in the review mode format from the guide.
+
+  ## Output Persistence
+  Write your complete review verdict to: {session_dir}/review-expert-alpha.md
+  At the very end of the file, append this sentinel marker on its own line:
+  <!-- AGENT_COMPLETE -->
 ")
 ```
 
 **Slot 6 — Expert β (always Task):**
 
 ```text
-Task(subagent_type="general-purpose", name="expert-beta", prompt="
+Task(subagent_type="general-purpose", name="expert-beta", max_turns=12, prompt="
   Read {CWF_PLUGIN_DIR}/references/expert-advisor-guide.md.
   You are Expert β, operating in **review mode**.
 
@@ -275,6 +345,11 @@ Task(subagent_type="general-purpose", name="expert-beta", prompt="
 
   Review through your published framework. Use web search to verify your expert identity
   and cite published work. Output in the review mode format from the guide.
+
+  ## Output Persistence
+  Write your complete review verdict to: {session_dir}/review-expert-beta.md
+  At the very end of the file, append this sentinel marker on its own line:
+  <!-- AGENT_COMPLETE -->
 ")
 ```
 
@@ -282,13 +357,22 @@ Task(subagent_type="general-purpose", name="expert-beta", prompt="
 
 ## Phase 3: Collect All Outputs
 
-### 3.1 Read all results
+### 3.1 Read all results from session directory
 
-- **Internal reviewers** (Security, UX/DX): read Task agent return values directly.
-- **External Bash** (Codex, Gemini): read from temp dir:
-  - `{tmp_dir}/codex-output.md` or `{tmp_dir}/gemini-output.md` for review content
-  - `{tmp_dir}/codex-meta.txt` or `{tmp_dir}/gemini-meta.txt` for exit code and duration
-  - `{tmp_dir}/codex-stderr.log` or `{tmp_dir}/gemini-stderr.log` for error details
+Read review verdicts from the session directory files (not in-memory return values):
+
+| Slot | File |
+|------|------|
+| 1 | `{session_dir}/review-security.md` |
+| 2 | `{session_dir}/review-ux-dx.md` |
+| 3 | `{session_dir}/review-correctness.md` |
+| 4 | `{session_dir}/review-architecture.md` |
+| 5 | `{session_dir}/review-expert-alpha.md` |
+| 6 | `{session_dir}/review-expert-beta.md` |
+
+For external CLI reviewers (Codex, Gemini), also read metadata from temp dir:
+- `{tmp_dir}/codex-meta.txt` or `{tmp_dir}/gemini-meta.txt` for exit code and duration
+- `{tmp_dir}/codex-stderr.log` or `{tmp_dir}/gemini-stderr.log` for error details
 
 For successful external reviews, **override** the provenance `duration_ms` with
 the actual value from the meta file (not any value the CLI may have generated).
@@ -306,13 +390,43 @@ Check each external reviewer's result:
 | 126-127 | Permission denied / not found | `source: FAILED` → launch Task fallback |
 | Other non-zero | Auth error, config issue, etc. | `source: FAILED` → launch Task fallback |
 
+#### Error cause extraction (L9)
+
+When an external CLI fails (exit code != 0), extract the actionable error cause from stderr before launching fallback:
+
+1. Read the stderr log file: `{tmp_dir}/{tool}-stderr.log`
+2. Extract the first actionable error message using this priority:
+   - **JSON stderr**: parse `.error.message` or `.error.details` (common for API errors like `MODEL_CAPACITY_EXHAUSTED`)
+   - **Plain text stderr**: find the last line containing "Error" or "error"
+   - **Fallback**: first 3 non-empty lines of stderr
+3. Store the extracted error cause per slot for use in the Confidence Note:
+
+```text
+error_causes[slot_N] = "{extracted_error}"
+```
+
+#### Launch fallbacks
+
 If fallbacks are needed, launch all needed fallback Task agents in **one message**,
 then read their results. Each fallback uses the fallback prompt template from
 `external-review.md` with the appropriate perspective (Correctness or Architecture).
 
+Each fallback Task agent prompt must include output persistence:
+
+```text
+Task(subagent_type="general-purpose", name="{tool}-fallback", max_turns=12, prompt="
+  {fallback_prompt}
+
+  ## Output Persistence
+  Write your complete review verdict to: {session_dir}/review-{slot_name}.md
+  At the very end of the file, append this sentinel marker on its own line:
+  <!-- AGENT_COMPLETE -->
+")
+```
+
 ### 3.3 Assemble 6 review outputs
 
-Collect all 6 outputs (mix of `REAL_EXECUTION` and `FALLBACK` sources).
+Collect all 6 outputs from session directory files (mix of `REAL_EXECUTION` and `FALLBACK` sources).
 Internal reviewers and expert reviewers follow the standard reviewer output
 format from `prompts.md`. Expert reviewers follow the review mode format
 from `expert-advisor-guide.md`.
@@ -366,7 +480,8 @@ Output to the conversation (do NOT write to a file unless the user asks):
 - Areas where reviewer confidence was low
 - Malformed reviewer outputs that required interpretation
 - Missing success criteria (if no plan was found)
-- External CLI fallbacks used (which tools were unavailable, why).
+- External CLI fallbacks used, with extracted error cause from stderr:
+  "Slot N ({tool}) FAILED → fallback. Cause: {extracted_error}"
   Include setup hint: "Run `codex auth login` / `npx @google/gemini-cli` to enable."
 - Perspective differences between real CLI output and fallback interpretation
 

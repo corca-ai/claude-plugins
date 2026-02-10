@@ -57,13 +57,22 @@ Edit `cwf-state.yaml` `live` section: set `phase: clarify`, `task` to the requir
 
 ### Phase 2: Research
 
-Launch two sub-agents **simultaneously** using the Task tool.
+#### Context recovery (before launching)
+
+Apply the [context recovery protocol](../../references/context-recovery-protocol.md) to these files:
+
+- `{session_dir}/clarify-codebase-research.md`
+- `{session_dir}/clarify-web-research.md`
+
+Launch sub-agents **simultaneously** using the Task tool (only for missing
+or invalid results).
 
 #### Sub-agent A: Codebase Researcher
 
 ```yaml
 Task tool:
   subagent_type: Explore
+  max_turns: 20
   prompt: |
     Explore the codebase and report evidence relevant to these decision points.
     For each point, search with Glob/Grep, read relevant files, and assess
@@ -72,6 +81,10 @@ Task tool:
 
     Decision points:
     {list from Phase 1}
+
+    Write your complete findings to: {session_dir}/clarify-codebase-research.md
+    The file MUST exist when you finish. End your output file with the exact
+    line `<!-- AGENT_COMPLETE -->` as the last line.
 ```
 
 #### Sub-agent B: Web Researcher
@@ -79,23 +92,45 @@ Task tool:
 ```yaml
 Task tool:
   subagent_type: general-purpose
+  max_turns: 20
   prompt: |
     Research best practices for these decision points.
-    Use the Bash tool to call the gather-context search script:
-      bash {cwf plugin dir}/skills/gather/scripts/search.sh "<query>"
-    Or use WebFetch for specific URLs.
+
+    Research strategy:
+    1. Use WebSearch to discover valid URLs first. NEVER construct URLs from
+       memory or training data — they may be outdated or nonexistent.
+    2. Find 3–5 authoritative sources. Stop when sufficient evidence is
+       collected — do NOT exhaustively search.
+    3. If a WebFetch returns 404 or 429, skip that domain entirely. Move to
+       the next source.
+    4. Prefer official documentation over blog posts.
+
+    Use WebSearch for discovery, then WebFetch for specific URLs you found.
     For each point, find authoritative sources and expert perspectives.
     Cite real published work. Report findings — do not make decisions.
 
     Decision points:
     {list from Phase 1}
+
+    Write your complete findings to: {session_dir}/clarify-web-research.md
+    The file MUST exist when you finish. End your output file with the exact
+    line `<!-- AGENT_COMPLETE -->` as the last line.
 ```
 
 Both sub-agents run in parallel. Wait for both to complete.
+Read the output files from session dir (not the in-memory Task return values).
 
 ### Phase 2.5: Expert Analysis
 
-Launch two domain expert sub-agents **simultaneously** using the Task tool.
+#### Context recovery (before launching)
+
+Apply the [context recovery protocol](../../references/context-recovery-protocol.md) to these files:
+
+- `{session_dir}/clarify-expert-alpha.md`
+- `{session_dir}/clarify-expert-beta.md`
+
+Launch two domain expert sub-agents **simultaneously** using the Task tool
+(only for missing or invalid results).
 
 **Expert selection**:
 
@@ -109,6 +144,7 @@ Launch two domain expert sub-agents **simultaneously** using the Task tool.
 ```yaml
 Task tool:
   subagent_type: general-purpose
+  max_turns: 12
   prompt: |
     Read {CWF_PLUGIN_DIR}/references/expert-advisor-guide.md.
     You are Expert α, operating in **clarify mode**.
@@ -125,6 +161,10 @@ Task tool:
     Analyze which decisions are most critical through your published framework.
     Use web search to verify your expert identity and cite published work.
     Output your analysis in the clarify mode format from the guide.
+
+    Write your complete findings to: {session_dir}/clarify-expert-alpha.md
+    The file MUST exist when you finish. End your output file with the exact
+    line `<!-- AGENT_COMPLETE -->` as the last line.
 ```
 
 #### Expert β
@@ -132,6 +172,7 @@ Task tool:
 ```yaml
 Task tool:
   subagent_type: general-purpose
+  max_turns: 12
   prompt: |
     Read {CWF_PLUGIN_DIR}/references/expert-advisor-guide.md.
     You are Expert β, operating in **clarify mode**.
@@ -148,9 +189,14 @@ Task tool:
     Analyze which decisions are most critical through your published framework.
     Use web search to verify your expert identity and cite published work.
     Output your analysis in the clarify mode format from the guide.
+
+    Write your complete findings to: {session_dir}/clarify-expert-beta.md
+    The file MUST exist when you finish. End your output file with the exact
+    line `<!-- AGENT_COMPLETE -->` as the last line.
 ```
 
 Both expert sub-agents run in parallel. Wait for both to complete.
+Read the output files from session dir (not the in-memory Task return values).
 
 **--light mode**: Phase 2.5 is skipped (consistent with --light skipping all sub-agents).
 
@@ -189,7 +235,15 @@ Present the classification:
 
 ### Phase 3.5: Advisory (T3 only)
 
-Launch two advisory sub-agents **simultaneously**:
+#### Context recovery (before launching)
+
+Apply the [context recovery protocol](../../references/context-recovery-protocol.md) to these files:
+
+- `{session_dir}/clarify-advisor-alpha.md`
+- `{session_dir}/clarify-advisor-beta.md`
+
+Launch two advisory sub-agents **simultaneously** (only for missing or
+invalid results):
 
 #### Advisor α
 
@@ -197,8 +251,9 @@ Launch two advisory sub-agents **simultaneously**:
 Task tool:
   subagent_type: general-purpose
   model: haiku
+  max_turns: 12
   prompt: |
-    Read {SKILL_DIR}/references/advisory-guide.md. You are Advisor α.
+    Read `{SKILL_DIR}/references/advisory-guide.md`. You are Advisor α.
 
     Tier 3 decision points:
     {list of T3 items}
@@ -208,6 +263,10 @@ Task tool:
     {web research findings for these items}
 
     Argue for the first perspective per the guide's side-assignment rules.
+
+    Write your complete findings to: {session_dir}/clarify-advisor-alpha.md
+    The file MUST exist when you finish. End your output file with the exact
+    line `<!-- AGENT_COMPLETE -->` as the last line.
 ```
 
 #### Advisor β
@@ -216,8 +275,9 @@ Task tool:
 Task tool:
   subagent_type: general-purpose
   model: haiku
+  max_turns: 12
   prompt: |
-    Read {SKILL_DIR}/references/advisory-guide.md. You are Advisor β.
+    Read `{SKILL_DIR}/references/advisory-guide.md`. You are Advisor β.
 
     Tier 3 decision points:
     {list of T3 items}
@@ -227,9 +287,14 @@ Task tool:
     {web research findings for these items}
 
     Argue for the opposing perspective per the guide's side-assignment rules.
+
+    Write your complete findings to: {session_dir}/clarify-advisor-beta.md
+    The file MUST exist when you finish. End your output file with the exact
+    line `<!-- AGENT_COMPLETE -->` as the last line.
 ```
 
 Both advisors run in parallel. Wait for both to complete.
+Read the output files from session dir (not the in-memory Task return values).
 
 ### Phase 4: Persistent Questioning (T3 only)
 
@@ -279,6 +344,15 @@ After each answer:
 
 Then ask: "Save this clarified requirement to a file?"
 If yes: save to a project-appropriate location with a descriptive filename.
+
+**Completion tracking** (after saving the summary file):
+
+1. Edit `cwf-state.yaml` → set `live.clarify_completed_at` to current
+   ISO 8601 timestamp (e.g., `"2026-02-10T14:30:00Z"`)
+2. Edit `cwf-state.yaml` → set `live.clarify_result_file` to the path of
+   the saved clarification summary file
+
+This state is what `cwf:impl` Phase 1.0 checks as a pre-condition.
 
 **Follow-up suggestions** (when CWF plugin is loaded):
 
@@ -336,6 +410,15 @@ while ambiguities remain:
 ```
 
 Then offer to save.
+
+**Completion tracking** (after saving the summary file):
+
+1. Edit `cwf-state.yaml` → set `live.clarify_completed_at` to current
+   ISO 8601 timestamp (e.g., `"2026-02-10T14:30:00Z"`)
+2. Edit `cwf-state.yaml` → set `live.clarify_result_file` to the path of
+   the saved clarification summary file
+
+This state is what `cwf:impl` Phase 1.0 checks as a pre-condition.
 
 **Follow-up** (when CWF plugin is loaded): Suggest `cwf:handoff --phase` if the user plans to clear context before implementation.
 
