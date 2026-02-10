@@ -1,6 +1,6 @@
 # Plugin Development Cheat Sheet
 
-Quick reference for adding and modifying plugins. For full details, see [adding-plugin.md](adding-plugin.md), [modifying-plugin.md](modifying-plugin.md), [skills-guide.md](skills-guide.md), [claude-marketplace.md](claude-marketplace.md).
+Quick reference for developing, testing, and deploying plugins.
 
 ## Directory Patterns
 
@@ -57,7 +57,13 @@ Add to `.claude-plugin/marketplace.json` → `plugins[]`:
 }
 ```
 
-## SKILL.md Frontmatter
+Rules: `name` = kebab-case matching directory name. `source` = relative path. `description` should match plugin.json.
+
+**Plugin caching**: Plugins are copied to a cache location on install. Files outside the plugin directory won't be available. Use `${CLAUDE_PLUGIN_ROOT}` in hooks and MCP configs to reference files within the installed plugin.
+
+## SKILL.md
+
+### Frontmatter
 
 ```yaml
 ---
@@ -72,6 +78,19 @@ allowed-tools:
 ```
 
 Keep SKILL.md < 500 lines. Move details to `references/`.
+
+### Content Rules
+
+1. Keep SKILL.md concise — move details to `references/`
+2. No duplication between SKILL.md and references
+3. Progressive disclosure — SKILL.md loads on trigger, references load as needed
+4. English only for all skill files
+
+### Design Principles
+
+- **Concise is Key**: Context window is shared resource. Don't explain what the agent already knows
+- **Degrees of Freedom**: High (text) for multiple valid approaches, medium (pseudocode) for preferred patterns, low (scripts) for exact sequences
+- **Execution-heavy skills** (API calls, file processing): delegate to wrapper scripts. SKILL.md handles intent; scripts handle execution
 
 ## hooks.json
 
@@ -93,9 +112,15 @@ Matchers: `PreToolUse`, `PostToolUse`, `Notification` (idle_prompt, etc.)
 
 For simple context injection (no JSON formatting), use `"type": "prompt"` instead of `"type": "command"`.
 
+Hooks are **snapshots at session start** (no hot-reload).
+
 ## Environment Variables
 
 Naming: `CLAUDE_CORCA_{PLUGIN_NAME}_{SETTING}`
+
+Priority: CLI argument > environment variable > hardcoded default
+
+Plugin directories are replaced on update (version-specific cache). User config **must** live outside the skill directory — environment variables in shell profile survive any plugin update.
 
 3-tier loading in scripts (needed because Claude Code runs Bash sessions — `~/.zshrc` is not sourced automatically):
 ```bash
@@ -145,6 +170,8 @@ fi
   ```
 - Empty array iteration under `set -u`: `"${arr[@]}"` on an empty array causes "unbound variable". Guard with `if [[ ${#arr[@]} -gt 0 ]]; then ... fi`.
 - Bash regex: in `[[ =~ ]]`, `"?` makes `?` literal (quoted), not a regex quantifier. Use `\"?` for optional literal-quote matching. Bash and zsh have different regex semantics — always debug bash scripts with `bash -c` or `bash -x`, not directly in the Bash tool (which uses zsh).
+- When researching Claude Code features (hooks, settings, plugins), verify against the [official docs](https://code.claude.com/docs/en/) via WebFetch.
+- When testing scripts, do not manually set up the environment (e.g., `source ~/.zshrc`). Test in a clean environment to reproduce real-world conditions.
 
 ## Testing
 
@@ -153,12 +180,19 @@ fi
 echo '{"tool_input":{"file_path":"/path/to/file"}}' | plugins/{name}/hooks/scripts/{script}.sh
 ```
 
-**Integration** — hooks are **snapshots at session start** (no hot-reload). Start a new session:
+**Skills** — verify SKILL.md frontmatter, script executability, and run directly to verify behavior.
+
+**Integration** — start a new session with `--plugin-dir`:
 ```bash
 claude --plugin-dir ./plugins/{name} --dangerously-skip-permissions --resume
 ```
 
-**Skills** — verify SKILL.md frontmatter and script executability.
+Alternative: add hooks via `/hooks` menu in the current session (goes through review process).
+
+**Apply locally** after modifying an installed plugin:
+```bash
+/plugin install <plugin-name>@corca-plugins
+```
 
 ## Version Bump Rules
 
@@ -178,3 +212,35 @@ claude --plugin-dir ./plugins/{name} --dangerously-skip-permissions --resume
 6. Test locally
 7. Commit and push
 8. On **main branch**: run `bash scripts/update-all.sh` (skip on feature branches — pulls from default branch only)
+
+Inform users after deploy:
+```text
+The plugin has been updated. To apply:
+1. /plugin marketplace update
+2. /plugin install <plugin-name>@corca-plugins
+```
+
+## Adding New Plugins
+
+Checklist for new plugins (in addition to the deploy workflow above):
+
+1. Add entry to `.claude-plugin/marketplace.json` → `plugins[]`
+2. Bump marketplace metadata version
+3. Update `README.md` and `README.ko.md` (table + detail section)
+4. Check `AI_NATIVE_PRODUCT_TEAM.md` for link opportunities
+
+## Marketplace User Commands
+
+```bash
+# Add marketplace
+/plugin marketplace add corca-ai/claude-plugins
+
+# Update marketplace catalog
+/plugin marketplace update
+
+# Install/update a plugin
+/plugin install {name}@corca-plugins
+/plugin update {name}@corca-plugins
+```
+
+For full marketplace documentation, see the [official Claude Code docs](https://code.claude.com/docs/en/plugin-marketplaces).

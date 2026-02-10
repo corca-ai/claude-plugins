@@ -80,14 +80,3 @@ Documentation is best for horizontal knowledge that applies across many tasks.
 
 > "Skills work better for action-specific workflows like version upgrades,
 > not horizontal framework knowledge." — Vercel
-
-## Application to This Project
-
-| File | Scope | Retrieval trigger |
-|------|-------|-------------------|
-| `CLAUDE.md` | Behavior rules, doc index, persist routing | Always loaded |
-| `docs/plugin-dev-cheatsheet.md` | Directory layout, schemas, deploy workflow, script guidelines | Writing/modifying plugin code |
-| `docs/architecture-patterns.md` | Code patterns, hook config, plugin integration | Designing architecture or integration |
-| `docs/project-context.md` | Project/org facts, design principles, process conventions | Understanding project norms |
-| `docs/documentation-guide.md` | This file — documentation principles | Writing/reorganizing documentation |
-| `cwf-state.yaml` | Session history, live state, tools, hooks | Session management |
