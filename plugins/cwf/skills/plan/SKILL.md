@@ -146,6 +146,20 @@ Use these file contents as input for Phase 3 synthesis.
 
 Synthesize research from both sub-agents into a structured plan. Read `{SKILL_DIR}/../../references/plan-protocol.md` for protocol rules on location, sections, and format.
 
+### Cross-Cutting Pattern Gate
+
+Before finalizing Steps, scan for cross-cutting patterns:
+
+1. Identify steps that apply **identical logic to 3+ targets** (files, skills, modules)
+2. If found: add a **Step 0** that creates a shared reference file for the common pattern. Subsequent steps reference the shared file — never duplicate the pattern inline.
+3. If not found: proceed normally
+
+**Prohibited instructions** in step descriptions:
+- "동일 적용" / "apply the same pattern" / "same as Step N"
+- Any instruction that delegates architecture to parallel implementors
+
+Each step must either reference a shared file or contain self-contained instructions. Parallel agents cannot see each other's work, so sharing must be decided at plan level.
+
 ### Required Plan Sections
 
 ````markdown
@@ -261,6 +275,7 @@ For a multi-perspective review before implementation, run:
 4. **Follow protocol**: Adhere to plan-protocol.md for format and location
 5. **Don't over-plan**: Keep steps actionable and concrete, avoid excessive detail
 6. **Preserve task intent**: Refine the approach, don't redirect the goal
+7. **Cross-cutting → shared reference first**: When identical logic applies to 3+ targets, create a shared reference file as Step 0. "동일 적용" is a plan smell — replace with an explicit shared file path
 
 ## References
 
