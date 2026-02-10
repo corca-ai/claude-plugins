@@ -68,4 +68,6 @@ Structural health of the documentation graph. Reference: [Software project docum
 | Auto-generated files in git | Files that can be regenerated (build output, compiled docs) are version-controlled |
 | Undocumented non-obvious decisions | Non-obvious technical choices (e.g., "no Tailwind", "no mock objects") lack explicit rationale anywhere in docs |
 | Obvious instructions | Docs include self-evident guidance (e.g., "write clean code", "follow best practices") that wastes reader attention |
+| Automation-redundant instructions | Docs include behavioral instructions already enforced by deterministic hooks or skill triggers (e.g., CLAUDE.md says "always do X" when a PostToolUse hook already validates X). Cross-check against installed `hooks.json` entries and skill trigger conditions |
+| Scope-overlapping documents | Multiple docs cover the same scope with no clear ownership boundary. Candidate for merge or deletion — one scope, one file |
 | Bare code fences | Code blocks missing language specifier (` ```bash `, ` ```text `, etc.) — run `npx markdownlint-cli2` to verify |

@@ -1,0 +1,42 @@
+# Architecture Patterns
+
+Code-level patterns, hook configuration, and plugin integration conventions
+accumulated from retrospectives and implementation sessions.
+
+## Code Patterns
+
+- **Script delegation**: Execution-heavy skills (gather-context) delegate API calls to wrapper scripts. SKILL.md handles intent analysis and parameter decisions; scripts handle env loading, JSON building, curl, and response formatting. This reduces context cost and improves reliability.
+- **Hook-based tool redirect**: Use PreToolUse hooks with `permissionDecision: "deny"` to redirect built-in tools to custom skills (e.g., WebSearch → `/gather-context --search`). Enables loose coupling between plugins.
+- **3-tier env loading**: Shell environment → `~/.claude/.env` → grep shell profiles (fallback). All credential-loading scripts must use this pattern. See [plugin-dev-cheatsheet.md](plugin-dev-cheatsheet.md) § Environment Variables for implementation.
+- **Safe extraction**: Scripts must avoid `eval` for parsing shell config. Use grep + parameter expansion instead.
+- **Local vs marketplace**: Repo-specific automation → `.claude/skills/` (e.g., plugin-deploy). Cross-project utility → `plugins/` marketplace.
+- **Deprecated plugin policy**: Set `deprecated: true` in plugin.json → remove entry from marketplace.json. Do NOT keep both with a "deprecated" flag in marketplace — the plugin should simply not be listed. check-consistency.sh detects this as a gap.
+- **Sub-agent orchestration via SKILL.md**: For multi-phase skills, SKILL.md acts as a thin orchestrator (sequencer + data router) while reference guides in `references/` hold domain knowledge. Each guide follows: role statement → context → methodology → constraints → output format. When data is already in orchestrator context, inline analysis may outperform sub-agents (avoids summarization loss).
+- **Shared skill conventions**: `references/skill-conventions.md` defines the structural template for all CWF skills (frontmatter → Language → Phases → Rules → References). When 3+ skills repeat the same pattern, extract to shared reference.
+- **Defensive cross-plugin integration**: When plugin A references plugin B's output, A must work normally when B is not installed. Use directory/file existence checks as the gate.
+- **Skills are session-level, agents are process-level**: Plugin skills (SKILL.md + allowed-tools) are loaded from cache at session start and only available in the main conversation context. Sub-agents spawned via Task tool do NOT inherit skill definitions. Design accordingly: (1) skill-dependent work → main session, (2) skill-independent work → delegate to agents, (3) to apply skill criteria indirectly, include reference docs in the agent prompt.
+- **Agent autonomy requires boundary awareness**: When delegating work to agents, the agent's tools (criteria, checklists, guides) must be self-aware of their own validity. A stale checklist followed blindly is worse than no checklist. Provenance metadata enables tools to detect when they may be operating outside their design envelope. (Woods: graceful extensibility; Meadows: leverage point #6 — information flow.)
+- **Validation hooks must be fail-visible**: Hooks that validate preconditions must always emit observable output (never silent `exit 0`), respond with allow/warn/deny based on conditions. Silent exit makes hook firing indistinguishable from hook not firing. When a hook chain includes a behavioral step, add an independent deterministic validation step that blocks if it was not done. (Reason: independent defense layers; Dekker: ambiguous protective structures accelerate drift.)
+- **YAML parser section boundary guards**: When parsing multi-section YAML with `while read` loops, always add a break condition for top-level keys (`^[a-z#]`). Without this, the last entry in a section is vulnerable to field overwrite by identically-named keys in subsequent sections.
+- **Custom skill preference**: When a custom skill overlaps with a built-in tool, prefer the custom skill. CWF enforces this via PreToolUse hook for some tools (e.g., WebSearch → `cwf:gather --search`); for other overlaps, prefer the custom skill manually.
+
+## Hook Configuration
+
+- Project hooks go in `.claude/settings.json` under the `"hooks"` key — NOT `.claude/hooks.json` (which is plugin-only format)
+- **Compact recovery**: `SessionStart(compact)` hook reads `cwf-state.yaml` `live` section and injects context after auto-compact. CWF skills update `live` at phase transitions; `check-session.sh --live` validates required fields.
+- `type: prompt` hooks work with any hook event and are simpler for context injection (no JSON formatting needed)
+- Hooks are **snapshots at session start** — no hot-reload. Requires new session or `/hooks` review to pick up changes.
+- **Skill loading is cache-based**: Skills are loaded from `~/.claude/plugins/cache/{marketplace}/{plugin}/{version}/`, not from the source directory. Source modifications require `claude plugin update` or `scripts/update-all.sh` to propagate. Both hooks and skills are session-start snapshots tied to the cache state.
+- **sync vs async rule of thumb**: If a hook only calls external services (Slack, logging) and doesn't need to modify Claude's behavior → use async. Sync hooks with empty stdout can corrupt conversation history on some event types.
+- **System tool matching**: Internal tools (`EnterPlanMode`, `ExitPlanMode`, `AskUserQuestion`) can be matched via `PreToolUse`/`PostToolUse` matchers — no dedicated hook events needed.
+- **Async race conditions**: Async hooks that check-then-create state files need atomic locking (e.g., `mkdir`). Multiple async instances of the same hook can run concurrently.
+- **SessionEnd hook limitation**: Fires after session ends, so the model cannot be involved. Only `type: "command"` (bash) is available. Tasks requiring model intelligence must happen in Stop hooks or skills instead.
+- **Hook output schemas differ by event**: PreToolUse uses `permissionDecision`; PostToolUse uses `{"decision": "block/allow", "reason": "..."}`. Check hook type before writing output format.
+- Claude Code hook docs: <https://code.claude.com/docs/en/hooks.md>
+
+## Plugin System
+
+- CWF plugin (`plugins/cwf/`) consolidates all workflow skills (9 skills: setup, update, gather, clarify, plan, impl, retro, refactor, handoff) and infrastructure hooks (7 groups). 10th skill (review) pending migration from `plugins/review/`.
+- Legacy marketplace plugins (clarify, retro, refactor, gather-context, attention-hook, plan-and-lessons, smart-read, prompt-logger, markdown-guard) still exist but are deprecated in favor of cwf.
+- **Env var backward-compat**: `attention-hook` supports legacy `CLAUDE_ATTENTION_*` alongside `CLAUDE_CORCA_ATTENTION_*`. New plugins should not add backward-compat — use `CLAUDE_CORCA_{PLUGIN}_{SETTING}` only.
+- **prompt-logger internals**: `/tmp/` state files with session hash for incremental processing. Atomic `mkdir` lock prevents Stop/SessionEnd race. When shared scripts short-circuit on no-new-lines, auto-commit logic must be duplicated in early-exit branch. Transcript timestamps are UTC — convert to local via epoch.
