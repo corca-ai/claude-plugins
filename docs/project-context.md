@@ -5,7 +5,7 @@ Project and organizational facts accumulated from retrospectives.
 ## Project
 
 - corca-plugins is a Claude Code plugin marketplace for "AI Native Product Teams"
-- Plan & Lessons Protocol creates `prompt-logs/{YYMMDD}-{NN}-{title}/` per session with plan.md, lessons.md, and optionally retro.md. Date via `date +%y%m%d`; NN auto-incremented by scanning existing dirs.
+- Plan & Lessons Protocol creates `prompt-logs/{YYMMDD}-{NN}-{title}/` per session with plan.md, lessons.md, and optionally retro.md. Sequence is allocated by `scripts/next-prompt-dir.sh` (date-scoped `YYMMDD-NN-*`), so numbering resets to `01` each day.
 
 ## Design Principles
 

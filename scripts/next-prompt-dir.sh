@@ -26,11 +26,15 @@ if [[ -d "$prompt_logs_dir" ]]; then
   for dir in "$prompt_logs_dir"/"${today}"-*/; do
     [[ -d "$dir" ]] || continue
     basename="$(basename "$dir")"
-    # Extract sequence number: YYMMDD-NN-...
-    seq_str="${basename#"${today}"-}"
-    seq_str="${seq_str%%-*}"
-    # Remove leading zeros for arithmetic
-    seq_num=$((10#$seq_str)) 2>/dev/null || continue
+
+    # Match only YYMMDD-NN-*; ignore other same-day directories
+    if [[ "$basename" =~ ^${today}-([0-9]{2})- ]]; then
+      seq_str="${BASH_REMATCH[1]}"
+    else
+      continue
+    fi
+
+    seq_num=$((10#$seq_str))
     if (( seq_num > max_seq )); then
       max_seq=$seq_num
     fi

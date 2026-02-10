@@ -8,9 +8,14 @@ Protocol for persisting planning artifacts and session learnings.
 
 `prompt-logs/{YYMMDD}-{NN}-{title}/plan.md`
 
-**Date**: Run `date +%y%m%d` to get the system date. Do not infer the date from your training data or conversation context — always use the system command.
+**Automated (required)**: Run `scripts/next-prompt-dir.sh <title>` and use its
+output path.
 
-**Sequence number**: Scan existing `prompt-logs/` directories matching today's date (`{YYMMDD}-*`) and pick the next number. If none exist, start at `01`.
+The script runs `date +%y%m%d`, scans only directories matching today's prefix
+(`{YYMMDD}-*`) and `YYMMDD-NN-*` shape, then returns the next sequence.
+If no matches exist for today, it starts at `01`.
+
+Never derive `NN` from a global max across multiple days. Sequence is per day.
 Examples: `260204-01-auth-design`, `260204-02-auth-impl`.
 
 The `{title}` must reflect the current session's task, not a previous session's.
