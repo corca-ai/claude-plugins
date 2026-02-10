@@ -10,7 +10,7 @@ AI coding sessions lose context at every boundary. When a session ends, the next
 
 CWF addresses this with six building-block concepts that compose across nine skills. Rather than nine independent tools, CWF is one integrated plugin where each skill synchronizes the same underlying behavioral patterns — expert advisors surface blind spots in both requirement clarification and session retrospectives; tier classification routes decisions to evidence or humans consistently; agent orchestration parallelizes work from research through implementation.
 
-The result: one plugin (`cwf`), nine skills, seven hook groups. Context survives session boundaries. Decisions are evidence-backed. Quality criteria evolve with the system.
+The result: one plugin (`cwf`), eleven skills, seven hook groups. Context survives session boundaries. Decisions are evidence-backed. Quality criteria evolve with the system.
 
 ## Core Concepts
 
@@ -45,10 +45,12 @@ gather → clarify → plan → impl → retro
 | 5 | [retro](#retro) | `cwf:retro` | Extract durable learnings through CDM analysis and expert lens |
 | 6 | [refactor](#refactor) | `cwf:refactor` | Multi-mode code and skill review — scan, tidy, deep review, holistic |
 | 7 | [handoff](#handoff) | `cwf:handoff` | Generate session or phase handoff documents |
-| 8 | [setup](#setup) | `cwf:setup` | Configure hook groups, detect tools, generate project index |
-| 9 | [update](#update) | `cwf:update` | Check and apply CWF plugin updates |
+| 8 | [ship](#ship) | `cwf:ship` | Automate GitHub workflow — issues, PRs, and merge management |
+| 9 | [review](#review) | `cwf:review` | Multi-perspective review with 6 parallel reviewers |
+| 10 | [setup](#setup) | `cwf:setup` | Configure hook groups, detect tools, generate project index |
+| 11 | [update](#update) | `cwf:update` | Check and apply CWF plugin updates |
 
-**Concept composition**: gather, clarify, plan, impl, retro, and refactor all synchronize Agent Orchestration. clarify is the richest composition — it synchronizes Expert Advisor, Tier Classification, Agent Orchestration, and Decision Point in a single workflow. handoff is the primary instantiation of the Handoff concept. refactor activates Provenance in holistic mode.
+**Concept composition**: gather, clarify, plan, impl, retro, refactor, and review all synchronize Agent Orchestration. clarify is the richest composition — it synchronizes Expert Advisor, Tier Classification, Agent Orchestration, and Decision Point in a single workflow. review synchronizes Expert Advisor and Agent Orchestration with external CLI integration. handoff is the primary instantiation of the Handoff concept. refactor activates Provenance in holistic mode.
 
 ## Installation
 
@@ -79,7 +81,7 @@ cwf:update
 
 ### Standalone plugins (legacy)
 
-CWF consolidates all functionality from the standalone plugins (gather-context, clarify, retro, refactor, attention-hook, smart-read, prompt-logger, markdown-guard). If you are using standalone plugins, uninstall them and install `cwf` instead. The standalone plugins remain in the marketplace for backward compatibility but receive no new features. The `plan-and-lessons` plugin is deprecated — plan mode hooks have been removed in favor of session-state-based context management.
+As of v3.0.0, standalone plugins (gather-context, clarify, retro, refactor, attention-hook, smart-read, prompt-logger, markdown-guard, plan-and-lessons) have been removed from the marketplace. If you have any installed, uninstall them and install `cwf` instead.
 
 ## Skills Reference
 
@@ -179,6 +181,35 @@ cwf:handoff --phase        # Generate phase-handoff.md (HOW context)
 Session handoffs carry task scope, lessons, and unresolved items for the next session. Phase handoffs carry protocols, rules, and constraints for the next workflow phase (HOW), complementing plan.md (WHAT).
 
 Full reference: [SKILL.md](plugins/cwf/skills/handoff/SKILL.md)
+
+### ship
+
+Automate GitHub workflow — issue creation, PR with structured templates, and merge management.
+
+```text
+cwf:ship                   # Interactive: choose issue, PR, or merge
+cwf:ship --issue           # Create GitHub issue
+cwf:ship --pr              # Create pull request
+cwf:ship --merge           # Merge current PR
+```
+
+Generates structured PR descriptions with lessons learned, critical decision summaries, and test checklists. Supports Korean PR templates and autonomous merge decision matrix.
+
+Full reference: [SKILL.md](plugins/cwf/skills/ship/SKILL.md)
+
+### review
+
+Multi-perspective review with 6 parallel reviewers.
+
+```text
+cwf:review                       # Review current changes (code mode)
+cwf:review --mode clarify        # Review clarified requirements
+cwf:review --mode plan           # Review implementation plan
+```
+
+6 parallel reviewers: 2 internal (Security, UX/DX) via Task agents + 2 external (Codex, Gemini) via CLI + 2 domain experts via Task agents. Graceful fallback when external CLIs are unavailable.
+
+Full reference: [SKILL.md](plugins/cwf/skills/review/SKILL.md)
 
 ### setup
 

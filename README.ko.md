@@ -1,318 +1,340 @@
-# corca-plugins
+# CWF (Corca Workflow Framework)
 
 [English](README.md)
 
-코르카에서 유지보수하는, [AI-Native Product Team](AI_NATIVE_PRODUCT_TEAM.ko.md)을 위한 Claude Code 플러그인 마켓플레이스입니다.
+구조화된 개발 세션을 반복 가능한 워크플로우로 전환하는 Claude Code 플러그인입니다 -- 컨텍스트 수집부터 회고 분석까지. [Corca](https://www.corca.ai/)에서 [AI-Native Product Team](AI_NATIVE_PRODUCT_TEAM.ko.md)을 위해 유지보수합니다.
+
+## 왜 CWF인가?
+
+AI 코딩 세션은 모든 경계에서 컨텍스트를 잃습니다. 세션이 끝나면 다음 세션은 처음부터 시작합니다. 요구사항이 명확화에서 구현으로 넘어갈 때 프로토콜과 제약 조건이 잊혀집니다. 5개 스킬 시스템을 위해 작성된 품질 기준은 시스템이 9개로 성장하면 조용히 무의미해집니다.
+
+CWF는 11개 스킬에 걸쳐 조합되는 6가지 빌딩 블록 개념으로 이 문제를 해결합니다. 11개의 독립된 도구가 아니라, 각 스킬이 동일한 기반 행동 패턴을 동기화하는 하나의 통합 플러그인입니다 -- 전문가 자문은 요구사항 명확화와 세션 회고 모두에서 사각지대를 드러내고, 티어 분류는 의사결정을 일관되게 증거나 인간에게 라우팅하며, 에이전트 오케스트레이션은 리서치부터 구현까지 작업을 병렬화합니다.
+
+결과: 하나의 플러그인(`cwf`), 11개 스킬, 7개 훅 그룹. 컨텍스트가 세션 경계를 넘어 유지됩니다. 의사결정에 증거가 뒷받침됩니다. 품질 기준이 시스템과 함께 진화합니다.
+
+## 핵심 개념
+
+CWF 스킬이 조합하는 6가지 재사용 가능한 행동 패턴입니다. 이것을 이해하면 각 스킬이 무엇을 하는지뿐 아니라 왜 함께 작동하는지 알 수 있습니다.
+
+**전문가 자문 (Expert Advisor)** -- 대립하는 전문가 프레임워크를 도입하여 사각지대를 줄입니다. 서로 다른 분석 렌즈를 가진 두 도메인 전문가가 문제를 독립적으로 평가하며, 그들의 의견 불일치가 숨겨진 가정을 드러냅니다.
+
+**티어 분류 (Tier Classification)** -- 의사결정을 적절한 권한에 라우팅합니다. 코드베이스 증거(T1)와 베스트 프랙티스 합의(T2)는 자율적으로 해결되고, 진정으로 주관적인 결정(T3)만 인간에게 전달됩니다.
+
+**에이전트 오케스트레이션 (Agent Orchestration)** -- 품질을 희생하지 않고 작업을 병렬화합니다. 오케스트레이터가 복잡도를 평가하고, 필요한 최소 에이전트를 생성하고, 의존성을 고려한 배치로 실행하고, 결과를 종합합니다.
+
+**결정 포인트 (Decision Point)** -- 모호성을 명시적으로 포착합니다. 요구사항이 누구든 결정하기 전에 구체적인 질문으로 분해되어, 모든 선택에 기록된 증거와 근거가 뒷받침됩니다.
+
+**핸드오프 (Handoff)** -- 경계를 넘어 컨텍스트를 보존합니다. 세션 핸드오프는 작업 범위와 교훈을, 페이즈 핸드오프는 프로토콜과 제약 조건을 전달합니다. 다음 에이전트가 백지 상태가 아닌 정보를 갖고 시작합니다.
+
+**출처 추적 (Provenance)** -- 기준의 노후화를 감지합니다. 참조 문서는 작성 당시의 시스템 상태 메타데이터를 담고 있으며, 스킬은 오래된 기준을 적용하기 전에 이를 확인합니다.
+
+## 워크플로우
+
+CWF 스킬은 컨텍스트 수집에서 학습 추출까지 자연스러운 흐름을 따릅니다:
+
+```text
+gather -> clarify -> plan -> impl -> retro
+```
+
+| # | 스킬 | 트리거 | 하는 일 |
+|---|------|--------|---------|
+| 1 | [gather](#gather) | `cwf:gather` | 정보 수집 -- URL, 웹 검색, 로컬 코드 탐색 |
+| 2 | [clarify](#clarify) | `cwf:clarify` | 모호한 요구사항을 리서치 + 티어 분류로 정밀한 스펙으로 전환 |
+| 3 | [plan](#plan) | `cwf:plan` | 리서치 기반 구현 계획과 BDD 성공 기준 작성 |
+| 4 | [impl](#impl) | `cwf:impl` | 계획에 따른 병렬 구현 오케스트레이션 |
+| 5 | [retro](#retro) | `cwf:retro` | CDM 분석과 전문가 렌즈를 통한 지속 가능한 교훈 추출 |
+| 6 | [refactor](#refactor) | `cwf:refactor` | 다중 모드 코드/스킬 리뷰 -- 스캔, 정리, 심층 리뷰, 전체적 분석 |
+| 7 | [handoff](#handoff) | `cwf:handoff` | 세션 또는 페이즈 핸드오프 문서 생성 |
+| 8 | [ship](#ship) | `cwf:ship` | GitHub 워크플로우 자동화 -- 이슈 생성, PR, 머지 관리 |
+| 9 | [review](#review) | `cwf:review` | 6명 병렬 리뷰어에 의한 범용 리뷰 -- 내부 + 외부 CLI + 도메인 전문가 |
+| 10 | [setup](#setup) | `cwf:setup` | 훅 그룹 설정, 도구 감지, 프로젝트 인덱스 생성 |
+| 11 | [update](#update) | `cwf:update` | CWF 플러그인 업데이트 확인 및 적용 |
+
+**개념 조합**: gather, clarify, plan, impl, retro, refactor는 모두 에이전트 오케스트레이션을 동기화합니다. clarify는 가장 풍부한 조합으로, 전문가 자문, 티어 분류, 에이전트 오케스트레이션, 결정 포인트를 하나의 워크플로우에서 동기화합니다. handoff는 핸드오프 개념의 주요 구현체입니다. refactor는 전체적 모드에서 출처 추적을 활성화합니다. review는 전문가 자문과 출처 추적을 활용한 다관점 리뷰를 수행합니다.
 
 ## 설치
 
-### 1. Marketplace 추가 및 업데이트
+### 빠른 시작
 
 ```bash
+# 마켓플레이스 추가
 claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
+
+# CWF 설치
+claude plugin install cwf@corca-plugins
+
+# 훅 적용을 위해 Claude Code 재시작
 ```
 
-새 플러그인이 추가되거나 기존 플러그인이 업데이트되면, 먼저 마켓플레이스를 업데이트하세요:
+### 업데이트
+
 ```bash
 claude plugin marketplace update corca-plugins
+claude plugin update cwf@corca-plugins
 ```
 
-그 다음 필요한 플러그인을 설치하거나 업데이트합니다:
-```bash
-claude plugin install <plugin-name>@corca-plugins  # 새로 설치
-claude plugin update <plugin-name>@corca-plugins   # 기존 플러그인 업데이트
-```
+또는 Claude Code 내에서:
 
-설치/업데이트 후 Claude Code를 재시작하면 적용됩니다.
-
-또는 설치 스크립트를 사용하여 카테고리별로 설치할 수 있습니다:
-```bash
-bash scripts/install.sh --all        # 전체 9개 플러그인
-bash scripts/install.sh --workflow   # 워크플로우 단계 1-6만
-bash scripts/install.sh --infra     # attention-hook + prompt-logger + markdown-guard
-bash scripts/install.sh --context --clarify  # 단계 조합 가능
-```
-
-마켓플레이스와 설치된 **모든** 플러그인을 한번에 업데이트하려면:
-```bash
-bash scripts/update-all.sh
-```
-
-터미널 대신 Claude Code 내에서도 동일한 작업이 가능합니다:
 ```text
-/plugin marketplace add corca-ai/claude-plugins
-/plugin marketplace update
+cwf:update
 ```
 
-### 2. 플러그인 오버뷰
+### 독립 플러그인 (레거시)
 
-| 플러그인 | 유형 | 단계 | 설명 |
-|---------|------|------|------|
-| [gather-context](#gather-context) | Skill + Hook | 1. 컨텍스트 | 통합 정보 수집: URL 자동 감지, 웹 검색, 로컬 코드 탐색 |
-| [clarify](#clarify) | Skill | 2. 명확화 | 통합 요구사항 명확화: 리서치 기반 또는 경량 Q&A |
-| [smart-read](#smart-read) | Hook | 4. 구현 | 파일 크기 기반 지능적 읽기 강제 |
-| [retro](#retro) | Skill | 5. 회고 | 적응형 세션 회고 — 기본은 경량, `--deep`으로 전문가 렌즈 포함 전체 분석 |
-| [refactor](#refactor) | Skill | 6. 리팩토링 | 다중 모드 코드/스킬 리뷰: 퀵 스캔, 심층 리뷰, 티디잉, 문서 검사 |
-| [attention-hook](#attention-hook) | Hook | 인프라 | 대기 상태일 때 Slack 알림 |
-| [prompt-logger](#prompt-logger) | Hook | 인프라 | 대화 턴을 마크다운으로 자동 기록 (회고 분석용) |
-| [markdown-guard](#markdown-guard) | Hook | 인프라 | Write/Edit 후 마크다운 검증 — 린트 위반 시 자동 수정 유도 |
+CWF는 독립 플러그인(gather-context, clarify, retro, refactor, attention-hook, smart-read, prompt-logger, markdown-guard)의 모든 기능을 통합합니다. 독립 플러그인을 사용 중이라면 제거하고 `cwf`를 설치하세요. 독립 플러그인은 하위 호환을 위해 마켓플레이스에 남아 있지만 새로운 기능은 추가되지 않습니다. `plan-and-lessons` 플러그인은 폐기되었습니다 -- 플랜 모드 훅은 세션 상태 기반 컨텍스트 관리로 대체되었습니다.
 
-## Skills
+## 스킬 레퍼런스
 
-### [gather-context](plugins/gather-context/skills/gather-context/SKILL.md)
+### gather
 
-**설치**: `claude plugin install gather-context@corca-plugins` | **갱신**: `claude plugin update gather-context@corca-plugins`
+통합 정보 수집 -- URL, 웹 검색, 로컬 코드 탐색.
 
-URL 자동 감지, 웹 검색, 로컬 코드 탐색 3가지 모드를 제공하는 통합 정보 수집 레이어입니다. `web-search`의 모든 기능을 흡수하여 하나의 플러그인으로 모든 외부 정보 수집을 처리합니다. Google Docs, Slack, Notion, GitHub 콘텐츠를 위한 내장 변환기를 포함하며, 검색에는 Tavily와 Exa API를 사용합니다.
+```text
+cwf:gather <url>                  # 서비스 자동 감지 (Google/Slack/Notion/GitHub/웹)
+cwf:gather --search <query>       # 웹 검색 (Tavily)
+cwf:gather --search code <query>  # 코드 검색 (Exa)
+cwf:gather --local <topic>        # 로컬 코드베이스 탐색
+```
 
-**사용법**:
-- URL 수집: `/gather-context <url>` (Google, Slack, Notion, GitHub, 일반 웹 자동 감지)
-- 웹 검색: `/gather-context --search <query>` (Tavily)
-- 코드 검색: `/gather-context --search code <query>` (Exa)
-- 뉴스/심층: `/gather-context --search --news <query>`, `/gather-context --search --deep <query>`
-- 로컬 탐색: `/gather-context --local <topic>`
-- 도움말: `/gather-context` 또는 `/gather-context help`
+Google Docs/Slides/Sheets, Slack 스레드, Notion 페이지, GitHub PR/이슈, 일반 웹 URL을 자동 감지합니다. 내장 WebSearch 리다이렉트 훅이 Claude의 WebSearch를 `cwf:gather --search`로 라우팅합니다.
 
-**지원 URL 서비스**:
+전체 레퍼런스: [SKILL.md](plugins/cwf/skills/gather/SKILL.md)
 
-| URL 패턴 | 핸들러 |
-|----------|--------|
-| `docs.google.com/{document,presentation,spreadsheets}/d/*` | Google Export (내장 스크립트) |
-| `*.slack.com/archives/*/p*` | Slack to MD (내장 스크립트) |
-| `*.notion.site/*`, `www.notion.so/*` | Notion to MD (내장 스크립트) |
-| `github.com/*/pull/*`, `github.com/*/issues/*` | GitHub (`gh` CLI) |
-| 기타 URL | Tavily 추출 → WebFetch 폴백 |
+### clarify
 
-**저장 위치**: 통합 기본값 `./gathered/` (환경변수 `CLAUDE_CORCA_GATHER_CONTEXT_OUTPUT_DIR`로 변경 가능, 서비스별 환경변수로 개별 지정도 가능)
+리서치 기반 요구사항 명확화와 자율적 의사결정.
 
-**필수 조건**:
-- `TAVILY_API_KEY` — 웹 검색과 URL 추출에 필요 ([발급](https://app.tavily.com/home))
-- `EXA_API_KEY` — 코드 검색에 필요 ([발급](https://dashboard.exa.ai/api-keys))
-- API 키는 `~/.zshrc` 또는 `~/.claude/.env`에 설정
+```text
+cwf:clarify <requirement>          # 리서치 기반 (기본)
+cwf:clarify <requirement> --light  # 직접 Q&A, 서브에이전트 없음
+```
 
-**빌트인 WebSearch 리다이렉트** (Hook):
-- 이 플러그인을 설치하면 Claude의 빌트인 `WebSearch` 도구를 차단하고 `/gather-context --search`로 리다이렉트하는 `PreToolUse` 훅이 등록됩니다.
+기본 모드: 요구사항을 결정 포인트로 분해 -> 병렬 리서치 (코드베이스 + 웹) -> 전문가 분석 -> 티어 분류 (T1/T2 자동 결정, T3 인간에게 질문) -> why-digging을 활용한 끈질긴 질문. 라이트 모드: 서브에이전트 없이 반복적 Q&A.
 
-**주의사항**:
-- 검색 쿼리가 외부 서비스로 전송됩니다. 기밀 코드나 민감한 정보를 포함하지 마세요.
+전체 레퍼런스: [SKILL.md](plugins/cwf/skills/clarify/SKILL.md)
 
-### [clarify](plugins/clarify/skills/clarify/SKILL.md)
+### plan
 
-**설치**: `claude plugin install clarify@corca-plugins` | **갱신**: `claude plugin update clarify@corca-plugins`
+병렬 리서치와 BDD 성공 기준을 갖춘 에이전트 지원 계획 작성.
 
-clarify v1, deep-clarify, interview의 장점을 하나로 합친 통합 요구사항 명확화 스킬입니다. 리서치 기반(기본)과 경량 Q&A(`--light`) 두 가지 모드를 제공합니다. Team Attention의 [Clarify 스킬](https://github.com/team-attention/plugins-for-claude-natives/blob/main/plugins/clarify/SKILL.md)에서 출발했습니다.
+```text
+cwf:plan <task description>
+```
 
-**사용법**:
-- `/clarify <요구사항>` — 리서치 기반 (기본)
-- `/clarify <요구사항> --light` — 직접 Q&A, 서브에이전트 없음
+병렬 선행 사례 + 코드베이스 리서치 -> 단계, 파일, 성공 기준(BDD + 정성적)이 포함된 구조화된 계획 -> `prompt-logs/` 세션 디렉토리에 저장.
 
-**기본 모드** (리서치 기반):
-1. 요구사항 캡처 및 결정 포인트 분해
-2. 병렬 리서치: 코드베이스 탐색 + 웹/베스트 프랙티스 리서치 (gather-context 설치 시 활용, 미설치 시 내장 도구 폴백)
-3. 티어 분류: T1 (코드베이스 해결) → 자동 결정, T2 (베스트 프랙티스 해결) → 자동 결정, T3 (주관적) → 사람에게 질문
-4. T3 항목에 대해 대립하는 관점의 자문 서브에이전트가 의견 제시
-5. Why-digging과 긴장 감지를 활용한 끈질긴 질문
-6. 출력: 결정 테이블 + 명확화된 요구사항
+전체 레퍼런스: [SKILL.md](plugins/cwf/skills/plan/SKILL.md)
 
-**--light 모드** (직접 Q&A):
-- AskUserQuestion을 통한 반복 질문
-- 피상적 답변에 대한 Why-digging
-- 답변 간 긴장 감지
-- Before/After 비교 출력
+### impl
 
-**주요 기능**:
-- 질문 전 자율 리서치 — 진정으로 주관적인 결정만 질문
-- gather-context와 통합 (미설치 시 우아하게 폴백)
-- 끈질긴 질문: 2-3단계 why-digging, 모순 감지
-- 모든 항목이 리서치로 해결되면 자문/질문 단계 완전 생략
-- 사용자 언어 자동 적응 (한국어/영어)
+구조화된 계획에 기반한 구현 오케스트레이션.
 
-### [retro](plugins/retro/skills/retro/SKILL.md)
+```text
+cwf:impl                    # 가장 최근 plan.md 자동 감지
+cwf:impl <path/to/plan.md>  # 명시적 계획 경로
+```
 
-**설치**: `claude plugin install retro@corca-plugins` | **갱신**: `claude plugin update retro@corca-plugins`
+계획 로드(+ 페이즈 핸드오프가 있으면 함께) -> 도메인과 의존성별 작업 항목 분해 -> 적응형 에이전트 팀 구성(1-4명) -> 병렬 배치 실행 -> BDD 기준 대비 검증.
 
-적응형 세션 회고 스킬입니다. `lessons.md`가 세션 중 점진적으로 쌓이는 학습 기록이라면, `retro`는 세션 전체를 조감하는 종합 회고입니다. 기본은 경량 모드(빠르고 저비용), `--deep`으로 전문가 분석을 포함한 전체 회고를 수행합니다.
+전체 레퍼런스: [SKILL.md](plugins/cwf/skills/impl/SKILL.md)
 
-**사용법**:
-- 세션 종료 시 (경량): `/retro`
-- 전문가 렌즈 포함 전체 분석: `/retro --deep`
-- 특정 디렉토리 지정: `/retro prompt-logs/260130-my-session`
+### retro
 
-**모드**:
-- **경량** (기본): 섹션 1-4 + 7. 서브에이전트 없음, 웹 검색 없음. 세션 무게에 따라 에이전트가 자동 선택.
-- **심층** (`--deep`): Expert Lens(병렬 서브에이전트)와 Learning Resources(웹 검색) 포함 전체 7개 섹션.
+적응형 세션 회고 -- 기본은 경량, 요청 시 심층.
 
-**주요 기능**:
-- 유저/조직/프로젝트에 대한 정보 중 이후 작업에 도움될 내용 문서화
-- 업무 스타일·협업 방식 관찰 후 CLAUDE.md 업데이트 제안 (유저 승인 후 적용)
-- 낭비 분석(Waste Reduction): 허비된 턴, 과설계, 놓친 지름길, 컨텍스트 낭비, 커뮤니케이션 비효율 식별
-- Gary Klein의 CDM(Critical Decision Method)으로 세션의 핵심 의사결정 분석
-- Expert Lens (심층만): 병렬 서브에이전트가 실존 전문가의 관점에서 세션을 분석
-- Learning Resources (심층만): 유저의 지식 수준에 맞춘 웹 검색 학습자료 제공
-- 설치된 스킬 스캔 후 관련성 분석, 이후 외부 스킬 탐색 제안
+```text
+cwf:retro            # 적응형 (기본은 심층)
+cwf:retro --deep     # 전문가 렌즈 포함 전체 분석
+cwf:retro --light    # 섹션 1-4 + 7만, 서브에이전트 없음
+```
 
-**출력물**:
-- `prompt-logs/{YYMMDD}-{NN}-{title}/retro.md` — plan.md, lessons.md와 같은 디렉토리에 저장
+섹션: 기억할 만한 컨텍스트, 협업 선호도, 낭비 감소(5 Whys), 핵심 의사결정 분석(CDM), 전문가 렌즈(심층), 학습 자료(심층), 관련 스킬. 발견 사항을 프로젝트 수준 문서에 영속화.
 
-### [refactor](plugins/refactor/skills/refactor/SKILL.md)
+전체 레퍼런스: [SKILL.md](plugins/cwf/skills/retro/SKILL.md)
 
-**설치**: `claude plugin install refactor@corca-plugins` | **갱신**: `claude plugin update refactor@corca-plugins`
+### refactor
 
-다중 모드 코드 및 스킬 리뷰 도구입니다. 빠른 구조 스캔부터 크로스 플러그인 분석까지 5가지 모드를 제공합니다. suggest-tidyings의 커밋 기반 티디잉 워크플로우를 흡수했습니다.
+5가지 운영 모드를 갖춘 다중 모드 코드/스킬 리뷰.
 
-**사용법**:
-- `/refactor` — 모든 마켓플레이스 스킬 퀵 스캔
-- `/refactor --code [branch]` — 커밋 기반 티디잉 (병렬 서브에이전트)
-- `/refactor --skill <name>` — 단일 스킬 심층 리뷰
-- `/refactor --skill --holistic` — 크로스 플러그인 분석
-- `/refactor --docs` — 문서 일관성 리뷰
+```text
+cwf:refactor                        # 모든 스킬 퀵 스캔
+cwf:refactor --code [branch]        # 커밋 기반 정리
+cwf:refactor --skill <name>         # 단일 스킬 심층 리뷰
+cwf:refactor --skill --holistic     # 크로스 플러그인 분석
+cwf:refactor --docs                 # 문서 일관성 리뷰
+```
 
-**모드**:
-- **퀵 스캔** (인자 없음): 모든 마켓플레이스 SKILL.md의 구조적 검사 — 단어/줄 수, 미참조 리소스, Anthropic 컴플라이언스(kebab-case, description 길이). 플래그와 함께 요약 테이블 출력.
-- **코드 티디잉** (`--code`): 최근 non-tidying 커밋을 분석하여 안전한 리팩토링 기회를 찾습니다. 병렬 서브에이전트가 Kent Beck의 "Tidy First?" 철학에서 가져온 8가지 티디잉 기법(guard clauses, dead code, explaining variables 등)을 적용합니다.
-- **심층 리뷰** (`--skill <name>`): 단일 스킬을 Progressive Disclosure 기준 + Anthropic 컴플라이언스로 평가합니다. 우선순위가 지정된 리팩토링 제안을 포함한 구조화된 보고서를 생성합니다.
-- **전체적 분석** (`--skill --holistic`): 세 가지 차원(패턴 전파, 경계 이슈, 누락된 연결)에 걸친 크로스 플러그인 분석. 보고서를 `prompt-logs/`에 저장합니다.
-- **문서 리뷰** (`--docs`): CLAUDE.md, README, project-context.md, marketplace.json, plugin.json 간의 일관성을 점검합니다. 깨진 링크, 오래된 참조, 구조적 불일치를 플래그합니다.
+퀵 스캔은 구조적 검사를 실행합니다. 코드 정리는 커밋을 분석하여 안전한 리팩토링을 찾습니다(Kent Beck의 "Tidy First?"). 심층 리뷰는 프로그레시브 디스클로저 기준으로 평가합니다. 전체적 모드는 크로스 플러그인 패턴 이슈를 감지합니다. 문서 모드는 문서 간 일관성을 점검합니다.
 
-## Hooks
+전체 레퍼런스: [SKILL.md](plugins/cwf/skills/refactor/SKILL.md)
 
-### [attention-hook](plugins/attention-hook/README.md)
+### handoff
 
-**설치**: `claude plugin install attention-hook@corca-plugins` | **갱신**: `claude plugin update attention-hook@corca-plugins`
+프로젝트 상태와 산출물로부터 세션 또는 페이즈 핸드오프 문서를 생성합니다.
 
-Claude Code가 입력을 기다릴 때 Slack 스레드로 알림을 보내는 훅입니다. 하나의 세션 알림이 하나의 스레드로 묶여 채널이 깔끔하게 유지됩니다. 원격 서버에 세팅해뒀을 때 유용합니다. ([작업 배경 블로그 글](https://www.stdy.blog/1p1w-03-attention-hook/))
+```text
+cwf:handoff                # next-session.md 생성 + 등록
+cwf:handoff --register     # cwf-state.yaml에 세션 등록만
+cwf:handoff --phase        # phase-handoff.md 생성 (HOW 컨텍스트)
+```
 
-**주요 기능**:
-- **스레드 그룹화**: 첫 사용자 프롬프트가 부모 메시지를 생성하고, 이후 알림은 스레드 답글로 표시
-- **대기 알림**: 사용자 입력을 60초 이상 기다릴 때 (`idle_prompt`)
-- **AskUserQuestion 알림**: Claude가 질문 후 30초 이상 응답이 없을 때 (`CLAUDE_CORCA_ATTENTION_DELAY`)
-- **Plan 모드 알림**: Claude가 Plan 모드 진입/종료를 요청하고 30초 이상 응답이 없을 때
-- **하트비트 상태**: 장시간 자율 작업 중 주기적 상태 업데이트 (5분 이상 유휴)
-- **하위 호환**: `SLACK_WEBHOOK_URL`만 설정된 경우 스레딩 없이 기존 방식으로 동작
+세션 핸드오프는 작업 범위, 교훈, 미해결 항목을 다음 세션으로 전달합니다. 페이즈 핸드오프는 프로토콜, 규칙, 제약 조건을 다음 워크플로우 페이즈(HOW)로 전달하며, plan.md(WHAT)를 보완합니다.
 
-> **호환성 주의**: 이 스크립트는 Claude Code의 내부 transcript 구조를 `jq`로 파싱합니다. Claude Code 버전이 업데이트되면 동작하지 않을 수 있습니다. 테스트된 버전 정보는 스크립트 주석을 참조하세요.
+전체 레퍼런스: [SKILL.md](plugins/cwf/skills/handoff/SKILL.md)
 
-**필수 조건**:
-- `jq` 설치 필요 (JSON 파싱용)
-- Slack App (`chat:write` + `im:write` 권한, 권장) 또는 Incoming Webhook URL
+### ship
 
-**설정 방법** (Slack App — 스레딩 지원):
+GitHub 워크플로우 자동화 -- 이슈 생성, PR, 머지 관리.
 
-1. [api.slack.com/apps](https://api.slack.com/apps)에서 Slack App 생성, `chat:write` + `im:write` 스코프 추가, 워크스페이스에 설치
-2. 채널 ID 확인: 봇에게 DM 열기 → 봇 이름 클릭 → 하단의 채널 ID 복사 (`D`로 시작). 채널 사용 시 `/invite @봇이름`으로 먼저 초대.
-3. `~/.claude/.env` 파일 설정:
+```text
+cwf:ship                                   # 사용법 표시
+cwf:ship issue [--base B] [--no-branch]    # 이슈 + 피처 브랜치 생성
+cwf:ship pr [--base B] [--issue N] [--draft]  # PR 생성
+cwf:ship merge [--squash|--merge|--rebase]    # 승인된 PR 머지
+cwf:ship status                            # 이슈, PR, 체크 상태 조회
+```
+
+세션 컨텍스트(plan.md, lessons.md, retro.md)에서 자동으로 이슈 본문과 PR 본문을 조합합니다. CDM 분석, 결정 테이블, 성공 기준 체크리스트를 PR에 포함합니다. 인간 판단이 불필요한 경우 자율 머지를 지원합니다.
+
+전체 레퍼런스: [SKILL.md](plugins/cwf/skills/ship/SKILL.md)
+
+### review
+
+6명 병렬 리뷰어에 의한 범용 리뷰 -- 내러티브 판정.
+
+```text
+cwf:review                 # 코드 리뷰 (기본)
+cwf:review --mode plan     # 계획/스펙 리뷰
+cwf:review --mode clarify  # 요구사항 리뷰
+```
+
+2명 내부 리뷰어(Security, UX/DX) + 2명 외부 CLI 리뷰어(Codex, Gemini) + 2명 도메인 전문가가 병렬로 리뷰합니다. 외부 CLI가 없으면 Task 에이전트로 우아하게 폴백합니다. 판정은 Pass / Conditional Pass / Revise 세 단계입니다. plan.md의 BDD 성공 기준을 자동 검증합니다.
+
+전체 레퍼런스: [SKILL.md](plugins/cwf/skills/review/SKILL.md)
+
+### setup
+
+CWF 초기 설정.
+
+```text
+cwf:setup                # 전체 설정 (훅 + 도구 + 인덱스)
+cwf:setup --hooks        # 훅 그룹 선택만
+cwf:setup --tools        # 외부 도구 감지만
+cwf:setup --index        # 프로젝트 index.md 생성
+```
+
+대화형 훅 그룹 토글, 외부 AI CLI 및 API 키 감지(Codex, Gemini, Tavily, Exa), 프로그레시브 디스클로저 인덱스 생성. CWF 훅은 setup 없이도 동작합니다 -- 이 스킬은 커스터마이징용입니다.
+
+전체 레퍼런스: [SKILL.md](plugins/cwf/skills/setup/SKILL.md)
+
+### update
+
+CWF 플러그인 업데이트 확인 및 적용.
+
+```text
+cwf:update               # 새 버전이 있으면 확인 + 업데이트
+cwf:update --check       # 버전 확인만
+```
+
+전체 레퍼런스: [SKILL.md](plugins/cwf/skills/update/SKILL.md)
+
+## 훅
+
+CWF는 자동으로 실행되는 7개 훅 그룹을 포함합니다. 모두 기본 활성화되어 있으며, `cwf:setup --hooks`로 개별 그룹을 토글할 수 있습니다.
+
+| 그룹 | 훅 유형 | 하는 일 |
+|------|---------|---------|
+| `attention` | Notification, Pre/PostToolUse | 유휴 상태 및 AskUserQuestion 시 Slack 알림 |
+| `log` | Stop, SessionEnd | 대화 턴을 마크다운으로 자동 기록 |
+| `read` | PreToolUse -> Read | 파일 크기 인식 읽기 가드 (500줄 이상 경고, 2000줄 이상 차단) |
+| `lint_markdown` | PostToolUse -> Write\|Edit | 마크다운 검증 -- 린트 위반 시 자동 수정 유도 |
+| `lint_shell` | PostToolUse -> Write\|Edit | 셸 스크립트용 ShellCheck 검증 |
+| `websearch_redirect` | PreToolUse -> WebSearch | Claude의 WebSearch를 `cwf:gather --search`로 리다이렉트 |
+| `compact_recovery` | SessionStart -> compact | auto-compact 후 컨텍스트 복구를 위해 라이브 세션 상태 주입 |
+
+알림 예시:
+
+<img src="assets/attention-hook-normal-response.png" alt="Slack 알림 -- 일반 응답" width="600">
+
+<img src="assets/attention-hook-AskUserQuestion.png" alt="Slack 알림 -- AskUserQuestion" width="600">
+
+## 설정
+
+`~/.claude/.env`에 환경 변수를 설정하세요:
+
+### Slack 알림 (attention 훅)
+
 ```bash
-# ~/.claude/.env
-SLACK_BOT_TOKEN="xoxb-your-bot-token"
-SLACK_CHANNEL_ID="D0123456789"  # 봇 DM 채널 (또는 C...로 시작하는 채널 ID)
-CLAUDE_CORCA_ATTENTION_DELAY=30  # AskUserQuestion 알림 지연 시간 (초, 기본값: 30)
+SLACK_BOT_TOKEN="xoxb-your-bot-token"       # chat:write + im:write 스코프를 가진 Slack App
+SLACK_CHANNEL_ID="D0123456789"               # 봇 DM 채널 ID (또는 C...로 시작하는 채널 ID)
+CLAUDE_CORCA_ATTENTION_DELAY=30              # AskUserQuestion 알림 지연 시간 (초)
 ```
 
-레거시 웹훅 설정(스레딩 없음)은 `SLACK_WEBHOOK_URL`을 대신 설정하세요. 자세한 내용은 [플러그인 README](plugins/attention-hook/README.md)를 참조하세요.
+레거시 웹훅 설정(스레딩 없음)은 `SLACK_WEBHOOK_URL`을 대신 설정하세요.
 
-**알림 내용**:
-- 📝 사용자 요청 내용 (처음/끝 5줄씩 truncate)
-- 🤖 요청에 대한 Claude의 응답 (처음/끝 5줄씩 truncate)
-- ❓ 질문 대기 중: AskUserQuestion의 질문과 선택지 (있을 경우)
-- ✅ Todo: 완료/진행중/대기 항목 수 및 각 항목 내용
-- 💓 하트비트: 장시간 작업 중 Todo 진행 상황과 함께 주기적 상태 업데이트
+### 검색 API (gather 스킬)
 
-**알림 예시**:
-
-<img src="assets/attention-hook-normal-response.png" alt="Slack 알림 예시 1 - 일반적인 응답" width="600">
-
-<img src="assets/attention-hook-AskUserQuestion.png" alt="Slack 알림 예시 2 - AskUserQuestion" width="600">
-
-### [smart-read](plugins/smart-read/hooks/hooks.json)
-
-**설치**: `claude plugin install smart-read@corca-plugins` | **갱신**: `claude plugin update smart-read@corca-plugins`
-
-Read 도구 호출을 가로채서 파일 크기에 따라 지능적인 읽기를 강제하는 훅입니다. 큰 파일의 전체 읽기를 차단하여 컨텍스트 낭비를 방지하고, offset/limit 또는 Grep 사용을 안내합니다.
-
-**동작 방식**:
-- `PreToolUse` → `Read` 매처로 파일 읽기를 가로챔
-- 전체 읽기 허용 전 파일 크기(줄 수)를 확인
-- 작은 파일 (≤500줄): 조용히 허용
-- 중간 파일 (500-2000줄): 허용하되 `additionalContext`로 줄 수 정보 제공
-- 큰 파일 (>2000줄): 차단 후 `offset`/`limit` 또는 `Grep` 사용 안내
-- 바이너리 파일 (PDF, 이미지, 노트북): 항상 허용 (Read가 자체적으로 처리)
-
-**우회**: Claude가 `offset` 또는 `limit`을 명시적으로 설정하면 훅을 우회합니다. 둘 다 없을 때만 차단하므로, 의도적인 부분 읽기는 항상 허용됩니다.
-
-**설정** (선택):
-
-`~/.claude/.env`에서 임계값 조정:
 ```bash
-# ~/.claude/.env
-CLAUDE_CORCA_SMART_READ_WARN_LINES=500   # 이 줄 수 이상이면 additionalContext 추가 (기본값: 500)
-CLAUDE_CORCA_SMART_READ_DENY_LINES=2000  # 이 줄 수 이상이면 읽기 차단 (기본값: 2000)
+TAVILY_API_KEY="tvly-..."                    # 웹 검색 및 URL 추출 (https://app.tavily.com)
+EXA_API_KEY="..."                            # 코드 검색 (https://dashboard.exa.ai)
 ```
 
-### [prompt-logger](plugins/prompt-logger/README.md)
+### Gather 출력
 
-**설치**: `claude plugin install prompt-logger@corca-plugins` | **갱신**: `claude plugin update prompt-logger@corca-plugins`
-
-매 대화 턴을 마크다운 파일로 자동 기록하는 훅입니다. `Stop`과 `SessionEnd` 훅을 사용하여 턴이 완료될 때마다 증분 방식으로 캡처합니다. 모델 개입 없이 순수 bash + jq로 처리합니다.
-
-**동작 방식**:
-- `Stop` 훅: Claude 응답 완료 시 발동 → 완료된 턴을 기록
-- `SessionEnd` 훅: 종료/클리어 시 발동 → 미기록 콘텐츠 캡처
-- 두 훅 모두 동일한 멱등성 스크립트를 호출 (오프셋 기반 증분 처리)
-
-**출력**: 세션당 하나의 마크다운 파일 (`{cwd}/prompt-logs/sessions/{date}-{hash}.md`)
-- 세션 메타데이터 (모델, 브랜치, CWD, Claude Code 버전)
-- 각 턴의 타임스탬프, 소요 시간, 토큰 사용량
-- 전체 사용자 프롬프트 (이미지는 `[Image]`로 대체)
-- 축약된 어시스턴트 응답 (임계값 초과 시 처음 5줄 + 마지막 5줄)
-- 도구 호출 요약 (도구명 + 핵심 파라미터)
-
-**설정** (선택):
-
-`~/.claude/.env`에서 설정:
 ```bash
-# ~/.claude/.env
-CLAUDE_CORCA_PROMPT_LOGGER_DIR="/custom/path"        # 출력 디렉토리 (기본값: {cwd}/prompt-logs/sessions)
-CLAUDE_CORCA_PROMPT_LOGGER_ENABLED=false              # 로깅 비활성화 (기본값: true)
-CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE=20                # 축약 임계값 (줄 수, 기본값: 10)
+CLAUDE_CORCA_GATHER_CONTEXT_OUTPUT_DIR="./gathered"  # 기본 출력 디렉토리
 ```
 
-### [markdown-guard](plugins/markdown-guard/hooks/hooks.json)
+### Smart-read 임계값
 
-**설치**: `claude plugin install markdown-guard@corca-plugins` | **갱신**: `claude plugin update markdown-guard@corca-plugins`
+```bash
+CLAUDE_CORCA_SMART_READ_WARN_LINES=500      # 이 줄 수 이상이면 경고 표시 (기본값: 500)
+CLAUDE_CORCA_SMART_READ_DENY_LINES=2000     # 이 줄 수 이상이면 전체 읽기 차단 (기본값: 2000)
+```
 
-모든 Write/Edit 작업 후 마크다운 파일을 검증하는 PostToolUse 훅입니다. `markdownlint-cli2`가 위반 사항(코드 펜스 언어 누락, 제목 주변 빈 줄 누락 등)을 감지하면 작업을 차단하고 이슈를 보고하여 Claude가 즉시 자체 수정할 수 있게 합니다.
+### 프롬프트 로거
 
-**동작 방식**:
-- `PostToolUse` → `Write|Edit` 매처(정규식)로 마크다운 쓰기를 가로챔
-- 작성된 파일에 `npx markdownlint-cli2` 실행 (`.markdownlint.json` 설정 적용)
-- 위반 발견 시: 린트 출력 내용과 함께 차단
-- 정상 시: 조용히 통과
-
-**주의사항**:
-- `.md` 파일이 아니거나 `prompt-logs/` 경로는 자동으로 건너뜀
-- `npx`나 `markdownlint-cli2`가 없으면 우아하게 건너뜀
-- `markdownlint-cli2` 필요 (`npx`로 자동 설치)
+```bash
+CLAUDE_CORCA_PROMPT_LOGGER_DIR="/custom/path"  # 출력 디렉토리 (기본값: {cwd}/prompt-logs/sessions)
+CLAUDE_CORCA_PROMPT_LOGGER_ENABLED=false       # 로깅 비활성화 (기본값: true)
+CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE=20         # 축약 임계값 (줄 수, 기본값: 10)
+```
 
 ## 삭제된 플러그인
 
-다음 플러그인들은 마켓플레이스에서 삭제되었습니다. 소스 코드는 커밋 `238f82d`에서 참조할 수 있습니다.
+다음 플러그인들은 마켓플레이스에서 삭제되었습니다.
+
+### v3.0.0에서 삭제
+
+모든 독립 플러그인이 CWF로 통합되었습니다. 소스 코드는 커밋 `238f82d`에서 참조할 수 있습니다.
+
+| 삭제된 플러그인 | 대체 | 명령어 매핑 |
+|------------|------|------|
+| `gather-context` | [gather](#gather) | `/gather-context <url>` -> `cwf:gather <url>` |
+| `clarify` | [clarify](#clarify) | `/clarify <req>` -> `cwf:clarify <req>` |
+| `retro` | [retro](#retro) | `/retro` -> `cwf:retro` |
+| `refactor` | [refactor](#refactor) | `/refactor` -> `cwf:refactor` |
+| `attention-hook` | [attention 훅 그룹](#훅) | (훅으로 자동 실행) |
+| `smart-read` | [read 훅 그룹](#훅) | (훅으로 자동 실행) |
+| `prompt-logger` | [log 훅 그룹](#훅) | (훅으로 자동 실행) |
+| `markdown-guard` | [lint_markdown 훅 그룹](#훅) | (훅으로 자동 실행) |
 
 ### v2.0.0에서 삭제
 
 | 삭제된 플러그인 | 대체 | 명령어 매핑 |
 |------------|------|------|
-| `suggest-tidyings` | [refactor](#refactor) `--code` | `/suggest-tidyings` → `/refactor --code` |
-| `deep-clarify` | [clarify](#clarify) | `/deep-clarify <요구사항>` → `/clarify <요구사항>` |
-| `interview` | [clarify](#clarify) | `/interview <topic>` → `/clarify <요구사항>` |
-| `web-search` | [gather-context](#gather-context) | `/web-search <q>` → `/gather-context --search <q>` |
+| `suggest-tidyings` | [refactor](#refactor) `--code` | `/suggest-tidyings` -> `cwf:refactor --code` |
+| `deep-clarify` | [clarify](#clarify) | `/deep-clarify <req>` -> `cwf:clarify <req>` |
+| `interview` | [clarify](#clarify) | `/interview <topic>` -> `cwf:clarify <req>` |
+| `web-search` | [gather](#gather) | `/web-search <q>` -> `cwf:gather --search <q>` |
 
 ### v1.8.0에서 삭제
 
 | 삭제된 플러그인 | 대체 |
 |------------|------|
-| `g-export` | `gather-context` (Google Docs/Slides/Sheets 내장) |
-| `slack-to-md` | `gather-context` (Slack 스레드 변환 내장) |
-| `notion-to-md` | `gather-context` (Notion 페이지 변환 내장) |
+| `g-export` | [gather](#gather) (Google Docs/Slides/Sheets 내장) |
+| `slack-to-md` | [gather](#gather) (Slack 스레드 변환 내장) |
+| `notion-to-md` | [gather](#gather) (Notion 페이지 변환 내장) |
 
 ## 라이선스
 
