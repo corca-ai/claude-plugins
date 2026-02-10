@@ -53,7 +53,7 @@ if [ -d "$LOCK_DIR" ]; then
     fi
 fi
 if mkdir "$LOCK_DIR" 2>/dev/null; then
-    trap 'rmdir "$LOCK_DIR" 2>/dev/null' EXIT INT TERM
+    trap 'rmdir "$LOCK_DIR" 2>/dev/null || true' EXIT INT TERM
 
     THREAD_TS=$(slack_get_thread_ts "$HASH")
     if [ -z "$THREAD_TS" ]; then
@@ -67,12 +67,17 @@ if mkdir "$LOCK_DIR" 2>/dev/null; then
             DISPLAY_PROMPT="${DISPLAY_PROMPT:0:500}..."
         fi
 
-        MESSAGE=":large_green_circle: Claude Code @ ${HOSTNAME_STR} | ${CWD}"$'\n'":memo: ${DISPLAY_PROMPT}"
+        PARENT_MENTION=$(slack_attention_parent_mention)
+        HEADER=":large_green_circle: Claude Code @ ${HOSTNAME_STR} | ${CWD}"
+        if [ -n "$PARENT_MENTION" ]; then
+            HEADER="${PARENT_MENTION} ${HEADER}"
+        fi
+
+        MESSAGE="${HEADER}"$'\n'":memo: ${DISPLAY_PROMPT}"
 
         slack_send "$HASH" "$MESSAGE" ""
     fi
 
-    rmdir "$LOCK_DIR" 2>/dev/null
 fi
 
 exit 0

@@ -62,6 +62,45 @@ slack_escape_json() {
     echo "$text"
 }
 
+slack_normalize_bool() {
+    local value="${1:-false}"
+    local normalized
+    normalized=$(printf '%s' "$value" | tr '[:upper:]' '[:lower:]')
+    case "$normalized" in
+        true|1|yes|on) echo "true" ;;
+        false|0|no|off) echo "false" ;;
+        *) echo "false" ;;
+    esac
+}
+
+# Build mention text for parent notifications.
+# Priority:
+#   1) CLAUDE_CORCA_ATTENTION_PARENT_MENTION (raw, e.g. "<@U123...>" or "@name")
+#   2) CLAUDE_CORCA_ATTENTION_USER_ID (auto-wrapped as "<@...>")
+#   3) CLAUDE_CORCA_ATTENTION_USER_HANDLE (auto-prefixed as "@...")
+slack_attention_parent_mention() {
+    if [ -n "${CLAUDE_CORCA_ATTENTION_PARENT_MENTION:-}" ]; then
+        echo "${CLAUDE_CORCA_ATTENTION_PARENT_MENTION}"
+        return
+    fi
+
+    if [ -n "${CLAUDE_CORCA_ATTENTION_USER_ID:-}" ]; then
+        echo "<@${CLAUDE_CORCA_ATTENTION_USER_ID}>"
+        return
+    fi
+
+    if [ -n "${CLAUDE_CORCA_ATTENTION_USER_HANDLE:-}" ]; then
+        if [[ "${CLAUDE_CORCA_ATTENTION_USER_HANDLE}" == @* ]]; then
+            echo "${CLAUDE_CORCA_ATTENTION_USER_HANDLE}"
+        else
+            echo "@${CLAUDE_CORCA_ATTENTION_USER_HANDLE}"
+        fi
+        return
+    fi
+
+    echo ""
+}
+
 # Send message to Slack
 # Usage: slack_send <hash> <text> [is_thread_reply]
 #   hash:            session hash for state file lookup
@@ -87,7 +126,8 @@ slack_send() {
 
         local payload="{\"channel\": \"${SLACK_CHANNEL_ID}\", \"text\": \"${escaped_text}\""
         if [ -n "$thread_ts" ]; then
-            local broadcast="${CLAUDE_CORCA_ATTENTION_REPLY_BROADCAST:-true}"
+            local broadcast
+            broadcast=$(slack_normalize_bool "${CLAUDE_CORCA_ATTENTION_REPLY_BROADCAST:-false}")
             payload+=", \"thread_ts\": \"${thread_ts}\", \"reply_broadcast\": ${broadcast}"
         fi
         payload+="}"

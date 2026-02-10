@@ -21,24 +21,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # === HELPER FUNCTIONS ===
 
-# Truncate text to first N lines + ... + last N lines
-truncate_text() {
-    local text="$1"
-    local line_count=$(echo "$text" | wc -l)
-
-    if [ "$line_count" -le 10 ]; then
-        echo "$text"
-    else
-        local first=$(echo "$text" | head -n 5)
-        local last=$(echo "$text" | tail -n 5)
-        echo "$first"
-        echo ""
-        echo "...(truncated)..."
-        echo ""
-        echo "$last"
-    fi
-}
-
 # Escape special characters for JSON
 escape_json() {
     local text="$1"
@@ -52,9 +34,15 @@ escape_json() {
 # Source shared Slack utility
 # shellcheck source=slack-send.sh
 source "$SCRIPT_DIR/slack-send.sh"
+# shellcheck source=text-format.sh
+source "$SCRIPT_DIR/text-format.sh"
 
 # === CONFIGURATION ===
 slack_load_config
+ATTENTION_TRUNCATE_LINES="${CLAUDE_CORCA_ATTENTION_TRUNCATE:-10}"
+if ! [[ "$ATTENTION_TRUNCATE_LINES" =~ ^[0-9]+$ ]] || [ "$ATTENTION_TRUNCATE_LINES" -le 0 ]; then
+    ATTENTION_TRUNCATE_LINES=10
+fi
 
 # === READ HOOK INPUT ===
 INPUT=$(cat)
@@ -99,24 +87,49 @@ if [ -n "$TRANSCRIPT_PATH" ] && [ -f "$TRANSCRIPT_PATH" ]; then
 
     # Build message body (compact format for thread replies)
     MESSAGE=""
+    append_section() {
+        local title="$1"
+        local body="$2"
+        if [ -z "$body" ]; then
+            return
+        fi
+
+        if [ -n "$MESSAGE" ]; then
+            MESSAGE+=$'\n\n'
+        fi
+        MESSAGE+="${title}"$'\n'"${body}"
+    }
 
     if [ -n "$LAST_HUMAN_TEXT" ]; then
-        TRUNCATED_REQUEST=$(truncate_text "$LAST_HUMAN_TEXT")
-        MESSAGE+=":memo: Request:"$'\n'"$TRUNCATED_REQUEST"$'\n'
+        REQUEST_TEXT=$(normalize_multiline_text "$LAST_HUMAN_TEXT")
+        TRUNCATED_REQUEST=$(truncate_middle_lines "$REQUEST_TEXT" "$ATTENTION_TRUNCATE_LINES")
+        append_section ":memo: Request:" "$TRUNCATED_REQUEST"
     fi
 
     if [ -n "$LAST_ASSISTANT_TEXT" ]; then
-        TRUNCATED_RESPONSE=$(truncate_text "$LAST_ASSISTANT_TEXT")
-        MESSAGE+=$'\n'":robot_face: Response:"$'\n'"$TRUNCATED_RESPONSE"$'\n'
+        RESPONSE_TEXT=$(normalize_multiline_text "$LAST_ASSISTANT_TEXT")
+        TRUNCATED_RESPONSE=$(truncate_middle_lines "$RESPONSE_TEXT" "$ATTENTION_TRUNCATE_LINES")
+        append_section ":robot_face: Response:" "$TRUNCATED_RESPONSE"
     fi
 
     if [ -n "$ASK_QUESTION" ]; then
-        TRUNCATED_QUESTION=$(truncate_text "$ASK_QUESTION")
-        MESSAGE+=$'\n'":question: Waiting for answer:"$'\n'"$TRUNCATED_QUESTION"$'\n'
+        QUESTION_TEXT=$(normalize_multiline_text "$ASK_QUESTION")
+        TRUNCATED_QUESTION=$(truncate_middle_lines "$QUESTION_TEXT" "$ATTENTION_TRUNCATE_LINES")
+        append_section ":question: Waiting for answer:" "$TRUNCATED_QUESTION"
     fi
 
     if [ -n "$TODO_STATUS" ]; then
-        MESSAGE+=$'\n'"$TODO_STATUS"
+        TODO_TEXT=$(normalize_multiline_text "$TODO_STATUS")
+        if [ -n "$TODO_TEXT" ]; then
+            if [ -n "$MESSAGE" ]; then
+                MESSAGE+=$'\n\n'
+            fi
+            MESSAGE+="$TODO_TEXT"
+        fi
+    fi
+
+    if [ -z "$MESSAGE" ]; then
+        MESSAGE="Claude is waiting for your input"
     fi
 
 else

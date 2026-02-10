@@ -18,24 +18,6 @@ set -euo pipefail
 
 # === HELPER FUNCTIONS ===
 
-# Truncate text to first N lines + ... + last N lines
-truncate_text() {
-    local text="$1"
-    local line_count=$(echo "$text" | wc -l)
-
-    if [ "$line_count" -le 10 ]; then
-        echo "$text"
-    else
-        local first=$(echo "$text" | head -n 5)
-        local last=$(echo "$text" | tail -n 5)
-        echo "$first"
-        echo ""
-        echo "...(truncated)..."
-        echo ""
-        echo "$last"
-    fi
-}
-
 # Escape text for shell variable assignment (single quotes)
 escape_for_shell() {
     local text="$1"
@@ -77,7 +59,10 @@ parse_assistant_text() {
          if type == "array" then [.[] | select(.type == "text") | .text] else [. // ""] end] |
         flatten |
         map(select(. != "")) |
-        join("\n\n")' "$transcript" 2>/dev/null
+        join("\n") |
+        gsub("^[\\s\\n]+"; "") |
+        gsub("[\\s\\n]+$"; "") |
+        gsub("\\n{3,}"; "\n\n")' "$transcript" 2>/dev/null
 }
 
 # Parse AskUserQuestion tool calls from current turn

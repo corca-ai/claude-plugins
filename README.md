@@ -267,6 +267,12 @@ Set environment variables in `~/.claude/.env`:
 SLACK_BOT_TOKEN="xoxb-your-bot-token"       # Slack App with chat:write + im:write scopes
 SLACK_CHANNEL_ID="D0123456789"               # Bot DM channel ID (or C... for channels)
 CLAUDE_CORCA_ATTENTION_DELAY=30              # AskUserQuestion notification delay (seconds)
+CLAUDE_CORCA_ATTENTION_REPLY_BROADCAST=false # Thread replies also visible in channel timeline (default: false)
+CLAUDE_CORCA_ATTENTION_TRUNCATE=10           # Max lines per Request/Response section (default: 10)
+# Optional parent mention (first prompt only):
+CLAUDE_CORCA_ATTENTION_USER_ID="U0123456789" # Recommended: Slack user ID => <@U...>
+# CLAUDE_CORCA_ATTENTION_USER_HANDLE="your-handle"
+# CLAUDE_CORCA_ATTENTION_PARENT_MENTION="<@U0123456789>"  # Raw override
 ```
 
 For legacy webhook setup (no threading), set `SLACK_WEBHOOK_URL` instead.

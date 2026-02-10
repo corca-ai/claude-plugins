@@ -8,6 +8,8 @@ set -euo pipefail
 HOOK_GROUP="log"
 # shellcheck source=cwf-hook-gate.sh
 source "$(dirname "${BASH_SOURCE[0]}")/cwf-hook-gate.sh"
+# shellcheck source=text-format.sh
+source "$(dirname "${BASH_SOURCE[0]}")/text-format.sh"
 
 HOOK_TYPE="${1:-stop}"
 
@@ -379,7 +381,8 @@ while [ "$TURN_IDX" -lt "$TURN_COUNT" ]; do
     ')
 
     if [ -n "$ASSISTANT_TEXT" ]; then
-        LINE_COUNT=$(echo "$ASSISTANT_TEXT" | wc -l | tr -d ' ')
+        ASSISTANT_TEXT=$(normalize_multiline_text "$ASSISTANT_TEXT")
+        LINE_COUNT=$(text_line_count "$ASSISTANT_TEXT")
 
         {
             echo ""
@@ -387,17 +390,11 @@ while [ "$TURN_IDX" -lt "$TURN_COUNT" ]; do
         } >> "$OUT_FILE"
 
         if [ "$LINE_COUNT" -gt "$TRUNCATE_THRESHOLD" ]; then
-            HALF=$((TRUNCATE_THRESHOLD / 2))
             OMITTED=$((LINE_COUNT - TRUNCATE_THRESHOLD))
-            {
-                echo "$ASSISTANT_TEXT" | head -n "$HALF"
-                echo ""
-                echo "...(${OMITTED} lines truncated)..."
-                echo ""
-                echo "$ASSISTANT_TEXT" | tail -n "$HALF"
-            } >> "$OUT_FILE"
+            MARKER="...(${OMITTED} lines truncated)..."
+            truncate_middle_lines "$ASSISTANT_TEXT" "$TRUNCATE_THRESHOLD" "$MARKER" >> "$OUT_FILE"
         else
-            echo "$ASSISTANT_TEXT" >> "$OUT_FILE"
+            printf '%s\n' "$ASSISTANT_TEXT" >> "$OUT_FILE"
         fi
     fi
 
