@@ -166,7 +166,15 @@ Read `{SKILL_DIR}/../../references/agent-patterns.md` for general agent principl
 | 4-6 | 3 | Balance parallelism vs coordination |
 | 7+ | 4 (hard cap) | Beyond 4, overhead exceeds gains |
 
-### 2.5 Present Decomposition
+### 2.5 Cross-Cutting Assessment
+
+Before finalizing decomposition, assess whether changes are cross-cutting:
+
+1. **Cross-cutting indicator**: A single concept (protocol, pattern, interface) projected across 3+ files
+2. **If cross-cutting**: Commit boundary = change pattern. Add a `Commit Group` column to group files by the concept they implement, regardless of work item assignment.
+3. **If modular**: Commit boundary = work item (default). No `Commit Group` needed.
+
+### 2.6 Present Decomposition
 
 Show the decomposition before executing:
 
@@ -175,16 +183,17 @@ Show the decomposition before executing:
 
 ### Work Items
 
-| # | Steps | Domain | Files | Parallel |
-|---|-------|--------|-------|----------|
-| 1 | 1, 2 | {domain} | {file list} | yes |
-| 2 | 3 | {domain} | {file list} | yes |
-| 3 | 4, 5 | {domain} | {file list} | after #1 |
+| # | Steps | Domain | Files | Parallel | Commit Group |
+|---|-------|--------|-------|----------|--------------|
+| 1 | 1, 2 | {domain} | {file list} | yes | {group or "—"} |
+| 2 | 3 | {domain} | {file list} | yes | {group or "—"} |
+| 3 | 4, 5 | {domain} | {file list} | after #1 | {group or "—"} |
 
 ### Execution Strategy
 - **Mode**: {Direct (3a) | Agent Team (3b)}
 - **Agents**: {count}
 - **Batches**: {count} (sequential batches of parallel items)
+- **Commit Strategy**: {per work item | per change pattern}
 
 ### Don't Touch (enforced)
 - {files from plan's Don't Touch section}
