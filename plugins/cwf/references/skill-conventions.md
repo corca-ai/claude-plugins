@@ -71,6 +71,45 @@ These rules apply to all CWF skills. Include them verbatim:
 1. **All code fences must have language specifier**: Never use bare fences.
 2. **cwf-state.yaml is SSOT**: Read before modifying. Edit, do not overwrite.
    (Only for skills that read/write cwf-state.yaml.)
+3. **cwf-state.yaml auto-init**: If cwf-state.yaml does not exist in the project root,
+   create it with the minimum schema before proceeding. See [cwf-state-init](#cwf-stateyaml-auto-init) below.
+
+## cwf-state.yaml Auto-Init
+
+When a CWF skill needs cwf-state.yaml and it does not exist, create it with:
+
+```yaml
+# cwf-state.yaml — Corca Workflow Framework project state
+# Git-tracked, per-project. Read/written by cwf skills.
+
+workflow:
+  current_stage: clarify
+  started_at: "{today YYYY-MM-DD}"
+
+sessions: []
+
+tools:
+  codex: unknown
+  gemini: unknown
+
+hooks:
+  attention: true
+  log: true
+  read: true
+  lint_markdown: true
+  lint_shell: true
+  websearch_redirect: true
+  compact_recovery: true
+
+live: {}
+
+expert_roster: []
+```
+
+Skills that update `live` (clarify, plan, impl, retro, handoff) should populate
+it on first use. The `sessions` list grows as sessions complete.
+
+compact-context.sh already handles missing cwf-state.yaml gracefully (exits 0).
 
 ### Skill-specific rules
 

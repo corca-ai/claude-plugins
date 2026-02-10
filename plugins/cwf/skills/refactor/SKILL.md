@@ -312,6 +312,17 @@ Read `{SKILL_DIR}/references/docs-criteria.md` Section 5 and evaluate:
 - Non-obvious decisions lacking documented rationale
 - Self-evident instructions wasting reader attention
 
+### 6. Structural Optimization
+
+Read `{SKILL_DIR}/references/docs-criteria.md` Section 6 and synthesize:
+- Merge candidates (scope-overlapping docs → identify primary absorber)
+- Deletion candidates (unique content fits elsewhere)
+- CLAUDE.md trimming proposals (obvious + automation-redundant + duplicated)
+- Target structure: before/after doc set comparison
+- Principle compliance: rate each doc against the 7 documentation principles
+
+Present as a concrete restructuring proposal with rationale.
+
 ---
 
 ## References

@@ -71,3 +71,29 @@ Structural health of the documentation graph. Reference: [Software project docum
 | Automation-redundant instructions | Docs include behavioral instructions already enforced by deterministic hooks or skill triggers (e.g., CLAUDE.md says "always do X" when a PostToolUse hook already validates X). Cross-check against installed `hooks.json` entries and skill trigger conditions |
 | Scope-overlapping documents | Multiple docs cover the same scope with no clear ownership boundary. Candidate for merge or deletion — one scope, one file |
 | Bare code fences | Code blocks missing language specifier (` ```bash `, ` ```text `, etc.) — run `npx markdownlint-cli2` to verify |
+
+## 6. Structural Optimization
+
+Synthesize findings from Sections 1-5 into actionable restructuring proposals.
+
+### Documentation Principles (reference frame)
+
+Apply these principles when evaluating structure:
+
+1. **Always-loaded file = compressed index**: The entry-point (CLAUDE.md) should contain pointers and scope descriptions, not full content.
+2. **Each document has one clear scope**: If a doc serves multiple unrelated purposes, agents can't make a meaningful read/skip decision.
+3. **Agent autonomy for reading, explicit routing for writing**: Agents judge which docs are relevant; writing needs explicit routing (persist routing table).
+4. **Less is more**: Instruction-following quality degrades as instruction count rises. CLAUDE.md < 100 lines ideal; individual docs focused enough to be skippable.
+5. **Documentation-as-Code**: Single source of truth per fact. Meaningful names. Link, don't copy. Remove unreachable docs.
+6. **Non-obvious decisions only**: Skip guidance a capable agent would independently reach.
+7. **Skills for vertical, docs for horizontal**: Skills for action-specific workflows; docs for cross-task knowledge.
+
+### Proposals to produce
+
+| Proposal type | Description |
+|---------------|-------------|
+| **Merge candidates** | Scope-overlapping docs that should combine into one. Identify the primary file (absorber) and secondary files (to be deleted). |
+| **Deletion candidates** | Docs whose unique content fits entirely within another file. |
+| **CLAUDE.md trimming** | Lines that are (a) obvious, (b) automation-redundant (hook/skill enforced), or (c) duplicated in docs/. |
+| **Target structure** | Before/after comparison of the doc set with clear scope per file. |
+| **Principle compliance** | Rate each remaining doc against principles 1-7 above. Flag violations. |
