@@ -379,7 +379,17 @@ If any BDD criteria are uncovered:
    - Defer them (add to Deferred Actions)
    - Ignore them (they may be covered by later stages)
 
-### 4.5 Suggest Review
+### 4.5 Session Completeness Check
+
+Run the session completeness check:
+
+```bash
+scripts/check-session.sh --impl
+```
+
+If any FAIL items are reported, fix them before suggesting review. This ensures all required artifacts (plan.md, lessons.md, next-session.md) exist and cwf-state.yaml is properly updated.
+
+### 4.6 Suggest Review
 
 After presenting the summary:
 

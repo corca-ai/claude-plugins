@@ -243,7 +243,7 @@ sessions:
     branch: marketplace-v3
     completed_at: "2026-02-10"
     summary: "4 CDM fixes (plan cross-cutting gate, impl commit strategy branching, decision journal + phase-aware compact recovery, review fail-fast for CAPACITY errors) + cwf:run auto-chaining skill + impl gate extraction to shared reference. 6 commits, 5/5 BDD pass."
-    artifacts: [plan.md, lessons.md]
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md]
 
 # External tool availability (detected by cwf:setup)
 tools:
@@ -340,4 +340,16 @@ expert_roster:
     source: "A Philosophy of Software Design (2018/2021), Always Measure One Level Deeper (CACM, 2018)"
     rationale: "Applied to context recovery protocol depth analysis, SKILL.md interface bloat from tactical accumulation, concept-level vs file-level plan decomposition"
     introduced: "S32"
+    usage_count: 1
+  - name: "W. Edwards Deming"
+    domain: "systems thinking, common cause vs special cause variation, PDCA cycle, build quality into process"
+    source: "Out of the Crisis (MIT Press, 1986), Point 3: cease dependence on inspection"
+    rationale: "Applied to convention-vs-structure enforcement gap, commit strategy recurrence as common cause variation, check-session.sh as inspection-to-process conversion"
+    introduced: "S33"
+    usage_count: 1
+  - name: "Chris Argyris"
+    domain: "espoused theory vs theory-in-use, single-loop vs double-loop learning, defensive routines"
+    source: "Organizational Learning: A Theory of Action Perspective (Argyris & Schön, 1978), Teaching Smart People How to Learn (HBR, 1991)"
+    rationale: "Applied to teaching-practicing gap analysis, SKILL.md recording vs current behavior gap as espoused/theory-in-use divergence, eval>state>doc as double-loop learning mechanism"
+    introduced: "S33"
     usage_count: 1

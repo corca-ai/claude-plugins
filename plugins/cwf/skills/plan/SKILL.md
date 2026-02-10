@@ -160,6 +160,16 @@ Before finalizing Steps, scan for cross-cutting patterns:
 
 Each step must either reference a shared file or contain self-contained instructions. Parallel agents cannot see each other's work, so sharing must be decided at plan level.
 
+### Preparatory Refactoring Check
+
+Before finalizing Steps, assess whether preparatory refactoring is needed:
+
+1. For each target file in "Files to Create/Modify", check its line count
+2. If a file is **300+ lines** AND **3+ changes are planned** for it:
+   - Add a **Step 0** that extracts separable blocks to reference files
+   - This reduces edit surface for subsequent steps and improves commit independence
+3. If no files meet the threshold: proceed normally
+
 ### Required Plan Sections
 
 ````markdown
@@ -173,6 +183,14 @@ Each step must either reference a shared file or contain self-contained instruct
 
 ## Scope
 {What is included and excluded}
+
+## Commit Strategy
+{How changes should be committed — one of:}
+- **Per step**: Each step gets its own commit (default for modular changes)
+- **Per change pattern**: Group commits by concept when cross-cutting
+- **Custom**: Explicit commit boundaries with rationale
+
+If not specified, default to **one commit per Step**.
 
 ## Steps
 1. {Step with clear deliverable}
@@ -276,6 +294,8 @@ For a multi-perspective review before implementation, run:
 5. **Don't over-plan**: Keep steps actionable and concrete, avoid excessive detail
 6. **Preserve task intent**: Refine the approach, don't redirect the goal
 7. **Cross-cutting → shared reference first**: When identical logic applies to 3+ targets, create a shared reference file as Step 0. "동일 적용" is a plan smell — replace with an explicit shared file path
+8. **Commit Strategy is required**: Every plan must include a Commit Strategy section. Default is one commit per Step.
+9. **Preparatory refactoring check**: When a target file is 300+ lines with 3+ planned changes, add Step 0 to extract separable blocks first
 
 ## References
 

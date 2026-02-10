@@ -42,6 +42,18 @@ and merge marketplace-v3 to main.
   during integration testing
 - External files outside the repository
 
+## S33 CDM Action Items (verify during integration test)
+
+The following were applied in S33 retro. Verify they work correctly:
+
+1. **Clarify depth heuristic** (clarify/SKILL.md): Mode Selection section
+   auto-selects depth based on input specificity
+2. **Plan Commit Strategy** (plan/SKILL.md): Required section in plan template
+3. **Preparatory refactoring check** (plan/SKILL.md): 300+ lines, 3+ changes
+   triggers Step 0 extraction suggestion
+4. **check-session.sh gate** (impl/SKILL.md Phase 4.5, run/SKILL.md Phase 3):
+   Forced function, not optional memory
+
 ## Success Criteria — Behavioral (BDD)
 
 - Given cwf:run with a task description, When the pipeline executes,

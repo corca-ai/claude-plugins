@@ -23,3 +23,15 @@
 - **Expected**: Auto-chaining would require complex inter-skill communication
 - **Actual**: The Skill tool provides exactly the right abstraction — invoke a skill, wait for completion, check result, decide next step. cwf:run is essentially a state machine that calls `Skill(skill="cwf:X")` in a loop.
 - **Takeaway**: When designing orchestration skills, prefer sequential Skill invocations over spawning Task agents. The Skill tool preserves the conversation context, which is critical for user gates.
+
+### Convention-level lessons recur; structure-level lessons stick
+
+- **Expected**: Recording a lesson in lessons.md would prevent recurrence
+- **Actual**: S32's commit strategy lesson (CDM 2) recurred in S33 — user had to intervene with "Do commit in proper units." SKILL.md structural changes (cross-cutting gate, fail-fast classification) did not recur.
+- **Takeaway**: Lessons that only exist as conventions ("remember to do X") are fragile. To prevent recurrence, escalate to structure: required template sections, workflow phases, or automated gates. Applied: plan template now requires Commit Strategy section.
+
+### Rules in docs get ignored; rules in workflow get followed
+
+- **Expected**: CLAUDE.md rule "run check-session.sh --impl" would be followed
+- **Actual**: BDD 5/5 pass created a "completion illusion" and check-session.sh was never run. The rule existed in CLAUDE.md (a document) but not in impl SKILL.md (a workflow).
+- **Takeaway**: A rule's location determines its execution likelihood. Move compliance checks from docs to workflow phases or forced-function gates. Applied: check-session.sh added as impl Phase 4.5 and cwf:run Phase 3.

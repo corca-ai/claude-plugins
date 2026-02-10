@@ -31,6 +31,24 @@ cwf:clarify <requirement> --light  # Direct Q&A, no sub-agents
 
 ---
 
+## Mode Selection
+
+Before entering Default or --light mode, assess **clarify depth** based on input specificity:
+
+1. Read `next-session.md` or the user's task description
+2. Check if the input provides: **target file paths**, **expected changes per file**, and **BDD-style success criteria**
+3. Apply this heuristic:
+
+| Input specificity | Clarify depth | Rationale |
+|-------------------|---------------|-----------|
+| All 3 present (files + changes + criteria) | **AskUserQuestion only** — ask 2-3 binary/choice questions for remaining ambiguities, skip Phases 2-2.5 | Prior session retro effectively served as clarify |
+| 1-2 present | **--light mode** — iterative Q&A without sub-agents | Partial clarity, direct questions suffice |
+| None present (vague requirement) | **Default mode** — full research + expert analysis | Scope is open, exploration needed |
+
+This heuristic can be overridden by explicit `--light` flag or user instruction.
+
+---
+
 ## Default Mode
 
 ### Phase 0: Update Live State

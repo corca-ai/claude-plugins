@@ -156,6 +156,14 @@ Skipping {stage} (--skip flag).
 
 After all stages complete (or the pipeline is halted):
 
+1. Run session completeness check:
+
+   ```bash
+   scripts/check-session.sh --impl
+   ```
+
+   If any FAIL items are reported, fix them before proceeding. This is a forced function — the pipeline is not complete until all checks pass.
+
 1. Update `cwf-state.yaml`:
    - Set `live.phase` to `"done"`
    - Append session entry to `sessions` list
