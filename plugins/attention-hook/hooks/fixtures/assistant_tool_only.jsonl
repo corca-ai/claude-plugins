@@ -1,4 +1,0 @@
-{"type":"user","message":{"content":"Request"}}
-{"type":"assistant","message":{"content":[{"type":"text","text":"Has text"},{"type":"tool_use","id":"toolu_01XYZ","name":"Bash","input":{"command":"pwd"}}]}}
-{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"toolu_01XYZ","content":"/home/user"}]}}
-{"type":"assistant","message":{"content":[{"type":"tool_use","id":"toolu_02ABC","name":"Read","input":{"file_path":"/tmp/test"}}]}}

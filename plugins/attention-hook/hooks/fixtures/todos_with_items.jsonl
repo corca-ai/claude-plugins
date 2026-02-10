@@ -1,2 +1,0 @@
-{"type":"user","message":{"content":"Help me with tasks"}}
-{"type":"assistant","message":{"content":[{"type":"tool_use","id":"toolu_01TODO","name":"TodoWrite","input":{"todos":[{"content":"Task 1","status":"completed","activeForm":"Completing task 1"},{"content":"Task 2","status":"in_progress","activeForm":"Working on task 2"},{"content":"Task 3","status":"pending","activeForm":"Task 3 pending"}]}}]}}

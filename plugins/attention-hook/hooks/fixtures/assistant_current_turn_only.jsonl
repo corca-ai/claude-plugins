@@ -1,4 +1,0 @@
-{"type":"user","message":{"content":"First request"}}
-{"type":"assistant","message":{"content":[{"type":"text","text":"Old response from previous turn"}]}}
-{"type":"user","message":{"content":"Second request"}}
-{"type":"assistant","message":{"content":[{"type":"text","text":"Current turn response"}]}}

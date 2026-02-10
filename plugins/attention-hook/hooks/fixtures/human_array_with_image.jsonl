@@ -1,3 +1,0 @@
-{"type":"user","message":{"content":"Old text message"}}
-{"type":"assistant","message":{"content":[{"type":"text","text":"Response"}]}}
-{"type":"user","message":{"content":[{"type":"text","text":"Message with image"},{"type":"image","source":{"type":"base64","data":"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk"}}]}}
