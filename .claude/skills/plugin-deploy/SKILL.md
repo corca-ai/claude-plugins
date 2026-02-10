@@ -27,6 +27,7 @@ Automate the plugin lifecycle after creation or modification. Ensures no step is
 /plugin-deploy <name> --new        Force new-plugin flow
 /plugin-deploy <name> --dry-run    Check only, no modifications
 /plugin-deploy <name> --skip-test  Skip local testing step
+/plugin-deploy <name> --skip-codex-sync  Skip Codex user-scope sync (cwf only)
 ```
 
 No args or "help" → print usage and stop.
@@ -45,6 +46,7 @@ Parse JSON output. If `error` field exists → report and stop.
 
 - `detected_new: true` → new plugin: needs marketplace entry, README sections, AI_NATIVE check
 - `detected_new: false` → modified plugin: needs version bump check, marketplace sync
+- `name == "cwf"` → include Codex user-scope sync step via `scripts/codex/sync-skills.sh`
 - `--dry-run` → display report, list actions, stop
 
 ### 3. Fix Gaps
@@ -66,7 +68,18 @@ For README edits: read the file, find the plugin overview table and the Skills/H
 
 Re-run check-consistency.sh → confirm `gap_count: 0`. Fix iteratively if gaps remain.
 
-### 5. Local Test (unless --skip-test)
+### 5. Codex User-Scope Sync (cwf only, unless --skip-codex-sync)
+
+For `cwf` plugin deployments, run:
+
+```bash
+bash {SKILL_DIR}/../../../scripts/codex/sync-skills.sh --cleanup-legacy
+```
+
+This includes post-sync link validation (`scripts/codex/verify-skill-links.sh`).
+If sync or validation fails, report exact stderr and stop (do not continue with stale links).
+
+### 6. Local Test (unless --skip-test)
 
 By `plugin_type`:
 
@@ -74,7 +87,7 @@ By `plugin_type`:
 - **skill**: verify SKILL.md frontmatter, check script executability
 - **hybrid**: both
 
-### 6. Summary
+### 7. Summary
 
 Report: plugin name, type, version change, files modified, remaining manual steps (commit).
 
@@ -88,7 +101,9 @@ Usage:
   /plugin-deploy <name> --new        New plugin flow
   /plugin-deploy <name> --dry-run    Check only
   /plugin-deploy <name> --skip-test  Skip local tests
+  /plugin-deploy <name> --skip-codex-sync  Skip Codex sync (cwf only)
 
 Checks: plugin.json version, marketplace.json sync, README mentions,
-        AI_NATIVE links (new only), skill/hook structure
+        AI_NATIVE links (new only), skill/hook structure,
+        Codex user-scope links for cwf
 ```

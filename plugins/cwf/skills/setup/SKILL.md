@@ -2,7 +2,7 @@
 name: setup
 description: |
   Initial CWF configuration: hook group selection, external tool detection,
-  and progressive disclosure index generation.
+  optional Codex user-scope skill sync, and progressive disclosure index generation.
   Triggers: "cwf:setup", "setup hooks", "configure cwf"
 allowed-tools:
   - Read
@@ -17,7 +17,7 @@ allowed-tools:
 # Setup
 
 Initial CWF configuration. Interactive hook toggle, external tool detection,
-and progressive disclosure index generation.
+optional Codex skill sync, and progressive disclosure index generation.
 
 **Language**: Write config files in English. Communicate with the user in their prompt language.
 
@@ -27,6 +27,7 @@ and progressive disclosure index generation.
 cwf:setup                # Full setup (hooks + tools + index)
 cwf:setup --hooks        # Hook group selection only
 cwf:setup --tools        # External tool detection only
+cwf:setup --codex        # Sync CWF skills into Codex user scope (~/.agents/skills)
 cwf:setup --index        # Generate index.md only
 ```
 
@@ -140,6 +141,35 @@ Tool Detection Results:
 
 ---
 
+## Phase 2.5: Codex User-Scope Skill Sync (Optional)
+
+Use this phase when:
+- User runs `cwf:setup --codex`
+- Full setup and user wants Codex to load CWF from local repo via symlink
+
+### 2.5.1 Run Sync Script
+
+Run:
+
+```bash
+bash {SKILL_DIR}/../../../../scripts/codex/sync-skills.sh --cleanup-legacy
+```
+
+Expected behavior:
+- Link CWF skills from `plugins/cwf/skills/*` into `~/.agents/skills`
+- Link shared references into `~/.agents/references`
+- Move legacy custom entries from `~/.codex/skills` to backup (`.system` is kept)
+- Validate relative skill references via `scripts/codex/verify-skill-links.sh`
+
+### 2.5.2 Report Results
+
+Report:
+- Number of linked skills
+- Destination paths (`~/.agents/skills`, `~/.agents/references`)
+- Whether legacy `~/.codex/skills` was moved and backup path
+
+---
+
 ## Phase 3: Generate index.md
 
 Create a progressive disclosure index for the project — pointers to key
@@ -212,9 +242,12 @@ Add `setup` to `cwf-state.yaml` current session's `stage_checkpoints` list.
 5. **AskUserQuestion for all choices**: No batch defaults. Always ask.
 6. **Idempotent**: Re-running updates existing config, does not duplicate.
 7. **All code fences must have language specifier**: Never use bare fences.
+8. **Codex sync uses symlink + backup move**: Do not delete user files directly.
 
 ## References
 
 - [cwf-hook-gate.sh](../../hooks/scripts/cwf-hook-gate.sh) — hook gate mechanism
 - [hooks.json](../../hooks/hooks.json) — hook definitions
 - [agent-patterns.md](../../references/agent-patterns.md) — Single pattern
+- [sync-skills.sh](../../../../scripts/codex/sync-skills.sh) — Codex user-scope skill sync
+- [verify-skill-links.sh](../../../../scripts/codex/verify-skill-links.sh) — Codex skill link validation
