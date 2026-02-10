@@ -6,3 +6,4 @@ work-in-progress
 .env.local
 .cache/
 **/__pycache__/
+/tmux
