@@ -404,7 +404,8 @@ Source: `prompt-logs/260208-01-refactor-review/`
 | **S13** (done) | marketplace-v3 | Holistic refactor review on entire cwf plugin | Use `cwf:refactor --holistic` on itself. |
 | **S13.5** (done) | s13.5-*-* | Self-healing criteria (A), expert-in-the-loop + phase handoff (B), concept distillation + README v3 (B2), concept-refactor integration (B3), plan mode removal + live state + compact recovery (C1), docs restructure + hook infra + orphan recovery (C2DE). All 7 workstreams complete. | Provenance check triggers on stale criteria. |
 | **S32** (done) | marketplace-v3 | **Docs overhaul W1-W9**: CLAUDE.md rewrite (66→44), cheatsheet merge (5 docs→1), project-context + architecture-patterns trim, standalone plugin deletion (9 dirs), marketplace v3.0.0, clarify Path B removal, refactor --docs enhancement, cwf-state auto-init, README sync (EN+KO) | markdownlint 0 errors. 93 files, -7479/+446 lines. |
-| **S13.6** | s13.6-cwf-protocol | Full CWF protocol design: auto-chaining gather→clarify→plan→review→impl→retro→ship | Single `cwf` invocation chains full cycle. |
+| **S32-impl** (done) | marketplace-v3 | **L1-L3+L9 impl**: Branch gate (impl Phase 0.5), clarify completion gate (Phase 1.0), sub-agent file persistence with context recovery protocol (5 skills: clarify/plan/review/retro/refactor), log-turn.sh fix, review error observability (stderr capture). Extracted shared `context-recovery-protocol.md`. | Full pipeline: clarify→plan→review(plan)→impl(4 agents)→review(code, 6 reviewers)→fix 3 concerns→commit. Deep retro with Brooks + Ousterhout. |
+| **S33** | marketplace-v3 | **CDM improvements + S13.6 auto-chaining**: (1) Plan template cross-cutting pattern check, (2) impl commit strategy branching for cross-cutting changes, (3) phase-aware compact recovery (impl auto-loads plan.md), (4) review Phase 3.2 fail-fast for CAPACITY errors, (5) S13.6 auto-chaining protocol design (gather→clarify→plan→review→impl→retro→ship). | CDM items verified by retro re-check. Auto-chaining tested with a real task. |
 | **S14** | marketplace-v3 | Integration test, deprecate old plugins, merge to main. **Produce `docs/v3-migration-decisions.md`** — synthesize all key decisions and lessons from S0-S14 into a single document. PR body gets the summary, doc gets the details. README v3 philosophy moved to S13.5-B2. | Full workflow end-to-end test. |
 
 ### Session Dependencies
@@ -424,7 +425,7 @@ S1 → S2 → S3 (ship skill — enables workflow for all v3 sessions)
               ↓
          S12 (setup/update/handoff, needs all skills)
               ↓
-         S13 → S13.5-A → S13.5-B → S13.5-B2 → S13.5-C/D/E → S32 (docs overhaul) → S13.6 → S14
+         S13 → S13.5-A → S13.5-B → S13.5-B2 → S13.5-C/D/E → S32 (docs overhaul) → S32-impl (L1-L3+L9) → S33 (CDM + S13.6) → S14
 ```
 
 ### S13.5 Workstream Details

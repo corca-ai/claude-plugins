@@ -229,6 +229,14 @@ sessions:
     summary: "Removed plan mode hooks, added cwf-state.yaml live section, built SessionStart(compact) hook with session log turn injection, deprecated plan-and-lessons plugin"
     artifacts: [plan.md, lessons.md, retro.md, next-session.md, session.md]
 
+  - id: S32-impl
+    title: "L1-L3+L9 implementation"
+    dir: prompt-logs/260210-03-docs-overhaul-impl
+    branch: marketplace-v3
+    completed_at: "2026-02-10"
+    summary: "Implemented branch gate (impl Phase 0.5), clarify completion gate (Phase 1.0), sub-agent file persistence with context recovery protocol (5 skills), log-turn.sh fix, review error observability. Extracted shared context-recovery-protocol.md. Full pipeline: clarify→plan→review→impl(4 agents)→review(6 reviewers)→fix→commit. Deep retro with Brooks + Ousterhout."
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md, session.md]
+
 # External tool availability (detected by cwf:setup)
 tools:
   codex: available
@@ -254,7 +262,7 @@ live:
   session_id: "S32"
   dir: "prompt-logs/260210-03-docs-overhaul-impl"
   branch: "marketplace-v3"
-  phase: "impl"
+  phase: "retro"
   task: "Implement L1-L3+L9: impl git awareness, clarify completion gate, sub-agent file persistence (5 skills), log-turn.sh fix, review error observability"
   key_files:
     - plugins/cwf/skills/impl/SKILL.md
@@ -314,4 +322,16 @@ expert_roster:
     source: "Drift into Failure (Ashgate, 2011)"
     rationale: "Applied to agent behavioral drift analysis"
     introduced: "S13.5-B3"
+    usage_count: 1
+  - name: "Frederick P. Brooks Jr."
+    domain: "conceptual integrity, communication overhead, plan-to-throw-one-away, essential vs accidental complexity"
+    source: "The Mythical Man-Month (1975/1995), No Silver Bullet (1986), The Design of Design (2010)"
+    rationale: "Applied to parallel agent conceptual integrity failure, compact recovery as first system, plan over-engineering (second-system effect)"
+    introduced: "S32"
+    usage_count: 1
+  - name: "John Ousterhout"
+    domain: "deep vs shallow modules, information leakage, strategic vs tactical programming, interface bloat"
+    source: "A Philosophy of Software Design (2018/2021), Always Measure One Level Deeper (CACM, 2018)"
+    rationale: "Applied to context recovery protocol depth analysis, SKILL.md interface bloat from tactical accumulation, concept-level vs file-level plan decomposition"
+    introduced: "S32"
     usage_count: 1

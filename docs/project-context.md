@@ -30,6 +30,9 @@ Project and organizational facts accumulated from retrospectives.
 - **Plan document ≠ current state**: master-plan.md and other plan documents are plans, not execution records. Always check cwf-state.yaml sessions list for actual completion status.
 - **Parallel sub-agent review after large changes**: After large multi-file changes, consider running parallel sub-agent reviews before committing — give each agent a different review perspective (content integrity, missed opportunities, structural analysis).
 - **Delegation criterion: exploration cost**: When a task requires understanding existing code structure before modifying it, delegate to a sub-agent or codex exec. When creating new files or making small edits with known context, execute directly. Decide before starting exploration — switching mid-exploration wastes the exploration context.
+- **Cross-cutting pattern → shared reference first**: When a plan applies identical logic to 3+ targets (files, skills, modules), extract it to a shared reference file as Step 0 before parallel agents execute. "동일 적용" / "apply the same pattern" is a plan smell — replace with an explicit shared file path. Parallel agents cannot see each other's work, so sharing must be decided at plan level.
+- **Commit boundary = change pattern, not work item**: When changes are cross-cutting (one concept projected across multiple files), commit boundaries should follow the concept, not the work item. Assess "is this change cross-cutting?" before committing to a per-work-item commit strategy.
+- **Plan decomposition: concept-level over file-level**: When a plan modifies N files with the same conceptual change, decompose by concept ("introduce protocol X, then project into N targets") rather than by file ("modify file A, modify file B"). Concept-level decomposition naturally produces deep shared modules + shallow connection points.
 
 ## Directory Classification Criteria
 
