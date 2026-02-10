@@ -59,9 +59,7 @@ Edit `cwf-state.yaml` `live` section: set `phase: clarify`, `task` to the requir
 
 Launch two sub-agents **simultaneously** using the Task tool.
 
-**Path A — cwf:gather available** (check if `cwf:gather` or `/gather-context` appears in available skills in the system prompt):
-
-#### Sub-agent A: Codebase Researcher (Path A)
+#### Sub-agent A: Codebase Researcher
 
 ```yaml
 Task tool:
@@ -76,7 +74,7 @@ Task tool:
     {list from Phase 1}
 ```
 
-#### Sub-agent B: Web Researcher (Path A)
+#### Sub-agent B: Web Researcher
 
 ```yaml
 Task tool:
@@ -88,34 +86,6 @@ Task tool:
     Or use WebFetch for specific URLs.
     For each point, find authoritative sources and expert perspectives.
     Cite real published work. Report findings — do not make decisions.
-
-    Decision points:
-    {list from Phase 1}
-```
-
-**Path B — cwf:gather NOT available** (fallback):
-
-#### Sub-agent A: Codebase Researcher (Path B)
-
-```yaml
-Task tool:
-  subagent_type: Explore
-  prompt: |
-    Read {SKILL_DIR}/references/research-guide.md Section 1,
-    then research these decision points by exploring the codebase.
-
-    Decision points:
-    {list from Phase 1}
-```
-
-#### Sub-agent B: Web Researcher (Path B)
-
-```yaml
-Task tool:
-  subagent_type: general-purpose
-  prompt: |
-    Read {SKILL_DIR}/references/research-guide.md Section 2,
-    then research these decision points using WebSearch and WebFetch.
 
     Decision points:
     {list from Phase 1}
