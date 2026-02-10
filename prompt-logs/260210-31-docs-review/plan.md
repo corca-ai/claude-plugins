@@ -206,6 +206,5 @@ W6 (refactor) ─→ W2 (docs-criteria references documentation-guide absorption
 
 ## Out of Scope
 
-- PLUGIN_ROOT dependency removal (Option C from earlier analysis): dogfood.sh makes this lower priority. Defer unless symlink issues arise.
 - marketplace.json CWF entry: only after v3 merge to main
 - Standalone plugin deprecation communication to users: separate PR after v3 merge
