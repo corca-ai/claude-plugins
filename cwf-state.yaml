@@ -237,6 +237,14 @@ sessions:
     summary: "Implemented branch gate (impl Phase 0.5), clarify completion gate (Phase 1.0), sub-agent file persistence with context recovery protocol (5 skills), log-turn.sh fix, review error observability. Extracted shared context-recovery-protocol.md. Full pipeline: clarify→plan→review→impl(4 agents)→review(6 reviewers)→fix→commit. Deep retro with Brooks + Ousterhout."
     artifacts: [plan.md, lessons.md, retro.md, next-session.md, session.md]
 
+  - id: S33
+    title: "CDM improvements + auto-chaining"
+    dir: prompt-logs/260210-04-s33-cdm-auto-chain
+    branch: marketplace-v3
+    completed_at: "2026-02-10"
+    summary: "4 CDM fixes (plan cross-cutting gate, impl commit strategy branching, decision journal + phase-aware compact recovery, review fail-fast for CAPACITY errors) + cwf:run auto-chaining skill + impl gate extraction to shared reference. 6 commits, 5/5 BDD pass."
+    artifacts: [plan.md, lessons.md]
+
 # External tool availability (detected by cwf:setup)
 tools:
   codex: available
@@ -262,7 +270,7 @@ live:
   session_id: "S33"
   dir: "prompt-logs/260210-04-s33-cdm-auto-chain"
   branch: "marketplace-v3"
-  phase: "impl"
+  phase: "retro"
   task: "CDM improvements (plan cross-cutting gate, impl commit strategy branching, phase-aware compact recovery, review fail-fast) + S13.6 auto-chaining protocol design + gate extraction"
   key_files:
     - plugins/cwf/skills/plan/SKILL.md
