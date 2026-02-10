@@ -26,10 +26,7 @@ Project and organizational facts accumulated from retrospectives.
 - **Canonical template over recent example**: When producing templated artifacts, always read the canonical template definition first — not the most recent instance. After a convention change, previous instances become stale.
 - **Feedback loop existence over case count**: When a structural failure is discovered and no feedback loop exists to detect future occurrences, install the loop immediately — don't wait for more cases. (Meadows: "Drift to Low Performance"; Woods: graceful extensibility.)
 - **Reporting: minimize reader's external knowledge dependency**: When reporting quantitative results, provide enough context (denominator, ratio, trend) for the reader to assess significance. "7 rules disabled" → "7/55 rules disabled (13%)".
-- **Separation of concerns: WHAT vs HOW**: plan.md carries WHAT (specs, steps, files), phase handoff carries HOW (protocols, rules, references). When adding new information transfer needs, find the tool whose concern already matches.
 - **Reference guide separation by consumer count**: When a reference guide has 1 consumer, keep it specialized. When N consumers need the same pattern, create a new shared guide. "Separate now, unify when stable."
-- **Count-agnostic logic design**: When designing synthesis/verdict logic, use count-independent conditions (any/all/none) and annotate the design intent (e.g., "reviewer-count-agnostic").
-- **Retro persist criterion**: JTBD lens ("What recurring situation will this learning prevent?") determines whether a finding deserves persistence beyond the session's lessons.md. See CLAUDE.md § Persist Routing for target file selection.
 - **Plan document ≠ current state**: master-plan.md and other plan documents are plans, not execution records. Always check cwf-state.yaml sessions list for actual completion status.
 - **Parallel sub-agent review after large changes**: After large multi-file changes, consider running parallel sub-agent reviews before committing — give each agent a different review perspective (content integrity, missed opportunities, structural analysis).
 - **Delegation criterion: exploration cost**: When a task requires understanding existing code structure before modifying it, delegate to a sub-agent or codex exec. When creating new files or making small edits with known context, execute directly. Decide before starting exploration — switching mid-exploration wastes the exploration context.
@@ -46,11 +43,6 @@ Document placement uses **lifecycle as primary axis**, consumer count as seconda
 
 Key distinction: `references/` holds **external framework source texts**, not analysis outputs. Discovery of session artifacts is via `cwf-state.yaml` session history.
 
-## Documentation Intent
-
-- README per-plugin install/update commands are intentionally repeated for copy-paste UX — users jump directly to a plugin section.
-
 ## Conventions
 
-- Lessons and retro: written in the user's language
 - Installed marketplace plugins live at `~/.claude/plugins/marketplaces/`. To find a specific skill file, use Glob (e.g. `**/skill-name**/SKILL.md`), not Explore agent.
