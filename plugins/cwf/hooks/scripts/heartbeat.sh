@@ -24,7 +24,13 @@ fi
 # Source shared utilities
 # shellcheck source=slack-send.sh
 source "$SCRIPT_DIR/slack-send.sh"
+# shellcheck source=text-format.sh
+source "$SCRIPT_DIR/text-format.sh"
 slack_load_config
+ATTENTION_TRUNCATE_LINES="${CLAUDE_CORCA_ATTENTION_TRUNCATE:-10}"
+if ! [[ "$ATTENTION_TRUNCATE_LINES" =~ ^[0-9]+$ ]] || [ "$ATTENTION_TRUNCATE_LINES" -le 0 ]; then
+    ATTENTION_TRUNCATE_LINES=10
+fi
 
 HASH=$(slack_session_hash "$SESSION_ID")
 
@@ -81,7 +87,11 @@ fi
 IDLE_MIN=$((IDLE_SECONDS / 60))
 MESSAGE=":heartbeat: Status (${IDLE_MIN}m idle)"
 if [ -n "$TODO_STATUS" ]; then
-    MESSAGE+=$'\n'"$TODO_STATUS"
+    TODO_TEXT=$(normalize_multiline_text "$TODO_STATUS")
+    TODO_TEXT=$(truncate_middle_lines "$TODO_TEXT" "$ATTENTION_TRUNCATE_LINES")
+    if [ -n "$TODO_TEXT" ]; then
+        MESSAGE+=$'\n'"$TODO_TEXT"
+    fi
 fi
 
 slack_send "$HASH" "$MESSAGE" "true"
