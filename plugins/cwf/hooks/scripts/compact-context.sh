@@ -35,6 +35,7 @@ phase=""
 task=""
 key_files=()
 dont_touch=()
+decision_journal=()
 current_list=""
 
 while IFS= read -r line; do
@@ -70,12 +71,19 @@ while IFS= read -r line; do
             current_list="key_files"
         elif [[ "$line" =~ ^[[:space:]]+dont_touch: ]]; then
             current_list="dont_touch"
+        elif [[ "$line" =~ ^[[:space:]]+decision_journal: ]]; then
+            current_list="decision_journal"
         elif [[ "$line" =~ ^[[:space:]]+-[[:space:]]+(.+) ]]; then
             item="${BASH_REMATCH[1]}"
             if [[ "$current_list" == "key_files" ]]; then
                 key_files+=("$item")
             elif [[ "$current_list" == "dont_touch" ]]; then
                 dont_touch+=("$item")
+            elif [[ "$current_list" == "decision_journal" ]]; then
+                # Strip surrounding quotes from journal entries
+                item="${item#\"}"
+                item="${item%\"}"
+                decision_journal+=("$item")
             fi
         fi
     fi
@@ -143,6 +151,45 @@ if [[ -n "$HOOK_SESSION_ID" ]]; then
             ' "$SESSION_LOG" | tail -n "$MAX_LINES")
         fi
     fi
+fi
+
+# ── Phase-aware context enrichment ────────────────────────────────────────────
+# Impl phase has 10-50x higher decision density than clarify/plan.
+# Inject plan.md summary and decision journal when phase=impl.
+plan_content=""
+if [[ "$phase" == *impl* ]]; then
+    # Find plan.md from key_files or session dir
+    plan_path=""
+    for f in "${key_files[@]}"; do
+        if [[ "$f" == *plan.md ]]; then
+            plan_path="${CLAUDE_PROJECT_DIR:-.}/${f}"
+            break
+        fi
+    done
+    # Fallback: look in session dir
+    if [[ -z "$plan_path" ]] && [[ -n "$dir" ]]; then
+        plan_path="${CLAUDE_PROJECT_DIR:-.}/${dir}/plan.md"
+    fi
+    if [[ -n "$plan_path" ]] && [[ -f "$plan_path" ]]; then
+        plan_content=$(head -n 80 "$plan_path")
+    fi
+fi
+
+if [[ -n "$plan_content" ]]; then
+    context="${context}
+
+Plan summary (first 80 lines):
+${plan_content}"
+fi
+
+if [[ ${#decision_journal[@]} -gt 0 ]]; then
+    context="${context}
+
+Decision journal (impl-phase decisions made before compact):"
+    for entry in "${decision_journal[@]}"; do
+        context="${context}
+  - ${entry}"
+    done
 fi
 
 context="${context}

@@ -259,27 +259,25 @@ hooks:
 # read by SessionStart(compact) hook for context recovery after auto-compact.
 # check-session.sh --live validates required fields are populated.
 live:
-  session_id: "S32"
-  dir: "prompt-logs/260210-03-docs-overhaul-impl"
+  session_id: "S33"
+  dir: "prompt-logs/260210-04-s33-cdm-auto-chain"
   branch: "marketplace-v3"
-  phase: "retro"
-  task: "Implement L1-L3+L9: impl git awareness, clarify completion gate, sub-agent file persistence (5 skills), log-turn.sh fix, review error observability"
+  phase: "impl"
+  task: "CDM improvements (plan cross-cutting gate, impl commit strategy branching, phase-aware compact recovery, review fail-fast) + S13.6 auto-chaining protocol design + gate extraction"
   key_files:
-    - plugins/cwf/skills/impl/SKILL.md
-    - plugins/cwf/skills/clarify/SKILL.md
     - plugins/cwf/skills/plan/SKILL.md
+    - plugins/cwf/skills/impl/SKILL.md
     - plugins/cwf/skills/review/SKILL.md
-    - plugins/cwf/skills/retro/SKILL.md
-    - plugins/cwf/skills/refactor/SKILL.md
-    - plugins/cwf/hooks/scripts/log-turn.sh
+    - plugins/cwf/hooks/scripts/compact-context.sh
     - cwf-state.yaml
-    - prompt-logs/260210-03-docs-overhaul-impl/plan.md
+    - prompt-logs/260210-03-docs-overhaul-impl/retro.md
+    - prompt-logs/260210-04-s33-cdm-auto-chain/plan.md
   decisions:
-    - "Always feature branch (hard gate, not warn)"
-    - "Fine-grained per-work-item commits + lesson-driven commits"
-    - "Hard-block impl if clarify not completed (--skip-clarify override)"
-    - "Maximize file persistence for clarify sub-agent results"
-    - "cwf-state.yaml schema: extend live section, no breaking changes"
+    - "CDM 1-4: surgical changes to existing skills, not over-engineered"
+    - "Part B: full cwf:run implementation (user choice)"
+    - "Part C: extract gates to references/impl-gates.md"
+    - "CDM 3: decision journal mechanism (user choice over simple plan.md auto-load)"
+  decision_journal: []    # Populated during impl phase, read by compact recovery hook
   # Added by cwf:clarify Phase 5 — read by cwf:impl Phase 1.0
   clarify_completed_at: ""    # ISO 8601 timestamp, empty = not completed
   clarify_result_file: ""     # Path to clarify summary file

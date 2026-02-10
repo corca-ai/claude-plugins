@@ -35,7 +35,31 @@ cwf:impl --skip-clarify     # Skip Phase 1.0 clarify pre-condition check
 
 ## Phase 0: Update Live State
 
-Edit `cwf-state.yaml` `live` section: set `phase: impl`, `task` to the plan's goal summary, and `key_files` to the plan's key files list.
+Edit `cwf-state.yaml` `live` section: set `phase: impl`, `task` to the plan's goal summary, and `key_files` to the plan's key files list. Initialize `decision_journal` as an empty list:
+
+```yaml
+live:
+  phase: "impl"
+  task: "{plan goal summary}"
+  decision_journal: []
+```
+
+### Decision Journal
+
+Throughout Phases 2-4, append significant decisions to `live.decision_journal` in `cwf-state.yaml`. Record decisions when:
+- A design choice is made between alternatives
+- A deviation from the plan occurs
+- A trade-off is resolved
+
+Format each entry as a timestamped string:
+
+```yaml
+decision_journal:
+  - "Phase 2: chose per-pattern commits — changes are cross-cutting"
+  - "Phase 3b: agent-2 deviated from plan — added error handling for edge case"
+```
+
+The compact recovery hook reads this field to restore decision context after auto-compaction. Keep entries concise (one line each, max ~80 chars).
 
 ## Phase 0.5: Branch Gate
 
