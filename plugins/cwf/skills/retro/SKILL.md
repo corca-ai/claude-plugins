@@ -44,10 +44,9 @@ Edit `cwf-state.yaml` `live` section: set `phase: retro`.
 
 Resolution order:
 1. If `[path]` argument provided, use it
-2. Scan session for `prompt-logs/` paths already used (plan.md, lessons.md writes)
-3. List `prompt-logs/` dirs matching today's date (`{YYMMDD}-*`)
-4. If ambiguous, AskUserQuestion with candidates
-5. If none exist, run `scripts/next-prompt-dir.sh <title>` and create that path
+2. Reuse `prompt-logs/` path already used in this session (plan.md/lessons.md writes)
+3. If multiple candidates exist, AskUserQuestion with candidates
+4. Otherwise run `scripts/next-prompt-dir.sh <title>` and create that path
 
 ### 2. Read Existing Artifacts
 

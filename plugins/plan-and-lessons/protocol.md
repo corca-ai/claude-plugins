@@ -8,11 +8,10 @@ Protocol for persisting planning artifacts and session learnings.
 
 `prompt-logs/{YYMMDD}-{NN}-{title}/plan.md`
 
-**Automated**: Run `scripts/next-prompt-dir.sh <title>` to get the correct path.
-The script determines today's date, scans existing directories, and outputs the
-next available path (e.g., `prompt-logs/260204-03-auth-impl`).
-
-If the user specifies a path, use it instead of the script output.
+**Path rule**:
+- If the user specifies a path, use it.
+- Otherwise run `scripts/next-prompt-dir.sh <title>` and use its output path as-is.
+- Do not hand-calculate sequence numbers.
 
 The `{title}` must reflect the current session's task, not a previous session's.
 Even if the input spec or reference document lives in an existing `prompt-logs/`

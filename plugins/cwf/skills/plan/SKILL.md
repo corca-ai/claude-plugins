@@ -172,12 +172,9 @@ Always use the **two-layer format**:
 
 Determine the session directory following plan-protocol.md location rules:
 
-1. Resolve path via `scripts/next-prompt-dir.sh <title>`.
-2. Ensure sequence is date-scoped (`{YYMMDD}-NN`) and resets to `01` when no
-   directory exists for today.
-3. Create `prompt-logs/{YYMMDD}-{NN}-{title}/`.
-
-Do not derive `NN` from the most recent directory across previous days.
+1. If the user provided an output path, use it.
+2. Otherwise run `scripts/next-prompt-dir.sh <title>` and use its output path.
+3. Create the resolved directory path.
 
 Write two files:
 
