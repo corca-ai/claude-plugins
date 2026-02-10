@@ -43,9 +43,9 @@ are missing or unauthenticated. But real CLI reviews provide diverse model
 perspectives beyond Claude.
 
 **Fallback latency**: If both external CLIs fail, the skill incurs a
-two-round-trip penalty — first the CLI attempts run (up to 280s timeout each),
-then fallback Task agents are launched sequentially. Worst case adds ~5-10 min
-wall-clock time compared to a fully-cached CLI run.
+two-round-trip penalty — first the CLI attempts run (up to 120s timeout each),
+then fallback Task agents are launched sequentially. Error-type classification
+(Phase 3.2) enables fail-fast for CAPACITY errors, reducing wasted time.
 
 ## Mode Routing
 
@@ -234,7 +234,7 @@ Task(subagent_type="general-purpose", name="uxdx-reviewer", max_turns=12, prompt
 If Codex available:
 
 ```text
-Bash(timeout=300000, command="START_MS=$(date +%s%3N); CODEX_RUNNER='./scripts/codex/codex-with-log.sh'; [ -x \"$CODEX_RUNNER\" ] || CODEX_RUNNER='codex'; timeout 280 \"$CODEX_RUNNER\" exec --sandbox read-only -c model_reasoning_effort='high' - < '{tmp_dir}/codex-prompt.md' > '{tmp_dir}/codex-output.md' 2>'{tmp_dir}/codex-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/codex-meta.txt'")
+Bash(timeout=300000, command="START_MS=$(date +%s%3N); CODEX_RUNNER='./scripts/codex/codex-with-log.sh'; [ -x \"$CODEX_RUNNER\" ] || CODEX_RUNNER='codex'; timeout 120 \"$CODEX_RUNNER\" exec --sandbox read-only -c model_reasoning_effort='high' - < '{tmp_dir}/codex-prompt.md' > '{tmp_dir}/codex-output.md' 2>'{tmp_dir}/codex-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/codex-meta.txt'")
 ```
 
 For `--mode code`, use `model_reasoning_effort='xhigh'` instead.
@@ -268,7 +268,7 @@ Using the fallback prompt template from `external-review.md` with the Correctnes
 If Gemini available:
 
 ```text
-Bash(timeout=300000, command="START_MS=$(date +%s%3N); timeout 280 npx @google/gemini-cli -o text < '{tmp_dir}/gemini-prompt.md' > '{tmp_dir}/gemini-output.md' 2>'{tmp_dir}/gemini-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/gemini-meta.txt'")
+Bash(timeout=300000, command="START_MS=$(date +%s%3N); timeout 120 npx @google/gemini-cli -o text < '{tmp_dir}/gemini-prompt.md' > '{tmp_dir}/gemini-output.md' 2>'{tmp_dir}/gemini-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/gemini-meta.txt'")
 ```
 
 Uses stdin redirection (`< prompt.md`) instead of `-p "$(cat ...)"` to prevent
@@ -380,29 +380,44 @@ Use the actual command executed for the `command` field.
 
 ### 3.2 Handle external failures
 
-Check each external reviewer's result:
+#### Error-type classification (check FIRST, before exit code)
+
+When an external CLI exits non-zero, parse stderr **immediately** for error type keywords. This prevents wasting time on retries that cannot succeed.
+
+1. Read `{tmp_dir}/{tool}-stderr.log`
+1. Classify by the **first matching** pattern:
+   - `MODEL_CAPACITY_EXHAUSTED`, `429`, `ResourceExhausted`, `quota` → **CAPACITY**: fail-fast, immediate fallback, no retry
+   - `INTERNAL_ERROR`, `500`, `InternalError`, `server error` → **INTERNAL**: 1 retry then fallback
+   - `AUTHENTICATION`, `401`, `UNAUTHENTICATED`, `API key` → **AUTH**: abort immediately with setup hint
+1. Apply the action:
+   - **CAPACITY**: Skip exit code check. Launch fallback immediately.
+   - **INTERNAL**: Re-run the CLI command once. If still fails, launch fallback.
+   - **AUTH**: Do NOT launch fallback. Report: `Slot N ({tool}) AUTH error. Run codex auth login / npx @google/gemini-cli to configure.`
+1. If **no pattern matches**, fall through to exit code classification below.
+
+#### Exit code classification
 
 | Exit code | Meaning | Action |
 |-----------|---------|--------|
 | 0 + non-empty output | Success | `source: REAL_EXECUTION` |
 | 0 + empty output | Silent failure | `source: FAILED` → launch Task fallback |
-| 124 | Timeout (280s exceeded) | `source: FAILED` → launch Task fallback |
+| 124 | Timeout (120s exceeded) | `source: FAILED` → launch Task fallback |
 | 126-127 | Permission denied / not found | `source: FAILED` → launch Task fallback |
-| Other non-zero | Auth error, config issue, etc. | `source: FAILED` → launch Task fallback |
+| Other non-zero | Unclassified error | `source: FAILED` → launch Task fallback |
 
 #### Error cause extraction (L9)
 
-When an external CLI fails (exit code != 0), extract the actionable error cause from stderr before launching fallback:
+When an external CLI fails (exit code != 0), extract the actionable error cause from stderr for the Confidence Note:
 
 1. Read the stderr log file: `{tmp_dir}/{tool}-stderr.log`
 2. Extract the first actionable error message using this priority:
-   - **JSON stderr**: parse `.error.message` or `.error.details` (common for API errors like `MODEL_CAPACITY_EXHAUSTED`)
+   - **JSON stderr**: parse `.error.message` or `.error.details`
    - **Plain text stderr**: find the last line containing "Error" or "error"
    - **Fallback**: first 3 non-empty lines of stderr
-3. Store the extracted error cause per slot for use in the Confidence Note:
+3. Store the extracted error cause per slot:
 
 ```text
-error_causes[slot_N] = "{extracted_error}"
+error_causes[slot_N] = "{error_type}: {extracted_error}"
 ```
 
 #### Launch fallbacks
@@ -523,7 +538,7 @@ This prevents sensitive review content (diffs, plans) from persisting in `/tmp/`
 | No plan.md found | AskUserQuestion: ask user to specify target |
 | All 6 reviewers report no issues | Verdict = Pass. Note "clean review" in synthesis |
 | Codex/Gemini CLI not found | Task agent fallback with same perspective. Mark `FALLBACK` in provenance. |
-| External CLI timeout (280s) | Mark `FAILED`. Spawn Task agent fallback. Note in Confidence Note. |
+| External CLI timeout (120s) | Mark `FAILED`. Spawn Task agent fallback. Note in Confidence Note. |
 | External CLI auth error | Mark `FAILED`. Spawn Task agent fallback. Note in Confidence Note. |
 | External output malformed | Extract by pattern matching. Note in Confidence Note. |
 
