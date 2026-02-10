@@ -29,18 +29,13 @@ items before finishing.
 ## Collaboration Style
 
 - The user communicates in Korean. Respond in Korean for conversation, English for code and docs (per Language rules below).
-- The user expects protocols in CLAUDE.md to be followed without explicit reminders.
 - Prefer short, precise feedback loops — ask for intent confirmation before large implementations.
 - When executing a pre-designed plan: if a discrepancy between the plan and actual code is discovered during implementation, record it in lessons.md, report immediately, and ask the user for a decision before proceeding.
 - When researching Claude Code features (hooks, settings, plugins), always verify against the official docs (https://code.claude.com/docs/en/) via WebFetch. Do not rely solely on claude-code-guide agent responses.
-- When testing hooks or infrastructure, verify incrementally — test one path first, then expand to others.
 - When testing scripts, do not manually set up the environment (e.g., `source ~/.zshrc`) before running tests. Test in a clean environment to reproduce real-world conditions.
-- When debugging bash scripts (`#!/usr/bin/env bash`), always use `bash -c '...'` or `bash -x script.sh` — never run debug snippets directly in the Bash tool (which uses zsh). Bash and zsh have different `[[ =~ ]]` regex semantics; debugging in the wrong shell produces misleading results.
-- When requirements are ambiguous or large in scope, use the clarification skill before analysis or implementation. Do not manually ask clarification questions when a clarification skill is available.
 - Never delete user-created files without explicit confirmation. Prefer `mv` over `rm`. Untracked files cannot be restored via git.
 - When the user proposes a choice where other reasonable alternatives exist (file locations, naming, structure, interfaces), provide honest counterarguments and trade-off analysis. Before agreeing, present at least one alternative axis the user hasn't mentioned. Do not just agree.
 - When the user provides external reference articles or research, read them before forming design opinions. Research → design, not design → research.
-- When writing markdown (SKILL.md, references, READMEs), always include a language specifier on code fences (` ```bash `, ` ```text `, ` ```yaml `, etc.). Never use bare ` ``` `. See `.markdownlint.json` for enforced rules.
 
 ## Dogfooding
 
