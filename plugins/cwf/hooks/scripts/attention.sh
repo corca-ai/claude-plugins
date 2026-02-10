@@ -21,16 +21,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # === HELPER FUNCTIONS ===
 
-# Escape special characters for JSON
-escape_json() {
-    local text="$1"
-    text="${text//\\/\\\\}"
-    text="${text//\"/\\\"}"
-    text="${text//$'\n'/\\n}"
-    text="${text//$'\t'/\\t}"
-    echo "$text"
-}
-
 # Source shared Slack utility
 # shellcheck source=slack-send.sh
 source "$SCRIPT_DIR/slack-send.sh"
@@ -101,25 +91,22 @@ if [ -n "$TRANSCRIPT_PATH" ] && [ -f "$TRANSCRIPT_PATH" ]; then
     }
 
     if [ -n "$LAST_HUMAN_TEXT" ]; then
-        REQUEST_TEXT=$(normalize_multiline_text "$LAST_HUMAN_TEXT")
-        TRUNCATED_REQUEST=$(truncate_middle_lines "$REQUEST_TEXT" "$ATTENTION_TRUNCATE_LINES")
+        TRUNCATED_REQUEST=$(normalize_and_truncate_text "$LAST_HUMAN_TEXT" "$ATTENTION_TRUNCATE_LINES")
         append_section ":memo: Request:" "$TRUNCATED_REQUEST"
     fi
 
     if [ -n "$LAST_ASSISTANT_TEXT" ]; then
-        RESPONSE_TEXT=$(normalize_multiline_text "$LAST_ASSISTANT_TEXT")
-        TRUNCATED_RESPONSE=$(truncate_middle_lines "$RESPONSE_TEXT" "$ATTENTION_TRUNCATE_LINES")
+        TRUNCATED_RESPONSE=$(normalize_and_truncate_text "$LAST_ASSISTANT_TEXT" "$ATTENTION_TRUNCATE_LINES")
         append_section ":robot_face: Response:" "$TRUNCATED_RESPONSE"
     fi
 
     if [ -n "$ASK_QUESTION" ]; then
-        QUESTION_TEXT=$(normalize_multiline_text "$ASK_QUESTION")
-        TRUNCATED_QUESTION=$(truncate_middle_lines "$QUESTION_TEXT" "$ATTENTION_TRUNCATE_LINES")
+        TRUNCATED_QUESTION=$(normalize_and_truncate_text "$ASK_QUESTION" "$ATTENTION_TRUNCATE_LINES")
         append_section ":question: Waiting for answer:" "$TRUNCATED_QUESTION"
     fi
 
     if [ -n "$TODO_STATUS" ]; then
-        TODO_TEXT=$(normalize_multiline_text "$TODO_STATUS")
+        TODO_TEXT=$(normalize_and_truncate_text "$TODO_STATUS")
         if [ -n "$TODO_TEXT" ]; then
             if [ -n "$MESSAGE" ]; then
                 MESSAGE+=$'\n\n'
@@ -173,8 +160,8 @@ if [ -n "$HASH" ]; then
     fi
 else
     # Legacy fallback: no session_id available
-    ESCAPED_TITLE=$(escape_json "$TITLE")
-    ESCAPED_MESSAGE=$(escape_json "$MESSAGE")
+    ESCAPED_TITLE=$(slack_escape_json "$TITLE")
+    ESCAPED_MESSAGE=$(slack_escape_json "$MESSAGE")
 
     if [ -n "${SLACK_WEBHOOK_URL:-}" ]; then
         curl -s -X POST "${SLACK_WEBHOOK_URL}" \

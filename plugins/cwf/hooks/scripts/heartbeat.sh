@@ -87,8 +87,7 @@ fi
 IDLE_MIN=$((IDLE_SECONDS / 60))
 MESSAGE=":heartbeat: Status (${IDLE_MIN}m idle)"
 if [ -n "$TODO_STATUS" ]; then
-    TODO_TEXT=$(normalize_multiline_text "$TODO_STATUS")
-    TODO_TEXT=$(truncate_middle_lines "$TODO_TEXT" "$ATTENTION_TRUNCATE_LINES")
+    TODO_TEXT=$(normalize_and_truncate_text "$TODO_STATUS" "$ATTENTION_TRUNCATE_LINES")
     if [ -n "$TODO_TEXT" ]; then
         MESSAGE+=$'\n'"$TODO_TEXT"
     fi

@@ -124,26 +124,26 @@ parse_todos() {
         return
     fi
 
-    local completed=$(echo "$todo_json" | jq '[.[] | select(.status == "completed")] | length')
-    local in_progress=$(echo "$todo_json" | jq '[.[] | select(.status == "in_progress")] | length')
-    local pending=$(echo "$todo_json" | jq '[.[] | select(.status == "pending")] | length')
-    local total=$((completed + in_progress + pending))
+    echo "$todo_json" | jq -r '
+        def item_lines($status; $icon):
+            [.[] | select(.status == $status) | "  " + $icon + " " + (.content // "")]
+            | map(select(length > 0));
 
-    if [ "$total" -gt 0 ]; then
-        echo ":white_check_mark: Todo: $completed/$total done"
-        local in_progress_items=$(echo "$todo_json" | jq -r '.[] | select(.status == "in_progress") | "  :arrow_forward: " + .content')
-        if [ -n "$in_progress_items" ]; then
-            echo "$in_progress_items"
-        fi
-        local pending_items=$(echo "$todo_json" | jq -r '.[] | select(.status == "pending") | "  :white_circle: " + .content')
-        if [ -n "$pending_items" ]; then
-            echo "$pending_items"
-        fi
-        local completed_items=$(echo "$todo_json" | jq -r '.[] | select(.status == "completed") | "  :white_check_mark: " + .content')
-        if [ -n "$completed_items" ]; then
-            echo "$completed_items"
-        fi
-    fi
+        ([.[] | select(.status == "completed")] | length) as $completed |
+        ([.[] | select(.status == "in_progress")] | length) as $in_progress |
+        ([.[] | select(.status == "pending")] | length) as $pending |
+        ($completed + $in_progress + $pending) as $total |
+
+        if $total == 0 then
+            ""
+        else
+            ([":white_check_mark: Todo: " + ($completed|tostring) + "/" + ($total|tostring) + " done"]
+            + item_lines("in_progress"; ":arrow_forward:")
+            + item_lines("pending"; ":white_circle:")
+            + item_lines("completed"; ":white_check_mark:"))
+            | join("\n")
+        end
+    '
 }
 
 # === MAIN LOGIC ===

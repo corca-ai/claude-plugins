@@ -78,3 +78,27 @@ truncate_middle_lines() {
         printf '%s\n' "$text" | tail -n "$tail_lines"
     fi
 }
+
+# Normalize blank lines and optionally truncate in one step.
+# Usage: normalize_and_truncate_text <text> [max_lines] [marker]
+# - max_lines <= 0 or invalid: normalize only
+normalize_and_truncate_text() {
+    local text="${1:-}"
+    local max_lines="${2:-0}"
+    local marker="${3:-...(truncated)...}"
+
+    if [ -z "$text" ]; then
+        echo ""
+        return
+    fi
+
+    local normalized
+    normalized=$(normalize_multiline_text "$text")
+
+    if [[ "$max_lines" =~ ^[0-9]+$ ]] && [ "$max_lines" -gt 0 ]; then
+        truncate_middle_lines "$normalized" "$max_lines" "$marker"
+        return
+    fi
+
+    printf '%s\n' "$normalized"
+}
