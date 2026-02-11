@@ -324,7 +324,7 @@ sessions:
     branch: feat/s23-prestep4-audit-exec
     completed_at: "2026-02-11"
     summary: "Executed full pre-Step4 evidence package with 12-skill coverage, script-path audit, README/discoverability gates, and interactive Step4 prompt. Added commit-checkpoint rule to handoff execution contracts."
-    artifacts: [plan.md, lessons.md, refactor-evidence.md, skill-coverage-matrix.md, script-coverage-matrix.md, readme-framing-audit.md, discoverability-audit.md, readiness-prestep4.md, step4-interactive-prompt.md, next-session.md]
+    artifacts: [plan.md, lessons.md, retro.md, refactor-evidence.md, skill-coverage-matrix.md, script-coverage-matrix.md, readme-framing-audit.md, discoverability-audit.md, readiness-prestep4.md, step4-interactive-prompt.md, next-session.md]
 
 # External tool availability (detected by cwf:setup)
 tools:
@@ -352,9 +352,10 @@ live:
   session_id: "S23"
   dir: "prompt-logs/260211-09-s22-pre-release-readiness-audit-plan"
   branch: "feat/s23-prestep4-audit-exec"
-  phase: "handoff"
-  task: "Execute S22 concerns 1-3 audit package and prepare interactive Step4 prompt"
+  phase: "ship"
+  task: "Create PR for S23 pre-Step4 audit package after retrospective completion"
   key_files:
+    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/retro.md
     - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/refactor-evidence.md
     - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/skill-coverage-matrix.md
     - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/script-coverage-matrix.md
