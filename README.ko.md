@@ -220,12 +220,37 @@ CWF 초기 설정.
 cwf:setup                # 전체 설정 (훅 + 도구 + 인덱스)
 cwf:setup --hooks        # 훅 그룹 선택만
 cwf:setup --tools        # 외부 도구 감지만
+cwf:setup --codex        # Codex 사용자 스코프(~/.agents/*)에 CWF 스킬/레퍼런스 연결
+cwf:setup --codex-wrapper # 세션 로그 자동 동기화를 위한 codex wrapper 설치
 cwf:setup --index        # 프로젝트 index.md 생성
 ```
 
-대화형 훅 그룹 토글, 외부 AI CLI 및 API 키 감지(Codex, Gemini, Tavily, Exa), 프로그레시브 디스클로저 인덱스 생성. CWF 훅은 setup 없이도 동작합니다 -- 이 스킬은 커스터마이징용입니다.
+대화형 훅 그룹 토글, 외부 AI CLI 및 API 키 감지(Codex, Gemini, Tavily, Exa), 선택적 Codex 연동(스킬 + wrapper), 프로그레시브 디스클로저 인덱스 생성을 제공합니다. CWF 훅은 setup 없이도 동작합니다 -- 이 스킬은 커스터마이징용입니다.
 
 전체 레퍼런스: [SKILL.md](plugins/cwf/skills/setup/SKILL.md)
+
+### Codex 연동
+
+Codex CLI가 설치되어 있다면 다음 설정을 권장합니다.
+
+```bash
+cwf:setup --codex
+cwf:setup --codex-wrapper
+```
+
+적용되는 내용:
+- `~/.agents/skills/*`, `~/.agents/references`를 로컬 CWF에 심링크 (최신 파일 자동 반영)
+- `~/.local/bin/codex` wrapper 설치 + PATH 업데이트(`~/.zshrc`, `~/.bashrc`)
+- 이후 `codex` 실행 시 세션 로그가 `prompt-logs/sessions-codex/`로 자동 동기화
+
+검증:
+
+```bash
+bash scripts/codex/install-wrapper.sh --status
+type -a codex
+```
+
+설치 후 새 셸을 열거나 `source ~/.zshrc`를 실행하세요. `codex`를 호출하는 alias(예: `codexyolo='codex ...'`)도 동일하게 wrapper를 사용합니다.
 
 ### update
 

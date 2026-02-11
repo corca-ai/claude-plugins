@@ -219,12 +219,37 @@ Initial CWF configuration.
 cwf:setup                # Full setup (hooks + tools + index)
 cwf:setup --hooks        # Hook group selection only
 cwf:setup --tools        # External tool detection only
+cwf:setup --codex        # Link CWF skills/references into Codex user scope (~/.agents/*)
+cwf:setup --codex-wrapper # Install codex wrapper for automatic session log sync
 cwf:setup --index        # Generate project index.md
 ```
 
-Interactive hook group toggle, external AI CLI and API key detection (Codex, Gemini, Tavily, Exa), and progressive disclosure index generation. CWF hooks work without running setup — this skill is for customization.
+Interactive hook group toggle, external AI CLI and API key detection (Codex, Gemini, Tavily, Exa), optional Codex integration (skills + wrapper), and progressive disclosure index generation. CWF hooks work without running setup — this skill is for customization.
 
 Full reference: [SKILL.md](plugins/cwf/skills/setup/SKILL.md)
+
+### Codex Integration
+
+If Codex CLI is installed, recommended setup is:
+
+```bash
+cwf:setup --codex
+cwf:setup --codex-wrapper
+```
+
+What this enables:
+- `~/.agents/skills/*` and `~/.agents/references` symlinked to local CWF (latest files auto-loaded)
+- `~/.local/bin/codex` wrapper installation + PATH update (`~/.zshrc`, `~/.bashrc`)
+- Every `codex` run auto-syncs session logs into `prompt-logs/sessions-codex/`
+
+Verify:
+
+```bash
+bash scripts/codex/install-wrapper.sh --status
+type -a codex
+```
+
+After install, open a new shell (or `source ~/.zshrc`). Aliases that call `codex` (for example `codexyolo='codex ...'`) also use the wrapper.
 
 ### update
 
