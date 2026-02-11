@@ -74,6 +74,7 @@ Apply the [context recovery protocol](../../references/context-recovery-protocol
 | Codebase Analyst | `{session_dir}/plan-codebase-analysis.md` |
 
 Skip to Phase 3 if both files are valid.
+These two files are **critical outputs** for plan synthesis.
 
 ### 2.2 Launch sub-agents
 
@@ -141,6 +142,7 @@ Task tool:
 ```
 
 Wait for all launched sub-agents to complete.
+Re-validate each launched file using the context recovery protocol.
 
 ### 2.3 Read output files
 
@@ -150,6 +152,15 @@ After sub-agents complete, read the result files from the session directory (not
 - `{session_dir}/plan-codebase-analysis.md` — Codebase analysis findings
 
 Use these file contents as input for Phase 3 synthesis.
+
+### 2.4 Persistence Gate (Critical)
+
+Apply the stage-tier policy from the context recovery protocol:
+
+1. `plan-prior-art-research.md` and `plan-codebase-analysis.md` are critical.
+2. If either file is still invalid after one bounded retry, **hard fail** the
+   stage with explicit file-level error and stop plan drafting.
+3. Record gate path in output (`PERSISTENCE_GATE=HARD_FAIL` or equivalent).
 
 ## Phase 3: Plan Drafting
 
@@ -305,6 +316,7 @@ For a multi-perspective review before implementation, run:
 7. **Cross-cutting → shared reference first**: When identical logic applies to 3+ targets, create a shared reference file as Step 0. "동일 적용" is a plan smell — replace with an explicit shared file path
 8. **Commit Strategy is required**: Every plan must include a Commit Strategy section. Default is one commit per Step.
 9. **Preparatory refactoring check**: When a target file is 300+ lines with 3+ planned changes, add Step 0 to extract separable blocks first
+10. **Critical persistence outputs hard-fail**: If `plan-prior-art-research.md` or `plan-codebase-analysis.md` remains invalid after bounded retry, stop with explicit error instead of drafting from partial data
 
 ## References
 

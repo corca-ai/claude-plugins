@@ -89,6 +89,13 @@ Apply the [context recovery protocol](../../references/context-recovery-protocol
 | 2 | Expert α | `{session_dir}/retro-expert-alpha.md` |
 | 2 | Expert β | `{session_dir}/retro-expert-beta.md` |
 
+Stage-tier policy for deep mode outputs:
+- **Critical (hard gate)**: `{session_dir}/retro-cdm-analysis.md`
+- **Non-critical (soft gate)**: `{session_dir}/retro-learning-resources.md`,
+  `{session_dir}/retro-expert-alpha.md`, `{session_dir}/retro-expert-beta.md`
+
+For all outputs: bounded retry = 1 for missing/invalid files.
+
 **Batch 1** — launch in a single message with 2 parallel Task calls (only for agents whose result files are missing or invalid):
 
 - **Agent A — CDM Analysis**: `subagent_type: general-purpose`, `max_turns: 12`. Prompt: "Read `{SKILL_DIR}/references/cdm-guide.md`. Analyze the following session summary using CDM methodology. Session summary: {Sections 1-3 summary}. cwf-state context: {relevant cwf-state.yaml content}. Output Section 4 content. **Output Persistence**: Write your complete analysis to: `{session_dir}/retro-cdm-analysis.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`"
@@ -98,12 +105,24 @@ Wait for Batch 1 to complete. Read output files from session directory:
 - `{session_dir}/retro-cdm-analysis.md` — CDM analysis (needed by Batch 2 experts)
 - `{session_dir}/retro-learning-resources.md` — Learning resources
 
+Gate behavior after Batch 1:
+- If `retro-cdm-analysis.md` remains invalid after retry: **hard fail** deep retro.
+- If `retro-learning-resources.md` remains invalid after retry: continue with
+  warning and render Section 6 with explicit omission note.
+- Record gate path in output (`PERSISTENCE_GATE=HARD_FAIL` or
+  `PERSISTENCE_GATE=SOFT_CONTINUE`, or equivalent wording).
+
 **Batch 2** — launch in a single message with 2 parallel Task calls (after Batch 1, only for agents whose result files are missing or invalid):
 
 - **Agent C — Expert alpha**: `subagent_type: general-purpose`, `max_turns: 12`. Prompt: "Read `{SKILL_DIR}/references/expert-lens-guide.md`. You are Expert alpha. Session summary: {Sections 1-4 summary, including CDM results from Agent A}. Deep-clarify experts: {names or 'not available'}. Analyze through your framework. Use web search to verify expert identity and cite published work (follow Web Research Protocol in {CWF_PLUGIN_DIR}/references/agent-patterns.md; you have Bash access for agent-browser fallback). Output your Expert alpha section. **Output Persistence**: Write your complete analysis to: `{session_dir}/retro-expert-alpha.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`"
 - **Agent D — Expert beta**: `subagent_type: general-purpose`, `max_turns: 12`. Prompt: "Read `{SKILL_DIR}/references/expert-lens-guide.md`. You are Expert beta. Session summary: {Sections 1-4 summary, including CDM results from Agent A}. Deep-clarify experts: {names or 'not available'}. Analyze through your framework. Use web search to verify expert identity and cite published work (follow Web Research Protocol in {CWF_PLUGIN_DIR}/references/agent-patterns.md; you have Bash access for agent-browser fallback). Output your Expert beta section. **Output Persistence**: Write your complete analysis to: `{session_dir}/retro-expert-beta.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`"
 
 After Batch 2: read output files from session directory (`{session_dir}/retro-expert-alpha.md`, `{session_dir}/retro-expert-beta.md`). Draft Section 7 inline (skills scan), then integrate all results into retro.md.
+
+Gate behavior after Batch 2:
+- If either expert file remains invalid after retry: continue with warning and
+  render Section 5 from available expert output(s) plus explicit omission note.
+- Record soft gate path in output (`PERSISTENCE_GATE=SOFT_CONTINUE` or equivalent).
 
 **Rationale for 2-batch design**: Expert Lens requires CDM results ("Sections 1-4 provided by orchestrator" per expert-lens-guide.md). CDM and Learning Resources are independent → Batch 1 parallel. Expert alpha and Expert beta both need CDM results → Batch 2 after Batch 1.
 
@@ -324,3 +343,4 @@ Do not prompt the user to start this discussion.
 11. In deep mode, analysis sections (CDM, Expert Lens, Learning Resources) run as parallel sub-agents in two batches. Do not run them inline.
 12. Persist findings follow the eval > state > doc hierarchy. Never suggest adding a doc rule when a deterministic check is possible.
 13. Read cwf-state.yaml (if it exists) during artifact reading to understand project lifecycle context.
+14. Apply stage-tier persistence gates in deep mode: CDM output hard-fails when invalid after bounded retry; Expert/Learning outputs use warning + explicit omission notes.

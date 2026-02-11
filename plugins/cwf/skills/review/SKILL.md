@@ -177,6 +177,7 @@ Apply the [context recovery protocol](../../references/context-recovery-protocol
 | 6 | Expert β | `{session_dir}/review-expert-beta.md` |
 
 Skip to Phase 3 if all 6 files are valid. In recovery mode (all files cached), skip Phase 2.1–2.3 entirely — proceed directly to Phase 3. Note that temp-dir metadata (`{tmp_dir}/*-meta.txt`) will not exist in recovery; use `duration_ms: —` and `source: CACHED` in provenance for recovered slots.
+All 6 review output files are **critical outputs** for review synthesis.
 
 ### 2.1 Prepare prompts
 
@@ -413,6 +414,11 @@ Read review verdicts from the session directory files (not in-memory return valu
 | 5 | `{session_dir}/review-expert-alpha.md` |
 | 6 | `{session_dir}/review-expert-beta.md` |
 
+Re-validate all six files with the context recovery protocol before synthesis.
+If any file remains invalid after one bounded retry, apply a **hard fail**
+for the stage and stop with explicit file-level error.
+Report the gate path explicitly (`PERSISTENCE_GATE=HARD_FAIL` or equivalent).
+
 For external CLI reviewers (Codex, Gemini), also read metadata from temp dir:
 - `{tmp_dir}/codex-meta.txt` or `{tmp_dir}/gemini-meta.txt` for exit code and duration
 - `{tmp_dir}/codex-stderr.log` or `{tmp_dir}/gemini-stderr.log` for error details
@@ -625,6 +631,8 @@ This prevents sensitive review content (diffs, plans) from persisting in `/tmp/`
    "best effort" silently.
 9. **Base strategy must be explicit in output** — for code mode, always
    report which base path was used (explicit `--base`, upstream, or fallback).
+10. **Critical reviewer outputs hard-fail** — if any required review file
+    remains invalid after bounded retry, stop synthesis with explicit file-level error.
 
 ---
 

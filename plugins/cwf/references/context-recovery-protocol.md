@@ -21,6 +21,56 @@ For each expected output file in the session directory:
 3. If **valid** → use the existing content; do NOT re-launch that sub-agent
 4. If **invalid** (empty or missing sentinel) → re-launch the sub-agent, overwriting the file
 
+## Stage-Tier Gate Policy
+
+Use hybrid persistence gates by output criticality.
+
+### Critical Outputs (hard gate)
+
+If a critical output is invalid:
+
+1. Re-launch once (bounded retry = 1)
+2. Re-validate
+3. If still invalid, **hard fail** the stage with an explicit file-level error
+
+Critical by default for orchestrator stages:
+
+- `cwf:plan` research outputs used to draft the plan
+- `cwf:review` reviewer verdict files used for synthesis
+- `cwf:retro` CDM output (deep mode Section 4 dependency)
+
+### Non-Critical Outputs (soft gate)
+
+If a non-critical output is invalid:
+
+1. Re-launch once (bounded retry = 1)
+2. Re-validate
+3. If still invalid, continue with **warning + explicit omission note**
+
+Typical non-critical examples:
+
+- Advisory/optional outputs
+- Deep retro Expert Lens / Learning Resources outputs when the corresponding
+  section can be skipped with an explicit note
+
+## Validation Loop Contract
+
+Every orchestrator that uses this protocol should apply the same loop:
+
+1. Recovery check (reuse valid files)
+2. Launch only missing/invalid files
+3. Re-validate launched files
+4. Apply stage-tier gate (hard/soft)
+
+## Gate Path Visibility
+
+Gate choice must be observable in stage output:
+
+- Hard gate path: report explicit failure with invalid file list
+  (`PERSISTENCE_GATE=HARD_FAIL` or equivalent wording)
+- Soft gate path: report warning + omission note
+  (`PERSISTENCE_GATE=SOFT_CONTINUE` or equivalent wording)
+
 ## Agent Self-Persistence
 
 Each sub-agent prompt MUST include output persistence instructions:
