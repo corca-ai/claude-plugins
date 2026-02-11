@@ -278,6 +278,14 @@ sessions:
     summary: "Implemented integrated-review fixes for S16 next-session handoff: scope freeze, full-scope manifest gate, stable GAP/UTT/CW/BL traceability, semantic completion checks, redaction policy, and canonical milestone mapping."
     artifacts: [plan.md, lessons.md, next-session.md]
 
+  - id: S18
+    title: "Execute hardened S16 gap-analysis protocol"
+    dir: prompt-logs/260211-05-s18-v3-gap-analysis-execution
+    branch: feat/s17-handoff-protocol-hardening
+    completed_at: "2026-02-11"
+    summary: "Executed S16 hardened protocol end-to-end on frozen range 42d2cd9..01293b3: full-scope manifest, 74-row coverage matrix, 734-item redacted utterance index, GAP/CW/BL traceability set, semantic completion gate pass, and explicit blocking-risk summary."
+    artifacts: [plan.md, lessons.md, next-session.md, scope-freeze.md, analysis-manifest.md, coverage-matrix.md, user-utterances-index.md, gap-candidates.md, consistency-check.md, discussion-backlog.md, gap-decisions.md, completion-check.md, summary.md]
+
 # External tool availability (detected by cwf:setup)
 tools:
   codex: available
@@ -301,23 +309,24 @@ hooks:
 # read by SessionStart(compact) hook for context recovery after auto-compact.
 # check-session.sh --live validates required fields are populated.
 live:
-  session_id: "S17"
-  dir: "prompt-logs/260211-04-s17-next-session-hardening"
+  session_id: "S18"
+  dir: "prompt-logs/260211-05-s18-v3-gap-analysis-execution"
   branch: "feat/s17-handoff-protocol-hardening"
   phase: "done"
-  task: "Implement integrated review fixes for S16 next-session handoff protocol"
+  task: "Execute hardened S16 omission-resistant v3 gap-analysis protocol end-to-end"
   key_files:
-    - prompt-logs/260211-03-s16-v3-gap-analysis-handoff/next-session.md
-    - prompt-logs/260211-03-s16-v3-gap-analysis-handoff/next-session.review.integrated.md
-    - prompt-logs/260211-04-s17-next-session-hardening/plan.md
-    - prompt-logs/260211-04-s17-next-session-hardening/lessons.md
-    - prompt-logs/260211-04-s17-next-session-hardening/next-session.md
+    - prompt-logs/260211-05-s18-v3-gap-analysis-execution/scope-freeze.md
+    - prompt-logs/260211-05-s18-v3-gap-analysis-execution/analysis-manifest.md
+    - prompt-logs/260211-05-s18-v3-gap-analysis-execution/coverage-matrix.md
+    - prompt-logs/260211-05-s18-v3-gap-analysis-execution/gap-candidates.md
+    - prompt-logs/260211-05-s18-v3-gap-analysis-execution/discussion-backlog.md
+    - prompt-logs/260211-05-s18-v3-gap-analysis-execution/completion-check.md
     - cwf-state.yaml
   decisions:
-    - "Freeze END_SHA at session start for reproducible analysis range"
-    - "Manifest gate must cover all declared include buckets"
-    - "Use stable IDs (UTT/GAP/CW/BL) for cross-artifact closure"
-    - "Replace existence-only completion with semantic closure checks"
+    - "Freeze END_SHA once and require identical RANGE string across artifacts"
+    - "Treat sessions and sessions-codex logs as equal-weight intent sources"
+    - "Preserve uncertainty as Unknown instead of forcing false closure"
+    - "Require GAP->BL and CW->GAP closure before pass"
   decision_journal: []
   clarify_completed_at: ""
   clarify_result_file: ""
