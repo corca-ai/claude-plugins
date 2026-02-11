@@ -260,7 +260,7 @@ sessions:
     branch: marketplace-v3
     completed_at: "2026-02-11"
     summary: "Completed agent-browser integration: cwf:setup tool detection, 4 skill sub-agent prompts updated to reference Web Research Protocol (clarify, plan, retro, review), regression test 3/3 BDD pass (deming.org: WebFetch empty → agent-browser full content)."
-    artifacts: [plan.md, lessons.md]
+    artifacts: [plan.md, lessons.md, retro.md, session.md]
 
 # External tool availability (detected by cwf:setup)
 tools:
@@ -377,4 +377,16 @@ expert_roster:
     source: "How Complex Systems Fail (1998/2000), Above the Line Below the Line (ACM Queue, 2020), Going Solid (BMJ QS, 2005)"
     rationale: "Applied to S33 protocol masking deeper WebFetch failure, agent mental model gap (line of representation), compact-context.sh tight coupling progression"
     introduced: "S14"
+    usage_count: 1
+  - name: "Martin Fowler"
+    domain: "refactoring patterns, knowledge duplication (Rule of Three), shared abstractions, evolutionary design"
+    source: "Refactoring: Improving the Design of Existing Code 2nd ed. (2018), Is Design Dead? (martinfowler.com), BeckDesignRules (martinfowler.com/bliki)"
+    rationale: "Applied to inline rule duplication as Duplicated Code smell, protocol reference extraction as Extract Function structural extension, Shotgun Surgery smell for partial category updates"
+    introduced: "S15"
+    usage_count: 1
+  - name: "Nancy Leveson"
+    domain: "systems safety engineering, STAMP/STPA, system-level hazard analysis, control structure analysis"
+    source: "Engineering a Safer World: Systems Thinking Applied to Safety (MIT Press, 2011)"
+    rationale: "Applied to parallel agent file conflict as UCA (control action not provided), inline rule drift as open-loop control / feedback loop degradation, defensive consistency as hazard prevention"
+    introduced: "S15"
     usage_count: 1
