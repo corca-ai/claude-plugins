@@ -212,6 +212,8 @@ the task scope directly.
 - Commit gate:
   - Commit during execution in meaningful units (per work item or change pattern).
   - Avoid one monolithic end-of-session commit when multiple logical units exist.
+  - After the first completed unit, run `git status --short`, confirm the next
+    commit boundary, and commit before starting the next major unit.
 - Staging policy:
   - Stage only intended files for each commit unit.
   - Do not use broad staging that may include unrelated changes.

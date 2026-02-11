@@ -310,6 +310,22 @@ sessions:
     summary: "Introduced shared env-loader (env -> shell profiles -> legacy .claude/.env) and migrated hook/gather scripts to it; aligned docs to profile-first policy; updated review skill to provider-routed external slots across codex/gemini/claude fallback."
     artifacts: [plan.md, lessons.md, next-session.md]
 
+  - id: S22
+    title: "Pre-release readiness audit plan"
+    dir: prompt-logs/260211-09-s22-pre-release-readiness-audit-plan
+    branch: marketplace-v3
+    completed_at: "2026-02-11"
+    summary: "Established release-readiness audit scope and gates for concerns 1-4 with explicit pre-Step4 split and mention-only execution contract."
+    artifacts: [plan.md, lessons.md, next-session.md]
+
+  - id: S23
+    title: "Execute concerns 1-3 + prepare Step 4 prompt"
+    dir: prompt-logs/260211-09-s22-pre-release-readiness-audit-plan
+    branch: feat/s23-prestep4-audit-exec
+    completed_at: "2026-02-11"
+    summary: "Executed full pre-Step4 evidence package with 12-skill coverage, script-path audit, README/discoverability gates, and interactive Step4 prompt. Added commit-checkpoint rule to handoff execution contracts."
+    artifacts: [plan.md, lessons.md, retro.md, refactor-evidence.md, skill-coverage-matrix.md, script-coverage-matrix.md, readme-framing-audit.md, discoverability-audit.md, readiness-prestep4.md, step4-interactive-prompt.md, next-session.md]
+
 # External tool availability (detected by cwf:setup)
 tools:
   codex: available
@@ -333,27 +349,28 @@ hooks:
 # read by SessionStart(compact) hook for context recovery after auto-compact.
 # check-session.sh --live validates required fields are populated.
 live:
-  session_id: "S22"
+  session_id: "S23"
   dir: "prompt-logs/260211-09-s22-pre-release-readiness-audit-plan"
-  branch: "feat/s17-handoff-protocol-hardening"
-  phase: "plan"
-  task: "Plan pre-release readiness audit for docs, architecture, discoverability, and first-user journey"
+  branch: "feat/s23-prestep4-audit-exec"
+  phase: "ship"
+  task: "Create PR for S23 pre-Step4 audit package after retrospective completion"
   key_files:
-    - AGENTS.md
-    - cwf-index.md
-    - docs/project-context.md
-    - docs/architecture-patterns.md
-    - docs/documentation-guide.md
-    - README.md
-    - README.ko.md
-    - plugins/cwf/skills/refactor/SKILL.md
-    - plugins/cwf/skills/review/SKILL.md
-    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/plan.md
+    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/retro.md
+    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/refactor-evidence.md
+    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/skill-coverage-matrix.md
+    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/script-coverage-matrix.md
+    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/readme-framing-audit.md
+    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/discoverability-audit.md
+    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/readiness-prestep4.md
+    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/step4-interactive-prompt.md
+    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/next-session.md
+    - plugins/cwf/references/plan-protocol.md
+    - plugins/cwf/skills/handoff/SKILL.md
     - cwf-state.yaml
   decisions:
-    - "Start from docs/discoverability audit before final release to reduce first-user friction"
-    - "Use refactor modes as evidence producers, then synthesize with manual scenario walkthrough"
-    - "Treat first-install user journey as a hard release gate, not optional UX polish"
+    - "Reconciled planned 11-skill scope to live 12-skill inventory for full-coverage audit execution."
+    - "Classified concerns 1-3 as FAIL blockers and deferred final Go/No-Go until interactive Step4."
+    - "Promoted commit-gate drift lesson into explicit execution-contract checkpoint rule."
   decision_journal: []
 
 # Expert roster for domain expert sub-agents (used by clarify, review, retro)

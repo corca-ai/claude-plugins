@@ -13,3 +13,19 @@ When validating release docs -> audit README for scope boundaries and decision r
 - **Takeaway**: docs consistency checks and entry-path usability checks should be tracked as distinct release gates.
 
 When defining release audits -> treat discoverability architecture as an independent pass/fail criterion.
+
+### Planned Skill Count (11) Drifted From Current Repository State (12)
+
+- **Expected**: execution scope for deep skill review is fixed to 11 CWF skills.
+- **Actual**: repository currently has 12 skill directories under `plugins/cwf/skills/` (`run` exists in addition to the original 11).
+- **Takeaway**: execution contracts that hardcode inventory counts need an explicit drift rule ("audit all currently present active skills unless user freezes scope").
+
+When executing a pre-designed full-coverage audit -> reconcile planned inventory with live repository inventory before starting coverage.
+
+### Execution Contract Drift: Commit Gate Not Applied During Artifact Build
+
+- **Expected**: during execution, commit in meaningful units instead of accumulating all artifact edits uncommitted.
+- **Actual**: S23 pre-Step4 artifacts were drafted in one uncommitted batch on `marketplace-v3`.
+- **Takeaway**: execution contracts need an explicit mid-run checkpoint (`git status` + commit-unit decision) before writing the second artifact onward.
+
+When executing mention-only handoff contracts -> enforce a commit checkpoint after first artifact unit to prevent end-loaded commits.
