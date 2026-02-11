@@ -262,6 +262,14 @@ sessions:
     summary: "Completed agent-browser integration: cwf:setup tool detection, 4 skill sub-agent prompts updated to reference Web Research Protocol (clarify, plan, retro, review), regression test 3/3 BDD pass (deming.org: WebFetch empty → agent-browser full content)."
     artifacts: [plan.md, lessons.md, retro.md, session.md]
 
+  - id: S16
+    title: "V3 exhaustive analysis handoff design"
+    dir: prompt-logs/260211-03-s16-v3-gap-analysis-handoff
+    branch: marketplace-v3
+    completed_at: "2026-02-11"
+    summary: "Created a single-file next-session handoff for omission-resistant CWF v3 analysis anchored to 42d2cd9..HEAD, including purpose, evidence hierarchy, decision rationale, extraction workflow, and completion gates."
+    artifacts: [plan.md, lessons.md, next-session.md]
+
 # External tool availability (detected by cwf:setup)
 tools:
   codex: available
@@ -285,20 +293,23 @@ hooks:
 # read by SessionStart(compact) hook for context recovery after auto-compact.
 # check-session.sh --live validates required fields are populated.
 live:
-  session_id: "S15"
-  dir: "prompt-logs/260211-02-s15-agent-browser-integration"
+  session_id: "S16"
+  dir: "prompt-logs/260211-03-s16-v3-gap-analysis-handoff"
   branch: "marketplace-v3"
   phase: "done"
-  task: "agent-browser integration into CWF sub-agent prompts (setup detection + 4 skill prompt updates + regression test)"
+  task: "Create a single-file executable handoff for exhaustive post-42d2cd9 CWF v3 coverage and gap analysis"
   key_files:
-    - plugins/cwf/skills/setup/SKILL.md
-    - plugins/cwf/skills/clarify/SKILL.md
-    - plugins/cwf/skills/plan/SKILL.md
-    - plugins/cwf/skills/retro/SKILL.md
-    - plugins/cwf/skills/review/SKILL.md
-    - plugins/cwf/references/agent-patterns.md
+    - prompt-logs/260211-03-s16-v3-gap-analysis-handoff/next-session.md
+    - prompt-logs/260211-03-s16-v3-gap-analysis-handoff/plan.md
+    - prompt-logs/260211-03-s16-v3-gap-analysis-handoff/lessons.md
+    - prompt-logs/260208-03-cwf-v3-master-plan/master-plan.md
+    - docs/v3-migration-decisions.md
+    - cwf-state.yaml
   decisions:
-    - "Reference shared protocol instead of inline rules in sub-agent prompts"
+    - "Anchor corpus scope to 42d2cd9..HEAD to match user intent"
+    - "Treat session.md as optional pointer, not completeness proof"
+    - "Use post-discussion artifact reflection as final status authority"
+    - "Preserve Unknown state to prevent false closure"
   decision_journal: []
   clarify_completed_at: ""
   clarify_result_file: ""
