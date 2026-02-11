@@ -29,3 +29,11 @@ When executing a pre-designed full-coverage audit -> reconcile planned inventory
 - **Takeaway**: execution contracts need an explicit mid-run checkpoint (`git status` + commit-unit decision) before writing the second artifact onward.
 
 When executing mention-only handoff contracts -> enforce a commit checkpoint after first artifact unit to prevent end-loaded commits.
+
+### Session Sequencing Must Match User Intent: Remediation Before Interactive Walkthrough
+
+- **Expected**: S24 executes interactive Step 4 first, then produces final readiness synthesis.
+- **Actual**: user clarified preferred order is detailed No-Go remediation discussion + implementation first, then interactive walkthrough.
+- **Takeaway**: when handoff contains multiple valid phase orderings, explicit user intent should lock the phase sequence before execution starts.
+
+When preparing next-session handoff for mixed autonomous/interactive work -> include a phase-order lock and per-phase outputs so mention-only execution follows the intended sequence.
