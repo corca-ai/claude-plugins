@@ -2,8 +2,9 @@
 name: review
 description: |
   Universal review with narrative verdicts. 6 parallel reviewers:
-  2 internal (Security, UX/DX) via Task + 2 external (Codex, Gemini) via CLI
-  + 2 domain experts via Task. Graceful fallback when CLIs unavailable.
+  2 internal (Security, UX/DX) via Task + 2 external slots via available
+  providers (Codex/Gemini CLI, Claude Task fallback) + 2 domain experts via Task.
+  Graceful fallback when CLIs are unavailable.
   Modes: --mode clarify/plan/code. Triggers: "/review"
 allowed-tools:
   - Task
@@ -17,7 +18,7 @@ allowed-tools:
 
 # Review (/review)
 
-Universal review with narrative verdicts via 6 parallel reviewers (2 internal + 2 external CLI + 2 domain experts).
+Universal review with narrative verdicts via 6 parallel reviewers (2 internal + 2 external slots + 2 domain experts).
 
 **Language**: Match the user's language for synthesis. Reviewer prompts in English.
 
@@ -28,6 +29,7 @@ Universal review with narrative verdicts via 6 parallel reviewers (2 internal + 
 /review --mode plan     Plan/spec review
 /review --mode clarify  Requirement review
 /review --mode code --base marketplace-v3 --scenarios prompt-logs/holdout.md
+/review --mode code --correctness-provider gemini --architecture-provider claude
 ```
 
 ## External CLI Setup (one-time)
@@ -69,6 +71,8 @@ Extract flags from user input:
 - `--mode` (default: `code`)
 - `--base <branch>` (optional, code mode only)
 - `--scenarios <path>` (optional holdout scenarios file)
+- `--correctness-provider <auto|codex|gemini|claude>` (optional, default: `auto`)
+- `--architecture-provider <auto|gemini|codex|claude>` (optional, default: `auto`)
 
 ### 2. Detect review target
 
@@ -213,16 +217,17 @@ IMPORTANT:
 - Include the Provenance block at the end.
 ```
 
-For **external** reviewers (Codex, Gemini):
+For **external** reviewer slots (Correctness, Architecture):
 
 1. Read `{SKILL_DIR}/references/external-review.md`
 2. Extract the reviewer's Role section + mode-specific checklist
 3. Create temp dir: `mktemp -d /tmp/claude-review-XXXXXX`
-4. Write prompt files to temp dir: `codex-prompt.md` and `gemini-prompt.md`
+4. Write prompt files to temp dir: `correctness-prompt.md` and `architecture-prompt.md`
    - Same structure as internal prompts (role + mode checklist + review target + criteria)
+   - These are perspective prompts, not provider-bound prompts.
    - Use the **external provenance format** from `external-review.md` (includes `duration_ms`, `command`)
 
-### 2.2 Detect CLI availability
+### 2.2 Detect provider availability and route external slots
 
 Single Bash call to check both:
 
@@ -236,6 +241,19 @@ Parse the output:
 
 Note: `NPX_FOUND` only confirms npx is installed, not that Gemini CLI is
 authenticated or cached. Runtime failures are handled in Phase 3.2.
+
+Resolve providers for external slots:
+
+- Slot 3 (Correctness):
+  - `--correctness-provider auto` → prefer `codex`, then `gemini`, then `claude`
+  - explicit `codex` / `gemini` / `claude` overrides auto
+- Slot 4 (Architecture):
+  - `--architecture-provider auto` → prefer `gemini`, then `codex`, then `claude`
+  - explicit `gemini` / `codex` / `claude` overrides auto
+
+Provider semantics:
+- `codex` / `gemini`: run external CLI for that slot
+- `claude`: run Task fallback directly for that slot (no CLI attempt)
 
 ### 2.3 Launch all 6 in ONE message
 
@@ -267,30 +285,28 @@ Task(subagent_type="general-purpose", name="uxdx-reviewer", max_turns=12, prompt
 ")
 ```
 
-**Slot 3 — Correctness (Codex or fallback):**
+**Slot 3 — Correctness (provider-routed):**
 
-If Codex available:
+If Slot 3 provider resolves to `codex`:
 
 ```text
-Bash(timeout=300000, command="START_MS=$(date +%s%3N); CODEX_RUNNER='./scripts/codex/codex-with-log.sh'; [ -x \"$CODEX_RUNNER\" ] || CODEX_RUNNER='codex'; timeout 120 \"$CODEX_RUNNER\" exec --sandbox read-only -c model_reasoning_effort='high' - < '{tmp_dir}/codex-prompt.md' > '{tmp_dir}/codex-output.md' 2>'{tmp_dir}/codex-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/codex-meta.txt'")
+Bash(timeout=300000, command="START_MS=$(date +%s%3N); CODEX_RUNNER='./scripts/codex/codex-with-log.sh'; [ -x \"$CODEX_RUNNER\" ] || CODEX_RUNNER='codex'; timeout 120 \"$CODEX_RUNNER\" exec --sandbox read-only -c model_reasoning_effort='high' - < '{tmp_dir}/correctness-prompt.md' > '{tmp_dir}/slot3-output.md' 2>'{tmp_dir}/slot3-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"TOOL=codex EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/slot3-meta.txt'")
 ```
 
 For `--mode code`, use `model_reasoning_effort='xhigh'` instead.
 Single quotes around config values avoid double-quote conflicts in the Bash wrapper.
 
-After successful Codex execution (exit 0 + non-empty output), copy output to session dir:
-
-```bash
-cp '{tmp_dir}/codex-output.md' '{session_dir}/review-correctness.md'
-echo '' >> '{session_dir}/review-correctness.md'
-echo '<!-- AGENT_COMPLETE -->' >> '{session_dir}/review-correctness.md'
-```
-
-If Codex NOT available:
+If Slot 3 provider resolves to `gemini`:
 
 ```text
-Task(subagent_type="general-purpose", name="codex-fallback", max_turns=12, prompt="
-  {codex_fallback_prompt}
+Bash(timeout=300000, command="START_MS=$(date +%s%3N); timeout 120 npx @google/gemini-cli -o text < '{tmp_dir}/correctness-prompt.md' > '{tmp_dir}/slot3-output.md' 2>'{tmp_dir}/slot3-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"TOOL=gemini EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/slot3-meta.txt'")
+```
+
+If Slot 3 provider resolves to `claude`:
+
+```text
+Task(subagent_type="general-purpose", name="correctness-fallback", max_turns=12, prompt="
+  {correctness_fallback_prompt}
 
   ## Output Persistence
   Write your complete review verdict to: {session_dir}/review-correctness.md
@@ -299,32 +315,38 @@ Task(subagent_type="general-purpose", name="codex-fallback", max_turns=12, promp
 ")
 ```
 
-Using the fallback prompt template from `external-review.md` with the Correctness perspective.
+When Slot 3 uses external CLI and succeeds (exit 0 + non-empty output), copy output to session dir:
 
-**Slot 4 — Architecture (Gemini or fallback):**
+```bash
+cp '{tmp_dir}/slot3-output.md' '{session_dir}/review-correctness.md'
+echo '' >> '{session_dir}/review-correctness.md'
+echo '<!-- AGENT_COMPLETE -->' >> '{session_dir}/review-correctness.md'
+```
 
-If Gemini available:
+**Slot 4 — Architecture (provider-routed):**
+
+If Slot 4 provider resolves to `gemini`:
 
 ```text
-Bash(timeout=300000, command="START_MS=$(date +%s%3N); timeout 120 npx @google/gemini-cli -o text < '{tmp_dir}/gemini-prompt.md' > '{tmp_dir}/gemini-output.md' 2>'{tmp_dir}/gemini-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/gemini-meta.txt'")
+Bash(timeout=300000, command="START_MS=$(date +%s%3N); timeout 120 npx @google/gemini-cli -o text < '{tmp_dir}/architecture-prompt.md' > '{tmp_dir}/slot4-output.md' 2>'{tmp_dir}/slot4-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"TOOL=gemini EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/slot4-meta.txt'")
 ```
 
 Uses stdin redirection (`< prompt.md`) instead of `-p "$(cat ...)"` to prevent
 shell injection from review target content containing `$()` or backticks.
 
-After successful Gemini execution (exit 0 + non-empty output), copy output to session dir:
-
-```bash
-cp '{tmp_dir}/gemini-output.md' '{session_dir}/review-architecture.md'
-echo '' >> '{session_dir}/review-architecture.md'
-echo '<!-- AGENT_COMPLETE -->' >> '{session_dir}/review-architecture.md'
-```
-
-If Gemini NOT available:
+If Slot 4 provider resolves to `codex`:
 
 ```text
-Task(subagent_type="general-purpose", name="gemini-fallback", max_turns=12, prompt="
-  {gemini_fallback_prompt}
+Bash(timeout=300000, command="START_MS=$(date +%s%3N); CODEX_RUNNER='./scripts/codex/codex-with-log.sh'; [ -x \"$CODEX_RUNNER\" ] || CODEX_RUNNER='codex'; timeout 120 \"$CODEX_RUNNER\" exec --sandbox read-only -c model_reasoning_effort='high' - < '{tmp_dir}/architecture-prompt.md' > '{tmp_dir}/slot4-output.md' 2>'{tmp_dir}/slot4-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"TOOL=codex EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/slot4-meta.txt'")
+```
+
+For `--mode code`, use `model_reasoning_effort='xhigh'` instead.
+
+If Slot 4 provider resolves to `claude`:
+
+```text
+Task(subagent_type="general-purpose", name="architecture-fallback", max_turns=12, prompt="
+  {architecture_fallback_prompt}
 
   ## Output Persistence
   Write your complete review verdict to: {session_dir}/review-architecture.md
@@ -333,7 +355,13 @@ Task(subagent_type="general-purpose", name="gemini-fallback", max_turns=12, prom
 ")
 ```
 
-Using the fallback prompt template from `external-review.md` with the Architecture perspective.
+When Slot 4 uses external CLI and succeeds (exit 0 + non-empty output), copy output to session dir:
+
+```bash
+cp '{tmp_dir}/slot4-output.md' '{session_dir}/review-architecture.md'
+echo '' >> '{session_dir}/review-architecture.md'
+echo '<!-- AGENT_COMPLETE -->' >> '{session_dir}/review-architecture.md'
+```
 
 **Slot 5 — Expert α (always Task):**
 
@@ -419,9 +447,9 @@ If any file remains invalid after one bounded retry, apply a **hard fail**
 for the stage and stop with explicit file-level error.
 Report the gate path explicitly (`PERSISTENCE_GATE=HARD_FAIL` or equivalent).
 
-For external CLI reviewers (Codex, Gemini), also read metadata from temp dir:
-- `{tmp_dir}/codex-meta.txt` or `{tmp_dir}/gemini-meta.txt` for exit code and duration
-- `{tmp_dir}/codex-stderr.log` or `{tmp_dir}/gemini-stderr.log` for error details
+For external slot executions, also read metadata from temp dir:
+- `{tmp_dir}/slot3-meta.txt` / `{tmp_dir}/slot4-meta.txt` for provider tool, exit code, and duration
+- `{tmp_dir}/slot3-stderr.log` / `{tmp_dir}/slot4-stderr.log` for error details
 
 For successful external reviews, **override** the provenance `duration_ms` with
 the actual value from the meta file (not any value the CLI may have generated).
@@ -433,7 +461,7 @@ Use the actual command executed for the `command` field.
 
 When an external CLI exits non-zero, parse stderr **immediately** for error type keywords. This prevents wasting time on retries that cannot succeed.
 
-1. Read `{tmp_dir}/{tool}-stderr.log`
+1. Read `{tmp_dir}/slot{N}-stderr.log`
 1. Classify by the **first matching** pattern:
    - `MODEL_CAPACITY_EXHAUSTED`, `429`, `ResourceExhausted`, `quota` → **CAPACITY**: fail-fast, immediate fallback, no retry
    - `INTERNAL_ERROR`, `500`, `InternalError`, `server error` → **INTERNAL**: 1 retry then fallback
@@ -442,7 +470,7 @@ When an external CLI exits non-zero, parse stderr **immediately** for error type
 1. Apply the action:
    - **CAPACITY**: Skip exit code check. Launch fallback immediately.
    - **INTERNAL**: Re-run the CLI command once. If still fails, launch fallback.
-   - **AUTH**: Do NOT launch fallback. Report: `Slot N ({tool}) AUTH error. Run codex auth login / npx @google/gemini-cli to configure.`
+   - **AUTH**: Do NOT launch fallback. Report: `Slot N ({tool}) AUTH error. Configure the selected provider (codex auth login or npx @google/gemini-cli).`
    - **TOOL_ERROR**: Skip exit code check. Launch fallback immediately. Note in Confidence Note: `Slot N ({tool}) TOOL_ERROR — CLI attempted unavailable tool.`
 1. If **no pattern matches**, fall through to exit code classification below.
 
@@ -460,7 +488,7 @@ When an external CLI exits non-zero, parse stderr **immediately** for error type
 
 When an external CLI fails (exit code != 0), extract the actionable error cause from stderr for the Confidence Note:
 
-1. Read the stderr log file: `{tmp_dir}/{tool}-stderr.log`
+1. Read the stderr log file: `{tmp_dir}/slot{N}-stderr.log`
 2. Extract the first actionable error message using this priority:
    - **JSON stderr**: parse `.error.message` or `.error.details`
    - **Plain text stderr**: find the last line containing "Error" or "error"
@@ -557,7 +585,8 @@ Output to the conversation (do NOT write to a file unless the user asks):
   "`--scenarios {holdout_path}` ({holdout_count} checks)"
 - External CLI fallbacks used, with extracted error cause from stderr:
   "Slot N ({tool}) FAILED → fallback. Cause: {extracted_error}"
-  Include setup hint: "Run `codex auth login` / `npx @google/gemini-cli` to enable."
+  Include setup hint based on failed provider:
+  "Codex -> `codex auth login`; Gemini -> `npx @google/gemini-cli`."
 - Perspective differences between real CLI output and fallback interpretation
 
 ### Reviewer Provenance
@@ -565,8 +594,8 @@ Output to the conversation (do NOT write to a file unless the user asks):
 |----------|--------|------|----------|
 | Security | REAL_EXECUTION | claude-task | — |
 | UX/DX | REAL_EXECUTION | claude-task | — |
-| Correctness | {REAL_EXECUTION / FALLBACK} | {codex / claude-task-fallback} | {duration_ms} |
-| Architecture | {REAL_EXECUTION / FALLBACK} | {gemini / claude-task-fallback} | {duration_ms} |
+| Correctness | {REAL_EXECUTION / FALLBACK} | {slot3_tool / claude-task-fallback} | {duration_ms} |
+| Architecture | {REAL_EXECUTION / FALLBACK} | {slot4_tool / claude-task-fallback} | {duration_ms} |
 | Expert Alpha | REAL_EXECUTION | claude-task | — |
 | Expert Beta | REAL_EXECUTION | claude-task | — |
 ```
@@ -599,7 +628,7 @@ This prevents sensitive review content (diffs, plans) from persisting in `/tmp/`
 | No git changes found (code mode) | AskUserQuestion: ask user to specify target |
 | No plan.md found | AskUserQuestion: ask user to specify target |
 | All 6 reviewers report no issues | Verdict = Pass. Note "clean review" in synthesis |
-| Codex/Gemini CLI not found | Task agent fallback with same perspective. Mark `FALLBACK` in provenance. |
+| Configured external provider unavailable | Route per provider policy (`auto` fallback chain or explicit `claude`). |
 | External CLI timeout (120s) | Mark `FAILED`. Spawn Task agent fallback. Note in Confidence Note. |
 | External CLI auth error | Mark `FAILED`. Spawn Task agent fallback. Note in Confidence Note. |
 | External output malformed | Extract by pattern matching. Note in Confidence Note. |
