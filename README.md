@@ -47,7 +47,7 @@ gather → clarify → plan → impl → retro
 | 7 | [handoff](#handoff) | `cwf:handoff` | Generate session or phase handoff documents |
 | 8 | [ship](#ship) | `cwf:ship` | Automate GitHub workflow — issues, PRs, and merge management |
 | 9 | [review](#review) | `cwf:review` | Multi-perspective review with 6 parallel reviewers |
-| 10 | [setup](#setup) | `cwf:setup` | Configure hook groups, detect tools, generate project index |
+| 10 | [setup](#setup) | `cwf:setup` | Configure hook groups, detect tools, optionally generate project index |
 | 11 | [update](#update) | `cwf:update` | Check and apply CWF plugin updates |
 
 **Concept composition**: gather, clarify, plan, impl, retro, refactor, and review all synchronize Agent Orchestration. clarify is the richest composition — it synchronizes Expert Advisor, Tier Classification, Agent Orchestration, and Decision Point in a single workflow. review synchronizes Expert Advisor and Agent Orchestration with external CLI integration. handoff is the primary instantiation of the Handoff concept. refactor activates Provenance in holistic mode.
@@ -216,17 +216,26 @@ Full reference: [SKILL.md](plugins/cwf/skills/review/SKILL.md)
 Initial CWF configuration.
 
 ```text
-cwf:setup                # Full setup (hooks + tools + index)
+cwf:setup                # Full setup (hooks + tools + optional index prompt)
 cwf:setup --hooks        # Hook group selection only
 cwf:setup --tools        # External tool detection only
 cwf:setup --codex        # Link CWF skills/references into Codex user scope (~/.agents/*)
 cwf:setup --codex-wrapper # Install codex wrapper for automatic session log sync
-cwf:setup --index        # Generate project index.md
+cwf:setup --index        # Generate/refresh progressive index output (explicit)
+cwf:setup --index --target file   # cwf-index.md only (default)
+cwf:setup --index --target agents # AGENTS.md managed block only
+cwf:setup --index --target both   # cwf-index.md + AGENTS.md block
 ```
 
-Interactive hook group toggle, external AI CLI and API key detection (Codex, Gemini, Tavily, Exa), optional Codex integration (skills + wrapper), and progressive disclosure index generation. CWF hooks work without running setup — this skill is for customization.
+Interactive hook group toggle, external AI CLI and API key detection (Codex, Gemini, Tavily, Exa), optional Codex integration (skills + wrapper), and optional progressive disclosure index generation. In full setup, index creation is prompted and does not overwrite existing `cwf-index.md`. Explicit regeneration is done with `cwf:setup --index`. Index output target can be `cwf-index.md`, `AGENTS.md` managed block, or both.
 
 Full reference: [SKILL.md](plugins/cwf/skills/setup/SKILL.md)
+
+### Agent Entry Files
+
+- `AGENTS.md` is the shared cross-agent entry point (Codex, Claude Code, and compatible runtimes).
+- `CLAUDE.md` is a thin Claude-specific adapter that points to `AGENTS.md`.
+- Progressive disclosure index output defaults to `cwf-index.md` and can also be embedded into the managed block in `AGENTS.md` via `cwf:setup --index --target agents|both`.
 
 ### Codex Integration
 

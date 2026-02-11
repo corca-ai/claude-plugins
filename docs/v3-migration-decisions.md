@@ -128,10 +128,11 @@ context separate from plan WHAT).
 
 ### #18 Progressive Disclosure Index
 
-`cwf:setup` generates `index.md` — "when to read what" pointers, not
-content summaries. Agents read entry points of matched areas only, not
-entire codebase. Low maintenance — valid as long as structure doesn't
-change.
+`cwf:setup` can generate progressive index output via opt-in prompt.
+Default file target is `cwf-index.md` (no overwrite in full setup).
+`cwf:setup --index` is the explicit refresh path and supports target
+selection (`file`, `agents`, `both`). Index content remains "when to read
+what" pointers, not summaries.
 
 ## Emergent Decisions (S13.5-S33)
 

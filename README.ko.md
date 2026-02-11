@@ -47,7 +47,7 @@ gather -> clarify -> plan -> impl -> retro
 | 7 | [handoff](#handoff) | `cwf:handoff` | 세션 또는 페이즈 핸드오프 문서 생성 |
 | 8 | [ship](#ship) | `cwf:ship` | GitHub 워크플로우 자동화 -- 이슈 생성, PR, 머지 관리 |
 | 9 | [review](#review) | `cwf:review` | 6명 병렬 리뷰어에 의한 범용 리뷰 -- 내부 + 외부 CLI + 도메인 전문가 |
-| 10 | [setup](#setup) | `cwf:setup` | 훅 그룹 설정, 도구 감지, 프로젝트 인덱스 생성 |
+| 10 | [setup](#setup) | `cwf:setup` | 훅 그룹 설정, 도구 감지, 프로젝트 인덱스 선택 생성 |
 | 11 | [update](#update) | `cwf:update` | CWF 플러그인 업데이트 확인 및 적용 |
 
 **개념 조합**: gather, clarify, plan, impl, retro, refactor는 모두 에이전트 오케스트레이션을 동기화합니다. clarify는 가장 풍부한 조합으로, 전문가 자문, 티어 분류, 에이전트 오케스트레이션, 결정 포인트를 하나의 워크플로우에서 동기화합니다. handoff는 핸드오프 개념의 주요 구현체입니다. refactor는 전체적 모드에서 출처 추적을 활성화합니다. review는 전문가 자문과 출처 추적을 활용한 다관점 리뷰를 수행합니다.
@@ -217,17 +217,26 @@ cwf:review --mode clarify  # 요구사항 리뷰
 CWF 초기 설정.
 
 ```text
-cwf:setup                # 전체 설정 (훅 + 도구 + 인덱스)
+cwf:setup                # 전체 설정 (훅 + 도구 + 인덱스 생성 여부 질문)
 cwf:setup --hooks        # 훅 그룹 선택만
 cwf:setup --tools        # 외부 도구 감지만
 cwf:setup --codex        # Codex 사용자 스코프(~/.agents/*)에 CWF 스킬/레퍼런스 연결
 cwf:setup --codex-wrapper # 세션 로그 자동 동기화를 위한 codex wrapper 설치
-cwf:setup --index        # 프로젝트 index.md 생성
+cwf:setup --index        # 프로그레시브 인덱스 명시적 생성/갱신
+cwf:setup --index --target file   # cwf-index.md만 (기본값)
+cwf:setup --index --target agents # AGENTS.md 관리 블록만
+cwf:setup --index --target both   # cwf-index.md + AGENTS.md 블록
 ```
 
-대화형 훅 그룹 토글, 외부 AI CLI 및 API 키 감지(Codex, Gemini, Tavily, Exa), 선택적 Codex 연동(스킬 + wrapper), 프로그레시브 디스클로저 인덱스 생성을 제공합니다. CWF 훅은 setup 없이도 동작합니다 -- 이 스킬은 커스터마이징용입니다.
+대화형 훅 그룹 토글, 외부 AI CLI 및 API 키 감지(Codex, Gemini, Tavily, Exa), 선택적 Codex 연동(스킬 + wrapper), 선택적 프로그레시브 디스클로저 인덱스 생성을 제공합니다. 전체 setup에서는 인덱스 생성을 물어보고, 기존 `cwf-index.md`는 덮어쓰지 않습니다. 명시적 재생성은 `cwf:setup --index`를 사용하세요. 인덱스 출력 대상은 `cwf-index.md`, `AGENTS.md` 관리 블록, 또는 둘 다를 선택할 수 있습니다.
 
 전체 레퍼런스: [SKILL.md](plugins/cwf/skills/setup/SKILL.md)
+
+### 에이전트 엔트리 파일
+
+- `AGENTS.md`는 공통 크로스-에이전트 엔트리포인트입니다(Codex, Claude Code, 호환 런타임).
+- `CLAUDE.md`는 `AGENTS.md`를 참조하는 Claude 전용 thin adapter입니다.
+- 프로그레시브 디스클로저 인덱스 기본 출력은 `cwf-index.md`이며, `cwf:setup --index --target agents|both`로 `AGENTS.md` 관리 블록에도 반영할 수 있습니다.
 
 ### Codex 연동
 
