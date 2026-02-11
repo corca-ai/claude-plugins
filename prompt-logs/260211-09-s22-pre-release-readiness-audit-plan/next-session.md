@@ -6,6 +6,15 @@ S23 completed concerns 1-3 with full pre-Step4 artifacts and an explicit blocker
 The next session should execute concern 4 interactively with the user, then produce
 `onboarding-scenario.md` and final `readiness-report.md`.
 
+## Decision Locks (Confirmed in S23 Close)
+
+The following decisions are fixed unless explicitly reopened by the user:
+
+1. Release gate policy: **No-Go remains fixed until Concern 1-3 blockers are resolved**.
+2. README scope for next implementation: **minimal framing patch first** (`is / is-not / assumptions / decisions+why` + inventory sync), not full rewrite.
+3. Self-containment issue handling: **treat as release blocker** (not post-release debt).
+4. PR handling for S23 package: **merge now** (documentation/audit package; no runtime behavior change).
+
 ## Context Files to Read First
 
 1. `prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/readiness-prestep4.md`
@@ -37,6 +46,7 @@ S24 interactive onboarding walkthrough work immediately.
 - Scope gate:
   - Treat Step 4 as explicitly interactive; ask user at branch decisions.
   - Do not auto-resolve subjective onboarding-path choices.
+  - Apply the Decision Locks above by default during synthesis.
 - Required outputs for this run:
   - `onboarding-scenario.md`
   - `readiness-report.md`
