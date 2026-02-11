@@ -270,6 +270,14 @@ sessions:
     summary: "Created a single-file next-session handoff for omission-resistant CWF v3 analysis anchored to 42d2cd9..HEAD, including purpose, evidence hierarchy, decision rationale, extraction workflow, and completion gates."
     artifacts: [plan.md, lessons.md, next-session.md, next-session.review.claude.md, retro.md, session.md]
 
+  - id: S17
+    title: "Harden S16 handoff protocol from integrated review"
+    dir: prompt-logs/260211-04-s17-next-session-hardening
+    branch: feat/s17-handoff-protocol-hardening
+    completed_at: "2026-02-11"
+    summary: "Implemented integrated-review fixes for S16 next-session handoff: scope freeze, full-scope manifest gate, stable GAP/UTT/CW/BL traceability, semantic completion checks, redaction policy, and canonical milestone mapping."
+    artifacts: [plan.md, lessons.md, next-session.md]
+
 # External tool availability (detected by cwf:setup)
 tools:
   codex: available
@@ -293,23 +301,23 @@ hooks:
 # read by SessionStart(compact) hook for context recovery after auto-compact.
 # check-session.sh --live validates required fields are populated.
 live:
-  session_id: "S16"
-  dir: "prompt-logs/260211-03-s16-v3-gap-analysis-handoff"
-  branch: "marketplace-v3"
+  session_id: "S17"
+  dir: "prompt-logs/260211-04-s17-next-session-hardening"
+  branch: "feat/s17-handoff-protocol-hardening"
   phase: "done"
-  task: "Create a single-file executable handoff for exhaustive post-42d2cd9 CWF v3 coverage and gap analysis"
+  task: "Implement integrated review fixes for S16 next-session handoff protocol"
   key_files:
     - prompt-logs/260211-03-s16-v3-gap-analysis-handoff/next-session.md
-    - prompt-logs/260211-03-s16-v3-gap-analysis-handoff/plan.md
-    - prompt-logs/260211-03-s16-v3-gap-analysis-handoff/lessons.md
-    - prompt-logs/260208-03-cwf-v3-master-plan/master-plan.md
-    - docs/v3-migration-decisions.md
+    - prompt-logs/260211-03-s16-v3-gap-analysis-handoff/next-session.review.integrated.md
+    - prompt-logs/260211-04-s17-next-session-hardening/plan.md
+    - prompt-logs/260211-04-s17-next-session-hardening/lessons.md
+    - prompt-logs/260211-04-s17-next-session-hardening/next-session.md
     - cwf-state.yaml
   decisions:
-    - "Anchor corpus scope to 42d2cd9..HEAD to match user intent"
-    - "Treat session.md as optional pointer, not completeness proof"
-    - "Use post-discussion artifact reflection as final status authority"
-    - "Preserve Unknown state to prevent false closure"
+    - "Freeze END_SHA at session start for reproducible analysis range"
+    - "Manifest gate must cover all declared include buckets"
+    - "Use stable IDs (UTT/GAP/CW/BL) for cross-artifact closure"
+    - "Replace existence-only completion with semantic closure checks"
   decision_journal: []
   clarify_completed_at: ""
   clarify_result_file: ""
