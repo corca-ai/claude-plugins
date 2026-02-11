@@ -268,7 +268,7 @@ sessions:
     branch: marketplace-v3
     completed_at: "2026-02-11"
     summary: "Created a single-file next-session handoff for omission-resistant CWF v3 analysis anchored to 42d2cd9..HEAD, including purpose, evidence hierarchy, decision rationale, extraction workflow, and completion gates."
-    artifacts: [plan.md, lessons.md, next-session.md]
+    artifacts: [plan.md, lessons.md, next-session.md, next-session.review.claude.md, retro.md, session.md]
 
 # External tool availability (detected by cwf:setup)
 tools:
@@ -368,9 +368,9 @@ expert_roster:
   - name: "W. Edwards Deming"
     domain: "systems thinking, common cause vs special cause variation, PDCA cycle, build quality into process"
     source: "Out of the Crisis (MIT Press, 1986), Point 3: cease dependence on inspection"
-    rationale: "Applied to convention-vs-structure enforcement gap, commit strategy recurrence as common cause variation, check-session.sh as inspection-to-process conversion"
+    rationale: "Applied to convention-vs-structure enforcement gap, commit strategy recurrence as common cause variation, check-session.sh as inspection-to-process conversion, TOOL_ERROR as common cause variation, Check vs Study distinction in review orchestration"
     introduced: "S33"
-    usage_count: 1
+    usage_count: 2
   - name: "Chris Argyris"
     domain: "espoused theory vs theory-in-use, single-loop vs double-loop learning, defensive routines"
     source: "Organizational Learning: A Theory of Action Perspective (Argyris & Schön, 1978), Teaching Smart People How to Learn (HBR, 1991)"
@@ -380,9 +380,9 @@ expert_roster:
   - name: "Gojko Adzic"
     domain: "specification by example, living documentation, key examples, collaborative specification"
     source: "Specification by Example (Manning, 2011), Bridging the Communication Gap (Neuri, 2009)"
-    rationale: "Applied to SKILL.md-as-executable-specification insight, key examples for protocol validation, bottom-up failure classification as example classification"
+    rationale: "Applied to SKILL.md-as-executable-specification insight, key examples for protocol validation, bottom-up failure classification as example classification, S16 handoff review: key example absence and existence-only completion criteria"
     introduced: "S14"
-    usage_count: 1
+    usage_count: 2
   - name: "Richard Cook"
     domain: "complex system failure, latent failures, line of representation, going solid, defense in depth"
     source: "How Complex Systems Fail (1998/2000), Above the Line Below the Line (ACM Queue, 2020), Going Solid (BMJ QS, 2005)"
@@ -395,9 +395,15 @@ expert_roster:
     rationale: "Applied to inline rule duplication as Duplicated Code smell, protocol reference extraction as Extract Function structural extension, Shotgun Surgery smell for partial category updates"
     introduced: "S15"
     usage_count: 1
+  - name: "Charles Perrow"
+    domain: "normal accident theory, interactive complexity vs linear interaction, tight/loose coupling, common-mode failure"
+    source: "Normal Accidents: Living with High-Risk Technologies (Basic Books, 1984; Princeton UP revised, 1999)"
+    rationale: "Applied to component vs interaction failure distinction in error taxonomy, common-mode failure in review systems (tool shares defect class with target), tight coupling buffer analysis for in-session fix decisions"
+    introduced: "S16"
+    usage_count: 1
   - name: "Nancy Leveson"
     domain: "systems safety engineering, STAMP/STPA, system-level hazard analysis, control structure analysis"
     source: "Engineering a Safer World: Systems Thinking Applied to Safety (MIT Press, 2011)"
-    rationale: "Applied to parallel agent file conflict as UCA (control action not provided), inline rule drift as open-loop control / feedback loop degradation, defensive consistency as hazard prevention"
+    rationale: "Applied to parallel agent file conflict as UCA (control action not provided), inline rule drift as open-loop control / feedback loop degradation, defensive consistency as hazard prevention, S16 handoff review: open-loop Phase 0→1 transition, unenforced Do Not Skip constraints"
     introduced: "S15"
-    usage_count: 1
+    usage_count: 2
