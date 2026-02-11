@@ -245,10 +245,19 @@ sessions:
     summary: "4 CDM fixes (plan cross-cutting gate, impl commit strategy branching, decision journal + phase-aware compact recovery, review fail-fast for CAPACITY errors) + cwf:run auto-chaining skill + impl gate extraction to shared reference. 6 commits, 5/5 BDD pass."
     artifacts: [plan.md, lessons.md, retro.md, next-session.md]
 
+  - id: S14
+    title: "Integration test + agent-browser plan"
+    dir: prompt-logs/260211-01-s14-integration-test
+    branch: marketplace-v3
+    completed_at: "2026-02-11"
+    summary: "Integration test: 5/5 CDM items verified, 7/7 run logic checks, 6/6 fail-fast checks, 28/28 cross-refs clean. compact-context.sh 2 bugs fixed (decisions leak, quote stripping). v3-migration-decisions.md written. Web research replay exposed WebFetch 9% success rate → agent-browser integration planned."
+    artifacts: [plan.md, lessons.md, next-session.md, agent-browser-plan.md]
+
 # External tool availability (detected by cwf:setup)
 tools:
   codex: available
   gemini: available
+  agent_browser: available
   tavily: unknown
   exa: unknown
 
@@ -267,28 +276,24 @@ hooks:
 # read by SessionStart(compact) hook for context recovery after auto-compact.
 # check-session.sh --live validates required fields are populated.
 live:
-  session_id: "S33"
-  dir: "prompt-logs/260210-04-s33-cdm-auto-chain"
+  session_id: "S14"
+  dir: "prompt-logs/260211-01-s14-integration-test"
   branch: "marketplace-v3"
-  phase: "retro"
-  task: "CDM improvements (plan cross-cutting gate, impl commit strategy branching, phase-aware compact recovery, review fail-fast) + S13.6 auto-chaining protocol design + gate extraction"
+  phase: "done"
+  task: "Integration test (E2E, smoke, compact recovery, fail-fast), v3-migration-decisions.md, final cleanup"
   key_files:
+    - plugins/cwf/skills/run/SKILL.md
+    - plugins/cwf/skills/clarify/SKILL.md
     - plugins/cwf/skills/plan/SKILL.md
     - plugins/cwf/skills/impl/SKILL.md
     - plugins/cwf/skills/review/SKILL.md
     - plugins/cwf/hooks/scripts/compact-context.sh
     - cwf-state.yaml
-    - prompt-logs/260210-03-docs-overhaul-impl/retro.md
-    - prompt-logs/260210-04-s33-cdm-auto-chain/plan.md
   decisions:
-    - "CDM 1-4: surgical changes to existing skills, not over-engineered"
-    - "Part B: full cwf:run implementation (user choice)"
-    - "Part C: extract gates to references/impl-gates.md"
-    - "CDM 3: decision journal mechanism (user choice over simple plan.md auto-load)"
-  decision_journal: []    # Populated during impl phase, read by compact recovery hook
-  # Added by cwf:clarify Phase 5 — read by cwf:impl Phase 1.0
-  clarify_completed_at: ""    # ISO 8601 timestamp, empty = not completed
-  clarify_result_file: ""     # Path to clarify summary file
+    - "Merge to main deferred — user has additional pre-merge work"
+  decision_journal: []
+  clarify_completed_at: ""
+  clarify_result_file: ""
 
 # Expert roster for domain expert sub-agents (used by clarify, review, retro)
 # Semi-automatic evolution: usage_count auto-incremented, new experts user-approved
