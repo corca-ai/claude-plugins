@@ -105,3 +105,27 @@ Create when the current session is part of a tracked sequence (e.g., sessions in
 Include: context files to read, task scope, don't-touch boundaries, lessons from prior sessions, success criteria, and a start command.
 
 If using `cwf-state.yaml`, add `next-session.md` to the session's `artifacts` list.
+
+### Execution Contract (Mention-Only Safe)
+
+Every generated `next-session.md` MUST include an explicit execution contract section.
+Treat this as a runtime behavior contract, not optional prose.
+
+Contract minimum:
+
+1. **Mention-only execution**
+   - If the user input only mentions `next-session.md` (with or without "start"),
+     treat it as "execute this handoff", not as a request to summarize the file.
+2. **Branch gate before implementation edits**
+   - Before implementation edits, detect current branch.
+   - If on a base branch (`main`, `master`, or repo primary branch), create/switch
+     to a feature branch and continue execution.
+3. **Commit gate during execution**
+   - Commit in meaningful units while executing (per work item or change pattern).
+   - Avoid one monolithic end-of-session commit when multiple logical units exist.
+4. **Selective staging**
+   - Stage only intended files for the current unit.
+   - Do not use broad staging that can capture unrelated changes.
+
+The contract must be concrete enough that an agent can follow it without extra
+user prompts.

@@ -179,6 +179,7 @@ cwf:handoff --phase        # phase-handoff.md 생성 (HOW 컨텍스트)
 ```
 
 세션 핸드오프는 작업 범위, 교훈, 미해결 항목을 다음 세션으로 전달합니다. 페이즈 핸드오프는 프로토콜, 규칙, 제약 조건을 다음 워크플로우 페이즈(HOW)로 전달하며, plan.md(WHAT)를 보완합니다.
+이제 `next-session.md`에는 멘션만으로 실행 가능한 실행 계약도 포함되며, 베이스 브랜치 탈출(브랜치 게이트)과 의미 단위 커밋 정책을 함께 명시합니다.
 
 전체 레퍼런스: [SKILL.md](plugins/cwf/skills/handoff/SKILL.md)
 

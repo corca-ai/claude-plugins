@@ -97,7 +97,7 @@ Fall back to `cwf-state.yaml` stages and user input:
 
 Write `next-session.md` in the current session's prompt-logs directory. Follow the format defined in `plan-protocol.md` (Handoff Document section).
 
-### 8 Required Sections
+### 9 Required Sections
 
 #### 1. Context Files to Read
 
@@ -197,7 +197,29 @@ instead of manual execution.
 
 Reference the discovery mechanism from `AGENTS.md` Dogfooding section. Do not hardcode a list of specific skills.
 
-#### 8. Start Command
+#### 8. Execution Contract (Mention-Only Safe)
+
+```markdown
+## Execution Contract (Mention-Only Safe)
+
+If the user mentions only this file, treat it as an instruction to execute
+the task scope directly.
+
+- Branch gate:
+  - Before implementation edits, check current branch.
+  - If on a base branch (`main`, `master`, or repo primary branch), create/switch
+    to a feature branch and continue.
+- Commit gate:
+  - Commit during execution in meaningful units (per work item or change pattern).
+  - Avoid one monolithic end-of-session commit when multiple logical units exist.
+- Staging policy:
+  - Stage only intended files for each commit unit.
+  - Do not use broad staging that may include unrelated changes.
+```
+
+This section is mandatory for `next-session.md`.
+
+#### 9. Start Command
 
 ````markdown
 ## Start Command
@@ -397,6 +419,8 @@ Report results. If any artifacts are missing, list them and suggest fixes.
 12. **Phase handoff is written by the phase that has context**: The clarify/gather agent writes the phase handoff because it holds the HOW context. Do not defer to a later phase.
 13. **Phase handoff is intra-session**: It transfers context between phases within the same session. `completed_at` is not set and Phase 4b/5 are skipped.
 14. **Draft-then-review**: Always present the generated `phase-handoff.md` to the user for review before finalizing.
+15. **Execution contract is required**: `next-session.md` must include "Execution Contract (Mention-Only Safe)".
+16. **Contract must include branch+commit gates**: Mention-only execution must define base-branch escape and meaningful commit unit rules.
 
 ## References
 

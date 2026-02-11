@@ -70,7 +70,7 @@ Execute stages in order. Each stage invokes the corresponding CWF skill via the 
 | 2 | clarify | `cwf:clarify` | User confirms requirements | false |
 | 3 | plan | `cwf:plan` | User approves plan | false |
 | 4 | review-plan | `cwf:review --mode plan` | Verdict-based | true |
-| 5 | impl | `cwf:impl --skip-clarify --skip-branch` | — | true |
+| 5 | impl | `cwf:impl --skip-clarify` | — | true |
 | 6 | review-code | `cwf:review --mode code` | Verdict-based | true |
 | 7 | retro | `cwf:retro` | — | true |
 | 8 | ship | `cwf:ship` | User confirms PR | false |
@@ -202,3 +202,4 @@ After all stages complete (or the pipeline is halted):
 1. **Preserve skill autonomy**: Each invoked skill manages its own sub-agents, artifacts, and output. `cwf:run` orchestrates but does not micromanage.
 1. **Flags compose**: `--from impl --skip retro` is valid. Apply both filters.
 1. **Graceful halt**: When the user chooses "Stop", update state and report what was completed. Do not leave state in an inconsistent phase.
+1. **Do not bypass impl branch gate by default**: `cwf:run` must not pass `--skip-branch` to `cwf:impl` unless the user explicitly requests bypass.

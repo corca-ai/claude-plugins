@@ -179,6 +179,7 @@ cwf:handoff --phase        # Generate phase-handoff.md (HOW context)
 ```
 
 Session handoffs carry task scope, lessons, and unresolved items for the next session. Phase handoffs carry protocols, rules, and constraints for the next workflow phase (HOW), complementing plan.md (WHAT).
+`next-session.md` now also includes an execution contract so mention-only start can run directly, including branch gate (auto escape from base branch) and meaningful commit-unit policy.
 
 Full reference: [SKILL.md](plugins/cwf/skills/handoff/SKILL.md)
 
