@@ -10,10 +10,10 @@ Project and organizational facts accumulated from retrospectives.
 ## Design Principles
 
 - SKILL.md tells Claude "what to do", not "how to analyze" — trust Claude's capabilities
-- CLAUDE.md is for Claude's behavior, not user instructions
-- Progressive disclosure: CLAUDE.md is a concise index, details live in specialized docs/
+- AGENTS.md is the shared cross-agent behavior index; runtime adapters (e.g. CLAUDE.md) add runtime-only rules
+- Progressive disclosure: AGENTS.md is a concise index, details live in specialized docs/
 - Dogfooding: new tools are tested in the session that creates them
-- Deterministic validation over behavioral instruction: When preventing recurring mistakes, prefer scripts/checks that always run and produce pass/fail over adding more rules to CLAUDE.md. Behavioral instructions degrade; deterministic checks scale. Example: `check-session.sh` + `session_defaults` catches missing artifacts reliably.
+- Deterministic validation over behavioral instruction: When preventing recurring mistakes, prefer scripts/checks that always run and produce pass/fail over adding more rules to docs. Behavioral instructions degrade; deterministic checks scale. Example: `check-session.sh` + `session_defaults` catches missing artifacts reliably.
 
 ## Process Heuristics
 
@@ -33,6 +33,7 @@ Project and organizational facts accumulated from retrospectives.
 - **Cross-cutting pattern → shared reference first**: When a plan applies identical logic to 3+ targets (files, skills, modules), extract it to a shared reference file as Step 0 before parallel agents execute. "동일 적용" / "apply the same pattern" is a plan smell — replace with an explicit shared file path. Parallel agents cannot see each other's work, so sharing must be decided at plan level.
 - **Commit boundary = change pattern, not work item**: When changes are cross-cutting (one concept projected across multiple files), commit boundaries should follow the concept, not the work item. Assess "is this change cross-cutting?" before committing to a per-work-item commit strategy.
 - **Plan decomposition: concept-level over file-level**: When a plan modifies N files with the same conceptual change, decompose by concept ("introduce protocol X, then project into N targets") rather than by file ("modify file A, modify file B"). Concept-level decomposition naturally produces deep shared modules + shallow connection points.
+- **Failure pattern classification before solution debate**: When a known problem has multiple proposed solutions, classify failure data by type (bottom-up) before debating solution architecture (top-down). If the majority of failures originate from the same tool limitation, replace the tool — don't redesign the architecture. "Diagnose before prescribing."
 
 ## Directory Classification Criteria
 

@@ -13,8 +13,10 @@ projects. Synthesized from three external sources and this project's experience.
 
 ### 1. Always-loaded file = compressed index
 
-The entry-point file (CLAUDE.md) should contain pointers and scope descriptions,
-not full content. Agents decide which files to retrieve based on task context.
+The primary cross-agent entry point (`AGENTS.md`) should contain pointers and
+scope descriptions, not full content. Runtime-specific adapter files (for
+example `CLAUDE.md`) should remain thin and defer to `AGENTS.md`.
+Agents decide which files to retrieve based on task context.
 
 > "No decision point where agents must choose to look something up,
 > consistent availability across all turns." — Vercel
@@ -46,7 +48,8 @@ signal — it depends on the finding's category, not the current task.
 Instruction-following quality degrades uniformly as instruction count rises.
 Each additional instruction slightly reduces adherence to all other instructions.
 
-- CLAUDE.md: aim for < 300 lines, ideally < 100
+- AGENTS.md: aim for < 300 lines, ideally < 100
+- Runtime adapters (e.g., CLAUDE.md): keep as thin wrappers, ideally < 80 lines
 - Individual docs: focused enough to be skippable when irrelevant
 - Prefer pointers to copies — `file:line` references over embedded snippets
 
