@@ -123,6 +123,9 @@ Contract minimum:
 3. **Commit gate during execution**
    - Commit in meaningful units while executing (per work item or change pattern).
    - Avoid one monolithic end-of-session commit when multiple logical units exist.
+   - Add an explicit checkpoint after the first completed unit:
+     run `git status --short`, decide the next commit boundary, and commit before
+     continuing to the next major unit.
 4. **Selective staging**
    - Stage only intended files for the current unit.
    - Do not use broad staging that can capture unrelated changes.
