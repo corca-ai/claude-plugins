@@ -35,6 +35,7 @@ phase=""
 task=""
 key_files=()
 dont_touch=()
+decisions=()
 decision_journal=()
 current_list=""
 
@@ -55,13 +56,13 @@ while IFS= read -r line; do
         if [[ "$line" =~ ^[[:space:]]+session_id:[[:space:]]*\"?([^\"]*)\"? ]]; then
             session_id="${BASH_REMATCH[1]}"
             current_list=""
-        elif [[ "$line" =~ ^[[:space:]]+dir:[[:space:]]*(.+) ]]; then
+        elif [[ "$line" =~ ^[[:space:]]+dir:[[:space:]]*\"?([^\"]*)\"? ]]; then
             dir="${BASH_REMATCH[1]}"
             current_list=""
-        elif [[ "$line" =~ ^[[:space:]]+branch:[[:space:]]*(.+) ]]; then
+        elif [[ "$line" =~ ^[[:space:]]+branch:[[:space:]]*\"?([^\"]*)\"? ]]; then
             branch="${BASH_REMATCH[1]}"
             current_list=""
-        elif [[ "$line" =~ ^[[:space:]]+phase:[[:space:]]*(.+) ]]; then
+        elif [[ "$line" =~ ^[[:space:]]+phase:[[:space:]]*\"?([^\"]*)\"? ]]; then
             phase="${BASH_REMATCH[1]}"
             current_list=""
         elif [[ "$line" =~ ^[[:space:]]+task:[[:space:]]*\"?([^\"]*)\"? ]]; then
@@ -71,6 +72,8 @@ while IFS= read -r line; do
             current_list="key_files"
         elif [[ "$line" =~ ^[[:space:]]+dont_touch: ]]; then
             current_list="dont_touch"
+        elif [[ "$line" =~ ^[[:space:]]+decisions: ]]; then
+            current_list="decisions"
         elif [[ "$line" =~ ^[[:space:]]+decision_journal: ]]; then
             current_list="decision_journal"
         elif [[ "$line" =~ ^[[:space:]]+-[[:space:]]+(.+) ]]; then
@@ -79,6 +82,11 @@ while IFS= read -r line; do
                 key_files+=("$item")
             elif [[ "$current_list" == "dont_touch" ]]; then
                 dont_touch+=("$item")
+            elif [[ "$current_list" == "decisions" ]]; then
+                # Strip surrounding quotes
+                item="${item#\"}"
+                item="${item%\"}"
+                decisions+=("$item")
             elif [[ "$current_list" == "decision_journal" ]]; then
                 # Strip surrounding quotes from journal entries
                 item="${item#\"}"
@@ -115,6 +123,15 @@ Do NOT modify:"
     for f in "${dont_touch[@]}"; do
         context="${context}
   - ${f}"
+    done
+fi
+
+if [[ ${#decisions[@]} -gt 0 ]]; then
+    context="${context}
+Key decisions:"
+    for d in "${decisions[@]}"; do
+        context="${context}
+  - ${d}"
     done
 fi
 

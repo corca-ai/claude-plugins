@@ -158,15 +158,62 @@ When `--mode plan` or `--mode code` is used, `cwf:review` receives the plan's su
 
 ## Web Research Protocol
 
-All sub-agents that use WebSearch/WebFetch must follow these rules to avoid wasting turns on invalid URLs:
+All sub-agents that use WebSearch/WebFetch must follow these rules.
+Include this protocol (or reference this section) in every sub-agent
+prompt that involves web research.
 
-1. **Discover before fetching**: Use WebSearch to find valid URLs first. NEVER construct URLs from memory or training data — they may be outdated or nonexistent.
-2. **Skip failed domains**: If a WebFetch returns 404 or 429, skip that domain entirely. Move to the next source.
-3. **Stop when sufficient**: Find 3-5 authoritative sources. Stop when sufficient evidence is collected — do NOT exhaustively search.
-4. **Prefer official sources**: Official documentation and primary sources over blog posts.
-5. **Budget turns**: Reserve at least 2-3 turns for writing output. If `max_turns` is 12, stop researching by turn 9-10.
+### Phase 1: Discover URLs
 
-Include this protocol (or reference this section) in every sub-agent prompt that involves web research. Failure to include it causes agents to exhaust `max_turns` on 404 retries without producing output.
+Use WebSearch to find valid URLs first. NEVER construct URLs from memory
+or training data — they may be outdated or nonexistent. Find 3-5
+authoritative sources. Stop when sufficient evidence is collected.
+Prefer official documentation over blog posts.
+
+### Phase 2: Fetch Content (two-tier)
+
+**Tier A — WebFetch** (try first, fast and lightweight):
+
+Use WebFetch for the discovered URL. If it returns substantive content
+(>50 chars of body text), use it and move on.
+
+**Tier B — agent-browser** (fallback for JS-rendered sites):
+
+If WebFetch returns empty or minimal content, the page likely requires
+JavaScript rendering. Check availability and use agent-browser:
+
+```bash
+command -v agent-browser  # check if installed
+agent-browser open <url>
+agent-browser snapshot -c  # compact accessibility tree
+agent-browser close
+```
+
+agent-browser renders JavaScript via headless Chromium. It handles SPAs,
+client-side rendering, and redirect chains that WebFetch cannot.
+
+If agent-browser is not installed, skip the URL and move to the next
+source. Do not retry the same URL with WebFetch.
+
+**Fetch decision flow**:
+
+```text
+URL discovered via WebSearch
+  → WebFetch(url)
+    → got content? → use it ✓
+    → empty/minimal?
+      → agent-browser available?
+        → yes → agent-browser open+snapshot → use it ✓
+        → no  → skip URL, next source
+```
+
+### Common Rules
+
+1. **Skip failed domains**: If any fetch returns 404, 429, or 403, skip
+   that domain entirely. Move to the next source.
+2. **Budget turns**: Reserve at least 2-3 turns for writing output. If
+   `max_turns` is 12, stop researching by turn 9-10.
+3. **No retry loops**: Each URL gets at most 2 attempts (WebFetch +
+   agent-browser). Never retry the same URL with the same tool.
 
 ## Design Principles
 
