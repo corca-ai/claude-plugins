@@ -27,6 +27,7 @@ Universal review with narrative verdicts via 6 parallel reviewers (2 internal + 
 /review                 Code review (default)
 /review --mode plan     Plan/spec review
 /review --mode clarify  Requirement review
+/review --mode code --base marketplace-v3 --scenarios prompt-logs/holdout.md
 ```
 
 ## External CLI Setup (one-time)
@@ -63,7 +64,11 @@ Default: `--mode code`.
 
 ### 1. Parse mode flag
 
-Extract `--mode` from user input. Default to `code` if not specified.
+Extract flags from user input:
+
+- `--mode` (default: `code`)
+- `--base <branch>` (optional, code mode only)
+- `--scenarios <path>` (optional holdout scenarios file)
 
 ### 2. Detect review target
 
@@ -73,12 +78,28 @@ Automatically detect what to review based on mode:
 
 Try in order (first non-empty wins):
 
-1. Detect base branch: check `main`, then `master`, then the default remote branch
-   via `git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||'`
-2. Branch diff vs base: `git diff $(git merge-base HEAD {base_branch})..HEAD`
+1. Resolve base strategy:
+   - If `--base <branch>` is provided:
+     - Verify branch exists locally (`refs/heads/{branch}`) or in origin (`refs/remotes/origin/{branch}`).
+     - If only remote exists, use `origin/{branch}`.
+     - If neither exists: stop with explicit error and ask user for a valid branch.
+     - Record `base_strategy: explicit (--base)`.
+   - If `--base` is not provided:
+     - First try upstream-aware detection:
+       `git rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/null`
+     - If upstream exists, use it and record `base_strategy: upstream`.
+     - Otherwise fallback to `main`, `master`, then default remote branch
+       (`git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||'`)
+       and record `base_strategy: fallback`.
+2. Branch diff vs resolved base:
+   `git diff $(git merge-base HEAD {resolved_base})..HEAD`
    - Only if current branch differs from the detected base branch
 3. Staged changes: `git diff --cached`
 4. Last commit: `git show HEAD`
+5. Store review-target provenance for synthesis:
+   - `resolved_base`
+   - `base_strategy`
+   - `diff_range` (when branch diff path is used)
 
 If all empty, ask user with AskUserQuestion.
 
@@ -112,6 +133,22 @@ Search the associated plan.md for success criteria to use as verification input:
 4. If no plan.md or no criteria found: proceed without criteria.
    Note in synthesis: "No success criteria found — review based on
    general best practices only."
+
+### 4. Optional holdout scenarios (`--scenarios <path>`)
+
+When `--scenarios` is provided:
+
+1. Validate the file path exists, is readable, and is non-empty.
+2. Parse holdout checks from one of:
+   - Given/When/Then blocks
+   - checklist items (`- [ ]` / `- [x]`)
+3. If the file is missing/invalid or contains zero parseable checks:
+   stop with an explicit error (do not silently ignore).
+4. Merge parsed holdout checks into the review checklist as a separate
+   "holdout" set (distinct from plan-derived behavioral criteria).
+5. Record holdout provenance:
+   - `holdout_path`
+   - `holdout_count`
 
 ---
 
@@ -162,7 +199,7 @@ You are conducting a {mode} review as the {reviewer_name}.
 {the diff, plan content, or clarify artifact}
 
 ## Success Criteria to Verify
-{behavioral criteria as checklist, qualitative criteria as narrative items}
+{behavioral criteria + holdout checks as checklist, qualitative criteria as narrative items}
 (If none: "No specific success criteria provided. Review based on general best practices.")
 
 ## Output Format
@@ -315,7 +352,7 @@ Task(subagent_type="general-purpose", name="expert-alpha", max_turns=12, prompt=
   {the diff, plan content, or clarify artifact}
 
   ## Success Criteria to Verify
-  {behavioral criteria as checklist, qualitative criteria as narrative items}
+  {behavioral criteria + holdout checks as checklist, qualitative criteria as narrative items}
 
   Review through your published framework. Use web search to verify your expert identity
   and cite published work (follow Web Research Protocol in
@@ -344,7 +381,7 @@ Task(subagent_type="general-purpose", name="expert-beta", max_turns=12, prompt="
   {the diff, plan content, or clarify artifact}
 
   ## Success Criteria to Verify
-  {behavioral criteria as checklist, qualitative criteria as narrative items}
+  {behavioral criteria + holdout checks as checklist, qualitative criteria as narrative items}
 
   Review through your published framework. Use web search to verify your expert identity
   and cite published work (follow Web Research Protocol in
@@ -482,9 +519,14 @@ Output to the conversation (do NOT write to a file unless the user asks):
 {1-2 sentence summary of overall assessment}
 
 ### Behavioral Criteria Verification
-(Only if criteria were extracted from plan)
+(Only if criteria were extracted from plan and/or holdout scenarios)
 - [x] {criterion} — {reviewer}: {evidence}
 - [ ] {criterion} — {reviewer}: {reason for failure}
+
+### Holdout Scenario Assessment
+(Only when `--scenarios <path>` is provided)
+- [x] {holdout scenario/check} — {reviewer}: {evidence}
+- [ ] {holdout scenario/check} — {reviewer}: {reason for failure}
 
 ### Concerns (must address)
 - **{reviewer}** [{severity}]: {concern description}
@@ -503,6 +545,10 @@ Output to the conversation (do NOT write to a file unless the user asks):
 - Areas where reviewer confidence was low
 - Malformed reviewer outputs that required interpretation
 - Missing success criteria (if no plan was found)
+- Base strategy used for code review target:
+  "Base: {resolved_base} ({base_strategy})"
+- Holdout scenario source:
+  "`--scenarios {holdout_path}` ({holdout_count} checks)"
 - External CLI fallbacks used, with extracted error cause from stderr:
   "Slot N ({tool}) FAILED → fallback. Cause: {extracted_error}"
   Include setup hint: "Run `codex auth login` / `npx @google/gemini-cli` to enable."
@@ -541,7 +587,9 @@ This prevents sensitive review content (diffs, plans) from persisting in `/tmp/`
 |-----------|--------|
 | No review target found | AskUserQuestion: "What should I review?" |
 | Reviewer output malformed | Extract by pattern matching, note in Confidence Note |
-| `--scenarios <path>` flag used | Holdout scenario validation (planned). Print "Not yet implemented. Proceeding without holdout scenarios." |
+| `--scenarios <path>` file missing/unreadable | Stop with explicit error. Ask for a valid scenarios path. |
+| `--scenarios <path>` has zero parseable checks | Stop with explicit error. Ask for GWT/checklist-formatted scenarios. |
+| `--base <branch>` not found in local/origin refs | Stop with explicit error. Ask for a valid base branch. |
 | No git changes found (code mode) | AskUserQuestion: ask user to specify target |
 | No plan.md found | AskUserQuestion: ask user to specify target |
 | All 6 reviewers report no issues | Verdict = Pass. Note "clean review" in synthesis |
@@ -572,6 +620,35 @@ This prevents sensitive review content (diffs, plans) from persisting in `/tmp/`
    timeout, auth error) never blocks the review. Fall back to a Task
    sub-agent with the same perspective. Always record the fallback in
    the Provenance table and Confidence Note.
+8. **No silent holdout bypass** — when `--scenarios` is provided, the
+   scenario file must be validated and assessed. Never downgrade to
+   "best effort" silently.
+9. **Base strategy must be explicit in output** — for code mode, always
+   report which base path was used (explicit `--base`, upstream, or fallback).
+
+---
+
+## BDD Acceptance Checks
+
+Use these checks when validating updates to this skill:
+
+```gherkin
+Given a review invocation with --scenarios and a valid GWT/checklist file
+When /review runs
+Then holdout checks are included in reviewer prompts and synthesis with path/count provenance
+
+Given a review invocation with --scenarios pointing to a missing file
+When /review runs
+Then the review stops with an explicit validation error instead of silently continuing
+
+Given a review invocation with --mode code and no --base
+When the current branch has an upstream
+Then /review uses the upstream branch as base and records base_strategy=upstream
+
+Given a review invocation with --mode code --base <branch>
+When <branch> exists
+Then /review deterministically uses that base and records base_strategy=explicit (--base)
+```
 
 ---
 
