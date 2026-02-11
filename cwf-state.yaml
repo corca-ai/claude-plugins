@@ -333,27 +333,27 @@ hooks:
 # read by SessionStart(compact) hook for context recovery after auto-compact.
 # check-session.sh --live validates required fields are populated.
 live:
-  session_id: "S21"
-  dir: "prompt-logs/260211-08-s21-env-loader-review-provider-routing"
+  session_id: "S22"
+  dir: "prompt-logs/260211-09-s22-pre-release-readiness-audit-plan"
   branch: "feat/s17-handoff-protocol-hardening"
-  phase: "done"
-  task: "Unify env loading with profile-first compatibility and flex /review external providers"
+  phase: "plan"
+  task: "Plan pre-release readiness audit for docs, architecture, discoverability, and first-user journey"
   key_files:
-    - plugins/cwf/hooks/scripts/env-loader.sh
-    - plugins/cwf/hooks/scripts/log-turn.sh
-    - plugins/cwf/hooks/scripts/smart-read.sh
-    - plugins/cwf/hooks/scripts/slack-send.sh
-    - plugins/cwf/skills/gather/scripts/search.sh
-    - plugins/cwf/skills/gather/scripts/extract.sh
-    - plugins/cwf/skills/gather/scripts/code-search.sh
-    - plugins/cwf/skills/gather/scripts/slack-api.mjs
+    - AGENTS.md
+    - cwf-index.md
+    - docs/project-context.md
+    - docs/architecture-patterns.md
+    - docs/documentation-guide.md
+    - README.md
+    - README.ko.md
+    - plugins/cwf/skills/refactor/SKILL.md
     - plugins/cwf/skills/review/SKILL.md
-    - plugins/cwf/skills/review/references/external-review.md
+    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/plan.md
     - cwf-state.yaml
   decisions:
-    - "Adopt shared env loader with precedence env -> shell profiles -> legacy ~/.claude/.env for runtime scripts"
-    - "Preserve backward compatibility by retaining ~/.claude/.env as fallback source"
-    - "Decouple external review slot perspective from provider via provider-routed codex/gemini/claude policy"
+    - "Start from docs/discoverability audit before final release to reduce first-user friction"
+    - "Use refactor modes as evidence producers, then synthesize with manual scenario walkthrough"
+    - "Treat first-install user journey as a hard release gate, not optional UX polish"
   decision_journal: []
 
 # Expert roster for domain expert sub-agents (used by clarify, review, retro)
