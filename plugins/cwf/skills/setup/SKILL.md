@@ -190,15 +190,15 @@ Options:
 If `Skills + wrapper (recommended)`:
 
 ```bash
-bash {SKILL_DIR}/../../../../scripts/codex/sync-skills.sh --cleanup-legacy
-bash {SKILL_DIR}/../../../../scripts/codex/install-wrapper.sh --enable --add-path
-bash {SKILL_DIR}/../../../../scripts/codex/install-wrapper.sh --status
+bash {SKILL_DIR}/../../scripts/codex/sync-skills.sh --cleanup-legacy
+bash {SKILL_DIR}/../../scripts/codex/install-wrapper.sh --enable --add-path
+bash {SKILL_DIR}/../../scripts/codex/install-wrapper.sh --status
 ```
 
 If `Skills only`:
 
 ```bash
-bash {SKILL_DIR}/../../../../scripts/codex/sync-skills.sh --cleanup-legacy
+bash {SKILL_DIR}/../../scripts/codex/sync-skills.sh --cleanup-legacy
 ```
 
 If `Skip for now`: no command execution in this phase.
@@ -208,7 +208,7 @@ If `Skip for now`: no command execution in this phase.
 When wrapper install was selected, always report:
 
 ```bash
-bash {SKILL_DIR}/../../../../scripts/codex/install-wrapper.sh --status
+bash {SKILL_DIR}/../../scripts/codex/install-wrapper.sh --status
 type -a codex
 ```
 
@@ -232,14 +232,14 @@ Use this phase when:
 Run:
 
 ```bash
-bash {SKILL_DIR}/../../../../scripts/codex/sync-skills.sh --cleanup-legacy
+bash {SKILL_DIR}/../../scripts/codex/sync-skills.sh --cleanup-legacy
 ```
 
 Expected behavior:
 - Link CWF skills from `plugins/cwf/skills/*` into `~/.agents/skills`
 - Link shared references into `~/.agents/references`
 - Move legacy custom entries from `~/.codex/skills` to backup (`.system` is kept)
-- Validate relative skill references via `scripts/codex/verify-skill-links.sh`
+- Validate relative skill references via `{SKILL_DIR}/../../scripts/codex/verify-skill-links.sh`
 
 ### 2.5.2 Report Results
 
@@ -276,19 +276,19 @@ If user declines, skip this phase.
 Run:
 
 ```bash
-bash {SKILL_DIR}/../../../../scripts/codex/install-wrapper.sh --enable --add-path
+bash {SKILL_DIR}/../../scripts/codex/install-wrapper.sh --enable --add-path
 ```
 
 This installs a wrapper symlink at `~/.local/bin/codex` pointing to:
 
 ```text
-{repo}/scripts/codex/codex-with-log.sh
+{SKILL_DIR}/../../scripts/codex/codex-with-log.sh
 ```
 
 The wrapper preserves normal Codex behavior and runs:
 
 ```bash
-bash {SKILL_DIR}/../../../../scripts/codex/sync-session-logs.sh --cwd "$PWD"
+bash {SKILL_DIR}/../../scripts/codex/sync-session-logs.sh --cwd "$PWD"
 ```
 
 after each Codex run to persist markdown logs under `prompt-logs/sessions/`
@@ -300,13 +300,13 @@ as `*.codex.md` (legacy `sessions-codex/` remains readable during migration)
 Report current status:
 
 ```bash
-bash {SKILL_DIR}/../../../../scripts/codex/install-wrapper.sh --status
+bash {SKILL_DIR}/../../scripts/codex/install-wrapper.sh --status
 ```
 
 Provide rollback command:
 
 ```bash
-bash {SKILL_DIR}/../../../../scripts/codex/install-wrapper.sh --disable
+bash {SKILL_DIR}/../../scripts/codex/install-wrapper.sh --disable
 ```
 
 Include activation note:
@@ -454,5 +454,5 @@ Add `setup` to `cwf-state.yaml` current session's `stage_checkpoints` list.
 - [cwf-hook-gate.sh](../../hooks/scripts/cwf-hook-gate.sh) — hook gate mechanism
 - [hooks.json](../../hooks/hooks.json) — hook definitions
 - [agent-patterns.md](../../references/agent-patterns.md) — Single pattern
-- [sync-skills.sh](../../../../scripts/codex/sync-skills.sh) — Codex user-scope skill sync
-- [verify-skill-links.sh](../../../../scripts/codex/verify-skill-links.sh) — Codex skill link validation
+- [sync-skills.sh](../../scripts/codex/sync-skills.sh) — Codex user-scope skill sync
+- [verify-skill-links.sh](../../scripts/codex/verify-skill-links.sh) — Codex skill link validation

@@ -286,3 +286,18 @@ Usage:
 
 Defaults: base=marketplace-v3, merge=squash
 ```
+
+## Rules
+
+1. Use `gh` as the primary interface; do not craft raw GitHub API payloads when `gh` already supports the operation.
+2. Stop immediately on failed prerequisites (`gh` missing, unauthenticated, or invalid branch state).
+3. Keep PR purpose and decision sections evidence-backed from session artifacts when available (`plan.md`, `lessons.md`, `retro.md`).
+4. Never auto-merge when human-judgment items are present in the PR body.
+5. Preserve user-created files and branches; do not perform destructive cleanup beyond explicit merge cleanup.
+6. All code fences must have language specifiers.
+
+## References
+
+- [issue-template.md](references/issue-template.md) — Issue body template
+- [pr-template.md](references/pr-template.md) — PR body template
+- [agent-patterns.md](../../references/agent-patterns.md) — Shared workflow pattern reference

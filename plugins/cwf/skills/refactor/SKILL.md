@@ -368,16 +368,6 @@ Present as a concrete restructuring proposal with rationale.
 
 ---
 
-## References
-
-- Review criteria for deep review: [references/review-criteria.md](references/review-criteria.md)
-- Holistic analysis framework: [references/holistic-criteria.md](references/holistic-criteria.md)
-- Concept synchronization map: [concept-map.md](../../references/concept-map.md)
-- Tidying techniques for --code mode: [references/tidying-guide.md](references/tidying-guide.md)
-- Docs review criteria: [references/docs-criteria.md](references/docs-criteria.md)
-- Shared agent patterns: [agent-patterns.md](../../references/agent-patterns.md)
-- Skill conventions checklist: [skill-conventions.md](../../references/skill-conventions.md)
-
 ## Rules
 
 1. Write review reports in English, communicate with user in their prompt language
@@ -388,3 +378,13 @@ Present as a concrete restructuring proposal with rationale.
 6. Docs Review: inline, no sub-agents
 7. Sub-agents analyze and report; orchestrator merges. Sub-agents do not modify files
 8. All code fences must have a language specifier
+
+## References
+
+- Review criteria for deep review: [references/review-criteria.md](references/review-criteria.md)
+- Holistic analysis framework: [references/holistic-criteria.md](references/holistic-criteria.md)
+- Concept synchronization map: [concept-map.md](../../references/concept-map.md)
+- Tidying techniques for --code mode: [references/tidying-guide.md](references/tidying-guide.md)
+- Docs review criteria: [references/docs-criteria.md](references/docs-criteria.md)
+- Shared agent patterns: [agent-patterns.md](../../references/agent-patterns.md)
+- Skill conventions checklist: [skill-conventions.md](../../references/skill-conventions.md)

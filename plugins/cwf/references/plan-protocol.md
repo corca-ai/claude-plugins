@@ -10,7 +10,7 @@ Protocol for persisting planning artifacts and session learnings.
 
 **Path rule**:
 - If the user specifies a path, use it.
-- Otherwise run `scripts/next-prompt-dir.sh <title>` and use its output path as-is.
+- Otherwise run `{SKILL_DIR}/../../scripts/next-prompt-dir.sh <title>` and use its output path as-is.
 - Do not hand-calculate sequence numbers.
 
 The `{title}` must reflect the current session's task, not a previous session's.

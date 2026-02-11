@@ -37,7 +37,7 @@ cwf:run --skip review-plan,retro     # Skip specific stages
 ## Phase 1: Initialize
 
 1. Parse task description and flags (`--from`, `--skip`)
-1. Create session directory via `scripts/next-prompt-dir.sh <sanitized-title>`
+1. Create session directory via `{SKILL_DIR}/../../scripts/next-prompt-dir.sh <sanitized-title>`
 1. Update `cwf-state.yaml` `live` section:
 
 ```yaml
@@ -159,7 +159,7 @@ After all stages complete (or the pipeline is halted):
 1. Run session completeness check:
 
    ```bash
-   scripts/check-session.sh --impl
+   bash {SKILL_DIR}/../../scripts/check-session.sh --impl
    ```
 
    If any FAIL items are reported, fix them before proceeding. This is a forced function — the pipeline is not complete until all checks pass.
@@ -203,3 +203,8 @@ After all stages complete (or the pipeline is halted):
 1. **Flags compose**: `--from impl --skip retro` is valid. Apply both filters.
 1. **Graceful halt**: When the user chooses "Stop", update state and report what was completed. Do not leave state in an inconsistent phase.
 1. **Do not bypass impl branch gate by default**: `cwf:run` must not pass `--skip-branch` to `cwf:impl` unless the user explicitly requests bypass.
+
+## References
+
+- [agent-patterns.md](../../references/agent-patterns.md) — Shared agent orchestration patterns
+- [plan-protocol.md](../../references/plan-protocol.md) — Session artifact location/protocol

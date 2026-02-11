@@ -24,7 +24,7 @@ Produces `retro.md` alongside `plan.md` and `lessons.md` in the session's prompt
 
 **Language**: Write retro.md in the user's language. Communicate with the user in their prompt language.
 
-## Invocation
+## Quick Start
 
 ```text
 /retro [path]            # adaptive (light by default)
@@ -46,7 +46,7 @@ Resolution order:
 1. If `[path]` argument provided, use it
 2. Reuse `prompt-logs/` path already used in this session (plan.md/lessons.md writes)
 3. If multiple candidates exist, AskUserQuestion with candidates
-4. Otherwise run `scripts/next-prompt-dir.sh <title>` and create that path
+4. Otherwise run `{SKILL_DIR}/../../scripts/next-prompt-dir.sh <title>` and create that path
 
 ### 2. Read Existing Artifacts
 
@@ -322,12 +322,6 @@ Do not prompt the user to start this discussion.
 ### Skill Gaps
 ```
 
-## References
-
-- `{SKILL_DIR}/references/cdm-guide.md` — CDM probe methodology and output format
-- `{SKILL_DIR}/references/expert-lens-guide.md` — Expert identity, grounding, and analysis format
-- [agent-patterns.md](../../references/agent-patterns.md) — Shared agent orchestration patterns
-
 ## Rules
 
 1. Never duplicate content already in lessons.md
@@ -344,3 +338,9 @@ Do not prompt the user to start this discussion.
 12. Persist findings follow the eval > state > doc hierarchy. Never suggest adding a doc rule when a deterministic check is possible.
 13. Read cwf-state.yaml (if it exists) during artifact reading to understand project lifecycle context.
 14. Apply stage-tier persistence gates in deep mode: CDM output hard-fails when invalid after bounded retry; Expert/Learning outputs use warning + explicit omission notes.
+
+## References
+
+- `{SKILL_DIR}/references/cdm-guide.md` — CDM probe methodology and output format
+- `{SKILL_DIR}/references/expert-lens-guide.md` — Expert identity, grounding, and analysis format
+- [agent-patterns.md](../../references/agent-patterns.md) — Shared agent orchestration patterns

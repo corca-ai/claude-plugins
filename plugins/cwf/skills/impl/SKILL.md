@@ -384,7 +384,7 @@ If any BDD criteria are uncovered:
 Run the session completeness check:
 
 ```bash
-scripts/check-session.sh --impl
+bash {SKILL_DIR}/../../scripts/check-session.sh --impl
 ```
 
 If any FAIL items are reported, fix them before suggesting review. This ensures all required artifacts (plan.md, lessons.md, next-session.md) exist and cwf-state.yaml is properly updated.

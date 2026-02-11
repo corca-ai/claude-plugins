@@ -267,7 +267,7 @@ Always use the **two-layer format**:
 Determine the session directory following plan-protocol.md location rules:
 
 1. If the user provided an output path, use it.
-2. Otherwise run `scripts/next-prompt-dir.sh <title>` and use its output path.
+2. Otherwise run `{SKILL_DIR}/../../scripts/next-prompt-dir.sh <title>` and use its output path.
 3. Create the resolved directory path.
 
 Write two files:
