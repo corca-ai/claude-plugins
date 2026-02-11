@@ -302,6 +302,14 @@ sessions:
     summary: "Closed DEC-003/006/007 scope: GAP-003 dedicated trace with binary resolved verdict, stage-tier persistence gate policy encoded (hard critical / soft non-critical), and check-session semantic extension via --semantic-gap with positive/negative validation evidence."
     artifacts: [clarify-result.md, plan.md, review-plan.md, gap-003-trace.md, gap-closure-update.md, lessons.md, impl-validation.md, review-code.md, retro.md, next-session.md]
 
+  - id: S21
+    title: "Profile-first env loader + review provider routing"
+    dir: prompt-logs/260211-08-s21-env-loader-review-provider-routing
+    branch: feat/s17-handoff-protocol-hardening
+    completed_at: "2026-02-11"
+    summary: "Introduced shared env-loader (env -> shell profiles -> legacy .claude/.env) and migrated hook/gather scripts to it; aligned docs to profile-first policy; updated review skill to provider-routed external slots across codex/gemini/claude fallback."
+    artifacts: [plan.md, lessons.md, next-session.md]
+
 # External tool availability (detected by cwf:setup)
 tools:
   codex: available
@@ -325,26 +333,28 @@ hooks:
 # read by SessionStart(compact) hook for context recovery after auto-compact.
 # check-session.sh --live validates required fields are populated.
 live:
-  session_id: "S20"
-  dir: "prompt-logs/260211-07-s20-close-remaining-open-gap-set"
+  session_id: "S21"
+  dir: "prompt-logs/260211-08-s21-env-loader-review-provider-routing"
   branch: "feat/s17-handoff-protocol-hardening"
   phase: "done"
-  task: "Close remaining S18 open gaps for DEC-003/DEC-006/DEC-007"
+  task: "Unify env loading with profile-first compatibility and flex /review external providers"
   key_files:
-    - scripts/check-session.sh
-    - plugins/cwf/references/context-recovery-protocol.md
-    - plugins/cwf/skills/plan/SKILL.md
+    - plugins/cwf/hooks/scripts/env-loader.sh
+    - plugins/cwf/hooks/scripts/log-turn.sh
+    - plugins/cwf/hooks/scripts/smart-read.sh
+    - plugins/cwf/hooks/scripts/slack-send.sh
+    - plugins/cwf/skills/gather/scripts/search.sh
+    - plugins/cwf/skills/gather/scripts/extract.sh
+    - plugins/cwf/skills/gather/scripts/code-search.sh
+    - plugins/cwf/skills/gather/scripts/slack-api.mjs
     - plugins/cwf/skills/review/SKILL.md
-    - plugins/cwf/skills/retro/SKILL.md
-    - prompt-logs/260211-07-s20-close-remaining-open-gap-set/gap-003-trace.md
+    - plugins/cwf/skills/review/references/external-review.md
     - cwf-state.yaml
   decisions:
-    - "Reclassify GAP-003 via dedicated intent-to-implementation trace before proposing new implementation"
-    - "Apply hybrid persistence gates: hard fail for critical outputs, soft continue for non-critical outputs"
-    - "Extend check-session with additive --semantic-gap mode for first-wave semantic closure checks"
+    - "Adopt shared env loader with precedence env -> shell profiles -> legacy ~/.claude/.env for runtime scripts"
+    - "Preserve backward compatibility by retaining ~/.claude/.env as fallback source"
+    - "Decouple external review slot perspective from provider via provider-routed codex/gemini/claude policy"
   decision_journal: []
-  clarify_completed_at: "2026-02-11"
-  clarify_result_file: "prompt-logs/260211-07-s20-close-remaining-open-gap-set/clarify-result.md"
 
 # Expert roster for domain expert sub-agents (used by clarify, review, retro)
 # Semi-automatic evolution: usage_count auto-incremented, new experts user-approved
