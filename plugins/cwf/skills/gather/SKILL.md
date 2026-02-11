@@ -83,7 +83,7 @@ node {SKILL_DIR}/scripts/slack-api.mjs <channel_id> <thread_ts> --attachments-di
 After conversion, rename to a meaningful name from the first message (lowercase, hyphens, max 50 chars).
 **Existing .md file**: Extract Slack URL from `> Source:` line to re-fetch.
 
-**Prerequisites**: Node.js 18+, Slack Bot (`channels:history`, `channels:join`, `users:read`, `files:read`), `SLACK_BOT_TOKEN` in `~/.claude/.env`.
+**Prerequisites**: Node.js 18+, Slack Bot (`channels:history`, `channels:join`, `users:read`, `files:read`), `SLACK_BOT_TOKEN` in shell profile (`~/.zshrc`/`~/.bashrc`) or legacy `~/.claude/.env`.
 Details: [references/slack-export.md](references/slack-export.md)
 
 ### Notion Export

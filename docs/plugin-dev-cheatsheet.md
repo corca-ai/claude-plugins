@@ -122,19 +122,16 @@ Priority: CLI argument > environment variable > hardcoded default
 
 Plugin directories are replaced on update (version-specific cache). User config **must** live outside the skill directory — environment variables in shell profile survive any plugin update.
 
-3-tier loading in scripts (needed because Claude Code runs Bash sessions — `~/.zshrc` is not sourced automatically):
+Use the shared loader (`plugins/cwf/hooks/scripts/env-loader.sh`) and keep this source order:
+- process env
+- shell profiles (`~/.zshenv`, `~/.zprofile`, `~/.zshrc`, `~/.bash_profile`, `~/.bashrc`, `~/.profile`)
+- legacy fallback file (`~/.claude/.env`)
+
+This is needed because Claude Code runs non-interactive Bash sessions — profile files are not auto-sourced.
 ```bash
-# 1. Shell env (already set)
-# 2. ~/.claude/.env
-[ -f "$HOME/.claude/.env" ] && { set -a; source "$HOME/.claude/.env"; set +a; }
-# 3. Shell profiles (fallback: safe extraction without eval)
-if [ -z "${VAR:-}" ]; then
-  _line=$(grep -shm1 '^export VAR=' ~/.zshrc ~/.bashrc 2>/dev/null) || true
-  if [ -n "${_line:-}" ]; then
-    VAR="${_line#*=}"; VAR="${VAR#[\"\']}"; VAR="${VAR%[\"\']}"
-    export VAR
-  fi
-fi
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../../../hooks/scripts/env-loader.sh"
+cwf_env_load_vars VAR
 ```
 
 ## Script Guidelines

@@ -25,15 +25,17 @@ Only check the key required for the invoked subcommand. Do not require both keys
 **Tavily** (web search + extract):
 ```text
 Get your API key: https://app.tavily.com/home
-Then add to ~/.claude/.env or ~/.zshrc:
+Then add to ~/.zshrc or ~/.bashrc:
   export TAVILY_API_KEY="your-key-here"
+Legacy fallback: ~/.claude/.env
 ```
 
 **Exa** (code search):
 ```text
 Get your API key: https://dashboard.exa.ai/api-keys
-Then add to ~/.claude/.env or ~/.zshrc:
+Then add to ~/.zshrc or ~/.bashrc:
   export EXA_API_KEY="your-key-here"
+Legacy fallback: ~/.claude/.env
 ```
 
 ## Tavily Search Parameters

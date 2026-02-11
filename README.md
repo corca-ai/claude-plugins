@@ -301,7 +301,8 @@ Notification examples:
 
 ## Configuration
 
-Set environment variables in `~/.claude/.env`:
+Set environment variables in your shell profile (`~/.zshrc` or `~/.bashrc`).
+Legacy fallback (`~/.claude/.env`) is still supported.
 
 ### Slack notifications (attention hook)
 
