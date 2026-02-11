@@ -1,11 +1,12 @@
 # External Reviewer Perspectives & CLI Templates
 
-Reference for `/review` skill — external CLI reviewers (Codex, Gemini).
+Reference for `/review` skill — provider-routed external CLI slots
+(Codex/Gemini, with Claude Task fallback handled in SKILL.md).
 These complement the internal reviewers in `prompts.md`.
 
 ---
 
-## Codex Reviewer (Correctness & Performance)
+## Correctness Perspective (default provider: Codex)
 
 ### Role
 
@@ -62,7 +63,7 @@ Review the implementation for correctness and performance issues:
 
 ---
 
-## Gemini Reviewer (Architecture & Patterns)
+## Architecture Perspective (default provider: Gemini)
 
 ### Role
 
@@ -124,6 +125,9 @@ Review the implementation for architectural and pattern quality:
 All external CLIs use `exec` / prompt-based mode so that the role, checklist,
 and output format instructions are reliably delivered via stdin. This ensures
 structured output conforming to the reviewer output format.
+
+Provider and perspective are decoupled: either CLI may run either perspective
+prompt when slot routing requires it.
 
 ### Codex
 

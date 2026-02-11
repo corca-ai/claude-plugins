@@ -270,6 +270,46 @@ sessions:
     summary: "Created a single-file next-session handoff for omission-resistant CWF v3 analysis anchored to 42d2cd9..HEAD, including purpose, evidence hierarchy, decision rationale, extraction workflow, and completion gates."
     artifacts: [plan.md, lessons.md, next-session.md, next-session.review.claude.md, retro.md, session.md]
 
+  - id: S17
+    title: "Harden S16 handoff protocol from integrated review"
+    dir: prompt-logs/260211-04-s17-next-session-hardening
+    branch: feat/s17-handoff-protocol-hardening
+    completed_at: "2026-02-11"
+    summary: "Implemented integrated-review fixes for S16 next-session handoff: scope freeze, full-scope manifest gate, stable GAP/UTT/CW/BL traceability, semantic completion checks, redaction policy, and canonical milestone mapping."
+    artifacts: [plan.md, lessons.md, next-session.md]
+
+  - id: S18
+    title: "Execute hardened S16 gap-analysis protocol"
+    dir: prompt-logs/260211-05-s18-v3-gap-analysis-execution
+    branch: feat/s17-handoff-protocol-hardening
+    completed_at: "2026-02-11"
+    summary: "Executed S16 hardened protocol end-to-end on frozen range 42d2cd9..01293b3: full-scope manifest, 74-row coverage matrix, 734-item redacted utterance index, GAP/CW/BL traceability set, semantic completion gate pass, and explicit blocking-risk summary."
+    artifacts: [plan.md, lessons.md, next-session.md, scope-freeze.md, analysis-manifest.md, coverage-matrix.md, user-utterances-index.md, gap-candidates.md, consistency-check.md, discussion-backlog.md, gap-decisions.md, completion-check.md, summary.md]
+
+  - id: S19
+    title: "Resolve top open gaps from S18"
+    dir: prompt-logs/260211-06-s19-resolve-top-open-gaps
+    branch: feat/s17-handoff-protocol-hardening
+    completed_at: "2026-02-11"
+    summary: "Implemented BL-001/002/003 closures: executable review contracts for --scenarios and --base, canonical runtime log migration to sessions/*.codex.md + sessions/*.claude.md with legacy compatibility reads, and aligned setup/readme/retro/handoff contracts with smoke validation evidence."
+    artifacts: [clarify-result.md, plan.md, review-plan.md, lessons.md, impl-validation.md, review-code.md, retro.md, next-session.md]
+
+  - id: S20
+    title: "Close remaining open gap set"
+    dir: prompt-logs/260211-07-s20-close-remaining-open-gap-set
+    branch: feat/s17-handoff-protocol-hardening
+    completed_at: "2026-02-11"
+    summary: "Closed DEC-003/006/007 scope: GAP-003 dedicated trace with binary resolved verdict, stage-tier persistence gate policy encoded (hard critical / soft non-critical), and check-session semantic extension via --semantic-gap with positive/negative validation evidence."
+    artifacts: [clarify-result.md, plan.md, review-plan.md, gap-003-trace.md, gap-closure-update.md, lessons.md, impl-validation.md, review-code.md, retro.md, next-session.md]
+
+  - id: S21
+    title: "Profile-first env loader + review provider routing"
+    dir: prompt-logs/260211-08-s21-env-loader-review-provider-routing
+    branch: feat/s17-handoff-protocol-hardening
+    completed_at: "2026-02-11"
+    summary: "Introduced shared env-loader (env -> shell profiles -> legacy .claude/.env) and migrated hook/gather scripts to it; aligned docs to profile-first policy; updated review skill to provider-routed external slots across codex/gemini/claude fallback."
+    artifacts: [plan.md, lessons.md, next-session.md]
+
 # External tool availability (detected by cwf:setup)
 tools:
   codex: available
@@ -293,26 +333,28 @@ hooks:
 # read by SessionStart(compact) hook for context recovery after auto-compact.
 # check-session.sh --live validates required fields are populated.
 live:
-  session_id: "S16"
-  dir: "prompt-logs/260211-03-s16-v3-gap-analysis-handoff"
-  branch: "marketplace-v3"
-  phase: "done"
-  task: "Create a single-file executable handoff for exhaustive post-42d2cd9 CWF v3 coverage and gap analysis"
+  session_id: "S22"
+  dir: "prompt-logs/260211-09-s22-pre-release-readiness-audit-plan"
+  branch: "feat/s17-handoff-protocol-hardening"
+  phase: "plan"
+  task: "Plan pre-release readiness audit for docs, architecture, discoverability, and first-user journey"
   key_files:
-    - prompt-logs/260211-03-s16-v3-gap-analysis-handoff/next-session.md
-    - prompt-logs/260211-03-s16-v3-gap-analysis-handoff/plan.md
-    - prompt-logs/260211-03-s16-v3-gap-analysis-handoff/lessons.md
-    - prompt-logs/260208-03-cwf-v3-master-plan/master-plan.md
-    - docs/v3-migration-decisions.md
+    - AGENTS.md
+    - cwf-index.md
+    - docs/project-context.md
+    - docs/architecture-patterns.md
+    - docs/documentation-guide.md
+    - README.md
+    - README.ko.md
+    - plugins/cwf/skills/refactor/SKILL.md
+    - plugins/cwf/skills/review/SKILL.md
+    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/plan.md
     - cwf-state.yaml
   decisions:
-    - "Anchor corpus scope to 42d2cd9..HEAD to match user intent"
-    - "Treat session.md as optional pointer, not completeness proof"
-    - "Use post-discussion artifact reflection as final status authority"
-    - "Preserve Unknown state to prevent false closure"
+    - "Start from docs/discoverability audit before final release to reduce first-user friction"
+    - "Use refactor modes as evidence producers, then synthesize with manual scenario walkthrough"
+    - "Treat first-install user journey as a hard release gate, not optional UX polish"
   decision_journal: []
-  clarify_completed_at: ""
-  clarify_result_file: ""
 
 # Expert roster for domain expert sub-agents (used by clarify, review, retro)
 # Semi-automatic evolution: usage_count auto-incremented, new experts user-approved

@@ -6,7 +6,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REDACTOR_SCRIPT="$SCRIPT_DIR/redact-sensitive.pl"
 JSON_REDACTOR_SCRIPT="$SCRIPT_DIR/redact-jsonl.sh"
-TARGET_DIR="${1:-prompt-logs/sessions-codex}"
+TARGET_DIR="${1:-prompt-logs/sessions}"
 
 if [ ! -f "$REDACTOR_SCRIPT" ]; then
   echo "Missing redactor script: $REDACTOR_SCRIPT" >&2

@@ -60,6 +60,10 @@ Read the current session's artifacts (if they exist):
   - Identify entries with unimplemented proposals (keywords: "구현은 별도 세션", "스코프 밖", "future", "deferred", "separate session", "out of scope")
 - `retro.md` — retrospective (if available)
   - Identify action items not yet addressed
+- Runtime session logs (optional but recommended when available)
+  - Canonical unified path: `prompt-logs/sessions/*.claude.md`, `prompt-logs/sessions/*.codex.md`
+  - Legacy compatibility reads: `prompt-logs/sessions/*.md`, `prompt-logs/sessions-codex/*.md`
+  - Use these as additional evidence when extracting unresolved items and collaboration signals
 
 ---
 
@@ -93,7 +97,7 @@ Fall back to `cwf-state.yaml` stages and user input:
 
 Write `next-session.md` in the current session's prompt-logs directory. Follow the format defined in `plan-protocol.md` (Handoff Document section).
 
-### 8 Required Sections
+### 9 Required Sections
 
 #### 1. Context Files to Read
 
@@ -105,7 +109,8 @@ List files the next session agent must read before starting:
 1. `AGENTS.md` — shared project rules and protocols (cross-agent)
 2. `docs/plugin-dev-cheatsheet.md` — plugin development patterns
 3. `cwf-state.yaml` — session history and project state
-4. {task-specific files from master-plan or plan.md}
+4. `prompt-logs/sessions/*.claude.md` / `*.codex.md` (or legacy `sessions-codex/*.md`) — runtime conversation evidence when available
+5. {task-specific files from master-plan or plan.md}
 ```
 
 Always include `AGENTS.md`, `docs/plugin-dev-cheatsheet.md`, and `cwf-state.yaml` as standard entries. Add task-specific files based on the next session's scope. Include `CLAUDE.md` only when Claude runtime-specific behavior is relevant.
@@ -192,7 +197,29 @@ instead of manual execution.
 
 Reference the discovery mechanism from `AGENTS.md` Dogfooding section. Do not hardcode a list of specific skills.
 
-#### 8. Start Command
+#### 8. Execution Contract (Mention-Only Safe)
+
+```markdown
+## Execution Contract (Mention-Only Safe)
+
+If the user mentions only this file, treat it as an instruction to execute
+the task scope directly.
+
+- Branch gate:
+  - Before implementation edits, check current branch.
+  - If on a base branch (`main`, `master`, or repo primary branch), create/switch
+    to a feature branch and continue.
+- Commit gate:
+  - Commit during execution in meaningful units (per work item or change pattern).
+  - Avoid one monolithic end-of-session commit when multiple logical units exist.
+- Staging policy:
+  - Stage only intended files for each commit unit.
+  - Do not use broad staging that may include unrelated changes.
+```
+
+This section is mandatory for `next-session.md`.
+
+#### 9. Start Command
 
 ````markdown
 ## Start Command
@@ -229,6 +256,9 @@ Example: "clarify + design → implementation"
 The agent executing this skill holds the clarify/gather context in its active conversation. Extract the following from conversation history and session artifacts:
 
 1. **Context Files**: Which files must the next phase agent read? Always include `AGENTS.md` and `cwf-state.yaml`. Add files that emerged as critical during the clarify/gather phase. Include `CLAUDE.md` only if runtime-specific behavior matters.
+   - When available, include runtime logs from canonical/legacy patterns:
+     `prompt-logs/sessions/*.claude.md`, `prompt-logs/sessions/*.codex.md`,
+     `prompt-logs/sessions/*.md`, `prompt-logs/sessions-codex/*.md`
 2. **Design Decisions**: Key choices made during clarify/gather with rationale. Source from clarification summaries, user decisions, and discussion outcomes
 3. **Protocols**: Rules and behavioral protocols discovered or established during the current phase. Source from `lessons.md` entries and explicit user instructions
 4. **Prohibitions**: Explicit "do not" constraints. Source from user instructions, clarify decisions, and scope boundaries
@@ -389,6 +419,8 @@ Report results. If any artifacts are missing, list them and suggest fixes.
 12. **Phase handoff is written by the phase that has context**: The clarify/gather agent writes the phase handoff because it holds the HOW context. Do not defer to a later phase.
 13. **Phase handoff is intra-session**: It transfers context between phases within the same session. `completed_at` is not set and Phase 4b/5 are skipped.
 14. **Draft-then-review**: Always present the generated `phase-handoff.md` to the user for review before finalizing.
+15. **Execution contract is required**: `next-session.md` must include "Execution Contract (Mention-Only Safe)".
+16. **Contract must include branch+commit gates**: Mention-only execution must define base-branch escape and meaningful commit unit rules.
 
 ## References
 

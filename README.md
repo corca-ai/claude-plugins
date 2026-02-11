@@ -179,6 +179,7 @@ cwf:handoff --phase        # Generate phase-handoff.md (HOW context)
 ```
 
 Session handoffs carry task scope, lessons, and unresolved items for the next session. Phase handoffs carry protocols, rules, and constraints for the next workflow phase (HOW), complementing plan.md (WHAT).
+`next-session.md` now also includes an execution contract so mention-only start can run directly, including branch gate (auto escape from base branch) and meaningful commit-unit policy.
 
 Full reference: [SKILL.md](plugins/cwf/skills/handoff/SKILL.md)
 
@@ -249,8 +250,9 @@ cwf:setup --codex-wrapper
 What this enables:
 - `~/.agents/skills/*` and `~/.agents/references` symlinked to local CWF (latest files auto-loaded)
 - `~/.local/bin/codex` wrapper installation + PATH update (`~/.zshrc`, `~/.bashrc`)
-- Every `codex` run auto-syncs session logs into `prompt-logs/sessions-codex/`
-- Synced markdown/raw logs are redacted automatically (API keys/tokens masked before write)
+- Every `codex` run auto-syncs session markdown logs into `prompt-logs/sessions/` as `*.codex.md`
+- Sync is anchored to the session updated during the current run (reduces wrong-session exports on shared cwd)
+- Raw JSONL copy is opt-in (`--raw`); redaction still applies when raw export is enabled
 
 Verify:
 
@@ -300,7 +302,8 @@ Notification examples:
 
 ## Configuration
 
-Set environment variables in `~/.claude/.env`:
+Set environment variables in your shell profile (`~/.zshrc` or `~/.bashrc`).
+Legacy fallback (`~/.claude/.env`) is still supported.
 
 ### Slack notifications (attention hook)
 

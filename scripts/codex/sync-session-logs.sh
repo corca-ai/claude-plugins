@@ -8,8 +8,8 @@
 #
 # By default this script:
 # - Finds the latest Codex session for the current cwd
-# - Writes markdown to ./prompt-logs/sessions-codex
-# - Copies raw JSONL to ./prompt-logs/sessions-codex/raw
+# - Writes markdown to ./prompt-logs/sessions as *.codex.md
+# - Does not copy raw JSONL (use --raw to enable)
 
 set -euo pipefail
 
@@ -19,7 +19,7 @@ REDACTOR_SCRIPT="$SCRIPT_DIR/redact-sensitive.pl"
 JSON_REDACTOR_SCRIPT="$SCRIPT_DIR/redact-jsonl.sh"
 
 DEFAULT_CWD="$(pwd)"
-DEFAULT_OUT_DIR="$DEFAULT_CWD/prompt-logs/sessions-codex"
+DEFAULT_OUT_DIR="$DEFAULT_CWD/prompt-logs/sessions"
 CODEX_SESSIONS_DIR="${CODEX_SESSIONS_DIR:-$HOME/.codex/sessions}"
 TRUNCATE_THRESHOLD="${CODEX_PROMPT_LOGGER_TRUNCATE:-20}"
 
@@ -27,7 +27,8 @@ SESSION_ID=""
 JSONL_PATH=""
 CWD_FILTER="$DEFAULT_CWD"
 OUT_DIR="$DEFAULT_OUT_DIR"
-COPY_RAW=true
+COPY_RAW=false
+SINCE_EPOCH=""
 QUIET=false
 
 usage() {
@@ -41,8 +42,10 @@ Options:
   --session-id <id>    Export a specific session id
   --jsonl <path>       Export a specific JSONL file directly
   --cwd <path>         Prefer sessions whose session_meta.cwd matches path (default: $PWD)
-  --out-dir <path>     Output directory (default: ./prompt-logs/sessions-codex)
-  --no-raw             Do not copy raw JSONL into out-dir/raw
+  --since-epoch <sec>  Prefer sessions modified at/after this epoch seconds value
+  --out-dir <path>     Output directory (default: ./prompt-logs/sessions)
+  --raw                Copy raw JSONL into out-dir/raw
+  --no-raw             Backward-compatible alias for default behavior (no raw copy)
   --quiet              Suppress informational output
   -h, --help           Show help
 USAGE
@@ -107,13 +110,27 @@ find_session_by_id() {
   find "$CODEX_SESSIONS_DIR" -type f -name "*${sid}.jsonl" 2>/dev/null | head -n1
 }
 
+file_mtime_epoch() {
+  local path="$1"
+  stat -c %Y "$path" 2>/dev/null || stat -f %m "$path" 2>/dev/null || echo "0"
+}
+
 find_latest_session_for_cwd() {
   local target_cwd="$1"
+  local min_epoch="${2:-}"
   local f
+  local file_epoch
+  local session_cwd
 
   while IFS= read -r f; do
     [ -f "$f" ] || continue
-    local session_cwd
+    if [ -n "$min_epoch" ]; then
+      file_epoch=$(file_mtime_epoch "$f")
+      if [ -n "$file_epoch" ] && [ "$file_epoch" -lt "$min_epoch" ]; then
+        continue
+      fi
+    fi
+
     session_cwd=$(jq -r 'select(.type == "session_meta") | .payload.cwd // empty' "$f" 2>/dev/null | head -n1)
     if [ -n "$session_cwd" ] && [ "$session_cwd" = "$target_cwd" ]; then
       echo "$f"
@@ -179,9 +196,17 @@ while [ "$#" -gt 0 ]; do
       CWD_FILTER="${2:-}"
       shift 2
       ;;
+    --since-epoch)
+      SINCE_EPOCH="${2:-}"
+      shift 2
+      ;;
     --out-dir)
       OUT_DIR="${2:-}"
       shift 2
+      ;;
+    --raw)
+      COPY_RAW=true
+      shift
       ;;
     --no-raw)
       COPY_RAW=false
@@ -212,9 +237,13 @@ if [ -z "$JSONL_PATH" ]; then
   if [ -n "$SESSION_ID" ]; then
     JSONL_PATH=$(find_session_by_id "$SESSION_ID")
   else
-    JSONL_PATH=$(find_latest_session_for_cwd "$CWD_FILTER" || true)
+    JSONL_PATH=$(find_latest_session_for_cwd "$CWD_FILTER" "$SINCE_EPOCH" || true)
     if [ -z "$JSONL_PATH" ]; then
-      JSONL_PATH=$(find "$CODEX_SESSIONS_DIR" -type f -name '*.jsonl' -print0 2>/dev/null | xargs -0 ls -1t 2>/dev/null | head -n1 || true)
+      if [ -n "$SINCE_EPOCH" ]; then
+        log "No cwd-matched Codex session updated since epoch: $SINCE_EPOCH"
+      else
+        JSONL_PATH=$(find "$CODEX_SESSIONS_DIR" -type f -name '*.jsonl' -print0 2>/dev/null | xargs -0 ls -1t 2>/dev/null | head -n1 || true)
+      fi
     fi
   fi
 fi
@@ -258,30 +287,72 @@ START_HHMM=$(utc_to_local "$SESSION_STARTED_UTC" "%H%M")
 [ -z "$START_HHMM" ] && START_HHMM="$(date +%H%M)"
 
 mkdir -p "$OUT_DIR"
-OUT_FILE="$OUT_DIR/${DATE_STR}-${START_HHMM}-${HASH}.md"
+OUT_FILE="$OUT_DIR/${DATE_STR}-${START_HHMM}-${HASH}.codex.md"
 
 EVENTS_FILE=$(mktemp)
 trap 'rm -f "$EVENTS_FILE"' EXIT
 
-jq -c '
-  if .type == "event_msg" and (.payload.type == "user_message" or .payload.type == "agent_message") then
-    {
-      kind: "message",
-      role: (if .payload.type == "user_message" then "user" else "assistant" end),
-      ts: (.timestamp // ""),
-      text: (.payload.message // "")
-    }
-  elif .type == "response_item" and (.payload.type == "function_call" or .payload.type == "custom_tool_call") then
-    {
-      kind: "tool",
-      ts: (.timestamp // ""),
-      name: (.payload.name // "tool"),
-      arguments: (.payload.arguments // "")
-    }
-  else
-    empty
-  end
-' "$JSONL_PATH" > "$EVENTS_FILE"
+HAS_EVENT_MESSAGES=$(jq -r 'select(.type == "event_msg" and (.payload.type == "user_message" or .payload.type == "agent_message")) | 1' "$JSONL_PATH" 2>/dev/null | head -n1 || true)
+
+if [ -n "$HAS_EVENT_MESSAGES" ]; then
+  jq -c '
+    if .type == "event_msg" and (.payload.type == "user_message" or .payload.type == "agent_message") then
+      {
+        kind: "message",
+        role: (if .payload.type == "user_message" then "user" else "assistant" end),
+        ts: (.timestamp // ""),
+        text: (.payload.message // "")
+      }
+    elif .type == "response_item" and (.payload.type == "function_call" or .payload.type == "custom_tool_call") then
+      {
+        kind: "tool",
+        ts: (.timestamp // ""),
+        name: (.payload.name // "tool"),
+        arguments: (.payload.arguments // "")
+      }
+    else
+      empty
+    end
+  ' "$JSONL_PATH" > "$EVENTS_FILE"
+else
+  log "No event_msg user/assistant messages detected; falling back to response_item.message."
+  jq -c '
+    def message_text:
+      if (.payload.content | type) == "array" then
+        (.payload.content
+          | map(
+              if .type == "input_text" then (.text // "")
+              elif .type == "output_text" then (.text // "")
+              elif (.text? != null) then (.text // "")
+              elif (.input_text? != null) then (.input_text // "")
+              elif (.output_text? != null) then (.output_text // "")
+              else ""
+              end
+            )
+          | join("\n")
+        )
+      else
+        ""
+      end;
+    if .type == "response_item" and .payload.type == "message" and (.payload.role == "user" or .payload.role == "assistant") then
+      {
+        kind: "message",
+        role: .payload.role,
+        ts: (.timestamp // ""),
+        text: message_text
+      }
+    elif .type == "response_item" and (.payload.type == "function_call" or .payload.type == "custom_tool_call") then
+      {
+        kind: "tool",
+        ts: (.timestamp // ""),
+        name: (.payload.name // "tool"),
+        arguments: (.payload.arguments // "")
+      }
+    else
+      empty
+    end
+  ' "$JSONL_PATH" > "$EVENTS_FILE"
+fi
 
 {
   echo "# Session: ${HASH}"

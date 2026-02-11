@@ -3,6 +3,10 @@
 # Usage: code-search.sh [--tokens NUM] "<query>"
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../../../hooks/scripts/env-loader.sh
+source "$SCRIPT_DIR/../../../hooks/scripts/env-loader.sh"
+
 # --- Parse arguments ---
 TOKENS_NUM=5000
 QUERY=""
@@ -24,17 +28,8 @@ if [ -z "$QUERY" ]; then
   exit 1
 fi
 
-# --- Load API key: shell env → ~/.claude/.env → shell profiles ---
-[ -z "${EXA_API_KEY:-}" ] && [ -f ~/.claude/.env ] && source ~/.claude/.env 2>/dev/null
-if [ -z "${EXA_API_KEY:-}" ]; then
-  _line=$(grep -shm1 '^export EXA_API_KEY=' ~/.zshenv ~/.zshrc ~/.bashrc ~/.bash_profile ~/.profile 2>/dev/null) || true
-  if [ -n "${_line:-}" ]; then
-    EXA_API_KEY="${_line#*=}"
-    EXA_API_KEY="${EXA_API_KEY#[\"\']}"
-    EXA_API_KEY="${EXA_API_KEY%[\"\']}"
-    export EXA_API_KEY
-  fi
-fi
+# --- Load API key: shell env -> shell profiles -> legacy ~/.claude/.env ---
+cwf_env_load_vars EXA_API_KEY
 
 if [ -z "${EXA_API_KEY:-}" ]; then
   cat >&2 <<'MSG'
@@ -42,8 +37,11 @@ Error: EXA_API_KEY is not set.
 
 Get your API key: https://dashboard.exa.ai/api-keys
 
-Then add to your shell profile:
+Then add to your shell profile (~/.zshrc or ~/.bashrc):
   export EXA_API_KEY="your-key-here"
+
+Legacy fallback is also supported:
+  ~/.claude/.env
 MSG
   exit 1
 fi

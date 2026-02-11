@@ -10,14 +10,13 @@ set -euo pipefail
 HOOK_GROUP="read"
 # shellcheck source=cwf-hook-gate.sh
 source "$(dirname "${BASH_SOURCE[0]}")/cwf-hook-gate.sh"
+# shellcheck source=env-loader.sh
+source "$(dirname "${BASH_SOURCE[0]}")/env-loader.sh"
 
-# --- Load environment variables ---
-ENV_FILE="$HOME/.claude/.env"
-if [ -f "$ENV_FILE" ]; then
-    set -a
-    source "$ENV_FILE"
-    set +a
-fi
+# --- Load environment variables (env -> shell profiles -> legacy ~/.claude/.env) ---
+cwf_env_load_vars \
+  CLAUDE_CORCA_SMART_READ_WARN_LINES \
+  CLAUDE_CORCA_SMART_READ_DENY_LINES
 
 WARN_LINES="${CLAUDE_CORCA_SMART_READ_WARN_LINES:-500}"
 DENY_LINES="${CLAUDE_CORCA_SMART_READ_DENY_LINES:-2000}"

@@ -179,6 +179,7 @@ cwf:handoff --phase        # phase-handoff.md 생성 (HOW 컨텍스트)
 ```
 
 세션 핸드오프는 작업 범위, 교훈, 미해결 항목을 다음 세션으로 전달합니다. 페이즈 핸드오프는 프로토콜, 규칙, 제약 조건을 다음 워크플로우 페이즈(HOW)로 전달하며, plan.md(WHAT)를 보완합니다.
+이제 `next-session.md`에는 멘션만으로 실행 가능한 실행 계약도 포함되며, 베이스 브랜치 탈출(브랜치 게이트)과 의미 단위 커밋 정책을 함께 명시합니다.
 
 전체 레퍼런스: [SKILL.md](plugins/cwf/skills/handoff/SKILL.md)
 
@@ -250,8 +251,9 @@ cwf:setup --codex-wrapper
 적용되는 내용:
 - `~/.agents/skills/*`, `~/.agents/references`를 로컬 CWF에 심링크 (최신 파일 자동 반영)
 - `~/.local/bin/codex` wrapper 설치 + PATH 업데이트(`~/.zshrc`, `~/.bashrc`)
-- 이후 `codex` 실행 시 세션 로그가 `prompt-logs/sessions-codex/`로 자동 동기화
-- 동기화되는 markdown/raw 로그는 자동으로 민감정보(API 키/토큰) 마스킹(redaction) 처리
+- 이후 `codex` 실행 시 세션 markdown 로그가 `prompt-logs/sessions/`에 `*.codex.md` 형식으로 자동 동기화
+- 동기화 대상은 현재 실행에서 갱신된 세션으로 우선 고정되어, 같은 cwd에서 잘못된 세션 export를 줄입니다
+- raw JSONL 복사는 기본 비활성(옵션 `--raw`)이며, raw export 시에도 민감정보 마스킹(redaction)이 적용됩니다
 
 검증:
 
@@ -301,7 +303,8 @@ CWF는 자동으로 실행되는 7개 훅 그룹을 포함합니다. 모두 기�
 
 ## 설정
 
-`~/.claude/.env`에 환경 변수를 설정하세요:
+셸 프로파일(`~/.zshrc` 또는 `~/.bashrc`)에 환경 변수를 설정하세요.
+레거시 하위호환으로 `~/.claude/.env`도 계속 지원합니다.
 
 ### Slack 알림 (attention 훅)
 

@@ -12,14 +12,21 @@
 # Diagnose: run directly to check Slack configuration
 #   ./slack-send.sh --diagnose
 
-# Load config from ~/.claude/.env
+# shellcheck source=env-loader.sh
+source "$(dirname "${BASH_SOURCE[0]}")/env-loader.sh"
+
+# Load config from process env / shell profiles / legacy ~/.claude/.env
 slack_load_config() {
-    local env_file="$HOME/.claude/.env"
-    if [ -f "$env_file" ]; then
-        set -a
-        source "$env_file"
-        set +a
-    fi
+    cwf_env_load_vars \
+        SLACK_BOT_TOKEN \
+        SLACK_CHANNEL_ID \
+        SLACK_WEBHOOK_URL \
+        CLAUDE_CORCA_ATTENTION_USER_ID \
+        CLAUDE_CORCA_ATTENTION_USER_HANDLE \
+        CLAUDE_CORCA_ATTENTION_PARENT_MENTION \
+        CLAUDE_CORCA_ATTENTION_REPLY_BROADCAST \
+        CLAUDE_CORCA_ATTENTION_DELAY \
+        CLAUDE_CORCA_ATTENTION_TRUNCATE
 }
 
 # Generate session-scoped hash (first 12 chars of SHA-256)
@@ -176,14 +183,12 @@ slack_diagnose() {
     echo "=== attention-hook Slack diagnostics ==="
     echo ""
 
-    # 1. Check env file
+    # 1. Check legacy fallback file
     local env_file="$HOME/.claude/.env"
     if [ -f "$env_file" ]; then
-        echo "$pass ~/.claude/.env found"
+        echo "$pass ~/.claude/.env found (legacy fallback)"
     else
-        echo "$fail ~/.claude/.env not found"
-        echo "  Create it with SLACK_BOT_TOKEN and SLACK_CHANNEL_ID"
-        return 1
+        echo "  ~/.claude/.env not found (ok if shell profile/environment is configured)"
     fi
 
     # 2. Load config
@@ -196,6 +201,7 @@ slack_diagnose() {
         echo "$pass SLACK_BOT_TOKEN: set (${#SLACK_BOT_TOKEN} chars)"
     else
         echo "$fail SLACK_BOT_TOKEN: not set"
+        echo "  Set it in ~/.zshrc or ~/.bashrc (legacy fallback: ~/.claude/.env)"
         has_error=1
     fi
 
@@ -203,6 +209,7 @@ slack_diagnose() {
         echo "$pass SLACK_CHANNEL_ID: $SLACK_CHANNEL_ID"
     else
         echo "$fail SLACK_CHANNEL_ID: not set"
+        echo "  Set it in ~/.zshrc or ~/.bashrc (legacy fallback: ~/.claude/.env)"
         has_error=1
     fi
 

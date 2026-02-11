@@ -40,19 +40,19 @@ function loadToken() {
     return process.env.SLACK_BOT_TOKEN;
   }
 
-  // 2. Read from ~/.claude/.env
-  const token = extractVarFromFile(join(homedir(), '.claude', '.env'), 'SLACK_BOT_TOKEN');
-  if (token) return token;
-
-  // 3. Search shell profiles
-  const profiles = ['.zshenv', '.zshrc', '.bashrc', '.bash_profile', '.profile'];
+  // 2. Search shell profiles
+  const profiles = ['.zshenv', '.zprofile', '.zshrc', '.bash_profile', '.bashrc', '.profile'];
   for (const profile of profiles) {
     const found = extractVarFromFile(join(homedir(), profile), 'SLACK_BOT_TOKEN');
     if (found) return found;
   }
 
+  // 3. Legacy fallback: ~/.claude/.env
+  const token = extractVarFromFile(join(homedir(), '.claude', '.env'), 'SLACK_BOT_TOKEN');
+  if (token) return token;
+
   throw new Error(
-    'SLACK_BOT_TOKEN not found. Add SLACK_BOT_TOKEN=xoxb-... to ~/.claude/.env or shell profile'
+    'SLACK_BOT_TOKEN not found. Add it to ~/.zshrc or ~/.bashrc (legacy fallback: ~/.claude/.env)'
   );
 }
 

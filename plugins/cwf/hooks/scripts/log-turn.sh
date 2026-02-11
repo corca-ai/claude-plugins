@@ -10,6 +10,8 @@ HOOK_GROUP="log"
 source "$(dirname "${BASH_SOURCE[0]}")/cwf-hook-gate.sh"
 # shellcheck source=text-format.sh
 source "$(dirname "${BASH_SOURCE[0]}")/text-format.sh"
+# shellcheck source=env-loader.sh
+source "$(dirname "${BASH_SOURCE[0]}")/env-loader.sh"
 
 HOOK_TYPE="${1:-stop}"
 
@@ -26,25 +28,12 @@ fi
 # ── Wait for transcript flush (async hook may race with file writes) ─────────
 sleep 0.3
 
-# ── Load config ──────────────────────────────────────────────────────────────
-# 1. Shell env (already set)
-# 2. ~/.claude/.env
-[ -f "$HOME/.claude/.env" ] && { set -a; source "$HOME/.claude/.env"; set +a; }
-# 3. Shell profiles (fallback — safe extraction without eval)
-_safe_load() {
-  local _var="$1"; local _line
-  _line=$(grep -shm1 "^export ${_var}=" ~/.zshrc ~/.bashrc 2>/dev/null) || true
-  if [ -n "${_line:-}" ]; then
-    local _val="${_line#*=}"
-    _val="${_val#[\"\']}" ; _val="${_val%[\"\']}"
-    printf -v "$_var" '%s' "$_val"
-    export "$_var"
-  fi
-}
-[ -z "${CLAUDE_CORCA_PROMPT_LOGGER_DIR:-}" ] && _safe_load CLAUDE_CORCA_PROMPT_LOGGER_DIR
-[ -z "${CLAUDE_CORCA_PROMPT_LOGGER_ENABLED:-}" ] && _safe_load CLAUDE_CORCA_PROMPT_LOGGER_ENABLED
-[ -z "${CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE:-}" ] && _safe_load CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE
-[ -z "${CLAUDE_CORCA_PROMPT_LOGGER_AUTO_COMMIT:-}" ] && _safe_load CLAUDE_CORCA_PROMPT_LOGGER_AUTO_COMMIT
+# ── Load config (env -> shell profiles -> legacy ~/.claude/.env) ───────────
+cwf_env_load_vars \
+  CLAUDE_CORCA_PROMPT_LOGGER_DIR \
+  CLAUDE_CORCA_PROMPT_LOGGER_ENABLED \
+  CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE \
+  CLAUDE_CORCA_PROMPT_LOGGER_AUTO_COMMIT
 
 ENABLED="${CLAUDE_CORCA_PROMPT_LOGGER_ENABLED:-true}"
 if [ "$ENABLED" != "true" ]; then
@@ -92,7 +81,7 @@ TEMP_ENTRIES=$(mktemp)
 trap 'rm -f "$TEMP_ENTRIES"; rmdir "$LOCK_DIR" 2>/dev/null' EXIT
 
 # ── Resolve output file path ────────────────────────────────────────────────
-# Filename format: {yymmdd}-{hhmm}-{hash}.md
+# Filename format: {yymmdd}-{hhmm}-{hash}.claude.md
 # Session start time is used for {hhmm}, cached in state for consistency
 OUT_FILE_STATE="${STATE_DIR}/out_file"
 mkdir -p "$LOG_DIR"
@@ -102,7 +91,7 @@ if [ -f "$OUT_FILE_STATE" ]; then
 else
     # Check for existing file with this hash (handles process restart)
     EXISTING=""
-    for f in "$LOG_DIR"/*-"${HASH}.md"; do
+    for f in "$LOG_DIR"/*-"${HASH}.claude.md" "$LOG_DIR"/*-"${HASH}.md"; do
         if [ -f "$f" ]; then
             EXISTING="$f"
             break
@@ -120,7 +109,7 @@ else
         fi
         [ -z "${START_TIME:-}" ] && START_TIME=$(date +%H%M)
         DATE_STR=$(date +%y%m%d)
-        OUT_FILE="${LOG_DIR}/${DATE_STR}-${START_TIME}-${HASH}.md"
+        OUT_FILE="${LOG_DIR}/${DATE_STR}-${START_TIME}-${HASH}.claude.md"
     fi
     echo "$OUT_FILE" > "$OUT_FILE_STATE"
 fi
