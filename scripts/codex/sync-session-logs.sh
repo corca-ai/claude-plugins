@@ -15,6 +15,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+REDACTOR_SCRIPT="$SCRIPT_DIR/redact-sensitive.pl"
+JSON_REDACTOR_SCRIPT="$SCRIPT_DIR/redact-jsonl.sh"
 
 DEFAULT_CWD="$(pwd)"
 DEFAULT_OUT_DIR="$DEFAULT_CWD/prompt-logs/sessions-codex"
@@ -49,6 +51,31 @@ USAGE
 log() {
   if [ "$QUIET" != "true" ]; then
     echo "$*"
+  fi
+}
+
+can_redact() {
+  [ -f "$REDACTOR_SCRIPT" ] && command -v perl >/dev/null 2>&1
+}
+
+can_redact_jsonl() {
+  [ -x "$JSON_REDACTOR_SCRIPT" ] && command -v jq >/dev/null 2>&1
+}
+
+redact_file_in_place() {
+  local target_file="$1"
+  [ -f "$target_file" ] || return 0
+
+  if [[ "$target_file" == *.jsonl ]]; then
+    if can_redact_jsonl; then
+      "$JSON_REDACTOR_SCRIPT" "$target_file"
+    else
+      log "Warning: redaction skipped for $target_file (missing jq or $JSON_REDACTOR_SCRIPT)"
+    fi
+  elif can_redact; then
+    perl -i "$REDACTOR_SCRIPT" "$target_file"
+  else
+    log "Warning: redaction skipped for $target_file (missing perl or $REDACTOR_SCRIPT)"
   fi
 }
 
@@ -395,10 +422,14 @@ if [ "$HAS_TURN" = "true" ]; then
   flush_turn
 fi
 
+redact_file_in_place "$OUT_FILE"
+
 if [ "$COPY_RAW" = "true" ]; then
   RAW_DIR="$OUT_DIR/raw"
+  RAW_FILE="$RAW_DIR/$(basename "$JSONL_PATH")"
   mkdir -p "$RAW_DIR"
-  cp "$JSONL_PATH" "$RAW_DIR/$(basename "$JSONL_PATH")"
+  cp "$JSONL_PATH" "$RAW_FILE"
+  redact_file_in_place "$RAW_FILE"
 fi
 
 log "Codex session exported: $OUT_FILE"

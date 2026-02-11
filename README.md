@@ -250,12 +250,19 @@ What this enables:
 - `~/.agents/skills/*` and `~/.agents/references` symlinked to local CWF (latest files auto-loaded)
 - `~/.local/bin/codex` wrapper installation + PATH update (`~/.zshrc`, `~/.bashrc`)
 - Every `codex` run auto-syncs session logs into `prompt-logs/sessions-codex/`
+- Synced markdown/raw logs are redacted automatically (API keys/tokens masked before write)
 
 Verify:
 
 ```bash
 bash scripts/codex/install-wrapper.sh --status
 type -a codex
+```
+
+For one-time cleanup of existing session logs:
+
+```bash
+bash scripts/codex/redact-session-logs.sh
 ```
 
 After install, open a new shell (or `source ~/.zshrc`). Aliases that call `codex` (for example `codexyolo='codex ...'`) also use the wrapper.
