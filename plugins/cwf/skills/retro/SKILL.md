@@ -228,17 +228,19 @@ For each finding, evaluate enforcement mechanisms strongest-first:
 2. Read `cwf-state.yaml` `expert_roster:`
 3. For each expert used in Section 5:
    - If already in roster: increment `usage_count` by 1
-   - If new: prepare an addition entry with `name`, `domain`, `source`, `rationale`, `introduced: {current session}`, `usage_count: 1`
+   - If new: add entry with `name`, `domain`, `source`, `rationale`, `introduced: {current session}`, `usage_count: 1`
 4. Analyze the session's domain for roster gaps — are there frameworks or disciplines
    that would have been valuable but are not represented in the roster?
-5. Present roster changes via AskUserQuestion:
-   - Auto-changes (usage_count increments): show for confirmation
-   - New additions: show with rationale, require explicit user approval
-   - Gap recommendations: suggest new experts with reasoning
-6. Write approved changes to `cwf-state.yaml` `expert_roster:` section
+5. Apply all changes directly to `cwf-state.yaml` `expert_roster:` section:
+   - usage_count increments: apply automatically
+   - New expert additions: apply automatically
+   - Gap recommendations: add automatically if the expert has a clear published framework
+6. Report changes to the user in the retro output (Section 5 or post-section note)
+   for visibility, but do not gate on approval
 
-This is semi-automatic: usage tracking is automated, but roster expansion requires
-user approval to maintain quality and relevance.
+This is fully automatic: both usage tracking and roster expansion are applied
+without requiring user confirmation. The retro output provides visibility
+into all changes made.
 
 ### 8. Post-Retro Discussion
 
