@@ -1,95 +1,101 @@
-# Next Session: S24 — Resolve No-Go Blockers First, Then Interactive Step 4
+# Next Session: S25 — Interactive Readthrough First, Then Step 4 Simulation
 
 ## Context
 
-S23 produced a full pre-Step4 evidence package and confirmed Concern 1-3 blockers.
-The next session must run in two phases:
+S24 completed Phase A remediation for Concern 1-3 and produced implementation evidence.
+The next session is interactive-only and must prioritize collaborative reading/discussion
+before walkthrough simulation.
 
-1. **Phase A (first)**: detailed No-Go remediation discussion and actual implementation.
-2. **Phase B (after A)**: interactive Step 4 walkthrough and final readiness synthesis.
+## Decision Locks (Confirmed for S25 Start)
 
-This ordering is intentional: interactive validation should happen **after** blocker
-reduction work is implemented.
+1. Concern 1-3 blockers are treated as remediated baseline unless explicitly reopened.
+2. Mention-only start must enter interactive mode immediately (not summary-only mode).
+3. Execution order is fixed:
+   - **Step 1**: chunked, no-skip document readthrough + discussion
+   - **Step 2**: first-user scenario simulation
+4. Scenario simulation must not start until the user confirms readthrough completion.
 
-## Decision Locks (Confirmed in S23 Close)
+## Readthrough Queue (In-Order, No Skip)
 
-The following decisions are fixed unless explicitly reopened by the user:
-
-1. Release gate policy: **No-Go remains fixed until Concern 1-3 blockers are resolved**.
-2. README scope for next implementation: **minimal framing patch first** (`is / is-not / assumptions / decisions+why` + inventory sync), not full rewrite.
-3. Self-containment issue handling: **treat as release blocker** (not post-release debt).
-4. Phase ordering lock: **No-Go remediation implementation first, interactive walkthrough second**.
-
-## Context Files to Read First
-
-1. `prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/readiness-prestep4.md`
-2. `prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/refactor-evidence.md`
-3. `prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/skill-coverage-matrix.md`
-4. `prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/script-coverage-matrix.md`
-5. `prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/readme-framing-audit.md`
-6. `prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/discoverability-audit.md`
-7. `prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/step4-interactive-prompt.md`
-8. `README.md`
-9. `README.ko.md`
-10. `AGENTS.md`
-11. `cwf-index.md`
+1. `prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/no-go-remediation-plan.md`
+2. `prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/no-go-remediation-impl.md`
+3. `prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/readiness-prestep4.md`
+4. `prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/refactor-evidence.md`
+5. `prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/skill-coverage-matrix.md`
+6. `prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/script-coverage-matrix.md`
+7. `prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/readme-framing-audit.md`
+8. `prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/discoverability-audit.md`
+9. `README.md`
+10. `README.ko.md`
+11. `AGENTS.md`
+12. `cwf-index.md`
+13. `prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/step4-interactive-prompt.md`
 
 ## Execution Contract (Mention-Only Safe)
 
-If the user mentions only this file, treat that as an instruction to execute
-S24 phase-ordered work immediately (**Phase A -> Phase B**).
+If the user mentions only this file, treat it as an instruction to start S25
+interactive flow immediately.
 
-- Required strategy: blocker-first remediation, then user-interactive walkthrough
-- Branch gate:
-  - Before implementation edits, check current branch.
-  - If on `main`/`master` (or repo primary branch), create/switch to a feature branch and continue.
-- Commit gate:
-  - Commit in meaningful units during execution (not monolithic at the end).
-  - After the first completed unit, run `git status --short`, confirm next commit boundary, and commit before the next major unit.
-- Staging policy:
-  - Stage only files for the current unit; avoid broad staging.
+### Step 1 — Interactive Readthrough (Mandatory)
 
-### Phase A — No-Go Remediation (discussion + implementation)
+- Open files in the exact queue order above.
+- Read each file in sequential chunks (recommended 80-160 lines per chunk).
+- Do not skip chunks; cover each file to EOF.
+- After each chunk:
+  - present the chunk to the user,
+  - pause for discussion/questions,
+  - continue only with user acknowledgement.
+- Maintain a coverage log in-session (`file`, `last line shown`, `EOF reached`).
+- At each file boundary, confirm with the user before moving to the next file.
 
-- Required work:
-  - produce a detailed remediation decision log (scope, trade-offs, acceptance gates)
-  - implement agreed remediation changes for Concern 1-3 blockers (per Decision Locks)
-  - re-check blocker status with file-level evidence
-- Required outputs:
-  - `no-go-remediation-plan.md`
-  - `no-go-remediation-impl.md`
-  - updated evidence docs if findings changed
-- Phase gate:
-  - after Phase A, present residual blocker status and ask user confirmation to proceed to Phase B.
+### Step 2 — Discussion Consolidation Gate
 
-### Phase B — Interactive Step 4
+- Summarize agreed points, open questions, and disputed interpretations from Step 1.
+- Ask explicit confirmation: proceed to scenario simulation or continue readthrough discussion.
 
-- Required work:
-  - run first-user walkthrough interactively with user branch decisions
-  - produce final synthesis using post-remediation state
-- Required outputs:
-  - `onboarding-scenario.md`
-  - `readiness-report.md`
+### Step 3 — Interactive Step 4 Scenario Simulation
 
-- Completion policy:
-  - final Concern 1-4 status with explicit Go/No-Go
-  - register session state and run `scripts/check-session.sh --impl`
+- Run first-user walkthrough with explicit user choices at each branch.
+- Validate onboarding sequence, skill/hook discoverability, and expected outcomes.
+- Classify friction points as doc/runtime/discoverability and blocker/non-blocker.
+
+## Required Outputs
+
+1. `prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/interactive-readthrough-log.md`
+   - file-by-file chunk coverage
+   - key discussion points
+   - unresolved questions
+2. `prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/onboarding-scenario.md`
+   - scenario timeline
+   - command-by-command expectations
+   - decision forks + user choices
+   - friction log with severity and file references
+3. `prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/readiness-report.md`
+   - final Concern 1-4 status table
+   - explicit Go/No-Go
+   - blockers with required remediation set
+
+## Completion Policy
+
+- Final verdict must be evidence-backed and reflect post-remediation state.
+- No final Go/No-Go without user-confirmed branch decisions during simulation.
+- Register session state and run `scripts/check-session.sh --impl` before close.
 
 ## Task
 
-Execute blocker-remediation discussion and implementation first, then run
-interactive Step 4 walkthrough and produce final readiness artifacts.
+Execute the full interactive readthrough/discussion first, then run Step 4 simulation
+and publish readiness outputs.
 
 ## Success Criteria
 
 ```gherkin
-Given S23 pre-Step4 blocker snapshot and decision locks
-When S24 executes Phase A remediation discussion and implementation
-Then no-go-remediation-plan.md and no-go-remediation-impl.md capture decisions, applied changes, and residual blocker status
+Given S24 remediation outputs and the S25 readthrough queue
+When S25 executes chunked in-order readthrough with no skipped chunks
+Then interactive-readthrough-log.md records complete file coverage and discussion points
 
-Given Phase A output and updated repository state
-When S24 executes Phase B interactively with the user
-Then onboarding-scenario.md and readiness-report.md reflect post-remediation behavior and final Go/No-Go rationale
+Given user-confirmed readthrough completion
+When S25 runs interactive onboarding simulation with explicit branch choices
+Then onboarding-scenario.md and readiness-report.md capture final Concern 1-4 status and Go/No-Go rationale
 ```
 
 ## Start Command

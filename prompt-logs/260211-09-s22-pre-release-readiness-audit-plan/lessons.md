@@ -37,3 +37,11 @@ When executing mention-only handoff contracts -> enforce a commit checkpoint aft
 - **Takeaway**: when handoff contains multiple valid phase orderings, explicit user intent should lock the phase sequence before execution starts.
 
 When preparing next-session handoff for mixed autonomous/interactive work -> include a phase-order lock and per-phase outputs so mention-only execution follows the intended sequence.
+
+### Interactive Step Should Start With Chunked Readthrough Before Simulation
+
+- **Expected**: interactive Step 4 could begin directly from walkthrough simulation after remediation.
+- **Actual**: user intent requires a document-first interactive loop (chunked, no-skip readthrough + discussion) before any scenario simulation starts.
+- **Takeaway**: when readiness work depends on interpretation alignment, interactive document coverage should be an explicit gate prior to behavior simulation.
+
+When preparing mention-only interactive handoffs -> encode mandatory readthrough order/chunking and require explicit user confirmation before simulation.
