@@ -395,10 +395,12 @@ When an external CLI exits non-zero, parse stderr **immediately** for error type
    - `MODEL_CAPACITY_EXHAUSTED`, `429`, `ResourceExhausted`, `quota` → **CAPACITY**: fail-fast, immediate fallback, no retry
    - `INTERNAL_ERROR`, `500`, `InternalError`, `server error` → **INTERNAL**: 1 retry then fallback
    - `AUTHENTICATION`, `401`, `UNAUTHENTICATED`, `API key` → **AUTH**: abort immediately with setup hint
+   - `Tool.*not found`, `Did you mean one of` → **TOOL_ERROR**: fail-fast, immediate fallback, no retry
 1. Apply the action:
    - **CAPACITY**: Skip exit code check. Launch fallback immediately.
    - **INTERNAL**: Re-run the CLI command once. If still fails, launch fallback.
    - **AUTH**: Do NOT launch fallback. Report: `Slot N ({tool}) AUTH error. Run codex auth login / npx @google/gemini-cli to configure.`
+   - **TOOL_ERROR**: Skip exit code check. Launch fallback immediately. Note in Confidence Note: `Slot N ({tool}) TOOL_ERROR — CLI attempted unavailable tool.`
 1. If **no pattern matches**, fall through to exit code classification below.
 
 #### Exit code classification
