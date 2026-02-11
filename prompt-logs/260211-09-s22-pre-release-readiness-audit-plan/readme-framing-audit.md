@@ -65,3 +65,38 @@ For each decision, use a compact tuple:
 Concern 2 status: **FAIL (blocking)**.
 
 Rationale: core philosophy exists, but boundary/assumption/decision framing and bilingual consistency are insufficient for release-level first-user clarity.
+
+## S24 Remediation Update
+
+Date: 2026-02-11
+
+### Re-check Evidence
+
+- Framing contract added in English README:
+  - `README.md:7` (`Framing Contract`)
+  - `README.md:9` (`What CWF Is`)
+  - `README.md:15` (`What CWF Is Not`)
+  - `README.md:21` (`Assumptions`)
+  - `README.md:27` (`Key Decisions and Why`)
+- Skill inventory synchronized to 12 and includes `run`:
+  - `README.md:81`, `README.md:83`, `README.md:247`
+  - `README.ko.md:81`, `README.ko.md:83`, `README.ko.md:248`
+- Korean/English structure realigned for legacy framing (removed extra deleted-plugins chapter in Korean README; both now use concise legacy note).
+
+### Updated Gate Results
+
+| Gate | Requirement | Verdict |
+|---|---|---|
+| C2-G1 | CWF philosophy and core concept composition are explicit and actionable | PASS |
+| C2-G2 | README explicitly states **what CWF is** | PASS |
+| C2-G3 | README explicitly states **what CWF is not** | PASS |
+| C2-G4 | README explicitly lists core assumptions/premises | PASS |
+| C2-G5 | README explicitly lists major decisions and rationale (decision + why) | PASS |
+| C2-G6 | English/Korean conceptual equivalence is maintained | PASS |
+| C2-G7 | Skill inventory framing matches current runtime inventory | PASS |
+
+## Updated Verdict
+
+Concern 2 status after S24 remediation: **PASS**.
+
+Residual note: phrasing polish opportunities remain, but blocking framing gaps are closed.

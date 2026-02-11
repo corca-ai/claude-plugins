@@ -77,3 +77,30 @@ perl -c <*.pl>
 ## Verdict
 
 **PASS with advisories**: no deterministic syntax/runtime-parser failures; maintainability/security hygiene items remain.
+
+## S24 Remediation Update
+
+Date: 2026-02-11
+
+### Scope Expansion
+
+Added plugin-local script scope introduced by self-containment remediation:
+- `plugins/cwf/scripts/*`
+- `plugins/cwf/scripts/codex/*`
+
+### Deterministic Re-check (Delta)
+
+- Newly added plugin-local files checked: **10/10 pass**
+- Updated total script-like files across expanded scope (excluding `__pycache__` artifacts): **49**
+- Delta syntax failures: **0**
+
+Deterministic checks executed for added files:
+
+```bash
+bash -n plugins/cwf/scripts/*.sh plugins/cwf/scripts/codex/*.sh
+perl -c plugins/cwf/scripts/codex/redact-sensitive.pl
+```
+
+### Updated Verdict
+
+**PASS with advisories** remains unchanged: deterministic syntax checks pass; non-blocking hygiene advisories still apply.

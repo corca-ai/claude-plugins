@@ -91,3 +91,70 @@ Verdict for code mode: **WARN** (no critical runtime break detected, but maintai
 | `--code` | recent 5 commits | WARN |
 
 Aggregate Concern 1 status: **FAIL** (blocking inconsistencies remain before Step 4).
+
+## S24 Remediation Update (Post-Blocker Pass)
+
+Date: 2026-02-11
+Branch: `marketplace-v3`
+
+### Re-check Commands
+
+```bash
+bash plugins/cwf/skills/refactor/scripts/quick-scan.sh
+bash scripts/provenance-check.sh --level warn
+plugins/cwf/hooks/scripts/check-markdown.sh README.md README.ko.md docs/architecture-patterns.md AGENTS.md cwf-index.md
+```
+
+### Delta Findings
+
+#### Docs / Inventory Consistency
+
+Resolved:
+- README framing contract added (`README.md:7`, `README.md:9`, `README.md:15`, `README.md:21`, `README.md:27`).
+- README skill inventory synchronized to 12 and includes `run` (`README.md:81`, `README.md:83`, `README.md:247`; `README.ko.md:81`, `README.ko.md:83`, `README.ko.md:248`).
+- Marketplace metadata updated to 12-skill description (`.claude-plugin/marketplace.json:15`).
+- Architecture doc updated to 12-skill inventory (`docs/architecture-patterns.md:35`).
+
+#### Convention Compliance
+
+Resolved prior blockers:
+- `run` now includes `## References` (`plugins/cwf/skills/run/SKILL.md:207`).
+- `ship` now includes `## Rules` + `## References` (`plugins/cwf/skills/ship/SKILL.md:290`, `plugins/cwf/skills/ship/SKILL.md:299`).
+- `refactor` section order corrected (`plugins/cwf/skills/refactor/SKILL.md:371`, `plugins/cwf/skills/refactor/SKILL.md:382`).
+- `retro` now has explicit quick section and corrected order (`plugins/cwf/skills/retro/SKILL.md:27`, `plugins/cwf/skills/retro/SKILL.md:325`, `plugins/cwf/skills/retro/SKILL.md:342`).
+
+#### Concept/Provenance Synchronization
+
+Resolved:
+- Concept map updated from 9-skill-era to 12x6 coverage including `review`, `run`, `ship` (`plugins/cwf/references/concept-map.md:5`, `plugins/cwf/references/concept-map.md:168`, `plugins/cwf/references/concept-map.md:169`, `plugins/cwf/references/concept-map.md:171`).
+- Provenance freshness now 7/7 fresh against 12 skills / 15 hooks (`scripts/provenance-check.sh --level warn` output).
+
+#### Self-Containment Boundary
+
+Resolved for blocker scope and external-review path:
+- Plugin-local scripts added under `plugins/cwf/scripts/*` and skill references repointed from repo-root script paths.
+- Evidence paths:
+  - `plugins/cwf/skills/setup/SKILL.md:193`
+  - `plugins/cwf/skills/run/SKILL.md:40`
+  - `plugins/cwf/skills/impl/SKILL.md:387`
+  - `plugins/cwf/skills/handoff/SKILL.md:401`
+  - `plugins/cwf/skills/plan/SKILL.md:270`
+  - `plugins/cwf/skills/retro/SKILL.md:49`
+  - `plugins/cwf/skills/review/SKILL.md:293`
+
+### Residual Non-Blocking Advisories
+
+- `gather` still has unreferenced `scripts/csv-to-toon.sh` (quick-scan warning).
+- `review` remains over size guideline (>3000 words, >500 lines) (quick-scan warning).
+- `refactor` still flags unreferenced provenance sidecars (maintainability warning, not functional blocker).
+
+## S24 Quick Summary
+
+| Mode | Coverage | Verdict |
+|---|---:|---|
+| `--docs` | README/README.ko + marketplace + architecture + markdown checks | PASS |
+| `--holistic` | convention + concept/provenance + self-containment | PASS |
+| `--skill <name>` | 12/12 skills re-checked | PASS with warnings |
+| `--code` | advisories-only maintainability notes | WARN |
+
+Aggregate Concern 1 status after S24 remediation: **PASS (blockers resolved)**.

@@ -51,3 +51,32 @@ Convention source:
 - `review`
 - `run`
 - `ship`
+
+## S24 Remediation Delta
+
+Date: 2026-02-11
+Re-check basis: `bash plugins/cwf/skills/refactor/scripts/quick-scan.sh` + targeted manual structural checks.
+
+### Updated Coverage Summary
+
+- Audited skills: **12/12**
+- `PASS`: 9
+- `WARN`: 3
+- `FAIL`: 0
+
+### Verdict Changes from S23
+
+| Skill | S23 | S24 | Evidence |
+|---|---|---|---|
+| `run` | FAIL | PASS | Added missing `## References` (`plugins/cwf/skills/run/SKILL.md:207`) |
+| `ship` | FAIL | PASS | Added `## Rules` + `## References` (`plugins/cwf/skills/ship/SKILL.md:290`, `plugins/cwf/skills/ship/SKILL.md:299`) |
+| `retro` | WARN | PASS | Added explicit quick section + corrected section order (`plugins/cwf/skills/retro/SKILL.md:27`, `plugins/cwf/skills/retro/SKILL.md:325`, `plugins/cwf/skills/retro/SKILL.md:342`) |
+| `refactor` | WARN | WARN | Section order fixed; remaining warning is unreferenced provenance sidecars |
+| `review` | WARN | WARN | Size warning remains (>3000 words, >500 lines) |
+| `gather` | WARN | WARN | Unreferenced `scripts/csv-to-toon.sh` remains |
+
+### Updated Blocking Status
+
+- Structural convention blockers: **resolved**.
+- Coverage blocker for active skill inventory: **resolved**.
+- Remaining warnings: **non-blocking maintainability advisories**.

@@ -4,13 +4,44 @@
 
 구조화된 개발 세션을 반복 가능한 워크플로우로 전환하는 Claude Code 플러그인입니다 -- 컨텍스트 수집부터 회고 분석까지. [Corca](https://www.corca.ai/)에서 [AI-Native Product Team](AI_NATIVE_PRODUCT_TEAM.ko.md)을 위해 유지보수합니다.
 
+## 프레이밍 계약
+
+### CWF가 하는 것
+
+- 컨텍스트 수집, 요구사항 명확화, 계획, 구현, 리뷰, 회고, 핸드오프, 배포를 하나의 워크플로우 플러그인(`cwf`)으로 통합합니다.
+- `cwf-state.yaml`, prompt-log 산출물, 훅을 통해 페이즈/세션 경계에서 컨텍스트를 보존하는 상태 기반 워크플로우를 제공합니다.
+- Expert Advisor, Tier Classification, Agent Orchestration, Decision Point, Handoff, Provenance의 공통 개념을 조합하는 스킬 프레임워크입니다.
+
+### CWF가 하지 않는 것
+
+- 프로젝트별 엔지니어링 표준, CI 게이트, 인간의 제품 책임 의사결정을 대체하지 않습니다.
+- 모든 결정을 완전 자동화한다고 보장하지 않으며, 주관적 결정은 사용자 확인이 필요합니다.
+- 각 스킬이 완전히 분리된 범용 플러그인 묶음이 아니며, CWF 스킬은 의도적으로 상호 연동됩니다.
+
+### 가정
+
+- 사용자가 `prompt-logs/`, `cwf-state.yaml` 같은 세션 산출물을 저장/활용할 수 있는 저장소에서 작업합니다.
+- `AGENTS.md`와 `cwf-index.md`에서 시작해 필요 시 세부 문서를 읽는 progressive disclosure 방식에 동의합니다.
+- 반복 품질 이슈는 행동 지침보다 결정적 검증 스크립트로 관리하는 방식을 선호합니다.
+
+### 주요 결정과 이유
+
+1. **독립 플러그인 대신 통합 플러그인**
+   - 이유: 페이즈 전환 시 컨텍스트 손실과 프로토콜 드리프트를 줄이기 위해서입니다.
+2. **구현 전 인간 게이트, 구현 후 자율 체이닝(`run`)**
+   - 이유: 고판단 결정은 사람이 통제하고, 범위 확정 이후 실행 속도는 유지하기 위해서입니다.
+3. **멘션만으로 실행 가능한 핸드오프 계약**
+   - 이유: 다음 세션 시작 동작을 결정적으로 만들고 시작 모호성을 줄이기 위해서입니다.
+4. **개념/리뷰 기준의 Provenance 점검**
+   - 이유: 스킬/훅 인벤토리 변경 시 기준 문서의 노후화를 조기에 탐지하기 위해서입니다.
+
 ## 왜 CWF인가?
 
-AI 코딩 세션은 모든 경계에서 컨텍스트를 잃습니다. 세션이 끝나면 다음 세션은 처음부터 시작합니다. 요구사항이 명확화에서 구현으로 넘어갈 때 프로토콜과 제약 조건이 잊혀집니다. 5개 스킬 시스템을 위해 작성된 품질 기준은 시스템이 9개로 성장하면 조용히 무의미해집니다.
+AI 코딩 세션은 모든 경계에서 컨텍스트를 잃습니다. 세션이 끝나면 다음 세션은 처음부터 시작합니다. 요구사항이 명확화에서 구현으로 넘어갈 때 프로토콜과 제약 조건이 잊혀집니다. 5개 스킬 시스템을 위해 작성된 품질 기준은 시스템이 성장하면서 조용히 무의미해집니다.
 
-CWF는 11개 스킬에 걸쳐 조합되는 6가지 빌딩 블록 개념으로 이 문제를 해결합니다. 11개의 독립된 도구가 아니라, 각 스킬이 동일한 기반 행동 패턴을 동기화하는 하나의 통합 플러그인입니다 -- 전문가 자문은 요구사항 명확화와 세션 회고 모두에서 사각지대를 드러내고, 티어 분류는 의사결정을 일관되게 증거나 인간에게 라우팅하며, 에이전트 오케스트레이션은 리서치부터 구현까지 작업을 병렬화합니다.
+CWF는 12개 스킬에 걸쳐 조합되는 6가지 빌딩 블록 개념으로 이 문제를 해결합니다. 독립된 도구 묶음이 아니라, 각 스킬이 동일한 기반 행동 패턴을 동기화하는 하나의 통합 플러그인입니다 -- 전문가 자문은 요구사항 명확화와 세션 회고 모두에서 사각지대를 드러내고, 티어 분류는 의사결정을 일관되게 증거나 인간에게 라우팅하며, 에이전트 오케스트레이션은 리서치부터 구현까지 작업을 병렬화합니다.
 
-결과: 하나의 플러그인(`cwf`), 11개 스킬, 7개 훅 그룹. 컨텍스트가 세션 경계를 넘어 유지됩니다. 의사결정에 증거가 뒷받침됩니다. 품질 기준이 시스템과 함께 진화합니다.
+결과: 하나의 플러그인(`cwf`), 12개 스킬, 7개 훅 그룹. 컨텍스트가 세션 경계를 넘어 유지됩니다. 의사결정에 증거가 뒷받침됩니다. 품질 기준이 시스템과 함께 진화합니다.
 
 ## 핵심 개념
 
@@ -47,10 +78,11 @@ gather -> clarify -> plan -> impl -> retro
 | 7 | [handoff](#handoff) | `cwf:handoff` | 세션 또는 페이즈 핸드오프 문서 생성 |
 | 8 | [ship](#ship) | `cwf:ship` | GitHub 워크플로우 자동화 -- 이슈 생성, PR, 머지 관리 |
 | 9 | [review](#review) | `cwf:review` | 6명 병렬 리뷰어에 의한 범용 리뷰 -- 내부 + 외부 CLI + 도메인 전문가 |
-| 10 | [setup](#setup) | `cwf:setup` | 훅 그룹 설정, 도구 감지, 프로젝트 인덱스 선택 생성 |
-| 11 | [update](#update) | `cwf:update` | CWF 플러그인 업데이트 확인 및 적용 |
+| 10 | [run](#run) | `cwf:run` | gather부터 ship까지 전체 파이프라인을 단계 게이트와 함께 오케스트레이션 |
+| 11 | [setup](#setup) | `cwf:setup` | 훅 그룹 설정, 도구 감지, 프로젝트 인덱스 선택 생성 |
+| 12 | [update](#update) | `cwf:update` | CWF 플러그인 업데이트 확인 및 적용 |
 
-**개념 조합**: gather, clarify, plan, impl, retro, refactor는 모두 에이전트 오케스트레이션을 동기화합니다. clarify는 가장 풍부한 조합으로, 전문가 자문, 티어 분류, 에이전트 오케스트레이션, 결정 포인트를 하나의 워크플로우에서 동기화합니다. handoff는 핸드오프 개념의 주요 구현체입니다. refactor는 전체적 모드에서 출처 추적을 활성화합니다. review는 전문가 자문과 출처 추적을 활용한 다관점 리뷰를 수행합니다.
+**개념 조합**: gather, clarify, plan, impl, retro, refactor, review, run은 모두 에이전트 오케스트레이션을 동기화합니다. clarify는 가장 풍부한 조합으로, 전문가 자문, 티어 분류, 에이전트 오케스트레이션, 결정 포인트를 하나의 워크플로우에서 동기화합니다. review는 전문가 자문과 에이전트 오케스트레이션을 외부 CLI 연동과 함께 동기화합니다. handoff는 핸드오프 개념의 주요 구현체입니다. refactor는 전체적 모드에서 출처 추적을 활성화합니다.
 
 ## 설치
 
@@ -81,7 +113,7 @@ cwf:update
 
 ### 독립 플러그인 (레거시)
 
-CWF는 독립 플러그인(gather-context, clarify, retro, refactor, attention-hook, smart-read, prompt-logger, markdown-guard)의 모든 기능을 통합합니다. 독립 플러그인을 사용 중이라면 제거하고 `cwf`를 설치하세요. 독립 플러그인은 하위 호환을 위해 마켓플레이스에 남아 있지만 새로운 기능은 추가되지 않습니다. `plan-and-lessons` 플러그인은 폐기되었습니다 -- 플랜 모드 훅은 세션 상태 기반 컨텍스트 관리로 대체되었습니다.
+v3.0.0부터 독립 플러그인(gather-context, clarify, retro, refactor, attention-hook, smart-read, prompt-logger, markdown-guard, plan-and-lessons)은 마켓플레이스에서 제거되었습니다. 기존 설치가 있다면 제거하고 `cwf`를 설치하세요.
 
 ## 스킬 레퍼런스
 
@@ -213,6 +245,20 @@ cwf:review --mode clarify  # 요구사항 리뷰
 
 전체 레퍼런스: [SKILL.md](plugins/cwf/skills/review/SKILL.md)
 
+### run
+
+단계 게이트를 포함한 전체 CWF 파이프라인 자동 체이닝.
+
+```text
+cwf:run <task description>           # 처음부터 전체 파이프라인 실행
+cwf:run --from impl                  # impl 단계부터 재개
+cwf:run --skip review-plan,retro     # 특정 단계 건너뛰기
+```
+
+기본 흐름은 gather → clarify → plan → review(plan) → impl → review(code) → retro → ship이며, 구현 전 단계는 인간 게이트를 두고 구현 이후 단계는 기본적으로 자동 연쇄 실행됩니다.
+
+전체 레퍼런스: [SKILL.md](plugins/cwf/skills/run/SKILL.md)
+
 ### setup
 
 CWF 초기 설정.
@@ -343,42 +389,6 @@ CLAUDE_CORCA_PROMPT_LOGGER_DIR="/custom/path"  # 출력 디렉토리 (기본값:
 CLAUDE_CORCA_PROMPT_LOGGER_ENABLED=false       # 로깅 비활성화 (기본값: true)
 CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE=20         # 축약 임계값 (줄 수, 기본값: 10)
 ```
-
-## 삭제된 플러그인
-
-다음 플러그인들은 마켓플레이스에서 삭제되었습니다.
-
-### v3.0.0에서 삭제
-
-모든 독립 플러그인이 CWF로 통합되었습니다. 소스 코드는 커밋 `238f82d`에서 참조할 수 있습니다.
-
-| 삭제된 플러그인 | 대체 | 명령어 매핑 |
-|------------|------|------|
-| `gather-context` | [gather](#gather) | `/gather-context <url>` -> `cwf:gather <url>` |
-| `clarify` | [clarify](#clarify) | `/clarify <req>` -> `cwf:clarify <req>` |
-| `retro` | [retro](#retro) | `/retro` -> `cwf:retro` |
-| `refactor` | [refactor](#refactor) | `/refactor` -> `cwf:refactor` |
-| `attention-hook` | [attention 훅 그룹](#훅) | (훅으로 자동 실행) |
-| `smart-read` | [read 훅 그룹](#훅) | (훅으로 자동 실행) |
-| `prompt-logger` | [log 훅 그룹](#훅) | (훅으로 자동 실행) |
-| `markdown-guard` | [lint_markdown 훅 그룹](#훅) | (훅으로 자동 실행) |
-
-### v2.0.0에서 삭제
-
-| 삭제된 플러그인 | 대체 | 명령어 매핑 |
-|------------|------|------|
-| `suggest-tidyings` | [refactor](#refactor) `--code` | `/suggest-tidyings` -> `cwf:refactor --code` |
-| `deep-clarify` | [clarify](#clarify) | `/deep-clarify <req>` -> `cwf:clarify <req>` |
-| `interview` | [clarify](#clarify) | `/interview <topic>` -> `cwf:clarify <req>` |
-| `web-search` | [gather](#gather) | `/web-search <q>` -> `cwf:gather --search <q>` |
-
-### v1.8.0에서 삭제
-
-| 삭제된 플러그인 | 대체 |
-|------------|------|
-| `g-export` | [gather](#gather) (Google Docs/Slides/Sheets 내장) |
-| `slack-to-md` | [gather](#gather) (Slack 스레드 변환 내장) |
-| `notion-to-md` | [gather](#gather) (Notion 페이지 변환 내장) |
 
 ## 라이선스
 

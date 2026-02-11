@@ -1,8 +1,8 @@
 target: CLAUDE.md
 written_session: S7
-last_reviewed: S13.5
-skill_count: 9
-hook_count: 14
+last_reviewed: S24
+skill_count: 12
+hook_count: 15
 designed_for:
   - "Project-level agent instructions for claude-plugins repository"
   - "References docs/ for detailed guidance, cwf-state.yaml for session state"

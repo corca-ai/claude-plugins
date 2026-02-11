@@ -4,13 +4,44 @@
 
 A Claude Code plugin that turns structured development sessions into a repeatable workflow — from gathering context through retrospective analysis. Maintained by [Corca](https://www.corca.ai/) for [AI-Native Product Teams](AI_NATIVE_PRODUCT_TEAM.md).
 
+## Framing Contract
+
+### What CWF Is
+
+- A single workflow plugin (`cwf`) that integrates context gathering, requirement clarification, planning, implementation, review, retrospective, handoff, and shipping.
+- A stateful workflow system where `cwf-state.yaml`, prompt-log artifacts, and hooks preserve context across phase/session boundaries.
+- A composable skill framework built on shared concepts (Expert Advisor, Tier Classification, Agent Orchestration, Decision Point, Handoff, Provenance).
+
+### What CWF Is Not
+
+- Not a replacement for project-specific engineering standards, CI gates, or human product ownership decisions.
+- Not a guarantee that every decision can be fully automated; subjective decisions still require user confirmation.
+- Not a generic plugin bundle where each skill is isolated; CWF skills are intentionally interdependent.
+
+### Assumptions
+
+- Users work in repositories where session artifacts (`prompt-logs/`, `cwf-state.yaml`) are allowed and useful.
+- Users accept progressive disclosure: start from `AGENTS.md` and `cwf-index.md`, then load deeper docs as needed.
+- Teams prefer deterministic validation scripts for recurring quality checks over relying on behavioral memory.
+
+### Key Decisions and Why
+
+1. **Unified plugin over standalone plugins**
+   - Why: prevent context loss and protocol drift between phases.
+2. **Pre-impl human gates, post-impl autonomous chaining (`run`)**
+   - Why: keep high-judgment decisions human-controlled while preserving execution speed after scope is fixed.
+3. **Mention-only handoff execution contracts**
+   - Why: make session continuation deterministic and reduce startup ambiguity.
+4. **Provenance checks for concept/review references**
+   - Why: detect stale criteria when skill/hook inventory changes.
+
 ## Why CWF?
 
-AI coding sessions lose context at every boundary. When a session ends, the next one starts from scratch. When requirements shift from clarification to implementation, protocols and constraints are forgotten. When quality criteria are written for a five-skill system, they silently become irrelevant as the system grows to nine.
+AI coding sessions lose context at every boundary. When a session ends, the next one starts from scratch. When requirements shift from clarification to implementation, protocols and constraints are forgotten. When quality criteria are written for a five-skill system, they silently become irrelevant as the system grows.
 
-CWF addresses this with six building-block concepts that compose across nine skills. Rather than nine independent tools, CWF is one integrated plugin where each skill synchronizes the same underlying behavioral patterns — expert advisors surface blind spots in both requirement clarification and session retrospectives; tier classification routes decisions to evidence or humans consistently; agent orchestration parallelizes work from research through implementation.
+CWF addresses this with six building-block concepts that compose across twelve skills. Rather than independent tools, CWF is one integrated plugin where each skill synchronizes the same underlying behavioral patterns — expert advisors surface blind spots in both requirement clarification and session retrospectives; tier classification routes decisions to evidence or humans consistently; agent orchestration parallelizes work from research through implementation.
 
-The result: one plugin (`cwf`), eleven skills, seven hook groups. Context survives session boundaries. Decisions are evidence-backed. Quality criteria evolve with the system.
+The result: one plugin (`cwf`), twelve skills, seven hook groups. Context survives session boundaries. Decisions are evidence-backed. Quality criteria evolve with the system.
 
 ## Core Concepts
 
@@ -47,10 +78,11 @@ gather → clarify → plan → impl → retro
 | 7 | [handoff](#handoff) | `cwf:handoff` | Generate session or phase handoff documents |
 | 8 | [ship](#ship) | `cwf:ship` | Automate GitHub workflow — issues, PRs, and merge management |
 | 9 | [review](#review) | `cwf:review` | Multi-perspective review with 6 parallel reviewers |
-| 10 | [setup](#setup) | `cwf:setup` | Configure hook groups, detect tools, optionally generate project index |
-| 11 | [update](#update) | `cwf:update` | Check and apply CWF plugin updates |
+| 10 | [run](#run) | `cwf:run` | Orchestrate full pipeline chaining from gather to ship with stage gates |
+| 11 | [setup](#setup) | `cwf:setup` | Configure hook groups, detect tools, optionally generate project index |
+| 12 | [update](#update) | `cwf:update` | Check and apply CWF plugin updates |
 
-**Concept composition**: gather, clarify, plan, impl, retro, refactor, and review all synchronize Agent Orchestration. clarify is the richest composition — it synchronizes Expert Advisor, Tier Classification, Agent Orchestration, and Decision Point in a single workflow. review synchronizes Expert Advisor and Agent Orchestration with external CLI integration. handoff is the primary instantiation of the Handoff concept. refactor activates Provenance in holistic mode.
+**Concept composition**: gather, clarify, plan, impl, retro, refactor, review, and run all synchronize Agent Orchestration. clarify is the richest composition — it synchronizes Expert Advisor, Tier Classification, Agent Orchestration, and Decision Point in a single workflow. review synchronizes Expert Advisor and Agent Orchestration with external CLI integration. handoff is the primary instantiation of the Handoff concept. refactor activates Provenance in holistic mode.
 
 ## Installation
 
@@ -188,13 +220,14 @@ Full reference: [SKILL.md](plugins/cwf/skills/handoff/SKILL.md)
 Automate GitHub workflow — issue creation, PR with structured templates, and merge management.
 
 ```text
-cwf:ship                   # Interactive: choose issue, PR, or merge
-cwf:ship --issue           # Create GitHub issue
-cwf:ship --pr              # Create pull request
-cwf:ship --merge           # Merge current PR
+cwf:ship                                   # Show usage
+cwf:ship issue [--base B] [--no-branch]    # Create issue + feature branch
+cwf:ship pr [--base B] [--issue N] [--draft]  # Create pull request
+cwf:ship merge [--squash|--merge|--rebase]    # Merge approved PR
+cwf:ship status                            # Show issues, PRs, and checks
 ```
 
-Generates structured PR descriptions with lessons learned, critical decision summaries, and test checklists. Supports Korean PR templates and autonomous merge decision matrix.
+Builds issue/PR bodies from session context (`plan.md`, `lessons.md`, `retro.md`) including CDM/decision summaries, verification checklist, and human-judgment guardrails for merge decisions.
 
 Full reference: [SKILL.md](plugins/cwf/skills/ship/SKILL.md)
 
@@ -211,6 +244,20 @@ cwf:review --mode plan           # Review implementation plan
 6 parallel reviewers: 2 internal (Security, UX/DX) via Task agents + 2 external (Codex, Gemini) via CLI + 2 domain experts via Task agents. Graceful fallback when external CLIs are unavailable.
 
 Full reference: [SKILL.md](plugins/cwf/skills/review/SKILL.md)
+
+### run
+
+Full CWF pipeline auto-chaining with configurable stage gates.
+
+```text
+cwf:run <task description>           # Full pipeline from scratch
+cwf:run --from impl                  # Resume from impl stage
+cwf:run --skip review-plan,retro     # Skip specific stages
+```
+
+Executes gather → clarify → plan → review(plan) → impl → review(code) → retro → ship, with human gates before implementation and automatic chaining after implementation by default.
+
+Full reference: [SKILL.md](plugins/cwf/skills/run/SKILL.md)
 
 ### setup
 

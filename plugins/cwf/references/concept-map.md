@@ -1,8 +1,8 @@
 # Concept Synchronization Map
 
-<!-- Provenance: written at 9 skills, 14 hooks (S13.5-B3). Source: concept-distillation.md -->
+<!-- Provenance: reviewed at 12 skills, 15 hooks (S24). Source: concept-distillation.md -->
 
-Reference for refactor agents: 6 generic concepts with verification criteria, and a 9×6
+Reference for refactor agents: 6 generic concepts with verification criteria, and a 12×6
 synchronization map showing which concepts each skill composes.
 
 ## 1. Generic Concepts
@@ -165,7 +165,10 @@ Which generic concepts each skill composes:
 | impl | | | x | | x | |
 | retro | x | | x | | | |
 | refactor | | | x | | | x |
+| review | x | | x | | | |
+| run | | | x | | | |
 | handoff | | | | | x | |
+| ship | | | | | | |
 | setup | | | | | | |
 | update | | | | | | |
 
@@ -173,7 +176,7 @@ Which generic concepts each skill composes:
 
 - **Row** = one skill's concept composition (its molecule)
 - **Column** = one concept's reach across the system (its reuse)
-- **Sparse row** (setup, update) = infrastructure skill, no generic concept synchronization
+- **Sparse row** (setup, ship, update) = infrastructure/operational skill, no generic concept synchronization
 - **Dense row** (clarify) = complex skill composing many concepts
 - **Dense column** (Agent Orchestration) = pervasive concept reused across most skills
 
