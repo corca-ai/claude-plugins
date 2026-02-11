@@ -1,0 +1,15 @@
+### Semantic Gate Delivery With Backward Compatibility
+
+- **Expected**: semantic checks might require replacing existing `check-session.sh` paths.
+- **Actual**: adding opt-in `--semantic-gap` enabled semantic integrity checks without altering existing `--impl`/default behavior.
+- **Takeaway**: first-wave semantic enforcement can ship safely as additive mode before becoming default.
+
+When introducing stronger validation -> prefer additive mode first, then promote to default after false-positive review.
+
+### Unknown-to-Resolved Requires Explicit Trace
+
+- **Expected**: GAP-003 might remain Unknown due to historical ambiguity.
+- **Actual**: a dedicated trace from source intent lines to current implementation lines provided enough evidence for binary closure.
+- **Takeaway**: Unknown states should be treated as missing traceability, not permanent classification.
+
+When a gap is Unknown -> produce an intent-to-implementation trace table before discussing new implementation scope.

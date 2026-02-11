@@ -294,6 +294,14 @@ sessions:
     summary: "Implemented BL-001/002/003 closures: executable review contracts for --scenarios and --base, canonical runtime log migration to sessions/*.codex.md + sessions/*.claude.md with legacy compatibility reads, and aligned setup/readme/retro/handoff contracts with smoke validation evidence."
     artifacts: [clarify-result.md, plan.md, review-plan.md, lessons.md, impl-validation.md, review-code.md, retro.md, next-session.md]
 
+  - id: S20
+    title: "Close remaining open gap set"
+    dir: prompt-logs/260211-07-s20-close-remaining-open-gap-set
+    branch: feat/s17-handoff-protocol-hardening
+    completed_at: "2026-02-11"
+    summary: "Closed DEC-003/006/007 scope: GAP-003 dedicated trace with binary resolved verdict, stage-tier persistence gate policy encoded (hard critical / soft non-critical), and check-session semantic extension via --semantic-gap with positive/negative validation evidence."
+    artifacts: [clarify-result.md, plan.md, review-plan.md, gap-003-trace.md, gap-closure-update.md, lessons.md, impl-validation.md, review-code.md, retro.md, next-session.md]
+
 # External tool availability (detected by cwf:setup)
 tools:
   codex: available
@@ -317,26 +325,26 @@ hooks:
 # read by SessionStart(compact) hook for context recovery after auto-compact.
 # check-session.sh --live validates required fields are populated.
 live:
-  session_id: "S19"
-  dir: "prompt-logs/260211-06-s19-resolve-top-open-gaps"
+  session_id: "S20"
+  dir: "prompt-logs/260211-07-s20-close-remaining-open-gap-set"
   branch: "feat/s17-handoff-protocol-hardening"
   phase: "done"
-  task: "Resolve BL-001/BL-002/BL-003 from S18 with DEC-001/002/005 contracts"
+  task: "Close remaining S18 open gaps for DEC-003/DEC-006/DEC-007"
   key_files:
+    - scripts/check-session.sh
+    - plugins/cwf/references/context-recovery-protocol.md
+    - plugins/cwf/skills/plan/SKILL.md
     - plugins/cwf/skills/review/SKILL.md
     - plugins/cwf/skills/retro/SKILL.md
-    - plugins/cwf/skills/handoff/SKILL.md
-    - scripts/codex/sync-session-logs.sh
-    - plugins/cwf/hooks/scripts/log-turn.sh
-    - prompt-logs/260211-06-s19-resolve-top-open-gaps/impl-validation.md
+    - prompt-logs/260211-07-s20-close-remaining-open-gap-set/gap-003-trace.md
     - cwf-state.yaml
   decisions:
-    - "Implement --scenarios as executable contract with explicit validation failure path"
-    - "Use upstream-aware default base detection with deterministic --base override"
-    - "Unify runtime logs under prompt-logs/sessions with *.claude.md/*.codex.md and legacy read compatibility"
+    - "Reclassify GAP-003 via dedicated intent-to-implementation trace before proposing new implementation"
+    - "Apply hybrid persistence gates: hard fail for critical outputs, soft continue for non-critical outputs"
+    - "Extend check-session with additive --semantic-gap mode for first-wave semantic closure checks"
   decision_journal: []
   clarify_completed_at: "2026-02-11"
-  clarify_result_file: "prompt-logs/260211-06-s19-resolve-top-open-gaps/clarify-result.md"
+  clarify_result_file: "prompt-logs/260211-07-s20-close-remaining-open-gap-set/clarify-result.md"
 
 # Expert roster for domain expert sub-agents (used by clarify, review, retro)
 # Semi-automatic evolution: usage_count auto-incremented, new experts user-approved
