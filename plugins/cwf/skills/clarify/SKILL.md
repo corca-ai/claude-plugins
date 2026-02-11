@@ -114,16 +114,14 @@ Task tool:
   prompt: |
     Research best practices for these decision points.
 
-    Research strategy:
-    1. Use WebSearch to discover valid URLs first. NEVER construct URLs from
-       memory or training data — they may be outdated or nonexistent.
-    2. Find 3–5 authoritative sources. Stop when sufficient evidence is
-       collected — do NOT exhaustively search.
-    3. If a WebFetch returns 404 or 429, skip that domain entirely. Move to
-       the next source.
-    4. Prefer official documentation over blog posts.
+    ## Web Research Protocol
+    Read the "Web Research Protocol" section of
+    {CWF_PLUGIN_DIR}/references/agent-patterns.md and follow it exactly.
+    Key points: discover URLs via WebSearch first (never guess URLs),
+    use WebFetch then fall back to agent-browser for JS-rendered pages,
+    skip failed domains, budget turns for writing output.
+    You have Bash access for agent-browser CLI commands.
 
-    Use WebSearch for discovery, then WebFetch for specific URLs you found.
     For each point, find authoritative sources and expert perspectives.
     Cite real published work. Report findings — do not make decisions.
 

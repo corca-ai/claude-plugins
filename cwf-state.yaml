@@ -254,13 +254,21 @@ sessions:
     artifacts: [plan.md, lessons.md, retro.md, next-session.md, agent-browser-plan.md, session.md]
     stage_checkpoints: [setup]
 
+  - id: S15
+    title: "Agent-browser integration into sub-agent prompts"
+    dir: prompt-logs/260211-02-s15-agent-browser-integration
+    branch: marketplace-v3
+    completed_at: "2026-02-11"
+    summary: "Completed agent-browser integration: cwf:setup tool detection, 4 skill sub-agent prompts updated to reference Web Research Protocol (clarify, plan, retro, review), regression test 3/3 BDD pass (deming.org: WebFetch empty → agent-browser full content)."
+    artifacts: [plan.md, lessons.md]
+
 # External tool availability (detected by cwf:setup)
 tools:
   codex: available
   gemini: available
   agent_browser: available
-  tavily: unknown
-  exa: unknown
+  tavily: available
+  exa: available
 
 # Hook group toggle state (mirrors ~/.claude/cwf-hooks-enabled.sh)
 # Default: all enabled — hooks work without cwf:setup
@@ -277,21 +285,20 @@ hooks:
 # read by SessionStart(compact) hook for context recovery after auto-compact.
 # check-session.sh --live validates required fields are populated.
 live:
-  session_id: "S14"
-  dir: "prompt-logs/260211-01-s14-integration-test"
+  session_id: "S15"
+  dir: "prompt-logs/260211-02-s15-agent-browser-integration"
   branch: "marketplace-v3"
   phase: "done"
-  task: "Integration test (E2E, smoke, compact recovery, fail-fast), v3-migration-decisions.md, final cleanup"
+  task: "agent-browser integration into CWF sub-agent prompts (setup detection + 4 skill prompt updates + regression test)"
   key_files:
-    - plugins/cwf/skills/run/SKILL.md
+    - plugins/cwf/skills/setup/SKILL.md
     - plugins/cwf/skills/clarify/SKILL.md
     - plugins/cwf/skills/plan/SKILL.md
-    - plugins/cwf/skills/impl/SKILL.md
+    - plugins/cwf/skills/retro/SKILL.md
     - plugins/cwf/skills/review/SKILL.md
-    - plugins/cwf/hooks/scripts/compact-context.sh
-    - cwf-state.yaml
+    - plugins/cwf/references/agent-patterns.md
   decisions:
-    - "Merge to main deferred — user has additional pre-merge work"
+    - "Reference shared protocol instead of inline rules in sub-agent prompts"
   decision_journal: []
   clarify_completed_at: ""
   clarify_result_file: ""

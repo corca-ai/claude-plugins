@@ -318,7 +318,10 @@ Task(subagent_type="general-purpose", name="expert-alpha", max_turns=12, prompt=
   {behavioral criteria as checklist, qualitative criteria as narrative items}
 
   Review through your published framework. Use web search to verify your expert identity
-  and cite published work. Output in the review mode format from the guide.
+  and cite published work (follow Web Research Protocol in
+  {CWF_PLUGIN_DIR}/references/agent-patterns.md; you have Bash access for
+  agent-browser fallback on JS-rendered pages). Output in the review mode format
+  from the guide.
 
   ## Output Persistence
   Write your complete review verdict to: {session_dir}/review-expert-alpha.md
@@ -344,7 +347,10 @@ Task(subagent_type="general-purpose", name="expert-beta", max_turns=12, prompt="
   {behavioral criteria as checklist, qualitative criteria as narrative items}
 
   Review through your published framework. Use web search to verify your expert identity
-  and cite published work. Output in the review mode format from the guide.
+  and cite published work (follow Web Research Protocol in
+  {CWF_PLUGIN_DIR}/references/agent-patterns.md; you have Bash access for
+  agent-browser fallback on JS-rendered pages). Output in the review mode format
+  from the guide.
 
   ## Output Persistence
   Write your complete review verdict to: {session_dir}/review-expert-beta.md

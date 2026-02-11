@@ -87,7 +87,16 @@ Task tool:
   max_turns: 20
   prompt: |
     Research best practices, frameworks, and prior art relevant to this task.
-    Use WebSearch and WebFetch to find:
+
+    ## Web Research Protocol
+    Read the "Web Research Protocol" section of
+    {CWF_PLUGIN_DIR}/references/agent-patterns.md and follow it exactly.
+    Key points: discover URLs via WebSearch first (never guess URLs),
+    use WebFetch then fall back to agent-browser for JS-rendered pages,
+    skip failed domains, budget turns for writing output.
+    You have Bash access for agent-browser CLI commands.
+
+    Find:
     - Established methodologies or patterns for this type of work
     - Common pitfalls and how others avoided them
     - Relevant tools, libraries, or approaches
