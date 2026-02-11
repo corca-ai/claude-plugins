@@ -38,3 +38,16 @@
 
 ### Skill Gaps
 - No additional skill gaps identified.
+
+### Post-Retro Findings
+- 점검 질문: "스킬에서 Claude 강결합을 줄이기 위해 `~/.claude/.env` 의존성을 `~/.zshrc`/`~/.bashrc` 중심으로 옮기고, 하위호환을 보장했는가?"
+- 판정: **부분 구현 상태 (fully migrated 아님)**.
+- 구현된 부분:
+  - `plugins/cwf/skills/gather/scripts/search.sh`는 `shell env -> ~/.claude/.env -> shell profiles` 순서로 로딩.
+  - `plugins/cwf/hooks/scripts/log-turn.sh`는 동일한 3-tier 로딩을 적용.
+  - `plugins/cwf/skills/gather/scripts/slack-api.mjs`도 env -> `.env` -> profiles 순서 지원.
+- 미구현/잔존 결합:
+  - `plugins/cwf/hooks/scripts/smart-read.sh`는 `~/.claude/.env`만 로딩.
+  - `plugins/cwf/hooks/scripts/slack-send.sh`도 `~/.claude/.env` 중심 로딩.
+  - `README.md`/`README.ko.md` 설정 문구가 여전히 `.env` 중심 안내라, 운영 관점에서 표준 위치 전환이 완료되지 않음.
+- 결론: backward compatibility 자체는 일부 스크립트에서 확보됐지만, repository 전체 기준으로는 `.env` 결합이 남아 있어 "이전 완료"로 보기는 어렵다.
