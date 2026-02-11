@@ -92,7 +92,7 @@ TEMP_ENTRIES=$(mktemp)
 trap 'rm -f "$TEMP_ENTRIES"; rmdir "$LOCK_DIR" 2>/dev/null' EXIT
 
 # ── Resolve output file path ────────────────────────────────────────────────
-# Filename format: {yymmdd}-{hhmm}-{hash}.md
+# Filename format: {yymmdd}-{hhmm}-{hash}.claude.md
 # Session start time is used for {hhmm}, cached in state for consistency
 OUT_FILE_STATE="${STATE_DIR}/out_file"
 mkdir -p "$LOG_DIR"
@@ -102,7 +102,7 @@ if [ -f "$OUT_FILE_STATE" ]; then
 else
     # Check for existing file with this hash (handles process restart)
     EXISTING=""
-    for f in "$LOG_DIR"/*-"${HASH}.md"; do
+    for f in "$LOG_DIR"/*-"${HASH}.claude.md" "$LOG_DIR"/*-"${HASH}.md"; do
         if [ -f "$f" ]; then
             EXISTING="$f"
             break
@@ -120,7 +120,7 @@ else
         fi
         [ -z "${START_TIME:-}" ] && START_TIME=$(date +%H%M)
         DATE_STR=$(date +%y%m%d)
-        OUT_FILE="${LOG_DIR}/${DATE_STR}-${START_TIME}-${HASH}.md"
+        OUT_FILE="${LOG_DIR}/${DATE_STR}-${START_TIME}-${HASH}.claude.md"
     fi
     echo "$OUT_FILE" > "$OUT_FILE_STATE"
 fi

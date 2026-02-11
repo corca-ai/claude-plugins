@@ -60,6 +60,10 @@ Read the current session's artifacts (if they exist):
   - Identify entries with unimplemented proposals (keywords: "구현은 별도 세션", "스코프 밖", "future", "deferred", "separate session", "out of scope")
 - `retro.md` — retrospective (if available)
   - Identify action items not yet addressed
+- Runtime session logs (optional but recommended when available)
+  - Canonical unified path: `prompt-logs/sessions/*.claude.md`, `prompt-logs/sessions/*.codex.md`
+  - Legacy compatibility reads: `prompt-logs/sessions/*.md`, `prompt-logs/sessions-codex/*.md`
+  - Use these as additional evidence when extracting unresolved items and collaboration signals
 
 ---
 
@@ -105,7 +109,8 @@ List files the next session agent must read before starting:
 1. `AGENTS.md` — shared project rules and protocols (cross-agent)
 2. `docs/plugin-dev-cheatsheet.md` — plugin development patterns
 3. `cwf-state.yaml` — session history and project state
-4. {task-specific files from master-plan or plan.md}
+4. `prompt-logs/sessions/*.claude.md` / `*.codex.md` (or legacy `sessions-codex/*.md`) — runtime conversation evidence when available
+5. {task-specific files from master-plan or plan.md}
 ```
 
 Always include `AGENTS.md`, `docs/plugin-dev-cheatsheet.md`, and `cwf-state.yaml` as standard entries. Add task-specific files based on the next session's scope. Include `CLAUDE.md` only when Claude runtime-specific behavior is relevant.
@@ -229,6 +234,9 @@ Example: "clarify + design → implementation"
 The agent executing this skill holds the clarify/gather context in its active conversation. Extract the following from conversation history and session artifacts:
 
 1. **Context Files**: Which files must the next phase agent read? Always include `AGENTS.md` and `cwf-state.yaml`. Add files that emerged as critical during the clarify/gather phase. Include `CLAUDE.md` only if runtime-specific behavior matters.
+   - When available, include runtime logs from canonical/legacy patterns:
+     `prompt-logs/sessions/*.claude.md`, `prompt-logs/sessions/*.codex.md`,
+     `prompt-logs/sessions/*.md`, `prompt-logs/sessions-codex/*.md`
 2. **Design Decisions**: Key choices made during clarify/gather with rationale. Source from clarification summaries, user decisions, and discussion outcomes
 3. **Protocols**: Rules and behavioral protocols discovered or established during the current phase. Source from `lessons.md` entries and explicit user instructions
 4. **Prohibitions**: Explicit "do not" constraints. Source from user instructions, clarify decisions, and scope boundaries

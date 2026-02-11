@@ -8,7 +8,7 @@
 #
 # By default this script:
 # - Finds the latest Codex session for the current cwd
-# - Writes markdown to ./prompt-logs/sessions-codex
+# - Writes markdown to ./prompt-logs/sessions as *.codex.md
 # - Does not copy raw JSONL (use --raw to enable)
 
 set -euo pipefail
@@ -19,7 +19,7 @@ REDACTOR_SCRIPT="$SCRIPT_DIR/redact-sensitive.pl"
 JSON_REDACTOR_SCRIPT="$SCRIPT_DIR/redact-jsonl.sh"
 
 DEFAULT_CWD="$(pwd)"
-DEFAULT_OUT_DIR="$DEFAULT_CWD/prompt-logs/sessions-codex"
+DEFAULT_OUT_DIR="$DEFAULT_CWD/prompt-logs/sessions"
 CODEX_SESSIONS_DIR="${CODEX_SESSIONS_DIR:-$HOME/.codex/sessions}"
 TRUNCATE_THRESHOLD="${CODEX_PROMPT_LOGGER_TRUNCATE:-20}"
 
@@ -43,7 +43,7 @@ Options:
   --jsonl <path>       Export a specific JSONL file directly
   --cwd <path>         Prefer sessions whose session_meta.cwd matches path (default: $PWD)
   --since-epoch <sec>  Prefer sessions modified at/after this epoch seconds value
-  --out-dir <path>     Output directory (default: ./prompt-logs/sessions-codex)
+  --out-dir <path>     Output directory (default: ./prompt-logs/sessions)
   --raw                Copy raw JSONL into out-dir/raw
   --no-raw             Backward-compatible alias for default behavior (no raw copy)
   --quiet              Suppress informational output
@@ -287,7 +287,7 @@ START_HHMM=$(utc_to_local "$SESSION_STARTED_UTC" "%H%M")
 [ -z "$START_HHMM" ] && START_HHMM="$(date +%H%M)"
 
 mkdir -p "$OUT_DIR"
-OUT_FILE="$OUT_DIR/${DATE_STR}-${START_HHMM}-${HASH}.md"
+OUT_FILE="$OUT_DIR/${DATE_STR}-${START_HHMM}-${HASH}.codex.md"
 
 EVENTS_FILE=$(mktemp)
 trap 'rm -f "$EVENTS_FILE"' EXIT

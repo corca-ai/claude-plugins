@@ -186,14 +186,21 @@ Write to `{output-dir}/retro.md` using the format below.
 
 ### 6. Link Session Log
 
-If `prompt-logs/sessions/` exists (prompt-logger plugin installed):
-1. List files matching today's date (`{YYMMDD}-*.md`), filter out already-symlinked ones
-2. Read a sample of each candidate to verify it matches the current session
-3. If verified and `{output-dir}/session.md` does not exist, create a relative symlink:
+Discover runtime logs using this order:
+1. Canonical path: `prompt-logs/sessions/`
+   - Prefer suffix files: `{YYMMDD}-*.claude.md`, `{YYMMDD}-*.codex.md`
+   - Also read legacy unsuffixed files: `{YYMMDD}-*.md`
+2. Legacy compatibility path: `prompt-logs/sessions-codex/`
+   - Read `{YYMMDD}-*.md` only when no canonical codex candidate exists
+
+Then:
+1. Filter out already-symlinked candidates.
+2. Read a sample of each candidate to verify it matches the current session.
+3. If verified and `{output-dir}/session.md` does not exist, create a relative symlink using the actual source directory:
    ```bash
-   ln -s "../sessions/{filename}" "{output-dir}/session.md"
+   ln -s "../{sessions-or-sessions-codex}/{filename}" "{output-dir}/session.md"
    ```
-4. If no candidates or directory does not exist, skip silently
+4. If no candidates or directories do not exist, skip silently.
 
 ### 7. Persist Findings
 
