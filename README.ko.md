@@ -250,8 +250,9 @@ cwf:setup --codex-wrapper
 적용되는 내용:
 - `~/.agents/skills/*`, `~/.agents/references`를 로컬 CWF에 심링크 (최신 파일 자동 반영)
 - `~/.local/bin/codex` wrapper 설치 + PATH 업데이트(`~/.zshrc`, `~/.bashrc`)
-- 이후 `codex` 실행 시 세션 로그가 `prompt-logs/sessions-codex/`로 자동 동기화
-- 동기화되는 markdown/raw 로그는 자동으로 민감정보(API 키/토큰) 마스킹(redaction) 처리
+- 이후 `codex` 실행 시 세션 markdown 로그가 `prompt-logs/sessions-codex/`로 자동 동기화
+- 동기화 대상은 현재 실행에서 갱신된 세션으로 우선 고정되어, 같은 cwd에서 잘못된 세션 export를 줄입니다
+- raw JSONL 복사는 기본 비활성(옵션 `--raw`)이며, raw export 시에도 민감정보 마스킹(redaction)이 적용됩니다
 
 검증:
 

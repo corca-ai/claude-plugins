@@ -249,8 +249,9 @@ cwf:setup --codex-wrapper
 What this enables:
 - `~/.agents/skills/*` and `~/.agents/references` symlinked to local CWF (latest files auto-loaded)
 - `~/.local/bin/codex` wrapper installation + PATH update (`~/.zshrc`, `~/.bashrc`)
-- Every `codex` run auto-syncs session logs into `prompt-logs/sessions-codex/`
-- Synced markdown/raw logs are redacted automatically (API keys/tokens masked before write)
+- Every `codex` run auto-syncs session markdown logs into `prompt-logs/sessions-codex/`
+- Sync is anchored to the session updated during the current run (reduces wrong-session exports on shared cwd)
+- Raw JSONL copy is opt-in (`--raw`); redaction still applies when raw export is enabled
 
 Verify:
 

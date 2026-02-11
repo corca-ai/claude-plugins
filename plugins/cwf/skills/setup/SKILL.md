@@ -291,7 +291,8 @@ The wrapper preserves normal Codex behavior and runs:
 bash {SKILL_DIR}/../../../../scripts/codex/sync-session-logs.sh --cwd "$PWD"
 ```
 
-after each Codex run to persist markdown + raw JSONL under `prompt-logs/sessions-codex/`.
+after each Codex run to persist markdown logs under `prompt-logs/sessions-codex/`
+(`raw` JSONL copy is opt-in via `--raw`).
 
 ### 2.6.3 Report and Reversal
 

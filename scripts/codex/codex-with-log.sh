@@ -38,13 +38,19 @@ if [ -z "$REAL_CODEX" ]; then
   exit 1
 fi
 
+RUN_START_EPOCH="$(date +%s 2>/dev/null || true)"
+
 set +e
 "$REAL_CODEX" "$@"
 EXIT_CODE=$?
 set -e
 
 if [ -x "$SYNC_SCRIPT" ]; then
-  "$SYNC_SCRIPT" --cwd "$PWD" --quiet || true
+  if [ -n "$RUN_START_EPOCH" ]; then
+    "$SYNC_SCRIPT" --cwd "$PWD" --since-epoch "$RUN_START_EPOCH" --quiet || true
+  else
+    "$SYNC_SCRIPT" --cwd "$PWD" --quiet || true
+  fi
 fi
 
 exit "$EXIT_CODE"
