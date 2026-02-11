@@ -102,13 +102,13 @@ List files the next session agent must read before starting:
 ```markdown
 ## Context Files to Read
 
-1. `CLAUDE.md` — project rules and protocols
+1. `AGENTS.md` — shared project rules and protocols (cross-agent)
 2. `docs/plugin-dev-cheatsheet.md` — plugin development patterns
 3. `cwf-state.yaml` — session history and project state
 4. {task-specific files from master-plan or plan.md}
 ```
 
-Always include `CLAUDE.md`, `docs/plugin-dev-cheatsheet.md`, and `cwf-state.yaml` as standard entries. Add task-specific files based on the next session's scope.
+Always include `AGENTS.md`, `docs/plugin-dev-cheatsheet.md`, and `cwf-state.yaml` as standard entries. Add task-specific files based on the next session's scope. Include `CLAUDE.md` only when Claude runtime-specific behavior is relevant.
 
 #### 2. Task Scope
 
@@ -190,7 +190,7 @@ the trigger list in skill descriptions. Use CWF skills for workflow stages
 instead of manual execution.
 ```
 
-Reference the discovery mechanism from `CLAUDE.md` Dogfooding section. Do not hardcode a list of specific skills.
+Reference the discovery mechanism from `AGENTS.md` Dogfooding section. Do not hardcode a list of specific skills.
 
 #### 8. Start Command
 
@@ -228,7 +228,7 @@ Example: "clarify + design → implementation"
 
 The agent executing this skill holds the clarify/gather context in its active conversation. Extract the following from conversation history and session artifacts:
 
-1. **Context Files**: Which files must the next phase agent read? Always include `CLAUDE.md` and `cwf-state.yaml`. Add files that emerged as critical during the clarify/gather phase
+1. **Context Files**: Which files must the next phase agent read? Always include `AGENTS.md` and `cwf-state.yaml`. Add files that emerged as critical during the clarify/gather phase. Include `CLAUDE.md` only if runtime-specific behavior matters.
 2. **Design Decisions**: Key choices made during clarify/gather with rationale. Source from clarification summaries, user decisions, and discussion outcomes
 3. **Protocols**: Rules and behavioral protocols discovered or established during the current phase. Source from `lessons.md` entries and explicit user instructions
 4. **Prohibitions**: Explicit "do not" constraints. Source from user instructions, clarify decisions, and scope boundaries
@@ -248,7 +248,7 @@ Write to `prompt-logs/{session-dir}/phase-handoff.md`:
 
 ## Context Files to Read
 
-1. `CLAUDE.md` — project rules and protocols
+1. `AGENTS.md` — shared project rules and protocols (cross-agent)
 2. `cwf-state.yaml` — current project state
 3. {additional files from 3b.2}
 

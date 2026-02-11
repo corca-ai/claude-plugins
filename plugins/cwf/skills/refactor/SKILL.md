@@ -313,10 +313,10 @@ Present the report summary. The user may want to discuss findings, adjust priori
 
 Review documentation consistency across the repository.
 
-### 1. CLAUDE.md Review
+### 1. Agent Entry Docs Review
 
-Read the project's `CLAUDE.md` and evaluate:
-- Size: flag if exceeding ~200 lines (progressive disclosure — details belong in docs/)
+Read the project's `AGENTS.md` (and runtime adapter docs like `CLAUDE.md`) and evaluate:
+- Size: flag if AGENTS exceeds ~200 lines (progressive disclosure — details belong in docs/)
 - Accuracy: do referenced files/paths exist?
 - Staleness: do referenced plugins/skills still exist and match current state?
 
@@ -360,7 +360,7 @@ Read `{SKILL_DIR}/references/docs-criteria.md` Section 5 and evaluate:
 Read `{SKILL_DIR}/references/docs-criteria.md` Section 6 and synthesize:
 - Merge candidates (scope-overlapping docs → identify primary absorber)
 - Deletion candidates (unique content fits elsewhere)
-- CLAUDE.md trimming proposals (obvious + automation-redundant + duplicated)
+- AGENTS/adapter trimming proposals (obvious + automation-redundant + duplicated)
 - Target structure: before/after doc set comparison
 - Principle compliance: rate each doc against the 7 documentation principles
 
