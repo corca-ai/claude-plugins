@@ -32,6 +32,22 @@ cwf:setup --codex-wrapper # Optional Codex wrapper install for session log sync
 cwf:setup --index        # Generate index.md only
 ```
 
+## Mode Routing
+
+Parse input flags and run only the relevant phases:
+
+| Input | Phases |
+|-------|--------|
+| `cwf:setup` | 1 → 2 → 2.4 (if codex available) → 3 → 4 |
+| `cwf:setup --hooks` | 1 → 4 |
+| `cwf:setup --tools` | 2 → 4 |
+| `cwf:setup --codex` | 2.5 → 4 |
+| `cwf:setup --codex-wrapper` | 2.6 → 4 |
+| `cwf:setup --index` | 3 → 4 |
+
+When mode is full setup and Codex CLI is available, do not silently skip Codex integration.
+Always run Phase 2.4 and ask the user which integration level to apply.
+
 ---
 
 ## Phase 1: Hook Group Selection
@@ -72,7 +88,7 @@ export HOOK_READ_ENABLED="true"
 export HOOK_LINT_MARKDOWN_ENABLED="false"
 export HOOK_LINT_SHELL_ENABLED="true"
 export HOOK_WEBSEARCH_REDIRECT_ENABLED="true"
-export HOOK_PLAN_PROTOCOL_ENABLED="true"
+export HOOK_COMPACT_RECOVERY_ENABLED="true"
 ```
 
 - One `export HOOK_{GROUP}_ENABLED` line per group (uppercased)
@@ -142,6 +158,65 @@ Tool Detection Results:
 
 ---
 
+## Phase 2.4: Codex Integration on Full Setup
+
+Use this phase when:
+- Mode is full setup (`cwf:setup`)
+- Phase 2 detected `codex: available`
+
+### 2.4.1 Ask Integration Level
+
+Use AskUserQuestion (single choice):
+
+```text
+Codex CLI was detected. How should CWF integrate with Codex?
+```
+
+Options:
+- `Skills + wrapper (recommended)`:
+  - Link CWF skills/references into `~/.agents/*`
+  - Install `codex` wrapper and PATH line for automatic session log sync
+- `Skills only`:
+  - Link skills/references only (no wrapper install)
+- `Skip for now`:
+  - Do not change Codex integration in this run
+
+### 2.4.2 Execute Selection
+
+If `Skills + wrapper (recommended)`:
+
+```bash
+bash {SKILL_DIR}/../../../../scripts/codex/sync-skills.sh --cleanup-legacy
+bash {SKILL_DIR}/../../../../scripts/codex/install-wrapper.sh --enable --add-path
+bash {SKILL_DIR}/../../../../scripts/codex/install-wrapper.sh --status
+```
+
+If `Skills only`:
+
+```bash
+bash {SKILL_DIR}/../../../../scripts/codex/sync-skills.sh --cleanup-legacy
+```
+
+If `Skip for now`: no command execution in this phase.
+
+### 2.4.3 Always Print Post-Setup Verification
+
+When wrapper install was selected, always report:
+
+```bash
+bash {SKILL_DIR}/../../../../scripts/codex/install-wrapper.sh --status
+type -a codex
+```
+
+And include this note in plain language:
+
+```text
+Open a new shell (or source ~/.zshrc). After that, running `codex` will auto-sync session logs.
+Aliases that call `codex` (for example: codexyolo='codex ...') also inherit this behavior.
+```
+
+---
+
 ## Phase 2.5: Codex User-Scope Skill Sync (Optional)
 
 Use this phase when:
@@ -168,6 +243,11 @@ Report:
 - Number of linked skills
 - Destination paths (`~/.agents/skills`, `~/.agents/references`)
 - Whether legacy `~/.codex/skills` was moved and backup path
+- Quick verification command:
+
+```bash
+ls -la ~/.agents/skills
+```
 
 ---
 
@@ -221,6 +301,12 @@ Provide rollback command:
 
 ```bash
 bash {SKILL_DIR}/../../../../scripts/codex/install-wrapper.sh --disable
+```
+
+Include activation note:
+
+```text
+If wrapper is active, restart shell (or source ~/.zshrc) before testing `codex`.
 ```
 
 ---

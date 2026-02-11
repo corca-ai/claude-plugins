@@ -109,6 +109,8 @@ enable_wrapper() {
   fi
 
   status
+  echo "Open a new shell (or run: source ~/.zshrc) before testing codex."
+  echo "Aliases that call 'codex' (e.g., codexyolo='codex ...') will also use the wrapper."
 }
 
 disable_wrapper() {
