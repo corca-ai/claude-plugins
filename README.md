@@ -336,7 +336,7 @@ CWF includes 7 hook groups that run automatically. All are enabled by default; u
 | `attention` | Notification, Pre/PostToolUse | Slack notifications on idle and AskUserQuestion |
 | `log` | Stop, SessionEnd | Auto-log conversation turns to markdown |
 | `read` | PreToolUse → Read | File-size aware reading guard (warn >500 lines, block >2000) |
-| `lint_markdown` | PostToolUse → Write\|Edit | Markdown validation — lint violations trigger self-correction |
+| `lint_markdown` | PostToolUse → Write\|Edit | Markdown lint + local link validation — lint violations trigger self-correction, broken links reported async |
 | `lint_shell` | PostToolUse → Write\|Edit | ShellCheck validation for shell scripts |
 | `websearch_redirect` | PreToolUse → WebSearch | Redirect Claude's WebSearch to `cwf:gather --search` |
 | `compact_recovery` | SessionStart → compact | Inject live session state after auto-compact for context recovery |
