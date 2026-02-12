@@ -186,6 +186,14 @@ def main():
     # Collect target .md files (no symlink following)
     md_files = sorted(repo_root.rglob("*.md"))
 
+    # Always exclude non-documentation directories
+    always_exclude = [repo_root / "node_modules", repo_root / ".git"]
+    # Also exclude nested node_modules (e.g., scripts/node_modules/)
+    md_files = [
+        f for f in md_files
+        if not any(part == "node_modules" or part == ".git" for part in f.relative_to(repo_root).parts)
+    ]
+
     # Filter out prompt-logs unless requested
     if not args.include_prompt_logs:
         prompt_logs_dir = repo_root / "prompt-logs"
