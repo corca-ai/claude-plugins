@@ -1,0 +1,41 @@
+# .lychee.toml — Link checker configuration for lychee
+# See: https://lychee.cli.rs/usage/config/
+
+# Check anchor fragments within documents
+include_fragments = true
+
+# Only check Markdown files
+include_extensions = ["md"]
+
+# Exclude directories from scanning
+exclude_path = [
+  "prompt-logs/",
+  "node_modules/",
+  ".git/",
+  "references/anthropic-skills-guide/"
+]
+
+# Caching
+cache = true
+max_cache_age = "2d"
+
+# Network settings
+max_retries = 2
+timeout = 20
+max_concurrency = 8
+
+# Accept these HTTP status codes as valid
+accept = [200, 204, 301, 302, 429]
+
+# Exclude known-placeholder and local-only URLs
+exclude = [
+  "^https?://localhost",
+  "^https?://127\\.0\\.0\\.1",
+  "^https?://0\\.0\\.0\\.0",
+  "^https?://example\\.com",
+  "^https?://example\\.org",
+  "^https?://example\\.net",
+  "^https?://(.+\\.)?test$",
+  "^https?://placeholder",
+  "^https?://your-"
+]

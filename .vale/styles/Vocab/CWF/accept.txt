@@ -1,0 +1,10 @@
+cwf
+lychee
+datasketch
+ajv
+yq
+remark
+shingle
+minhash
+provenance
+sidecar

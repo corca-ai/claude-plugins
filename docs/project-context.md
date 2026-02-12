@@ -35,6 +35,7 @@ Project and organizational facts accumulated from retrospectives.
 - **Plan decomposition: concept-level over file-level**: When a plan modifies N files with the same conceptual change, decompose by concept ("introduce protocol X, then project into N targets") rather than by file ("modify file A, modify file B"). Concept-level decomposition naturally produces deep shared modules + shallow connection points.
 - **Failure pattern classification before solution debate**: When a known problem has multiple proposed solutions, classify failure data by type (bottom-up) before debating solution architecture (top-down). If the majority of failures originate from the same tool limitation, replace the tool — don't redesign the architecture. "Diagnose before prescribing."
 - **Execution contract commit checkpoint**: When a handoff contract requires meaningful commit units, enforce a checkpoint after the first completed unit (`git status --short` + commit-boundary decision + commit) before starting the next major unit. This prevents end-loaded monolithic commits.
+- **Filesystem scans ignore .gitignore**: Every script that scans for files (`.md` or otherwise) must explicitly exclude `node_modules/`, `.git/`, and other non-content directories. `.gitignore` is a git-layer concept — `pathlib.rglob()`, `find`, `readdirSync`, and similar filesystem-level tools do not respect it.
 
 ## Directory Classification Criteria
 

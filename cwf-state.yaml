@@ -318,6 +318,14 @@ sessions:
     summary: "Established release-readiness audit scope and gates for concerns 1-4 with explicit pre-Step4 split and mention-only execution contract."
     artifacts: [plan.md, lessons.md, next-session.md]
 
+  - id: S24
+    title: "Static analysis tooling integration"
+    dir: prompt-logs/260212-01-static-analysis-tooling
+    branch: feat/s24-static-analysis-tooling
+    completed_at: "2026-02-12"
+    summary: "Added 5 standalone analysis scripts (check-links.sh, doc-graph.mjs, find-duplicates.py, check-schemas.sh, doc-churn.sh) + 3 JSON schemas + .lychee.toml + vale stub. Full cwf:run pipeline execution. PR #23."
+    artifacts: [plan.md, lessons.md, retro.md, session.md]
+
   - id: S23
     title: "Execute concerns 1-3 + prepare Step 4 prompt"
     dir: prompt-logs/260211-09-s22-pre-release-readiness-audit-plan
@@ -349,28 +357,14 @@ hooks:
 # read by SessionStart(compact) hook for context recovery after auto-compact.
 # check-session.sh --live validates required fields are populated.
 live:
-  session_id: "S23"
-  dir: "prompt-logs/260211-09-s22-pre-release-readiness-audit-plan"
-  branch: "feat/s23-prestep4-audit-exec"
-  phase: "ship"
-  task: "Create PR for S23 pre-Step4 audit package after retrospective completion"
+  session_id: "S24"
+  dir: "prompt-logs/260212-01-static-analysis-tooling"
+  branch: "feat/s24-static-analysis-tooling"
+  phase: "done"
+  task: "Integrate static analysis tools: lychee, doc-graph, datasketch, schema validation, git-log analysis"
   key_files:
-    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/retro.md
-    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/refactor-evidence.md
-    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/skill-coverage-matrix.md
-    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/script-coverage-matrix.md
-    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/readme-framing-audit.md
-    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/discoverability-audit.md
-    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/readiness-prestep4.md
-    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/step4-interactive-prompt.md
-    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/next-session.md
-    - plugins/cwf/references/plan-protocol.md
-    - plugins/cwf/skills/handoff/SKILL.md
     - cwf-state.yaml
-  decisions:
-    - "Reconciled planned 11-skill scope to live 12-skill inventory for full-coverage audit execution."
-    - "Classified concerns 1-3 as FAIL blockers and deferred final Go/No-Go until interactive Step4."
-    - "Promoted commit-gate drift lesson into explicit execution-contract checkpoint rule."
+  decisions: []
   decision_journal: []
 
 # Expert roster for domain expert sub-agents (used by clarify, review, retro)
@@ -391,9 +385,9 @@ expert_roster:
   - name: "David Parnas"
     domain: "information hiding, modular decomposition criteria"
     source: "On the Criteria To Be Used in Decomposing Systems into Modules (CACM, 1972)"
-    rationale: "Applied to concept vs principle distinction and directory structure classification"
+    rationale: "Applied to concept vs principle distinction and directory structure classification, S24 retro: script decomposition as Decomposition 2 (secrets = detection algorithms), check-schemas.sh target encoding as information leakage, review filename collision as namespace sharing violation"
     introduced: "S13.5-B2"
-    usage_count: 1
+    usage_count: 2
   - name: "Gary Klein"
     domain: "naturalistic decision-making, recognition-primed decision model"
     source: "Sources of Power: How People Make Decisions (MIT Press, 1998)"
@@ -421,15 +415,15 @@ expert_roster:
   - name: "John Ousterhout"
     domain: "deep vs shallow modules, information leakage, strategic vs tactical programming, interface bloat"
     source: "A Philosophy of Software Design (2018/2021), Always Measure One Level Deeper (CACM, 2018)"
-    rationale: "Applied to context recovery protocol depth analysis, SKILL.md interface bloat from tactical accumulation, concept-level vs file-level plan decomposition"
+    rationale: "Applied to context recovery protocol depth analysis, SKILL.md interface bloat from tactical accumulation, concept-level vs file-level plan decomposition, S24 code review: doc-graph.mjs shallow module pattern, check-schemas.sh target encoding as shallow abstraction"
     introduced: "S32"
-    usage_count: 1
+    usage_count: 2
   - name: "W. Edwards Deming"
     domain: "systems thinking, common cause vs special cause variation, PDCA cycle, build quality into process"
     source: "Out of the Crisis (MIT Press, 1986), Point 3: cease dependence on inspection"
-    rationale: "Applied to convention-vs-structure enforcement gap, commit strategy recurrence as common cause variation, check-session.sh as inspection-to-process conversion, TOOL_ERROR as common cause variation, Check vs Study distinction in review orchestration"
+    rationale: "Applied to convention-vs-structure enforcement gap, commit strategy recurrence as common cause variation, check-session.sh as inspection-to-process conversion, TOOL_ERROR as common cause variation, Check vs Study distinction in review orchestration, S24 retro: 5 inspection tools as Point 3 tension, 4/6 agent failure as common cause variation, datasketch threshold as PDCA cycle, additionalProperties as statistical process control"
     introduced: "S33"
-    usage_count: 2
+    usage_count: 3
   - name: "Chris Argyris"
     domain: "espoused theory vs theory-in-use, single-loop vs double-loop learning, defensive routines"
     source: "Organizational Learning: A Theory of Action Perspective (Argyris & Schön, 1978), Teaching Smart People How to Learn (HBR, 1991)"
