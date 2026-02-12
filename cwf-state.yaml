@@ -349,28 +349,14 @@ hooks:
 # read by SessionStart(compact) hook for context recovery after auto-compact.
 # check-session.sh --live validates required fields are populated.
 live:
-  session_id: "S23"
-  dir: "prompt-logs/260211-09-s22-pre-release-readiness-audit-plan"
-  branch: "feat/s23-prestep4-audit-exec"
-  phase: "ship"
-  task: "Create PR for S23 pre-Step4 audit package after retrospective completion"
+  session_id: "S24"
+  dir: "prompt-logs/260212-01-static-analysis-tooling"
+  branch: "feat/s24-static-analysis-tooling"
+  phase: "impl"
+  task: "Integrate static analysis tools: lychee, doc-graph, datasketch, schema validation, git-log analysis"
   key_files:
-    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/retro.md
-    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/refactor-evidence.md
-    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/skill-coverage-matrix.md
-    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/script-coverage-matrix.md
-    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/readme-framing-audit.md
-    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/discoverability-audit.md
-    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/readiness-prestep4.md
-    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/step4-interactive-prompt.md
-    - prompt-logs/260211-09-s22-pre-release-readiness-audit-plan/next-session.md
-    - plugins/cwf/references/plan-protocol.md
-    - plugins/cwf/skills/handoff/SKILL.md
     - cwf-state.yaml
-  decisions:
-    - "Reconciled planned 11-skill scope to live 12-skill inventory for full-coverage audit execution."
-    - "Classified concerns 1-3 as FAIL blockers and deferred final Go/No-Go until interactive Step4."
-    - "Promoted commit-gate drift lesson into explicit execution-contract checkpoint rule."
+  decisions: []
   decision_journal: []
 
 # Expert roster for domain expert sub-agents (used by clarify, review, retro)
