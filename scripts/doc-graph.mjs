@@ -8,7 +8,7 @@
 //   (default)  Print human-readable summary
 // Exit 0 = clean, Exit 1 = orphans or broken refs found
 
-import { readFileSync, existsSync, statSync } from 'node:fs';
+import { readFileSync, existsSync, statSync, readdirSync } from 'node:fs';
 import { resolve, relative, dirname, extname } from 'node:path';
 import { execSync } from 'node:child_process';
 import { unified } from 'unified';
@@ -111,7 +111,6 @@ function collectMdFiles(dir) {
 }
 
 function readdirRecursive(dir) {
-  const { readdirSync } = await_import_fs();
   const results = [];
   const entries = readdirSync(dir, { withFileTypes: true });
   for (const entry of entries) {
@@ -132,13 +131,6 @@ function readdirRecursive(dir) {
   }
   return results;
 }
-
-// Synchronous fs import workaround (already imported at top)
-function await_import_fs() {
-  return { readdirSync: readdirSyncImpl };
-}
-
-import { readdirSync as readdirSyncImpl } from 'node:fs';
 
 // --- Parse markdown and extract links ---
 
@@ -273,22 +265,7 @@ const inboundCounts = Object.entries(inbound)
 
 // --- Output ---
 
-if (mode === 'json' || (mode === 'summary' && jsonOutput)) {
-  // Full JSON output
-  const output = {
-    stats: {
-      total_docs: totalDocs,
-      total_links: totalLinks,
-      orphan_count: orphans.length,
-      broken_ref_count: brokenRefs.length,
-    },
-    adjacency,
-    orphans,
-    broken_refs: brokenRefs,
-    top_referenced: inboundCounts.slice(0, 10),
-  };
-  console.log(JSON.stringify(output, null, 2));
-} else if (mode === 'orphans') {
+if (mode === 'orphans') {
   if (jsonOutput) {
     console.log(JSON.stringify({ orphans, count: orphans.length }, null, 2));
   } else {

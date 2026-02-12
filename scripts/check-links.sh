@@ -76,17 +76,17 @@ fi
 # Collect .md files (excluding paths from .lychee.toml exclude_path)
 LYCHEE_ARGS+=("**/*.md")
 
-echo -e "${GREEN}Running link check...${NC}"
+echo -e "${GREEN}Running link check...${NC}" >&2
 if [[ "$LOCAL_ONLY" == "true" ]]; then
-  echo -e "${YELLOW}Mode: local only (skipping external URLs)${NC}"
+  echo -e "${YELLOW}Mode: local only (skipping external URLs)${NC}" >&2
 fi
 
 # Run lychee — exit code 0 = no broken links, non-zero = broken links found
 if lychee "${LYCHEE_ARGS[@]}"; then
-  echo -e "${GREEN}All links are valid.${NC}"
+  echo -e "${GREEN}All links are valid.${NC}" >&2
   exit 0
 else
   EXIT_CODE=$?
-  echo -e "${RED}Broken links detected.${NC}"
+  echo -e "${RED}Broken links detected.${NC}" >&2
   exit "$EXIT_CODE"
 fi

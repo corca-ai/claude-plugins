@@ -125,7 +125,7 @@ validate_target() {
     local tmpfile
     tmpfile=$(mktemp "${TMPDIR:-/tmp}/check-schemas-XXXXXX.json")
     TMPFILES+=("$tmpfile")
-    if ! yq -o json "$data_path" > "$tmpfile" 2>&1; then
+    if ! yq -o json "$data_path" > "$tmpfile"; then
       echo "Error: yq conversion failed for ${data}" >&2
       return 1
     fi
