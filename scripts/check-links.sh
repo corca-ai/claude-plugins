@@ -2,20 +2,22 @@
 set -euo pipefail
 
 # check-links.sh — Check for broken links in Markdown documentation
-# Usage: check-links.sh [--local] [--json] [-h|--help]
-#   --local   Skip external URLs; only check internal file refs and anchors
-#   --json    Output machine-readable JSON format
-#   -h|--help Show this usage message
+# Usage: check-links.sh [--local] [--json] [--file PATH] [-h|--help]
+#   --local      Skip external URLs; only check internal file refs and anchors
+#   --json       Output machine-readable JSON format
+#   --file PATH  Check a single file instead of all .md files
+#   -h|--help    Show this usage message
 # Exit 0 = no broken links, Exit 1 = broken links found
 
 usage() {
-  sed -n '3,9p' "$0" | sed 's/^# \?//'
+  sed -n '3,10p' "$0" | sed 's/^# \?//'
   exit 0
 }
 
 REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
 LOCAL_ONLY=false
 JSON_OUTPUT=false
+SINGLE_FILE=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -29,6 +31,10 @@ while [[ $# -gt 0 ]]; do
     --json)
       JSON_OUTPUT=true
       shift
+      ;;
+    --file)
+      SINGLE_FILE="$2"
+      shift 2
       ;;
     *)
       echo "Error: Unknown option: $1" >&2
@@ -73,8 +79,12 @@ if [[ "$JSON_OUTPUT" == "true" ]]; then
   LYCHEE_ARGS+=("--format" "json")
 fi
 
-# Collect .md files (excluding paths from .lychee.toml exclude_path)
-LYCHEE_ARGS+=("**/*.md")
+# Target: single file or all .md files
+if [[ -n "$SINGLE_FILE" ]]; then
+  LYCHEE_ARGS+=("$SINGLE_FILE")
+else
+  LYCHEE_ARGS+=("**/*.md")
+fi
 
 echo -e "${GREEN}Running link check...${NC}" >&2
 if [[ "$LOCAL_ONLY" == "true" ]]; then
