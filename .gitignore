@@ -7,3 +7,7 @@ work-in-progress
 .cache/
 **/__pycache__/
 /tmux
+
+# Static analysis tooling
+.lycheecache
+scripts/node_modules/
