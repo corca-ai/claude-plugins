@@ -336,7 +336,7 @@ CWF는 자동으로 실행되는 7개 훅 그룹을 포함합니다. 모두 기�
 | `attention` | Notification, Pre/PostToolUse | 유휴 상태 및 AskUserQuestion 시 Slack 알림 |
 | `log` | Stop, SessionEnd | 대화 턴을 마크다운으로 자동 기록 |
 | `read` | PreToolUse -> Read | 파일 크기 인식 읽기 가드 (500줄 이상 경고, 2000줄 이상 차단) |
-| `lint_markdown` | PostToolUse -> Write\|Edit | 마크다운 검증 -- 린트 위반 시 자동 수정 유도 |
+| `lint_markdown` | PostToolUse -> Write\|Edit | 마크다운 린트 + 로컬 링크 검증 -- 린트 위반 시 자동 수정 유도, 깨진 링크 비동기 보고 |
 | `lint_shell` | PostToolUse -> Write\|Edit | 셸 스크립트용 ShellCheck 검증 |
 | `websearch_redirect` | PreToolUse -> WebSearch | Claude의 WebSearch를 `cwf:gather --search`로 리다이렉트 |
 | `compact_recovery` | SessionStart -> compact | auto-compact 후 컨텍스트 복구를 위해 라이브 세션 상태 주입 |

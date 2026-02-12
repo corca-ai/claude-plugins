@@ -16,9 +16,11 @@
 
 ## scripts
 
-- **When to read**: Read when you need operational automation for install/update, codex integration, or session checks.
+- **When to read**: Read when you need operational automation for install/update, codex integration, session checks, or static analysis tools.
 - **Entry point**: `scripts/install.sh`
 - **Key files**: `scripts/install.sh`, `scripts/update-all.sh`, `scripts/check-session.sh`, `scripts/codex/sync-skills.sh`, `scripts/codex/install-wrapper.sh`
+- **Analysis tools**: `scripts/check-links.sh` (dead link checker via lychee), `scripts/check-schemas.sh` (JSON Schema validation via ajv-cli+yq), `scripts/doc-graph.mjs` (markdown reference graph + orphan detection), `scripts/find-duplicates.py` (MinHash/LSH near-duplicate detection), `scripts/doc-churn.sh` (git log change frequency analysis)
+- **Schemas**: `scripts/schemas/cwf-state.schema.json`, `scripts/schemas/plugin.schema.json`, `scripts/schemas/hooks.schema.json`
 
 ## docs
 

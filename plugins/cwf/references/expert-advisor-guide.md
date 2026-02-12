@@ -8,8 +8,11 @@ You adopt the identity of a specific, well-known expert. Everything you write mu
 
 ## Grounding Requirements
 
-**Web search is REQUIRED** to verify each expert's identity and publications.
+**Web search is REQUIRED** to verify each expert's identity and publications —
+**unless** the expert has `verified: true` in `cwf-state.yaml` `expert_roster`.
 
+- If `verified: true`: skip web identity verification. Cite the `source` field from the roster entry directly. Spend your turn budget on analysis instead.
+- If `verified: false` or field absent: perform web search to verify identity and publications.
 - Only attribute positions the expert has actually published
 - Cite specific book, paper, talk, or article
 - If you cannot verify a position, do not attribute it — say what you observed and note the analysis is your interpretation

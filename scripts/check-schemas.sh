@@ -81,30 +81,17 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 # --- Validation targets ---
-# Format: "schema_file:data_file[:converter]"
+# Each target is validated by calling: validate_target <schema> <data> [converter]
 # converter is optional; "yq" means convert YAML to JSON first
 
-targets=(
-  "cwf-state.schema.json:cwf-state.yaml:yq"
-  "plugin.schema.json:plugins/cwf/.claude-plugin/plugin.json"
-  "hooks.schema.json:plugins/cwf/hooks/hooks.json"
-)
-
 # --- Validate a single target ---
-# Args: target_spec ("schema:data[:converter]")
+# Args: schema_file data_file [converter]
 # Returns: 0 on pass, 1 on fail
 
 validate_target() {
-  local spec="$1"
-  local schema data converter
-  schema="${spec%%:*}"
-  local rest="${spec#*:}"
-  data="${rest%%:*}"
-  converter="${rest#*:}"
-  # If no converter field, converter == data (no colon separator found)
-  if [[ "$converter" == "$data" ]]; then
-    converter=""
-  fi
+  local schema="$1"
+  local data="$2"
+  local converter="${3:-}"
 
   local schema_path="${SCHEMA_DIR}/${schema}"
   local data_path="${REPO_ROOT}/${data}"
@@ -151,12 +138,18 @@ pass_count=0
 fail_count=0
 json_results=""
 
-for pair in "${targets[@]}"; do
-  # Extract the human-readable data file name
-  local_rest="${pair#*:}"
-  data_file="${local_rest%%:*}"
+# --- Validation target definitions ---
+# schema_file  data_file  [converter]
+target_schemas=("cwf-state.schema.json"  "plugin.schema.json"           "hooks.schema.json")
+target_data=(   "cwf-state.yaml"         "plugins/cwf/.claude-plugin/plugin.json" "plugins/cwf/hooks/hooks.json")
+target_conv=(   "yq"                     ""                              "")
 
-  if validate_target "$pair"; then
+total=${#target_schemas[@]}
+
+for i in $(seq 0 $((total - 1))); do
+  data_file="${target_data[$i]}"
+
+  if validate_target "${target_schemas[$i]}" "${target_data[$i]}" "${target_conv[$i]}"; then
     pass_count=$((pass_count + 1))
     if [[ "$JSON_OUTPUT" == "true" ]]; then
       entry=$(printf '{"file":"%s","status":"PASS"}' "$data_file")
@@ -179,8 +172,6 @@ for pair in "${targets[@]}"; do
 done
 
 # --- Summary ---
-
-total=${#targets[@]}
 
 if [[ "$JSON_OUTPUT" == "true" ]]; then
   printf '{"results":[%s],"summary":{"total":%d,"pass":%d,"fail":%d}}\n' \
