@@ -85,7 +85,7 @@ FRESH_EPOCH=$((NOW - 7 * 86400))
 CURRENT_EPOCH=$((NOW - 30 * 86400))
 
 # Collect .md files
-mapfile -t MD_FILES < <(find . -name "*.md" -type f ! -path "./.git/*" | sort)
+mapfile -t MD_FILES < <(find . -name "*.md" -type f ! -path "./.git/*" ! -path "*/node_modules/*" | sort)
 
 # Filter prompt-logs unless requested
 if [[ "$INCLUDE_PROMPT_LOGS" != "true" ]]; then
@@ -182,7 +182,7 @@ for fpath in "${MD_FILES[@]}"; do
   # Apply --stale-only filter
   if [[ "$STALE_ONLY" == "true" ]]; then
     case "$status" in
-      stale|archival|unknown) ;;
+      stale|archival) ;;
       *) continue ;;
     esac
   fi
