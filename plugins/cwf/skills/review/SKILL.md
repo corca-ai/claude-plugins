@@ -156,6 +156,28 @@ When `--scenarios` is provided:
 
 ---
 
+### 5. Measure review target size and set turn budget
+
+Measure the review target size to determine agent turn budgets:
+
+```bash
+# For code mode: count diff lines
+diff_lines=$(echo "$review_target" | wc -l)
+```
+
+**Turn budget scaling** (applies to all Task agents in Phase 2):
+
+| Diff lines | `max_turns` | Rationale |
+|------------|-------------|-----------|
+| < 500 | 12 | Standard budget for small changes |
+| 500–2000 | 20 | Extended for medium diffs |
+| > 2000 | 28 | Large diffs need exploration + writing |
+
+For `--mode plan` and `--mode clarify`, use the document line count instead of diff lines.
+Store the resolved `max_turns` value for use in Phase 2.
+
+---
+
 ## Phase 2: Launch All Reviewers
 
 Launch **six** reviewers in parallel: 2 internal (Task agents) + 2 external (CLI or Task fallback) + 2 domain experts (Task agents).
@@ -167,18 +189,23 @@ Read `cwf-state.yaml` → `live.dir` to get the current session directory path.
 
 ```yaml
 session_dir: "{live.dir value from cwf-state.yaml}"
+mode_suffix: "{mode}"  # "code", "plan", or "clarify"
 ```
+
+**Mode-namespaced output files**: All review output files include the mode as a suffix
+to prevent filename collisions between review rounds (e.g., `review-plan` followed by
+`review-code` in the same session). The suffix is the `--mode` value.
 
 Apply the [context recovery protocol](../../references/context-recovery-protocol.md) to these files:
 
 | Slot | Reviewer | Output file |
 |------|----------|-------------|
-| 1 | Security | `{session_dir}/review-security.md` |
-| 2 | UX/DX | `{session_dir}/review-ux-dx.md` |
-| 3 | Correctness | `{session_dir}/review-correctness.md` |
-| 4 | Architecture | `{session_dir}/review-architecture.md` |
-| 5 | Expert α | `{session_dir}/review-expert-alpha.md` |
-| 6 | Expert β | `{session_dir}/review-expert-beta.md` |
+| 1 | Security | `{session_dir}/review-security-{mode}.md` |
+| 2 | UX/DX | `{session_dir}/review-ux-dx-{mode}.md` |
+| 3 | Correctness | `{session_dir}/review-correctness-{mode}.md` |
+| 4 | Architecture | `{session_dir}/review-architecture-{mode}.md` |
+| 5 | Expert α | `{session_dir}/review-expert-alpha-{mode}.md` |
+| 6 | Expert β | `{session_dir}/review-expert-beta-{mode}.md` |
 
 Skip to Phase 3 if all 6 files are valid. In recovery mode (all files cached), skip Phase 2.1–2.3 entirely — proceed directly to Phase 3. Note that temp-dir metadata (`{tmp_dir}/*-meta.txt`) will not exist in recovery; use `duration_ms: —` and `source: CACHED` in provenance for recovered slots.
 All 6 review output files are **critical outputs** for review synthesis.
@@ -262,11 +289,11 @@ All 6 reviewers launch in a single message for parallel execution:
 **Slot 1 — Security (always Task):**
 
 ```text
-Task(subagent_type="general-purpose", name="security-reviewer", max_turns=12, prompt="
+Task(subagent_type="general-purpose", name="security-reviewer", max_turns={max_turns}, prompt="
   {security_prompt}
 
   ## Output Persistence
-  Write your complete review verdict to: {session_dir}/review-security.md
+  Write your complete review verdict to: {session_dir}/review-security-{mode}.md
   At the very end of the file, append this sentinel marker on its own line:
   <!-- AGENT_COMPLETE -->
 ")
@@ -275,11 +302,11 @@ Task(subagent_type="general-purpose", name="security-reviewer", max_turns=12, pr
 **Slot 2 — UX/DX (always Task):**
 
 ```text
-Task(subagent_type="general-purpose", name="uxdx-reviewer", max_turns=12, prompt="
+Task(subagent_type="general-purpose", name="uxdx-reviewer", max_turns={max_turns}, prompt="
   {uxdx_prompt}
 
   ## Output Persistence
-  Write your complete review verdict to: {session_dir}/review-ux-dx.md
+  Write your complete review verdict to: {session_dir}/review-ux-dx-{mode}.md
   At the very end of the file, append this sentinel marker on its own line:
   <!-- AGENT_COMPLETE -->
 ")
@@ -305,11 +332,11 @@ Bash(timeout=300000, command="START_MS=$(date +%s%3N); timeout 120 npx @google/g
 If Slot 3 provider resolves to `claude`:
 
 ```text
-Task(subagent_type="general-purpose", name="correctness-fallback", max_turns=12, prompt="
+Task(subagent_type="general-purpose", name="correctness-fallback", max_turns={max_turns}, prompt="
   {correctness_fallback_prompt}
 
   ## Output Persistence
-  Write your complete review verdict to: {session_dir}/review-correctness.md
+  Write your complete review verdict to: {session_dir}/review-correctness-{mode}.md
   At the very end of the file, append this sentinel marker on its own line:
   <!-- AGENT_COMPLETE -->
 ")
@@ -318,9 +345,9 @@ Task(subagent_type="general-purpose", name="correctness-fallback", max_turns=12,
 When Slot 3 uses external CLI and succeeds (exit 0 + non-empty output), copy output to session dir:
 
 ```bash
-cp '{tmp_dir}/slot3-output.md' '{session_dir}/review-correctness.md'
-echo '' >> '{session_dir}/review-correctness.md'
-echo '<!-- AGENT_COMPLETE -->' >> '{session_dir}/review-correctness.md'
+cp '{tmp_dir}/slot3-output.md' '{session_dir}/review-correctness-{mode}.md'
+echo '' >> '{session_dir}/review-correctness-{mode}.md'
+echo '<!-- AGENT_COMPLETE -->' >> '{session_dir}/review-correctness-{mode}.md'
 ```
 
 **Slot 4 — Architecture (provider-routed):**
@@ -345,11 +372,11 @@ For `--mode code`, use `model_reasoning_effort='xhigh'` instead.
 If Slot 4 provider resolves to `claude`:
 
 ```text
-Task(subagent_type="general-purpose", name="architecture-fallback", max_turns=12, prompt="
+Task(subagent_type="general-purpose", name="architecture-fallback", max_turns={max_turns}, prompt="
   {architecture_fallback_prompt}
 
   ## Output Persistence
-  Write your complete review verdict to: {session_dir}/review-architecture.md
+  Write your complete review verdict to: {session_dir}/review-architecture-{mode}.md
   At the very end of the file, append this sentinel marker on its own line:
   <!-- AGENT_COMPLETE -->
 ")
@@ -358,9 +385,9 @@ Task(subagent_type="general-purpose", name="architecture-fallback", max_turns=12
 When Slot 4 uses external CLI and succeeds (exit 0 + non-empty output), copy output to session dir:
 
 ```bash
-cp '{tmp_dir}/slot4-output.md' '{session_dir}/review-architecture.md'
-echo '' >> '{session_dir}/review-architecture.md'
-echo '<!-- AGENT_COMPLETE -->' >> '{session_dir}/review-architecture.md'
+cp '{tmp_dir}/slot4-output.md' '{session_dir}/review-architecture-{mode}.md'
+echo '' >> '{session_dir}/review-architecture-{mode}.md'
+echo '<!-- AGENT_COMPLETE -->' >> '{session_dir}/review-architecture-{mode}.md'
 ```
 
 **Slot 5 — Expert α (always Task):**
@@ -370,7 +397,7 @@ for domain keywords; match against each roster entry's `domain` field. Select 2 
 with contrasting frameworks. If roster has < 2 matches, fill via independent selection.
 
 ```text
-Task(subagent_type="general-purpose", name="expert-alpha", max_turns=12, prompt="
+Task(subagent_type="general-purpose", name="expert-alpha", max_turns={max_turns}, prompt="
   Read {CWF_PLUGIN_DIR}/references/expert-advisor-guide.md.
   You are Expert α, operating in **review mode**.
 
@@ -390,7 +417,7 @@ Task(subagent_type="general-purpose", name="expert-alpha", max_turns=12, prompt=
   from the guide.
 
   ## Output Persistence
-  Write your complete review verdict to: {session_dir}/review-expert-alpha.md
+  Write your complete review verdict to: {session_dir}/review-expert-alpha-{mode}.md
   At the very end of the file, append this sentinel marker on its own line:
   <!-- AGENT_COMPLETE -->
 ")
@@ -399,7 +426,7 @@ Task(subagent_type="general-purpose", name="expert-alpha", max_turns=12, prompt=
 **Slot 6 — Expert β (always Task):**
 
 ```text
-Task(subagent_type="general-purpose", name="expert-beta", max_turns=12, prompt="
+Task(subagent_type="general-purpose", name="expert-beta", max_turns={max_turns}, prompt="
   Read {CWF_PLUGIN_DIR}/references/expert-advisor-guide.md.
   You are Expert β, operating in **review mode**.
 
@@ -419,7 +446,7 @@ Task(subagent_type="general-purpose", name="expert-beta", max_turns=12, prompt="
   from the guide.
 
   ## Output Persistence
-  Write your complete review verdict to: {session_dir}/review-expert-beta.md
+  Write your complete review verdict to: {session_dir}/review-expert-beta-{mode}.md
   At the very end of the file, append this sentinel marker on its own line:
   <!-- AGENT_COMPLETE -->
 ")
@@ -435,12 +462,12 @@ Read review verdicts from the session directory files (not in-memory return valu
 
 | Slot | File |
 |------|------|
-| 1 | `{session_dir}/review-security.md` |
-| 2 | `{session_dir}/review-ux-dx.md` |
-| 3 | `{session_dir}/review-correctness.md` |
-| 4 | `{session_dir}/review-architecture.md` |
-| 5 | `{session_dir}/review-expert-alpha.md` |
-| 6 | `{session_dir}/review-expert-beta.md` |
+| 1 | `{session_dir}/review-security-{mode}.md` |
+| 2 | `{session_dir}/review-ux-dx-{mode}.md` |
+| 3 | `{session_dir}/review-correctness-{mode}.md` |
+| 4 | `{session_dir}/review-architecture-{mode}.md` |
+| 5 | `{session_dir}/review-expert-alpha-{mode}.md` |
+| 6 | `{session_dir}/review-expert-beta-{mode}.md` |
 
 Re-validate all six files with the context recovery protocol before synthesis.
 If any file remains invalid after one bounded retry, apply a **hard fail**
@@ -508,11 +535,11 @@ then read their results. Each fallback uses the fallback prompt template from
 Each fallback Task agent prompt must include output persistence:
 
 ```text
-Task(subagent_type="general-purpose", name="{tool}-fallback", max_turns=12, prompt="
+Task(subagent_type="general-purpose", name="{tool}-fallback", max_turns={max_turns}, prompt="
   {fallback_prompt}
 
   ## Output Persistence
-  Write your complete review verdict to: {session_dir}/review-{slot_name}.md
+  Write your complete review verdict to: {session_dir}/review-{slot_name}-{mode}.md
   At the very end of the file, append this sentinel marker on its own line:
   <!-- AGENT_COMPLETE -->
 ")
