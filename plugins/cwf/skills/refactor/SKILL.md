@@ -351,7 +351,6 @@ Read `{SKILL_DIR}/references/docs-criteria.md` Section 5 and evaluate:
 - Orphaned documents unreachable from entry points
 - Circular references or deep navigation paths (>3 hops)
 - Inline overload (substantive content that should be a separate doc)
-- Non-clickable internal doc path references (prefer `[label](path)` over code-literal paths)
 - Unnecessary hard wraps in prose (especially when MD013 is disabled)
 - Auto-generated files committed to git
 - Non-obvious decisions lacking documented rationale

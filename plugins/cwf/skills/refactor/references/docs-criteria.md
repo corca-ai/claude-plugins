@@ -65,7 +65,6 @@ Structural health of the documentation graph. Reference: [Software project docum
 | Orphaned documents | Doc file unreachable from any entry point (AGENTS.md, runtime adapters, README, docs/ index) |
 | Circular references | Two docs reference each other for the same concept, or navigation path > 3 hops from entry |
 | Inline overload | A single file embeds substantive content that should live in a dedicated doc (e.g., full protocol text inside AGENTS.md instead of a reference link) |
-| Non-clickable internal doc paths | Internal document references are written as code literals (e.g., `` `docs/x.md` ``) or plain text instead of Markdown links (`[text](path)`) |
 | Unnecessary hard wraps in prose | Prose paragraphs are split across multiple short lines without semantic boundaries (when MD013 is disabled, this should be style-reviewed explicitly) |
 | Auto-generated files in git | Files that can be regenerated (build output, compiled docs) are version-controlled |
 | Undocumented non-obvious decisions | Non-obvious technical choices (e.g., "no Tailwind", "no mock objects") lack explicit rationale anywhere in docs |
