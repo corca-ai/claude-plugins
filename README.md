@@ -21,7 +21,7 @@ A Claude Code plugin that turns structured development sessions into a repeatabl
 ### Assumptions
 
 - Users work in repositories where session artifacts (`prompt-logs/`, `cwf-state.yaml`) are allowed and useful.
-- Users accept progressive disclosure: start from `AGENTS.md` and `cwf-index.md`, then load deeper docs as needed.
+- Users accept progressive disclosure: start from [AGENTS.md](AGENTS.md) and [cwf-index.md](cwf-index.md), then load deeper docs as needed.
 - Teams prefer deterministic validation scripts for recurring quality checks over relying on behavioral memory.
 
 ### Key Decisions and Why
@@ -275,15 +275,16 @@ cwf:setup --index --target agents # AGENTS.md managed block only
 cwf:setup --index --target both   # cwf-index.md + AGENTS.md block
 ```
 
-Interactive hook group toggle, external AI CLI and API key detection (Codex, Gemini, Tavily, Exa), optional Codex integration (skills + wrapper), and optional progressive disclosure index generation. In full setup, index creation is prompted and does not overwrite existing `cwf-index.md`. Explicit regeneration is done with `cwf:setup --index`. Index output target can be `cwf-index.md`, `AGENTS.md` managed block, or both.
+Interactive hook group toggle, external AI CLI and API key detection (Codex, Gemini, Tavily, Exa), optional Codex integration (skills + wrapper), and optional progressive disclosure index generation. In full setup, index creation is prompted and does not overwrite existing [cwf-index.md](cwf-index.md). Explicit regeneration is done with `cwf:setup --index`. Index output target can be [cwf-index.md](cwf-index.md), [AGENTS.md](AGENTS.md) managed block, or both.
 
 Full reference: [SKILL.md](plugins/cwf/skills/setup/SKILL.md)
 
 ### Agent Entry Files
 
-- `AGENTS.md` is the shared cross-agent entry point (Codex, Claude Code, and compatible runtimes).
-- `CLAUDE.md` is a thin Claude-specific adapter that points to `AGENTS.md`.
-- Progressive disclosure index output defaults to `cwf-index.md` and can also be embedded into the managed block in `AGENTS.md` via `cwf:setup --index --target agents|both`.
+- [AGENTS.md](AGENTS.md) is the shared cross-agent entry point (Codex, Claude Code, and compatible runtimes).
+- [CLAUDE.md](CLAUDE.md) is a thin Claude-specific adapter that points to [AGENTS.md](AGENTS.md).
+- Progressive disclosure index output defaults to [cwf-index.md](cwf-index.md) and can also be embedded into the managed block in [AGENTS.md](AGENTS.md) via `cwf:setup --index --target agents|both`.
+- Interactive user-facing doc review playbook (relationship map + chunked review + resume state): [docs/interactive-doc-review-protocol.md](docs/interactive-doc-review-protocol.md).
 
 ### Codex Integration
 

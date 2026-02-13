@@ -315,21 +315,21 @@ Review documentation consistency across the repository.
 
 ### 1. Agent Entry Docs Review
 
-Read the project's `AGENTS.md` (and runtime adapter docs like `CLAUDE.md`) and evaluate:
+Read the project's [AGENTS.md](AGENTS.md) (and runtime adapter docs like [CLAUDE.md](CLAUDE.md)) and evaluate:
 - Size: flag if AGENTS exceeds ~200 lines (progressive disclosure — details belong in docs/)
 - Accuracy: do referenced files/paths exist?
 - Staleness: do referenced plugins/skills still exist and match current state?
 
 ### 2. Project Context Review
 
-Read `docs/project-context.md` and check:
+Read [docs/project-context.md](docs/project-context.md) and check:
 - Plugin listing matches actual `plugins/` directory contents
 - Architecture patterns are current (no references to removed/renamed plugins)
 - Convention entries match actual practice
 
 ### 3. README Review
 
-Read `README.md` and `README.ko.md`:
+Read [README.md](README.md) and [README.ko.md](README.ko.md):
 - Plugin overview table matches `marketplace.json` entries
 - Each active plugin has install/update commands
 - Deprecated plugins are clearly marked
@@ -340,7 +340,7 @@ Read `README.md` and `README.ko.md`:
 Check alignment between:
 - `marketplace.json` plugin list ↔ README overview table
 - `marketplace.json` descriptions ↔ `plugin.json` descriptions
-- `docs/project-context.md` plugin listing ↔ actual `plugins/` contents
+- [docs/project-context.md](docs/project-context.md) plugin listing ↔ actual `plugins/` contents
 - Dead internal links (file references that don't resolve)
 
 Present findings as a prioritized list of inconsistencies with suggested fixes.
@@ -351,6 +351,8 @@ Read `{SKILL_DIR}/references/docs-criteria.md` Section 5 and evaluate:
 - Orphaned documents unreachable from entry points
 - Circular references or deep navigation paths (>3 hops)
 - Inline overload (substantive content that should be a separate doc)
+- Non-clickable internal doc path references (prefer `[label](path)` over code-literal paths)
+- Unnecessary hard wraps in prose (especially when MD013 is disabled)
 - Auto-generated files committed to git
 - Non-obvious decisions lacking documented rationale
 - Self-evident instructions wasting reader attention

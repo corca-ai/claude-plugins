@@ -1,3 +1,9 @@
 {
-  "ignores": ["prompt-logs/", "node_modules/", "references/anthropic-skills-guide/"]
+  "ignores": [
+    "prompt-logs/",
+    "node_modules/",
+    "**/node_modules/",
+    "references/anthropic-skills-guide/"
+  ],
+  "customRules": ["./scripts/markdownlint-rules/no-inline-md-path-literals.cjs"]
 }

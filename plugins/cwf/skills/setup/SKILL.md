@@ -340,9 +340,9 @@ When mode is full setup (`cwf:setup`):
 
 When generating index output (full setup opted-in, or `--index` mode), choose target:
 
-- `file` (recommended): write `cwf-index.md`
-- `agents`: update managed index block in `AGENTS.md`
-- `both`: write `cwf-index.md` and update `AGENTS.md` block
+- `file` (recommended): write [cwf-index.md](cwf-index.md)
+- `agents`: update managed index block in [AGENTS.md](AGENTS.md)
+- `both`: write [cwf-index.md](cwf-index.md) and update [AGENTS.md](AGENTS.md) block
 
 Target resolution:
 
@@ -361,7 +361,7 @@ Managed AGENTS block markers:
 <!-- CWF:INDEX:END -->
 ```
 
-If `AGENTS.md` does not exist and target is `agents` or `both`, create it with a minimal scaffold and the managed block.
+If [AGENTS.md](AGENTS.md) does not exist and target is `agents` or `both`, create it with a minimal scaffold and the managed block.
 
 ### 3.1 Scan Project Structure
 
@@ -382,11 +382,11 @@ For each area, generate:
 
 ### 3.3 Write cwf-index.md
 
-Write to project root `cwf-index.md`. Include a header noting it was generated
+Write to project root [cwf-index.md](cwf-index.md). Include a header noting it was generated
 by cwf:setup and can be regenerated.
 
 Write behavior by mode:
-- Full setup (`cwf:setup`): if target includes `file`, create only if `cwf-index.md` is missing.
+- Full setup (`cwf:setup`): if target includes `file`, create only if [cwf-index.md](cwf-index.md) is missing.
 - Explicit index mode (`cwf:setup --index`): if target includes `file`, create or overwrite.
 
 ```markdown
@@ -399,10 +399,10 @@ Write behavior by mode:
 
 ### 3.4 Update AGENTS.md Managed Block (target=agents|both)
 
-When target includes `agents`, write the same generated index body into the managed block in `AGENTS.md`:
+When target includes `agents`, write the same generated index body into the managed block in [AGENTS.md](AGENTS.md):
 
 - If markers exist, replace only the marker-delimited section.
-- If markers are absent, append a new managed block at the end of `AGENTS.md`.
+- If markers are absent, append a new managed block at the end of [AGENTS.md](AGENTS.md).
 - In full setup mode, this block update is allowed (managed region) even when avoiding file-level overwrite elsewhere.
 
 ---
@@ -436,7 +436,7 @@ Add `setup` to `cwf-state.yaml` current session's `stage_checkpoints` list.
    config for customizing (disabling specific groups).
 2. **cwf-state.yaml is SSOT**: Read before modifying. Edit, do not overwrite.
 3. **Index policy**: In full setup, ask first. Default target is `file`
-   (`cwf-index.md`). Do not overwrite existing `cwf-index.md` in full setup.
+   ([cwf-index.md](cwf-index.md)). Do not overwrite existing [cwf-index.md](cwf-index.md) in full setup.
    Use `cwf:setup --index` for explicit regeneration/overwrite.
 4. **AGENTS block policy**: When target includes `agents`, update only the
    managed marker block (`CWF:INDEX:START/END`) and preserve all other content.

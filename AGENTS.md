@@ -6,11 +6,11 @@ Shared operating guide for all coding agents in this repository (Codex, Claude C
 
 Start with:
 
-- `cwf-index.md` — project map ("when to read what")
-- `docs/project-context.md` — project/org facts and long-lived heuristics
-- `docs/architecture-patterns.md` — implementation and integration patterns
-- `docs/plugin-dev-cheatsheet.md` — practical plugin development/testing/deploy workflows
-- `docs/documentation-guide.md` — documentation quality and scope rules
+- [cwf-index.md](cwf-index.md) — project map ("when to read what")
+- [docs/project-context.md](docs/project-context.md) — project/org facts and long-lived heuristics
+- [docs/architecture-patterns.md](docs/architecture-patterns.md) — implementation and integration patterns
+- [docs/plugin-dev-cheatsheet.md](docs/plugin-dev-cheatsheet.md) — practical plugin development/testing/deploy workflows
+- [docs/documentation-guide.md](docs/documentation-guide.md) — documentation quality and scope rules
 
 Read only what is relevant to the current task.
 
@@ -22,7 +22,7 @@ Discover available CWF skills by reading `plugins/cwf/skills/*/SKILL.md`
 (or installed links under `~/.agents/skills/*`) and checking each skill's
 trigger section.
 
-After modifying code, check whether `README.md` or `README.ko.md` must be updated.
+After modifying code, check whether [README.md](README.md) or [README.ko.md](README.ko.md) must be updated.
 
 ## Session State
 
@@ -47,11 +47,11 @@ When graduating findings from lessons/retro into permanent docs:
 
 | Finding type | Target |
 |---|---|
-| Project/org fact, process convention | `docs/project-context.md` |
-| Code pattern, hook/integration pattern | `docs/architecture-patterns.md` |
-| Script gotcha, build/test tip | `docs/plugin-dev-cheatsheet.md` |
-| Runtime-specific behavior rule | Runtime adapter file (`CLAUDE.md`, or future runtime adapters) |
-| Documentation principle | `docs/documentation-guide.md` |
+| Project/org fact, process convention | [docs/project-context.md](docs/project-context.md) |
+| Code pattern, hook/integration pattern | [docs/architecture-patterns.md](docs/architecture-patterns.md) |
+| Script gotcha, build/test tip | [docs/plugin-dev-cheatsheet.md](docs/plugin-dev-cheatsheet.md) |
+| Runtime-specific behavior rule | Runtime adapter file ([CLAUDE.md](CLAUDE.md), or future runtime adapters) |
+| Documentation principle | [docs/documentation-guide.md](docs/documentation-guide.md) |
 
 ## Language
 
@@ -59,8 +59,8 @@ Write documentation in English by default.
 
 Korean docs live in:
 
-- `README.ko.md`
-- `AI_NATIVE_PRODUCT_TEAM.ko.md`
+- [README.ko.md](README.ko.md)
+- [AI_NATIVE_PRODUCT_TEAM.ko.md](AI_NATIVE_PRODUCT_TEAM.ko.md)
 
 ## Managed CWF Index
 

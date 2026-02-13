@@ -40,7 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Hooks: `smart-read` (1.0.0) — PreToolUse hook that enforces intelligent file reading based on file size (warn >500 lines, deny >2000 lines)
 - Skills (local): `plugin-deploy` — local skill to automate post-modification plugin lifecycle
-- Docs: `docs/plugin-dev-cheatsheet.md` — quick reference to reduce repeated doc reads
+- Docs: [docs/plugin-dev-cheatsheet.md](docs/plugin-dev-cheatsheet.md) — quick reference to reduce repeated doc reads
 - Scripts: `scripts/update-all.sh` — bulk marketplace + plugin update script
 
 ### Changed
@@ -83,8 +83,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Skills: `notion-to-md` - Converts public Notion pages to local Markdown files via Notion's v3 API (Python 3.7+ stdlib only)
-- Docs: `docs/skills-guide.md` - Reference document for skill structure, env var naming conventions, and design principles
-- Requirements: `requirements/url-export.md` - Plan document for unified URL export skill (`url-export`)
+- Docs: [docs/skills-guide.md](docs/skills-guide.md) - Reference document for skill structure, env var naming conventions, and design principles
+- Requirements: [requirements/url-export.md](requirements/url-export.md) - Plan document for unified URL export skill (`url-export`)
 
 ### Changed
 

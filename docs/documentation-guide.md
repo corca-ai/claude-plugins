@@ -13,9 +13,9 @@ projects. Synthesized from three external sources and this project's experience.
 
 ### 1. Always-loaded file = compressed index
 
-The primary cross-agent entry point (`AGENTS.md`) should contain pointers and
+The primary cross-agent entry point ([AGENTS.md](AGENTS.md)) should contain pointers and
 scope descriptions, not full content. Runtime-specific adapter files (for
-example `CLAUDE.md`) should remain thin and defer to `AGENTS.md`.
+example [CLAUDE.md](CLAUDE.md)) should remain thin and defer to [AGENTS.md](AGENTS.md).
 Agents decide which files to retrieve based on task context.
 
 > "No decision point where agents must choose to look something up,

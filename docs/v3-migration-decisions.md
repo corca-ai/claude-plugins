@@ -129,7 +129,7 @@ context separate from plan WHAT).
 ### #18 Progressive Disclosure Index
 
 `cwf:setup` can generate progressive index output via opt-in prompt.
-Default file target is `cwf-index.md` (no overwrite in full setup).
+Default file target is [cwf-index.md](cwf-index.md) (no overwrite in full setup).
 `cwf:setup --index` is the explicit refresh path and supports target
 selection (`file`, `agents`, `both`). Index content remains "when to read
 what" pointers, not summaries.

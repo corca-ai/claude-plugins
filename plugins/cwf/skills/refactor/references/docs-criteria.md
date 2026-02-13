@@ -4,7 +4,7 @@ Checklist for the `--docs` mode. Evaluate documentation consistency across the r
 
 ## 1. Agent Entry Docs Review
 
-Check the project's root `AGENTS.md` and runtime adapter docs (for example `CLAUDE.md`):
+Check the project's root [AGENTS.md](AGENTS.md) and runtime adapter docs (for example [CLAUDE.md](CLAUDE.md)):
 
 | Check | Flag condition |
 |-------|---------------|
@@ -16,7 +16,7 @@ Check the project's root `AGENTS.md` and runtime adapter docs (for example `CLAU
 
 ## 2. Project Context Review
 
-Check `docs/project-context.md`:
+Check [docs/project-context.md](docs/project-context.md):
 
 | Check | Flag condition |
 |-------|---------------|
@@ -28,7 +28,7 @@ Check `docs/project-context.md`:
 
 ## 3. README Review
 
-Check `README.md` and `README.ko.md`:
+Check [README.md](README.md) and [README.ko.md](README.ko.md):
 
 | Check | Flag condition |
 |-------|---------------|
@@ -47,8 +47,8 @@ Check alignment between documents:
 |----------|----------|-------|
 | `marketplace.json` plugins | README overview table | Same set of plugins, same descriptions |
 | `marketplace.json` descriptions | `plugin.json` descriptions | Consistent messaging |
-| `docs/project-context.md` plugins | `plugins/` directory | Matches actual contents |
-| `AGENTS.md` and adapter file references | Filesystem | All referenced paths exist |
+| [docs/project-context.md](docs/project-context.md) plugins | `plugins/` directory | Matches actual contents |
+| [AGENTS.md](AGENTS.md) and adapter file references | Filesystem | All referenced paths exist |
 | README deprecated section | `marketplace.json` deprecated flags | Consistent deprecation status |
 
 For each inconsistency found, report:
@@ -65,6 +65,8 @@ Structural health of the documentation graph. Reference: [Software project docum
 | Orphaned documents | Doc file unreachable from any entry point (AGENTS.md, runtime adapters, README, docs/ index) |
 | Circular references | Two docs reference each other for the same concept, or navigation path > 3 hops from entry |
 | Inline overload | A single file embeds substantive content that should live in a dedicated doc (e.g., full protocol text inside AGENTS.md instead of a reference link) |
+| Non-clickable internal doc paths | Internal document references are written as code literals (e.g., `` `docs/x.md` ``) or plain text instead of Markdown links (`[text](path)`) |
+| Unnecessary hard wraps in prose | Prose paragraphs are split across multiple short lines without semantic boundaries (when MD013 is disabled, this should be style-reviewed explicitly) |
 | Auto-generated files in git | Files that can be regenerated (build output, compiled docs) are version-controlled |
 | Undocumented non-obvious decisions | Non-obvious technical choices (e.g., "no Tailwind", "no mock objects") lack explicit rationale anywhere in docs |
 | Obvious instructions | Docs include self-evident guidance (e.g., "write clean code", "follow best practices") that wastes reader attention |
@@ -80,7 +82,7 @@ Synthesize findings from Sections 1-5 into actionable restructuring proposals.
 
 Apply these principles when evaluating structure:
 
-1. **Always-loaded file = compressed index**: The entry-point (`AGENTS.md`) should contain pointers and scope descriptions, not full content. Runtime adapters should stay thin.
+1. **Always-loaded file = compressed index**: The entry-point ([AGENTS.md](AGENTS.md)) should contain pointers and scope descriptions, not full content. Runtime adapters should stay thin.
 2. **Each document has one clear scope**: If a doc serves multiple unrelated purposes, agents can't make a meaningful read/skip decision.
 3. **Agent autonomy for reading, explicit routing for writing**: Agents judge which docs are relevant; writing needs explicit routing (persist routing table).
 4. **Less is more**: Instruction-following quality degrades as instruction count rises. AGENTS.md < 100 lines ideal; runtime adapters thin; individual docs focused enough to be skippable.
