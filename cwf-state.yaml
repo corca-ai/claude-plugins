@@ -366,7 +366,7 @@ hooks:
 # check-session.sh --live validates required fields are populated.
 live:
   session_id: "S25"
-  dir: "prompt-logs/260213-01-s25-post-s24-followup"
+  dir: "prompt-logs/260214-01-s25-post-s24-followup-retro-day2"
   branch: "feat/s25-post-s24-followup"
   phase: "done"
   task: "S24 follow-up: hook integration, review namespace, max_turns scaling, expert verified field, check-schemas refactor, document sync"

@@ -1,19 +1,29 @@
 {
   "stats": {
     "total_docs": 70,
-    "total_links": 411,
+    "total_links": 438,
     "orphan_count": 3,
-    "broken_ref_count": 3
+    "broken_ref_count": 4
   },
   "adjacency": {
-    ".claude/skills/plugin-deploy/SKILL.md": [],
+    ".claude/skills/plugin-deploy/SKILL.md": [
+      "scripts/codex/sync-skills.sh",
+      "scripts/codex/verify-skill-links.sh"
+    ],
     ".claude/skills/plugin-deploy/references/checklist.md": [
-      "docs/plugin-dev-cheatsheet.md"
+      "docs/plugin-dev-cheatsheet.md",
+      ".claude-plugin/plugin.json"
     ],
     "AGENTS.md": [
       "plugins/cwf/hooks/hooks.json",
       "docs/plugin-dev-cheatsheet.md",
       "scripts/check-session.sh",
+      "docs/documentation-guide.md",
+      "plugins/cwf/skills/refactor/references/docs-criteria.md",
+      ".markdownlint-cli2.jsonc",
+      "plugins/cwf/hooks/hooks.json",
+      "scripts/check-links.sh",
+      "scripts/doc-graph.mjs",
       "README.md",
       "AGENTS.md",
       "CLAUDE.md",
@@ -76,7 +86,8 @@
     "CLAUDE.md": [
       "AGENTS.md",
       "AGENTS.md",
-      "cwf-index.md"
+      "cwf-index.md",
+      "plugins/cwf/hooks/hooks.json"
     ],
     "README.ko.md": [
       "README.md",
@@ -167,7 +178,8 @@
       "plugins/cwf/scripts"
     ],
     "docs/architecture-patterns.md": [
-      "plugins/cwf/references/skill-conventions.md"
+      "plugins/cwf/references/skill-conventions.md",
+      ".claude/settings.json"
     ],
     "docs/documentation-guide.md": [
       "AGENTS.md",
@@ -200,15 +212,23 @@
       "docs/doc-graph.snapshot.json"
     ],
     "docs/plugin-dev-cheatsheet.md": [
+      ".claude-plugin/marketplace.json",
+      "plugins/cwf/hooks/scripts/env-loader.sh",
+      ".githooks/pre-commit",
+      ".githooks/pre-push",
+      "plugins/cwf/skills/setup/scripts/configure-git-hooks.sh",
       "CHANGELOG.md",
       "README.md",
       "README.ko.md",
       "AI_NATIVE_PRODUCT_TEAM.md",
+      ".claude-plugin/marketplace.json",
       "README.md",
       "README.ko.md",
       "AI_NATIVE_PRODUCT_TEAM.md"
     ],
-    "docs/project-context.md": [],
+    "docs/project-context.md": [
+      "scripts/next-prompt-dir.sh"
+    ],
     "docs/v3-migration-decisions.md": [
       "cwf-index.md",
       "repo-index.md",
@@ -301,11 +321,18 @@
       "plugins/cwf/skills/gather/scripts/slack-to-md.sh"
     ],
     "plugins/cwf/skills/gather/SKILL.md": [
+      "plugins/cwf/skills/gather/scripts/g-export.sh",
+      "plugins/cwf/skills/gather/scripts/slack-api.mjs",
+      "plugins/cwf/skills/gather/scripts/slack-to-md.sh",
+      "plugins/cwf/skills/gather/scripts/notion-to-md.py",
+      "plugins/cwf/skills/gather/scripts/extract.sh",
       "plugins/cwf/skills/gather/references/TOON.md",
       "plugins/cwf/skills/gather/references/google-export.md",
       "plugins/cwf/skills/gather/references/slack-export.md",
       "plugins/cwf/skills/gather/references/notion-export.md",
       "plugins/cwf/skills/gather/references/query-intelligence.md",
+      "plugins/cwf/skills/gather/scripts/search.sh",
+      "plugins/cwf/skills/gather/scripts/code-search.sh",
       "plugins/cwf/skills/gather/references/query-intelligence.md",
       "plugins/cwf/skills/gather/references/search-api-reference.md",
       "plugins/cwf/skills/gather/references/google-export.md",
@@ -434,7 +461,8 @@
       "plugins/cwf/skills/setup/SKILL.md",
       "plugins/cwf/skills/setup/README.md",
       "plugins/cwf/skills/setup/SKILL.md",
-      "plugins/cwf/skills/setup/scripts/check-index-coverage.sh"
+      "plugins/cwf/skills/setup/scripts/check-index-coverage.sh",
+      "plugins/cwf/skills/setup/scripts/configure-git-hooks.sh"
     ],
     "plugins/cwf/skills/setup/SKILL.md": [
       "plugins/cwf/.claude-plugin/plugin.json",
@@ -459,6 +487,7 @@
       "plugins/cwf/references/agent-patterns.md",
       "plugins/cwf/scripts/codex/sync-skills.sh",
       "plugins/cwf/scripts/codex/verify-skill-links.sh",
+      "plugins/cwf/skills/setup/scripts/configure-git-hooks.sh",
       "plugins/cwf/skills/setup/scripts/check-index-coverage.sh"
     ],
     "plugins/cwf/skills/ship/README.md": [
@@ -535,6 +564,11 @@
     "docs/v3-migration-decisions.md"
   ],
   "broken_refs": [
+    {
+      "source": ".claude/skills/plugin-deploy/references/checklist.md",
+      "target": ".claude-plugin/plugin.json",
+      "raw": "../../../../.claude-plugin/plugin.json"
+    },
     {
       "source": "plugins/cwf/skills/setup/SKILL.md",
       "target": "plugins/cwf/skills/setup/path",

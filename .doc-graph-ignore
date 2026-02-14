@@ -1,0 +1,3 @@
+# Excluded from doc-graph orphan/broken-link evaluation
+# Transitional archive document; intentionally not linked from active map
+docs/v3-migration-decisions.md

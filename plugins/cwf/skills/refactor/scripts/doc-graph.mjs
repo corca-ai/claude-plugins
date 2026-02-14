@@ -12,6 +12,35 @@ import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { resolve, relative, dirname, extname } from 'node:path';
 import { execSync } from 'node:child_process';
 
+const DOC_GRAPH_IGNORE_FILE = '.doc-graph-ignore';
+
+function normalizeRelPath(pathValue) {
+  return pathValue.replaceAll('\\\\', '/').replace(/^\.\//, '');
+}
+
+function loadIgnoreRules(rootDir) {
+  const ignoreFilePath = resolve(rootDir, DOC_GRAPH_IGNORE_FILE);
+  if (!existsSync(ignoreFilePath)) {
+    return [];
+  }
+
+  return readFileSync(ignoreFilePath, 'utf8')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith('#'))
+    .map((line) => normalizeRelPath(line.replace(/^\//, '')));
+}
+
+function isIgnoredPath(relPath, rules) {
+  const normalized = normalizeRelPath(relPath);
+  return rules.some((rule) => {
+    if (rule.endsWith('/')) {
+      return normalized.startsWith(rule);
+    }
+    return normalized === rule;
+  });
+}
+
 const args = process.argv.slice(2);
 let mode = 'summary';
 let impactFile = null;
@@ -91,10 +120,11 @@ function readdirRecursive(dir) {
 }
 
 function collectMdFiles(rootDir) {
+  const ignoreRules = loadIgnoreRules(rootDir);
   const allFiles = readdirRecursive(rootDir);
   const results = [];
   for (const file of allFiles) {
-    const relPath = relative(repoRoot, file);
+    const relPath = normalizeRelPath(relative(repoRoot, file));
     if (
       relPath.startsWith('.git/') ||
       relPath.startsWith('node_modules/') ||
@@ -103,6 +133,9 @@ function collectMdFiles(rootDir) {
       relPath === 'CHANGELOG.md' ||
       relPath.startsWith('references/')
     ) {
+      continue;
+    }
+    if (isIgnoredPath(relPath, ignoreRules)) {
       continue;
     }
     if (extname(file) === '.md') {
@@ -214,17 +247,21 @@ function extractLinks(filePath) {
 }
 
 const mdFiles = collectMdFiles(repoRoot);
+const ignoreRules = loadIgnoreRules(repoRoot);
 const adjacency = {};
 const inbound = {};
 const brokenRefs = [];
 
 for (const filePath of mdFiles) {
-  const relSource = relative(repoRoot, filePath);
+  const relSource = normalizeRelPath(relative(repoRoot, filePath));
   adjacency[relSource] = [];
 
   const links = extractLinks(filePath);
   for (const link of links) {
-    const relTarget = relative(repoRoot, link.resolved);
+    const relTarget = normalizeRelPath(relative(repoRoot, link.resolved));
+    if (isIgnoredPath(relTarget, ignoreRules)) {
+      continue;
+    }
     adjacency[relSource].push(relTarget);
 
     if (!existsSync(link.resolved)) {
@@ -232,7 +269,10 @@ for (const filePath of mdFiles) {
       if (!ext) {
         const withMd = link.resolved + '.md';
         if (existsSync(withMd)) {
-          const relWithMd = relative(repoRoot, withMd);
+          const relWithMd = normalizeRelPath(relative(repoRoot, withMd));
+          if (isIgnoredPath(relWithMd, ignoreRules)) {
+            continue;
+          }
           if (!inbound[relWithMd]) {
             inbound[relWithMd] = [];
           }

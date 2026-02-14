@@ -12,6 +12,7 @@ Protocol for persisting planning artifacts and session learnings.
 - If the user specifies a path, use it.
 - Otherwise run `{SKILL_DIR}/../../scripts/next-prompt-dir.sh <title>` and use its output path as-is.
 - Do not hand-calculate sequence numbers.
+- `YYMMDD` is the directory creation date, not a guarantee that all later work in that session happened on the same day.
 
 The `{title}` must reflect the current session's task, not a previous session's. Even if the input spec or reference document lives in an existing `prompt-logs/` directory, always create a new directory named after the current task.
 

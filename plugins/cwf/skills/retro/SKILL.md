@@ -30,8 +30,12 @@ Edit `cwf-state.yaml` `live` section: set `phase: retro`.
 Resolution order:
 1. If `[path]` argument provided, use it
 2. Reuse `prompt-logs/` path already used in this session (plan.md/lessons.md writes)
-3. If multiple candidates exist, AskUserQuestion with candidates
-4. Otherwise run `{SKILL_DIR}/../../scripts/next-prompt-dir.sh <title>` and create that path
+3. If reused session path date prefix (`YYMMDD`) differs from today's local date, AskUserQuestion:
+   - Continue existing session directory (recommended for same logical session across midnight/day rollover)
+   - Start a new dated directory for today
+4. If user selects a new dated directory, run `{SKILL_DIR}/../../scripts/next-prompt-dir.sh <title>` and create that path, then copy `plan.md` and `lessons.md` from the previous session directory when present so retro context is preserved.
+5. If multiple candidates exist, AskUserQuestion with candidates
+6. Otherwise run `{SKILL_DIR}/../../scripts/next-prompt-dir.sh <title>` and create that path
 
 ### 2. Read Existing Artifacts
 

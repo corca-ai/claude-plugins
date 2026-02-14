@@ -9,13 +9,13 @@ Keep stable invariants here; keep implementation detail in scoped docs.
 - If implementation diverges from a pre-designed plan, record the discrepancy in session lessons, report it immediately, and ask for a user decision before proceeding.
 - Never delete user-created files without explicit confirmation. Prefer `mv` over `rm`.
 - For design decisions, surface meaningful alternatives with trade-offs and incorporate user-provided external references before concluding.
-- Deterministic checks are authoritative; behavioral reminders are secondary. Operational details live in [plugins/cwf/hooks/hooks.json](plugins/cwf/hooks/hooks.json), [docs/plugin-dev-cheatsheet.md](docs/plugin-dev-cheatsheet.md), and [scripts/check-session.sh](scripts/check-session.sh).
+- Deterministic gates define pass/fail authority; prose must not duplicate or override them.
 
 ## Before Editing Docs
 
 - Read [docs/documentation-guide.md](docs/documentation-guide.md) first (principles and scope ownership).
 - Read [plugins/cwf/skills/refactor/references/docs-criteria.md](plugins/cwf/skills/refactor/references/docs-criteria.md) section 0 before proposing new doc rules.
-- For automatable issues, update deterministic gates ([.markdownlint-cli2.jsonc](.markdownlint-cli2.jsonc), [plugins/cwf/hooks/hooks.json](plugins/cwf/hooks/hooks.json), [scripts/check-links.sh](scripts/check-links.sh), [scripts/doc-graph.mjs](scripts/doc-graph.mjs)); keep prose for non-automatable policy only.
+- For automatable issues, update deterministic gates first ([.markdownlint-cli2.jsonc](.markdownlint-cli2.jsonc), [plugins/cwf/hooks/hooks.json](plugins/cwf/hooks/hooks.json), [scripts/check-links.sh](scripts/check-links.sh), [scripts/doc-graph.mjs](scripts/doc-graph.mjs)); keep prose changes for non-automatable policy.
 
 ## Document Map
 
