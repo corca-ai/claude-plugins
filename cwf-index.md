@@ -21,30 +21,20 @@
 - [run](plugins/cwf/skills/run/SKILL.md): End-to-end pipeline execution.
 - [refactor](plugins/cwf/skills/refactor/SKILL.md): Code/docs refactor and consistency review.
 
-## plugins/cwf/skills/*/references — Skill-local deep guidance
+## plugins/cwf/skills/*/README — Skill-local file maps
 
-- [clarify/advisory-guide](plugins/cwf/skills/clarify/references/advisory-guide.md): Advisory stance and response framing guidance.
-- [clarify/aggregation-guide](plugins/cwf/skills/clarify/references/aggregation-guide.md): Clarification synthesis and closure strategy.
-- [clarify/questioning-guide](plugins/cwf/skills/clarify/references/questioning-guide.md): Clarification question design patterns.
-- [clarify/research-guide](plugins/cwf/skills/clarify/references/research-guide.md): Research-first clarification tactics.
-- [gather/TOON](plugins/cwf/skills/gather/references/TOON.md): TOON extraction format reference.
-- [gather/google-export](plugins/cwf/skills/gather/references/google-export.md): Google export handling reference.
-- [gather/notion-export](plugins/cwf/skills/gather/references/notion-export.md): Notion export handling reference.
-- [gather/query-intelligence](plugins/cwf/skills/gather/references/query-intelligence.md): Query strategy and decomposition guidance.
-- [gather/search-api-reference](plugins/cwf/skills/gather/references/search-api-reference.md): Tavily/Exa search API reference.
-- [gather/slack-export](plugins/cwf/skills/gather/references/slack-export.md): Slack export handling reference.
-- [impl/agent-prompts](plugins/cwf/skills/impl/references/agent-prompts.md): Implementation-agent prompt templates.
-- [impl/impl-gates](plugins/cwf/skills/impl/references/impl-gates.md): Implementation completion gate definitions.
-- [refactor/docs-criteria](plugins/cwf/skills/refactor/references/docs-criteria.md): Documentation consistency review criteria.
-- [refactor/holistic-criteria](plugins/cwf/skills/refactor/references/holistic-criteria.md): Cross-plugin holistic review criteria.
-- [refactor/review-criteria](plugins/cwf/skills/refactor/references/review-criteria.md): General refactor review criteria.
-- [refactor/tidying-guide](plugins/cwf/skills/refactor/references/tidying-guide.md): Commit-based tidying guidance.
-- [retro/cdm-guide](plugins/cwf/skills/retro/references/cdm-guide.md): CDM-based retrospective lens.
-- [retro/expert-lens-guide](plugins/cwf/skills/retro/references/expert-lens-guide.md): Expert-lens retrospective guidance.
-- [review/external-review](plugins/cwf/skills/review/references/external-review.md): External reviewer orchestration guide.
-- [review/prompts](plugins/cwf/skills/review/references/prompts.md): Review prompt templates.
-- [ship/issue-template](plugins/cwf/skills/ship/references/issue-template.md): Issue template used by ship workflow.
-- [ship/pr-template](plugins/cwf/skills/ship/references/pr-template.md): PR template used by ship workflow.
+- [clarify files](plugins/cwf/skills/clarify/README.md): Local file map for clarify skill.
+- [gather files](plugins/cwf/skills/gather/README.md): Local file map for gather skill.
+- [handoff files](plugins/cwf/skills/handoff/README.md): Local file map for handoff skill.
+- [impl files](plugins/cwf/skills/impl/README.md): Local file map for impl skill.
+- [plan files](plugins/cwf/skills/plan/README.md): Local file map for plan skill.
+- [refactor files](plugins/cwf/skills/refactor/README.md): Local file map for refactor skill.
+- [retro files](plugins/cwf/skills/retro/README.md): Local file map for retro skill.
+- [review files](plugins/cwf/skills/review/README.md): Local file map for review skill.
+- [run files](plugins/cwf/skills/run/README.md): Local file map for run skill.
+- [setup files](plugins/cwf/skills/setup/README.md): Local file map for setup skill.
+- [ship files](plugins/cwf/skills/ship/README.md): Local file map for ship skill.
+- [update files](plugins/cwf/skills/update/README.md): Local file map for update skill.
 
 ## plugins/cwf/references — Cross-skill concepts and protocols
 
