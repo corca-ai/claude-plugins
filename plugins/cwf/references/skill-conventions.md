@@ -123,10 +123,10 @@ Every skill MUST have a `## References` section as the final section.
 
 | Reference | Path | When to link |
 |-----------|------|-------------|
-| Agent patterns | [../../references/agent-patterns.md](../../references/agent-patterns.md) | Skills using Task tool or sub-agents |
-| Plan protocol | [../../references/plan-protocol.md](../../references/plan-protocol.md) | Skills producing plan/lesson artifacts |
-| Expert advisor | [../../references/expert-advisor-guide.md](../../references/expert-advisor-guide.md) | Skills using expert sub-agents |
-| Skill conventions | [../../references/skill-conventions.md](../../references/skill-conventions.md) | (for refactor validation, not in individual skills) |
+| Agent patterns | [agent-patterns.md](agent-patterns.md) | Skills using Task tool or sub-agents |
+| Plan protocol | [plan-protocol.md](plan-protocol.md) | Skills producing plan/lesson artifacts |
+| Expert advisor | [expert-advisor-guide.md](expert-advisor-guide.md) | Skills using expert sub-agents |
+| Skill conventions | [skill-conventions.md](skill-conventions.md) | (for refactor validation, not in individual skills) |
 
 ### Skill-specific references
 
@@ -141,7 +141,7 @@ Link to files in the skill's own `references/` directory using relative paths:
 If the skill uses sub-agents, declare the pattern in the References section:
 
 ```text
-- [agent-patterns.md](../../references/agent-patterns.md) — {pattern name} pattern
+- [agent-patterns.md](agent-patterns.md) — {pattern name} pattern
 ```
 
 Pattern names: Single, Adaptive, Agent team, 4 parallel.

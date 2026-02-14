@@ -113,7 +113,7 @@ List files the next session agent must read before starting:
 5. {task-specific files from master-plan or plan.md}
 ```
 
-Always include [AGENTS.md](AGENTS.md), [docs/plugin-dev-cheatsheet.md](docs/plugin-dev-cheatsheet.md), and `cwf-state.yaml` as standard entries. Add task-specific files based on the next session's scope. Include [CLAUDE.md](CLAUDE.md) only when Claude runtime-specific behavior is relevant.
+Always include [AGENTS.md](../../../../AGENTS.md), [docs/plugin-dev-cheatsheet.md](../../../../docs/plugin-dev-cheatsheet.md), and `cwf-state.yaml` as standard entries. Add task-specific files based on the next session's scope. Include [CLAUDE.md](../../../../CLAUDE.md) only when Claude runtime-specific behavior is relevant.
 
 #### 2. Task Scope
 
@@ -195,7 +195,7 @@ the trigger list in skill descriptions. Use CWF skills for workflow stages
 instead of manual execution.
 ```
 
-Reference the discovery mechanism from [AGENTS.md](AGENTS.md) Dogfooding section. Do not hardcode a list of specific skills.
+Reference the discovery mechanism from [AGENTS.md](../../../../AGENTS.md) Dogfooding section. Do not hardcode a list of specific skills.
 
 #### 8. Execution Contract (Mention-Only Safe)
 
@@ -257,7 +257,7 @@ Example: "clarify + design → implementation"
 
 The agent executing this skill holds the clarify/gather context in its active conversation. Extract the following from conversation history and session artifacts:
 
-1. **Context Files**: Which files must the next phase agent read? Always include [AGENTS.md](AGENTS.md) and `cwf-state.yaml`. Add files that emerged as critical during the clarify/gather phase. Include [CLAUDE.md](CLAUDE.md) only if runtime-specific behavior matters.
+1. **Context Files**: Which files must the next phase agent read? Always include [AGENTS.md](../../../../AGENTS.md) and `cwf-state.yaml`. Add files that emerged as critical during the clarify/gather phase. Include [CLAUDE.md](../../../../CLAUDE.md) only if runtime-specific behavior matters.
    - When available, include runtime logs from canonical/legacy patterns:
      `prompt-logs/sessions/*.claude.md`, `prompt-logs/sessions/*.codex.md`,
      `prompt-logs/sessions/*.md`, `prompt-logs/sessions-codex/*.md`

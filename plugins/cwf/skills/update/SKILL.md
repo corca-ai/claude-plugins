@@ -96,7 +96,7 @@ CWF updated to {version}. Restart Claude Code for changes to take effect.
 
 After a successful update (or when showing version diff):
 
-1. Read [CHANGELOG.md](CHANGELOG.md) in the plugin source if it exists
+1. Read [CHANGELOG.md](../../../../CHANGELOG.md) in the plugin source if it exists
 2. Summarize changes between old and new version
 3. If no changelog exists, list new/modified skills by comparing directory
    structure

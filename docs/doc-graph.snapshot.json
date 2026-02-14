@@ -1,9 +1,9 @@
 {
   "stats": {
     "total_docs": 70,
-    "total_links": 451,
+    "total_links": 449,
     "orphan_count": 3,
-    "broken_ref_count": 46
+    "broken_ref_count": 0
   },
   "adjacency": {
     ".claude/skills/plugin-deploy/SKILL.md": [],
@@ -54,25 +54,24 @@
       "docs/documentation-guide.md",
       "docs/plugin-dev-cheatsheet.md",
       "docs/interactive-doc-review-protocol.md",
-      "docs/setup-output-examples.md",
       "references/anthropic-skills-guide/README.md",
       "references/essence-of-software/distillation.md"
     ],
     "AI_NATIVE_PRODUCT_TEAM.ko.md": [
       "AI_NATIVE_PRODUCT_TEAM.md",
-      "plugins/gather-context",
-      "plugins/clarify",
-      "plugins/retro",
-      "plugins/refactor",
-      "plugins/attention-hook"
+      "plugins/cwf/skills/gather/SKILL.md",
+      "plugins/cwf/skills/clarify/SKILL.md",
+      "plugins/cwf/skills/retro/SKILL.md",
+      "plugins/cwf/skills/refactor/SKILL.md",
+      "plugins/cwf/hooks/README.md"
     ],
     "AI_NATIVE_PRODUCT_TEAM.md": [
       "AI_NATIVE_PRODUCT_TEAM.ko.md",
-      "plugins/gather-context",
-      "plugins/clarify",
-      "plugins/retro",
-      "plugins/refactor",
-      "plugins/attention-hook"
+      "plugins/cwf/skills/gather/SKILL.md",
+      "plugins/cwf/skills/clarify/SKILL.md",
+      "plugins/cwf/skills/retro/SKILL.md",
+      "plugins/cwf/skills/refactor/SKILL.md",
+      "plugins/cwf/hooks/README.md"
     ],
     "CLAUDE.md": [
       "AGENTS.md",
@@ -168,7 +167,7 @@
       "plugins/cwf/scripts"
     ],
     "docs/architecture-patterns.md": [
-      "docs/references/skill-conventions.md"
+      "plugins/cwf/references/skill-conventions.md"
     ],
     "docs/documentation-guide.md": [
       "AGENTS.md",
@@ -201,19 +200,19 @@
       "docs/doc-graph.snapshot.json"
     ],
     "docs/plugin-dev-cheatsheet.md": [
-      "docs/CHANGELOG.md",
-      "docs/README.md",
-      "docs/README.ko.md",
-      "docs/AI_NATIVE_PRODUCT_TEAM.md",
-      "docs/README.md",
-      "docs/README.ko.md",
-      "docs/AI_NATIVE_PRODUCT_TEAM.md"
+      "CHANGELOG.md",
+      "README.md",
+      "README.ko.md",
+      "AI_NATIVE_PRODUCT_TEAM.md",
+      "README.md",
+      "README.ko.md",
+      "AI_NATIVE_PRODUCT_TEAM.md"
     ],
     "docs/project-context.md": [],
     "docs/v3-migration-decisions.md": [
-      "docs/cwf-index.md",
-      "docs/repo-index.md",
-      "docs/AGENTS.md"
+      "cwf-index.md",
+      "repo-index.md",
+      "AGENTS.md"
     ],
     "plugins/cwf/hooks/README.md": [
       "plugins/cwf/hooks/scripts",
@@ -241,10 +240,10 @@
     "plugins/cwf/references/expert-advisor-guide.md": [],
     "plugins/cwf/references/plan-protocol.md": [],
     "plugins/cwf/references/skill-conventions.md": [
-      "plugins/references/agent-patterns.md",
-      "plugins/references/plan-protocol.md",
-      "plugins/references/expert-advisor-guide.md",
-      "plugins/references/skill-conventions.md"
+      "plugins/cwf/references/agent-patterns.md",
+      "plugins/cwf/references/plan-protocol.md",
+      "plugins/cwf/references/expert-advisor-guide.md",
+      "plugins/cwf/references/skill-conventions.md"
     ],
     "plugins/cwf/scripts/README.md": [
       "plugins/cwf/scripts",
@@ -328,12 +327,12 @@
       "plugins/cwf/skills/handoff/SKILL.md"
     ],
     "plugins/cwf/skills/handoff/SKILL.md": [
-      "plugins/cwf/skills/handoff/AGENTS.md",
-      "plugins/cwf/skills/handoff/docs/plugin-dev-cheatsheet.md",
-      "plugins/cwf/skills/handoff/CLAUDE.md",
-      "plugins/cwf/skills/handoff/AGENTS.md",
-      "plugins/cwf/skills/handoff/AGENTS.md",
-      "plugins/cwf/skills/handoff/CLAUDE.md",
+      "AGENTS.md",
+      "docs/plugin-dev-cheatsheet.md",
+      "CLAUDE.md",
+      "AGENTS.md",
+      "AGENTS.md",
+      "CLAUDE.md",
       "plugins/cwf/references/plan-protocol.md",
       "plugins/cwf/references/agent-patterns.md"
     ],
@@ -357,7 +356,7 @@
       "plugins/cwf/references/agent-patterns.md"
     ],
     "plugins/cwf/skills/impl/references/agent-prompts.md": [
-      "plugins/cwf/skills/impl/references/CHANGELOG.md"
+      "CHANGELOG.md"
     ],
     "plugins/cwf/skills/impl/references/impl-gates.md": [],
     "plugins/cwf/skills/plan/README.md": [
@@ -410,16 +409,16 @@
       "plugins/cwf/skills/retro/references/expert-lens-guide.md"
     ],
     "plugins/cwf/skills/retro/SKILL.md": [
-      "plugins/cwf/skills/retro/AGENTS.md",
-      "plugins/cwf/skills/retro/CLAUDE.md",
-      "plugins/cwf/skills/retro/docs/project-context.md",
+      "AGENTS.md",
+      "CLAUDE.md",
+      "docs/project-context.md",
       "plugins/cwf/references/context-recovery-protocol.md",
-      "plugins/cwf/skills/retro/AGENTS.md",
-      "plugins/cwf/skills/retro/CLAUDE.md",
-      "plugins/cwf/skills/retro/AGENTS.md",
-      "plugins/cwf/skills/retro/AGENTS.md",
-      "plugins/cwf/skills/retro/AGENTS.md",
-      "plugins/cwf/skills/retro/AGENTS.md",
+      "AGENTS.md",
+      "CLAUDE.md",
+      "AGENTS.md",
+      "AGENTS.md",
+      "AGENTS.md",
+      "AGENTS.md",
       "plugins/cwf/references/agent-patterns.md"
     ],
     "plugins/cwf/skills/retro/references/cdm-guide.md": [],
@@ -435,8 +434,8 @@
       "plugins/cwf/references/context-recovery-protocol.md",
       "plugins/cwf/skills/review/references/prompts.md",
       "plugins/cwf/skills/review/references/external-review.md",
-      "plugins/cwf/skills/review/plugins/cwf/references/agent-patterns.md",
-      "plugins/cwf/skills/review/plugins/cwf/references/expert-advisor-guide.md"
+      "plugins/cwf/references/agent-patterns.md",
+      "plugins/cwf/references/expert-advisor-guide.md"
     ],
     "plugins/cwf/skills/review/references/external-review.md": [],
     "plugins/cwf/skills/review/references/prompts.md": [],
@@ -521,7 +520,7 @@
       "plugins/cwf/skills/update/SKILL.md"
     ],
     "plugins/cwf/skills/update/SKILL.md": [
-      "plugins/cwf/skills/update/CHANGELOG.md",
+      "CHANGELOG.md",
       "plugins/cwf/references/agent-patterns.md"
     ],
     "repo-index.md": [
@@ -566,7 +565,6 @@
       "docs/documentation-guide.md",
       "docs/plugin-dev-cheatsheet.md",
       "docs/interactive-doc-review-protocol.md",
-      "docs/setup-output-examples.md",
       "references/anthropic-skills-guide/README.md",
       "references/essence-of-software/distillation.md"
     ]
@@ -576,278 +574,47 @@
     ".claude/skills/plugin-deploy/references/checklist.md",
     "docs/v3-migration-decisions.md"
   ],
-  "broken_refs": [
-    {
-      "source": "AGENTS.md",
-      "target": "docs/setup-output-examples.md",
-      "raw": "docs/setup-output-examples.md"
-    },
-    {
-      "source": "AI_NATIVE_PRODUCT_TEAM.ko.md",
-      "target": "plugins/gather-context",
-      "raw": "./plugins/gather-context"
-    },
-    {
-      "source": "AI_NATIVE_PRODUCT_TEAM.ko.md",
-      "target": "plugins/clarify",
-      "raw": "./plugins/clarify"
-    },
-    {
-      "source": "AI_NATIVE_PRODUCT_TEAM.ko.md",
-      "target": "plugins/retro",
-      "raw": "./plugins/retro"
-    },
-    {
-      "source": "AI_NATIVE_PRODUCT_TEAM.ko.md",
-      "target": "plugins/refactor",
-      "raw": "./plugins/refactor"
-    },
-    {
-      "source": "AI_NATIVE_PRODUCT_TEAM.ko.md",
-      "target": "plugins/attention-hook",
-      "raw": "./plugins/attention-hook"
-    },
-    {
-      "source": "AI_NATIVE_PRODUCT_TEAM.md",
-      "target": "plugins/gather-context",
-      "raw": "./plugins/gather-context"
-    },
-    {
-      "source": "AI_NATIVE_PRODUCT_TEAM.md",
-      "target": "plugins/clarify",
-      "raw": "./plugins/clarify"
-    },
-    {
-      "source": "AI_NATIVE_PRODUCT_TEAM.md",
-      "target": "plugins/retro",
-      "raw": "./plugins/retro"
-    },
-    {
-      "source": "AI_NATIVE_PRODUCT_TEAM.md",
-      "target": "plugins/refactor",
-      "raw": "./plugins/refactor"
-    },
-    {
-      "source": "AI_NATIVE_PRODUCT_TEAM.md",
-      "target": "plugins/attention-hook",
-      "raw": "./plugins/attention-hook"
-    },
-    {
-      "source": "docs/architecture-patterns.md",
-      "target": "docs/references/skill-conventions.md",
-      "raw": "references/skill-conventions.md"
-    },
-    {
-      "source": "docs/plugin-dev-cheatsheet.md",
-      "target": "docs/CHANGELOG.md",
-      "raw": "CHANGELOG.md"
-    },
-    {
-      "source": "docs/plugin-dev-cheatsheet.md",
-      "target": "docs/README.md",
-      "raw": "README.md"
-    },
-    {
-      "source": "docs/plugin-dev-cheatsheet.md",
-      "target": "docs/README.ko.md",
-      "raw": "README.ko.md"
-    },
-    {
-      "source": "docs/plugin-dev-cheatsheet.md",
-      "target": "docs/AI_NATIVE_PRODUCT_TEAM.md",
-      "raw": "AI_NATIVE_PRODUCT_TEAM.md"
-    },
-    {
-      "source": "docs/plugin-dev-cheatsheet.md",
-      "target": "docs/README.md",
-      "raw": "README.md"
-    },
-    {
-      "source": "docs/plugin-dev-cheatsheet.md",
-      "target": "docs/README.ko.md",
-      "raw": "README.ko.md"
-    },
-    {
-      "source": "docs/plugin-dev-cheatsheet.md",
-      "target": "docs/AI_NATIVE_PRODUCT_TEAM.md",
-      "raw": "AI_NATIVE_PRODUCT_TEAM.md"
-    },
-    {
-      "source": "docs/v3-migration-decisions.md",
-      "target": "docs/cwf-index.md",
-      "raw": "cwf-index.md"
-    },
-    {
-      "source": "docs/v3-migration-decisions.md",
-      "target": "docs/repo-index.md",
-      "raw": "repo-index.md"
-    },
-    {
-      "source": "docs/v3-migration-decisions.md",
-      "target": "docs/AGENTS.md",
-      "raw": "AGENTS.md"
-    },
-    {
-      "source": "plugins/cwf/references/skill-conventions.md",
-      "target": "plugins/references/agent-patterns.md",
-      "raw": "../../references/agent-patterns.md"
-    },
-    {
-      "source": "plugins/cwf/references/skill-conventions.md",
-      "target": "plugins/references/plan-protocol.md",
-      "raw": "../../references/plan-protocol.md"
-    },
-    {
-      "source": "plugins/cwf/references/skill-conventions.md",
-      "target": "plugins/references/expert-advisor-guide.md",
-      "raw": "../../references/expert-advisor-guide.md"
-    },
-    {
-      "source": "plugins/cwf/references/skill-conventions.md",
-      "target": "plugins/references/skill-conventions.md",
-      "raw": "../../references/skill-conventions.md"
-    },
-    {
-      "source": "plugins/cwf/skills/handoff/SKILL.md",
-      "target": "plugins/cwf/skills/handoff/AGENTS.md",
-      "raw": "AGENTS.md"
-    },
-    {
-      "source": "plugins/cwf/skills/handoff/SKILL.md",
-      "target": "plugins/cwf/skills/handoff/docs/plugin-dev-cheatsheet.md",
-      "raw": "docs/plugin-dev-cheatsheet.md"
-    },
-    {
-      "source": "plugins/cwf/skills/handoff/SKILL.md",
-      "target": "plugins/cwf/skills/handoff/CLAUDE.md",
-      "raw": "CLAUDE.md"
-    },
-    {
-      "source": "plugins/cwf/skills/handoff/SKILL.md",
-      "target": "plugins/cwf/skills/handoff/AGENTS.md",
-      "raw": "AGENTS.md"
-    },
-    {
-      "source": "plugins/cwf/skills/handoff/SKILL.md",
-      "target": "plugins/cwf/skills/handoff/AGENTS.md",
-      "raw": "AGENTS.md"
-    },
-    {
-      "source": "plugins/cwf/skills/handoff/SKILL.md",
-      "target": "plugins/cwf/skills/handoff/CLAUDE.md",
-      "raw": "CLAUDE.md"
-    },
-    {
-      "source": "plugins/cwf/skills/impl/references/agent-prompts.md",
-      "target": "plugins/cwf/skills/impl/references/CHANGELOG.md",
-      "raw": "CHANGELOG.md"
-    },
-    {
-      "source": "plugins/cwf/skills/retro/SKILL.md",
-      "target": "plugins/cwf/skills/retro/AGENTS.md",
-      "raw": "AGENTS.md"
-    },
-    {
-      "source": "plugins/cwf/skills/retro/SKILL.md",
-      "target": "plugins/cwf/skills/retro/CLAUDE.md",
-      "raw": "CLAUDE.md"
-    },
-    {
-      "source": "plugins/cwf/skills/retro/SKILL.md",
-      "target": "plugins/cwf/skills/retro/docs/project-context.md",
-      "raw": "docs/project-context.md"
-    },
-    {
-      "source": "plugins/cwf/skills/retro/SKILL.md",
-      "target": "plugins/cwf/skills/retro/AGENTS.md",
-      "raw": "AGENTS.md"
-    },
-    {
-      "source": "plugins/cwf/skills/retro/SKILL.md",
-      "target": "plugins/cwf/skills/retro/CLAUDE.md",
-      "raw": "CLAUDE.md"
-    },
-    {
-      "source": "plugins/cwf/skills/retro/SKILL.md",
-      "target": "plugins/cwf/skills/retro/AGENTS.md",
-      "raw": "AGENTS.md"
-    },
-    {
-      "source": "plugins/cwf/skills/retro/SKILL.md",
-      "target": "plugins/cwf/skills/retro/AGENTS.md",
-      "raw": "AGENTS.md"
-    },
-    {
-      "source": "plugins/cwf/skills/retro/SKILL.md",
-      "target": "plugins/cwf/skills/retro/AGENTS.md",
-      "raw": "AGENTS.md"
-    },
-    {
-      "source": "plugins/cwf/skills/retro/SKILL.md",
-      "target": "plugins/cwf/skills/retro/AGENTS.md",
-      "raw": "AGENTS.md"
-    },
-    {
-      "source": "plugins/cwf/skills/review/SKILL.md",
-      "target": "plugins/cwf/skills/review/plugins/cwf/references/agent-patterns.md",
-      "raw": "plugins/cwf/references/agent-patterns.md"
-    },
-    {
-      "source": "plugins/cwf/skills/review/SKILL.md",
-      "target": "plugins/cwf/skills/review/plugins/cwf/references/expert-advisor-guide.md",
-      "raw": "plugins/cwf/references/expert-advisor-guide.md"
-    },
-    {
-      "source": "plugins/cwf/skills/update/SKILL.md",
-      "target": "plugins/cwf/skills/update/CHANGELOG.md",
-      "raw": "CHANGELOG.md"
-    },
-    {
-      "source": "repo-index.md",
-      "target": "docs/setup-output-examples.md",
-      "raw": "docs/setup-output-examples.md"
-    }
-  ],
+  "broken_refs": [],
   "top_referenced": [
     {
       "file": "AGENTS.md",
-      "count": 26
+      "count": 36
+    },
+    {
+      "file": "plugins/cwf/references/agent-patterns.md",
+      "count": 13
+    },
+    {
+      "file": "cwf-index.md",
+      "count": 13
+    },
+    {
+      "file": "repo-index.md",
+      "count": 13
     },
     {
       "file": "plugins/cwf/references/context-recovery-protocol.md",
       "count": 12
     },
     {
-      "file": "cwf-index.md",
-      "count": 12
-    },
-    {
-      "file": "repo-index.md",
-      "count": 12
-    },
-    {
-      "file": "plugins/cwf/references/agent-patterns.md",
+      "file": "CLAUDE.md",
       "count": 11
     },
     {
-      "file": "plugins/cwf/skills/impl/references/impl-gates.md",
+      "file": "plugins/cwf/skills/gather/SKILL.md",
       "count": 9
     },
     {
-      "file": "CLAUDE.md",
-      "count": 7
+      "file": "plugins/cwf/skills/clarify/SKILL.md",
+      "count": 9
     },
     {
-      "file": "plugins/cwf/skills/setup/SKILL.md",
-      "count": 7
+      "file": "plugins/cwf/skills/retro/SKILL.md",
+      "count": 9
     },
     {
-      "file": "plugins/cwf/skills/update/SKILL.md",
-      "count": 7
-    },
-    {
-      "file": "plugins/cwf/skills/gather/SKILL.md",
-      "count": 7
+      "file": "plugins/cwf/skills/refactor/SKILL.md",
+      "count": 9
     }
   ]
 }

@@ -62,7 +62,6 @@ Skill-internal files are documented in each skill-local README (for example, [cl
 - [documentation-guide](docs/documentation-guide.md): Documentation quality principles and scope rules.
 - [plugin-dev-cheatsheet](docs/plugin-dev-cheatsheet.md): Practical development/testing/deploy workflows.
 - [interactive-doc-review-protocol](docs/interactive-doc-review-protocol.md): Interactive documentation review process and chunking strategy.
-- [setup-output-examples](docs/setup-output-examples.md): User-facing setup output examples by setup flag.
 
 ## references — External conceptual frameworks used by this repository
 

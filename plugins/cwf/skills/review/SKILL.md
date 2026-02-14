@@ -720,5 +720,5 @@ Then /review deterministically uses that base and records base_strategy=explicit
 
 - Internal reviewer perspectives: [references/prompts.md](references/prompts.md)
 - External reviewer perspectives & CLI templates: [references/external-review.md](references/external-review.md)
-- Agent patterns (provenance, synthesis, execution): [plugins/cwf/references/agent-patterns.md](plugins/cwf/references/agent-patterns.md)
-- Expert advisor guide (expert sub-agent identity, grounding, review format): [plugins/cwf/references/expert-advisor-guide.md](plugins/cwf/references/expert-advisor-guide.md)
+- Agent patterns (provenance, synthesis, execution): [agent-patterns.md](../../references/agent-patterns.md)
+- Expert advisor guide (expert sub-agent identity, grounding, review format): [expert-advisor-guide.md](../../references/expert-advisor-guide.md)

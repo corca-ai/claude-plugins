@@ -203,9 +203,9 @@ Alternative: add hooks via `/hooks` menu in the current session (goes through re
 
 1. Bump version in `plugin.json` (see version bump rules above)
 2. Sync `marketplace.json` entry (version if listed, description, keywords)
-3. Update [CHANGELOG.md](CHANGELOG.md) if the plugin has one (describe what changed)
-4. Update [README.md](README.md) and [README.ko.md](README.ko.md) (table + detail section)
-5. New plugins: check [AI_NATIVE_PRODUCT_TEAM.md](AI_NATIVE_PRODUCT_TEAM.md) for link opportunities
+3. Update [CHANGELOG.md](../CHANGELOG.md) if the plugin has one (describe what changed)
+4. Update [README.md](../README.md) and [README.ko.md](../README.ko.md) (table + detail section)
+5. New plugins: check [AI_NATIVE_PRODUCT_TEAM.md](../AI_NATIVE_PRODUCT_TEAM.md) for link opportunities
 6. Test locally
 7. Commit and push
 8. On **main branch**: run `bash scripts/update-all.sh` (skip on feature branches — pulls from default branch only)
@@ -223,8 +223,8 @@ Checklist for new plugins (in addition to the deploy workflow above):
 
 1. Add entry to `.claude-plugin/marketplace.json` → `plugins[]`
 2. Bump marketplace metadata version
-3. Update [README.md](README.md) and [README.ko.md](README.ko.md) (table + detail section)
-4. Check [AI_NATIVE_PRODUCT_TEAM.md](AI_NATIVE_PRODUCT_TEAM.md) for link opportunities
+3. Update [README.md](../README.md) and [README.ko.md](../README.ko.md) (table + detail section)
+4. Check [AI_NATIVE_PRODUCT_TEAM.md](../AI_NATIVE_PRODUCT_TEAM.md) for link opportunities
 
 ## Marketplace User Commands
 
