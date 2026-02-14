@@ -93,3 +93,22 @@
 
 - Resolved by user decision: remove `repo-index.md` in this repository.
 - Repository index output remains available through AGENTS managed block generation (`cwf:setup --repo-index --target agents`).
+- Re-baseline after removal: `total_docs=67`, `total_links=351`, `orphan_count=0`, `broken_ref_count=0`.
+
+### Chunk Review 02
+
+1. Chunk: `README.md:1-117` (EOF: no)
+2. Excerpt: framing contract, rationale, core concepts, workflow table, and installation/update/legacy migration guidance.
+3. Meaning / Intent: present CWF positioning and behavioral model before tactical skill-by-skill reference sections.
+4. Review Focus (Line-Anchored):
+   - `README.md:24-25`: AGENTS-first routing statement now aligns with current repository policy; check that no alternate default entrypoint is implied in nearby sections.
+   - `README.md:70-83`: workflow table scope and ordering remain coherent with actual skill inventory and trigger model.
+5. Link Syntax Check: pass (`[]()` syntax consistent; no broken local references in this chunk).
+6. De-dup / What-Why Check: framing is high-signal; minor potential verbosity in concept narrative blocks, but still mostly what/why-oriented.
+7. Discussion Prompt:
+   - Should the framing section keep both "What CWF Is" and "Why CWF?" as separate top-level narratives, or can they be merged to reduce initial read length?
+   - In this README, do you want to keep the full 12-skill workflow table in the top half, or move detailed capability enumeration deeper for faster onboarding?
+
+### File Boundary Gate
+
+- Inbound links: `5` (orphan: no)

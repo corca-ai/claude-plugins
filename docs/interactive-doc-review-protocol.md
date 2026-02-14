@@ -178,11 +178,11 @@ review_state:
     references_done: false
   cursor:
     file: README.md
-    next_line: 1
+    next_line: 118
   completed_files: [AGENTS.md, CLAUDE.md]
-  current_file_eof: true
-  last_chunk_range: "CLAUDE.md:1-14"
-  last_inbound_count: 6
+  current_file_eof: false
+  last_chunk_range: "README.md:1-117"
+  last_inbound_count: 5
   orphan_triage:
     intentional: []
     needs_link_fix: []
@@ -190,6 +190,8 @@ review_state:
   unresolved_discussion_points:
     - "CLAUDE.md routing duplication: keep both sentence pointer and numbered read-first list?"
     - "CLAUDE.md env fallback note: keep in adapter or move to troubleshooting doc?"
+    - "README.md framing duplication risk: keep separate 'What CWF Is' and 'Why CWF?' sections?"
+    - "README.md placement of 12-skill workflow table: top-half vs deeper section?"
   last_updated: "2026-02-14"
 ```
 

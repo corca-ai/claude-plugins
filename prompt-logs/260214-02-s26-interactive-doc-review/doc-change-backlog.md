@@ -51,3 +51,7 @@ Status: Done (superseded by AGENTS-managed index policy; file removed).
 11. `NON_AUTOMATABLE` — Apply AGENTS-managed repository index policy for this repository.
 Reason: keep a single discoverability surface and reduce generated-file drift.
 Status: Done.
+
+12. `NON_AUTOMATABLE` — Decide whether README framing should merge "What CWF Is" and "Why CWF?" sections.
+Reason: potential onboarding-length reduction vs conceptual clarity trade-off.
+Status: Pending.
