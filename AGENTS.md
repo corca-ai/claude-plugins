@@ -1,10 +1,12 @@
 # Agent Operating Guide
 
-Shared operating guide for all coding agents in this repository (Codex, Claude Code, and compatible runtimes).
+Shared cross-runtime entry point for coding agents in this repository (Codex, Claude Code, and compatible runtimes).
 
-## Progressive Disclosure
+This file is a compressed index. Keep stable invariants here and keep implementation detail in scoped documents.
 
-Start with:
+## Read Order (Progressive Disclosure)
+
+Start from these pointers, then read only what is relevant to the current task:
 
 - [cwf-index.md](cwf-index.md) — project map ("when to read what")
 - [docs/project-context.md](docs/project-context.md) — project/org facts and long-lived heuristics
@@ -12,34 +14,26 @@ Start with:
 - [docs/plugin-dev-cheatsheet.md](docs/plugin-dev-cheatsheet.md) — practical plugin development/testing/deploy workflows
 - [docs/documentation-guide.md](docs/documentation-guide.md) — documentation quality and scope rules
 
-Read only what is relevant to the current task.
+## Operating Invariants
 
-## Dogfooding
-
-ALWAYS use CWF skills for the task at hand.
-
-Discover available CWF skills by reading `plugins/cwf/skills/*/SKILL.md`
-(or installed links under `~/.agents/skills/*`) and checking each skill's
-trigger section.
-
-After modifying code, check whether [README.md](README.md) or [README.ko.md](README.ko.md) must be updated.
-
-## Session State
-
-After implementation:
-
-1. Write `next-session.md`.
-2. Register the session in `cwf-state.yaml`.
-3. Run `scripts/check-session.sh --impl`.
-4. Fix all FAIL items before finishing.
-
-## Collaboration Style
-
+- Dogfooding: use CWF skills when the task matches triggers in skill definitions under [plugins/cwf/skills/](plugins/cwf/skills/) (or installed links under `~/.agents/skills/`).
 - The user communicates in Korean. Respond in Korean for conversation and English for code/docs (unless explicitly requested otherwise).
-- When executing a pre-designed plan, if actual code diverges from the plan, record the discrepancy in `lessons.md`, report it immediately, and ask for a user decision before proceeding.
+- When executing a pre-designed plan, if implementation diverges, record the discrepancy in session lessons, report it immediately, and ask for a user decision before proceeding.
 - Never delete user-created files without explicit confirmation. Prefer `mv` over `rm`.
 - When the user proposes one option and meaningful alternatives exist, provide counterarguments and trade-offs explicitly.
 - When the user provides external references/research, read them before forming design opinions.
+- After modifying code, check whether [README.md](README.md) or [README.ko.md](README.ko.md) must be updated.
+- Implementation completion is defined by passing `scripts/check-session.sh --impl`.
+
+## Deterministic-First Quality Control
+
+When a rule can be validated by tooling, enforce it in hooks/scripts rather than repeating behavioral instructions in [AGENTS.md](AGENTS.md).
+
+Primary enforcement points:
+
+- Hook config: `plugins/cwf/hooks/hooks.json`
+- Session validation: `scripts/check-session.sh`
+- Markdown and link checks: `plugins/cwf/hooks/scripts/check-markdown.sh`, `plugins/cwf/hooks/scripts/check-links-local.sh`, `scripts/check-links.sh`
 
 ## Persist Routing
 
@@ -57,10 +51,7 @@ When graduating findings from lessons/retro into permanent docs:
 
 Write documentation in English by default.
 
-Korean docs live in:
-
-- [README.ko.md](README.ko.md)
-- [AI_NATIVE_PRODUCT_TEAM.ko.md](AI_NATIVE_PRODUCT_TEAM.ko.md)
+Korean docs live in [README.ko.md](README.ko.md) and [AI_NATIVE_PRODUCT_TEAM.ko.md](AI_NATIVE_PRODUCT_TEAM.ko.md).
 
 ## Managed CWF Index
 

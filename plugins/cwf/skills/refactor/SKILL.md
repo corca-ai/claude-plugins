@@ -313,57 +313,82 @@ Present the report summary. The user may want to discuss findings, adjust priori
 
 Review documentation consistency across the repository.
 
-### 1. Agent Entry Docs Review
+### 1. Deterministic Tool Pass (Required First)
 
-Read the project's [AGENTS.md](AGENTS.md) (and runtime adapter docs like [CLAUDE.md](CLAUDE.md)) and evaluate:
-- Size: flag if AGENTS exceeds ~200 lines (progressive disclosure — details belong in docs/)
-- Accuracy: do referenced files/paths exist?
-- Staleness: do referenced plugins/skills still exist and match current state?
+Run deterministic checks before semantic review:
 
-### 2. Project Context Review
+```bash
+npx --yes markdownlint-cli2 "**/*.md"
+bash scripts/check-links.sh --local --json
+node scripts/doc-graph.mjs --json
+```
 
-Read [docs/project-context.md](docs/project-context.md) and check:
+Use tool output as the source of truth for lint-level issues.
+
+- If a tool is unavailable, report a tooling gap and continue with best-effort semantic review.
+- Do not restate lint-level findings manually unless you add repository-level interpretation or restructuring impact.
+
+### 2. Agent Entry Docs Review
+
+Read the project's [AGENTS.md](../../../../AGENTS.md) (and runtime adapter docs like [CLAUDE.md](../../../../CLAUDE.md)) and evaluate with `{SKILL_DIR}/references/docs-criteria.md` Section 1:
+
+- Compressed-index shape
+- What/why versus how boundary
+- Automation-redundant instructions
+- Routing completeness
+- Accuracy and staleness
+
+### 3. Project Context Review
+
+Read [docs/project-context.md](../../../../docs/project-context.md) and check:
+
 - Plugin listing matches actual `plugins/` directory contents
 - Architecture patterns are current (no references to removed/renamed plugins)
 - Convention entries match actual practice
 
-### 3. README Review
+### 4. README Review
 
-Read [README.md](README.md) and [README.ko.md](README.ko.md):
+Read [README.md](../../../../README.md) and [README.ko.md](../../../../README.ko.md):
+
 - Plugin overview table matches `marketplace.json` entries
 - Each active plugin has install/update commands
 - Deprecated plugins are clearly marked
 - Korean version mirrors English structure and content
 
-### 4. Cross-Document Consistency
+### 5. Cross-Document Consistency
 
 Check alignment between:
+
 - `marketplace.json` plugin list ↔ README overview table
 - `marketplace.json` descriptions ↔ `plugin.json` descriptions
-- [docs/project-context.md](docs/project-context.md) plugin listing ↔ actual `plugins/` contents
-- Dead internal links (file references that don't resolve)
+- [docs/project-context.md](../../../../docs/project-context.md) plugin listing ↔ actual `plugins/` contents
+- Entry-doc references ↔ actual filesystem paths
 
 Present findings as a prioritized list of inconsistencies with suggested fixes.
 
-### 5. Document Design Quality
+### 6. Document Design Quality (Semantic Layer)
 
-Read `{SKILL_DIR}/references/docs-criteria.md` Section 5 and evaluate:
-- Orphaned documents unreachable from entry points
+Read `{SKILL_DIR}/references/docs-criteria.md` Section 5 and evaluate semantic/structural issues that deterministic tools cannot fully judge:
+
+- Orphan intent and ownership boundary quality (using doc-graph output)
 - Circular references or deep navigation paths (>3 hops)
 - Inline overload (substantive content that should be a separate doc)
 - Unnecessary hard wraps in prose (especially when MD013 is disabled)
 - Auto-generated files committed to git
 - Non-obvious decisions lacking documented rationale
-- Self-evident instructions wasting reader attention
+- Self-evident or automation-redundant instructions
+- Scope overlap and ownership ambiguity
 
-### 6. Structural Optimization
+### 7. Structural Optimization
 
 Read `{SKILL_DIR}/references/docs-criteria.md` Section 6 and synthesize:
+
 - Merge candidates (scope-overlapping docs → identify primary absorber)
 - Deletion candidates (unique content fits elsewhere)
 - AGENTS/adapter trimming proposals (obvious + automation-redundant + duplicated)
 - Target structure: before/after doc set comparison
 - Principle compliance: rate each doc against the 7 documentation principles
+- Automation promotion candidates (manual findings that should move to lint/hooks/scripts)
 
 Present as a concrete restructuring proposal with rationale.
 
@@ -376,9 +401,11 @@ Present as a concrete restructuring proposal with rationale.
 3. Deep Review: 2 agents (structural 1-4 + quality/concept 5-8), single batch
 4. Holistic: 3 agents (Convention Compliance, Concept Integrity, Workflow Coherence), single batch after inline inventory
 5. Code Tidying: 1 agent per commit, all in one message
-6. Docs Review: inline, no sub-agents
-7. Sub-agents analyze and report; orchestrator merges. Sub-agents do not modify files
-8. All code fences must have a language specifier
+6. Docs Review: inline, no sub-agents (single-context synthesis over whole-repo graph and deterministic outputs)
+7. Docs Review must run the deterministic tool pass before semantic analysis
+8. In Docs Review, do not report lint/hook-detectable issues as standalone manual findings when tool output already covers them
+9. Sub-agents analyze and report; orchestrator merges. Sub-agents do not modify files
+10. All code fences must have a language specifier
 
 ## References
 

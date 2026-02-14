@@ -5,7 +5,7 @@
 include_fragments = true
 
 # Only check Markdown files
-include_extensions = ["md"]
+extensions = ["md"]
 
 # Exclude directories from scanning
 exclude_path = [
