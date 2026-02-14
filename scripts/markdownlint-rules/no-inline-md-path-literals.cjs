@@ -27,6 +27,7 @@ const ROOT_DOCS = new Set([
   "README.ko.md",
   "CHANGELOG.md",
   "cwf-index.md",
+  "repo-index.md",
   "AI_NATIVE_PRODUCT_TEAM.md",
   "AI_NATIVE_PRODUCT_TEAM.ko.md"
 ]);

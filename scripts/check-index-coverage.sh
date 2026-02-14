@@ -2,17 +2,20 @@
 set -euo pipefail
 
 if [ "${1:-}" = "" ]; then
-  echo "Usage: bash scripts/check-index-coverage.sh <index-file>"
-  echo "Example: bash scripts/check-index-coverage.sh cwf-index.md"
+  echo "Usage: bash scripts/check-index-coverage.sh <index-file> [--profile repo|cap]"
+  echo "Example: bash scripts/check-index-coverage.sh repo-index.md --profile repo"
+  echo "Example: bash scripts/check-index-coverage.sh cwf-index.md --profile cap"
   exit 2
 fi
 
 INDEX_FILE="$1"
-IGNORE_FILE=".cwf-index-ignore"
-
-if [ ! -f "$INDEX_FILE" ]; then
-  echo "Index file not found: $INDEX_FILE"
-  exit 2
+PROFILE="repo"
+if [ "${2:-}" = "--profile" ]; then
+  if [ "${3:-}" = "" ]; then
+    echo "Missing value for --profile (expected: repo or cap)"
+    exit 2
+  fi
+  PROFILE="$3"
 fi
 
 if ! command -v git >/dev/null 2>&1; then
@@ -21,7 +24,32 @@ if ! command -v git >/dev/null 2>&1; then
 fi
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
+CALLER_PWD="$PWD"
 cd "$REPO_ROOT"
+
+INDEX_PATH="$INDEX_FILE"
+case "$INDEX_PATH" in
+  /*) ;;
+  *) INDEX_PATH="$CALLER_PWD/$INDEX_PATH" ;;
+esac
+
+if [ ! -f "$INDEX_PATH" ]; then
+  echo "Index file not found: $INDEX_FILE"
+  exit 2
+fi
+
+case "$PROFILE" in
+  repo)
+    IGNORE_FILE="$REPO_ROOT/.cwf-index-ignore"
+    ;;
+  cap)
+    IGNORE_FILE="$REPO_ROOT/.cwf-cap-index-ignore"
+    ;;
+  *)
+    echo "Invalid --profile value: $PROFILE (expected: repo or cap)"
+    exit 2
+    ;;
+esac
 
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
@@ -57,7 +85,7 @@ is_ignored() {
   return 1
 }
 
-perl -ne 'while (/\[[^\]]+\]\(([^)]+)\)/g) { print "$1\n"; }' "$INDEX_FILE" > "$LINKS_RAW"
+perl -ne 'while (/\[[^\]]+\]\(([^)]+)\)/g) { print "$1\n"; }' "$INDEX_PATH" > "$LINKS_RAW"
 
 awk '
 {
@@ -71,7 +99,7 @@ awk '
 }
 ' "$LINKS_RAW" | sort -u > "$LINKS"
 
-collect_required_paths() {
+collect_required_paths_repo() {
   local file
   for file in README.md README.ko.md AGENTS.md CLAUDE.md; do
     if [ -f "$file" ]; then
@@ -88,19 +116,50 @@ collect_required_paths() {
   fi
 
   find . \
-    \( -path "./.git" -o -path "./node_modules" -o -path "./prompt-logs" \) -prune -o \
+    \( -path "./.git" -o -path "./.claude" -o -path "./node_modules" -o -path "./prompt-logs" \) -prune -o \
     -type f -name "SKILL.md" -print \
     | sed 's|^\./||' \
     | grep "/skills/" || true
 
   find . \
-    \( -path "./.git" -o -path "./node_modules" -o -path "./prompt-logs" \) -prune -o \
+    \( -path "./.git" -o -path "./.claude" -o -path "./node_modules" -o -path "./prompt-logs" \) -prune -o \
     -type f -name "*.md" -print \
     | sed 's|^\./||' \
     | grep "/references/" || true
 }
 
-collect_required_paths | sort -u > "$REQUIRED"
+collect_required_paths_cap() {
+  if [ -f "plugins/cwf/.claude-plugin/plugin.json" ]; then
+    printf "%s\n" "plugins/cwf/.claude-plugin/plugin.json"
+  fi
+
+  if [ -f "plugins/cwf/hooks/hooks.json" ]; then
+    printf "%s\n" "plugins/cwf/hooks/hooks.json"
+  fi
+
+  if [ -f "plugins/cwf/hooks/scripts/cwf-hook-gate.sh" ]; then
+    printf "%s\n" "plugins/cwf/hooks/scripts/cwf-hook-gate.sh"
+  fi
+
+  if [ -f "plugins/cwf/scripts/check-session.sh" ]; then
+    printf "%s\n" "plugins/cwf/scripts/check-session.sh"
+  fi
+
+  if [ -d "plugins/cwf/skills" ]; then
+    find plugins/cwf/skills -mindepth 2 -maxdepth 2 -type f -name "SKILL.md" | sort
+    find plugins/cwf/skills -type f -path "*/references/*.md" | sort
+  fi
+
+  if [ -d "plugins/cwf/references" ]; then
+    find plugins/cwf/references -type f -name "*.md" | sort
+  fi
+}
+
+if [ "$PROFILE" = "repo" ]; then
+  collect_required_paths_repo | sort -u > "$REQUIRED"
+else
+  collect_required_paths_cap | sort -u > "$REQUIRED"
+fi
 
 > "$REQUIRED_FILTERED"
 while IFS= read -r path; do
@@ -118,13 +177,13 @@ fi
 grep -Fvx -f "$LINKS" "$REQUIRED_FILTERED" > "$MISSING" || true
 
 if [ -s "$MISSING" ]; then
-  echo "Index coverage check FAILED: required docs missing from $INDEX_FILE"
+  echo "Index coverage check FAILED: required paths missing from $INDEX_FILE (profile=$PROFILE)"
   if [ "${#ignore_patterns[@]}" -gt 0 ]; then
-    echo "Ignore file applied: $IGNORE_FILE (${#ignore_patterns[@]} pattern(s))"
+    echo "Ignore file applied: $(basename "$IGNORE_FILE") (${#ignore_patterns[@]} pattern(s))"
   fi
   echo
   cat "$MISSING"
   exit 1
 fi
 
-echo "Index coverage check passed: $INDEX_FILE"
+echo "Index coverage check passed: $INDEX_FILE (profile=$PROFILE)"
