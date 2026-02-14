@@ -1,0 +1,12 @@
+{
+  "ignores": [
+    "prompt-logs/",
+    "node_modules/",
+    "**/node_modules/",
+    "references/anthropic-skills-guide/"
+  ],
+  "customRules": [
+    "./rules/no-inline-md-path-literals.cjs",
+    "./rules/no-hard-wrapped-prose.cjs"
+  ]
+}

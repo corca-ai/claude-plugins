@@ -41,20 +41,7 @@ Select autonomously what to read or update using the file descriptions in the bl
 - [run](plugins/cwf/skills/run/SKILL.md): End-to-end pipeline orchestration.
 - [refactor](plugins/cwf/skills/refactor/SKILL.md): Multi-mode refactor/docs review workflow.
 
-### plugins/cwf/skills/*/README — Skill-local file maps
-
-- [clarify files](plugins/cwf/skills/clarify/README.md): Local file map for clarify skill.
-- [gather files](plugins/cwf/skills/gather/README.md): Local file map for gather skill.
-- [handoff files](plugins/cwf/skills/handoff/README.md): Local file map for handoff skill.
-- [impl files](plugins/cwf/skills/impl/README.md): Local file map for impl skill.
-- [plan files](plugins/cwf/skills/plan/README.md): Local file map for plan skill.
-- [refactor files](plugins/cwf/skills/refactor/README.md): Local file map for refactor skill.
-- [retro files](plugins/cwf/skills/retro/README.md): Local file map for retro skill.
-- [review files](plugins/cwf/skills/review/README.md): Local file map for review skill.
-- [run files](plugins/cwf/skills/run/README.md): Local file map for run skill.
-- [setup files](plugins/cwf/skills/setup/README.md): Local file map for setup skill.
-- [ship files](plugins/cwf/skills/ship/README.md): Local file map for ship skill.
-- [update files](plugins/cwf/skills/update/README.md): Local file map for update skill.
+Skill-internal files are documented in each skill-local README (for example, [clarify README](plugins/cwf/skills/clarify/README.md)).
 
 ### plugins/cwf/references — Multi-skill concept/protocol consistency
 
@@ -86,7 +73,7 @@ Select autonomously what to read or update using the file descriptions in the bl
 - [documentation-guide](docs/documentation-guide.md): Documentation quality principles and scope rules.
 - [plugin-dev-cheatsheet](docs/plugin-dev-cheatsheet.md): Practical development/testing/deploy workflows.
 - [interactive-doc-review-protocol](docs/interactive-doc-review-protocol.md): Interactive documentation review process and chunking strategy.
-- [setup-output-matrix](docs/setup-output-matrix.md): User-facing setup flag to output-document matrix.
+- [setup-output-examples](docs/setup-output-examples.md): User-facing setup output examples by setup flag.
 
 ### references — External conceptual frameworks used by this repository
 

@@ -14,6 +14,8 @@ source "$(dirname "${BASH_SOURCE[0]}")/cwf-hook-gate.sh"
 INPUT=$(cat)
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
 CWD=$(echo "$INPUT" | jq -r '.cwd // empty')
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd)}"
 
 # --- Early exits ---
 
@@ -46,9 +48,24 @@ fi
 # --- Run markdownlint ---
 # Run from CWD if available (to pick up .markdownlint.json and .markdownlintignore)
 LINT_DIR="${CWD:-.}"
+REPO_ROOT="$(git -C "$LINT_DIR" rev-parse --show-toplevel 2>/dev/null || true)"
+PROJECT_CONFIG=""
+if [ -n "$REPO_ROOT" ] && [ -f "$REPO_ROOT/.markdownlint-cli2.jsonc" ]; then
+    PROJECT_CONFIG="$REPO_ROOT/.markdownlint-cli2.jsonc"
+fi
+
+PLUGIN_CONFIG="$PLUGIN_ROOT/hooks/markdownlint/.markdownlint-cli2.jsonc"
+LINT_CONFIG="$PROJECT_CONFIG"
+if [ -z "$LINT_CONFIG" ] && [ -f "$PLUGIN_CONFIG" ]; then
+    LINT_CONFIG="$PLUGIN_CONFIG"
+fi
 
 set +e
-LINT_OUTPUT=$(cd "$LINT_DIR" && npx --yes markdownlint-cli2 "$FILE_PATH" 2>&1)
+if [ -n "$LINT_CONFIG" ]; then
+    LINT_OUTPUT=$(cd "$LINT_DIR" && npx --yes markdownlint-cli2 --config "$LINT_CONFIG" "$FILE_PATH" 2>&1)
+else
+    LINT_OUTPUT=$(cd "$LINT_DIR" && npx --yes markdownlint-cli2 "$FILE_PATH" 2>&1)
+fi
 LINT_EXIT=$?
 set -e
 

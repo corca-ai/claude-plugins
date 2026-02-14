@@ -123,12 +123,6 @@ collect_required_paths_repo() {
 
   find . \
     \( -path "./.git" -o -path "./.claude" -o -path "./node_modules" -o -path "./prompt-logs" \) -prune -o \
-    -type f -name "README.md" -print \
-    | sed 's|^\./||' \
-    | grep "/skills/" || true
-
-  find . \
-    \( -path "./.git" -o -path "./.claude" -o -path "./node_modules" -o -path "./prompt-logs" \) -prune -o \
     -type f -name "*.md" -print \
     | sed 's|^\./||' \
     | grep "/references/" \
@@ -154,7 +148,6 @@ collect_required_paths_cap() {
 
   if [ -d "plugins/cwf/skills" ]; then
     find plugins/cwf/skills -mindepth 2 -maxdepth 2 -type f -name "SKILL.md" | sort
-    find plugins/cwf/skills -mindepth 2 -maxdepth 2 -type f -name "README.md" | sort
   fi
 
   if [ -d "plugins/cwf/references" ]; then

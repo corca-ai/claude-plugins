@@ -324,7 +324,6 @@ Build CWF capability inventories from the repository:
 - [plugins/cwf/.claude-plugin/plugin.json](../../.claude-plugin/plugin.json) (if present)
 - [plugins/cwf/hooks/hooks.json](../../hooks/hooks.json) and [plugins/cwf/hooks/scripts/cwf-hook-gate.sh](../../hooks/scripts/cwf-hook-gate.sh)
 - `plugins/cwf/skills/*/SKILL.md`
-- `plugins/cwf/skills/*/README.md`
 - `plugins/cwf/references/*.md`
 - [plugins/cwf/scripts/check-session.sh](../../scripts/check-session.sh) and `plugins/cwf/scripts/codex/*`
 
@@ -342,6 +341,7 @@ Generate concise capability-oriented sections:
 - Use canonical CWF skill order for [plugins/cwf/skills](../../skills): `setup`, `update`, `gather`, `clarify`, `plan`, `review`, `impl`, `retro`, `handoff`, `ship`, `run`, `refactor`.
 - Use deterministic alphabetical order for other sections.
 - Ensure every internal file/directory path is rendered as `[path](path)`.
+- Do not enumerate skill-internal files in index bullets; add one concise sentence that skill-local READMEs contain per-skill file maps.
 
 ### 3.3 Write [cwf-index.md](../../../../cwf-index.md)
 
@@ -420,7 +420,6 @@ Build adaptive file inventories (sorted) from the current repository structure:
 - `docs/*.md` (when `docs/` exists)
 - `references/**/*.md` (when `references/` exists)
 - Any `*/skills/*/SKILL.md` (excluding `.git/`, `node_modules/`, `prompt-logs/`)
-- Any `*/skills/*/README.md` (excluding `.git/`, `node_modules/`, `prompt-logs/`)
 - Any non-skill `*/references/*.md` (excluding `.git/`, `node_modules/`, `prompt-logs/`, and `*/skills/*/references/*`)
 
 These discovered inventories are mandatory coverage sets for repository index generation.
@@ -442,6 +441,7 @@ For each area, generate:
 - Prefer concise link labels when local context is clear.
 - Ensure every internal file/directory path is rendered as `[path](path)`.
 - Make descriptions file-centric ("what this file is"), not action scripts.
+- Do not enumerate skill-internal files in index bullets; add one concise sentence that skill-local READMEs contain per-skill file maps.
 - Do not use representative sampling for coverage sets; include every file in the mandatory inventories.
 - Use one stable ordering policy:
   - Root: fixed priority order (`README`, `AGENTS`, `CLAUDE`, `cwf-state`, `README.ko`).
@@ -519,7 +519,7 @@ Add `setup` to `cwf-state.yaml` current session's `stage_checkpoints` list.
 5. **AGENTS block policy**: When repository target includes `agents`, update only the managed marker block (`CWF:INDEX:START/END`) and preserve all other content.
 6. **Index content**: Pointers, not summaries. Use section heading intent + link bullets with file-level descriptions. Avoid separate `When to read`/`Role`/`Key files` labels.
 7. **Link policy**: Internal files/directories in generated index content must be markdown links (`[path](path)`), not inline literals.
-8. **Coverage policy**: For capability index, cover CWF inventories (skills + skill README + plugin references). For repository index, cover discovered repository inventories (root/docs/references + skill entry docs), except intentional exclusions.
+8. **Coverage policy**: For capability index, cover CWF inventories (skills + plugin references). For repository index, cover discovered repository inventories (root/docs/references + skill entry docs), except intentional exclusions.
 9. **Coverage validation**: Run [scripts/check-index-coverage.sh](../../../../scripts/check-index-coverage.sh) with explicit profile (`--profile cap` or `--profile repo`) and fix all missing findings.
 10. **Ignore policy**: Use [.cwf-cap-index-ignore](../../../../.cwf-cap-index-ignore) and [.cwf-index-ignore](../../../../.cwf-index-ignore) only for intentional exclusions.
 11. **Bash 3.2 compatible output**: `cwf-hooks-enabled.sh` uses only `export` lines with quoted string values.
