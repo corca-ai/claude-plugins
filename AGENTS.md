@@ -71,6 +71,8 @@ Skill-internal files are documented in each skill-local README (for example, [cl
 
 ### scripts — Deterministic automation, verification, and maintenance operations
 
+Runtime behavior belongs in [plugins/cwf/hooks](plugins/cwf/hooks/); repository operations belong in [scripts](scripts/).
+
 - [install](scripts/install.sh): Main install and synchronization entrypoint.
 - [update-all](scripts/update-all.sh): Bulk update workflow across managed artifacts.
 - [check-session](scripts/check-session.sh): Session completeness and consistency checks.
