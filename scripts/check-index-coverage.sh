@@ -71,12 +71,36 @@ awk '
 }
 ' "$LINKS_RAW" | sort -u > "$LINKS"
 
-{
-  find docs -maxdepth 1 -type f -name "*.md" | sort
-  find plugins/cwf/skills -mindepth 2 -maxdepth 2 -type f -name "SKILL.md" | sort
-  find plugins/cwf/references -maxdepth 1 -type f -name "*.md" | sort
-  find references -type f -name "*.md" | sort
-} | sort -u > "$REQUIRED"
+collect_required_paths() {
+  local file
+  for file in README.md README.ko.md AGENTS.md CLAUDE.md; do
+    if [ -f "$file" ]; then
+      printf "%s\n" "$file"
+    fi
+  done
+
+  if [ -d docs ]; then
+    find docs -maxdepth 1 -type f -name "*.md" | sort
+  fi
+
+  if [ -d references ]; then
+    find references -type f -name "*.md" | sort
+  fi
+
+  find . \
+    \( -path "./.git" -o -path "./node_modules" -o -path "./prompt-logs" \) -prune -o \
+    -type f -name "SKILL.md" -print \
+    | sed 's|^\./||' \
+    | grep "/skills/" || true
+
+  find . \
+    \( -path "./.git" -o -path "./node_modules" -o -path "./prompt-logs" \) -prune -o \
+    -type f -name "*.md" -print \
+    | sed 's|^\./||' \
+    | grep "/references/" || true
+}
+
+collect_required_paths | sort -u > "$REQUIRED"
 
 > "$REQUIRED_FILTERED"
 while IFS= read -r path; do
@@ -85,6 +109,11 @@ while IFS= read -r path; do
   fi
   printf "%s\n" "$path" >> "$REQUIRED_FILTERED"
 done < "$REQUIRED"
+
+if [ ! -s "$REQUIRED_FILTERED" ]; then
+  echo "Index coverage check passed: $INDEX_FILE (no coverage inventory files detected)"
+  exit 0
+fi
 
 grep -Fvx -f "$LINKS" "$REQUIRED_FILTERED" > "$MISSING" || true
 

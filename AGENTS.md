@@ -71,7 +71,6 @@ Select autonomously what to read or update using the file descriptions in the bl
 - [documentation-guide](docs/documentation-guide.md): Documentation quality principles and scope rules.
 - [plugin-dev-cheatsheet](docs/plugin-dev-cheatsheet.md): Practical development/testing/deploy workflows.
 - [interactive-doc-review-protocol](docs/interactive-doc-review-protocol.md): Interactive documentation review process and chunking strategy.
-- [v3-migration-decisions](docs/v3-migration-decisions.md): Decision rationale and migration history.
 
 ### references — External conceptual frameworks used by this repository
 

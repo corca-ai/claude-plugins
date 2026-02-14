@@ -360,14 +360,15 @@ If [AGENTS.md](../../../../AGENTS.md) does not exist and target is `agents` or `
 
 Use Glob to find top-level directories. Exclude hidden directories (`.git`, `.claude`), `node_modules`, and `prompt-logs`.
 
-Build explicit file inventories (sorted):
+Build adaptive file inventories (sorted) from the current repository structure:
 
-- `docs/*.md`
-- `plugins/cwf/skills/*/SKILL.md`
-- `plugins/cwf/references/*.md`
-- `references/**/*.md`
+- Root entry docs if present: `AGENTS.md`, `CLAUDE.md`, `README.md`, `README.ko.md`
+- `docs/*.md` (when `docs/` exists)
+- `references/**/*.md` (when `references/` exists)
+- Any `*/skills/*/SKILL.md` (excluding `.git/`, `node_modules/`, `prompt-logs/`)
+- Any `*/references/**/*.md` (excluding `.git/`, `node_modules/`, `prompt-logs/`)
 
-These inventories are mandatory coverage sets for index generation.
+These discovered inventories are mandatory coverage sets for index generation in the current repository.
 
 Apply optional exclusions from [.cwf-index-ignore](../../../../.cwf-index-ignore) (glob patterns, one per line) before finalizing index content.
 
@@ -390,10 +391,11 @@ For each area, generate:
 - Make key-file descriptions file-centric ("what this file is"), not action scripts ("read this when...").
 - Keep descriptions minimal; if a filename is self-evident, use a very short gloss.
 - Do not use representative sampling for coverage sets; include every file in the mandatory inventories.
-- Recommended area split: `Root`, [plugins/cwf/skills](../../skills), [plugins/cwf/references](../../references), [plugins/cwf/hooks](../../hooks), `scripts`, `docs`, `references`.
+- Recommended area split is structure-derived: include only areas that exist (for example `Root`, `docs`, `references`, `scripts`, `plugins/*/skills`, `plugins/*/references`, `plugins/*/hooks`).
 - Use one stable ordering policy to avoid mixed ordering confusion:
   - Root: fixed priority order (`README`, `AGENTS`, `CLAUDE`, `cwf-state`, `README.ko`).
-  - [plugins/cwf/skills](../../skills): canonical workflow order (`setup`, `update`, `gather`, `clarify`, `plan`, `review`, `impl`, `retro`, `handoff`, `ship`, `run`, `refactor`).
+  - When [plugins/cwf/skills](../../skills) exists, use canonical CWF workflow order (`setup`, `update`, `gather`, `clarify`, `plan`, `review`, `impl`, `retro`, `handoff`, `ship`, `run`, `refactor`).
+  - For non-CWF skill collections, use deterministic alphabetical order.
   - Other sections: deterministic order (alphabetical unless there is a clear canonical sequence).
 
 ### 3.3 Write cwf-index.md
@@ -470,7 +472,7 @@ Add `setup` to `cwf-state.yaml` current session's `stage_checkpoints` list.
 4. **AGENTS block policy**: When target includes `agents`, update only the managed marker block (`CWF:INDEX:START/END`) and preserve all other content.
 5. **Index content**: Pointers, not summaries. Use section heading intent (`{area} — {intent}`) + link bullets with file-level descriptions. Avoid separate `When to read`/`Role`/`Key files` labels.
 6. **Link policy**: Internal files/directories in generated index content must be markdown links (`[path](path)`), not inline literals.
-7. **Coverage policy**: Include all files from mandatory inventories (`docs/*.md`, `plugins/cwf/skills/*/SKILL.md`, `plugins/cwf/references/*.md`, `references/**/*.md`) except intentional exclusions in [.cwf-index-ignore](../../../../.cwf-index-ignore).
+7. **Coverage policy**: Include all files from discovered inventory families in the current repository (root entry docs when present, `docs/*.md`, `references/**/*.md`, any `*/skills/*/SKILL.md`, any `*/references/**/*.md`) except intentional exclusions in [.cwf-index-ignore](../../../../.cwf-index-ignore).
 8. **Coverage validation**: Run [scripts/check-index-coverage.sh](../../../../scripts/check-index-coverage.sh) and fix all missing coverage findings.
 9. **Ignore policy**: Use [.cwf-index-ignore](../../../../.cwf-index-ignore) only for intentional exclusions; default behavior is full coverage.
 10. **Bash 3.2 compatible output**: `cwf-hooks-enabled.sh` uses only `export` lines with quoted string values.

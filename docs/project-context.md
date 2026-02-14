@@ -14,6 +14,7 @@ Project and organizational facts accumulated from retrospectives.
 - Progressive disclosure: AGENTS.md is a concise index, details live in specialized docs/
 - Dogfooding: new tools are tested in the session that creates them
 - Deterministic validation over behavioral instruction: When preventing recurring mistakes, prefer scripts/checks that always run and produce pass/fail over adding more rules to docs. Behavioral instructions degrade; deterministic checks scale. Example: `check-session.sh` + `session_defaults` catches missing artifacts reliably.
+- CWF skill architecture: skills are strongly composed with each other, but execution must remain repository-agnostic. Skills can assume CWF capability contracts, but must not hard-require this repo's specific directory layout; they should detect available structure and degrade gracefully.
 
 ## Process Heuristics
 
