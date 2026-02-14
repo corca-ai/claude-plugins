@@ -5,29 +5,53 @@
 ## Root
 
 - **Role**: Repository entry surface for user-facing overview, runtime adapters, and live session state.
-- **Key files**: [README.md](README.md), [README.ko.md](README.ko.md), [cwf-state.yaml](cwf-state.yaml), [AGENTS.md](AGENTS.md), [CLAUDE.md](CLAUDE.md)
+- **Key files**:
+  - [README.md](README.md): Repository overview and install/update entry.
+  - [README.ko.md](README.ko.md): Korean mirror of the repository overview.
+  - [cwf-state.yaml](cwf-state.yaml): Live workflow state and stage checkpoints (SSOT).
+  - [AGENTS.md](AGENTS.md): Cross-runtime invariants and routing map.
+  - [CLAUDE.md](CLAUDE.md): Claude-runtime adapter and runtime-specific deltas.
 
 ## plugins
 
 - **Role**: CWF implementation surface where skills, hooks, and shared references define agent behavior.
-- **Key files**: [plugins/cwf/skills/setup/SKILL.md](plugins/cwf/skills/setup/SKILL.md), [plugins/cwf/skills/review/SKILL.md](plugins/cwf/skills/review/SKILL.md), [plugins/cwf/skills/run/SKILL.md](plugins/cwf/skills/run/SKILL.md), [plugins/cwf/hooks/hooks.json](plugins/cwf/hooks/hooks.json), [plugins/cwf/hooks/scripts/cwf-hook-gate.sh](plugins/cwf/hooks/scripts/cwf-hook-gate.sh)
+- **Key files**:
+  - [plugins/cwf/skills/setup/SKILL.md](plugins/cwf/skills/setup/SKILL.md): Setup workflow and index generation policy.
+  - [plugins/cwf/skills/review/SKILL.md](plugins/cwf/skills/review/SKILL.md): Multi-review orchestration and verdict policy.
+  - [plugins/cwf/skills/run/SKILL.md](plugins/cwf/skills/run/SKILL.md): End-to-end workflow chaining semantics.
+  - [plugins/cwf/hooks/hooks.json](plugins/cwf/hooks/hooks.json): Deterministic hook registrations.
+  - [plugins/cwf/hooks/scripts/cwf-hook-gate.sh](plugins/cwf/hooks/scripts/cwf-hook-gate.sh): Runtime gate logic for hook toggles.
 
 ## scripts
 
 - **Role**: Deterministic automation and validation utilities for install/update, session hygiene, and docs analysis.
-- **Key files**: [scripts/install.sh](scripts/install.sh), [scripts/update-all.sh](scripts/update-all.sh), [scripts/check-session.sh](scripts/check-session.sh), [scripts/check-links.sh](scripts/check-links.sh), [scripts/doc-graph.mjs](scripts/doc-graph.mjs)
+- **Key files**:
+  - [scripts/install.sh](scripts/install.sh): Main install and synchronization entrypoint.
+  - [scripts/update-all.sh](scripts/update-all.sh): Bulk update workflow across managed artifacts.
+  - [scripts/check-session.sh](scripts/check-session.sh): Session completeness and consistency checks.
+  - [scripts/check-links.sh](scripts/check-links.sh): Link-validation wrapper used in docs checks.
+  - [scripts/doc-graph.mjs](scripts/doc-graph.mjs): Documentation graph and orphan analysis.
 
 ## docs
 
 - **Role**: Stable project knowledge: org context, architecture patterns, documentation standards, and migration decisions.
-- **Key files**: [docs/project-context.md](docs/project-context.md), [docs/architecture-patterns.md](docs/architecture-patterns.md), [docs/documentation-guide.md](docs/documentation-guide.md), [docs/v3-migration-decisions.md](docs/v3-migration-decisions.md), [docs/plugin-dev-cheatsheet.md](docs/plugin-dev-cheatsheet.md)
+- **Key files**:
+  - [docs/project-context.md](docs/project-context.md): Project/org facts and long-lived conventions.
+  - [docs/architecture-patterns.md](docs/architecture-patterns.md): Implementation and integration patterns.
+  - [docs/documentation-guide.md](docs/documentation-guide.md): Documentation quality principles and scope rules.
+  - [docs/v3-migration-decisions.md](docs/v3-migration-decisions.md): Decision rationale and migration history.
+  - [docs/plugin-dev-cheatsheet.md](docs/plugin-dev-cheatsheet.md): Practical development/testing/deploy workflows.
 
 ## references
 
 - **Role**: Conceptual foundations for shared design/review language across skills.
-- **Key files**: [references/essence-of-software/distillation.md](references/essence-of-software/distillation.md)
+- **Key files**:
+  - [references/essence-of-software/distillation.md](references/essence-of-software/distillation.md): Core concept distillation used by review and design docs.
 
 ## assets
 
 - **Role**: Image assets used by repository docs and hook behavior explanations.
-- **Key files**: [assets/attention-hook-AskUserQuestion.png](assets/attention-hook-AskUserQuestion.png), [assets/attention-hook-normal-response.png](assets/attention-hook-normal-response.png), [assets/g-export-sheet-md-example.png](assets/g-export-sheet-md-example.png)
+- **Key files**:
+  - [assets/attention-hook-AskUserQuestion.png](assets/attention-hook-AskUserQuestion.png): Attention-hook AskUserQuestion behavior screenshot.
+  - [assets/attention-hook-normal-response.png](assets/attention-hook-normal-response.png): Attention-hook normal-response screenshot.
+  - [assets/g-export-sheet-md-example.png](assets/g-export-sheet-md-example.png): Example sheet export artifact used in docs.

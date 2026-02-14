@@ -368,11 +368,15 @@ For each area, generate:
 ## {area}
 
 - **Role**: {one-line scope statement describing what this area owns and why}
-- **Key files**: {2-5 most important files as markdown links}
+- **Key files**:
+  - [path/to/file](path/to/file): {one-line description of what this file is}
+  - [path/to/file](path/to/file): {one-line description of what this file is}
 ```
 
 - Keep `Role` as what/why guidance (scope + intent), not procedural trigger text.
 - Ensure every internal file/directory path is rendered as `[path](path)`.
+- Make key-file descriptions file-centric ("what this file is"), not action scripts ("read this when...").
+- Keep descriptions minimal; if a filename is self-evident, use a very short gloss.
 
 ### 3.3 Write cwf-index.md
 
@@ -428,7 +432,7 @@ Add `setup` to `cwf-state.yaml` current session's `stage_checkpoints` list.
 2. **cwf-state.yaml is SSOT**: Read before modifying. Edit, do not overwrite.
 3. **Index policy**: In full setup, ask first. Default target is `file` ([cwf-index.md](../../../../cwf-index.md)). Do not overwrite existing [cwf-index.md](../../../../cwf-index.md) in full setup. Use `cwf:setup --index` for explicit regeneration/overwrite.
 4. **AGENTS block policy**: When target includes `agents`, update only the managed marker block (`CWF:INDEX:START/END`) and preserve all other content.
-5. **Index content**: Pointers, not summaries. Include `Role` + `Key files`, keep role text what/why oriented, and avoid content duplication.
+5. **Index content**: Pointers, not summaries. Include `Role` + file-level `Key files` descriptions, keep text what/why oriented, and avoid content duplication.
 6. **Link policy**: Internal files/directories in generated index content must be markdown links (`[path](path)`), not inline literals.
 7. **Bash 3.2 compatible output**: `cwf-hooks-enabled.sh` uses only `export` lines with quoted string values.
 8. **AskUserQuestion for all choices**: No batch defaults. Always ask.
