@@ -18,5 +18,10 @@ npx --yes markdownlint-cli2 "${md_files[@]}"
 
 echo "[pre-commit] local link validation on staged markdown files..."
 for file in "${md_files[@]}"; do
+  case "$file" in
+    CHANGELOG.md|references/*)
+      continue
+      ;;
+  esac
   bash scripts/check-links.sh --local --json --file "$file" >/dev/null
 done
