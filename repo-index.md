@@ -40,6 +40,11 @@ Skill-internal files are documented in each skill-local README (for example, [cl
 
 - [hooks manifest](plugins/cwf/hooks/hooks.json): Hook registration manifest.
 - [cwf-hook-gate](plugins/cwf/hooks/scripts/cwf-hook-gate.sh): Runtime hook gate and toggle logic.
+- [hooks script map](plugins/cwf/hooks/README.md): Map of hook-local scripts and responsibilities.
+
+## plugins/cwf/scripts — CWF operational scripts used by setup/session flows
+
+- [scripts map](plugins/cwf/scripts/README.md): Map of operational scripts under [plugins/cwf/scripts](plugins/cwf/scripts).
 
 ## scripts — Deterministic automation, verification, and maintenance operations
 

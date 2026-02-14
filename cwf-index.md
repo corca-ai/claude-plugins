@@ -36,16 +36,8 @@ Skill-internal files are documented in each skill-local README (for example, [cl
 
 - [hooks manifest](plugins/cwf/hooks/hooks.json): Hook registration manifest.
 - [cwf-hook-gate](plugins/cwf/hooks/scripts/cwf-hook-gate.sh): Runtime hook gate and toggle logic.
+- [hooks script map](plugins/cwf/hooks/README.md): Map of hook-local scripts and responsibilities.
 
 ## plugins/cwf/scripts — Operational scripts
 
-- [check-session](plugins/cwf/scripts/check-session.sh): Session completeness and consistency checks.
-- [next-prompt-dir](plugins/cwf/scripts/next-prompt-dir.sh): Session directory naming helper.
-- [codex-with-log](plugins/cwf/scripts/codex/codex-with-log.sh): Codex wrapper entrypoint.
-- [install-wrapper](plugins/cwf/scripts/codex/install-wrapper.sh): Codex wrapper install/status/rollback helper.
-- [sync-skills](plugins/cwf/scripts/codex/sync-skills.sh): Codex user-scope skill sync.
-- [verify-skill-links](plugins/cwf/scripts/codex/verify-skill-links.sh): Skill link validation for Codex loading.
-- [sync-session-logs](plugins/cwf/scripts/codex/sync-session-logs.sh): Session markdown sync pipeline.
-- [redact-session-logs](plugins/cwf/scripts/codex/redact-session-logs.sh): Batch markdown redaction helper.
-- [redact-jsonl](plugins/cwf/scripts/codex/redact-jsonl.sh): JSONL redaction wrapper.
-- [redact-sensitive](plugins/cwf/scripts/codex/redact-sensitive.pl): Sensitive-token redaction engine.
+- [scripts map](plugins/cwf/scripts/README.md): Map of operational scripts under [plugins/cwf/scripts](plugins/cwf/scripts).

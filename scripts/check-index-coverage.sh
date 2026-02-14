@@ -111,6 +111,14 @@ collect_required_paths_repo() {
     find docs -maxdepth 1 -type f -name "*.md" | sort
   fi
 
+  if [ -f "plugins/cwf/hooks/README.md" ]; then
+    printf "%s\n" "plugins/cwf/hooks/README.md"
+  fi
+
+  if [ -f "plugins/cwf/scripts/README.md" ]; then
+    printf "%s\n" "plugins/cwf/scripts/README.md"
+  fi
+
   if [ -d references ]; then
     find references -type f -name "*.md" | sort
   fi
@@ -138,12 +146,16 @@ collect_required_paths_cap() {
     printf "%s\n" "plugins/cwf/hooks/hooks.json"
   fi
 
+  if [ -f "plugins/cwf/hooks/README.md" ]; then
+    printf "%s\n" "plugins/cwf/hooks/README.md"
+  fi
+
   if [ -f "plugins/cwf/hooks/scripts/cwf-hook-gate.sh" ]; then
     printf "%s\n" "plugins/cwf/hooks/scripts/cwf-hook-gate.sh"
   fi
 
-  if [ -f "plugins/cwf/scripts/check-session.sh" ]; then
-    printf "%s\n" "plugins/cwf/scripts/check-session.sh"
+  if [ -f "plugins/cwf/scripts/README.md" ]; then
+    printf "%s\n" "plugins/cwf/scripts/README.md"
   fi
 
   if [ -d "plugins/cwf/skills" ]; then

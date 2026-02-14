@@ -11,6 +11,12 @@ Keep stable invariants here; keep implementation detail in scoped docs.
 - For design decisions, surface meaningful alternatives with trade-offs and incorporate user-provided external references before concluding.
 - Deterministic checks are authoritative; behavioral reminders are secondary. Operational details live in [plugins/cwf/hooks/hooks.json](plugins/cwf/hooks/hooks.json), [docs/plugin-dev-cheatsheet.md](docs/plugin-dev-cheatsheet.md), and [scripts/check-session.sh](scripts/check-session.sh).
 
+## CWF Onboarding
+
+- Start at [README setup section](README.md#setup), then run `cwf:setup`.
+- To maximize automatic CWF usage in Codex runtime, apply [cwf:setup --codex](README.md#setup) (and optionally [cwf:setup --codex-wrapper](README.md#setup)).
+- For hook-local script behavior, read [plugins/cwf/hooks/README.md](plugins/cwf/hooks/README.md). For CWF operational scripts, read [plugins/cwf/scripts/README.md](plugins/cwf/scripts/README.md).
+
 ## Document Map
 
 Select autonomously what to read or update using the file descriptions in the block below.
@@ -56,6 +62,11 @@ Skill-internal files are documented in each skill-local README (for example, [cl
 
 - [hooks manifest](plugins/cwf/hooks/hooks.json): Hook registration manifest.
 - [cwf-hook-gate](plugins/cwf/hooks/scripts/cwf-hook-gate.sh): Runtime hook gate and toggle logic.
+- [hooks script map](plugins/cwf/hooks/README.md): Map of hook-local scripts and responsibilities.
+
+### plugins/cwf/scripts — CWF operational scripts used by setup/session flows
+
+- [scripts map](plugins/cwf/scripts/README.md): Map of operational scripts under [plugins/cwf/scripts](plugins/cwf/scripts).
 
 ### scripts — Deterministic automation, verification, and maintenance operations
 
