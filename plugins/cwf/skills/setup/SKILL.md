@@ -360,23 +360,37 @@ If [AGENTS.md](../../../../AGENTS.md) does not exist and target is `agents` or `
 
 Use Glob to find top-level directories. Exclude hidden directories (`.git`, `.claude`), `node_modules`, and `prompt-logs`.
 
+Build explicit file inventories (sorted):
+
+- `docs/*.md`
+- `plugins/cwf/skills/*/SKILL.md`
+- `plugins/cwf/references/*.md`
+- `references/**/*.md`
+
+These inventories are mandatory coverage sets for index generation.
+
+Apply optional exclusions from [.cwf-index-ignore](../../../../.cwf-index-ignore) (glob patterns, one per line) before finalizing index content.
+
 ### 3.2 Build Index
 
 For each area, generate:
 
 ```markdown
-## {area}
+## {area} — {task intent boundary; when this area becomes relevant}
 
-- **Role**: {one-line scope statement describing what this area owns and why}
-- **Key files**:
-  - [path/to/file](path/to/file): {one-line description of what this file is}
-  - [path/to/file](path/to/file): {one-line description of what this file is}
+- [label](path/to/file): {one-line description of what this file is}
+- [label](path/to/file): {one-line description of what this file is}
 ```
 
-- Keep `Role` as what/why guidance (scope + intent), not procedural trigger text.
+- Keep intent text concise and intent-level; avoid low-level procedural scripts.
+- Absorb read-intent into the section heading (`{area} — {intent}`) and omit separate `When to read`/`Role` labels.
+- Omit `Key files` label and emit direct link bullets only.
+- Prefer concise link labels when local context is clear (for example, [clarify](../clarify/SKILL.md)); use longer labels only when ambiguity is likely.
 - Ensure every internal file/directory path is rendered as `[path](path)`.
 - Make key-file descriptions file-centric ("what this file is"), not action scripts ("read this when...").
 - Keep descriptions minimal; if a filename is self-evident, use a very short gloss.
+- Do not use representative sampling for coverage sets; include every file in the mandatory inventories.
+- Recommended area split: `Root`, [plugins/cwf/skills](../../skills), [plugins/cwf/references](../../references), [plugins/cwf/hooks](../../hooks), `scripts`, `docs`, `references`, `assets`.
 
 ### 3.3 Write cwf-index.md
 
@@ -401,6 +415,24 @@ When target includes `agents`, write the same generated index body into the mana
 - If markers exist, replace only the marker-delimited section.
 - If markers are absent, append a new managed block at the end of [AGENTS.md](../../../../AGENTS.md).
 - In full setup mode, this block update is allowed (managed region) even when avoiding file-level overwrite elsewhere.
+
+### 3.5 Coverage Validation (Required)
+
+Run deterministic coverage checks after writing index output:
+
+```bash
+bash scripts/check-index-coverage.sh cwf-index.md
+```
+
+This check applies optional ignore patterns from [.cwf-index-ignore](../../../../.cwf-index-ignore).
+
+If target includes `agents`, also run:
+
+```bash
+bash scripts/check-index-coverage.sh AGENTS.md
+```
+
+If validation fails, regenerate and fix missing links before finishing.
 
 ---
 
@@ -432,13 +464,16 @@ Add `setup` to `cwf-state.yaml` current session's `stage_checkpoints` list.
 2. **cwf-state.yaml is SSOT**: Read before modifying. Edit, do not overwrite.
 3. **Index policy**: In full setup, ask first. Default target is `file` ([cwf-index.md](../../../../cwf-index.md)). Do not overwrite existing [cwf-index.md](../../../../cwf-index.md) in full setup. Use `cwf:setup --index` for explicit regeneration/overwrite.
 4. **AGENTS block policy**: When target includes `agents`, update only the managed marker block (`CWF:INDEX:START/END`) and preserve all other content.
-5. **Index content**: Pointers, not summaries. Include `Role` + file-level `Key files` descriptions, keep text what/why oriented, and avoid content duplication.
+5. **Index content**: Pointers, not summaries. Use section heading intent (`{area} — {intent}`) + link bullets with file-level descriptions. Avoid separate `When to read`/`Role`/`Key files` labels.
 6. **Link policy**: Internal files/directories in generated index content must be markdown links (`[path](path)`), not inline literals.
-7. **Bash 3.2 compatible output**: `cwf-hooks-enabled.sh` uses only `export` lines with quoted string values.
-8. **AskUserQuestion for all choices**: No batch defaults. Always ask.
-9. **Idempotent**: Re-running updates existing config, does not duplicate.
-10. **All code fences must have language specifier**: Never use bare fences.
-11. **Codex sync uses symlink + backup move**: Do not delete user files directly.
+7. **Coverage policy**: Include all files from mandatory inventories (`docs/*.md`, `plugins/cwf/skills/*/SKILL.md`, `plugins/cwf/references/*.md`, `references/**/*.md`).
+8. **Coverage validation**: Run [scripts/check-index-coverage.sh](../../../../scripts/check-index-coverage.sh) and fix all missing coverage findings.
+9. **Ignore policy**: Use [.cwf-index-ignore](../../../../.cwf-index-ignore) only for intentional exclusions; default behavior is full coverage.
+10. **Bash 3.2 compatible output**: `cwf-hooks-enabled.sh` uses only `export` lines with quoted string values.
+11. **AskUserQuestion for all choices**: No batch defaults. Always ask.
+12. **Idempotent**: Re-running updates existing config, does not duplicate.
+13. **All code fences must have language specifier**: Never use bare fences.
+14. **Codex sync uses symlink + backup move**: Do not delete user files directly.
 
 ## References
 
@@ -447,3 +482,5 @@ Add `setup` to `cwf-state.yaml` current session's `stage_checkpoints` list.
 - [agent-patterns.md](../../references/agent-patterns.md) — Single pattern
 - [sync-skills.sh](../../scripts/codex/sync-skills.sh) — Codex user-scope skill sync
 - [verify-skill-links.sh](../../scripts/codex/verify-skill-links.sh) — Codex skill link validation
+- [check-index-coverage.sh](../../../../scripts/check-index-coverage.sh) — deterministic index coverage validation
+- [.cwf-index-ignore](../../../../.cwf-index-ignore) — optional intentional exclusion list for index coverage
