@@ -9,6 +9,7 @@ Keep stable invariants here; keep implementation detail in scoped docs.
 - If implementation diverges from a pre-designed plan, record the discrepancy in session lessons, report it immediately, and ask for a user decision before proceeding.
 - Never delete user-created files without explicit confirmation. Prefer `mv` over `rm`.
 - For design decisions, surface meaningful alternatives with trade-offs and incorporate user-provided external references before concluding.
+- For plugin code or plugin metadata changes, run local [plugin-deploy](.claude/skills/plugin-deploy/SKILL.md) as the default lifecycle workflow.
 - Deterministic gates define pass/fail authority; prose must not duplicate or override them.
 
 ## Before Editing Docs

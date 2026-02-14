@@ -11,3 +11,7 @@ work-in-progress
 # Static analysis tooling
 .lycheecache
 scripts/node_modules/
+
+# Generated doc-graph artifacts (local working files)
+docs/doc-graph.snapshot.json
+docs/doc-graph.scope.json

@@ -7,7 +7,7 @@ For version bump rules, marketplace.json format, and deploy workflow, see [plugi
 ## New Plugin Checklist
 
 - [ ] `plugins/{name}/` directory with correct structure
-- [ ] [.claude-plugin/plugin.json](../../../../.claude-plugin/plugin.json) with name, description, version, author, repository
+- [ ] `plugins/{name}/.claude-plugin/plugin.json` with name, description, version, author, repository
 - [ ] SKILL.md (skill) or hooks.json (hook) or both (hybrid)
 - [ ] marketplace.json entry added
 - [ ] README.md: add to overview table + detail section under Skills or Hooks

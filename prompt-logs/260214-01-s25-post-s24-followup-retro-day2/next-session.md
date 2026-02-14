@@ -13,7 +13,12 @@
 
 ## Task Scope
 
-Continue repository documentation hardening via interactive review, starting from high-impact non-`prompt-logs` documents and applying the same review protocol used in S25 Day 2.
+Run two tracks in order:
+
+1. Apply selected retro-proposed fixes that should be implemented before broader doc review.
+2. Resume interactive documentation review from the next file after `AGENTS.md`.
+
+`AGENTS.md` review and related policy edits were completed in commit `85bf866`.
 
 ### What to Build
 
@@ -28,6 +33,11 @@ Continue repository documentation hardening via interactive review, starting fro
 - Classify findings first: `AUTO_EXISTING`, `AUTO_CANDIDATE`, `NON_AUTOMATABLE`.
 - Keep `plugin -> repo` link coupling disallowed.
 - Preserve `less is more` and `what/why > how` principles in always-loaded docs.
+
+### Resume Cursor
+
+- Interactive doc review cursor: `CLAUDE.md` line 1 (next file after `AGENTS.md`)
+- AGENTS status: completed in this session
 
 ## Don't Touch
 

@@ -227,6 +227,8 @@ git config core.hooksPath .githooks
 
 ## Deploy Workflow
 
+Default executor for plugin changes: [plugin-deploy](../.claude/skills/plugin-deploy/SKILL.md). Use manual steps below only when the skill is unavailable or explicitly skipped.
+
 1. Bump version in `plugin.json` (see version bump rules above)
 2. Sync `marketplace.json` entry (version if listed, description, keywords)
 3. Update [CHANGELOG.md](../CHANGELOG.md) if the plugin has one (describe what changed)

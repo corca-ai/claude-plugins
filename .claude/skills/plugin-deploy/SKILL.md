@@ -15,6 +15,8 @@ allowed-tools:
 
 Automate the plugin lifecycle after creation or modification. Ensures no step is skipped.
 
+For detailed edge cases and README formatting examples, see [checklist](references/checklist.md).
+
 **Language**: Match the user's language.
 
 ## Commands
