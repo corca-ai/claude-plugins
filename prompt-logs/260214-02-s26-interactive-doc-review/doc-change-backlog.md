@@ -55,3 +55,7 @@ Status: Done.
 12. `NON_AUTOMATABLE` — Decide whether README framing should merge "What CWF Is" and "Why CWF?" sections.
 Reason: potential onboarding-length reduction vs conceptual clarity trade-off.
 Status: Pending.
+
+13. `NON_AUTOMATABLE` — Clarify review-gate sequencing in README plan/impl descriptions.
+Reason: users may miss that implementation normally proceeds after plan review and is followed by code review.
+Status: Done.

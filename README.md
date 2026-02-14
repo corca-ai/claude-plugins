@@ -153,7 +153,7 @@ Agent-assisted plan drafting with parallel research and BDD success criteria.
 cwf:plan <task description>
 ```
 
-Parallel prior art + codebase research → structured plan with steps, files, success criteria (BDD + qualitative) → saved to `prompt-logs/` session directory.
+Parallel prior art + codebase research → structured plan with steps, files, success criteria (BDD + qualitative) → saved to `prompt-logs/` session directory. Recommended flow: run `cwf:review --mode plan` before implementation so plan-level concerns are resolved before `cwf:impl`.
 
 Full reference: [SKILL.md](plugins/cwf/skills/plan/SKILL.md)
 
@@ -166,7 +166,7 @@ cwf:impl                    # Auto-detect most recent plan.md
 cwf:impl <path/to/plan.md>  # Explicit plan path
 ```
 
-Loads plan (+ phase handoff if present) → decomposes into work items by domain and dependency → sizes agent team adaptively (1-4 agents) → executes in parallel batches → verifies against BDD criteria.
+Loads plan (+ phase handoff if present) → decomposes into work items by domain and dependency → sizes agent team adaptively (1-4 agents) → executes in parallel batches → verifies against BDD criteria. Typical sequence: `cwf:plan` → `cwf:review --mode plan` → `cwf:impl` → `cwf:review --mode code`.
 
 Full reference: [SKILL.md](plugins/cwf/skills/impl/SKILL.md)
 

@@ -153,7 +153,7 @@ cwf:clarify <requirement> --light  # 직접 Q&A, 서브에이전트 없음
 cwf:plan <task description>
 ```
 
-병렬 선행 사례 + 코드베이스 리서치 -> 단계, 파일, 성공 기준(BDD + 정성적)이 포함된 구조화된 계획 -> `prompt-logs/` 세션 디렉토리에 저장.
+병렬 선행 사례 + 코드베이스 리서치 -> 단계, 파일, 성공 기준(BDD + 정성적)이 포함된 구조화된 계획 -> `prompt-logs/` 세션 디렉토리에 저장. 권장 흐름: 구현 전에 `cwf:review --mode plan`으로 계획을 먼저 검토해 plan 단계 우려사항을 해소합니다.
 
 전체 레퍼런스: [SKILL.md](plugins/cwf/skills/plan/SKILL.md)
 
@@ -166,7 +166,7 @@ cwf:impl                    # 가장 최근 plan.md 자동 감지
 cwf:impl <path/to/plan.md>  # 명시적 계획 경로
 ```
 
-계획 로드(+ 페이즈 핸드오프가 있으면 함께) -> 도메인과 의존성별 작업 항목 분해 -> 적응형 에이전트 팀 구성(1-4명) -> 병렬 배치 실행 -> BDD 기준 대비 검증.
+계획 로드(+ 페이즈 핸드오프가 있으면 함께) -> 도메인과 의존성별 작업 항목 분해 -> 적응형 에이전트 팀 구성(1-4명) -> 병렬 배치 실행 -> BDD 기준 대비 검증. 일반 순서: `cwf:plan` -> `cwf:review --mode plan` -> `cwf:impl` -> `cwf:review --mode code`.
 
 전체 레퍼런스: [SKILL.md](plugins/cwf/skills/impl/SKILL.md)
 

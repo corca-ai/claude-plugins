@@ -112,3 +112,10 @@
 ### File Boundary Gate
 
 - Inbound links: `5` (orphan: no)
+
+### Follow-up Edit (From Discussion)
+
+- User feedback: plan/impl skill descriptions should state review gates more explicitly.
+- Applied: added explicit sequence/guard text in `README.md` and `README.ko.md`:
+  - plan -> `cwf:review --mode plan` before `cwf:impl`
+  - impl flow includes post-impl `cwf:review --mode code`
