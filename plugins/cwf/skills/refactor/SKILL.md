@@ -335,8 +335,8 @@ Read the project's [AGENTS.md][repo-agents] (and runtime adapter docs like [CLAU
 - Compressed-index shape
 - Less-is-more signal quality (line-level high/medium/low utility scoring across the full file, not intro-only)
 - What/why versus how boundary
-- Read-route clarity ("read when" is explicit per route)
-- Read/write route separation (overlapping targets have distinct read vs write purpose)
+- Document-role clarity (each linked doc is defined by what it is, not procedural trigger phrasing)
+- Routing duplication minimization (avoid repeated listing of the same targets across sections unless purpose differs materially)
 - Automation-redundant instructions
 - Routing completeness
 - Accuracy and staleness

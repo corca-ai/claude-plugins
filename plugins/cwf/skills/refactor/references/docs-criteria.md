@@ -27,8 +27,9 @@ Check the project's root [AGENTS.md][repo-agents] and runtime adapter docs (for 
 | Partial-only SNR trimming | Review trims only opening lines; no full-file line/bullet utility pass was performed |
 | AGENTS/adapters are not index-shaped | Entry docs include long phase-by-phase procedures instead of routing + invariants |
 | What/why vs how boundary violation | Entry docs prescribe low-level execution sequences that belong in specialized docs, scripts, or hooks |
-| Route trigger ambiguity | Read routes lack explicit "read when" conditions, causing broad over-reading |
-| Read/write route ambiguity | Read routes and persist routes overlap without explicit purpose split |
+| Document-role ambiguity | Linked docs are listed without clear role definition ("what this doc is") |
+| Directive-style routing overload | Entry docs rely on procedural read/write directives instead of concise role mapping |
+| Routing list duplication | The same target docs are repeated across sections without materially different purpose |
 | Behavioral rules duplicated by deterministic checks | Entry docs say "always do X" for behavior already enforced by hooks/scripts |
 | Missing core routing links | Entry docs omit links to the core docs needed for progressive disclosure |
 | References non-existent files | Dead path reference |
