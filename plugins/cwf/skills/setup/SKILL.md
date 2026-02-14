@@ -405,7 +405,7 @@ Generate concise capability-oriented sections:
 - Keep descriptions file-centric; avoid procedure-heavy wording.
 - Use canonical CWF skill order for [plugins/cwf/skills](../../skills): `setup`, `update`, `gather`, `clarify`, `plan`, `review`, `impl`, `retro`, `handoff`, `ship`, `run`, `refactor`.
 - Use deterministic alphabetical order for other sections.
-- Ensure every internal file/directory path is rendered as `[path](path)`.
+- Ensure every internal file/directory reference uses a Markdown link with a relative target.
 - Do not enumerate skill-internal files in index bullets; add one concise sentence that skill-local READMEs contain per-skill file maps.
 - For hooks/scripts families, prefer linking [plugins/cwf/hooks/README.md](../../hooks/README.md) and [plugins/cwf/scripts/README.md](../../scripts/README.md) over enumerating every script file.
 
@@ -506,7 +506,7 @@ For each area, generate:
 - Keep intent text concise and intent-level.
 - Absorb read-intent into section headings; omit separate `When to read`/`Role`/`Key files` labels.
 - Prefer concise link labels when local context is clear.
-- Ensure every internal file/directory path is rendered as `[path](path)`.
+- Ensure every internal file/directory reference uses a Markdown link with a relative target.
 - Make descriptions file-centric ("what this file is"), not action scripts.
 - Do not enumerate skill-internal files in index bullets; add one concise sentence that skill-local READMEs contain per-skill file maps.
 - For hooks/scripts families, prefer linking [plugins/cwf/hooks/README.md](../../hooks/README.md) and [plugins/cwf/scripts/README.md](../../scripts/README.md) over enumerating every script file.
@@ -586,7 +586,7 @@ Add `setup` to `cwf-state.yaml` current session's `stage_checkpoints` list.
 4. **Repository index policy**: Repository-wide index is optional in full setup (ask first). `cwf:setup --repo-index` explicitly regenerates it.
 5. **AGENTS block policy**: When repository target includes `agents`, update only the managed marker block (`CWF:INDEX:START/END`) and preserve all other content.
 6. **Index content**: Pointers, not summaries. Use section heading intent + link bullets with file-level descriptions. Avoid separate `When to read`/`Role`/`Key files` labels.
-7. **Link policy**: Internal files/directories in generated index content must be markdown links (`[path](path)`), not inline literals.
+7. **Link policy**: Internal files/directories in generated index content must use Markdown links with relative targets, not inline literals.
 8. **Coverage policy**: For capability index, cover CWF inventories (skills + plugin references + hooks/scripts READMEs when present). For repository index, cover discovered repository inventories (root/docs/references + skill entry docs + hooks/scripts READMEs when present), except intentional exclusions.
 9. **Coverage validation**: Run `{SKILL_DIR}/scripts/check-index-coverage.sh` with explicit profile (`--profile cap` or `--profile repo`) and fix all missing findings.
 10. **Ignore policy**: Use .cwf-cap-index-ignore and .cwf-index-ignore only for intentional exclusions.

@@ -23,6 +23,13 @@
 - Scope: `plugins/cwf/skills/review/SKILL.md`.
 - Result: implemented (new synthesis section + explicit rule + BDD check).
 
+### Fix 3: Deterministic markdownlint noise reduction + setup link false-positive cleanup
+
+- Motivation: baseline lint output was dominated by vendored markdown under `scripts/node_modules/**`; doc-graph showed 3 setup broken refs from placeholder example text.
+- Classification: `AUTO_CANDIDATE` -> gate scope hardening + `AUTO_EXISTING` broken-ref cleanup.
+- Scope: `.markdownlint-cli2.jsonc`, `plugins/cwf/skills/setup/SKILL.md`.
+- Result: implemented (ignore patterns expanded, placeholder pseudo-link removed).
+
 ## Track 2 — Interactive Review
 
 ### Deterministic Baseline (Pre-Chunk)

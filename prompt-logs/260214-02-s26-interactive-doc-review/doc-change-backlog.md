@@ -26,11 +26,11 @@ Status: Pending.
 
 5. `AUTO_CANDIDATE` — Narrow markdownlint deterministic command scope to exclude vendored markdown under `scripts/node_modules/**`.
 Reason: baseline run produced high-volume third-party noise (`1955` findings), obscuring repository-owned doc signals.
-Status: Pending.
+Status: Done.
 
 6. `AUTO_EXISTING` — Fix broken graph references detected by `doc-graph` in `plugins/cwf/skills/setup/SKILL.md` (`raw: path`).
 Reason: deterministic graph gate already flags this as `broken_ref_count`.
-Status: Pending.
+Status: Done.
 
 7. `NON_AUTOMATABLE` — Decide whether to deduplicate routing text in `CLAUDE.md` (`line 3` vs `line 7-8`).
 Reason: requires editorial judgment on adapter readability vs explicitness.
