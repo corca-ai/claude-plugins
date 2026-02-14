@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+PROFILE="strict"
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
@@ -9,13 +10,39 @@ mapfile -t md_files < <(
     | grep -Ev '^(prompt-logs/|references/anthropic-skills-guide/)' || true
 )
 
-if [ "${#md_files[@]}" -eq 0 ]; then
-  echo "[pre-push] no markdown files found; skipping lint checks"
-  exit 0
+if [ "${#md_files[@]}" -gt 0 ]; then
+  echo "[pre-push] markdownlint on tracked markdown files..."
+  npx --yes markdownlint-cli2 "${md_files[@]}"
+else
+  echo "[pre-push] no markdown files found; skipping markdownlint"
 fi
 
-echo "[pre-push] markdownlint on tracked markdown files..."
-npx --yes markdownlint-cli2 "${md_files[@]}"
+if [[ "$PROFILE" != "fast" ]]; then
+  echo "[pre-push] local link validation..."
+  bash scripts/check-links.sh --local --json
 
-echo "[pre-push] local link validation..."
-bash scripts/check-links.sh --local --json
+  if [[ -x scripts/check-index-coverage.sh ]]; then
+    echo "[pre-push] index coverage checks..."
+    if [[ -f AGENTS.md ]]; then
+      bash scripts/check-index-coverage.sh AGENTS.md --profile repo
+    fi
+    if [[ -f repo-index.md ]]; then
+      bash scripts/check-index-coverage.sh repo-index.md --profile repo
+    fi
+    if [[ -f cwf-index.md ]]; then
+      bash scripts/check-index-coverage.sh cwf-index.md --profile cap
+    fi
+  else
+    echo "[pre-push] scripts/check-index-coverage.sh missing or not executable" >&2
+    exit 1
+  fi
+fi
+
+if [[ "$PROFILE" == "strict" ]]; then
+  if [[ -x scripts/provenance-check.sh ]]; then
+    echo "[pre-push] provenance freshness report (inform)..."
+    bash scripts/provenance-check.sh --level inform
+  else
+    echo "[pre-push] scripts/provenance-check.sh missing; skipping provenance report" >&2
+  fi
+fi

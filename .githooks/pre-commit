@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+PROFILE="strict"
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
@@ -9,19 +10,31 @@ mapfile -t md_files < <(
     | grep -Ev '^(prompt-logs/|references/anthropic-skills-guide/)' || true
 )
 
-if [ "${#md_files[@]}" -eq 0 ]; then
-  exit 0
+if [ "${#md_files[@]}" -gt 0 ]; then
+  echo "[pre-commit] markdownlint on staged markdown files..."
+  npx --yes markdownlint-cli2 "${md_files[@]}"
+
+  if [[ "$PROFILE" != "fast" ]]; then
+    echo "[pre-commit] local link validation on staged markdown files..."
+    for file in "${md_files[@]}"; do
+      case "$file" in
+        CHANGELOG.md|references/*)
+          continue
+          ;;
+      esac
+      bash scripts/check-links.sh --local --json --file "$file" >/dev/null
+    done
+  fi
 fi
 
-echo "[pre-commit] markdownlint on staged markdown files..."
-npx --yes markdownlint-cli2 "${md_files[@]}"
-
-echo "[pre-commit] local link validation on staged markdown files..."
-for file in "${md_files[@]}"; do
-  case "$file" in
-    CHANGELOG.md|references/*)
-      continue
-      ;;
-  esac
-  bash scripts/check-links.sh --local --json --file "$file" >/dev/null
-done
+if [[ "$PROFILE" != "fast" ]]; then
+  mapfile -t sh_files < <(git diff --cached --name-only --diff-filter=ACMR -- '*.sh' || true)
+  if [ "${#sh_files[@]}" -gt 0 ]; then
+    if command -v shellcheck >/dev/null 2>&1; then
+      echo "[pre-commit] shellcheck on staged shell scripts..."
+      shellcheck -x "${sh_files[@]}"
+    else
+      echo "[pre-commit] shellcheck not found; skipping shell lint" >&2
+    fi
+  fi
+fi

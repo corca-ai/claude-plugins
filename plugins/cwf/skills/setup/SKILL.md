@@ -1,11 +1,11 @@
 ---
 name: setup
-description: "Initial CWF configuration: hook group selection, external tool detection, optional Codex user-scope skill sync, always-on CWF capability index generation, and optional repository index generation. Triggers: \"cwf:setup\", \"setup hooks\", \"configure cwf\""
+description: "Initial CWF configuration: hook group selection, external tool detection, optional Codex integration, optional git hook gate installation, always-on CWF capability index generation, and optional repository index generation. Triggers: \"cwf:setup\", \"setup hooks\", \"configure cwf\""
 ---
 
 # Setup
 
-Initial CWF configuration. Interactive hook toggle, external tool detection, optional Codex skill sync, always-on CWF capability index generation, and optional repository index generation.
+Initial CWF configuration. Interactive hook toggle, external tool detection, optional Codex integration, optional git hook gate installation, always-on CWF capability index generation, and optional repository index generation.
 
 **Language**: Write config files in English. Communicate with the user in their prompt language.
 
@@ -17,6 +17,9 @@ cwf:setup --hooks        # Hook group selection only
 cwf:setup --tools        # External tool detection only
 cwf:setup --codex        # Sync CWF skills into Codex user scope (~/.agents/skills)
 cwf:setup --codex-wrapper # Optional Codex wrapper install for session log sync
+cwf:setup --git-hooks both --gate-profile balanced  # Install repo git hooks and set gate depth
+cwf:setup --git-hooks pre-commit --gate-profile fast # Lightweight local-only git gate
+cwf:setup --git-hooks none # Remove repo-managed git hooks
 cwf:setup --cap-index    # Generate/refresh CWF capability index only
 cwf:setup --repo-index   # Generate/refresh repository index (explicit)
 cwf:setup --repo-index --target file   # repo-index.md only (default)
@@ -30,15 +33,18 @@ Parse input flags and run only the relevant phases:
 
 | Input | Phases |
 |-------|--------|
-| `cwf:setup` | 1 → 2 → 2.4 (if codex available) → 3 (always) → 4 (opt-in) → 5 |
+| `cwf:setup` | 1 → 2 → 2.4 (if codex available) → 2.7 (always ask) → 3 (always) → 4 (opt-in) → 5 |
 | `cwf:setup --hooks` | 1 → 5 |
 | `cwf:setup --tools` | 2 → 5 |
 | `cwf:setup --codex` | 2.5 → 5 |
 | `cwf:setup --codex-wrapper` | 2.6 → 5 |
+| `cwf:setup --git-hooks <none\|pre-commit\|pre-push\|both> [--gate-profile <fast\|balanced\|strict>]` | 2.7 → 5 |
 | `cwf:setup --cap-index` | 3 → 5 |
 | `cwf:setup --repo-index [--target file\|agents\|both]` | 4 → 5 |
 
 When mode is full setup and Codex CLI is available, do not silently skip Codex integration; always run Phase 2.4 and ask the user which integration level to apply.
+
+When mode is full setup, do not expect users to supply optional flags manually. Always ask for git hook installation mode and gate profile in Phase 2.7.
 
 ---
 
@@ -301,6 +307,77 @@ If wrapper is active, restart shell (or source ~/.zshrc) before testing `codex`.
 
 ---
 
+## Phase 2.7: Git Hook Gate Installation
+
+Use this phase when:
+- Mode is full setup (`cwf:setup`)
+- User runs `cwf:setup --git-hooks ...`
+
+### 2.7.1 Resolve Install Mode
+
+Install mode values:
+- `none`
+- `pre-commit`
+- `pre-push`
+- `both`
+
+Resolution order:
+1. If command includes `--git-hooks <value>`, use it.
+2. Otherwise ask AskUserQuestion (single choice):
+   ```text
+   Configure repository git hook gates as part of setup?
+   ```
+   Options:
+   - `both` (recommended)
+   - `pre-commit`
+   - `pre-push`
+   - `none`
+
+### 2.7.2 Resolve Gate Profile
+
+Gate profile values:
+- `fast`: markdownlint only
+- `balanced`: markdownlint + local link checks + staged shellcheck + push-time index coverage checks
+- `strict`: balanced + provenance freshness report on push
+
+Resolution order:
+1. If command includes `--gate-profile <value>`, use it.
+2. Otherwise ask AskUserQuestion (single choice):
+   ```text
+   Select git gate profile (speed vs coverage).
+   ```
+   Options:
+   - `balanced` (recommended)
+   - `fast`
+   - `strict`
+
+If install mode is `none`, skip gate profile selection.
+
+### 2.7.3 Apply Configuration
+
+Run:
+
+```bash
+bash {SKILL_DIR}/scripts/configure-git-hooks.sh --install <mode> --profile <profile>
+```
+
+This script updates repository git hook files (`pre-commit`, `pre-push`) under the configured hooks path and sets `git config core.hooksPath .githooks` when hooks are enabled.
+
+### 2.7.4 Report Effective State
+
+Always report:
+
+```bash
+git config --get core.hooksPath
+```
+
+And summarize:
+- installed hooks (`pre-commit`, `pre-push`)
+- selected profile
+- what each hook enforces at that profile
+
+---
+
 ## Phase 3: Generate CWF Capability Index
 
 Generate a CWF-focused capability index. This phase always runs in full setup.
@@ -518,6 +595,7 @@ Add `setup` to `cwf-state.yaml` current session's `stage_checkpoints` list.
 13. **Idempotent**: Re-running updates existing config, does not duplicate.
 14. **All code fences must have language specifier**: Never use bare fences.
 15. **Codex sync uses symlink + backup move**: Do not delete user files directly.
+16. **Single-entry setup UX**: `cwf:setup` must ask and apply optional integrations (Codex mode, git hook mode/profile, repo index target) instead of requiring users to remember flags.
 
 ## References
 
@@ -526,6 +604,7 @@ Add `setup` to `cwf-state.yaml` current session's `stage_checkpoints` list.
 - [agent-patterns.md](../../references/agent-patterns.md) — Single pattern
 - [sync-skills.sh](../../scripts/codex/sync-skills.sh) — Codex user-scope skill sync
 - [verify-skill-links.sh](../../scripts/codex/verify-skill-links.sh) — Codex skill link validation
+- [scripts/configure-git-hooks.sh](scripts/configure-git-hooks.sh) — installs and profiles repository git hook gates
 - [scripts/check-index-coverage.sh](scripts/check-index-coverage.sh) — deterministic index coverage validation
 - .cwf-cap-index-ignore — optional intentional exclusion list for capability index coverage
 - .cwf-index-ignore — optional intentional exclusion list for repository index coverage

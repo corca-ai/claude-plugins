@@ -193,13 +193,29 @@ Alternative: add hooks via `/hooks` menu in the current session (goes through re
 
 ## Repo Git Hooks
 
-Enable repo hooks once per clone:
+Recommended (interactive, single entrypoint):
+```text
+cwf:setup
+```
+Full setup asks whether to install git hooks and which gate profile to use.
+
+Explicit mode (non-interactive):
+```text
+cwf:setup --git-hooks both --gate-profile balanced
+```
+
+Manual fallback:
 ```bash
 git config core.hooksPath .githooks
 ```
 
-- [pre-commit](../.githooks/pre-commit): markdownlint on staged `*.md`/`*.mdx` (excluding `prompt-logs/` and `references/anthropic-skills-guide/`).
-- [pre-push](../.githooks/pre-push): full markdownlint on tracked markdown files plus `bash scripts/check-links.sh --local --json`.
+- Profiles:
+  - `fast`: markdownlint only
+  - `balanced` (recommended): markdownlint + local link checks + staged shellcheck + push-time index coverage
+  - `strict`: `balanced` + provenance freshness report on push
+- [pre-commit](../.githooks/pre-commit): staged checks for markdown and shell scripts.
+- [pre-push](../.githooks/pre-push): repo-wide markdown/link checks plus index coverage checks.
+- [plugins/cwf/skills/setup/scripts/configure-git-hooks.sh](../plugins/cwf/skills/setup/scripts/configure-git-hooks.sh): deterministic hook installer/profile applier used by setup.
 
 ## Version Bump Rules
 
