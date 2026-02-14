@@ -1,18 +1,6 @@
 ---
 name: setup
-description: |
-  Initial CWF configuration: hook group selection, external tool detection,
-  optional Codex user-scope skill sync, always-on CWF capability index generation,
-  and optional repository index generation.
-  Triggers: "cwf:setup", "setup hooks", "configure cwf"
-allowed-tools:
-  - Read
-  - Write
-  - Edit
-  - Bash
-  - Glob
-  - Grep
-  - AskUserQuestion
+description: "Initial CWF configuration: hook group selection, external tool detection, optional Codex user-scope skill sync, always-on CWF capability index generation, and optional repository index generation. Triggers: \"cwf:setup\", \"setup hooks\", \"configure cwf\""
 ---
 
 # Setup
@@ -344,9 +332,9 @@ Generate concise capability-oriented sections:
 - Do not enumerate skill-internal files in index bullets; add one concise sentence that skill-local READMEs contain per-skill file maps.
 - For hooks/scripts families, prefer linking [plugins/cwf/hooks/README.md](../../hooks/README.md) and [plugins/cwf/scripts/README.md](../../scripts/README.md) over enumerating every script file.
 
-### 3.3 Write [cwf-index.md](../../../../cwf-index.md)
+### 3.3 Write cwf-index.md
 
-Create or overwrite [cwf-index.md](../../../../cwf-index.md):
+Create or overwrite cwf-index.md:
 
 ```markdown
 # CWF Capability Index
@@ -361,10 +349,10 @@ Create or overwrite [cwf-index.md](../../../../cwf-index.md):
 Run:
 
 ```bash
-bash scripts/check-index-coverage.sh cwf-index.md --profile cap
+bash {SKILL_DIR}/scripts/check-index-coverage.sh cwf-index.md --profile cap
 ```
 
-This check applies optional exclusions from repository-root [.cwf-cap-index-ignore](../../../../.cwf-cap-index-ignore).
+This check applies optional exclusions from repository-root .cwf-cap-index-ignore.
 
 If validation fails, regenerate and fix missing coverage before finishing.
 
@@ -388,9 +376,9 @@ If user answers `No`, skip Phase 4.
 
 When generating repository index output (full setup opted-in, or `--repo-index` mode), choose target:
 
-- `file` (recommended): write [repo-index.md](../../../../repo-index.md)
-- `agents`: update managed index block in [AGENTS.md](../../../../AGENTS.md)
-- `both`: write [repo-index.md](../../../../repo-index.md) and update [AGENTS.md](../../../../AGENTS.md) block
+- `file` (recommended): write repo-index.md
+- `agents`: update managed index block in AGENTS.md
+- `both`: write repo-index.md and update AGENTS.md block
 
 Target resolution:
 
@@ -409,7 +397,7 @@ Managed AGENTS block markers:
 <!-- CWF:INDEX:END -->
 ```
 
-If [AGENTS.md](../../../../AGENTS.md) does not exist and target is `agents` or `both`, create it with a minimal scaffold and the managed block.
+If AGENTS.md does not exist and target is `agents` or `both`, create it with a minimal scaffold and the managed block.
 
 ### 4.1 Scan Project Structure
 
@@ -417,7 +405,7 @@ Use Glob to find top-level directories. Exclude hidden directories (`.git`, `.cl
 
 Build adaptive file inventories (sorted) from the current repository structure:
 
-- Root entry docs if present: [AGENTS.md](../../../../AGENTS.md), [CLAUDE.md](../../../../CLAUDE.md), [README.md](../../../../README.md), [README.ko.md](../../../../README.ko.md)
+- Root entry docs if present: AGENTS.md, CLAUDE.md, README.md, README.ko.md
 - `docs/*.md` (when `docs/` exists)
 - `references/**/*.md` (when `references/` exists)
 - Any `*/skills/*/SKILL.md` (excluding `.git/`, `node_modules/`, `prompt-logs/`)
@@ -426,7 +414,7 @@ Build adaptive file inventories (sorted) from the current repository structure:
 
 These discovered inventories are mandatory coverage sets for repository index generation.
 
-Apply optional exclusions from repository-root [.cwf-index-ignore](../../../../.cwf-index-ignore) (glob patterns, one per line) before finalizing repository index content.
+Apply optional exclusions from repository-root .cwf-index-ignore (glob patterns, one per line) before finalizing repository index content.
 
 ### 4.2 Build Repository Index
 
@@ -452,9 +440,9 @@ For each area, generate:
   - For non-CWF skill collections, use deterministic alphabetical order.
   - Other sections: deterministic order (alphabetical unless there is a clear canonical sequence).
 
-### 4.3 Write [repo-index.md](../../../../repo-index.md)
+### 4.3 Write repo-index.md
 
-When target includes `file`, create or overwrite [repo-index.md](../../../../repo-index.md):
+When target includes `file`, create or overwrite repo-index.md:
 
 ```markdown
 # Repository Index
@@ -464,28 +452,28 @@ When target includes `file`, create or overwrite [repo-index.md](../../../../rep
 {areas}
 ```
 
-### 4.4 Update [AGENTS.md](../../../../AGENTS.md) Managed Block (target=agents|both)
+### 4.4 Update AGENTS.md Managed Block (target=agents|both)
 
-When target includes `agents`, write the generated repository index body into the managed block in [AGENTS.md](../../../../AGENTS.md):
+When target includes `agents`, write the generated repository index body into the managed block in AGENTS.md:
 
 - If markers exist, replace only the marker-delimited section.
-- If markers are absent, append a new managed block at the end of [AGENTS.md](../../../../AGENTS.md).
+- If markers are absent, append a new managed block at the end of AGENTS.md.
 
 ### 4.5 Repository Coverage Validation (Required)
 
 If target includes `file`, run:
 
 ```bash
-bash scripts/check-index-coverage.sh repo-index.md --profile repo
+bash {SKILL_DIR}/scripts/check-index-coverage.sh repo-index.md --profile repo
 ```
 
 If target includes `agents`, also run:
 
 ```bash
-bash scripts/check-index-coverage.sh AGENTS.md --profile repo
+bash {SKILL_DIR}/scripts/check-index-coverage.sh AGENTS.md --profile repo
 ```
 
-This check applies optional exclusions from repository-root [.cwf-index-ignore](../../../../.cwf-index-ignore).
+This check applies optional exclusions from repository-root .cwf-index-ignore.
 
 If validation fails, regenerate and fix missing links before finishing.
 
@@ -517,14 +505,14 @@ Add `setup` to `cwf-state.yaml` current session's `stage_checkpoints` list.
 
 1. **Default-enabled**: Hooks work without cwf:setup. This skill creates config for customizing (disabling specific groups).
 2. **cwf-state.yaml is SSOT**: Read before modifying. Edit, do not overwrite.
-3. **Capability index policy**: [cwf-index.md](../../../../cwf-index.md) is CWF-only and must be generated in full setup. `cwf:setup --cap-index` explicitly regenerates it.
+3. **Capability index policy**: cwf-index.md is CWF-only and must be generated in full setup. `cwf:setup --cap-index` explicitly regenerates it.
 4. **Repository index policy**: Repository-wide index is optional in full setup (ask first). `cwf:setup --repo-index` explicitly regenerates it.
 5. **AGENTS block policy**: When repository target includes `agents`, update only the managed marker block (`CWF:INDEX:START/END`) and preserve all other content.
 6. **Index content**: Pointers, not summaries. Use section heading intent + link bullets with file-level descriptions. Avoid separate `When to read`/`Role`/`Key files` labels.
 7. **Link policy**: Internal files/directories in generated index content must be markdown links (`[path](path)`), not inline literals.
 8. **Coverage policy**: For capability index, cover CWF inventories (skills + plugin references + hooks/scripts READMEs when present). For repository index, cover discovered repository inventories (root/docs/references + skill entry docs + hooks/scripts READMEs when present), except intentional exclusions.
-9. **Coverage validation**: Run [scripts/check-index-coverage.sh](../../../../scripts/check-index-coverage.sh) with explicit profile (`--profile cap` or `--profile repo`) and fix all missing findings.
-10. **Ignore policy**: Use [.cwf-cap-index-ignore](../../../../.cwf-cap-index-ignore) and [.cwf-index-ignore](../../../../.cwf-index-ignore) only for intentional exclusions.
+9. **Coverage validation**: Run `{SKILL_DIR}/scripts/check-index-coverage.sh` with explicit profile (`--profile cap` or `--profile repo`) and fix all missing findings.
+10. **Ignore policy**: Use .cwf-cap-index-ignore and .cwf-index-ignore only for intentional exclusions.
 11. **Bash 3.2 compatible output**: `cwf-hooks-enabled.sh` uses only `export` lines with quoted string values.
 12. **AskUserQuestion for all choices**: No batch defaults. Always ask.
 13. **Idempotent**: Re-running updates existing config, does not duplicate.
@@ -538,6 +526,6 @@ Add `setup` to `cwf-state.yaml` current session's `stage_checkpoints` list.
 - [agent-patterns.md](../../references/agent-patterns.md) — Single pattern
 - [sync-skills.sh](../../scripts/codex/sync-skills.sh) — Codex user-scope skill sync
 - [verify-skill-links.sh](../../scripts/codex/verify-skill-links.sh) — Codex skill link validation
-- [check-index-coverage.sh](../../../../scripts/check-index-coverage.sh) — deterministic index coverage validation
-- [.cwf-cap-index-ignore](../../../../.cwf-cap-index-ignore) — optional intentional exclusion list for capability index coverage
-- [.cwf-index-ignore](../../../../.cwf-index-ignore) — optional intentional exclusion list for repository index coverage
+- [scripts/check-index-coverage.sh](scripts/check-index-coverage.sh) — deterministic index coverage validation
+- .cwf-cap-index-ignore — optional intentional exclusion list for capability index coverage
+- .cwf-index-ignore — optional intentional exclusion list for repository index coverage

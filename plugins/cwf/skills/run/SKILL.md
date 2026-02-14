@@ -1,20 +1,6 @@
 ---
 name: run
-description: |
-  Full CWF pipeline auto-chaining. Orchestrates the complete workflow:
-  gather → clarify → plan → review(plan) → impl → review(code) → retro → ship.
-  Respects Decision #19: human gates pre-impl, autonomous post-impl.
-  Triggers: "cwf:run", "run workflow"
-allowed-tools:
-  - Skill
-  - Task
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Grep
-  - Bash
-  - AskUserQuestion
+description: "Full CWF pipeline auto-chaining. Orchestrates the complete workflow: gather → clarify → plan → review(plan) → impl → review(code) → retro → ship. Respects Decision #19: human gates pre-impl, autonomous post-impl. Triggers: \"cwf:run\", \"run workflow\""
 ---
 
 # Run

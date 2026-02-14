@@ -4,3 +4,4 @@ File-level map for [setup](SKILL.md).
 
 - [README.md](README.md): File map for this skill directory.
 - [SKILL.md](SKILL.md): Primary instructions and execution workflow for this skill.
+- [scripts/check-index-coverage.sh](scripts/check-index-coverage.sh): Validates generated index coverage for cap/repo profiles.

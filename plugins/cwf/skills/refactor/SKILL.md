@@ -1,19 +1,6 @@
 ---
 name: refactor
-description: |
-  Multi-mode code and skill review. Quick scan all plugins, deep-review a single skill,
-  holistic cross-plugin analysis, commit-based tidying, or docs consistency check.
-  Triggers: "cwf:refactor", "/refactor", "tidy", "review skill", "cleanup code",
-  "check docs consistency"
-allowed-tools:
-  - Task
-  - Read
-  - Write
-  - Edit
-  - Bash
-  - Glob
-  - Grep
-  - AskUserQuestion
+description: "Multi-mode code and skill review. Quick scan all plugins, deep-review a single skill, holistic cross-plugin analysis, commit-based tidying, or docs consistency check. Triggers: \"cwf:refactor\", \"/refactor\", \"tidy\", \"review skill\", \"cleanup code\", \"check docs consistency\""
 ---
 
 # Refactor (cwf:refactor)
@@ -315,12 +302,20 @@ Review documentation consistency across the repository.
 
 ### 1. Deterministic Tool Pass (Required First)
 
+Before proposing any new documentation rule, run this placement gate:
+
+- `AUTO_EXISTING`: already enforced by lint/hook/script → remove prose duplication, do not add rule text.
+- `AUTO_CANDIDATE`: enforceable via lint/hook/script but missing automation → propose automation change first, do not add prose rule text.
+- `NON_AUTOMATABLE`: judgment-only guidance → keep as concise principle with rationale.
+
+Only `NON_AUTOMATABLE` items should become or remain documentation rules.
+
 Run deterministic checks before semantic review:
 
 ```bash
 npx --yes markdownlint-cli2 "**/*.md"
-bash scripts/check-links.sh --local --json
-node scripts/doc-graph.mjs --json
+bash {SKILL_DIR}/scripts/check-links.sh --local --json
+node {SKILL_DIR}/scripts/doc-graph.mjs --json
 ```
 
 Use tool output as the source of truth for lint-level issues.
@@ -330,7 +325,7 @@ Use tool output as the source of truth for lint-level issues.
 
 ### 2. Agent Entry Docs Review
 
-Read the project's [AGENTS.md][repo-agents] (and runtime adapter docs like [CLAUDE.md][repo-claude]) and evaluate with `{SKILL_DIR}/references/docs-criteria.md` Section 1:
+Read the project's AGENTS.md (and runtime adapter docs like CLAUDE.md) and evaluate with `{SKILL_DIR}/references/docs-criteria.md` Section 1:
 
 - Compressed-index shape
 - Less-is-more signal quality (line-level high/medium/low utility scoring across the full file, not intro-only)
@@ -343,15 +338,15 @@ Read the project's [AGENTS.md][repo-agents] (and runtime adapter docs like [CLAU
 
 ### 3. Project Context Review
 
-Read [docs/project-context.md][repo-project-context] and check:
+Read docs/project-context.md and check:
 
-- Plugin listing matches actual [plugins/][repo-plugins-dir] directory contents
+- Plugin listing matches actual plugins/ directory contents
 - Architecture patterns are current (no references to removed/renamed plugins)
 - Convention entries match actual practice
 
 ### 4. README Review
 
-Read [README.md][repo-readme] and [README.ko.md][repo-readme-ko]:
+Read README.md and README.ko.md:
 
 - Plugin overview table matches `marketplace.json` entries
 - Each active plugin has install/update commands
@@ -362,9 +357,9 @@ Read [README.md][repo-readme] and [README.ko.md][repo-readme-ko]:
 
 Check alignment between:
 
-- [.claude-plugin/marketplace.json][repo-marketplace] plugin list ↔ README overview table
-- [.claude-plugin/marketplace.json][repo-marketplace] descriptions ↔ plugin manifest descriptions under [plugins/][repo-plugins-dir]
-- [docs/project-context.md][repo-project-context] plugin listing ↔ actual [plugins/][repo-plugins-dir] contents
+- .claude-plugin/marketplace.json plugin list ↔ README overview table
+- .claude-plugin/marketplace.json descriptions ↔ plugin manifest descriptions under plugins/
+- docs/project-context.md plugin listing ↔ actual plugins/ contents
 - Entry-doc references ↔ actual filesystem paths
 - Root-relative internal links (leading-slash paths like /path/to/doc.md) ↔ portability check (prefer file-relative links)
 
@@ -420,11 +415,3 @@ Present as a concrete restructuring proposal with rationale.
 - Docs review criteria: [references/docs-criteria.md](references/docs-criteria.md)
 - Shared agent patterns: [agent-patterns.md](../../references/agent-patterns.md)
 - Skill conventions checklist: [skill-conventions.md](../../references/skill-conventions.md)
-
-[repo-agents]: ../../../../AGENTS.md
-[repo-claude]: ../../../../CLAUDE.md
-[repo-project-context]: ../../../../docs/project-context.md
-[repo-readme]: ../../../../README.md
-[repo-readme-ko]: ../../../../README.ko.md
-[repo-marketplace]: ../../../../.claude-plugin/marketplace.json
-[repo-plugins-dir]: ../../../../plugins/

@@ -66,7 +66,7 @@ Map file patterns and step keywords to implementation domains. Use this to assig
 
 | File Pattern | Keywords | Domain | Agent Expertise |
 |-------------|----------|--------|-----------------|
-| `*.md`, `SKILL.md`, [CHANGELOG.md](../../../../../CHANGELOG.md) | "document", "write", "draft" | Documentation | Markdown structure, skill frontmatter, reference organization |
+| `*.md`, `SKILL.md`, CHANGELOG.md | "document", "write", "draft" | Documentation | Markdown structure, skill frontmatter, reference organization |
 | `*.sh`, `scripts/` | "script", "bash", "hook" | Shell/Scripting | Bash best practices, cross-platform compat, set -euo pipefail |
 | `*.ts`, `*.js`, `*.mjs` | "node", "typescript", "api" | JavaScript/TypeScript | Node.js patterns, async/await, module systems |
 | `*.py` | "python", "script" | Python | Python idioms, virtual environments, type hints |
@@ -144,3 +144,4 @@ A plan qualifies for **Direct Execution (Phase 3a)** when ALL of these hold:
 If any condition fails, use **Agent Team Execution (Phase 3b)**.
 
 When in doubt, prefer Agent Team — the overhead of 2 agents is small compared to the risk of a complex plan going wrong in direct execution.
+

@@ -1,19 +1,6 @@
 ---
 name: review
-description: |
-  Universal review with narrative verdicts. 6 parallel reviewers:
-  2 internal (Security, UX/DX) via Task + 2 external slots via available
-  providers (Codex/Gemini CLI, Claude Task fallback) + 2 domain experts via Task.
-  Graceful fallback when CLIs are unavailable.
-  Modes: --mode clarify/plan/code. Triggers: "/review"
-allowed-tools:
-  - Task
-  - Read
-  - Write
-  - Glob
-  - Grep
-  - Bash
-  - AskUserQuestion
+description: "Universal review with narrative verdicts. 6 parallel reviewers: 2 internal (Security, UX/DX) via Task + 2 external slots via available providers (Codex/Gemini CLI, Claude Task fallback) + 2 domain experts via Task. Graceful fallback when CLIs are unavailable. Modes: --mode clarify/plan/code. Triggers: \"/review\""
 ---
 
 # Review (/review)

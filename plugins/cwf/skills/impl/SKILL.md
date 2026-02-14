@@ -1,19 +1,6 @@
 ---
 name: impl
-description: |
-  Implementation orchestration from a plan. Decomposes plan steps into
-  parallelizable work items, spawns domain-appropriate agents, and verifies
-  completion against BDD success criteria.
-  Triggers: "cwf:impl", "implement this plan"
-allowed-tools:
-  - Task
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Grep
-  - Bash
-  - AskUserQuestion
+description: "Implementation orchestration from a plan. Decomposes plan steps into parallelizable work items, spawns domain-appropriate agents, and verifies completion against BDD success criteria. Triggers: \"cwf:impl\", \"implement this plan\""
 ---
 
 # Impl

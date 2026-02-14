@@ -1,20 +1,6 @@
 ---
 name: plan
-description: |
-  Agent-assisted plan drafting with parallel research, BDD success criteria,
-  and cwf:review integration. Complements the plan-protocol hook (passive injection)
-  with active, structured plan creation.
-  Triggers: "cwf:plan", "plan this task"
-allowed-tools:
-  - Task
-  - Read
-  - Glob
-  - Grep
-  - Write
-  - Bash
-  - AskUserQuestion
-  - WebSearch
-  - WebFetch
+description: "Agent-assisted plan drafting with parallel research, BDD success criteria, and cwf:review integration. Complements the plan-protocol hook (passive injection) with active, structured plan creation. Triggers: \"cwf:plan\", \"plan this task\""
 ---
 
 # Plan

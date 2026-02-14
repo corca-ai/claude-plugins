@@ -1,14 +1,6 @@
 ---
 name: update
-description: |
-  Check and update CWF plugin to the latest version.
-  Triggers: "cwf:update", "update cwf", "check for updates"
-allowed-tools:
-  - Read
-  - Bash
-  - Glob
-  - Grep
-  - AskUserQuestion
+description: "Check and update CWF plugin to the latest version. Triggers: \"cwf:update\", \"update cwf\", \"check for updates\""
 ---
 
 # Update
@@ -37,7 +29,7 @@ Locate the installed plugin.json using Glob:
 ```
 
 Read the `version` field. If not found, report that CWF is not installed and
-suggest `bash scripts/install.sh`.
+suggest installing via marketplace (`claude plugin install cwf@corca-plugins`).
 
 ### 1.2 Update Marketplace
 
@@ -96,7 +88,7 @@ CWF updated to {version}. Restart Claude Code for changes to take effect.
 
 After a successful update (or when showing version diff):
 
-1. Read [CHANGELOG.md](../../../../CHANGELOG.md) in the plugin source if it exists
+1. Read CHANGELOG.md in the plugin source if it exists
 2. Summarize changes between old and new version
 3. If no changelog exists, list new/modified skills by comparing directory
    structure

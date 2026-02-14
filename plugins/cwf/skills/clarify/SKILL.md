@@ -1,19 +1,6 @@
 ---
 name: clarify
-description: |
-  Unified requirement clarification. Default: research-first with autonomous
-  decision-making and persistent questioning. --light: direct iterative Q&A.
-  Triggers: "cwf:clarify", "clarify this", "refine requirements"
-allowed-tools:
-  - Task
-  - Read
-  - Glob
-  - Grep
-  - Write
-  - Bash
-  - AskUserQuestion
-  - WebSearch
-  - WebFetch
+description: "Unified requirement clarification. Default: research-first with autonomous decision-making and persistent questioning. --light: direct iterative Q&A. Triggers: \"cwf:clarify\", \"clarify this\", \"refine requirements\""
 ---
 
 # Clarify

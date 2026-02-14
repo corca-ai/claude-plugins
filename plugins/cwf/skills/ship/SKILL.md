@@ -1,13 +1,6 @@
 ---
 name: ship
-description: |
-  Automate GitHub workflow: issue creation, PR with lessons/CDM/checklist,
-  and merge management. Triggers: "/ship"
-allowed-tools:
-  - Bash
-  - Read
-  - Glob
-  - Grep
+description: "Automate GitHub workflow: issue creation, PR with lessons/CDM/checklist, and merge management. Triggers: \"/ship\""
 ---
 
 # Ship (/ship)

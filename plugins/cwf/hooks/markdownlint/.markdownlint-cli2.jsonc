@@ -7,6 +7,8 @@
   ],
   "customRules": [
     "./rules/no-inline-md-path-literals.cjs",
-    "./rules/no-hard-wrapped-prose.cjs"
+    "./rules/no-hard-wrapped-prose.cjs",
+    "./rules/skill-frontmatter-schema.cjs",
+    "./rules/no-plugin-external-links.cjs"
   ]
 }

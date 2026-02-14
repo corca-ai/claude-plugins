@@ -7,18 +7,21 @@ Checklist for the `--docs` mode. Evaluate documentation consistency across the r
 Run deterministic checks before semantic review:
 
 - Markdown lint (`npx --yes markdownlint-cli2`)
-- Link validation (`bash scripts/check-links.sh --local --json`)
-- Graph/orphan analysis (`node scripts/doc-graph.mjs --json`)
+- Link validation (`bash {SKILL_DIR}/scripts/check-links.sh --local --json`)
+- Graph/orphan analysis (`node {SKILL_DIR}/scripts/doc-graph.mjs --json`)
+- Plugin-boundary lint (CORCA004: plugin docs must not link outside `plugins/cwf/`)
 
 Rules:
 
 - Treat tool output as source of truth for lint-level findings.
 - Do not duplicate linter findings as manual review items unless you are interpreting repository-level impact.
 - If a required tool is missing, report a tooling gap.
+- For each proposed new documentation rule, classify first: `AUTO_EXISTING`, `AUTO_CANDIDATE`, or `NON_AUTOMATABLE`.
+- Only `NON_AUTOMATABLE` items belong in prose rules; `AUTO_EXISTING` and `AUTO_CANDIDATE` belong in deterministic gates.
 
 ## 1. Agent Entry Docs Review
 
-Check the project's root [AGENTS.md][repo-agents] and runtime adapter docs (for example [CLAUDE.md][repo-claude]):
+Check the project's root AGENTS.md and runtime adapter docs (for example CLAUDE.md):
 
 | Check | Flag condition |
 |-------|---------------|
@@ -41,11 +44,11 @@ Check the project's root [AGENTS.md][repo-agents] and runtime adapter docs (for 
 
 ## 2. Project Context Review
 
-Check [docs/project-context.md][repo-project-context]:
+Check docs/project-context.md:
 
 | Check | Flag condition |
 |-------|---------------|
-| Plugin listing doesn't match [plugins/][repo-plugins-dir] directory | Missing or extra entries |
+| Plugin listing doesn't match plugins/ directory | Missing or extra entries |
 | Lists deprecated plugin as active | Status not updated |
 | Architecture patterns reference removed plugins | Stale reference |
 | Convention entries contradict actual practice | Inconsistency |
@@ -53,11 +56,11 @@ Check [docs/project-context.md][repo-project-context]:
 
 ## 3. README Review
 
-Check [README.md][repo-readme] and [README.ko.md][repo-readme-ko]:
+Check README.md and README.ko.md:
 
 | Check | Flag condition |
 |-------|---------------|
-| Overview table doesn't match [.claude-plugin/marketplace.json][repo-marketplace] | Missing, extra, or mismatched entries |
+| Overview table doesn't match .claude-plugin/marketplace.json | Missing, extra, or mismatched entries |
 | Active plugin missing install/update commands | Incomplete section |
 | Deprecated plugin not clearly marked | Missing deprecation notice |
 | Korean version structure differs from English | Structural mismatch |
@@ -70,11 +73,11 @@ Check alignment between documents:
 
 | Source A | Source B | Check |
 |----------|----------|-------|
-| [.claude-plugin/marketplace.json][repo-marketplace] plugins | README overview table | Same set of plugins, same descriptions |
-| [.claude-plugin/marketplace.json][repo-marketplace] descriptions | Plugin manifest descriptions under [plugins/][repo-plugins-dir] | Consistent messaging |
-| [docs/project-context.md][repo-project-context] plugins | [plugins/][repo-plugins-dir] directory | Matches actual contents |
-| [AGENTS.md][repo-agents] and adapter file references | Filesystem | All referenced paths exist |
-| README deprecated section | [.claude-plugin/marketplace.json][repo-marketplace] deprecated flags | Consistent deprecation status |
+| .claude-plugin/marketplace.json plugins | README overview table | Same set of plugins, same descriptions |
+| .claude-plugin/marketplace.json descriptions | Plugin manifest descriptions under plugins/ | Consistent messaging |
+| docs/project-context.md plugins | plugins/ directory | Matches actual contents |
+| AGENTS.md and adapter file references | Filesystem | All referenced paths exist |
+| README deprecated section | .claude-plugin/marketplace.json deprecated flags | Consistent deprecation status |
 
 For each inconsistency found, report:
 - **What**: The specific mismatch
@@ -87,14 +90,14 @@ Structural health of the documentation graph. Reference: [Software project docum
 
 | Check | Flag condition |
 |-------|---------------|
-| Orphaned documents | Doc file unreachable from any entry point ([AGENTS.md](../../../../../AGENTS.md), runtime adapters, README, docs/ index) |
+| Orphaned documents | Doc file unreachable from any entry point (AGENTS.md, runtime adapters, README, docs/ index) |
 | Circular references | Two docs reference each other for the same concept, or navigation path > 3 hops from entry |
-| Inline overload | A single file embeds substantive content that should live in a dedicated doc (e.g., full protocol text inside [AGENTS.md](../../../../../AGENTS.md) instead of a reference link) |
+| Inline overload | A single file embeds substantive content that should live in a dedicated doc (e.g., full protocol text inside AGENTS.md instead of a reference link) |
 | Unnecessary hard wraps in prose | Prose paragraphs are split across multiple short lines without semantic boundaries (when MD013 is disabled, this should be style-reviewed explicitly) |
 | Auto-generated files in git | Files that can be regenerated (build output, compiled docs) are version-controlled |
 | Undocumented non-obvious decisions | Non-obvious technical choices (e.g., "no Tailwind", "no mock objects") lack explicit rationale anywhere in docs |
 | Obvious instructions | Docs include self-evident guidance (e.g., "write clean code", "follow best practices") that wastes reader attention |
-| Automation-redundant instructions | Docs include behavioral instructions already enforced by deterministic hooks or skill triggers (e.g., AGENTS/adapters say "always do X" when a PostToolUse hook already validates X). Cross-check against [plugins/cwf/hooks/hooks.json][repo-hooks-json] entries and skill trigger conditions |
+| Automation-redundant instructions | Docs include behavioral instructions already enforced by deterministic hooks or skill triggers (e.g., AGENTS/adapters say "always do X" when a PostToolUse hook already validates X). Cross-check against plugins/cwf/hooks/hooks.json entries and skill trigger conditions |
 | Root-relative internal links | Links with leading-slash targets (for example, /docs/x.md) are renderer/tooling dependent; prefer file-relative links |
 | Scope-overlapping documents | Multiple docs cover the same scope with no clear ownership boundary. Candidate for merge or deletion — one scope, one file |
 | Manual-review/linter overlap | Review narrative repeats deterministic tool findings without adding semantic interpretation or structural action |
@@ -107,10 +110,10 @@ Synthesize findings from Sections 1-5 into actionable restructuring proposals.
 
 Apply these principles when evaluating structure:
 
-1. **Always-loaded file = compressed index**: The entry-point ([AGENTS.md][repo-agents]) should contain pointers and scope descriptions, not full content. Runtime adapters should stay thin.
+1. **Always-loaded file = compressed index**: The entry-point (AGENTS.md) should contain pointers and scope descriptions, not full content. Runtime adapters should stay thin.
 2. **Each document has one clear scope**: If a doc serves multiple unrelated purposes, agents can't make a meaningful read/skip decision.
 3. **Agent autonomy for reading, explicit routing for writing**: Agents judge which docs are relevant; writing needs explicit routing (persist routing table).
-4. **Less is more**: Instruction-following quality degrades as instruction count rises. [AGENTS.md][repo-agents] < 100 lines ideal; runtime adapters thin; individual docs focused enough to be skippable.
+4. **Less is more**: Instruction-following quality degrades as instruction count rises. AGENTS.md < 100 lines ideal; runtime adapters thin; individual docs focused enough to be skippable.
 5. **Documentation-as-Code**: Single source of truth per fact. Meaningful names. Link, don't copy. Remove unreachable docs.
 6. **Non-obvious decisions only**: Skip guidance a capable agent would independently reach.
 7. **Skills for vertical, docs for horizontal**: Skills for action-specific workflows; docs for cross-task knowledge.
@@ -126,12 +129,3 @@ Apply these principles when evaluating structure:
 | **Target structure** | Before/after comparison of the doc set with clear scope per file. |
 | **Principle compliance** | Rate each remaining doc against principles 1-7 above. Flag violations. |
 | **Automation promotion candidates** | Repeated manual findings that should become deterministic checks (lint rule, hook, or script). Include proposed owner file. |
-
-[repo-agents]: ../../../../../AGENTS.md
-[repo-claude]: ../../../../../CLAUDE.md
-[repo-project-context]: ../../../../../docs/project-context.md
-[repo-readme]: ../../../../../README.md
-[repo-readme-ko]: ../../../../../README.ko.md
-[repo-marketplace]: ../../../../../.claude-plugin/marketplace.json
-[repo-plugins-dir]: ../../../../../plugins/
-[repo-hooks-json]: ../../../../../plugins/cwf/hooks/hooks.json

@@ -7,6 +7,8 @@
   ],
   "customRules": [
     "./scripts/markdownlint-rules/no-inline-md-path-literals.cjs",
-    "./scripts/markdownlint-rules/no-hard-wrapped-prose.cjs"
+    "./scripts/markdownlint-rules/no-hard-wrapped-prose.cjs",
+    "./scripts/markdownlint-rules/skill-frontmatter-schema.cjs",
+    "./scripts/markdownlint-rules/no-plugin-external-links.cjs"
   ]
 }

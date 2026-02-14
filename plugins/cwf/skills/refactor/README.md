@@ -11,5 +11,7 @@ File-level map for [refactor](SKILL.md).
 - [references/review-criteria.md](references/review-criteria.md): Reference file used by this skill (review-criteria).
 - [references/review-criteria.provenance.yaml](references/review-criteria.provenance.yaml): Reference file used by this skill (review-criteria.provenance.yaml).
 - [references/tidying-guide.md](references/tidying-guide.md): Reference file used by this skill (tidying-guide).
+- [scripts/check-links.sh](scripts/check-links.sh): Helper script used by this skill (markdown link validation for docs mode).
+- [scripts/doc-graph.mjs](scripts/doc-graph.mjs): Helper script used by this skill (doc graph/orphan analysis for docs mode).
 - [scripts/quick-scan.sh](scripts/quick-scan.sh): Helper script used by this skill (quick-scan.sh).
 - [scripts/tidy-target-commits.sh](scripts/tidy-target-commits.sh): Helper script used by this skill (tidy-target-commits.sh).

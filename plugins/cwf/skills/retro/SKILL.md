@@ -1,20 +1,6 @@
 ---
 name: retro
-description: |
-  Comprehensive session retrospective with adaptive depth. Light by default,
-  deep on request with parallel sub-agent analysis.
-  Triggers: "cwf:retro", "retro", "retrospective", "회고"
-allowed-tools:
-  - Read
-  - Write
-  - Edit
-  - Bash
-  - Glob
-  - Grep
-  - WebSearch
-  - Skill
-  - Task
-  - AskUserQuestion
+description: "Comprehensive session retrospective with adaptive depth. Light by default, deep on request with parallel sub-agent analysis. Triggers: \"cwf:retro\", \"retro\", \"retrospective\", \"회고\""
 ---
 
 # Session Retrospective
@@ -50,7 +36,7 @@ Resolution order:
 
 ### 2. Read Existing Artifacts
 
-Read `plan.md`, `lessons.md` (if they exist in target dir), [AGENTS.md](../../../../AGENTS.md) from project root (plus [CLAUDE.md](../../../../CLAUDE.md) when runtime-specific behavior matters), project context document (e.g. [docs/project-context.md](../../../../docs/project-context.md)), and `cwf-state.yaml` (if it exists) — to understand session goals, project stage, and avoid duplicating content.
+Read `plan.md`, `lessons.md` (if they exist in target dir), AGENTS.md from project root (plus CLAUDE.md when runtime-specific behavior matters), project context document (e.g. docs/project-context.md), and `cwf-state.yaml` (if it exists) — to understand session goals, project stage, and avoid duplicating content.
 
 ### 3. Select Mode
 
@@ -132,7 +118,7 @@ User, org, and project facts useful for future sessions: domain knowledge, tech 
 
 #### Section 2: Collaboration Preferences
 
-Work style and communication observations; compare against current [AGENTS.md](../../../../AGENTS.md) (and [CLAUDE.md](../../../../CLAUDE.md) when runtime-specific). If warranted, draft `### Suggested Agent-Guide Updates` as a bullet list (omit if none). **Right-placement check**: if a learning belongs to a doc already referenced by AGENTS/adapter docs, suggest updating that doc instead.
+Work style and communication observations; compare against current AGENTS.md (and CLAUDE.md when runtime-specific). If warranted, draft `### Suggested Agent-Guide Updates` as a bullet list (omit if none). **Right-placement check**: if a learning belongs to a doc already referenced by AGENTS/adapter docs, suggest updating that doc instead.
 
 #### Section 3: Waste Reduction
 
@@ -238,13 +224,13 @@ For each finding, evaluate enforcement mechanisms strongest-first:
 
 3. **Tier 3: Doc** (behavioral, last resort) — Only for judgment calls
    - `project-context.md` for architectural patterns
-   - [AGENTS.md](../../../../AGENTS.md) or runtime adapter docs only for rules that can't be automated
+   - AGENTS.md or runtime adapter docs only for rules that can't be automated
 
 **Per-section persist actions**:
 
 - **S1 Context** → `project-context.md` (Tier 3 — context is inherently behavioral). Offer to append new context.
-- **S2 Collaboration** → Evaluate each suggestion through tiers individually. AskUserQuestion "Apply?" for [AGENTS.md](../../../../AGENTS.md)/adapter changes.
-- **S3 Waste / Root causes** → For each 5 Whys structural cause, present: "**Finding**: X. **Recommended tier**: {1|2|3}. **Mechanism**: {specific change}." Right-placement check: [AGENTS.md](../../../../AGENTS.md) (or runtime adapters) for behavioral rules, `project-context.md` for architectural patterns, protocol/skill docs for process changes.
+- **S2 Collaboration** → Evaluate each suggestion through tiers individually. AskUserQuestion "Apply?" for AGENTS.md/adapter changes.
+- **S3 Waste / Root causes** → For each 5 Whys structural cause, present: "**Finding**: X. **Recommended tier**: {1|2|3}. **Mechanism**: {specific change}." Right-placement check: AGENTS.md (or runtime adapters) for behavioral rules, `project-context.md` for architectural patterns, protocol/skill docs for process changes.
 - **S4 CDM** → Key lessons through tiers (most → Tier 3 `project-context.md`).
 - **S7 Skills** → AskUserQuestion "Implement now?" for actionable improvements.
 
@@ -327,7 +313,7 @@ Do not prompt the user to start this discussion.
 1. Never duplicate content already in lessons.md
 2. Be specific — cite session moments, not generic advice
 3. Keep each section focused — if nothing to say, state that briefly
-4. [AGENTS.md](../../../../AGENTS.md)/runtime adapter changes require explicit user approval
+4. AGENTS.md/runtime adapter changes require explicit user approval
 5. If early session context is unavailable due to conversation length, focus on what is visible and note the limitation
 6. CDM analysis (Section 4) is unconditional — every session has decisions to analyze
 7. Expert Lens (Section 5) is deep-mode only — in light mode, output a one-line pointer to `--deep`

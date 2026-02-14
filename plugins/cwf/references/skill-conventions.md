@@ -184,7 +184,7 @@ This applies to analysis reports, quick scans, review summaries, and any skill o
 - [ ] All skills follow section order (frontmatter → title → Language → Quick Start → Phases → Rules → References)
 - [ ] Language declarations use standard pattern
 - [ ] All skills have Rules section
-- [ ] Shared reference paths use `../../references/` (not `../references/` or `../../../references/`)
+- [ ] Shared reference paths use `../../references/` (avoid deeper parent traversal forms)
 - [ ] Agent pattern matches declaration in agent-patterns.md
 - [ ] No repeated patterns that should be extracted to shared references
 
