@@ -178,11 +178,11 @@ review_state:
     skill_refs_done: false
     references_done: false
   cursor:
-    file: repo-index.md
+    file: README.md
     next_line: 1
-  completed_files: [AGENTS.md, CLAUDE.md]
+  completed_files: [AGENTS.md, CLAUDE.md, repo-index.md]
   current_file_eof: true
-  last_chunk_range: "CLAUDE.md:1-14"
+  last_chunk_range: "repo-index.md:1-69"
   last_inbound_count: 6
   orphan_triage:
     intentional: []
@@ -191,6 +191,7 @@ review_state:
   unresolved_discussion_points:
     - "CLAUDE.md routing duplication: keep both sentence pointer and numbered read-first list?"
     - "CLAUDE.md env fallback note: keep in adapter or move to troubleshooting doc?"
+    - "repo-index.md header self-link: keep for generation uniformity or remove as low-signal?"
   last_updated: "2026-02-14"
 ```
 

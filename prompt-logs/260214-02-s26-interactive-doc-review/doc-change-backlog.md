@@ -43,3 +43,7 @@ Status: Done (superseded by AGENTS-first policy; file removed).
 9. `NON_AUTOMATABLE` — Confirm AGENTS-only default entrypoint while preserving explicit `--cap-index` as optional path.
 Reason: balances policy clarity (single default) with user-controlled discoverability artifact generation.
 Status: Done.
+
+10. `NON_AUTOMATABLE` — Decide whether generated `repo-index.md` header self-link (`[repo-index.md](repo-index.md)`) should be kept.
+Reason: template consistency vs low-signal redundancy trade-off.
+Status: Pending.
