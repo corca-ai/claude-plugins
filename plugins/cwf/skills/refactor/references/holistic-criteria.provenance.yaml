@@ -1,8 +1,8 @@
 target: holistic-criteria.md
 written_session: S11a
-last_reviewed: S24
+last_reviewed: S26
 skill_count: 12
-hook_count: 15
+hook_count: 16
 designed_for:
   - "Cross-plugin analysis across 12 CWF skills with single-mode routing"
   - "15 hook scripts in 7 functional groups"
