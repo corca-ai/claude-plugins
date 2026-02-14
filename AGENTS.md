@@ -10,6 +10,7 @@ Compressed cross-runtime index for repository agents. Keep stable invariants her
 - If implementation diverges from a pre-designed plan, record the discrepancy in session lessons, report it immediately, and ask for a user decision before proceeding.
 - Never delete user-created files without explicit confirmation. Prefer `mv` over `rm`.
 - For design decisions, surface meaningful alternatives with trade-offs and incorporate user-provided external references before concluding.
+- Deterministic checks are authoritative; behavioral reminders are secondary. Operational details live in [plugins/cwf/hooks/hooks.json](plugins/cwf/hooks/hooks.json), [docs/plugin-dev-cheatsheet.md](docs/plugin-dev-cheatsheet.md), and [scripts/check-session.sh](scripts/check-session.sh).
 
 ## Document Roles
 
@@ -20,10 +21,6 @@ Compressed cross-runtime index for repository agents. Keep stable invariants her
 - [cwf-index.md](cwf-index.md): Project map of where information lives.
 - [CLAUDE.md](CLAUDE.md): Claude runtime adapter only.
 - [README.md](README.md), [README.ko.md](README.ko.md), [AI_NATIVE_PRODUCT_TEAM.md](AI_NATIVE_PRODUCT_TEAM.md), [AI_NATIVE_PRODUCT_TEAM.ko.md](AI_NATIVE_PRODUCT_TEAM.ko.md): User-facing product and usage documentation.
-
-## Deterministic Gates
-
-- Deterministic checks are authoritative; behavioral reminders are secondary. Operational details live in [plugins/cwf/hooks/hooks.json](plugins/cwf/hooks/hooks.json), [docs/plugin-dev-cheatsheet.md](docs/plugin-dev-cheatsheet.md), and [scripts/check-session.sh](scripts/check-session.sh).
 
 ## Managed CWF Index
 
