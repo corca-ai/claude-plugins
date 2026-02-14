@@ -5,5 +5,8 @@
     "**/node_modules/",
     "references/anthropic-skills-guide/"
   ],
-  "customRules": ["./scripts/markdownlint-rules/no-inline-md-path-literals.cjs"]
+  "customRules": [
+    "./scripts/markdownlint-rules/no-inline-md-path-literals.cjs",
+    "./scripts/markdownlint-rules/no-hard-wrapped-prose.cjs"
+  ]
 }

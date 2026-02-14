@@ -1,12 +1,12 @@
 # Agent Operating Guide
 
-Shared cross-runtime entry point for coding agents in this repository (Codex, Claude Code, and compatible runtimes).
+Compressed cross-runtime index for repository agents.
 
-This file is a compressed index. Keep stable invariants here and keep implementation detail in scoped documents.
+Keep stable invariants here; keep implementation detail in scoped docs.
 
-## Read Order (Progressive Disclosure)
+## Core Routes
 
-Start from these pointers, then read only what is relevant to the current task:
+Read only what is relevant to the current task:
 
 - [cwf-index.md](cwf-index.md) — project map ("when to read what")
 - [docs/project-context.md](docs/project-context.md) — project/org facts and long-lived heuristics

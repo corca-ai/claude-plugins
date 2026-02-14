@@ -61,8 +61,8 @@ Parse the JSON output and present a summary table:
 | Plugin | Skill | Words | Lines | Flags |
 |--------|-------|-------|-------|-------|
 
-For each flagged skill (flag_count > 0), list the specific flags.
-Suggest: "Run `cwf:refactor --skill <name>` for a deep review."
+- For each flagged skill (flag_count > 0), list the specific flags.
+- Suggest: "Run `cwf:refactor --skill <name>` for a deep review."
 
 ---
 
@@ -330,9 +330,10 @@ Use tool output as the source of truth for lint-level issues.
 
 ### 2. Agent Entry Docs Review
 
-Read the project's [AGENTS.md](../../../../AGENTS.md) (and runtime adapter docs like [CLAUDE.md](../../../../CLAUDE.md)) and evaluate with `{SKILL_DIR}/references/docs-criteria.md` Section 1:
+Read the project's [AGENTS.md][repo-agents] (and runtime adapter docs like [CLAUDE.md][repo-claude]) and evaluate with `{SKILL_DIR}/references/docs-criteria.md` Section 1:
 
 - Compressed-index shape
+- Less-is-more signal quality (line-level high/medium/low utility scoring)
 - What/why versus how boundary
 - Automation-redundant instructions
 - Routing completeness
@@ -340,7 +341,7 @@ Read the project's [AGENTS.md](../../../../AGENTS.md) (and runtime adapter docs 
 
 ### 3. Project Context Review
 
-Read [docs/project-context.md](../../../../docs/project-context.md) and check:
+Read [docs/project-context.md][repo-project-context] and check:
 
 - Plugin listing matches actual `plugins/` directory contents
 - Architecture patterns are current (no references to removed/renamed plugins)
@@ -348,7 +349,7 @@ Read [docs/project-context.md](../../../../docs/project-context.md) and check:
 
 ### 4. README Review
 
-Read [README.md](../../../../README.md) and [README.ko.md](../../../../README.ko.md):
+Read [README.md][repo-readme] and [README.ko.md][repo-readme-ko]:
 
 - Plugin overview table matches `marketplace.json` entries
 - Each active plugin has install/update commands
@@ -361,8 +362,9 @@ Check alignment between:
 
 - `marketplace.json` plugin list ↔ README overview table
 - `marketplace.json` descriptions ↔ `plugin.json` descriptions
-- [docs/project-context.md](../../../../docs/project-context.md) plugin listing ↔ actual `plugins/` contents
+- [docs/project-context.md][repo-project-context] plugin listing ↔ actual `plugins/` contents
 - Entry-doc references ↔ actual filesystem paths
+- Root-relative internal links (leading-slash paths like /path/to/doc.md) ↔ portability check (prefer file-relative links)
 
 Present findings as a prioritized list of inconsistencies with suggested fixes.
 
@@ -416,3 +418,9 @@ Present as a concrete restructuring proposal with rationale.
 - Docs review criteria: [references/docs-criteria.md](references/docs-criteria.md)
 - Shared agent patterns: [agent-patterns.md](../../references/agent-patterns.md)
 - Skill conventions checklist: [skill-conventions.md](../../references/skill-conventions.md)
+
+[repo-agents]: ../../../../AGENTS.md
+[repo-claude]: ../../../../CLAUDE.md
+[repo-project-context]: ../../../../docs/project-context.md
+[repo-readme]: ../../../../README.md
+[repo-readme-ko]: ../../../../README.ko.md
