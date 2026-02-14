@@ -24,8 +24,11 @@ Check the project's root [AGENTS.md][repo-agents] and runtime adapter docs (for 
 |-------|---------------|
 | AGENTS line count > 200 | Progressive disclosure violation — details should live in docs/ |
 | Low-signal boilerplate | Intro/meta lines do not change routing, invariants, or safety outcomes |
+| Partial-only SNR trimming | Review trims only opening lines; no full-file line/bullet utility pass was performed |
 | AGENTS/adapters are not index-shaped | Entry docs include long phase-by-phase procedures instead of routing + invariants |
 | What/why vs how boundary violation | Entry docs prescribe low-level execution sequences that belong in specialized docs, scripts, or hooks |
+| Route trigger ambiguity | Read routes lack explicit "read when" conditions, causing broad over-reading |
+| Read/write route ambiguity | Read routes and persist routes overlap without explicit purpose split |
 | Behavioral rules duplicated by deterministic checks | Entry docs say "always do X" for behavior already enforced by hooks/scripts |
 | Missing core routing links | Entry docs omit links to the core docs needed for progressive disclosure |
 | References non-existent files | Dead path reference |
@@ -39,7 +42,7 @@ Check [docs/project-context.md][repo-project-context]:
 
 | Check | Flag condition |
 |-------|---------------|
-| Plugin listing doesn't match `plugins/` directory | Missing or extra entries |
+| Plugin listing doesn't match [plugins/][repo-plugins-dir] directory | Missing or extra entries |
 | Lists deprecated plugin as active | Status not updated |
 | Architecture patterns reference removed plugins | Stale reference |
 | Convention entries contradict actual practice | Inconsistency |
@@ -51,7 +54,7 @@ Check [README.md][repo-readme] and [README.ko.md][repo-readme-ko]:
 
 | Check | Flag condition |
 |-------|---------------|
-| Overview table doesn't match `marketplace.json` | Missing, extra, or mismatched entries |
+| Overview table doesn't match [.claude-plugin/marketplace.json][repo-marketplace] | Missing, extra, or mismatched entries |
 | Active plugin missing install/update commands | Incomplete section |
 | Deprecated plugin not clearly marked | Missing deprecation notice |
 | Korean version structure differs from English | Structural mismatch |
@@ -64,11 +67,11 @@ Check alignment between documents:
 
 | Source A | Source B | Check |
 |----------|----------|-------|
-| `marketplace.json` plugins | README overview table | Same set of plugins, same descriptions |
-| `marketplace.json` descriptions | `plugin.json` descriptions | Consistent messaging |
-| [docs/project-context.md][repo-project-context] plugins | `plugins/` directory | Matches actual contents |
+| [.claude-plugin/marketplace.json][repo-marketplace] plugins | README overview table | Same set of plugins, same descriptions |
+| [.claude-plugin/marketplace.json][repo-marketplace] descriptions | Plugin manifest descriptions under [plugins/][repo-plugins-dir] | Consistent messaging |
+| [docs/project-context.md][repo-project-context] plugins | [plugins/][repo-plugins-dir] directory | Matches actual contents |
 | [AGENTS.md][repo-agents] and adapter file references | Filesystem | All referenced paths exist |
-| README deprecated section | `marketplace.json` deprecated flags | Consistent deprecation status |
+| README deprecated section | [.claude-plugin/marketplace.json][repo-marketplace] deprecated flags | Consistent deprecation status |
 
 For each inconsistency found, report:
 - **What**: The specific mismatch
@@ -88,7 +91,7 @@ Structural health of the documentation graph. Reference: [Software project docum
 | Auto-generated files in git | Files that can be regenerated (build output, compiled docs) are version-controlled |
 | Undocumented non-obvious decisions | Non-obvious technical choices (e.g., "no Tailwind", "no mock objects") lack explicit rationale anywhere in docs |
 | Obvious instructions | Docs include self-evident guidance (e.g., "write clean code", "follow best practices") that wastes reader attention |
-| Automation-redundant instructions | Docs include behavioral instructions already enforced by deterministic hooks or skill triggers (e.g., AGENTS/adapters say "always do X" when a PostToolUse hook already validates X). Cross-check against installed `hooks.json` entries and skill trigger conditions |
+| Automation-redundant instructions | Docs include behavioral instructions already enforced by deterministic hooks or skill triggers (e.g., AGENTS/adapters say "always do X" when a PostToolUse hook already validates X). Cross-check against [plugins/cwf/hooks/hooks.json][repo-hooks-json] entries and skill trigger conditions |
 | Root-relative internal links | Links with leading-slash targets (for example, /docs/x.md) are renderer/tooling dependent; prefer file-relative links |
 | Scope-overlapping documents | Multiple docs cover the same scope with no clear ownership boundary. Candidate for merge or deletion — one scope, one file |
 | Manual-review/linter overlap | Review narrative repeats deterministic tool findings without adding semantic interpretation or structural action |
@@ -126,3 +129,6 @@ Apply these principles when evaluating structure:
 [repo-project-context]: ../../../../../docs/project-context.md
 [repo-readme]: ../../../../../README.md
 [repo-readme-ko]: ../../../../../README.ko.md
+[repo-marketplace]: ../../../../../.claude-plugin/marketplace.json
+[repo-plugins-dir]: ../../../../../plugins/
+[repo-hooks-json]: ../../../../../plugins/cwf/hooks/hooks.json

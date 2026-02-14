@@ -4,15 +4,20 @@ Compressed cross-runtime index for repository agents.
 
 Keep stable invariants here; keep implementation detail in scoped docs.
 
-## Core Routes
+## Read Routes
 
-Read only what is relevant to the current task:
+Minimum baseline before implementation work:
 
-- [cwf-index.md](cwf-index.md) — project map ("when to read what")
-- [docs/project-context.md](docs/project-context.md) — project/org facts and long-lived heuristics
+- [docs/project-context.md](docs/project-context.md) — project facts, long-lived heuristics, and process conventions
 - [docs/architecture-patterns.md](docs/architecture-patterns.md) — implementation and integration patterns
-- [docs/plugin-dev-cheatsheet.md](docs/plugin-dev-cheatsheet.md) — practical plugin development/testing/deploy workflows
-- [docs/documentation-guide.md](docs/documentation-guide.md) — documentation quality and scope rules
+
+Task-driven routes:
+
+| File | Read when |
+|---|---|
+| [cwf-index.md](cwf-index.md) | You need a fast project map ("when to read what") |
+| [docs/plugin-dev-cheatsheet.md](docs/plugin-dev-cheatsheet.md) | You are changing plugin, hook, script, test, or deploy workflows |
+| [docs/documentation-guide.md](docs/documentation-guide.md) | You are writing/reviewing docs, [AGENTS.md](AGENTS.md), or runtime adapters |
 
 ## Operating Invariants
 
@@ -23,19 +28,10 @@ Read only what is relevant to the current task:
 - When the user proposes one option and meaningful alternatives exist, provide counterarguments and trade-offs explicitly.
 - When the user provides external references/research, read them before forming design opinions.
 - After modifying code, check whether [README.md](README.md) or [README.ko.md](README.ko.md) must be updated.
-- Implementation completion is defined by passing `scripts/check-session.sh --impl`.
+- Implementation completion is defined by passing [scripts/check-session.sh](scripts/check-session.sh) `--impl`.
+- Prefer deterministic checks over behavioral reminders. Primary enforcement points: [plugins/cwf/hooks/hooks.json](plugins/cwf/hooks/hooks.json), [scripts/check-session.sh](scripts/check-session.sh), [plugins/cwf/hooks/scripts/check-markdown.sh](plugins/cwf/hooks/scripts/check-markdown.sh), [plugins/cwf/hooks/scripts/check-links-local.sh](plugins/cwf/hooks/scripts/check-links-local.sh), [scripts/check-links.sh](scripts/check-links.sh).
 
-## Deterministic-First Quality Control
-
-When a rule can be validated by tooling, enforce it in hooks/scripts rather than repeating behavioral instructions in [AGENTS.md](AGENTS.md).
-
-Primary enforcement points:
-
-- Hook config: `plugins/cwf/hooks/hooks.json`
-- Session validation: `scripts/check-session.sh`
-- Markdown and link checks: `plugins/cwf/hooks/scripts/check-markdown.sh`, `plugins/cwf/hooks/scripts/check-links-local.sh`, `scripts/check-links.sh`
-
-## Persist Routing
+## Write Routes (Persist)
 
 When graduating findings from lessons/retro into permanent docs:
 

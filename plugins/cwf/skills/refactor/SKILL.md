@@ -333,8 +333,10 @@ Use tool output as the source of truth for lint-level issues.
 Read the project's [AGENTS.md][repo-agents] (and runtime adapter docs like [CLAUDE.md][repo-claude]) and evaluate with `{SKILL_DIR}/references/docs-criteria.md` Section 1:
 
 - Compressed-index shape
-- Less-is-more signal quality (line-level high/medium/low utility scoring)
+- Less-is-more signal quality (line-level high/medium/low utility scoring across the full file, not intro-only)
 - What/why versus how boundary
+- Read-route clarity ("read when" is explicit per route)
+- Read/write route separation (overlapping targets have distinct read vs write purpose)
 - Automation-redundant instructions
 - Routing completeness
 - Accuracy and staleness
@@ -343,7 +345,7 @@ Read the project's [AGENTS.md][repo-agents] (and runtime adapter docs like [CLAU
 
 Read [docs/project-context.md][repo-project-context] and check:
 
-- Plugin listing matches actual `plugins/` directory contents
+- Plugin listing matches actual [plugins/][repo-plugins-dir] directory contents
 - Architecture patterns are current (no references to removed/renamed plugins)
 - Convention entries match actual practice
 
@@ -360,9 +362,9 @@ Read [README.md][repo-readme] and [README.ko.md][repo-readme-ko]:
 
 Check alignment between:
 
-- `marketplace.json` plugin list ↔ README overview table
-- `marketplace.json` descriptions ↔ `plugin.json` descriptions
-- [docs/project-context.md][repo-project-context] plugin listing ↔ actual `plugins/` contents
+- [.claude-plugin/marketplace.json][repo-marketplace] plugin list ↔ README overview table
+- [.claude-plugin/marketplace.json][repo-marketplace] descriptions ↔ plugin manifest descriptions under [plugins/][repo-plugins-dir]
+- [docs/project-context.md][repo-project-context] plugin listing ↔ actual [plugins/][repo-plugins-dir] contents
 - Entry-doc references ↔ actual filesystem paths
 - Root-relative internal links (leading-slash paths like /path/to/doc.md) ↔ portability check (prefer file-relative links)
 
@@ -424,3 +426,5 @@ Present as a concrete restructuring proposal with rationale.
 [repo-project-context]: ../../../../docs/project-context.md
 [repo-readme]: ../../../../README.md
 [repo-readme-ko]: ../../../../README.ko.md
+[repo-marketplace]: ../../../../.claude-plugin/marketplace.json
+[repo-plugins-dir]: ../../../../plugins/

@@ -1,21 +1,24 @@
 "use strict";
 
 // Custom markdownlint rule:
-// Disallow inline-code document path literals like `docs/x.md`.
-// Prefer clickable markdown links like [docs/x.md](docs/x.md).
+// Disallow inline-code repository path literals like `docs/x.md` or
+// `plugins/cwf/hooks/hooks.json`. Prefer clickable markdown links.
 //
 // Scope:
 // - prose lines only (fenced code blocks ignored)
 // - inline code spans only
-// - skips already-linked labels: [`docs/x.md`](docs/x.md)
+// - skips already-linked labels: [`path`](path)
 
 const RULE_NAME = "CORCA001";
-const RULE_ALIAS = "no-inline-md-path-literals";
+const RULE_ALIASES = [
+  "no-inline-file-path-literals",
+  "no-inline-md-path-literals"
+];
 
 const FENCE_RE = /^\s{0,3}(```+|~~~+)/;
 const INLINE_CODE_RE = /`([^`]+)`/g;
-const MD_PATH_RE =
-  /^(?:\.{1,2}\/|\/)?[A-Za-z0-9_.-]+(?:\/[A-Za-z0-9_.-]+)*\.md(?:#[A-Za-z0-9._-]+)?$/;
+const REPO_PATH_RE =
+  /^(?:\.{1,2}\/|\/)?[A-Za-z0-9_.-]+(?:\/[A-Za-z0-9_.-]+)+(?:#[A-Za-z0-9._-]+)?$/;
 
 const ROOT_DOCS = new Set([
   "AGENTS.md",
@@ -28,27 +31,37 @@ const ROOT_DOCS = new Set([
   "AI_NATIVE_PRODUCT_TEAM.ko.md"
 ]);
 
-function isLinkableDocPath(content) {
-  if (content.includes("*")) {
+function isLinkableRepoPath(content) {
+  if (
+    content.includes("*") ||
+    content.includes("{") ||
+    content.includes("}") ||
+    content.includes("$") ||
+    content.includes(" ") ||
+    content.startsWith("~/")
+  ) {
     return false;
   }
-  if (!MD_PATH_RE.test(content)) {
+
+  if (/^(?:https?|file):\/\//i.test(content)) {
     return false;
   }
-  if (content.includes("/")) {
+
+  const base = content.split("#")[0];
+  if (REPO_PATH_RE.test(base) && /[A-Za-z]/.test(base)) {
     return true;
   }
-  const base = content.split("#")[0];
+
   return ROOT_DOCS.has(base);
 }
 
 module.exports = [
   {
-    names: [RULE_NAME, RULE_ALIAS],
+    names: [RULE_NAME, ...RULE_ALIASES],
     description:
-      "Inline-code markdown document paths must be markdown links, not code literals",
+      "Inline-code repository paths must be markdown links, not code literals",
     tags: ["links", "accessibility", "style"],
-    function: function noInlineMdPathLiterals(params, onError) {
+    function: function noInlineFilePathLiterals(params, onError) {
       let inFence = false;
 
       params.lines.forEach((line, index) => {
@@ -65,7 +78,7 @@ module.exports = [
         while ((match = INLINE_CODE_RE.exec(line)) !== null) {
           const full = match[0];
           const content = match[1].trim();
-          if (!isLinkableDocPath(content)) {
+          if (!isLinkableRepoPath(content)) {
             continue;
           }
 
@@ -81,7 +94,7 @@ module.exports = [
 
           onError({
             lineNumber: index + 1,
-            detail: `Inline doc path literal \`${content}\` should be a markdown link: [${content}](${content})`,
+            detail: `Inline file path literal \`${content}\` should be a markdown link: [${content}](${content})`,
             context: line,
             range: [start + 1, full.length]
           });
