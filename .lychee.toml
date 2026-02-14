@@ -11,6 +11,8 @@ extensions = ["md"]
 exclude_path = [
   "^prompt-logs/",
   "^node_modules/",
+  "(^|/)node_modules/",
+  "^scripts/node_modules/",
   "^\\.git/",
   "^CHANGELOG\\.md$",
   "^references/",
