@@ -84,8 +84,8 @@ Reference command:
 Before the first chunk in each session, run:
 
 ```bash
-node scripts/doc-graph.mjs --json >/tmp/doc-graph-review.json || true
-jq '.stats' /tmp/doc-graph-review.json
+node scripts/doc-graph.mjs --json > docs/doc-graph.snapshot.json || true
+jq '.stats' docs/doc-graph.snapshot.json
 ```
 
 Then present:
@@ -94,13 +94,13 @@ Then present:
 - Baseline metrics: `total_docs`, `total_links`, `orphan_count`, `broken_ref_count`.
 - One-line interpretation of current graph density and orphan risk.
 
-If structure or links were edited during the session, regenerate the graph snapshot before the next file group.
+If structure or links were edited during the session, regenerate [docs/doc-graph.snapshot.json](doc-graph.snapshot.json) before the next file group.
 
 ## Orphan Gates (Mandatory)
 
 ### Gate A: Session Baseline
 
-Record baseline stats from the generated graph snapshot file.
+Record baseline stats from [docs/doc-graph.snapshot.json](doc-graph.snapshot.json).
 
 ### Gate B: Group Boundary Recheck
 
