@@ -158,28 +158,21 @@ When `--mode plan` or `--mode code` is used, `cwf:review` receives the plan's su
 
 ## Web Research Protocol
 
-All sub-agents that use WebSearch/WebFetch must follow these rules.
-Include this protocol (or reference this section) in every sub-agent
-prompt that involves web research.
+All sub-agents that use WebSearch/WebFetch must follow these rules. Include this protocol (or reference this section) in every sub-agent prompt that involves web research.
 
 ### Phase 1: Discover URLs
 
-Use WebSearch to find valid URLs first. NEVER construct URLs from memory
-or training data — they may be outdated or nonexistent. Find 3-5
-authoritative sources. Stop when sufficient evidence is collected.
-Prefer official documentation over blog posts.
+Use WebSearch to find valid URLs first. NEVER construct URLs from memory or training data — they may be outdated or nonexistent. Find 3-5 authoritative sources. Stop when sufficient evidence is collected. Prefer official documentation over blog posts.
 
 ### Phase 2: Fetch Content (two-tier)
 
 **Tier A — WebFetch** (try first, fast and lightweight):
 
-Use WebFetch for the discovered URL. If it returns substantive content
-(>50 chars of body text), use it and move on.
+Use WebFetch for the discovered URL. If it returns substantive content (>50 chars of body text), use it and move on.
 
 **Tier B — agent-browser** (fallback for JS-rendered sites):
 
-If WebFetch returns empty or minimal content, the page likely requires
-JavaScript rendering. Check availability and use agent-browser:
+If WebFetch returns empty or minimal content, the page likely requires JavaScript rendering. Check availability and use agent-browser:
 
 ```bash
 command -v agent-browser  # check if installed
@@ -188,11 +181,9 @@ agent-browser snapshot -c  # compact accessibility tree
 agent-browser close
 ```
 
-agent-browser renders JavaScript via headless Chromium. It handles SPAs,
-client-side rendering, and redirect chains that WebFetch cannot.
+agent-browser renders JavaScript via headless Chromium. It handles SPAs, client-side rendering, and redirect chains that WebFetch cannot.
 
-If agent-browser is not installed, skip the URL and move to the next
-source. Do not retry the same URL with WebFetch.
+If agent-browser is not installed, skip the URL and move to the next source. Do not retry the same URL with WebFetch.
 
 **Fetch decision flow**:
 

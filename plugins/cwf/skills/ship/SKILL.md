@@ -193,8 +193,7 @@ Check PR status and merge if ready.
    | `없음` or empty | Yes | `reviewDecision` = `APPROVED` required |
    | Items listed | Any | Report items, **stop** — do not merge |
 
-   If not ready, report which conditions are blocking and stop.
-   Do not attempt to merge.
+   If not ready, report which conditions are blocking and stop. Do not attempt to merge.
 
 3. **Merge**:
 

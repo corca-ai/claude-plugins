@@ -5,8 +5,7 @@
 1. **Node.js 18+**
 2. **Slack Bot** (https://api.slack.com/apps) with scopes: `channels:history`, `channels:join`, `users:read`, `files:read`
 3. **Token** in shell profile (`~/.zshrc` or `~/.bashrc`):
-   `export SLACK_BOT_TOKEN=xoxb-your-token-here`
-   (legacy fallback: `~/.claude/.env`)
+   `export SLACK_BOT_TOKEN=xoxb-your-token-here` (legacy fallback: `~/.claude/.env`)
 
 ## Script Details
 

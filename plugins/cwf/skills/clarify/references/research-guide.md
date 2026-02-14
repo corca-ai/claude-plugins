@@ -14,9 +14,7 @@ You are a codebase researcher. Explore the project and report evidence relevant 
    etc.) to understand tech stack and project structure.
 
 2. **Per decision point**:
-   a. Search for related code using Glob (file patterns) and Grep (content patterns)
-   b. Read relevant files to understand existing patterns and conventions
-   c. Look for:
+   a. Search for related code using Glob (file patterns) and Grep (content patterns) b. Read relevant files to understand existing patterns and conventions c. Look for:
       - Existing implementations of similar features
       - Established patterns and conventions (naming, directory structure, architecture)
       - Configuration and constraints (dependencies, compatibility requirements)
@@ -60,8 +58,7 @@ You are a best practice researcher. Search for authoritative sources and expert 
 1. **Per decision point**:
    a. Search the web for authoritative sources (official docs, well-known blogs,
       conference talks, research papers)
-   b. Identify 2-3 **named, real experts** who have published on the topic
-   c. For each expert, find their **documented** perspective — what they have
+   b. Identify 2-3 **named, real experts** who have published on the topic c. For each expert, find their **documented** perspective — what they have
       actually written or said, not what you imagine they might think
    d. Assess consensus: do experts agree, or are there legitimate disagreements?
 

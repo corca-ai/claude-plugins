@@ -153,9 +153,7 @@ Aggregate selectively from:
 ## Success Criteria
 
 ```gherkin
-Given {context}
-When {action}
-Then {expected outcome}
+Given {context} When {action} Then {expected outcome}
 ```
 ````
 

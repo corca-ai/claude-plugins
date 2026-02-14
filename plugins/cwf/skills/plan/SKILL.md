@@ -59,8 +59,7 @@ Apply the [context recovery protocol](../../references/context-recovery-protocol
 | Prior Art Researcher | `{session_dir}/plan-prior-art-research.md` |
 | Codebase Analyst | `{session_dir}/plan-codebase-analysis.md` |
 
-Skip to Phase 3 if both files are valid.
-These two files are **critical outputs** for plan synthesis.
+Skip to Phase 3 if both files are valid. These two files are **critical outputs** for plan synthesis.
 
 ### 2.2 Launch sub-agents
 
@@ -127,8 +126,7 @@ Task tool:
     <!-- AGENT_COMPLETE -->
 ```
 
-Wait for all launched sub-agents to complete.
-Re-validate each launched file using the context recovery protocol.
+Wait for all launched sub-agents to complete. Re-validate each launched file using the context recovery protocol.
 
 ### 2.3 Read output files
 
@@ -210,9 +208,7 @@ Two-layer format:
 ### Behavioral (BDD)
 
 ```gherkin
-Given [context]
-When [action]
-Then [expected outcome]
+Given [context] When [action] Then [expected outcome]
 ```
 
 ### Qualitative

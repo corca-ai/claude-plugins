@@ -2,13 +2,11 @@
 
 <!-- Provenance: reviewed at 12 skills, 15 hooks (S24). Source: concept-distillation.md -->
 
-Reference for refactor agents: 6 generic concepts with verification criteria, and a 12×6
-synchronization map showing which concepts each skill composes.
+Reference for refactor agents: 6 generic concepts with verification criteria, and a 12×6 synchronization map showing which concepts each skill composes.
 
 ## 1. Generic Concepts
 
-Six reusable behavioral abstractions. Each is independently definable — understanding
-one requires no knowledge of the others.
+Six reusable behavioral abstractions. Each is independently definable — understanding one requires no knowledge of the others.
 
 ### 1.1 Expert Advisor
 
@@ -194,8 +192,7 @@ Per-skill verification. Given a target skill:
    - Does the skill perform the concept's **required actions**?
 4. Flag gaps: concept claimed in map but not implemented, or implemented incorrectly
 
-**Example**: Deep reviewing `gather` → row shows Agent Orchestration only → verify
-adaptive sizing, parallel batch, output synthesis in gather's SKILL.md.
+**Example**: Deep reviewing `gather` → row shows Agent Orchestration only → verify adaptive sizing, parallel batch, output synthesis in gather's SKILL.md.
 
 ### For Holistic Analysis (Axis 2: Concept Integrity)
 
@@ -209,6 +206,4 @@ Cross-skill verification. Given the full inventory:
 3. Check for concept overloading: a skill using one concept for two distinct purposes
 4. Check for missing synchronization: a skill that should compose a concept but doesn't
 
-**Example**: Column "Expert Advisor" → clarify, retro, review all compose it →
-verify they all select from `expert_roster`, use contrasting frameworks, and synthesize
-tension. If one uses experts without contrast, flag as under-synchronized.
+**Example**: Column "Expert Advisor" → clarify, retro, review all compose it → verify they all select from `expert_roster`, use contrasting frameworks, and synthesize tension. If one uses experts without contrast, flag as under-synchronized.

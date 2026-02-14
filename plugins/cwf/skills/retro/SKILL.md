@@ -5,8 +5,7 @@ description: "Comprehensive session retrospective with adaptive depth. Light by 
 
 # Session Retrospective
 
-Adaptive end-of-session review. Light by default, deep on request.
-Produces `retro.md` alongside `plan.md` and `lessons.md` in the session's prompt-logs directory.
+Adaptive end-of-session review. Light by default, deep on request. Produces `retro.md` alongside `plan.md` and `lessons.md` in the session's prompt-logs directory.
 
 **Language**: Write retro.md in the user's language. Communicate with the user in their prompt language.
 
@@ -250,9 +249,7 @@ For each finding, evaluate enforcement mechanisms strongest-first:
 6. Report changes to the user in the retro output (Section 5 or post-section note)
    for visibility, but do not gate on approval
 
-This is fully automatic: both usage tracking and roster expansion are applied
-without requiring user confirmation. The retro output provides visibility
-into all changes made.
+This is fully automatic: both usage tracking and roster expansion are applied without requiring user confirmation. The retro output provides visibility into all changes made.
 
 ### 8. Post-Retro Discussion
 

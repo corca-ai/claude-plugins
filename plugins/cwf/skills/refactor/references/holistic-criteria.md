@@ -2,8 +2,7 @@
 
 <!-- Provenance: written at 5 skills, 7 hooks (S11a). Restructured at 9 skills, 14 hooks (S13.5-B3): PP/BI/MC → Form/Meaning/Function. -->
 
-Three axes for cross-plugin analysis, based on semiotic decomposition (Form / Meaning / Function).
-Apply each to the full plugin inventory.
+Three axes for cross-plugin analysis, based on semiotic decomposition (Form / Meaning / Function). Apply each to the full plugin inventory.
 
 ## 1. Convention Compliance (Form)
 

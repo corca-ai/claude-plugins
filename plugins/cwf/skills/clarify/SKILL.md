@@ -69,8 +69,7 @@ Apply the [context recovery protocol](../../references/context-recovery-protocol
 - `{session_dir}/clarify-codebase-research.md`
 - `{session_dir}/clarify-web-research.md`
 
-Launch sub-agents **simultaneously** using the Task tool (only for missing
-or invalid results).
+Launch sub-agents **simultaneously** using the Task tool (only for missing or invalid results).
 
 #### Sub-agent A: Codebase Researcher
 
@@ -120,8 +119,7 @@ Task tool:
     line `<!-- AGENT_COMPLETE -->` as the last line.
 ```
 
-Both sub-agents run in parallel. Wait for both to complete.
-Read the output files from session dir (not the in-memory Task return values).
+Both sub-agents run in parallel. Wait for both to complete. Read the output files from session dir (not the in-memory Task return values).
 
 ### Phase 2.5: Expert Analysis
 
@@ -132,8 +130,7 @@ Apply the [context recovery protocol](../../references/context-recovery-protocol
 - `{session_dir}/clarify-expert-alpha.md`
 - `{session_dir}/clarify-expert-beta.md`
 
-Launch two domain expert sub-agents **simultaneously** using the Task tool
-(only for missing or invalid results).
+Launch two domain expert sub-agents **simultaneously** using the Task tool (only for missing or invalid results).
 
 **Expert selection**:
 
@@ -198,8 +195,7 @@ Task tool:
     line `<!-- AGENT_COMPLETE -->` as the last line.
 ```
 
-Both expert sub-agents run in parallel. Wait for both to complete.
-Read the output files from session dir (not the in-memory Task return values).
+Both expert sub-agents run in parallel. Wait for both to complete. Read the output files from session dir (not the in-memory Task return values).
 
 **--light mode**: Phase 2.5 is skipped (consistent with --light skipping all sub-agents).
 
@@ -207,15 +203,13 @@ Read the output files from session dir (not the in-memory Task return values).
 
 Read `{SKILL_DIR}/references/aggregation-guide.md` for full classification rules.
 
-For each decision point, classify using **three evidence sources**:
-codebase research (Phase 2), web research (Phase 2), and expert analysis (Phase 2.5).
+For each decision point, classify using **three evidence sources**: codebase research (Phase 2), web research (Phase 2), and expert analysis (Phase 2.5).
 
 - **T1 (Codebase-resolved)** — codebase has clear evidence → decide autonomously, cite files
 - **T2 (Best-practice-resolved)** — best practice consensus → decide autonomously, cite sources
 - **T3 (Requires human)** — evidence conflicts, all silent, or subjective → queue
 
-**Constructive tension**: When sources conflict, classify as T3. Expert analysis provides additional
-signal but does not override direct codebase or best-practice evidence.
+**Constructive tension**: When sources conflict, classify as T3. Expert analysis provides additional signal but does not override direct codebase or best-practice evidence.
 
 Present the classification:
 
@@ -245,8 +239,7 @@ Apply the [context recovery protocol](../../references/context-recovery-protocol
 - `{session_dir}/clarify-advisor-alpha.md`
 - `{session_dir}/clarify-advisor-beta.md`
 
-Launch two advisory sub-agents **simultaneously** (only for missing or
-invalid results):
+Launch two advisory sub-agents **simultaneously** (only for missing or invalid results):
 
 #### Advisor α
 
@@ -296,8 +289,7 @@ Task tool:
     line `<!-- AGENT_COMPLETE -->` as the last line.
 ```
 
-Both advisors run in parallel. Wait for both to complete.
-Read the output files from session dir (not the in-memory Task return values).
+Both advisors run in parallel. Wait for both to complete. Read the output files from session dir (not the in-memory Task return values).
 
 ### Phase 4: Persistent Questioning (T3 only)
 
@@ -345,8 +337,7 @@ After each answer:
 | 3 | ... | ... | Human | advisory context |
 ```
 
-Then ask: "Save this clarified requirement to a file?"
-If yes: save to a project-appropriate location with a descriptive filename.
+Then ask: "Save this clarified requirement to a file?" If yes: save to a project-appropriate location with a descriptive filename.
 
 **Completion tracking** (after saving the summary file):
 

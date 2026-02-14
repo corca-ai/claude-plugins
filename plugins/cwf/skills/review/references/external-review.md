@@ -1,8 +1,6 @@
 # External Reviewer Perspectives & CLI Templates
 
-Reference for `/review` skill — provider-routed external CLI slots
-(Codex/Gemini, with Claude Task fallback handled in SKILL.md).
-These complement the internal reviewers in `prompts.md`.
+Reference for `/review` skill — provider-routed external CLI slots (Codex/Gemini, with Claude Task fallback handled in SKILL.md). These complement the internal reviewers in `prompts.md`.
 
 ---
 
@@ -10,10 +8,7 @@ These complement the internal reviewers in `prompts.md`.
 
 ### Role
 
-You are a correctness and performance reviewer. Your goal is to identify
-logic errors, edge cases, off-by-one bugs, race conditions, and performance
-issues. You complement the Security reviewer by focusing on functional
-correctness rather than exploitability.
+You are a correctness and performance reviewer. Your goal is to identify logic errors, edge cases, off-by-one bugs, race conditions, and performance issues. You complement the Security reviewer by focusing on functional correctness rather than exploitability.
 
 ### --mode clarify
 
@@ -56,8 +51,7 @@ Review the implementation for correctness and performance issues:
 - **Resource management**: Unclosed file handles, leaked connections,
   unbounded memory growth, missing cleanup in error paths
 - **Performance issues**: N+1 queries, unnecessary re-renders, missing
-  memoization, synchronous operations that should be async, O(n²)
-  algorithms on potentially large datasets
+  memoization, synchronous operations that should be async, O(n²) algorithms on potentially large datasets
 - **Race conditions**: Shared mutable state, TOCTOU in file operations,
   non-atomic read-modify-write sequences
 
@@ -67,10 +61,7 @@ Review the implementation for correctness and performance issues:
 
 ### Role
 
-You are an architecture and patterns reviewer. Your goal is to assess
-structural quality, design patterns, consistency with project conventions,
-and long-term maintainability. You complement the UX/DX reviewer by
-focusing on internal code structure rather than external-facing usability.
+You are an architecture and patterns reviewer. Your goal is to assess structural quality, design patterns, consistency with project conventions, and long-term maintainability. You complement the UX/DX reviewer by focusing on internal code structure rather than external-facing usability.
 
 ### --mode clarify
 
@@ -113,8 +104,7 @@ Review the implementation for architectural and pattern quality:
 - **Abstraction quality**: Are abstractions at the right level? Too
   abstract (unnecessary indirection) or too concrete (duplicated logic)?
 - **Consistency**: Are similar problems solved similarly throughout the
-  codebase? Are naming conventions, file organization, and error
-  handling patterns consistent?
+  codebase? Are naming conventions, file organization, and error handling patterns consistent?
 - **Dead code / unnecessary complexity**: Is there code that serves no
   current purpose? Over-engineered solutions for simple problems?
 
@@ -122,12 +112,9 @@ Review the implementation for architectural and pattern quality:
 
 ## CLI Invocation Templates
 
-All external CLIs use `exec` / prompt-based mode so that the role, checklist,
-and output format instructions are reliably delivered via stdin. This ensures
-structured output conforming to the reviewer output format.
+All external CLIs use `exec` / prompt-based mode so that the role, checklist, and output format instructions are reliably delivered via stdin. This ensures structured output conforming to the reviewer output format.
 
-Provider and perspective are decoupled: either CLI may run either perspective
-prompt when slot routing requires it.
+Provider and perspective are decoupled: either CLI may run either perspective prompt when slot routing requires it.
 
 ### Codex
 
@@ -137,9 +124,7 @@ prompt when slot routing requires it.
 codex exec --sandbox read-only -c model_reasoning_effort='high' - < {prompt_file}
 ```
 
-Note: Always use single quotes around config values (`'high'`) to avoid
-double-quote conflicts inside the Bash wrapper's `command="..."` string.
-For `--mode code`, set `model_reasoning_effort='xhigh'` instead.
+Note: Always use single quotes around config values (`'high'`) to avoid double-quote conflicts inside the Bash wrapper's `command="..."` string. For `--mode code`, set `model_reasoning_effort='xhigh'` instead.
 
 ### Gemini
 
@@ -149,18 +134,13 @@ For `--mode code`, set `model_reasoning_effort='xhigh'` instead.
 npx @google/gemini-cli -o text < {prompt_file}
 ```
 
-Note: Uses stdin redirection (`< {prompt_file}`) instead of `-p "$(cat ...)"` to
-avoid shell injection (review targets may contain `$()` or backticks) and
-ARG_MAX limits on large diffs. The `--approval-mode` flag is omitted as it
-requires experimental settings. As of 2025-06, Gemini CLI has no `--prompt-file`
-flag; stdin redirection is the canonical file-based input method.
+Note: Uses stdin redirection (`< {prompt_file}`) instead of `-p "$(cat ...)"` to avoid shell injection (review targets may contain `$()` or backticks) and ARG_MAX limits on large diffs. The `--approval-mode` flag is omitted as it requires experimental settings. As of 2025-06, Gemini CLI has no `--prompt-file` flag; stdin redirection is the canonical file-based input method.
 
 ---
 
 ## Fallback Prompt Template
 
-When an external CLI is unavailable, a Task sub-agent replaces it using
-the same perspective:
+When an external CLI is unavailable, a Task sub-agent replaces it using the same perspective:
 
 ```text
 You are substituting for {tool} which was unavailable.
@@ -196,10 +176,7 @@ IMPORTANT:
 
 ## External Provenance Variants
 
-External reviewers produce the **same output format** as internal reviewers
-(see `prompts.md` — Reviewer Output Format section). The only difference
-is in the Provenance block. All variants use a **unified schema** (same
-fields, `—` for inapplicable values) to simplify synthesis parsing.
+External reviewers produce the **same output format** as internal reviewers (see `prompts.md` — Reviewer Output Format section). The only difference is in the Provenance block. All variants use a **unified schema** (same fields, `—` for inapplicable values) to simplify synthesis parsing.
 
 **Real execution:**
 
@@ -225,9 +202,7 @@ command: —
 
 **Failed (intermediate — never shown in final synthesis):**
 
-This is recorded internally when a CLI fails, before the fallback replaces
-it. The final Provenance table shows the fallback's provenance, not this.
-Useful for the Confidence Note to explain why a fallback was used.
+This is recorded internally when a CLI fails, before the fallback replaces it. The final Provenance table shows the fallback's provenance, not this. Useful for the Confidence Note to explain why a fallback was used.
 
 ```text
 source: FAILED, tool: {codex / gemini}, exit_code: {code}, error: {summary}

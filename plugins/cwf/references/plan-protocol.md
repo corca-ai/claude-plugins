@@ -13,8 +13,7 @@ Protocol for persisting planning artifacts and session learnings.
 - Otherwise run `{SKILL_DIR}/../../scripts/next-prompt-dir.sh <title>` and use its output path as-is.
 - Do not hand-calculate sequence numbers.
 
-The `{title}` must reflect the current session's task, not a previous session's.
-Even if the input spec or reference document lives in an existing `prompt-logs/` directory, always create a new directory named after the current task.
+The `{title}` must reflect the current session's task, not a previous session's. Even if the input spec or reference document lives in an existing `prompt-logs/` directory, always create a new directory named after the current task.
 
 ### Required Sections
 
@@ -25,9 +24,7 @@ Even if the input spec or reference document lives in an existing `prompt-logs/`
 ## Success Criteria
 
 ```gherkin
-Given [context]
-When [action]
-Then [expected outcome]
+Given [context] When [action] Then [expected outcome]
 ```
 ````
 <!-- markdownlint-enable MD040 -->
@@ -101,15 +98,13 @@ While lessons are accumulated incrementally during a session, the retro is a com
 
 `prompt-logs/{YYMMDD}-{NN}-{title}/next-session.md` — context transfer for the next session.
 
-Create when the current session is part of a tracked sequence (e.g., sessions in `cwf-state.yaml`).
-Include: context files to read, task scope, don't-touch boundaries, lessons from prior sessions, success criteria, and a start command.
+Create when the current session is part of a tracked sequence (e.g., sessions in `cwf-state.yaml`). Include: context files to read, task scope, don't-touch boundaries, lessons from prior sessions, success criteria, and a start command.
 
 If using `cwf-state.yaml`, add `next-session.md` to the session's `artifacts` list.
 
 ### Execution Contract (Mention-Only Safe)
 
-Every generated `next-session.md` MUST include an explicit execution contract section.
-Treat this as a runtime behavior contract, not optional prose.
+Every generated `next-session.md` MUST include an explicit execution contract section. Treat this as a runtime behavior contract, not optional prose.
 
 Contract minimum:
 
@@ -130,5 +125,4 @@ Contract minimum:
    - Stage only intended files for the current unit.
    - Do not use broad staging that can capture unrelated changes.
 
-The contract must be concrete enough that an agent can follow it without extra
-user prompts.
+The contract must be concrete enough that an agent can follow it without extra user prompts.

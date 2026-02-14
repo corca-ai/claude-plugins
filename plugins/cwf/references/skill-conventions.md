@@ -1,7 +1,6 @@
 # CWF Skill Conventions
 
-Shared structural conventions for all skills in the CWF plugin.
-Use this as a template when creating new skills and as a checklist when reviewing existing ones.
+Shared structural conventions for all skills in the CWF plugin. Use this as a template when creating new skills and as a checklist when reviewing existing ones.
 
 ## SKILL.md Structure
 
@@ -106,8 +105,7 @@ live: {}
 expert_roster: []
 ```
 
-Skills that update `live` (clarify, plan, impl, retro, handoff) should populate
-it on first use. The `sessions` list grows as sessions complete.
+Skills that update `live` (clarify, plan, impl, retro, handoff) should populate it on first use. The `sessions` list grows as sessions complete.
 
 compact-context.sh already handles missing cwf-state.yaml gracefully (exits 0).
 
@@ -144,8 +142,7 @@ If the skill uses sub-agents, declare the pattern in the References section:
 - [agent-patterns.md](agent-patterns.md) — {pattern name} pattern
 ```
 
-Pattern names: Single, Adaptive, Agent team, 4 parallel.
-Must match the pattern declared in `agent-patterns.md`.
+Pattern names: Single, Adaptive, Agent team, 4 parallel. Must match the pattern declared in `agent-patterns.md`.
 
 ## Reporting Principle
 

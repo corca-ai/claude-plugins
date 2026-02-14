@@ -1,7 +1,6 @@
 # Architecture Patterns
 
-Code-level patterns, hook configuration, and plugin integration conventions
-accumulated from retrospectives and implementation sessions.
+Code-level patterns, hook configuration, and plugin integration conventions accumulated from retrospectives and implementation sessions.
 
 ## Code Patterns
 

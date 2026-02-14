@@ -28,14 +28,9 @@ codex auth login          # OpenAI Codex
 npx @google/gemini-cli    # Google Gemini (interactive first-run setup)
 ```
 
-Both are optional — the skill falls back to Claude Task agents when CLIs
-are missing or unauthenticated. But real CLI reviews provide diverse model
-perspectives beyond Claude.
+Both are optional — the skill falls back to Claude Task agents when CLIs are missing or unauthenticated. But real CLI reviews provide diverse model perspectives beyond Claude.
 
-**Fallback latency**: If both external CLIs fail, the skill incurs a
-two-round-trip penalty — first the CLI attempts run (up to 120s timeout each),
-then fallback Task agents are launched sequentially. Error-type classification
-(Phase 3.2) enables fail-fast for CAPACITY errors, reducing wasted time.
+**Fallback latency**: If both external CLIs fail, the skill incurs a two-round-trip penalty — first the CLI attempts run (up to 120s timeout each), then fallback Task agents are launched sequentially. Error-type classification (Phase 3.2) enables fail-fast for CAPACITY errors, reducing wasted time.
 
 ## Mode Routing
 
@@ -119,11 +114,9 @@ Search the associated plan.md for success criteria to use as verification input:
 2. Extract **behavioral criteria** — look for Given/When/Then patterns or
    checkbox-style success criteria. These become a pass/fail checklist.
 3. Extract **qualitative criteria** — narrative criteria like "should be
-   intuitive" or "maintain backward compatibility". These are addressed
-   in the narrative verdict.
+   intuitive" or "maintain backward compatibility". These are addressed in the narrative verdict.
 4. If no plan.md or no criteria found: proceed without criteria.
-   Note in synthesis: "No success criteria found — review based on
-   general best practices only."
+   Note in synthesis: "No success criteria found — review based on general best practices only."
 
 ### 4. Optional holdout scenarios (`--scenarios <path>`)
 
@@ -160,15 +153,13 @@ diff_lines=$(echo "$review_target" | wc -l)
 | 500–2000 | 20 | Extended for medium diffs |
 | > 2000 | 28 | Large diffs need exploration + writing |
 
-For `--mode plan` and `--mode clarify`, use the document line count instead of diff lines.
-Store the resolved `max_turns` value for use in Phase 2.
+For `--mode plan` and `--mode clarify`, use the document line count instead of diff lines. Store the resolved `max_turns` value for use in Phase 2.
 
 ---
 
 ## Phase 2: Launch All Reviewers
 
-Launch **six** reviewers in parallel: 2 internal (Task agents) + 2 external (CLI or Task fallback) + 2 domain experts (Task agents).
-All launched in a **single message** for maximum parallelism.
+Launch **six** reviewers in parallel: 2 internal (Task agents) + 2 external (CLI or Task fallback) + 2 domain experts (Task agents). All launched in a **single message** for maximum parallelism.
 
 ### 2.0 Resolve session directory and context recovery
 
@@ -179,9 +170,7 @@ session_dir: "{live.dir value from cwf-state.yaml}"
 mode_suffix: "{mode}"  # "code", "plan", or "clarify"
 ```
 
-**Mode-namespaced output files**: All review output files include the mode as a suffix
-to prevent filename collisions between review rounds (e.g., `review-plan` followed by
-`review-code` in the same session). The suffix is the `--mode` value.
+**Mode-namespaced output files**: All review output files include the mode as a suffix to prevent filename collisions between review rounds (e.g., `review-plan` followed by `review-code` in the same session). The suffix is the `--mode` value.
 
 Apply the [context recovery protocol](../../references/context-recovery-protocol.md) to these files:
 
@@ -194,8 +183,7 @@ Apply the [context recovery protocol](../../references/context-recovery-protocol
 | 5 | Expert α | `{session_dir}/review-expert-alpha-{mode}.md` |
 | 6 | Expert β | `{session_dir}/review-expert-beta-{mode}.md` |
 
-Skip to Phase 3 if all 6 files are valid. In recovery mode (all files cached), skip Phase 2.1–2.3 entirely — proceed directly to Phase 3. Note that temp-dir metadata (`{tmp_dir}/*-meta.txt`) will not exist in recovery; use `duration_ms: —` and `source: CACHED` in provenance for recovered slots.
-All 6 review output files are **critical outputs** for review synthesis.
+Skip to Phase 3 if all 6 files are valid. In recovery mode (all files cached), skip Phase 2.1–2.3 entirely — proceed directly to Phase 3. Note that temp-dir metadata (`{tmp_dir}/*-meta.txt`) will not exist in recovery; use `duration_ms: —` and `source: CACHED` in provenance for recovered slots. All 6 review output files are **critical outputs** for review synthesis.
 
 ### 2.1 Prepare prompts
 
@@ -253,8 +241,7 @@ Parse the output:
 - Contains `CODEX_FOUND` → Codex CLI binary exists (auth assumed OK)
 - Contains `NPX_FOUND` → npx exists, Gemini CLI *may* be available
 
-Note: `NPX_FOUND` only confirms npx is installed, not that Gemini CLI is
-authenticated or cached. Runtime failures are handled in Phase 3.2.
+Note: `NPX_FOUND` only confirms npx is installed, not that Gemini CLI is authenticated or cached. Runtime failures are handled in Phase 3.2.
 
 Resolve providers for external slots:
 
@@ -307,8 +294,7 @@ If Slot 3 provider resolves to `codex`:
 Bash(timeout=300000, command="START_MS=$(date +%s%3N); CODEX_RUNNER='{SKILL_DIR}/../../scripts/codex/codex-with-log.sh'; [ -x \"$CODEX_RUNNER\" ] || CODEX_RUNNER='codex'; timeout 120 \"$CODEX_RUNNER\" exec --sandbox read-only -c model_reasoning_effort='high' - < '{tmp_dir}/correctness-prompt.md' > '{tmp_dir}/slot3-output.md' 2>'{tmp_dir}/slot3-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"TOOL=codex EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/slot3-meta.txt'")
 ```
 
-For `--mode code`, use `model_reasoning_effort='xhigh'` instead.
-Single quotes around config values avoid double-quote conflicts in the Bash wrapper.
+For `--mode code`, use `model_reasoning_effort='xhigh'` instead. Single quotes around config values avoid double-quote conflicts in the Bash wrapper.
 
 If Slot 3 provider resolves to `gemini`:
 
@@ -345,8 +331,7 @@ If Slot 4 provider resolves to `gemini`:
 Bash(timeout=300000, command="START_MS=$(date +%s%3N); timeout 120 npx @google/gemini-cli -o text < '{tmp_dir}/architecture-prompt.md' > '{tmp_dir}/slot4-output.md' 2>'{tmp_dir}/slot4-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"TOOL=gemini EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/slot4-meta.txt'")
 ```
 
-Uses stdin redirection (`< prompt.md`) instead of `-p "$(cat ...)"` to prevent
-shell injection from review target content containing `$()` or backticks.
+Uses stdin redirection (`< prompt.md`) instead of `-p "$(cat ...)"` to prevent shell injection from review target content containing `$()` or backticks.
 
 If Slot 4 provider resolves to `codex`:
 
@@ -379,9 +364,7 @@ echo '<!-- AGENT_COMPLETE -->' >> '{session_dir}/review-architecture-{mode}.md'
 
 **Slot 5 — Expert α (always Task):**
 
-Expert selection: Read `expert_roster` from `cwf-state.yaml`. Analyze the review target
-for domain keywords; match against each roster entry's `domain` field. Select 2 experts
-with contrasting frameworks. If roster has < 2 matches, fill via independent selection.
+Expert selection: Read `expert_roster` from `cwf-state.yaml`. Analyze the review target for domain keywords; match against each roster entry's `domain` field. Select 2 experts with contrasting frameworks. If roster has < 2 matches, fill via independent selection.
 
 ```text
 Task(subagent_type="general-purpose", name="expert-alpha", max_turns={max_turns}, prompt="
@@ -456,18 +439,13 @@ Read review verdicts from the session directory files (not in-memory return valu
 | 5 | `{session_dir}/review-expert-alpha-{mode}.md` |
 | 6 | `{session_dir}/review-expert-beta-{mode}.md` |
 
-Re-validate all six files with the context recovery protocol before synthesis.
-If any file remains invalid after one bounded retry, apply a **hard fail**
-for the stage and stop with explicit file-level error.
-Report the gate path explicitly (`PERSISTENCE_GATE=HARD_FAIL` or equivalent).
+Re-validate all six files with the context recovery protocol before synthesis. If any file remains invalid after one bounded retry, apply a **hard fail** for the stage and stop with explicit file-level error. Report the gate path explicitly (`PERSISTENCE_GATE=HARD_FAIL` or equivalent).
 
 For external slot executions, also read metadata from temp dir:
 - `{tmp_dir}/slot3-meta.txt` / `{tmp_dir}/slot4-meta.txt` for provider tool, exit code, and duration
 - `{tmp_dir}/slot3-stderr.log` / `{tmp_dir}/slot4-stderr.log` for error details
 
-For successful external reviews, **override** the provenance `duration_ms` with
-the actual value from the meta file (not any value the CLI may have generated).
-Use the actual command executed for the `command` field.
+For successful external reviews, **override** the provenance `duration_ms` with the actual value from the meta file (not any value the CLI may have generated). Use the actual command executed for the `command` field.
 
 ### 3.2 Handle external failures
 
@@ -515,9 +493,7 @@ error_causes[slot_N] = "{error_type}: {extracted_error}"
 
 #### Launch fallbacks
 
-If fallbacks are needed, launch all needed fallback Task agents in **one message**,
-then read their results. Each fallback uses the fallback prompt template from
-`external-review.md` with the appropriate perspective (Correctness or Architecture).
+If fallbacks are needed, launch all needed fallback Task agents in **one message**, then read their results. Each fallback uses the fallback prompt template from `external-review.md` with the appropriate perspective (Correctness or Architecture).
 
 Each fallback Task agent prompt must include output persistence:
 
@@ -534,10 +510,7 @@ Task(subagent_type="general-purpose", name="{tool}-fallback", max_turns={max_tur
 
 ### 3.3 Assemble 6 review outputs
 
-Collect all 6 outputs from session directory files (mix of `REAL_EXECUTION` and `FALLBACK` sources).
-Internal reviewers and expert reviewers follow the standard reviewer output
-format from `prompts.md`. Expert reviewers follow the review mode format
-from `expert-advisor-guide.md`.
+Collect all 6 outputs from session directory files (mix of `REAL_EXECUTION` and `FALLBACK` sources). Internal reviewers and expert reviewers follow the standard reviewer output format from `prompts.md`. Expert reviewers follow the review mode format from `expert-advisor-guide.md`.
 
 ---
 
@@ -614,9 +587,7 @@ Output to the conversation (do NOT write to a file unless the user asks):
 | Expert Beta | REAL_EXECUTION | claude-task | — |
 ```
 
-The Provenance table adapts to actual results: if an external CLI succeeded,
-show `REAL_EXECUTION` with the CLI tool name and measured duration. If it fell
-back, show `FALLBACK` with `claude-task-fallback`.
+The Provenance table adapts to actual results: if an external CLI succeeded, show `REAL_EXECUTION` with the CLI tool name and measured duration. If it fell back, show `FALLBACK` with `claude-task-fallback`.
 
 ### 3. Cleanup
 
@@ -652,8 +623,7 @@ This prevents sensitive review content (diffs, plans) from persisting in `/tmp/`
 ## Rules
 
 1. **Always run ALL 6 reviewers** — deliberate naivete. Never skip a reviewer
-   because the change "looks simple." Each perspective catches different issues.
-   Expert reviewers complement, not replace — the 4 core reviewers always run.
+   because the change "looks simple." Each perspective catches different issues. Expert reviewers complement, not replace — the 4 core reviewers always run.
 2. **Narrative only** — no numerical scores, no percentages, no letter grades.
    Verdicts are Pass / Conditional Pass / Revise.
 3. **Never inline review** — always use Task sub-agents. The main agent
@@ -663,15 +633,11 @@ This prevents sensitive review content (diffs, plans) from persisting in `/tmp/`
 5. **Output to conversation** — review results are communication, not state.
    Do not write files unless the user explicitly asks.
 6. **Criteria from plan** — review verifies plan criteria, it does not
-   invent its own. If no criteria exist, review on general best practices
-   and note the absence.
+   invent its own. If no criteria exist, review on general best practices and note the absence.
 7. **Graceful degradation** — external CLI failure (missing binary,
-   timeout, auth error) never blocks the review. Fall back to a Task
-   sub-agent with the same perspective. Always record the fallback in
-   the Provenance table and Confidence Note.
+   timeout, auth error) never blocks the review. Fall back to a Task sub-agent with the same perspective. Always record the fallback in the Provenance table and Confidence Note.
 8. **No silent holdout bypass** — when `--scenarios` is provided, the
-   scenario file must be validated and assessed. Never downgrade to
-   "best effort" silently.
+   scenario file must be validated and assessed. Never downgrade to "best effort" silently.
 9. **Base strategy must be explicit in output** — for code mode, always
    report which base path was used (explicit `--base`, upstream, or fallback).
 10. **Critical reviewer outputs hard-fail** — if any required review file

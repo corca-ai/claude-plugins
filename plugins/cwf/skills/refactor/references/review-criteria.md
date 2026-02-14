@@ -1,7 +1,6 @@
 # Skill Review Criteria
 
-Checklist distilled from skill-creator's Progressive Disclosure philosophy.
-Use this to evaluate a skill's SKILL.md and bundled resources.
+Checklist distilled from skill-creator's Progressive Disclosure philosophy. Use this to evaluate a skill's SKILL.md and bundled resources.
 
 ## 1. SKILL.md Size
 

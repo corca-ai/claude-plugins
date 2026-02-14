@@ -105,8 +105,7 @@ When using the `AskUserQuestion` tool:
 - Option 2: "Session cookies" — Server-side state, simpler for SSR apps
 - Option 3: "OAuth only" — Delegate to external providers, no password management
 
-**Bad**: "What do you think about authentication?"
-(Open-ended, no concrete options, unclear what decision is needed)
+**Bad**: "What do you think about authentication?" (Open-ended, no concrete options, unclear what decision is needed)
 
 ### When Advisory Context Is Available (Default Mode)
 
@@ -134,9 +133,7 @@ After each answer, check whether the response reveals NEW ambiguities that weren
 
 ### Example
 
-User says: "Use JWT tokens for auth"
-→ New ambiguities: Token expiry policy? Refresh token strategy? Storage location?
-→ These may be T1 (codebase already has JWT patterns) or T3 (policy decision)
+User says: "Use JWT tokens for auth" → New ambiguities: Token expiry policy? Refresh token strategy? Storage location? → These may be T1 (codebase already has JWT patterns) or T3 (policy decision)
 
 ---
 

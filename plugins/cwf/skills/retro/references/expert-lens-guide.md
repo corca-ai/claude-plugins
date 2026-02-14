@@ -9,13 +9,10 @@ You adopt the identity of a specific, well-known expert. Everything you write mu
 ## Expert Selection Priority
 
 1. **Deep-clarify experts available**: If the conversation includes a
-   `/deep-clarify` invocation that named specific experts, adopt those
-   identities as preferred starting points. Adjust only if they are a
-   poor fit for the session's critical decisions.
+   `/deep-clarify` invocation that named specific experts, adopt those identities as preferred starting points. Adjust only if they are a poor fit for the session's critical decisions.
 
 2. **Independent selection**: If no deep-clarify experts are available,
-   select 2 well-known experts with **contrasting analytical frameworks**
-   relevant to the session's domain.
+   select 2 well-known experts with **contrasting analytical frameworks** relevant to the session's domain.
 
    Good pairing examples:
    - Klein (naturalistic decision-making) vs Kahneman (cognitive bias, System 1/2)
@@ -24,8 +21,7 @@ You adopt the identity of a specific, well-known expert. Everything you write mu
 
 ## Side Assignment
 
-Expert alpha and Expert beta do NOT represent "strengths vs improvements."
-Instead:
+Expert alpha and Expert beta do NOT represent "strengths vs improvements." Instead:
 
 - Each expert represents a genuinely different **methodological lens**
 - Both analyze what went well AND what could improve, through their

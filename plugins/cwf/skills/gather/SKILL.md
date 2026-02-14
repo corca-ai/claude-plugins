@@ -51,8 +51,7 @@ Scan input for all URLs. Classify each by pattern table (most specific first):
 {SKILL_DIR}/scripts/g-export.sh <url> [format] [output-dir]
 ```
 
-**Prerequisites**: Public documents only (Share > Publish to web).
-Sheets default to TOON format — see [references/TOON.md](references/TOON.md). Details: [references/google-export.md](references/google-export.md)
+**Prerequisites**: Public documents only (Share > Publish to web). Sheets default to TOON format — see [references/TOON.md](references/TOON.md). Details: [references/google-export.md](references/google-export.md)
 
 ### Slack Export
 
@@ -65,11 +64,9 @@ node {SKILL_DIR}/scripts/slack-api.mjs <channel_id> <thread_ts> --attachments-di
   {SKILL_DIR}/scripts/slack-to-md.sh <channel_id> <thread_ts> <workspace> OUTPUT_DIR/<output_file>.md [title]
 ```
 
-After conversion, rename to a meaningful name from the first message (lowercase, hyphens, max 50 chars).
-**Existing .md file**: Extract Slack URL from `> Source:` line to re-fetch.
+After conversion, rename to a meaningful name from the first message (lowercase, hyphens, max 50 chars). **Existing .md file**: Extract Slack URL from `> Source:` line to re-fetch.
 
-**Prerequisites**: Node.js 18+, Slack Bot (`channels:history`, `channels:join`, `users:read`, `files:read`), `SLACK_BOT_TOKEN` in shell profile (`~/.zshrc`/`~/.bashrc`) or legacy `~/.claude/.env`.
-Details: [references/slack-export.md](references/slack-export.md)
+**Prerequisites**: Node.js 18+, Slack Bot (`channels:history`, `channels:join`, `users:read`, `files:read`), `SLACK_BOT_TOKEN` in shell profile (`~/.zshrc`/`~/.bashrc`) or legacy `~/.claude/.env`. Details: [references/slack-export.md](references/slack-export.md)
 
 ### Notion Export
 
@@ -77,9 +74,7 @@ Details: [references/slack-export.md](references/slack-export.md)
 python3 {SKILL_DIR}/scripts/notion-to-md.py "$URL" "$OUTPUT_PATH"
 ```
 
-**Prerequisites**: Page must be **published to the web**. Python 3.7+.
-**Limitations**: Sub-pages → `<!-- missing block -->`, images URL-only (S3 expires), no database views.
-Details: [references/notion-export.md](references/notion-export.md)
+**Prerequisites**: Page must be **published to the web**. Python 3.7+. **Limitations**: Sub-pages → `<!-- missing block -->`, images URL-only (S3 expires), no database views. Details: [references/notion-export.md](references/notion-export.md)
 
 ### GitHub
 

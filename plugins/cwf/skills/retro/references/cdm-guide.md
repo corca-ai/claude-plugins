@@ -10,9 +10,7 @@ A moment where the participant made a judgment call that shaped the session's di
 - Direction changes triggered by new information
 - Trade-off resolutions (e.g., workaround vs root cause fix)
 - **Intent-result gaps**: Moments where the intended approach diverged from what
-  actually happened (e.g., planned to use a tool but ended up not using it,
-  delegated a task but the delegate couldn't fulfill it). These silent failures
-  often reveal structural constraints worth persisting.
+  actually happened (e.g., planned to use a tool but ended up not using it, delegated a task but the delegate couldn't fulfill it). These silent failures often reveal structural constraints worth persisting.
 
 Trivial choices (variable naming, formatting) are NOT critical decisions.
 
@@ -36,8 +34,7 @@ Trivial choices (variable naming, formatting) are NOT critical decisions.
 ## Methodology
 
 1. **Identify 2-4 critical decisions** from the session. Scan for moments where
-   the work direction changed, a wrong assumption was corrected, or a key
-   trade-off was resolved.
+   the work direction changed, a wrong assumption was corrected, or a key trade-off was resolved.
 
 2. **Select 5-8 relevant probes per decision**. Always include Cues, Goals,
    Options, and Basis. Add others based on context:

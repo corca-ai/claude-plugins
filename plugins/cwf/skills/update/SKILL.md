@@ -28,8 +28,7 @@ Locate the installed plugin.json using Glob:
 ~/.claude/plugins/cache/corca-plugins/cwf/*/.claude-plugin/plugin.json
 ```
 
-Read the `version` field. If not found, report that CWF is not installed and
-suggest installing via marketplace (`claude plugin install cwf@corca-plugins`).
+Read the `version` field. If not found, report that CWF is not installed and suggest installing via marketplace (`claude plugin install cwf@corca-plugins`).
 
 ### 1.2 Update Marketplace
 
@@ -41,9 +40,7 @@ claude plugin marketplace update corca-plugins
 
 ### 1.3 Compare Versions
 
-After marketplace update, check if the latest available version differs from
-the installed version. Read the source plugin.json from the marketplace cache
-or re-check after update.
+After marketplace update, check if the latest available version differs from the installed version. Read the source plugin.json from the marketplace cache or re-check after update.
 
 Report the comparison:
 
@@ -97,8 +94,7 @@ After a successful update (or when showing version diff):
 
 ## Phase 4: Lessons Checkpoint
 
-Add `update` to `cwf-state.yaml` current session's `stage_checkpoints` list
-if lessons were recorded during the update process.
+Add `update` to `cwf-state.yaml` current session's `stage_checkpoints` list if lessons were recorded during the update process.
 
 ---
 
