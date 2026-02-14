@@ -35,3 +35,7 @@ Status: Done.
 7. `NON_AUTOMATABLE` — Decide whether to deduplicate routing text in `CLAUDE.md` (`line 3` vs `line 7-8`).
 Reason: requires editorial judgment on adapter readability vs explicitness.
 Status: Pending.
+
+8. `NON_AUTOMATABLE` — Decide whether `cwf-index.md` line-3 self-link (`[cwf-index.md](cwf-index.md)`) should be kept.
+Reason: it's template-consistent but may be low-signal redundancy in same-file context.
+Status: Pending.

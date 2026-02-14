@@ -164,14 +164,14 @@ On resume:
 ```yaml
 review_state:
   version: 2
-  status: ready
+  status: in_progress
   queue_policy: anchors_then_docs_then_plugin_refs_then_skill_refs_then_references
-  map_presented_in_current_session: false
+  map_presented_in_current_session: true
   graph_baseline:
-    total_docs: null
-    total_links: null
-    orphan_count: null
-    broken_ref_count: null
+    total_docs: 69
+    total_links: 435
+    orphan_count: 0
+    broken_ref_count: 0
   group_progress:
     anchors_done: false
     docs_done: false
@@ -179,17 +179,20 @@ review_state:
     skill_refs_done: false
     references_done: false
   cursor:
-    file: AGENTS.md
+    file: repo-index.md
     next_line: 1
-  completed_files: []
-  current_file_eof: false
-  last_chunk_range: ""
-  last_inbound_count: 0
+  completed_files: [AGENTS.md, CLAUDE.md, cwf-index.md]
+  current_file_eof: true
+  last_chunk_range: "cwf-index.md:1-43"
+  last_inbound_count: 9
   orphan_triage:
     intentional: []
     needs_link_fix: []
     deferred: []
-  unresolved_discussion_points: []
+  unresolved_discussion_points:
+    - "CLAUDE.md routing duplication: keep both sentence pointer and numbered read-first list?"
+    - "CLAUDE.md env fallback note: keep in adapter or move to troubleshooting doc?"
+    - "cwf-index.md line-3 self-link: keep for template consistency or remove as low-signal?"
   last_updated: "2026-02-14"
 ```
 

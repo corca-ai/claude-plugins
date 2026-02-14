@@ -39,6 +39,11 @@
 - `node scripts/doc-graph.mjs --json > docs/doc-graph.snapshot.json || true`: stats = `total_docs=69`, `total_links=438`, `orphan_count=0`, `broken_ref_count=3`.
 - Current broken refs (all same source): `plugins/cwf/skills/setup/SKILL.md` -> synthetic target `path`.
 
+### Deterministic Baseline Refresh (After Fix 3)
+
+- `markdownlint-cli2 "**/*.md"`: pass (`0`), vendored markdown noise excluded.
+- `node scripts/doc-graph.mjs --json > docs/doc-graph.snapshot.json || true`: stats = `total_docs=69`, `total_links=435`, `orphan_count=0`, `broken_ref_count=0`.
+
 ### Relationship Map
 
 - Anchor docs: `AGENTS.md`, `CLAUDE.md`, `README.md`, `README.ko.md`, `cwf-index.md`, `repo-index.md`.
@@ -63,3 +68,21 @@
 ### File Boundary Gate
 
 - Inbound links: `6` (orphan: no)
+
+### Chunk Review 02
+
+1. Chunk: `cwf-index.md:1-43` (EOF: yes)
+2. Excerpt: generated CWF capability index with plugin metadata, canonical skill list, shared references, hooks, and scripts map.
+3. Meaning / Intent: provide a compact CWF-scoped navigation map with stable ordering and file-centric descriptions.
+4. Review Focus (Line-Anchored):
+   - `cwf-index.md:3`: self-link on the same file title note (`[cwf-index.md](cwf-index.md)`) may be redundant signal.
+   - `cwf-index.md:11-22`: verify canonical workflow ordering (`setup` -> `refactor`) remains stable and complete.
+5. Link Syntax Check: pass (`[]()` usage consistent; no inline literal paths).
+6. De-dup / What-Why Check: concise overall; potential overlap with AGENTS generated index remains intentional but should stay synchronized by generation workflow.
+7. Discussion Prompt:
+   - Keep the self-link in line 3 for consistency with generated templates, or remove it to reduce one-token redundancy?
+   - Is dual-surface indexing (`AGENTS` block + `cwf-index.md`) still the preferred discoverability model, or should one become primary and the other pointer-only?
+
+### File Boundary Gate
+
+- Inbound links: `9` (orphan: no)
