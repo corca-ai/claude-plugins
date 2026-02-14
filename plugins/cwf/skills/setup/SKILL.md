@@ -390,7 +390,11 @@ For each area, generate:
 - Make key-file descriptions file-centric ("what this file is"), not action scripts ("read this when...").
 - Keep descriptions minimal; if a filename is self-evident, use a very short gloss.
 - Do not use representative sampling for coverage sets; include every file in the mandatory inventories.
-- Recommended area split: `Root`, [plugins/cwf/skills](../../skills), [plugins/cwf/references](../../references), [plugins/cwf/hooks](../../hooks), `scripts`, `docs`, `references`, `assets`.
+- Recommended area split: `Root`, [plugins/cwf/skills](../../skills), [plugins/cwf/references](../../references), [plugins/cwf/hooks](../../hooks), `scripts`, `docs`, `references`.
+- Use one stable ordering policy to avoid mixed ordering confusion:
+  - Root: fixed priority order (`README`, `AGENTS`, `CLAUDE`, `cwf-state`, `README.ko`).
+  - [plugins/cwf/skills](../../skills): canonical workflow order (`setup`, `update`, `gather`, `clarify`, `plan`, `review`, `impl`, `retro`, `handoff`, `ship`, `run`, `refactor`).
+  - Other sections: deterministic order (alphabetical unless there is a clear canonical sequence).
 
 ### 3.3 Write cwf-index.md
 
@@ -466,7 +470,7 @@ Add `setup` to `cwf-state.yaml` current session's `stage_checkpoints` list.
 4. **AGENTS block policy**: When target includes `agents`, update only the managed marker block (`CWF:INDEX:START/END`) and preserve all other content.
 5. **Index content**: Pointers, not summaries. Use section heading intent (`{area} — {intent}`) + link bullets with file-level descriptions. Avoid separate `When to read`/`Role`/`Key files` labels.
 6. **Link policy**: Internal files/directories in generated index content must be markdown links (`[path](path)`), not inline literals.
-7. **Coverage policy**: Include all files from mandatory inventories (`docs/*.md`, `plugins/cwf/skills/*/SKILL.md`, `plugins/cwf/references/*.md`, `references/**/*.md`).
+7. **Coverage policy**: Include all files from mandatory inventories (`docs/*.md`, `plugins/cwf/skills/*/SKILL.md`, `plugins/cwf/references/*.md`, `references/**/*.md`) except intentional exclusions in [.cwf-index-ignore](../../../../.cwf-index-ignore).
 8. **Coverage validation**: Run [scripts/check-index-coverage.sh](../../../../scripts/check-index-coverage.sh) and fix all missing coverage findings.
 9. **Ignore policy**: Use [.cwf-index-ignore](../../../../.cwf-index-ignore) only for intentional exclusions; default behavior is full coverage.
 10. **Bash 3.2 compatible output**: `cwf-hooks-enabled.sh` uses only `export` lines with quoted string values.

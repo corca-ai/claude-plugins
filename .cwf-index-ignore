@@ -1,7 +1,2 @@
-# Optional ignore patterns for index coverage checks.
-# One glob pattern per line (bash-style pattern matching).
-# Keep this file minimal and review exclusions regularly.
-#
-# Example:
-# references/anthropic-skills-guide/*
-# docs/interactive-doc-review-protocol.md
+references/anthropic-skills-guide/0[1-9]-*.md
+assets/*

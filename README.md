@@ -210,8 +210,7 @@ cwf:handoff --register     # Register session in cwf-state.yaml only
 cwf:handoff --phase        # Generate phase-handoff.md (HOW context)
 ```
 
-Session handoffs carry task scope, lessons, and unresolved items for the next session. Phase handoffs carry protocols, rules, and constraints for the next workflow phase (HOW), complementing plan.md (WHAT).
-`next-session.md` now also includes an execution contract so mention-only start can run directly, including branch gate (auto escape from base branch) and meaningful commit-unit policy.
+Session handoffs carry task scope, lessons, and unresolved items for the next session. Phase handoffs carry protocols, rules, and constraints for the next workflow phase (HOW), complementing plan.md (WHAT). `next-session.md` now also includes an execution contract so mention-only start can run directly, including branch gate (auto escape from base branch) and meaningful commit-unit policy.
 
 Full reference: [SKILL.md](plugins/cwf/skills/handoff/SKILL.md)
 
@@ -342,16 +341,13 @@ CWF includes 7 hook groups that run automatically. All are enabled by default; u
 | `websearch_redirect` | PreToolUse → WebSearch | Redirect Claude's WebSearch to `cwf:gather --search` |
 | `compact_recovery` | SessionStart → compact | Inject live session state after auto-compact for context recovery |
 
-Notification examples:
+Notification behavior:
 
-<img src="assets/attention-hook-normal-response.png" alt="Slack notification — normal response" width="600">
-
-<img src="assets/attention-hook-AskUserQuestion.png" alt="Slack notification — AskUserQuestion" width="600">
+Screenshots were deprecated in v3 and removed from the repository. Refer to the hook table above and [plugins/cwf/hooks/scripts/attention.sh](plugins/cwf/hooks/scripts/attention.sh) for behavior details.
 
 ## Configuration
 
-Set environment variables in your shell profile (`~/.zshrc` or `~/.bashrc`).
-Legacy fallback (`~/.claude/.env`) is still supported.
+Set environment variables in your shell profile (`~/.zshrc` or `~/.bashrc`). Legacy fallback (`~/.claude/.env`) is still supported.
 
 ### Slack notifications (attention hook)
 

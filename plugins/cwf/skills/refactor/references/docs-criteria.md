@@ -30,6 +30,7 @@ Check the project's root [AGENTS.md][repo-agents] and runtime adapter docs (for 
 | Document-role ambiguity | Linked docs are listed without clear role definition ("what this doc is") |
 | Directive-style routing overload | Entry docs rely on procedural read/write directives instead of concise role mapping |
 | Path-heavy link labels in scoped lists | Link labels repeat long filesystem paths even when section context already disambiguates targets |
+| Mixed ordering policy in a single index | Similar lists mix alphabetical and semantic order without an explicit policy, increasing navigation ambiguity |
 | Routing list duplication | The same target docs are repeated across sections without materially different purpose |
 | Behavioral rules duplicated by deterministic checks | Entry docs say "always do X" for behavior already enforced by hooks/scripts |
 | Missing core routing links | Entry docs omit links to the core docs needed for progressive disclosure |
