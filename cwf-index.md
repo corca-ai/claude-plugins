@@ -4,38 +4,30 @@
 
 ## Root
 
-- **When to read**: Start here when you need project-wide context, current state, or install/usage entry points.
-- **Entry point**: [README.md](README.md)
-- **Key files**: [README.md](README.md), [README.ko.md](README.ko.md), `cwf-state.yaml`, [AGENTS.md](AGENTS.md), [CLAUDE.md](CLAUDE.md)
+- **Role**: Repository entry surface for user-facing overview, runtime adapters, and live session state.
+- **Key files**: [README.md](README.md), [README.ko.md](README.ko.md), [cwf-state.yaml](cwf-state.yaml), [AGENTS.md](AGENTS.md), [CLAUDE.md](CLAUDE.md)
 
 ## plugins
 
-- **When to read**: Read when changing CWF behavior (skills, hooks, references) or adding new workflow capabilities.
-- **Entry point**: `plugins/cwf`
-- **Key files**: [plugins/cwf/skills/setup/SKILL.md](plugins/cwf/skills/setup/SKILL.md), [plugins/cwf/skills/review/SKILL.md](plugins/cwf/skills/review/SKILL.md), [plugins/cwf/skills/run/SKILL.md](plugins/cwf/skills/run/SKILL.md), `plugins/cwf/hooks/hooks.json`, `plugins/cwf/hooks/scripts/cwf-hook-gate.sh`
+- **Role**: CWF implementation surface where skills, hooks, and shared references define agent behavior.
+- **Key files**: [plugins/cwf/skills/setup/SKILL.md](plugins/cwf/skills/setup/SKILL.md), [plugins/cwf/skills/review/SKILL.md](plugins/cwf/skills/review/SKILL.md), [plugins/cwf/skills/run/SKILL.md](plugins/cwf/skills/run/SKILL.md), [plugins/cwf/hooks/hooks.json](plugins/cwf/hooks/hooks.json), [plugins/cwf/hooks/scripts/cwf-hook-gate.sh](plugins/cwf/hooks/scripts/cwf-hook-gate.sh)
 
 ## scripts
 
-- **When to read**: Read when you need operational automation for install/update, codex integration, session checks, or static analysis tools.
-- **Entry point**: `scripts/install.sh`
-- **Key files**: `scripts/install.sh`, `scripts/update-all.sh`, `scripts/check-session.sh`, `scripts/codex/sync-skills.sh`, `scripts/codex/install-wrapper.sh`
-- **Analysis tools**: `scripts/check-links.sh` (dead link checker via lychee), `scripts/check-schemas.sh` (JSON Schema validation via ajv-cli+yq), `scripts/doc-graph.mjs` (markdown reference graph + orphan detection), `scripts/find-duplicates.py` (MinHash/LSH near-duplicate detection), `scripts/doc-churn.sh` (git log change frequency analysis)
-- **Schemas**: `scripts/schemas/cwf-state.schema.json`, `scripts/schemas/plugin.schema.json`, `scripts/schemas/hooks.schema.json`
+- **Role**: Deterministic automation and validation utilities for install/update, session hygiene, and docs analysis.
+- **Key files**: [scripts/install.sh](scripts/install.sh), [scripts/update-all.sh](scripts/update-all.sh), [scripts/check-session.sh](scripts/check-session.sh), [scripts/check-links.sh](scripts/check-links.sh), [scripts/doc-graph.mjs](scripts/doc-graph.mjs)
 
 ## docs
 
-- **When to read**: Read when deciding architecture, migration policy, or documentation standards.
-- **Entry point**: [docs/project-context.md](docs/project-context.md)
+- **Role**: Stable project knowledge: org context, architecture patterns, documentation standards, and migration decisions.
 - **Key files**: [docs/project-context.md](docs/project-context.md), [docs/architecture-patterns.md](docs/architecture-patterns.md), [docs/documentation-guide.md](docs/documentation-guide.md), [docs/v3-migration-decisions.md](docs/v3-migration-decisions.md), [docs/plugin-dev-cheatsheet.md](docs/plugin-dev-cheatsheet.md)
 
 ## references
 
-- **When to read**: Read when you need conceptual foundations and shared principles for skill design and review.
-- **Entry point**: [references/essence-of-software/distillation.md](references/essence-of-software/distillation.md)
+- **Role**: Conceptual foundations for shared design/review language across skills.
 - **Key files**: [references/essence-of-software/distillation.md](references/essence-of-software/distillation.md)
 
 ## assets
 
-- **When to read**: Read when updating README visuals or explaining hook behavior with screenshots.
-- **Entry point**: `assets`
-- **Key files**: `assets/attention-hook-AskUserQuestion.png`, `assets/attention-hook-normal-response.png`, `assets/g-export-sheet-md-example.png`
+- **Role**: Image assets used by repository docs and hook behavior explanations.
+- **Key files**: [assets/attention-hook-AskUserQuestion.png](assets/attention-hook-AskUserQuestion.png), [assets/attention-hook-normal-response.png](assets/attention-hook-normal-response.png), [assets/g-export-sheet-md-example.png](assets/g-export-sheet-md-example.png)
