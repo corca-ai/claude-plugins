@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+
+mapfile -t md_files < <(
+  git ls-files '*.md' '*.mdx' \
+    | grep -Ev '^(prompt-logs/|references/anthropic-skills-guide/)' || true
+)
+
+if [ "${#md_files[@]}" -eq 0 ]; then
+  echo "[pre-push] no markdown files found; skipping lint checks"
+  exit 0
+fi
+
+echo "[pre-push] markdownlint on tracked markdown files..."
+npx --yes markdownlint-cli2 "${md_files[@]}"
+
+echo "[pre-push] local link validation..."
+bash scripts/check-links.sh --local --json

@@ -46,7 +46,7 @@ plugins/{name}/
 
 ## marketplace.json Entry
 
-Add to `.claude-plugin/marketplace.json` → `plugins[]`:
+Add to [.claude-plugin/marketplace.json](../.claude-plugin/marketplace.json) → `plugins[]`:
 
 ```json
 {
@@ -122,7 +122,7 @@ Priority: CLI argument > environment variable > hardcoded default
 
 Plugin directories are replaced on update (version-specific cache). User config **must** live outside the skill directory — environment variables in shell profile survive any plugin update.
 
-Use the shared loader (`plugins/cwf/hooks/scripts/env-loader.sh`) and keep this source order:
+Use the shared loader ([plugins/cwf/hooks/scripts/env-loader.sh](../plugins/cwf/hooks/scripts/env-loader.sh)) and keep this source order:
 - process env
 - shell profiles (`~/.zshenv`, `~/.zprofile`, `~/.zshrc`, `~/.bash_profile`, `~/.bashrc`, `~/.profile`)
 - legacy fallback file (`~/.claude/.env`)
@@ -158,7 +158,7 @@ cwf_env_load_vars VAR
   CURL_EXIT=$?
   set -e
   ```
-- `&&` chains under `set -e`: `[ -f "$f" ] && VAR="$f" && break` exits the script if `[ -f ]` fails (exit code 1). Use `if/then` blocks instead:
+- `&&` chains under `set -e`: `[ -f "$f" ] && VAR="$f" && break` exits the script if `[ -f ]` fails (exit code 1). Use if/then blocks instead:
   ```bash
   # BAD: exits under set -e when condition is false
   [ -f "$f" ] && RESULT="$f" && break
@@ -191,6 +191,16 @@ Alternative: add hooks via `/hooks` menu in the current session (goes through re
 /plugin install <plugin-name>@corca-plugins
 ```
 
+## Repo Git Hooks
+
+Enable repo hooks once per clone:
+```bash
+git config core.hooksPath .githooks
+```
+
+- [pre-commit](../.githooks/pre-commit): markdownlint on staged `*.md`/`*.mdx` (excluding `prompt-logs/` and `references/anthropic-skills-guide/`).
+- [pre-push](../.githooks/pre-push): full markdownlint on tracked markdown files plus `bash scripts/check-links.sh --local --json`.
+
 ## Version Bump Rules
 
 | Change type | Bump | Examples |
@@ -221,7 +231,7 @@ The plugin has been updated. To apply:
 
 Checklist for new plugins (in addition to the deploy workflow above):
 
-1. Add entry to `.claude-plugin/marketplace.json` → `plugins[]`
+1. Add entry to [.claude-plugin/marketplace.json](../.claude-plugin/marketplace.json) → `plugins[]`
 2. Bump marketplace metadata version
 3. Update [README.md](../README.md) and [README.ko.md](../README.ko.md) (table + detail section)
 4. Check [AI_NATIVE_PRODUCT_TEAM.md](../AI_NATIVE_PRODUCT_TEAM.md) for link opportunities

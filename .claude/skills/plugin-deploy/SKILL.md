@@ -1,9 +1,6 @@
 ---
 name: plugin-deploy
-description: |
-  Automate the post-modification plugin lifecycle: version checks, marketplace sync,
-  README updates, local testing, and deployment preparation.
-  Triggers: "/plugin-deploy"
+description: Automate the post-modification plugin lifecycle (version checks, marketplace sync, README updates, local testing, deployment prep). Trigger: "/plugin-deploy".
 allowed-tools:
   - Bash
   - Read
@@ -46,7 +43,7 @@ Parse JSON output. If `error` field exists → report and stop.
 
 - `detected_new: true` → new plugin: needs marketplace entry, README sections, AI_NATIVE check
 - `detected_new: false` → modified plugin: needs version bump check, marketplace sync
-- `name == "cwf"` → include Codex user-scope sync step via `scripts/codex/sync-skills.sh`
+- `name == "cwf"` → include Codex user-scope sync step via [scripts/codex/sync-skills.sh](../../../scripts/codex/sync-skills.sh)
 - `--dry-run` → display report, list actions, stop
 
 ### 3. Fix Gaps
@@ -76,8 +73,7 @@ For `cwf` plugin deployments, run:
 bash {SKILL_DIR}/../../../scripts/codex/sync-skills.sh --cleanup-legacy
 ```
 
-This includes post-sync link validation (`scripts/codex/verify-skill-links.sh`).
-If sync or validation fails, report exact stderr and stop (do not continue with stale links).
+This includes post-sync link validation ([scripts/codex/verify-skill-links.sh](../../../scripts/codex/verify-skill-links.sh)). If sync or validation fails, report exact stderr and stop (do not continue with stale links).
 
 ### 6. Local Test (unless --skip-test)
 

@@ -144,4 +144,3 @@ A plan qualifies for **Direct Execution (Phase 3a)** when ALL of these hold:
 If any condition fails, use **Agent Team Execution (Phase 3b)**.
 
 When in doubt, prefer Agent Team — the overhead of 2 agents is small compared to the risk of a complex plan going wrong in direct execution.
-

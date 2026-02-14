@@ -9,6 +9,6 @@ Read first:
 
 This file is intentionally Claude-specific:
 
-- CWF hook runtime is Claude-native (`plugins/cwf/hooks/hooks.json`, `${CLAUDE_PLUGIN_ROOT}`).
+- CWF hook runtime is Claude-native ([plugins/cwf/hooks/hooks.json](plugins/cwf/hooks/hooks.json), `${CLAUDE_PLUGIN_ROOT}`).
 - Hook toggles are loaded from `~/.claude/cwf-hooks-enabled.sh`.
 - Hook/integration env vars load from process env or shell profiles, with `~/.claude/.env` as legacy fallback.

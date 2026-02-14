@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+
+mapfile -t md_files < <(
+  git diff --cached --name-only --diff-filter=ACMR -- '*.md' '*.mdx' \
+    | grep -Ev '^(prompt-logs/|references/anthropic-skills-guide/)' || true
+)
+
+if [ "${#md_files[@]}" -eq 0 ]; then
+  exit 0
+fi
+
+echo "[pre-commit] markdownlint on staged markdown files..."
+npx --yes markdownlint-cli2 "${md_files[@]}"
+
+echo "[pre-commit] local link validation on staged markdown files..."
+for file in "${md_files[@]}"; do
+  bash scripts/check-links.sh --local --json --file "$file" >/dev/null
+done

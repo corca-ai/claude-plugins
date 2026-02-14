@@ -39,11 +39,11 @@ Scan input for all URLs. Classify each by pattern table (most specific first):
 
 | URL Pattern | Handler | Script / Tool |
 |-------------|---------|---------------|
-| `docs.google.com/{document,presentation,spreadsheets}/d/*` | Google Export | `scripts/g-export.sh` |
-| `*.slack.com/archives/*/p*` | Slack to MD | `scripts/slack-api.mjs` + `scripts/slack-to-md.sh` |
-| `*.notion.site/*`, `www.notion.so/*` | Notion to MD | `scripts/notion-to-md.py` |
+| `docs.google.com/{document,presentation,spreadsheets}/d/*` | Google Export | [scripts/g-export.sh](scripts/g-export.sh) |
+| `*.slack.com/archives/*/p*` | Slack to MD | [scripts/slack-api.mjs](scripts/slack-api.mjs) + [scripts/slack-to-md.sh](scripts/slack-to-md.sh) |
+| `*.notion.site/*`, `www.notion.so/*` | Notion to MD | [scripts/notion-to-md.py](scripts/notion-to-md.py) |
 | `github.com/*` | GitHub | `gh` CLI |
-| Any other URL | Generic | `scripts/extract.sh` → WebFetch fallback |
+| Any other URL | Generic | [scripts/extract.sh](scripts/extract.sh) → WebFetch fallback |
 
 ### Google Export
 
@@ -84,9 +84,9 @@ For `github.com` URLs, use the `gh` CLI to extract content as markdown.
 
 | URL type | Command |
 |----------|---------|
-| PR (`/pull/N`) | `gh pr view <url> --json title,body,state,author,comments --template '...'` |
-| Issue (`/issues/N`) | `gh issue view <url> --json title,body,state,author,comments --template '...'` |
-| Repository (`owner/repo`) | `gh repo view <url> --json name,description,readme` |
+| PR (path pattern: /pull/N) | `gh pr view <url> --json title,body,state,author,comments --template '...'` |
+| Issue (path pattern: /issues/N) | `gh issue view <url> --json title,body,state,author,comments --template '...'` |
+| Repository (owner/repo) | `gh repo view <url> --json name,description,readme` |
 | Other GitHub URL | Fall through to Generic handler |
 
 Save output to `{OUTPUT_DIR}/{type}-{owner}-{repo}-{number}.md`.
@@ -132,10 +132,10 @@ Web and code search via external APIs.
 
 | Command | Backend | Script |
 |---------|---------|--------|
-| `--search <query>` | Tavily | `scripts/search.sh` |
+| `--search <query>` | Tavily | [scripts/search.sh](scripts/search.sh) |
 | `--search --news <query>` | Tavily (topic: news) | `scripts/search.sh --topic news` |
 | `--search --deep <query>` | Tavily (advanced) | `scripts/search.sh --deep` |
-| `--search code <query>` | Exa | `scripts/code-search.sh` |
+| `--search code <query>` | Exa | [scripts/code-search.sh](scripts/code-search.sh) |
 
 ### Execution
 
@@ -178,14 +178,14 @@ Sanitize query for filename: lowercase, spaces to hyphens, remove special charac
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `CLAUDE_CORCA_GATHER_CONTEXT_OUTPUT_DIR` | `./gathered` | Unified default output directory |
+| `CLAUDE_CORCA_GATHER_CONTEXT_OUTPUT_DIR` | ./gathered | Unified default output directory |
 | `CLAUDE_CORCA_G_EXPORT_OUTPUT_DIR` | _(falls back to unified)_ | Google-specific override |
 | `CLAUDE_CORCA_SLACK_TO_MD_OUTPUT_DIR` | _(falls back to unified)_ | Slack-specific override |
 | `CLAUDE_CORCA_NOTION_TO_MD_OUTPUT_DIR` | _(falls back to unified)_ | Notion-specific override |
 | `TAVILY_API_KEY` | — | Required for `--search` and generic URL extract |
 | `EXA_API_KEY` | — | Required for `--search code` |
 
-**Output dir priority**: CLI argument > service-specific env var > `CLAUDE_CORCA_GATHER_CONTEXT_OUTPUT_DIR` > hardcoded default (`./gathered`)
+**Output dir priority**: CLI argument > service-specific env var > `CLAUDE_CORCA_GATHER_CONTEXT_OUTPUT_DIR` > hardcoded default (./gathered)
 
 When a service-specific env var is not set, pass the unified output dir as a CLI argument to the handler script.
 
@@ -235,7 +235,7 @@ Environment variables:
 
 1. **URL auto-detect priority**: Match most specific pattern first (Google > Slack > Notion > GitHub > Generic)
 2. **Graceful degradation**: Missing API keys print setup instructions, don't crash
-3. **Output dir hierarchy**: CLI argument > service-specific env var > unified env var > `./gathered`
+3. **Output dir hierarchy**: CLI argument > service-specific env var > unified env var > ./gathered
 4. **Data privacy**: Do not include confidential code or sensitive information in search queries
 5. **Sub-agent for --local**: Always use Task tool, never inline exploration
 6. **All code fences must have language specifier**: Never use bare fences
