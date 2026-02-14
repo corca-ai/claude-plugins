@@ -12,6 +12,8 @@ exclude_path = [
   "prompt-logs/",
   "node_modules/",
   ".git/",
+  "CHANGELOG.md",
+  "references/",
   "references/anthropic-skills-guide/"
 ]
 

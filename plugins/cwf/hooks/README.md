@@ -13,7 +13,7 @@ This file maps scripts under [plugins/cwf/hooks/scripts](scripts).
 - [scripts/smart-read.sh](scripts/smart-read.sh): Read guard for large files.
 - [scripts/redirect-websearch.sh](scripts/redirect-websearch.sh): Redirects native web search flow to CWF gather flow.
 - [scripts/check-markdown.sh](scripts/check-markdown.sh): Runs markdown lint checks after write/edit.
-- [scripts/check-links-local.sh](scripts/check-links-local.sh): Runs local link checks for edited markdown files.
+- [scripts/check-links-local.sh](scripts/check-links-local.sh): Runs local link checks for edited markdown files and blocks on broken links.
 - [scripts/check-shell.sh](scripts/check-shell.sh): Runs shell lint checks after write/edit.
 - [scripts/compact-context.sh](scripts/compact-context.sh): Injects live session state after compact recovery.
 - [scripts/env-loader.sh](scripts/env-loader.sh): Loads environment variables for hook runtime.

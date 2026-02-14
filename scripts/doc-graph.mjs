@@ -87,7 +87,7 @@ try {
   repoRoot = process.cwd();
 }
 
-// --- Collect all .md files (excluding prompt-logs/, node_modules/) ---
+// --- Collect all .md files (excluding configured source scopes) ---
 
 function collectMdFiles(dir) {
   const results = [];
@@ -99,7 +99,9 @@ function collectMdFiles(dir) {
       relPath.startsWith('prompt-logs/') ||
       relPath.startsWith('node_modules/') ||
       relPath.includes('/node_modules/') ||
-      relPath.startsWith('.git/')
+      relPath.startsWith('.git/') ||
+      relPath === 'CHANGELOG.md' ||
+      relPath.startsWith('references/')
     ) {
       continue;
     }
