@@ -6,12 +6,32 @@ set -euo pipefail
 # SessionEnd passes "session_end" arg to trigger auto-commit.
 
 HOOK_GROUP="log"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=cwf-hook-gate.sh
-source "$(dirname "${BASH_SOURCE[0]}")/cwf-hook-gate.sh"
+source "$SCRIPT_DIR/cwf-hook-gate.sh"
 # shellcheck source=text-format.sh
-source "$(dirname "${BASH_SOURCE[0]}")/text-format.sh"
+source "$SCRIPT_DIR/text-format.sh"
 # shellcheck source=env-loader.sh
-source "$(dirname "${BASH_SOURCE[0]}")/env-loader.sh"
+source "$SCRIPT_DIR/env-loader.sh"
+
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd)}"
+REDACTOR_SCRIPT="${PLUGIN_ROOT}/scripts/codex/redact-sensitive.pl"
+CAN_REDACT="false"
+if command -v perl >/dev/null 2>&1 && [ -f "$REDACTOR_SCRIPT" ]; then
+    CAN_REDACT="true"
+fi
+
+redact_sensitive_text() {
+    local raw_text="${1-}"
+
+    if [ "$CAN_REDACT" = "true" ]; then
+        if printf '%s' "$raw_text" | perl "$REDACTOR_SCRIPT"; then
+            return 0
+        fi
+    fi
+
+    printf '%s' "$raw_text"
+}
 
 HOOK_TYPE="${1:-stop}"
 
@@ -353,6 +373,7 @@ while [ "$TURN_IDX" -lt "$TURN_COUNT" ]; do
         ] | join("\n")
       else "" end
     ')
+    USER_CONTENT=$(redact_sensitive_text "$USER_CONTENT")
 
     {
         echo ""
@@ -368,6 +389,7 @@ while [ "$TURN_IDX" -lt "$TURN_COUNT" ]; do
       # Strip leading/trailing blank lines
       | gsub("^[\\s\\n]+"; "") | gsub("[\\s\\n]+$"; "")
     ')
+    ASSISTANT_TEXT=$(redact_sensitive_text "$ASSISTANT_TEXT")
 
     if [ -n "$ASSISTANT_TEXT" ]; then
         ASSISTANT_TEXT=$(normalize_multiline_text "$ASSISTANT_TEXT")
@@ -442,6 +464,7 @@ while [ "$TURN_IDX" -lt "$TURN_COUNT" ]; do
                 $name
               end
             ')
+            TOOL_SUMMARY=$(redact_sensitive_text "$TOOL_SUMMARY")
 
             TOOL_NUM=$((TOOL_IDX + 1))
             echo "${TOOL_NUM}. ${TOOL_SUMMARY}" >> "$OUT_FILE"
@@ -465,6 +488,7 @@ while [ "$TURN_IDX" -lt "$TURN_COUNT" ]; do
         select(test("User has answered|user.*answered"))
       ] | join("\n")
     ' 2>/dev/null || true)
+    ASK_ANSWERS=$(redact_sensitive_text "$ASK_ANSWERS")
     if [ -n "$ASK_ANSWERS" ]; then
         {
             echo ""

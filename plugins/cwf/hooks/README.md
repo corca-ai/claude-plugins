@@ -8,7 +8,7 @@ This file maps scripts under [plugins/cwf/hooks/scripts](scripts).
 - [scripts/cancel-timer.sh](scripts/cancel-timer.sh): Cancels waiting timer after `AskUserQuestion`.
 - [scripts/heartbeat.sh](scripts/heartbeat.sh): Emits async heartbeat metadata during tool usage.
 - [scripts/track-user-input.sh](scripts/track-user-input.sh): Records user prompt metadata.
-- [scripts/log-turn.sh](scripts/log-turn.sh): Persists turn/session logs.
+- [scripts/log-turn.sh](scripts/log-turn.sh): Persists turn/session logs with sensitive token redaction.
 - [scripts/parse-transcript.sh](scripts/parse-transcript.sh): Parses transcript structure for logging and exports.
 - [scripts/smart-read.sh](scripts/smart-read.sh): Read guard for large files.
 - [scripts/redirect-websearch.sh](scripts/redirect-websearch.sh): Redirects native web search flow to CWF gather flow.
