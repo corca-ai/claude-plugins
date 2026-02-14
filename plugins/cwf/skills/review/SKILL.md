@@ -560,6 +560,15 @@ Output to the conversation (do NOT write to a file unless the user asks):
 
 (If none: "No suggestions.")
 
+### Commit Boundary Guidance
+(Only when follow-up implementation is requested after this review)
+- `tidy`: structural/readability-only changes with no behavior or policy effect
+- `behavior-policy`: runtime behavior changes, validation logic, workflow/policy enforcement updates
+- If both categories exist, split work into separate commit units:
+  1. `tidy` commit(s) first
+  2. `behavior-policy` commit(s) second
+- After completing the first unit, run `git status --short`, confirm the next boundary, then commit before starting the next major unit.
+
 ### Confidence Note
 {Note any of the following:}
 - Disagreements between reviewers and which side was chosen
@@ -642,6 +651,9 @@ This prevents sensitive review content (diffs, plans) from persisting in `/tmp/`
    report which base path was used (explicit `--base`, upstream, or fallback).
 10. **Critical reviewer outputs hard-fail** — if any required review file
     remains invalid after bounded retry, stop synthesis with explicit file-level error.
+11. **Commit-boundary split for mixed follow-up work** — when review findings
+    imply both `tidy` and `behavior-policy` changes, recommend separate commit
+    units and `tidy` first.
 
 ---
 
@@ -665,6 +677,10 @@ Then /review uses the upstream branch as base and records base_strategy=upstream
 Given a review invocation with --mode code --base <branch>
 When <branch> exists
 Then /review deterministically uses that base and records base_strategy=explicit (--base)
+
+Given review findings include both structural tidy changes and behavior-policy changes
+When /review renders synthesis
+Then the synthesis includes commit-boundary guidance to split tidy and behavior-policy commits
 ```
 
 ---
