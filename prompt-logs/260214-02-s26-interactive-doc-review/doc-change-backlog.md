@@ -46,4 +46,8 @@ Status: Done.
 
 10. `NON_AUTOMATABLE` — Decide whether generated `repo-index.md` header self-link (`[repo-index.md](repo-index.md)`) should be kept.
 Reason: template consistency vs low-signal redundancy trade-off.
-Status: Pending.
+Status: Done (superseded by AGENTS-managed index policy; file removed).
+
+11. `NON_AUTOMATABLE` — Apply AGENTS-managed repository index policy for this repository.
+Reason: keep a single discoverability surface and reduce generated-file drift.
+Status: Done.

@@ -3,7 +3,7 @@ set -euo pipefail
 
 if [ "${1:-}" = "" ]; then
   echo "Usage: check-index-coverage.sh <index-file> [--profile repo|cap]"
-  echo "Example: check-index-coverage.sh repo-index.md --profile repo"
+  echo "Example: check-index-coverage.sh AGENTS.md --profile repo"
   echo "Example: check-index-coverage.sh cwf-index.md --profile cap"
   exit 2
 fi

@@ -270,12 +270,10 @@ cwf:setup --codex        # Codex 사용자 스코프(~/.agents/*)에 CWF 스킬/
 cwf:setup --codex-wrapper # 세션 로그 자동 동기화를 위한 codex wrapper 설치
 cwf:setup --cap-index    # CWF capability 인덱스만 생성/갱신 (cwf-index.md)
 cwf:setup --repo-index   # 저장소 인덱스 명시적 생성/갱신
-cwf:setup --repo-index --target file   # repo-index.md만 (기본값)
-cwf:setup --repo-index --target agents # AGENTS.md 관리 블록만
-cwf:setup --repo-index --target both   # repo-index.md + AGENTS.md 블록
+cwf:setup --repo-index --target agents # AGENTS.md 관리 블록 (권장)
 ```
 
-대화형 훅 그룹 토글, 외부 AI CLI 및 API 키 감지(Codex, Gemini, Tavily, Exa), 선택적 Codex 연동(스킬 + wrapper), 선택적 인덱스 생성을 제공합니다. CWF capability 인덱스는 `cwf:setup --cap-index`로 명시적으로 생성합니다. 저장소 인덱스 재생성은 `cwf:setup --repo-index`를 사용하며, 출력 대상은 [repo-index.md](repo-index.md), [AGENTS.md](AGENTS.md) 관리 블록, 또는 둘 다를 선택할 수 있습니다.
+대화형 훅 그룹 토글, 외부 AI CLI 및 API 키 감지(Codex, Gemini, Tavily, Exa), 선택적 Codex 연동(스킬 + wrapper), 선택적 인덱스 생성을 제공합니다. CWF capability 인덱스는 `cwf:setup --cap-index`로 명시적으로 생성합니다. 저장소 인덱스 재생성은 `cwf:setup --repo-index --target agents`로 [AGENTS.md](AGENTS.md) 관리 블록을 갱신합니다.
 
 전체 레퍼런스: [SKILL.md](plugins/cwf/skills/setup/SKILL.md)
 
@@ -284,7 +282,7 @@ cwf:setup --repo-index --target both   # repo-index.md + AGENTS.md 블록
 - [AGENTS.md](AGENTS.md)는 공통 크로스-에이전트 엔트리포인트입니다(Codex, Claude Code, 호환 런타임).
 - [CLAUDE.md](CLAUDE.md)는 [AGENTS.md](AGENTS.md)를 참조하는 Claude 전용 thin adapter입니다.
 - 필요 시 `cwf:setup --cap-index`로 CWF capability 맵을 생성할 수 있습니다.
-- 저장소 인덱스 기본 출력은 [repo-index.md](repo-index.md)이며, `cwf:setup --repo-index --target agents|both`로 [AGENTS.md](AGENTS.md) 관리 블록에도 반영할 수 있습니다.
+- 저장소 인덱스는 `cwf:setup --repo-index --target agents`로 [AGENTS.md](AGENTS.md) 관리 블록에 반영합니다.
 - 사용자 관점 문서 인터랙티브 리뷰 플레이북(관계도 + 청크 리뷰 + 재개 상태): [docs/interactive-doc-review-protocol.md](docs/interactive-doc-review-protocol.md).
 
 ### Codex 연동

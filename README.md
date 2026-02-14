@@ -270,12 +270,10 @@ cwf:setup --codex        # Link CWF skills/references into Codex user scope (~/.
 cwf:setup --codex-wrapper # Install codex wrapper for automatic session log sync
 cwf:setup --cap-index    # Generate/refresh CWF capability index only (cwf-index.md)
 cwf:setup --repo-index   # Generate/refresh repository index output (explicit)
-cwf:setup --repo-index --target file   # repo-index.md only (default)
-cwf:setup --repo-index --target agents # AGENTS.md managed block only
-cwf:setup --repo-index --target both   # repo-index.md + AGENTS.md block
+cwf:setup --repo-index --target agents # AGENTS.md managed block (recommended)
 ```
 
-Interactive hook group toggle, external AI CLI and API key detection (Codex, Gemini, Tavily, Exa), optional Codex integration (skills + wrapper), and optional index generation. CWF capability index generation is explicit via `cwf:setup --cap-index`. Repository index regeneration uses `cwf:setup --repo-index` and targets [repo-index.md](repo-index.md), [AGENTS.md](AGENTS.md) managed block, or both.
+Interactive hook group toggle, external AI CLI and API key detection (Codex, Gemini, Tavily, Exa), optional Codex integration (skills + wrapper), and optional index generation. CWF capability index generation is explicit via `cwf:setup --cap-index`. Repository index regeneration updates the managed block in [AGENTS.md](AGENTS.md) via `cwf:setup --repo-index --target agents`.
 
 Full reference: [SKILL.md](plugins/cwf/skills/setup/SKILL.md)
 
@@ -284,7 +282,7 @@ Full reference: [SKILL.md](plugins/cwf/skills/setup/SKILL.md)
 - [AGENTS.md](AGENTS.md) is the shared cross-agent entry point (Codex, Claude Code, and compatible runtimes).
 - [CLAUDE.md](CLAUDE.md) is a thin Claude-specific adapter that points to [AGENTS.md](AGENTS.md).
 - Optional CWF capability map can be generated on demand with `cwf:setup --cap-index`.
-- Repository-wide index output defaults to [repo-index.md](repo-index.md) and can also be embedded into the managed block in [AGENTS.md](AGENTS.md) via `cwf:setup --repo-index --target agents|both`.
+- Repository-wide index output is managed in [AGENTS.md](AGENTS.md) via `cwf:setup --repo-index --target agents`.
 - Interactive user-facing doc review playbook (relationship map + chunked review + resume state): [docs/interactive-doc-review-protocol.md](docs/interactive-doc-review-protocol.md).
 
 ### Codex Integration

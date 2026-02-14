@@ -175,9 +175,6 @@ if [[ "$PROFILE" != "fast" ]]; then
     if [[ -f AGENTS.md ]]; then
       bash scripts/check-index-coverage.sh AGENTS.md --profile repo
     fi
-    if [[ -f repo-index.md ]]; then
-      bash scripts/check-index-coverage.sh repo-index.md --profile repo
-    fi
     if [[ -f cwf-index.md ]]; then
       bash scripts/check-index-coverage.sh cwf-index.md --profile cap
     fi

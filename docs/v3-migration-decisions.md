@@ -94,7 +94,7 @@ Never reduce review depth or agent count for cost reasons. All 6 reviewers alway
 `cwf:setup` now separates two index outputs:
 
 - Capability index: optional artifact generated only on explicit command (`cwf:setup --cap-index`), not by default full setup.
-- Repository index: [repo-index.md](../repo-index.md) and/or [AGENTS.md](../AGENTS.md) managed block (`cwf:setup --repo-index --target file|agents|both`).
+- Repository index: [AGENTS.md](../AGENTS.md) managed block (`cwf:setup --repo-index --target agents`).
 
 Repository index content remains "when to read what" pointers, not summaries.
 
