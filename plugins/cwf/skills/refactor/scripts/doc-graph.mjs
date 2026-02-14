@@ -298,8 +298,7 @@ const orphanExclude = new Set([
   'README.md',
   'README.ko.md',
   'AGENTS.md',
-  'CLAUDE.md',
-  'cwf-index.md'
+  'CLAUDE.md'
 ]);
 
 const allMdRel = mdFiles.map((f) => relative(repoRoot, f));

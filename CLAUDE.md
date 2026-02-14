@@ -5,7 +5,6 @@ Shared agent rules and workflow guidance live in [AGENTS.md](AGENTS.md).
 Read first:
 
 1. [AGENTS.md](AGENTS.md)
-2. [cwf-index.md](cwf-index.md) (generated project map)
 
 This file is intentionally Claude-specific:
 

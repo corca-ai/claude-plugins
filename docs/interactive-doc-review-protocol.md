@@ -23,7 +23,7 @@ Repeatable, resumable workflow for user-facing documentation outside [prompt-log
 
 ### Include
 
-- Root docs: [AGENTS.md](../AGENTS.md), [README.md](../README.md), [README.ko.md](../README.ko.md), [CLAUDE.md](../CLAUDE.md), [AI_NATIVE_PRODUCT_TEAM.md](../AI_NATIVE_PRODUCT_TEAM.md), [AI_NATIVE_PRODUCT_TEAM.ko.md](../AI_NATIVE_PRODUCT_TEAM.ko.md), [cwf-index.md](../cwf-index.md), [repo-index.md](../repo-index.md), [CHANGELOG.md](../CHANGELOG.md)
+- Root docs: [AGENTS.md](../AGENTS.md), [README.md](../README.md), [README.ko.md](../README.ko.md), [CLAUDE.md](../CLAUDE.md), [AI_NATIVE_PRODUCT_TEAM.md](../AI_NATIVE_PRODUCT_TEAM.md), [AI_NATIVE_PRODUCT_TEAM.ko.md](../AI_NATIVE_PRODUCT_TEAM.ko.md), [repo-index.md](../repo-index.md), [CHANGELOG.md](../CHANGELOG.md)
 - Project docs: [docs/*.md](.)
 - Plugin shared references: [plugins/cwf/references/*.md](../plugins/cwf/references/)
 - Plugin internal reference docs: [plugins/cwf/skills/*/references/*.md](../plugins/cwf/skills/)
@@ -64,7 +64,6 @@ Reference command:
   printf '%s\n' \
     AGENTS.md \
     CLAUDE.md \
-    cwf-index.md \
     repo-index.md \
     README.md \
     README.ko.md \
@@ -168,8 +167,8 @@ review_state:
   queue_policy: anchors_then_docs_then_plugin_refs_then_skill_refs_then_references
   map_presented_in_current_session: true
   graph_baseline:
-    total_docs: 69
-    total_links: 435
+    total_docs: 68
+    total_links: 399
     orphan_count: 0
     broken_ref_count: 0
   group_progress:
@@ -181,10 +180,10 @@ review_state:
   cursor:
     file: repo-index.md
     next_line: 1
-  completed_files: [AGENTS.md, CLAUDE.md, cwf-index.md]
+  completed_files: [AGENTS.md, CLAUDE.md]
   current_file_eof: true
-  last_chunk_range: "cwf-index.md:1-43"
-  last_inbound_count: 9
+  last_chunk_range: "CLAUDE.md:1-14"
+  last_inbound_count: 6
   orphan_triage:
     intentional: []
     needs_link_fix: []
@@ -192,7 +191,6 @@ review_state:
   unresolved_discussion_points:
     - "CLAUDE.md routing duplication: keep both sentence pointer and numbered read-first list?"
     - "CLAUDE.md env fallback note: keep in adapter or move to troubleshooting doc?"
-    - "cwf-index.md line-3 self-link: keep for template consistency or remove as low-signal?"
   last_updated: "2026-02-14"
 ```
 

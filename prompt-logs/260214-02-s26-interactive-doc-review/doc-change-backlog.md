@@ -38,4 +38,8 @@ Status: Pending.
 
 8. `NON_AUTOMATABLE` — Decide whether `cwf-index.md` line-3 self-link (`[cwf-index.md](cwf-index.md)`) should be kept.
 Reason: it's template-consistent but may be low-signal redundancy in same-file context.
-Status: Pending.
+Status: Done (superseded by AGENTS-first policy; file removed).
+
+9. `NON_AUTOMATABLE` — Confirm AGENTS-only default entrypoint while preserving explicit `--cap-index` as optional path.
+Reason: balances policy clarity (single default) with user-controlled discoverability artifact generation.
+Status: Done.
