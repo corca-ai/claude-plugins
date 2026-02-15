@@ -41,7 +41,7 @@ As of v3.0.0, standalone plugins (gather-context, clarify, retro, refactor, atte
 ### What CWF Is
 
 - A single workflow plugin (`cwf`) that integrates context gathering, requirement clarification, planning, implementation, review, retrospective, handoff, and shipping.
-- A stateful workflow system where `cwf-state.yaml`, prompt-log artifacts, and hooks preserve context across phase/session boundaries.
+- A stateful workflow system where [`.cwf/cwf-state.yaml`](.cwf/cwf-state.yaml), prompt-log artifacts, and hooks preserve context across phase/session boundaries.
 - A composable skill framework built on shared concepts (Expert Advisor, Tier Classification, Agent Orchestration, Decision Point, Handoff, Provenance).
 
 ### What CWF Is Not
@@ -52,7 +52,7 @@ As of v3.0.0, standalone plugins (gather-context, clarify, retro, refactor, atte
 
 ### Assumptions
 
-- Users work in repositories where session artifacts (`.cwf/prompt-logs/`, `cwf-state.yaml`) are allowed and useful.
+- Users work in repositories where session artifacts (`.cwf/prompt-logs/`, [`.cwf/cwf-state.yaml`](.cwf/cwf-state.yaml)) are allowed and useful.
 - Users accept progressive disclosure: start from [AGENTS.md](AGENTS.md), then load deeper docs as needed.
 - Teams prefer deterministic validation scripts for recurring quality checks over relying on behavioral memory.
 
@@ -208,7 +208,7 @@ Generate session or phase handoff documents from project state and artifacts.
 
 ```text
 cwf:handoff                # Generate next-session.md + register
-cwf:handoff --register     # Register session in cwf-state.yaml only
+cwf:handoff --register     # Register session in .cwf/cwf-state.yaml only
 cwf:handoff --phase        # Generate phase-handoff.md (HOW context)
 ```
 
@@ -259,7 +259,7 @@ cwf:hitl --rule "<rule text>"        # Add review rule for remaining queue
 cwf:review --human                   # Compatibility alias (routes to cwf:hitl)
 ```
 
-State is persisted under `.cwf/hitl/sessions/` (`state.yaml`, `rules.yaml`, `queue.json`, `events.log`). `cwf-state.yaml` stores only live pointer metadata to the active HITL session.
+State is persisted under `.cwf/hitl/sessions/` (`state.yaml`, `rules.yaml`, `queue.json`, `events.log`). [`.cwf/cwf-state.yaml`](.cwf/cwf-state.yaml) stores only live pointer metadata to the active HITL session.
 
 Full reference: [SKILL.md](plugins/cwf/skills/hitl/SKILL.md)
 

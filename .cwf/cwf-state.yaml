@@ -24,7 +24,7 @@ session_defaults:
 sessions:
   - id: S0
     title: "Clarify + master plan"
-    dir: prompt-logs/260208-03-cwf-v3-master-plan
+    dir: .cwf/prompt-logs/260208-03-cwf-v3-master-plan
     branch: main
     completed_at: "2026-02-08"
     summary: "Designed CWF v3 architecture with 15-session plan and single-plugin approach"
@@ -32,7 +32,7 @@ sessions:
 
   - id: S1
     title: "Refactor critical issues"
-    dir: prompt-logs/260208-04-refactor-critical
+    dir: .cwf/prompt-logs/260208-04-refactor-critical
     branch: main
     completed_at: "2026-02-08"
     summary: "Fixed shebang/strict-mode/eval issues across 6 plugins, established JSON safety patterns"
@@ -40,7 +40,7 @@ sessions:
 
   - id: S2
     title: "Refactor session 2"
-    dir: prompt-logs/260208-05-refactor-s2
+    dir: .cwf/prompt-logs/260208-05-refactor-s2
     branch: main
     completed_at: "2026-02-08"
     summary: "Aligned env var naming to CLAUDE_CORCA_{PLUGIN}_{SETTING} across attention-hook"
@@ -48,7 +48,7 @@ sessions:
 
   - id: S3
     title: "Ship skill"
-    dir: prompt-logs/260208-06-ship-skill
+    dir: .cwf/prompt-logs/260208-06-ship-skill
     branch: main
     completed_at: "2026-02-08"
     summary: "Built /ship local skill for GitHub workflow automation with templating system"
@@ -56,7 +56,7 @@ sessions:
 
   - id: S4
     title: "CWF scaffold"
-    dir: prompt-logs/260208-04-cwf-scaffold
+    dir: .cwf/prompt-logs/260208-04-cwf-scaffold
     branch: main
     completed_at: "2026-02-08"
     summary: "Scaffolded CWF plugin with gate mechanism and 13 source/stub files for hooks"
@@ -64,7 +64,7 @@ sessions:
 
   - id: S4.5
     title: "Ship skill improvements"
-    dir: prompt-logs/260208-07-ship-improve
+    dir: .cwf/prompt-logs/260208-07-ship-improve
     branch: main
     completed_at: "2026-02-08"
     summary: "Enhanced /ship with Korean PR templates and 2x2 autonomous-merge decision matrix"
@@ -72,7 +72,7 @@ sessions:
 
   - id: S4.6
     title: "SW Factory discussion"
-    dir: prompt-logs/260208-08-sw-factory-discussion
+    dir: .cwf/prompt-logs/260208-08-sw-factory-discussion
     branch: main
     completed_at: "2026-02-08"
     summary: "Applied SW Factory concepts: sernarative review, progressive disclosure, BDD criteria"
@@ -80,7 +80,7 @@ sessions:
 
   - id: S5a
     title: "CWF review — internal reviewers"
-    dir: prompt-logs/260208-09-cwf-review-internal
+    dir: .cwf/prompt-logs/260208-09-cwf-review-internal
     branch: main
     completed_at: "2026-02-08"
     summary: "Implemented /review skill with 2 internal parallel reviewers (Security, UX/DX)"
@@ -88,7 +88,7 @@ sessions:
 
   - id: S5b
     title: "CWF review — external reviewers"
-    dir: prompt-logs/260208-03-s5b-external-reviewers
+    dir: .cwf/prompt-logs/260208-03-s5b-external-reviewers
     branch: main
     completed_at: "2026-02-08"
     summary: "Expanded /review to 4 reviewers with external CLIs (Codex, Gemini) and provenance format"
@@ -96,7 +96,7 @@ sessions:
 
   - id: S6a
     title: "CWF infra hooks"
-    dir: prompt-logs/260208-11-cwf-infra-hooks
+    dir: .cwf/prompt-logs/260208-11-cwf-infra-hooks
     branch: main
     completed_at: "2026-02-08"
     summary: "Migrated 3 simple hooks (check-markdown, smart-read, log-turn) into CWF plugin"
@@ -104,7 +104,7 @@ sessions:
 
   - id: S6b
     title: "CWF hook migration"
-    dir: prompt-logs/260208-12-s6b-cwf-migration
+    dir: .cwf/prompt-logs/260208-12-s6b-cwf-migration
     branch: marketplace-v3
     completed_at: "2026-02-08"
     summary: "Migrated attention-hook (5 scripts + 2 utilities) into CWF, added check-shell.sh"
@@ -112,7 +112,7 @@ sessions:
 
   - id: S7-prep
     title: "Populate cwf-state.yaml + update handoff workflow"
-    dir: prompt-logs/260208-13-s7-prep-cwf-state
+    dir: .cwf/prompt-logs/260208-13-s7-prep-cwf-state
     branch: marketplace-v3
     completed_at: "2026-02-08"
     summary: "Created machine-readable SSOT for session history, updated handoff template"
@@ -120,7 +120,7 @@ sessions:
 
   - id: S7
     title: "Migrate gather-context → cwf:gather"
-    dir: prompt-logs/260208-15-s7-cwf-gather-migration
+    dir: .cwf/prompt-logs/260208-15-s7-cwf-gather-migration
     branch: marketplace-v3
     completed_at: "2026-02-08"
     summary: "Copied gather-context skill into CWF as cwf:gather (8 scripts, 6 references, adapted SKILL.md), activated WebSearch redirect hook"
@@ -128,7 +128,7 @@ sessions:
 
   - id: S8
     title: "Migrate clarify → cwf:clarify"
-    dir: prompt-logs/260208-16-s8-cwf-clarify-migration
+    dir: .cwf/prompt-logs/260208-16-s8-cwf-clarify-migration
     branch: marketplace-v3
     completed_at: "2026-02-08"
     summary: "Copied clarify skill into CWF as cwf:clarify (SKILL.md + 4 reference files), updated Path A to use cwf:gather search script"
@@ -136,7 +136,7 @@ sessions:
 
   - id: S9
     title: "Migrate plan-and-lessons → cwf:plan"
-    dir: prompt-logs/260208-18-s9-cwf-plan
+    dir: .cwf/prompt-logs/260208-18-s9-cwf-plan
     branch: marketplace-v3
     completed_at: "2026-02-08"
     summary: "Created cwf:plan skill with 2-agent research + synthesizer pattern, synced plan-protocol.md Handoff Document section"
@@ -144,7 +144,7 @@ sessions:
 
   - id: S10
     title: "Build cwf:impl"
-    dir: prompt-logs/260208-19-s10-cwf-impl
+    dir: .cwf/prompt-logs/260208-19-s10-cwf-impl
     branch: marketplace-v3
     completed_at: "2026-02-08"
     summary: "Created cwf:impl skill with 4-phase orchestration (Load Plan → Analyze & Decompose → Execute 3a/3b → Verify), adaptive team sizing, domain signal table"
@@ -152,14 +152,14 @@ sessions:
 
   - id: S11a
     title: "Migrate retro → cwf:retro"
-    dir: prompt-logs/260208-20-s11a-cwf-retro
+    dir: .cwf/prompt-logs/260208-20-s11a-cwf-retro
     branch: marketplace-v3
     completed_at: "2026-02-08"
     summary: "Migrated retro v2.0.2 into CWF as cwf:retro with 2-batch parallel sub-agent design for deep mode and eval>state>doc persist hierarchy"
 
   - id: S11b
     title: "Migrate refactor → cwf:refactor"
-    dir: prompt-logs/260208-21-s11b-cwf-refactor
+    dir: .cwf/prompt-logs/260208-21-s11b-cwf-refactor
     branch: marketplace-v3
     completed_at: "2026-02-08"
     summary: "Migrated refactor v1.1.2 into CWF as cwf:refactor with 2-agent Deep Review and 3-agent Holistic parallel sub-agents"
@@ -167,7 +167,7 @@ sessions:
 
   - id: S12
     title: "Build cwf:setup + cwf:update + cwf:handoff"
-    dir: prompt-logs/260208-22-s12-cwf-setup-update-handoff
+    dir: .cwf/prompt-logs/260208-22-s12-cwf-setup-update-handoff
     branch: marketplace-v3
     completed_at: "2026-02-08"
     summary: "Built cwf:setup (hook toggle + tool detection + index.md), cwf:update (version check), cwf:handoff (state-based handoff generation). Rewrote install.sh and update-all.sh for single cwf plugin."
@@ -175,7 +175,7 @@ sessions:
 
   - id: S13
     title: "Holistic refactor review on entire CWF plugin"
-    dir: prompt-logs/260208-23-s13-holistic-refactor
+    dir: .cwf/prompt-logs/260208-23-s13-holistic-refactor
     branch: marketplace-v3
     completed_at: "2026-02-09"
     summary: "Cross-cutting quality gate on 9 skills + 14 hooks. Fixed broken refs (4 skills), missing Rules (gather), Language inconsistency. Created skill-conventions.md. Deep retro surfaced self-healing criteria need (Meadows/Woods). Hard wrap cleanup on 16 files."
@@ -183,7 +183,7 @@ sessions:
 
   - id: S13.5-A
     title: "Self-healing provenance system"
-    dir: prompt-logs/260209-24-s13.5-feedback-loop-infra
+    dir: .cwf/prompt-logs/260209-24-s13.5-feedback-loop-infra
     branch: s13.5-a-provenance
     completed_at: "2026-02-09"
     summary: "Implemented provenance sidecar pattern: 6 .provenance.yaml files, provenance-check.sh script, refactor holistic integration (Phase 1b), handoff unresolved items propagation (Phase 4b), skill-conventions Provenance Rule. Deep retro with Meadows/Woods expert analysis."
@@ -191,7 +191,7 @@ sessions:
 
   - id: S13.5-B
     title: "Expert-in-the-loop + phase handoff"
-    dir: prompt-logs/260209-25-s13.5-b-expert-loop
+    dir: .cwf/prompt-logs/260209-25-s13.5-b-expert-loop
     branch: s13.5-b-expert-loop
     completed_at: "2026-02-09"
     summary: "Expert-in-the-loop for clarify (Phase 2.5), review (Slots 5-6), retro (roster maintenance). Shared expert-advisor-guide.md. Phase handoff --phase mode for handoff/impl/clarify skills. Deep retro with Klein RPD + Argyris double-loop."
@@ -199,7 +199,7 @@ sessions:
 
   - id: S13.5-B2
     title: "Concept distillation + README v3"
-    dir: prompt-logs/260209-26-s13.5-b2-concept-distillation
+    dir: .cwf/prompt-logs/260209-26-s13.5-b2-concept-distillation
     branch: marketplace-v3
     completed_at: "2026-02-09"
     summary: "Applied Jackson's Essence of Software to analyze CWF into 6 generic + 9 application concepts. Rewrote README.md around CWF single-plugin structure (336→273 lines). Identified 3 refactor integration points for concept-based analysis (unimplemented)."
@@ -207,7 +207,7 @@ sessions:
 
   - id: S13.5-B3
     title: "Concept refactor plan + hook observability fix + implementation"
-    dir: prompt-logs/260209-27-s13.5-b3-concept-refactor
+    dir: .cwf/prompt-logs/260209-27-s13.5-b3-concept-refactor
     branch: feat/concept-refactor-integration
     completed_at: "2026-02-09"
     summary: "Designed and implemented Form/Meaning/Function restructuring of holistic + deep review frameworks. Created concept-map.md (6 concepts + 9×6 sync map). Restructured holistic-criteria.md (PP/BI/MC → Form/Meaning/Function) and review-criteria.md (merged 4+5, added Concept Integrity). Fixed exit-plan-mode.sh observability. GitHub issue #17."
@@ -215,7 +215,7 @@ sessions:
 
   - id: post-B3
     title: "Post S13.5-B3 housekeeping"
-    dir: prompt-logs/260209-28-post-b3-housekeeping
+    dir: .cwf/prompt-logs/260209-28-post-b3-housekeeping
     branch: marketplace-v3
     completed_at: "2026-02-09"
     summary: "Provenance hook_count update, expert roster, master-plan B3 row, hook audit, next-prompt-dir script, plan mode protocol"
@@ -223,7 +223,7 @@ sessions:
 
   - id: S29
     title: "Plan mode removal + live state + compact recovery"
-    dir: prompt-logs/260209-29-live-state-compact-recovery
+    dir: .cwf/prompt-logs/260209-29-live-state-compact-recovery
     branch: marketplace-v3
     completed_at: "2026-02-09"
     summary: "Removed plan mode hooks, added cwf-state.yaml live section, built SessionStart(compact) hook with session log turn injection, deprecated plan-and-lessons plugin"
@@ -231,7 +231,7 @@ sessions:
 
   - id: S32-impl
     title: "L1-L3+L9 implementation"
-    dir: prompt-logs/260210-03-docs-overhaul-impl
+    dir: .cwf/prompt-logs/260210-03-docs-overhaul-impl
     branch: marketplace-v3
     completed_at: "2026-02-10"
     summary: "Implemented branch gate (impl Phase 0.5), clarify completion gate (Phase 1.0), sub-agent file persistence with context recovery protocol (5 skills), log-turn.sh fix, review error observability. Extracted shared context-recovery-protocol.md. Full pipeline: clarify→plan→review→impl(4 agents)→review(6 reviewers)→fix→commit. Deep retro with Brooks + Ousterhout."
@@ -239,7 +239,7 @@ sessions:
 
   - id: S33
     title: "CDM improvements + auto-chaining"
-    dir: prompt-logs/260210-04-s33-cdm-auto-chain
+    dir: .cwf/prompt-logs/260210-04-s33-cdm-auto-chain
     branch: marketplace-v3
     completed_at: "2026-02-10"
     summary: "4 CDM fixes (plan cross-cutting gate, impl commit strategy branching, decision journal + phase-aware compact recovery, review fail-fast for CAPACITY errors) + cwf:run auto-chaining skill + impl gate extraction to shared reference. 6 commits, 5/5 BDD pass."
@@ -247,7 +247,7 @@ sessions:
 
   - id: S14
     title: "Integration test + agent-browser plan"
-    dir: prompt-logs/260211-01-s14-integration-test
+    dir: .cwf/prompt-logs/260211-01-s14-integration-test
     branch: marketplace-v3
     completed_at: "2026-02-11"
     summary: "Integration test: 5/5 CDM items verified, 7/7 run logic checks, 6/6 fail-fast checks, 28/28 cross-refs clean. compact-context.sh 2 bugs fixed (decisions leak, quote stripping). v3-migration-decisions.md written. Web research replay exposed WebFetch 9% success rate → agent-browser integration planned."
@@ -256,7 +256,7 @@ sessions:
 
   - id: S15
     title: "Agent-browser integration into sub-agent prompts"
-    dir: prompt-logs/260211-02-s15-agent-browser-integration
+    dir: .cwf/prompt-logs/260211-02-s15-agent-browser-integration
     branch: marketplace-v3
     completed_at: "2026-02-11"
     summary: "Completed agent-browser integration: cwf:setup tool detection, 4 skill sub-agent prompts updated to reference Web Research Protocol (clarify, plan, retro, review), regression test 3/3 BDD pass (deming.org: WebFetch empty → agent-browser full content)."
@@ -264,7 +264,7 @@ sessions:
 
   - id: S16
     title: "V3 exhaustive analysis handoff design"
-    dir: prompt-logs/260211-03-s16-v3-gap-analysis-handoff
+    dir: .cwf/prompt-logs/260211-03-s16-v3-gap-analysis-handoff
     branch: marketplace-v3
     completed_at: "2026-02-11"
     summary: "Created a single-file next-session handoff for omission-resistant CWF v3 analysis anchored to 42d2cd9..HEAD, including purpose, evidence hierarchy, decision rationale, extraction workflow, and completion gates."
@@ -272,7 +272,7 @@ sessions:
 
   - id: S17
     title: "Harden S16 handoff protocol from integrated review"
-    dir: prompt-logs/260211-04-s17-next-session-hardening
+    dir: .cwf/prompt-logs/260211-04-s17-next-session-hardening
     branch: feat/s17-handoff-protocol-hardening
     completed_at: "2026-02-11"
     summary: "Implemented integrated-review fixes for S16 next-session handoff: scope freeze, full-scope manifest gate, stable GAP/UTT/CW/BL traceability, semantic completion checks, redaction policy, and canonical milestone mapping."
@@ -280,7 +280,7 @@ sessions:
 
   - id: S18
     title: "Execute hardened S16 gap-analysis protocol"
-    dir: prompt-logs/260211-05-s18-v3-gap-analysis-execution
+    dir: .cwf/prompt-logs/260211-05-s18-v3-gap-analysis-execution
     branch: feat/s17-handoff-protocol-hardening
     completed_at: "2026-02-11"
     summary: "Executed S16 hardened protocol end-to-end on frozen range 42d2cd9..01293b3: full-scope manifest, 74-row coverage matrix, 734-item redacted utterance index, GAP/CW/BL traceability set, semantic completion gate pass, and explicit blocking-risk summary."
@@ -288,7 +288,7 @@ sessions:
 
   - id: S19
     title: "Resolve top open gaps from S18"
-    dir: prompt-logs/260211-06-s19-resolve-top-open-gaps
+    dir: .cwf/prompt-logs/260211-06-s19-resolve-top-open-gaps
     branch: feat/s17-handoff-protocol-hardening
     completed_at: "2026-02-11"
     summary: "Implemented BL-001/002/003 closures: executable review contracts for --scenarios and --base, canonical runtime log migration to sessions/*.codex.md + sessions/*.claude.md with legacy compatibility reads, and aligned setup/readme/retro/handoff contracts with smoke validation evidence."
@@ -296,7 +296,7 @@ sessions:
 
   - id: S20
     title: "Close remaining open gap set"
-    dir: prompt-logs/260211-07-s20-close-remaining-open-gap-set
+    dir: .cwf/prompt-logs/260211-07-s20-close-remaining-open-gap-set
     branch: feat/s17-handoff-protocol-hardening
     completed_at: "2026-02-11"
     summary: "Closed DEC-003/006/007 scope: GAP-003 dedicated trace with binary resolved verdict, stage-tier persistence gate policy encoded (hard critical / soft non-critical), and check-session semantic extension via --semantic-gap with positive/negative validation evidence."
@@ -304,7 +304,7 @@ sessions:
 
   - id: S21
     title: "Profile-first env loader + review provider routing"
-    dir: prompt-logs/260211-08-s21-env-loader-review-provider-routing
+    dir: .cwf/prompt-logs/260211-08-s21-env-loader-review-provider-routing
     branch: feat/s17-handoff-protocol-hardening
     completed_at: "2026-02-11"
     summary: "Introduced shared env-loader (env -> shell profiles -> legacy .claude/.env) and migrated hook/gather scripts to it; aligned docs to profile-first policy; updated review skill to provider-routed external slots across codex/gemini/claude fallback."
@@ -312,7 +312,7 @@ sessions:
 
   - id: S22
     title: "Pre-release readiness audit plan"
-    dir: prompt-logs/260211-09-s22-pre-release-readiness-audit-plan
+    dir: .cwf/prompt-logs/260211-09-s22-pre-release-readiness-audit-plan
     branch: marketplace-v3
     completed_at: "2026-02-11"
     summary: "Established release-readiness audit scope and gates for concerns 1-4 with explicit pre-Step4 split and mention-only execution contract."
@@ -320,7 +320,7 @@ sessions:
 
   - id: S24
     title: "Static analysis tooling integration"
-    dir: prompt-logs/260212-01-static-analysis-tooling
+    dir: .cwf/prompt-logs/260212-01-static-analysis-tooling
     branch: feat/s24-static-analysis-tooling
     completed_at: "2026-02-12"
     summary: "Added 5 standalone analysis scripts (check-links.sh, doc-graph.mjs, find-duplicates.py, check-schemas.sh, doc-churn.sh) + 3 JSON schemas + .lychee.toml + vale stub. Full cwf:run pipeline execution. PR #23."
@@ -328,7 +328,7 @@ sessions:
 
   - id: S25
     title: "Post-S24 follow-up: structural fixes + document sync"
-    dir: prompt-logs/260213-01-s25-post-s24-followup
+    dir: .cwf/prompt-logs/260213-01-s25-post-s24-followup
     branch: feat/s25-post-s24-followup
     completed_at: "2026-02-13"
     summary: "Applied S24 retro-driven fixes: check-links-local.sh PostToolUse hook, check-schemas.sh positional args refactor, review mode-namespaced output files, dynamic max_turns scaling, expert verified field for all 15 roster entries. Synced cwf-index.md, README.md, README.ko.md."
@@ -336,7 +336,7 @@ sessions:
 
   - id: S23
     title: "Execute concerns 1-3 + prepare Step 4 prompt"
-    dir: prompt-logs/260211-09-s22-pre-release-readiness-audit-plan
+    dir: .cwf/prompt-logs/260211-09-s22-pre-release-readiness-audit-plan
     branch: feat/s23-prestep4-audit-exec
     completed_at: "2026-02-11"
     summary: "Executed full pre-Step4 evidence package with 12-skill coverage, script-path audit, README/discoverability gates, and interactive Step4 prompt. Added commit-checkpoint rule to handoff execution contracts."
@@ -366,12 +366,12 @@ hooks:
 # check-session.sh --live validates required fields are populated.
 live:
   session_id: "S25"
-  dir: "prompt-logs/260214-01-s25-post-s24-followup-retro-day2"
+  dir: ".cwf/prompt-logs/260214-01-s25-post-s24-followup-retro-day2"
   branch: "feat/s25-post-s24-followup"
   phase: "done"
   task: "S24 follow-up: hook integration, review namespace, max_turns scaling, expert verified field, check-schemas refactor, document sync"
   key_files:
-    - cwf-state.yaml
+    - .cwf/cwf-state.yaml
   decisions: []
   decision_journal: []
 

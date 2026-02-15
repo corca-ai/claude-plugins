@@ -35,6 +35,20 @@ resolve_cwf_prompt_logs_dir() {
   fi
 }
 
+resolve_cwf_state_file() {
+  local base_dir="$1"
+  local artifact_root
+  local raw_state_file="${CWF_STATE_FILE:-}"
+
+  if [[ -n "$raw_state_file" ]]; then
+    resolve_cwf_abs_path "$base_dir" "$raw_state_file"
+    return 0
+  fi
+
+  artifact_root="$(resolve_cwf_artifact_root "$base_dir")"
+  printf '%s\n' "$artifact_root/cwf-state.yaml"
+}
+
 # Return a stable session-path prefix for script output.
 # Legacy compatibility:
 # - When CWF_PROMPT_LOGS_DIR is absolute outside base_dir, keep "prompt-logs".

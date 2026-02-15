@@ -29,7 +29,7 @@ Project and organizational facts accumulated from retrospectives.
 - **Feedback loop existence over case count**: When a structural failure is discovered and no feedback loop exists to detect future occurrences, install the loop immediately — don't wait for more cases. (Meadows: "Drift to Low Performance"; Woods: graceful extensibility.)
 - **Reporting: minimize reader's external knowledge dependency**: When reporting quantitative results, provide enough context (denominator, ratio, trend) for the reader to assess significance. "7 rules disabled" → "7/55 rules disabled (13%)".
 - **Reference guide separation by consumer count**: When a reference guide has 1 consumer, keep it specialized. When N consumers need the same pattern, create a new shared guide. "Separate now, unify when stable."
-- **Plan document ≠ current state**: master-plan.md and other plan documents are plans, not execution records. Always check cwf-state.yaml sessions list for actual completion status.
+- **Plan document ≠ current state**: master-plan.md and other plan documents are plans, not execution records. Always check [`.cwf/cwf-state.yaml`](../.cwf/cwf-state.yaml) sessions list for actual completion status.
 - **Parallel sub-agent review after large changes**: After large multi-file changes, consider running parallel sub-agent reviews before committing — give each agent a different review perspective (content integrity, missed opportunities, structural analysis).
 - **Delegation criterion: exploration cost**: When a task requires understanding existing code structure before modifying it, delegate to a sub-agent or codex exec. When creating new files or making small edits with known context, execute directly. Decide before starting exploration — switching mid-exploration wastes the exploration context.
 - **Cross-cutting pattern → shared reference first**: When a plan applies identical logic to 3+ targets (files, skills, modules), extract it to a shared reference file as Step 0 before parallel agents execute. "동일 적용" / "apply the same pattern" is a plan smell — replace with an explicit shared file path. Parallel agents cannot see each other's work, so sharing must be decided at plan level.
@@ -49,7 +49,7 @@ Document placement uses **lifecycle as primary axis**, consumer count as seconda
 | `references/` | Project-scope (permanent) | External framework updates | essence-of-software/distillation.md (source texts) |
 | `.cwf/prompt-logs/{session}/` | Session-scope (ephemeral) | Session ends; absorbed into deliverables | plan.md, retro.md, concept-distillation.md |
 
-Key distinction: `references/` holds **external framework source texts**, not analysis outputs. Discovery of session artifacts is via `cwf-state.yaml` session history.
+Key distinction: `references/` holds **external framework source texts**, not analysis outputs. Discovery of session artifacts is via [`.cwf/cwf-state.yaml`](../.cwf/cwf-state.yaml) session history.
 
 ## Conventions
 

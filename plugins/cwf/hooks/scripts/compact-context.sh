@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 # compact-context.sh — SessionStart(compact) hook
-# Reads cwf-state.yaml live section and injects context after auto-compact.
+# Reads the CWF state file live section and injects context after auto-compact.
 #
 # Input: stdin JSON with source: "compact" (SessionStart common fields)
 # Output: JSON with hookSpecificOutput.additionalContext (or silent exit 0)
@@ -9,23 +9,35 @@ set -euo pipefail
 # Three outcomes (never silent when live is populated):
 #   1. INJECT — live section populated → additionalContext with session state
 #   2. SKIP   — live section empty → exit 0 (pre-live session, no action)
-#   3. SKIP   — cwf-state.yaml not found → exit 0
+#   3. SKIP   — state file not found → exit 0
 
 HOOK_GROUP="compact_recovery"
 # shellcheck source=cwf-hook-gate.sh
 source "$(dirname "${BASH_SOURCE[0]}")/cwf-hook-gate.sh"
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd)}"
+RESOLVER_SCRIPT="${PLUGIN_ROOT}/scripts/cwf-artifact-paths.sh"
+
+if [[ ! -f "$RESOLVER_SCRIPT" ]]; then
+    exit 0
+fi
+
+# shellcheck source=../../scripts/cwf-artifact-paths.sh
+source "$RESOLVER_SCRIPT"
+
 # Read stdin to extract session_id for session log lookup
 INPUT=$(cat)
 HOOK_SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty' 2>/dev/null || true)
 
-# Find cwf-state.yaml relative to project root
-STATE_FILE="${CLAUDE_PROJECT_DIR:-.}/cwf-state.yaml"
+# Find CWF state file relative to project root
+STATE_BASE_DIR="${CLAUDE_PROJECT_DIR:-.}"
+STATE_FILE="$(resolve_cwf_state_file "$STATE_BASE_DIR")"
 if [[ ! -f "$STATE_FILE" ]]; then
     exit 0
 fi
 
-# Parse live section from cwf-state.yaml using simple line-by-line parsing
+# Parse live section from the state file using simple line-by-line parsing
 # (no yq/jq dependency for YAML — keeps it portable)
 in_live=false
 session_id=""
@@ -211,7 +223,7 @@ fi
 
 context="${context}
 
-Read cwf-state.yaml and the plan file in the session dir to restore full context."
+Read the CWF state file and the plan file in the session dir to restore full context."
 
 if [[ -n "$recent_turns" ]]; then
     context="${context}

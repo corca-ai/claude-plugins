@@ -141,7 +141,7 @@ json_results=""
 # --- Validation target definitions ---
 # schema_file  data_file  [converter]
 target_schemas=("cwf-state.schema.json"  "plugin.schema.json"           "hooks.schema.json")
-target_data=(   "cwf-state.yaml"         "plugins/cwf/.claude-plugin/plugin.json" "plugins/cwf/hooks/hooks.json")
+target_data=(   ".cwf/cwf-state.yaml"    "plugins/cwf/.claude-plugin/plugin.json" "plugins/cwf/hooks/hooks.json")
 target_conv=(   "yq"                     ""                              "")
 
 total=${#target_schemas[@]}

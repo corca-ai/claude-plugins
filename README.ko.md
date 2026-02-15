@@ -41,7 +41,7 @@ v3.0.0부터 독립 플러그인(gather-context, clarify, retro, refactor, atten
 ### CWF가 하는 것
 
 - 컨텍스트 수집, 요구사항 명확화, 계획, 구현, 리뷰, 회고, 핸드오프, 배포를 하나의 워크플로우 플러그인(`cwf`)으로 통합합니다.
-- `cwf-state.yaml`, prompt-log 산출물, 훅을 통해 페이즈/세션 경계에서 컨텍스트를 보존하는 상태 기반 워크플로우를 제공합니다.
+- [`.cwf/cwf-state.yaml`](.cwf/cwf-state.yaml), prompt-log 산출물, 훅을 통해 페이즈/세션 경계에서 컨텍스트를 보존하는 상태 기반 워크플로우를 제공합니다.
 - Expert Advisor, Tier Classification, Agent Orchestration, Decision Point, Handoff, Provenance의 공통 개념을 조합하는 스킬 프레임워크입니다.
 
 ### CWF가 하지 않는 것
@@ -52,7 +52,7 @@ v3.0.0부터 독립 플러그인(gather-context, clarify, retro, refactor, atten
 
 ### 가정
 
-- 사용자가 `.cwf/prompt-logs/`, `cwf-state.yaml` 같은 세션 산출물을 저장/활용할 수 있는 저장소에서 작업합니다.
+- 사용자가 `.cwf/prompt-logs/`, [`.cwf/cwf-state.yaml`](.cwf/cwf-state.yaml) 같은 세션 산출물을 저장/활용할 수 있는 저장소에서 작업합니다.
 - [AGENTS.md](AGENTS.md)에서 시작해 세부 문서를 읽는 progressive disclosure 방식에 동의합니다.
 - 반복 품질 이슈는 행동 지침보다 결정적 검증 스크립트로 관리하는 방식을 선호합니다.
 
@@ -208,7 +208,7 @@ cwf:refactor --docs                 # 문서 일관성 리뷰
 
 ```text
 cwf:handoff                # next-session.md 생성 + 등록
-cwf:handoff --register     # cwf-state.yaml에 세션 등록만
+cwf:handoff --register     # .cwf/cwf-state.yaml에 세션 등록만
 cwf:handoff --phase        # phase-handoff.md 생성 (HOW 컨텍스트)
 ```
 
@@ -259,7 +259,7 @@ cwf:hitl --rule "<rule text>"        # 남은 큐에 적용할 리뷰 룰 추가
 cwf:review --human                   # 호환 alias (내부적으로 cwf:hitl로 라우팅)
 ```
 
-상태는 `.cwf/hitl/sessions/`(`state.yaml`, `rules.yaml`, `queue.json`, `events.log`)에 저장합니다. `cwf-state.yaml`에는 활성 HITL 세션 포인터 메타데이터만 저장합니다.
+상태는 `.cwf/hitl/sessions/`(`state.yaml`, `rules.yaml`, `queue.json`, `events.log`)에 저장합니다. [`.cwf/cwf-state.yaml`](.cwf/cwf-state.yaml)에는 활성 HITL 세션 포인터 메타데이터만 저장합니다.
 
 전체 레퍼런스: [SKILL.md](plugins/cwf/skills/hitl/SKILL.md)
 

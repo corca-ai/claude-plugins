@@ -6,7 +6,7 @@ Current status for moving CWF-generated artifacts from repository root into `.cw
 
 - Final target: CWF-generated artifacts live under `.cwf/`.
 - Current strategy: `.cwf` is the default write location for session artifacts and generated indexes.
-- `cwf-state.yaml` remains the project SSOT and stores pointer metadata for relocated state.
+- [`.cwf/cwf-state.yaml`](../.cwf/cwf-state.yaml) is the project SSOT and stores workflow/session state.
 
 ## Scope
 
@@ -41,12 +41,12 @@ Current status for moving CWF-generated artifacts from repository root into `.cw
 ## Phase 1 — HITL state-first migration (Completed)
 
 - Introduce `cwf:hitl` state under `.cwf/hitl/sessions/**`.
-- Keep `cwf-state.yaml` as pointer-only index for active HITL state.
+- Store HITL session state under `.cwf/hitl/sessions/**`.
 - Do not move other skill artifact paths yet.
 
 Exit criteria:
 - HITL resume/restart works from `.cwf/hitl/**`.
-- `cwf-state.yaml` pointer is sufficient to recover state.
+- [`.cwf/cwf-state.yaml`](../.cwf/cwf-state.yaml) state is sufficient to recover context.
 
 ## Phase 2 — Path abstraction for session artifacts (Completed)
 

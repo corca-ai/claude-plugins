@@ -30,7 +30,7 @@ Select autonomously what to read or update using the file descriptions in the bl
 - [README](README.md): Repository overview and install/update entry.
 - [AGENTS](AGENTS.md): Cross-runtime invariants and navigation map.
 - [CLAUDE](CLAUDE.md): Claude runtime adapter and runtime-specific deltas.
-- [cwf-state](cwf-state.yaml): Live workflow state and stage checkpoints (SSOT).
+- [cwf-state](.cwf/cwf-state.yaml): Live workflow state and stage checkpoints (SSOT).
 - [README.ko](README.ko.md): Korean mirror of repository overview.
 
 ### plugins/cwf/skills — CWF workflow design, execution, and orchestration changes

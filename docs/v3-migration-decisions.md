@@ -51,7 +51,7 @@ External CLI not found → Task agent with same perspective prompt. Never falls 
 
 ### #12 Persistent Workflow State
 
-`cwf-state.yaml` is the single source of truth: current stage, 24-session history, tool availability, hook config, and live session state. Read by compact recovery hook, handoff skill, and check-session.sh.
+[`.cwf/cwf-state.yaml`](../.cwf/cwf-state.yaml) is the single source of truth: current stage, 24-session history, tool availability, hook config, and live session state. Read by compact recovery hook, handoff skill, and check-session.sh.
 
 ### #19 Shift Work (Human Gates)
 
@@ -87,7 +87,7 @@ Never reduce review depth or agent count for cost reasons. All 6 reviewers alway
 
 ### #13 Auto-Generated Handoff
 
-`cwf:handoff` generates session handoff from `cwf-state.yaml` + artifacts. Also supports `--phase` mode for phase-to-phase context transfer (HOW context separate from plan WHAT).
+`cwf:handoff` generates session handoff from [`.cwf/cwf-state.yaml`](../.cwf/cwf-state.yaml) + artifacts. Also supports `--phase` mode for phase-to-phase context transfer (HOW context separate from plan WHAT).
 
 ### #18 Progressive Disclosure Index
 
@@ -104,7 +104,7 @@ These decisions emerged during hardening, not in the original plan.
 
 ### Expert-in-the-Loop (S13.5-B)
 
-Domain expert sub-agents (roster in `cwf-state.yaml`) participate in clarify, review, and retro. Two experts with contrasting frameworks provide analytical tension. Expert roster evolves semi-automatically.
+Domain expert sub-agents (roster in [`.cwf/cwf-state.yaml`](../.cwf/cwf-state.yaml)) participate in clarify, review, and retro. Two experts with contrasting frameworks provide analytical tension. Expert roster evolves semi-automatically.
 
 ### Concept Distillation (S13.5-B2)
 
@@ -120,7 +120,7 @@ Shared protocol for sub-agent file persistence: agents write results to session 
 
 ### Decision Journal (S33)
 
-During impl phase, significant decisions are appended to `cwf-state.yaml` `live.decision_journal`. The compact recovery hook reads this field to restore decision context. One-line entries, max ~80 chars.
+During impl phase, significant decisions are appended to [`.cwf/cwf-state.yaml`](../.cwf/cwf-state.yaml) `live.decision_journal`. The compact recovery hook reads this field to restore decision context. One-line entries, max ~80 chars.
 
 ### Auto-Chaining — cwf:run (S33)
 

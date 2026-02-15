@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "cwf-state.schema.json",
   "title": "CWF State",
-  "description": "Schema for cwf-state.yaml — Corca Workflow Framework project state",
+  "description": "Schema for .cwf/cwf-state.yaml — Corca Workflow Framework project state",
   "type": "object",
   "required": ["workflow", "sessions", "tools", "hooks", "live"],
   "additionalProperties": true,

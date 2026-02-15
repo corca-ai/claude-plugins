@@ -19,7 +19,7 @@ Code-level patterns, hook configuration, and plugin integration conventions accu
 ## Hook Configuration
 
 - Project hooks go in [.claude/settings.json](../.claude/settings.json) under the `"hooks"` key — NOT .claude/hooks.json (which is plugin-only format)
-- **Compact recovery**: `SessionStart(compact)` hook reads `cwf-state.yaml` `live` section and injects context after auto-compact. CWF skills update `live` at phase transitions; `check-session.sh --live` validates required fields.
+- **Compact recovery**: `SessionStart(compact)` hook reads [`.cwf/cwf-state.yaml`](../.cwf/cwf-state.yaml) `live` section and injects context after auto-compact. CWF skills update `live` at phase transitions; `check-session.sh --live` validates required fields.
 - `type: prompt` hooks work with any hook event and are simpler for context injection (no JSON formatting needed)
 - **Hooks and skills are session-start snapshots**: See `plugin-dev-cheatsheet.md` § hooks.json and § Testing for details on cache-based loading and propagation.
 - **sync vs async rule of thumb**: If a hook only calls external services (Slack, logging) and doesn't need to modify Claude's behavior → use async. Sync hooks with empty stdout can corrupt conversation history on some event types.

@@ -6,7 +6,7 @@ set -euo pipefail
 #   --impl    Check impl_complete artifacts only (plan.md, lessons.md, next-session.md)
 #             Use after implementation, before retro. Prevents dismissing FAIL
 #             because "retro.md is expected to be missing at this stage."
-#   --live    Check that cwf-state.yaml live section has required fields populated
+#   --live    Check that the CWF state file live section has required fields populated
 #             (session_id, dir, phase, task). Use to verify context is preserved
 #             for compact recovery.
 #   --semantic-gap
@@ -14,9 +14,21 @@ set -euo pipefail
 #             (1) GAP(Unresolved/Unknown) -> BL linkage, (2) CW -> GAP linkage,
 #             (3) optional RANGE consistency.
 #   (default) Check all artifacts (always + milestone)
-# If no session-id, checks the most recent session in cwf-state.yaml
+# If no session-id, checks the most recent session in the CWF state file
 # Reads expected artifacts from session entry or session_defaults
 # Exit 0 = all good, Exit 1 = missing/empty artifacts
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || (cd "$SCRIPT_DIR/.." && pwd))"
+RESOLVER_SCRIPT="$SCRIPT_DIR/cwf-artifact-paths.sh"
+
+if [[ ! -f "$RESOLVER_SCRIPT" ]]; then
+  echo "Error: resolver script not found: $RESOLVER_SCRIPT" >&2
+  exit 1
+fi
+
+# shellcheck source=./cwf-artifact-paths.sh
+source "$RESOLVER_SCRIPT"
 
 PHASE=""
 if [[ "${1:-}" == "--impl" ]]; then
@@ -30,20 +42,20 @@ elif [[ "${1:-}" == "--semantic-gap" ]]; then
   shift
 fi
 
-STATE_FILE="cwf-state.yaml"
+STATE_FILE="$(resolve_cwf_state_file "$REPO_ROOT")"
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 if [[ ! -f "$STATE_FILE" ]]; then
-  echo -e "${RED}Error: $STATE_FILE not found${NC}" >&2
+  echo -e "${RED}Error: state file not found: $STATE_FILE${NC}" >&2
   exit 1
 fi
 
 # --live: validate live section has required fields
 if [[ "$PHASE" == "live" ]]; then
-  echo "Checking cwf-state.yaml live section..."
+  echo "Checking CWF state live section..."
   echo "---"
 
   live_pass=0
@@ -99,7 +111,7 @@ if [[ "$PHASE" == "live" ]]; then
   fi
 fi
 
-# Parse session_defaults from cwf-state.yaml
+# Parse session_defaults from the CWF state file
 # Extracts session_defaults.artifacts.always and .milestone lists
 parse_defaults() {
   local in_defaults=false
@@ -318,7 +330,7 @@ parse_defaults
 
 SESSION_ID="${1:-}"
 
-# Find the session block in cwf-state.yaml
+# Find the session block in the CWF state file
 # If no session ID given, use the last session entry
 if [[ -z "$SESSION_ID" ]]; then
   # Get the last session ID
