@@ -46,6 +46,7 @@ fi
 # Find repo root
 REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
 SCHEMA_DIR="${REPO_ROOT}/scripts/schemas"
+AJV_FORMATS_MODULE="./scripts/schemas/ajv-formats.cjs"
 
 # --- Dependency checks ---
 
@@ -119,9 +120,9 @@ validate_target() {
     validate_path="$tmpfile"
   fi
 
-  # Validate with ajv-cli
+  # Validate with ajv-cli + local format registrations
   local output
-  if output=$(npx ajv-cli@5 validate -s "$schema_path" -d "$validate_path" --spec=draft2020 --all-errors 2>&1); then
+  if output=$(cd "$REPO_ROOT" && npx ajv-cli@5 validate -c "$AJV_FORMATS_MODULE" -s "$schema_path" -d "$validate_path" --spec=draft2020 --all-errors 2>&1); then
     return 0
   else
     if [[ "$JSON_OUTPUT" != "true" ]]; then
