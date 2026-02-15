@@ -5,13 +5,13 @@ Uses MinHash/LSH (datasketch) to find blocks with high Jaccard similarity.
 Blocks are defined by Markdown headings; each heading section becomes a block.
 
 Usage:
-    find-duplicates.py [--threshold N] [--shingle-size N] [--json] [--include-prompt-logs] [-h]
+    find-duplicates.py [--threshold N] [--shingle-size N] [--json] [--include-project-artifacts] [-h]
 
 Options:
     --threshold N          Jaccard similarity threshold (default: 0.7)
     --shingle-size N       Word window size for similarity comparison (default: 3)
     --json                 Output as JSON array
-    --include-prompt-logs  Also scan prompt-log artifact directories (off by default)
+    --include-project-artifacts  Also scan project artifact directories (off by default)
     -h, --help             Show this help message and exit
 
 Exit codes:
@@ -170,10 +170,10 @@ def main():
         help="Output as JSON array",
     )
     parser.add_argument(
-        "--include-prompt-logs",
+        "--include-project-artifacts",
         action="store_true",
         default=False,
-        help="Also scan prompt-log artifact directories (off by default)",
+        help="Also scan project artifact directories (off by default)",
     )
     args = parser.parse_args()
 
@@ -194,14 +194,13 @@ def main():
         if not any(part == "node_modules" or part == ".git" for part in f.relative_to(repo_root).parts)
     ]
 
-    # Filter out prompt-log artifact directories unless requested
-    if not args.include_prompt_logs:
-        prompt_logs_dir = repo_root / "prompt-logs"
-        prompt_logs_cwf_dir = repo_root / ".cwf" / "prompt-logs"
+    # Filter out project artifact directories unless requested
+    if not args.include_project_artifacts:
+        projects_cwf_dir = repo_root / ".cwf" / "projects"
         md_files = [
             f
             for f in md_files
-            if not _is_under(f, prompt_logs_dir) and not _is_under(f, prompt_logs_cwf_dir)
+            if not _is_under(f, projects_cwf_dir)
         ]
 
     if not md_files:

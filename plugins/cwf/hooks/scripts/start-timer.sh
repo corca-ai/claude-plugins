@@ -26,14 +26,15 @@ if [ -n "$SESSION_ID" ]; then
     INPUT_FILE=$(slack_state_file "$HASH" "input.json")
     DEBUG_LOG=$(slack_state_file "$HASH" "debug.log")
 else
-    # Fallback: non-session-scoped (legacy)
+    # Fallback: non-session-scoped path when session_id is unavailable
     TIMER_FILE="/tmp/claude-attention-timer.pid"
     INPUT_FILE="/tmp/claude-attention-input.json"
     DEBUG_LOG="/tmp/claude-attention-debug.log"
 fi
 
 # Configurable delay (seconds)
-DELAY_SECONDS="${CLAUDE_CORCA_ATTENTION_DELAY:-${CLAUDE_ATTENTION_DELAY:-30}}"
+slack_load_config
+DELAY_SECONDS="${CWF_ATTENTION_DELAY:-30}"
 
 # Debug: log that this script was called
 echo "$(date): start-timer.sh called (session: ${SESSION_ID:-unknown})" >> "$DEBUG_LOG"

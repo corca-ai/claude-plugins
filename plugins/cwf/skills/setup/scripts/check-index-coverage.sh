@@ -124,13 +124,13 @@ collect_required_paths_repo() {
   fi
 
   find . \
-    \( -path "./.git" -o -path "./.claude" -o -path "./.cwf" -o -path "./node_modules" -o -path "./prompt-logs" \) -prune -o \
+    \( -path "./.git" -o -path "./.claude" -o -path "./.cwf" -o -path "./node_modules" -o -path "./projects" \) -prune -o \
     -type f -name "SKILL.md" -print \
     | sed 's|^\./||' \
     | grep "/skills/" || true
 
   find . \
-    \( -path "./.git" -o -path "./.claude" -o -path "./.cwf" -o -path "./node_modules" -o -path "./prompt-logs" \) -prune -o \
+    \( -path "./.git" -o -path "./.claude" -o -path "./.cwf" -o -path "./node_modules" -o -path "./projects" \) -prune -o \
     -type f -name "*.md" -print \
     | sed 's|^\./||' \
     | grep "/references/" \

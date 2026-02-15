@@ -66,14 +66,14 @@ Apply the [Clarify Completion Gate](references/impl-gates.md#clarify-completion-
 
 If an explicit path was provided, use it. Otherwise:
 
-1. Scan `.cwf/prompt-logs/*/plan.md` using Glob
+1. Scan `.cwf/projects/*/plan.md` using Glob
 2. Sort by directory name (most recent date-sequence first)
 3. Select the most recent `plan.md`
 
 If no plan is found, report to the user and stop:
 
 ```text
-No plan.md found in .cwf/prompt-logs/. Run cwf:plan first.
+No plan.md found in .cwf/projects/. Run cwf:plan first.
 ```
 
 ### 1.1b Phase Handoff Discovery

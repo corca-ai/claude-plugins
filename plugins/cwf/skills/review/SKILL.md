@@ -15,7 +15,7 @@ Universal review with narrative verdicts via 6 parallel reviewers (2 internal + 
 /review                 Code review (default)
 /review --mode plan     Plan/spec review
 /review --mode clarify  Requirement review
-/review --mode code --base marketplace-v3 --scenarios .cwf/prompt-logs/holdout.md
+/review --mode code --base marketplace-v3 --scenarios .cwf/projects/holdout.md
 /review --mode code --correctness-provider gemini --architecture-provider claude
 ```
 
@@ -93,16 +93,16 @@ If all empty, ask user with AskUserQuestion.
 
 1. Search for the most recent plan file:
    ```bash
-   ls -td .cwf/prompt-logs/*/plan.md 2>/dev/null | head -1
+   ls -td .cwf/projects/*/plan.md 2>/dev/null | head -1
    ```
-2. If not found, check `.cwf/prompt-logs/*/master-plan.md`
+2. If not found, check `.cwf/projects/*/master-plan.md`
 3. If not found, ask user with AskUserQuestion
 
 **--mode clarify:**
 
 1. Search for recent clarification artifacts:
    ```bash
-   ls -td .cwf/prompt-logs/*/clarify-result.md 2>/dev/null | head -1
+   ls -td .cwf/projects/*/clarify-result.md 2>/dev/null | head -1
    ```
 2. If not found, ask user with AskUserQuestion
 
@@ -110,7 +110,7 @@ If all empty, ask user with AskUserQuestion.
 
 Search the associated plan.md for success criteria to use as verification input:
 
-1. Find the most recent `.cwf/prompt-logs/*/plan.md` by modification time
+1. Find the most recent `.cwf/projects/*/plan.md` by modification time
 2. Extract **behavioral criteria** — look for Given/When/Then patterns or
    checkbox-style success criteria. These become a pass/fail checklist.
 3. Extract **qualitative criteria** — narrative criteria like "should be

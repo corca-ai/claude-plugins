@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# smart-read.sh — PreToolUse hook for Read
+# read-guard.sh — PreToolUse hook for Read
 # Checks file size before allowing full reads to prevent context waste.
 # - Small files (≤WARN): allowed silently
 # - Medium files (WARN..DENY]: allowed with additionalContext (line count)
@@ -13,13 +13,11 @@ source "$(dirname "${BASH_SOURCE[0]}")/cwf-hook-gate.sh"
 # shellcheck source=env-loader.sh
 source "$(dirname "${BASH_SOURCE[0]}")/env-loader.sh"
 
-# --- Load environment variables (env -> shell profiles -> legacy ~/.claude/.env) ---
-cwf_env_load_vars \
-  CLAUDE_CORCA_SMART_READ_WARN_LINES \
-  CLAUDE_CORCA_SMART_READ_DENY_LINES
+# --- Load environment variables (env -> shell profiles) ---
+cwf_env_load_vars CWF_READ_WARN_LINES CWF_READ_DENY_LINES
 
-WARN_LINES="${CLAUDE_CORCA_SMART_READ_WARN_LINES:-500}"
-DENY_LINES="${CLAUDE_CORCA_SMART_READ_DENY_LINES:-2000}"
+WARN_LINES="${CWF_READ_WARN_LINES:-500}"
+DENY_LINES="${CWF_READ_DENY_LINES:-2000}"
 
 # Ensure WARN ≤ DENY (if user sets DENY < WARN, clamp WARN down)
 if [ "$WARN_LINES" -gt "$DENY_LINES" ]; then

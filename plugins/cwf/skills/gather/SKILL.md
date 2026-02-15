@@ -66,7 +66,7 @@ node {SKILL_DIR}/scripts/slack-api.mjs <channel_id> <thread_ts> --attachments-di
 
 After conversion, rename to a meaningful name from the first message (lowercase, hyphens, max 50 chars). **Existing .md file**: Extract Slack URL from `> Source:` line to re-fetch.
 
-**Prerequisites**: Node.js 18+, Slack Bot (`channels:history`, `channels:join`, `users:read`, `files:read`), `SLACK_BOT_TOKEN` in shell profile (`~/.zshrc`/`~/.bashrc`) or legacy `~/.claude/.env`. Details: [references/slack-export.md](references/slack-export.md)
+**Prerequisites**: Node.js 18+, Slack Bot (`channels:history`, `channels:join`, `users:read`, `files:read`), `SLACK_BOT_TOKEN` in shell profile (`~/.zshrc`/`~/.bashrc`). Details: [references/slack-export.md](references/slack-export.md)
 
 ### Notion Export
 
@@ -178,14 +178,13 @@ Sanitize query for filename: lowercase, spaces to hyphens, remove special charac
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `CLAUDE_CORCA_GATHER_CONTEXT_OUTPUT_DIR` | ./gathered | Unified default output directory |
-| `CLAUDE_CORCA_G_EXPORT_OUTPUT_DIR` | _(falls back to unified)_ | Google-specific override |
-| `CLAUDE_CORCA_SLACK_TO_MD_OUTPUT_DIR` | _(falls back to unified)_ | Slack-specific override |
-| `CLAUDE_CORCA_NOTION_TO_MD_OUTPUT_DIR` | _(falls back to unified)_ | Notion-specific override |
+| `CWF_GATHER_OUTPUT_DIR` | .cwf/projects | Unified default output directory |
+| `CWF_GATHER_GOOGLE_OUTPUT_DIR` | _(falls back to unified)_ | Google-specific override |
+| `CWF_GATHER_NOTION_OUTPUT_DIR` | _(falls back to unified)_ | Notion-specific override |
 | `TAVILY_API_KEY` | — | Required for `--search` and generic URL extract |
 | `EXA_API_KEY` | — | Required for `--search code` |
 
-**Output dir priority**: CLI argument > service-specific env var > `CLAUDE_CORCA_GATHER_CONTEXT_OUTPUT_DIR` > hardcoded default (./gathered)
+**Output dir priority**: CLI argument > service-specific env var > `CWF_GATHER_OUTPUT_DIR` > hardcoded default (.cwf/projects)
 
 When a service-specific env var is not set, pass the unified output dir as a CLI argument to the handler script.
 
@@ -235,7 +234,7 @@ Environment variables:
 
 1. **URL auto-detect priority**: Match most specific pattern first (Google > Slack > Notion > GitHub > Generic)
 2. **Graceful degradation**: Missing API keys print setup instructions, don't crash
-3. **Output dir hierarchy**: CLI argument > service-specific env var > unified env var > ./gathered
+3. **Output dir hierarchy**: CLI argument > service-specific env var > unified env var > .cwf/projects
 4. **Data privacy**: Do not include confidential code or sensitive information in search queries
 5. **Sub-agent for --local**: Always use Task tool, never inline exploration
 6. **All code fences must have language specifier**: Never use bare fences

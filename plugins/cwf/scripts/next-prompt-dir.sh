@@ -3,10 +3,10 @@ set -euo pipefail
 
 # next-prompt-dir.sh — Output the next session directory path for today.
 # Usage: scripts/next-prompt-dir.sh <title>
-# Output: <prompt-logs-dir>/YYMMDD-NN-title (NN = zero-padded sequence number)
+# Output: <projects-dir>/YYMMDD-NN-title (NN = zero-padded sequence number)
 # Optional env for deterministic testing:
 #   CWF_NEXT_PROMPT_DATE=YYMMDD   Override today's date
-#   CWF_PROMPT_LOGS_DIR=/path     Override prompt-logs scan directory
+#   CWF_PROJECTS_DIR=/path        Override projects scan directory
 #   CWF_ARTIFACT_ROOT=/path        Override artifact root (default: ./.cwf)
 
 if [[ $# -lt 1 ]]; then
@@ -47,8 +47,8 @@ fi
 
 # shellcheck source=./cwf-artifact-paths.sh
 source "$resolver_script"
-prompt_logs_dir="$(resolve_cwf_prompt_logs_dir "$project_root")"
-prompt_logs_rel="$(resolve_cwf_prompt_logs_relpath "$project_root")"
+projects_dir="$(resolve_cwf_projects_dir "$project_root")"
+projects_rel="$(resolve_cwf_projects_relpath "$project_root")"
 
 # Get date in YYMMDD format (overridable for fixture tests).
 today="${CWF_NEXT_PROMPT_DATE:-$(date +%y%m%d)}"
@@ -59,7 +59,7 @@ fi
 
 # Find existing directories for today and determine the next sequence number
 max_seq=0
-if [[ -d "$prompt_logs_dir" ]]; then
+if [[ -d "$projects_dir" ]]; then
   while IFS= read -r -d '' dir; do
     basename="$(basename "$dir")"
 
@@ -72,15 +72,15 @@ if [[ -d "$prompt_logs_dir" ]]; then
       fi
     fi
   done < <(
-    find "$prompt_logs_dir" -mindepth 1 -maxdepth 1 -type d -name "${today}-*" -print0 2>/dev/null
+    find "$projects_dir" -mindepth 1 -maxdepth 1 -type d -name "${today}-*" -print0 2>/dev/null
   )
 fi
 
 next_seq=$(( max_seq + 1 ))
 next_seq_padded=$(printf "%02d" "$next_seq")
 
-if [[ "$prompt_logs_rel" == "." ]]; then
+if [[ "$projects_rel" == "." ]]; then
   echo "${today}-${next_seq_padded}-${title}"
 else
-  echo "${prompt_logs_rel}/${today}-${next_seq_padded}-${title}"
+  echo "${projects_rel}/${today}-${next_seq_padded}-${title}"
 fi

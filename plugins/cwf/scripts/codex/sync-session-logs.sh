@@ -8,7 +8,7 @@
 #
 # By default this script:
 # - Finds the latest Codex session for the current cwd
-# - Writes markdown to ./.cwf/prompt-logs/sessions by default as *.codex.md
+# - Writes markdown to ./.cwf/projects/sessions by default as *.codex.md
 # - Does not copy raw JSONL (use --raw to enable)
 
 set -euo pipefail
@@ -28,10 +28,10 @@ fi
 source "$RESOLVER_SCRIPT"
 
 DEFAULT_CWD="$(pwd)"
-DEFAULT_PROMPT_LOGS_DIR="$(resolve_cwf_prompt_logs_dir "$DEFAULT_CWD")"
-DEFAULT_OUT_DIR="$DEFAULT_PROMPT_LOGS_DIR/sessions"
+DEFAULT_PROJECTS_DIR="$(resolve_cwf_projects_dir "$DEFAULT_CWD")"
+DEFAULT_OUT_DIR="$DEFAULT_PROJECTS_DIR/sessions"
 CODEX_SESSIONS_DIR="${CODEX_SESSIONS_DIR:-$HOME/.codex/sessions}"
-TRUNCATE_THRESHOLD="${CODEX_PROMPT_LOGGER_TRUNCATE:-20}"
+TRUNCATE_THRESHOLD="${CODEX_SESSION_LOG_TRUNCATE:-20}"
 
 SESSION_ID=""
 JSONL_PATH=""
@@ -53,7 +53,7 @@ Options:
   --jsonl <path>       Export a specific JSONL file directly
   --cwd <path>         Prefer sessions whose session_meta.cwd matches path (default: $PWD)
   --since-epoch <sec>  Prefer sessions modified at/after this epoch seconds value
-  --out-dir <path>     Output directory (default: ./.cwf/prompt-logs/sessions)
+  --out-dir <path>     Output directory (default: ./.cwf/projects/sessions)
   --raw                Copy raw JSONL into out-dir/raw
   --no-raw             Backward-compatible alias for default behavior (no raw copy)
   --quiet              Suppress informational output

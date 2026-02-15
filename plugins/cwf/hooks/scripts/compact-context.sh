@@ -147,16 +147,17 @@ Key decisions:"
     done
 fi
 
-# ── Append recent turns from prompt-logger session log (if available) ─────────
+# ── Append recent turns from session log (if available) ─────────────────────
 # Provides conversational context alongside structural metadata from live section.
-# Gracefully skips if prompt-logger is not installed or no log exists.
+# Gracefully skips if session logging is not enabled or no log exists.
 MAX_TURNS=3
 MAX_LINES=100
 recent_turns=""
 
 if [[ -n "$HOOK_SESSION_ID" ]]; then
-    # prompt-logger stores session log path in /tmp/claude-prompt-logger-{session_id}/out_file
-    PL_STATE_DIR="/tmp/claude-prompt-logger-${HOOK_SESSION_ID}"
+    # Session logger stores current output path in:
+    # - /tmp/cwf-session-log-{session_id}/out_file
+    PL_STATE_DIR="/tmp/cwf-session-log-${HOOK_SESSION_ID}"
     if [[ -f "$PL_STATE_DIR/out_file" ]]; then
         SESSION_LOG=$(cat "$PL_STATE_DIR/out_file")
         if [[ -f "$SESSION_LOG" ]]; then

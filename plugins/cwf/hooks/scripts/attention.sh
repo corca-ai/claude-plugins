@@ -6,7 +6,7 @@ set -euo pipefail
 #
 # v2.0: Uses slack-send.sh for Web API threading support.
 # When a thread exists (created by track-user-input.sh), sends as thread reply.
-# Falls back to standalone message or legacy webhook if no thread/bot token.
+# Falls back to standalone message or webhook if no thread/bot token.
 #
 # === COMPATIBILITY WARNING ===
 # This script relies on parse-transcript.sh to parse Claude Code's internal transcript format.
@@ -29,7 +29,7 @@ source "$SCRIPT_DIR/text-format.sh"
 
 # === CONFIGURATION ===
 slack_load_config
-ATTENTION_TRUNCATE_LINES="${CLAUDE_CORCA_ATTENTION_TRUNCATE:-10}"
+ATTENTION_TRUNCATE_LINES="${CWF_ATTENTION_TRUNCATE:-10}"
 if ! [[ "$ATTENTION_TRUNCATE_LINES" =~ ^[0-9]+$ ]] || [ "$ATTENTION_TRUNCATE_LINES" -le 0 ]; then
     ATTENTION_TRUNCATE_LINES=10
 fi
@@ -159,7 +159,7 @@ if [ -n "$HASH" ]; then
         slack_send "$HASH" "*${TITLE}*"$'\n'"$MESSAGE" ""
     fi
 else
-    # Legacy fallback: no session_id available
+    # Fallback: no session_id available
     ESCAPED_TITLE=$(slack_escape_json "$TITLE")
     ESCAPED_MESSAGE=$(slack_escape_json "$MESSAGE")
 

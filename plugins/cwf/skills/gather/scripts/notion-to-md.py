@@ -490,7 +490,11 @@ def main():
 
         if not output_path:
             filename = sanitize_filename(page_title) + ".md"
-            output_dir = os.environ.get("CLAUDE_CORCA_NOTION_TO_MD_OUTPUT_DIR", "./notion-outputs")
+            output_dir = (
+                os.environ.get("CWF_GATHER_NOTION_OUTPUT_DIR")
+                or os.environ.get("CWF_GATHER_OUTPUT_DIR")
+                or ".cwf/projects"
+            )
             os.makedirs(output_dir, exist_ok=True)
             output_path = os.path.join(output_dir, filename)
 

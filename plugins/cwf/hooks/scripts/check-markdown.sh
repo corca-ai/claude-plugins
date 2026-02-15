@@ -4,7 +4,7 @@ set -euo pipefail
 # Validates markdown files using markdownlint after write/edit operations.
 # If violations are found, blocks with a reason so Claude can self-correct.
 # Skips silently when: not a .md file, file doesn't exist, markdownlint not available,
-# or file is under prompt-log artifacts (excluded from lint).
+# or file is under project artifacts (excluded from lint).
 
 HOOK_GROUP="lint_markdown"
 # shellcheck source=cwf-hook-gate.sh
@@ -30,9 +30,9 @@ case "$FILE_PATH" in
     *) exit 0 ;;
 esac
 
-# Skip prompt-log artifact paths (these are session artifacts, not production docs)
+# Skip project artifact paths (these are session artifacts, not production docs)
 case "$FILE_PATH" in
-    */prompt-logs/*|prompt-logs/*|*/.cwf/prompt-logs/*|.cwf/prompt-logs/*) exit 0 ;;
+    */.cwf/projects/*|.cwf/projects/*) exit 0 ;;
 esac
 
 # File doesn't exist (may have been deleted or path is virtual)

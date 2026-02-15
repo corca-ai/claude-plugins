@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Exa code context search — called by the gather-context skill
+# Exa code context search — called by the cwf:gather skill
 # Usage: code-search.sh [--tokens NUM] "<query>"
 set -euo pipefail
 
@@ -28,7 +28,7 @@ if [ -z "$QUERY" ]; then
   exit 1
 fi
 
-# --- Load API key: shell env -> shell profiles -> legacy ~/.claude/.env ---
+# --- Load API key: shell env -> shell profiles ---
 cwf_env_load_vars EXA_API_KEY
 
 if [ -z "${EXA_API_KEY:-}" ]; then
@@ -39,9 +39,6 @@ Get your API key: https://dashboard.exa.ai/api-keys
 
 Then add to your shell profile (~/.zshrc or ~/.bashrc):
   export EXA_API_KEY="your-key-here"
-
-Legacy fallback is also supported:
-  ~/.claude/.env
 MSG
   exit 1
 fi

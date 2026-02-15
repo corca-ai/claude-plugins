@@ -2,7 +2,7 @@
 
 // doc-graph.mjs — Build and analyze document reference graph from Markdown files
 // Usage: doc-graph.mjs [--orphans] [--impact <file>] [--json] [-h|--help]
-//   --orphans  List documents with zero inbound links (excluding prompt-log artifacts)
+//   --orphans  List documents with zero inbound links (excluding project artifacts)
 //   --impact   Given a changed file, list all documents that reference it
 //   --json     Output full adjacency list as JSON
 //   (default)  Print human-readable summary
@@ -107,7 +107,7 @@ function readdirRecursive(dir) {
       if (
         entry.name === '.git' ||
         entry.name === 'node_modules' ||
-        entry.name === 'prompt-logs'
+        entry.name === 'projects'
       ) {
         continue;
       }
@@ -132,8 +132,8 @@ function collectMdFiles(rootDir) {
       relPath.startsWith('.git/') ||
       relPath.startsWith('node_modules/') ||
       relPath.includes('/node_modules/') ||
-      relPath.startsWith('prompt-logs/') ||
-      relPath.startsWith('.cwf/prompt-logs/') ||
+      relPath.startsWith('projects/') ||
+      relPath.startsWith('.cwf/projects/') ||
       relPath === 'CHANGELOG.md' ||
       relPath.startsWith('references/')
     ) {
@@ -310,7 +310,7 @@ const orphans = allMdRel.filter((f) => {
   if (orphanExclude.has(f)) {
     return false;
   }
-  if (f.startsWith('prompt-logs/') || f.startsWith('.cwf/prompt-logs/')) {
+  if (f.startsWith('projects/') || f.startsWith('.cwf/projects/')) {
     return false;
   }
   return !inbound[f] || inbound[f].length === 0;

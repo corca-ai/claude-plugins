@@ -1,6 +1,6 @@
 # Research Guide
 
-This guide is for the **fallback research path** — used when the `gather-context` plugin is NOT available. If gather-context is installed, the main SKILL.md directs research through that plugin instead.
+This guide is for the **fallback research path** — used when `cwf:gather` is not available. When `cwf:gather` is available, the main SKILL.md routes research through it first.
 
 ---
 

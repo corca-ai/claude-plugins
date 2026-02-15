@@ -281,7 +281,7 @@ The wrapper preserves normal Codex behavior and runs:
 bash {SKILL_DIR}/../../scripts/codex/sync-session-logs.sh --cwd "$PWD"
 ```
 
-after each Codex run to persist markdown logs under `.cwf/prompt-logs/sessions/` as `*.codex.md` (legacy `prompt-logs/sessions/` and `sessions-codex/` remain readable during migration; `raw` JSONL copy is opt-in via `--raw`).
+after each Codex run to persist markdown logs under `.cwf/projects/sessions/` as `*.codex.md` (`raw` JSONL copy is opt-in via `--raw`).
 
 ### 2.6.3 Report and Reversal
 
@@ -469,15 +469,15 @@ If AGENTS.md does not exist, create it with a minimal scaffold and the managed b
 
 ### 4.1 Scan Project Structure
 
-Use Glob to find top-level directories. Exclude hidden directories (`.git`, `.claude`, `.cwf`), `node_modules`, and `prompt-logs`.
+Use Glob to find top-level directories. Exclude hidden directories (`.git`, `.claude`, `.cwf`), `node_modules`, and `projects`.
 
 Build adaptive file inventories (sorted) from the current repository structure:
 
 - Root entry docs if present: AGENTS.md, CLAUDE.md, README.md, README.ko.md
 - `docs/*.md` (when `docs/` exists)
 - `references/**/*.md` (when `references/` exists)
-- Any `*/skills/*/SKILL.md` (excluding `.git/`, `.cwf/`, `node_modules/`, `prompt-logs/`)
-- Any non-skill `*/references/*.md` (excluding `.git/`, `.cwf/`, `node_modules/`, `prompt-logs/`, and `*/skills/*/references/*`)
+- Any `*/skills/*/SKILL.md` (excluding `.git/`, `.cwf/`, `node_modules/`, `projects/`)
+- Any non-skill `*/references/*.md` (excluding `.git/`, `.cwf/`, `node_modules/`, `projects/`, and `*/skills/*/references/*`)
 - If present: [plugins/cwf/hooks/README.md](../../hooks/README.md), [plugins/cwf/scripts/README.md](../../scripts/README.md)
 
 These discovered inventories are mandatory coverage sets for repository index generation.

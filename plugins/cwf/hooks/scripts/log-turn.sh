@@ -52,15 +52,15 @@ fi
 # ── Wait for transcript flush (async hook may race with file writes) ─────────
 sleep 0.3
 
-# ── Load config (env -> shell profiles -> legacy ~/.claude/.env) ───────────
+# ── Load config (env -> shell profiles) ─────────────────────────────────────
 cwf_env_load_vars \
-  CLAUDE_CORCA_PROMPT_LOGGER_DIR \
-  CLAUDE_CORCA_PROMPT_LOGGER_ENABLED \
-  CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE \
-  CLAUDE_CORCA_PROMPT_LOGGER_AUTO_COMMIT \
-  CWF_ARTIFACT_ROOT
+  CWF_SESSION_LOG_DIR \
+  CWF_SESSION_LOG_ENABLED \
+  CWF_SESSION_LOG_TRUNCATE \
+  CWF_SESSION_LOG_AUTO_COMMIT
+cwf_env_load_vars CWF_ARTIFACT_ROOT
 
-ENABLED="${CLAUDE_CORCA_PROMPT_LOGGER_ENABLED:-true}"
+ENABLED="${CWF_SESSION_LOG_ENABLED:-true}"
 if [ "$ENABLED" != "true" ]; then
     exit 0
 fi
@@ -72,10 +72,10 @@ else
     ARTIFACT_ROOT="${CWD}/${ARTIFACT_ROOT_RAW}"
 fi
 
-DEFAULT_LOG_DIR="${ARTIFACT_ROOT}/prompt-logs/sessions"
-LOG_DIR="${CLAUDE_CORCA_PROMPT_LOGGER_DIR:-$DEFAULT_LOG_DIR}"
-TRUNCATE_THRESHOLD="${CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE:-10}"
-AUTO_COMMIT="${CLAUDE_CORCA_PROMPT_LOGGER_AUTO_COMMIT:-false}"
+DEFAULT_LOG_DIR="${ARTIFACT_ROOT}/projects/sessions"
+LOG_DIR="${CWF_SESSION_LOG_DIR:-$DEFAULT_LOG_DIR}"
+TRUNCATE_THRESHOLD="${CWF_SESSION_LOG_TRUNCATE:-10}"
+AUTO_COMMIT="${CWF_SESSION_LOG_AUTO_COMMIT:-false}"
 
 # ── Timezone helpers (transcript timestamps are UTC) ─────────────────────────
 LOCAL_TZ=$(date +%Z)
@@ -101,7 +101,7 @@ utc_to_local() {
 
 # ── Session hash & state ─────────────────────────────────────────────────────
 HASH=$(echo -n "$SESSION_ID" | shasum -a 256 | cut -c1-8)
-STATE_DIR="/tmp/claude-prompt-logger-${HASH}"
+STATE_DIR="/tmp/cwf-session-log-${HASH}"
 mkdir -p "$STATE_DIR"
 
 # ── Atomic lock (prevent race between Stop and SessionEnd) ────────────────────

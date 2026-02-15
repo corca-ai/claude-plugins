@@ -2,12 +2,12 @@
 set -euo pipefail
 
 # doc-churn.sh — Analyze document churn via git history
-# Usage: doc-churn.sh [--days N] [--stale-days N] [--stale-only] [--json] [--include-prompt-logs] [-h|--help]
+# Usage: doc-churn.sh [--days N] [--stale-days N] [--stale-only] [--json] [--include-project-artifacts] [-h|--help]
 #   --days N               Lookback period for commit counting (default: 30)
 #   --stale-days N         Threshold for stale classification (default: 90)
 #   --stale-only           Only show files classified as stale or archival
 #   --json                 Output machine-readable JSON
-#   --include-prompt-logs  Include prompt-log artifact directories (off by default)
+#   --include-project-artifacts  Include project artifact directories (off by default)
 #   -h|--help              Show this usage message
 # Exit 0 always (informational tool, not a linter)
 
@@ -20,7 +20,7 @@ DAYS=30
 STALE_DAYS=90
 STALE_ONLY=false
 JSON_OUTPUT=false
-INCLUDE_PROMPT_LOGS=false
+INCLUDE_PROJECT_ARTIFACTS=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -51,8 +51,8 @@ while [[ $# -gt 0 ]]; do
       JSON_OUTPUT=true
       shift
       ;;
-    --include-prompt-logs)
-      INCLUDE_PROMPT_LOGS=true
+    --include-project-artifacts)
+      INCLUDE_PROJECT_ARTIFACTS=true
       shift
       ;;
     *)
@@ -87,12 +87,12 @@ CURRENT_EPOCH=$((NOW - 30 * 86400))
 # Collect .md files
 mapfile -t MD_FILES < <(find . -name "*.md" -type f ! -path "./.git/*" ! -path "*/node_modules/*" | sort)
 
-# Filter prompt-log artifact directories unless requested
-if [[ "$INCLUDE_PROMPT_LOGS" != "true" ]]; then
+# Filter project artifact directories unless requested
+if [[ "$INCLUDE_PROJECT_ARTIFACTS" != "true" ]]; then
   FILTERED=()
   for f in "${MD_FILES[@]}"; do
     case "$f" in
-      ./prompt-logs/*|./.cwf/prompt-logs/*) continue ;;
+      ./.cwf/projects/*) continue ;;
       *) FILTERED+=("$f") ;;
     esac
   done

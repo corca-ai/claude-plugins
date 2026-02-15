@@ -29,7 +29,7 @@ Edit `cwf-state.yaml` `live` section: set `phase: retro`.
 
 Resolution order:
 1. If `[path]` argument provided, use it
-2. Reuse `.cwf/prompt-logs/` path already used in this session (plan.md/lessons.md writes)
+2. Reuse `.cwf/projects/` path already used in this session (plan.md/lessons.md writes)
 3. If reused session path date prefix (`YYMMDD`) differs from today's local date, AskUserQuestion:
    - Continue existing session directory (recommended for same logical session across midnight/day rollover)
    - Start a new dated directory for today
@@ -215,19 +215,16 @@ Write to `{output-dir}/retro.md` using the format below.
 
 ### 6. Link Session Log
 
-Discover runtime logs using this order:
-1. Canonical path: `.cwf/prompt-logs/sessions/`
-   - Prefer suffix files: `{YYMMDD}-*.claude.md`, `{YYMMDD}-*.codex.md`
-   - Also read legacy unsuffixed files: `{YYMMDD}-*.md`
-2. Legacy compatibility path: `.cwf/prompt-logs/sessions-codex/`
-   - Read `{YYMMDD}-*.md` only when no canonical codex candidate exists
+Discover runtime logs under `.cwf/projects/sessions/`.
+- Prefer suffix files: `{YYMMDD}-*.claude.md`, `{YYMMDD}-*.codex.md`
+- Also allow unsuffixed files: `{YYMMDD}-*.md`
 
 Then:
 1. Filter out already-symlinked candidates.
 2. Read a sample of each candidate to verify it matches the current session.
-3. If verified and `{output-dir}/session.md` does not exist, create a relative symlink using the actual source directory:
+3. If verified and `{output-dir}/session-log.md` does not exist, create a relative symlink:
    ```bash
-   ln -s "../{sessions-or-sessions-codex}/{filename}" "{output-dir}/session.md"
+   ln -s "../sessions/{filename}" "{output-dir}/session-log.md"
    ```
 4. If no candidates or directories do not exist, skip silently.
 

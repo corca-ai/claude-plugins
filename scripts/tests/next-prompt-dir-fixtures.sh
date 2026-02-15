@@ -35,31 +35,31 @@ assert_eq() {
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
-PROMPT_LOGS_DIR="$TMP_DIR/prompt-logs"
-mkdir -p "$PROMPT_LOGS_DIR"
+PROJECTS_DIR="$TMP_DIR/projects"
+mkdir -p "$PROJECTS_DIR"
 
 mkdir -p \
-  "$PROMPT_LOGS_DIR/260214-01-alpha" \
-  "$PROMPT_LOGS_DIR/260214-02-beta" \
-  "$PROMPT_LOGS_DIR/260214-xx-ignore" \
-  "$PROMPT_LOGS_DIR/260214-99" \
-  "$PROMPT_LOGS_DIR/260213-11-prev-day"
+  "$PROJECTS_DIR/260214-01-alpha" \
+  "$PROJECTS_DIR/260214-02-beta" \
+  "$PROJECTS_DIR/260214-xx-ignore" \
+  "$PROJECTS_DIR/260214-99" \
+  "$PROJECTS_DIR/260213-11-prev-day"
 
-expected_today="prompt-logs/260214-03-s26"
-actual_root_today="$(CWF_PROMPT_LOGS_DIR="$PROMPT_LOGS_DIR" CWF_NEXT_PROMPT_DATE=260214 bash "$ROOT_SCRIPT" s26)"
-actual_plugin_today="$(CWF_PROMPT_LOGS_DIR="$PROMPT_LOGS_DIR" CWF_NEXT_PROMPT_DATE=260214 bash "$PLUGIN_SCRIPT" s26)"
+expected_today="projects/260214-03-s26"
+actual_root_today="$(CWF_PROJECTS_DIR="$PROJECTS_DIR" CWF_NEXT_PROMPT_DATE=260214 bash "$ROOT_SCRIPT" s26)"
+actual_plugin_today="$(CWF_PROJECTS_DIR="$PROJECTS_DIR" CWF_NEXT_PROMPT_DATE=260214 bash "$PLUGIN_SCRIPT" s26)"
 
 assert_eq "root script uses max same-day sequence" "$expected_today" "$actual_root_today"
 assert_eq "plugin script matches root sequence logic" "$expected_today" "$actual_plugin_today"
 
-expected_next_day="prompt-logs/260215-01-s26"
-actual_root_next_day="$(CWF_PROMPT_LOGS_DIR="$PROMPT_LOGS_DIR" CWF_NEXT_PROMPT_DATE=260215 bash "$ROOT_SCRIPT" s26)"
-actual_plugin_next_day="$(CWF_PROMPT_LOGS_DIR="$PROMPT_LOGS_DIR" CWF_NEXT_PROMPT_DATE=260215 bash "$PLUGIN_SCRIPT" s26)"
+expected_next_day="projects/260215-01-s26"
+actual_root_next_day="$(CWF_PROJECTS_DIR="$PROJECTS_DIR" CWF_NEXT_PROMPT_DATE=260215 bash "$ROOT_SCRIPT" s26)"
+actual_plugin_next_day="$(CWF_PROJECTS_DIR="$PROJECTS_DIR" CWF_NEXT_PROMPT_DATE=260215 bash "$PLUGIN_SCRIPT" s26)"
 
 assert_eq "root script resets sequence across day boundary" "$expected_next_day" "$actual_root_next_day"
 assert_eq "plugin script resets sequence across day boundary" "$expected_next_day" "$actual_plugin_next_day"
 
-expected_artifact_root=".cwf/prompt-logs/990101-01-s26"
+expected_artifact_root=".cwf/projects/990101-01-s26"
 actual_root_artifact="$(CWF_ARTIFACT_ROOT=".cwf" CWF_NEXT_PROMPT_DATE=990101 bash "$ROOT_SCRIPT" s26)"
 actual_plugin_artifact="$(CWF_ARTIFACT_ROOT=".cwf" CWF_NEXT_PROMPT_DATE=990101 bash "$PLUGIN_SCRIPT" s26)"
 
@@ -67,7 +67,7 @@ assert_eq "root script supports artifact-root based output path" "$expected_arti
 assert_eq "plugin script supports artifact-root based output path" "$expected_artifact_root" "$actual_plugin_artifact"
 
 set +e
-CWF_PROMPT_LOGS_DIR="$PROMPT_LOGS_DIR" CWF_NEXT_PROMPT_DATE=2026-02-14 bash "$ROOT_SCRIPT" bad >/dev/null 2>&1
+CWF_PROJECTS_DIR="$PROJECTS_DIR" CWF_NEXT_PROMPT_DATE=2026-02-14 bash "$ROOT_SCRIPT" bad >/dev/null 2>&1
 invalid_status=$?
 set -e
 

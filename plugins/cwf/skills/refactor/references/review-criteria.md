@@ -80,7 +80,7 @@ Check alignment with Claude Code plugin best practices:
 
 ### Folder naming
 
-- Plugin folder must use kebab-case (e.g., `gather-context`, not `gatherContext` or `gather_context`)
+- Plugin folder must use kebab-case (e.g., `cwf-tools`, not `cwfTools` or `cwf_tools`)
 - Skill folder under `skills/` must also use kebab-case
 
 ### SKILL.md metadata

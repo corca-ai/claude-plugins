@@ -10,7 +10,7 @@ This file maps scripts under [plugins/cwf/hooks/scripts](scripts).
 - [scripts/track-user-input.sh](scripts/track-user-input.sh): Records user prompt metadata.
 - [scripts/log-turn.sh](scripts/log-turn.sh): Persists turn/session logs with sensitive token redaction.
 - [scripts/parse-transcript.sh](scripts/parse-transcript.sh): Parses transcript structure for logging and exports.
-- [scripts/smart-read.sh](scripts/smart-read.sh): Read guard for large files.
+- [scripts/read-guard.sh](scripts/read-guard.sh): Read guard for large files.
 - [scripts/redirect-websearch.sh](scripts/redirect-websearch.sh): Redirects native web search flow to CWF gather flow.
 - [scripts/check-markdown.sh](scripts/check-markdown.sh): Runs markdown lint checks after write/edit.
 - [scripts/check-links-local.sh](scripts/check-links-local.sh): Runs local link checks for edited markdown files and blocks on broken links.

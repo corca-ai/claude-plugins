@@ -1,7 +1,6 @@
 {
   "ignores": [
-    "prompt-logs/",
-    ".cwf/prompt-logs/",
+    ".cwf/projects/",
     "node_modules/",
     "**/node_modules/",
     "references/anthropic-skills-guide/"

@@ -4,8 +4,8 @@ Code-level patterns, hook configuration, and plugin integration conventions accu
 
 ## Code Patterns
 
-- **Script delegation**: Execution-heavy skills (gather-context) delegate API calls to wrapper scripts. SKILL.md handles intent analysis and parameter decisions; scripts handle env loading, JSON building, curl, and response formatting. This reduces context cost and improves reliability.
-- **Hook-based tool redirect**: Use PreToolUse hooks with `permissionDecision: "deny"` to redirect built-in tools to custom skills (e.g., WebSearch → `/gather-context --search`). Enables loose coupling between plugins.
+- **Script delegation**: Execution-heavy skills (`cwf:gather`) delegate API calls to wrapper scripts. SKILL.md handles intent analysis and parameter decisions; scripts handle env loading, JSON building, curl, and response formatting. This reduces context cost and improves reliability.
+- **Hook-based tool redirect**: Use PreToolUse hooks with `permissionDecision: "deny"` to redirect built-in tools to custom skills (e.g., WebSearch → `cwf:gather --search`). Enables loose coupling between plugins.
 - **3-tier env loading**: See `plugin-dev-cheatsheet.md` § Environment Variables for the pattern and implementation.
 - **Safe extraction**: Scripts must avoid `eval` for parsing shell config. Use grep + parameter expansion instead.
 - **Local vs marketplace**: Repo-specific automation → `.claude/skills/` (e.g., plugin-deploy). Cross-project utility → `plugins/` marketplace.
@@ -32,4 +32,4 @@ Code-level patterns, hook configuration, and plugin integration conventions accu
 ## Plugin System
 
 - CWF plugin (`plugins/cwf/`) consolidates all workflow skills (13 skills: setup, update, gather, clarify, plan, impl, retro, refactor, handoff, ship, review, hitl, run) and infrastructure hooks (7 groups).
-- **Env var backward-compat**: `attention-hook` supports legacy `CLAUDE_ATTENTION_*` alongside `CLAUDE_CORCA_ATTENTION_*`. New plugins should not add backward-compat — use `CLAUDE_CORCA_{PLUGIN}_{SETTING}` only.
+- **Env var policy**: Use `CWF_*` canonical names for CWF-managed configuration.

@@ -17,7 +17,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 URL="$1"
 FORMAT="$2"
-OUTPUT_DIR="${3:-${CLAUDE_CORCA_G_EXPORT_OUTPUT_DIR:-./g-exports}}"
+OUTPUT_DIR="${3:-${CWF_GATHER_GOOGLE_OUTPUT_DIR:-${CWF_GATHER_OUTPUT_DIR:-.cwf/projects}}}"
 
 # Extract document type and ID from URL
 if [[ "$URL" =~ docs\.google\.com/(presentation|document|spreadsheets)/d/([^/]+) ]]; then

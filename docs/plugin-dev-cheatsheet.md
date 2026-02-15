@@ -13,14 +13,14 @@ plugins/{name}/
     ├── references/          # optional
     └── scripts/             # optional
 
-# Hook-only (e.g., smart-read, prompt-logger)
+# Hook-only (e.g., read-guard, session-log)
 plugins/{name}/
 ├── .claude-plugin/plugin.json
 └── hooks/
     ├── hooks.json
     └── scripts/
 
-# Hybrid (e.g., gather-context)
+# Hybrid (e.g., cwf)
 plugins/{name}/
 ├── .claude-plugin/plugin.json
 ├── hooks/
@@ -116,7 +116,7 @@ Hooks are **snapshots at session start** (no hot-reload).
 
 ## Environment Variables
 
-Naming: `CLAUDE_CORCA_{PLUGIN_NAME}_{SETTING}`
+Naming: `CWF_{DOMAIN}_{SETTING}`
 
 Priority: CLI argument > environment variable > hardcoded default
 
@@ -125,13 +125,12 @@ Plugin directories are replaced on update (version-specific cache). User config 
 Use the shared loader ([plugins/cwf/hooks/scripts/env-loader.sh](../plugins/cwf/hooks/scripts/env-loader.sh)) and keep this source order:
 - process env
 - shell profiles (`~/.zshenv`, `~/.zprofile`, `~/.zshrc`, `~/.bash_profile`, `~/.bashrc`, `~/.profile`)
-- legacy fallback file (`~/.claude/.env`)
 
 This is needed because Claude Code runs non-interactive Bash sessions — profile files are not auto-sourced.
 ```bash
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../../../hooks/scripts/env-loader.sh"
-cwf_env_load_vars VAR
+cwf_env_load_vars CWF_FOO_BAR
 ```
 
 ## Script Guidelines

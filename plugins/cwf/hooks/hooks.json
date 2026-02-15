@@ -50,7 +50,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/smart-read.sh"
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/read-guard.sh"
           }
         ]
       },

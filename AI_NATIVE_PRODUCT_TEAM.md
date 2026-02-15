@@ -35,7 +35,7 @@ We distinguish between what AI does well and where humans must be involved. Fina
 
 A cycle of **research → spec writing → spec refinement → spec review → implementation instruction → retrospective → code review** becomes established.
 
-1. **Research**: information needed to write a spec is already prepared in an LLM-friendly form, or tools exist to collect it (MCP, scripts, custom prompts, etc.). For example, with [gather](./plugins/cwf/skills/gather/SKILL.md) you can provide a URL and it auto-detects the service and gathers Google Docs/Slack/Notion content via built-in scripts; with `gather-context --search` you can gather external information via web search and code/technical search. We provide these base materials to a research agent and receive a report.
+1. **Research**: information needed to write a spec is already prepared in an LLM-friendly form, or tools exist to collect it (MCP, scripts, custom prompts, etc.). For example, with [gather](./plugins/cwf/skills/gather/SKILL.md) you can provide a URL and it auto-detects the service and gathers Google Docs/Slack/Notion content via built-in scripts; with `cwf:gather --search` you can gather external information via web search and code/technical search. We provide these base materials to a research agent and receive a report.
 
 2. **Spec writing**: we process the report into a spec and write it in Jira tickets/GitHub issues (ideally as pair work).
 

@@ -1,27 +1,23 @@
-# CWF Artifact Migration Status (`.cwf` First)
+# CWF Artifact Path Policy
 
-Current status for moving CWF-generated artifacts from repository root into `.cwf/`.
+Current policy for CWF-generated artifacts under `.cwf/`.
 
 ## Decision
 
-- Final target: CWF-generated artifacts live under `.cwf/`.
-- Current strategy: `.cwf` is the default write location for session artifacts and generated indexes.
-- [`.cwf/cwf-state.yaml`](../.cwf/cwf-state.yaml) is the project SSOT and stores workflow/session state.
+- Canonical artifact root: `.cwf/`
+- Canonical session artifact directory: `.cwf/projects/`
+- Project workflow state: [`.cwf/cwf-state.yaml`](../.cwf/cwf-state.yaml)
+- Legacy root session-artifact compatibility: removed
 
 ## Scope
 
 ### Artifact classes
 
 1. Machine state (cursor/state/rules/queues/cache)
-2. Session logs and narrative docs (`prompt-logs/**`)
+2. Session artifacts (plans, lessons, retro, handoff, session logs)
 3. Generated indexes (`cwf-index`/repo index outputs)
 
-### Compatibility policy
-
-- Legacy reads from root `prompt-logs/**` remain supported during transition.
-- New writes default to `.cwf/prompt-logs/**`.
-
-## Target Layout
+## Canonical Layout
 
 ```text
 .cwf/
@@ -32,65 +28,20 @@ Current status for moving CWF-generated artifacts from repository root into `.cw
         rules.yaml
         queue.json
         events.log
-  prompt-logs/                 # canonical session artifact location
-  indexes/                     # generated-index location
+  projects/                    # canonical session artifacts
+  indexes/                     # generated indexes
 ```
 
-## Phase Plan
+## Implementation Rules
 
-## Phase 1 — HITL state-first migration (Completed)
+- All session-aware scripts and skills must resolve paths through `cwf-artifact-paths.sh`.
+- Default resolver output must point to `.cwf/projects/`.
+- User overrides use `CWF_ARTIFACT_ROOT` and `CWF_PROJECTS_DIR`.
+- New session runtime logs are written under `.cwf/projects/sessions/`.
+- Session log symlink filename in session dirs is `session-log.md`.
 
-- Introduce `cwf:hitl` state under `.cwf/hitl/sessions/**`.
-- Store HITL session state under `.cwf/hitl/sessions/**`.
-- Do not move other skill artifact paths yet.
+## Guardrails
 
-Exit criteria:
-- HITL resume/restart works from `.cwf/hitl/**`.
-- [`.cwf/cwf-state.yaml`](../.cwf/cwf-state.yaml) state is sufficient to recover context.
-
-## Phase 2 — Path abstraction for session artifacts (Completed)
-
-- Add shared resolver for legacy and next-generation artifact roots.
-- Update scripts/skills to consume resolver instead of hard-coded paths.
-- Support dual-read (legacy + new) during transition.
-
-Exit criteria:
-- All session-aware skills resolve paths through shared abstraction.
-- No direct hard-coded `prompt-logs/` writes in critical skills.
-
-## Phase 3 — Prompt logs canonical move (Completed)
-
-- Set canonical session artifact root to `.cwf/prompt-logs/`.
-- Keep root `prompt-logs` compatibility via dual-read support.
-
-Exit criteria:
-- New sessions write to `.cwf/prompt-logs/` by default.
-- Legacy readers continue to function.
-
-## Phase 4 — Generated index consolidation (Completed)
-
-- Consolidate generated index artifacts under `.cwf/indexes/`.
-- Preserve AGENTS managed-block update behavior for repository index.
-- Keep user-facing entrypoints stable.
-
-Exit criteria:
-- Index generation no longer creates root-level transient artifacts.
-- Coverage/link checks remain deterministic.
-
-## Phase 5 — Compatibility sunset (Pending)
-
-- Remove legacy root `prompt-logs` read fallbacks after migration window closes.
-- Simplify scripts to `.cwf`-only path resolution.
-- Update docs to remove transition notes.
-
-Exit criteria:
-- No legacy-path dependency in active skills/hooks/scripts.
-
-## Risks and Guardrails
-
-- Risk: breaking resume for in-flight sessions.
-  - Guardrail: dual-read period + pointer-based discovery.
-- Risk: hidden hard-coded paths.
-  - Guardrail: grep gate for `prompt-logs/` literals before each phase cutover.
-- Risk: user discoverability drop.
-  - Guardrail: keep user-facing docs focused on commands, not internal paths.
+- No hard-coded legacy artifact path literals in active scripts/skills/docs.
+- Deterministic checks (lint/link/index coverage) must exclude `.cwf/projects/` artifacts from normal doc quality gates.
+- User-facing docs should reference commands and expected outputs, not migration-era compatibility behavior.

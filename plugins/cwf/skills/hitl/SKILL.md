@@ -7,7 +7,7 @@ description: "Human-in-the-loop diff/chunk review with resumable state and rule 
 
 Interactive, resumable review over branch diff (`<base>...HEAD`). Reviews file-by-file in meaningful chunks, pauses for user input each chunk, and persists review state/rules so work can resume anytime.
 
-**Language**: Write review outputs in English. Communicate with the user in their prompt language.
+**Language**: Write review outputs in the user's prompt language by default. If the user explicitly requests another language, follow that request.
 
 ## Quick Reference
 

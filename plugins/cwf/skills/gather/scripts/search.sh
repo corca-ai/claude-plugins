@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Tavily web search — called by the gather-context skill
+# Tavily web search — called by the cwf:gather skill
 # Usage: search.sh [--topic news|finance] [--time-range day|week|month|year] [--deep] "<query>"
 set -euo pipefail
 
@@ -36,7 +36,7 @@ if [ -z "$QUERY" ]; then
   exit 1
 fi
 
-# --- Load API key: shell env -> shell profiles -> legacy ~/.claude/.env ---
+# --- Load API key: shell env -> shell profiles ---
 cwf_env_load_vars TAVILY_API_KEY
 
 if [ -z "${TAVILY_API_KEY:-}" ]; then
@@ -47,9 +47,6 @@ Get your API key: https://app.tavily.com/home
 
 Then add to your shell profile (~/.zshrc or ~/.bashrc):
   export TAVILY_API_KEY="your-key-here"
-
-Legacy fallback is also supported:
-  ~/.claude/.env
 MSG
   exit 1
 fi

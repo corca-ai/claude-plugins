@@ -5,7 +5,7 @@ Project and organizational facts accumulated from retrospectives.
 ## Project
 
 - corca-plugins is a Claude Code plugin marketplace for "AI Native Product Teams"
-- Plan & Lessons Protocol creates `.cwf/prompt-logs/{YYMMDD}-{NN}-{title}/` per session with plan.md, lessons.md, and optionally retro.md. Sequence is allocated by [scripts/next-prompt-dir.sh](../scripts/next-prompt-dir.sh) (date-scoped `YYMMDD-NN-*`), so numbering resets to `01` each day. When a session spans midnight or another day, the directory name usually keeps the original start-date prefix unless the workflow explicitly rolls over to a new directory.
+- Plan & Lessons Protocol creates `.cwf/projects/{YYMMDD}-{NN}-{title}/` per session with plan.md, lessons.md, and optionally retro.md. Sequence is allocated by [scripts/next-prompt-dir.sh](../scripts/next-prompt-dir.sh) (date-scoped `YYMMDD-NN-*`), so numbering resets to `01` each day. When a session spans midnight or another day, the directory name usually keeps the original start-date prefix unless the workflow explicitly rolls over to a new directory.
 
 ## Design Principles
 
@@ -47,7 +47,7 @@ Document placement uses **lifecycle as primary axis**, consumer count as seconda
 |-----------|-----------|----------------|----------|
 | `docs/` | Project-scope (permanent) | Project conventions change | plugin-dev-cheatsheet.md, architecture-patterns.md |
 | `references/` | Project-scope (permanent) | External framework updates | essence-of-software/distillation.md (source texts) |
-| `.cwf/prompt-logs/{session}/` | Session-scope (ephemeral) | Session ends; absorbed into deliverables | plan.md, retro.md, concept-distillation.md |
+| `.cwf/projects/{session}/` | Session-scope (ephemeral) | Session ends; absorbed into deliverables | plan.md, retro.md, concept-distillation.md |
 
 Key distinction: `references/` holds **external framework source texts**, not analysis outputs. Discovery of session artifacts is via [`.cwf/cwf-state.yaml`](../.cwf/cwf-state.yaml) session history.
 

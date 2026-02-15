@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Tavily URL content extraction — called by the gather-context skill
+# Tavily URL content extraction — called by the cwf:gather skill
 # Usage: extract.sh "<url>" [--query "<relevance_query>"]
 set -euo pipefail
 
@@ -31,11 +31,11 @@ fi
 # --- Validate URL ---
 if [[ ! "$URL" =~ ^https?:// ]]; then
   echo "Error: Invalid URL. Must start with http:// or https://" >&2
-  echo "Did you mean: /gather-context --search $URL?" >&2
+  echo "Did you mean: cwf:gather --search $URL?" >&2
   exit 1
 fi
 
-# --- Load API key: shell env -> shell profiles -> legacy ~/.claude/.env ---
+# --- Load API key: shell env -> shell profiles ---
 cwf_env_load_vars TAVILY_API_KEY
 
 if [ -z "${TAVILY_API_KEY:-}" ]; then
@@ -46,9 +46,6 @@ Get your API key: https://app.tavily.com/home
 
 Then add to your shell profile (~/.zshrc or ~/.bashrc):
   export TAVILY_API_KEY="your-key-here"
-
-Legacy fallback is also supported:
-  ~/.claude/.env
 MSG
   exit 1
 fi

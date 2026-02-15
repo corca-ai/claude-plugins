@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # redact-session-logs.sh: sanitize existing Codex session log artifacts in place.
-# Default target directory: ./.cwf/prompt-logs/sessions (unless argument is provided).
+# Default target directory: ./.cwf/projects/sessions (unless argument is provided).
 
 set -euo pipefail
 
@@ -18,7 +18,7 @@ fi
 source "$RESOLVER_SCRIPT"
 
 DEFAULT_CWD="$(pwd)"
-DEFAULT_TARGET_DIR="$(resolve_cwf_prompt_logs_dir "$DEFAULT_CWD")/sessions"
+DEFAULT_TARGET_DIR="$(resolve_cwf_projects_dir "$DEFAULT_CWD")/sessions"
 TARGET_DIR="${1:-$DEFAULT_TARGET_DIR}"
 
 if [ ! -f "$REDACTOR_SCRIPT" ]; then

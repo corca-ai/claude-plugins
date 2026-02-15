@@ -47,12 +47,8 @@ function loadToken() {
     if (found) return found;
   }
 
-  // 3. Legacy fallback: ~/.claude/.env
-  const token = extractVarFromFile(join(homedir(), '.claude', '.env'), 'SLACK_BOT_TOKEN');
-  if (token) return token;
-
   throw new Error(
-    'SLACK_BOT_TOKEN not found. Add it to ~/.zshrc or ~/.bashrc (legacy fallback: ~/.claude/.env)'
+    'SLACK_BOT_TOKEN not found. Add it to ~/.zshrc or ~/.bashrc.'
   );
 }
 

@@ -15,18 +15,20 @@
 # shellcheck source=env-loader.sh
 source "$(dirname "${BASH_SOURCE[0]}")/env-loader.sh"
 
-# Load config from process env / shell profiles / legacy ~/.claude/.env
+# Load config from process env / shell profiles
 slack_load_config() {
     cwf_env_load_vars \
         SLACK_BOT_TOKEN \
         SLACK_CHANNEL_ID \
         SLACK_WEBHOOK_URL \
-        CLAUDE_CORCA_ATTENTION_USER_ID \
-        CLAUDE_CORCA_ATTENTION_USER_HANDLE \
-        CLAUDE_CORCA_ATTENTION_PARENT_MENTION \
-        CLAUDE_CORCA_ATTENTION_REPLY_BROADCAST \
-        CLAUDE_CORCA_ATTENTION_DELAY \
-        CLAUDE_CORCA_ATTENTION_TRUNCATE
+        CWF_ATTENTION_USER_ID \
+        CWF_ATTENTION_USER_HANDLE \
+        CWF_ATTENTION_PARENT_MENTION \
+        CWF_ATTENTION_REPLY_BROADCAST \
+        CWF_ATTENTION_DELAY \
+        CWF_ATTENTION_TRUNCATE \
+        CWF_ATTENTION_HEARTBEAT_USER_IDLE \
+        CWF_ATTENTION_HEARTBEAT_INTERVAL
 }
 
 # Generate session-scoped hash (first 12 chars of SHA-256)
@@ -82,25 +84,25 @@ slack_normalize_bool() {
 
 # Build mention text for parent notifications.
 # Priority:
-#   1) CLAUDE_CORCA_ATTENTION_PARENT_MENTION (raw, e.g. "<@U123...>" or "@name")
-#   2) CLAUDE_CORCA_ATTENTION_USER_ID (auto-wrapped as "<@...>")
-#   3) CLAUDE_CORCA_ATTENTION_USER_HANDLE (auto-prefixed as "@...")
+#   1) CWF_ATTENTION_PARENT_MENTION (raw, e.g. "<@U123...>" or "@name")
+#   2) CWF_ATTENTION_USER_ID (auto-wrapped as "<@...>")
+#   3) CWF_ATTENTION_USER_HANDLE (auto-prefixed as "@...")
 slack_attention_parent_mention() {
-    if [ -n "${CLAUDE_CORCA_ATTENTION_PARENT_MENTION:-}" ]; then
-        echo "${CLAUDE_CORCA_ATTENTION_PARENT_MENTION}"
+    if [ -n "${CWF_ATTENTION_PARENT_MENTION:-}" ]; then
+        echo "${CWF_ATTENTION_PARENT_MENTION}"
         return
     fi
 
-    if [ -n "${CLAUDE_CORCA_ATTENTION_USER_ID:-}" ]; then
-        echo "<@${CLAUDE_CORCA_ATTENTION_USER_ID}>"
+    if [ -n "${CWF_ATTENTION_USER_ID:-}" ]; then
+        echo "<@${CWF_ATTENTION_USER_ID}>"
         return
     fi
 
-    if [ -n "${CLAUDE_CORCA_ATTENTION_USER_HANDLE:-}" ]; then
-        if [[ "${CLAUDE_CORCA_ATTENTION_USER_HANDLE}" == @* ]]; then
-            echo "${CLAUDE_CORCA_ATTENTION_USER_HANDLE}"
+    if [ -n "${CWF_ATTENTION_USER_HANDLE:-}" ]; then
+        if [[ "${CWF_ATTENTION_USER_HANDLE}" == @* ]]; then
+            echo "${CWF_ATTENTION_USER_HANDLE}"
         else
-            echo "@${CLAUDE_CORCA_ATTENTION_USER_HANDLE}"
+            echo "@${CWF_ATTENTION_USER_HANDLE}"
         fi
         return
     fi
@@ -134,7 +136,7 @@ slack_send() {
         local payload="{\"channel\": \"${SLACK_CHANNEL_ID}\", \"text\": \"${escaped_text}\""
         if [ -n "$thread_ts" ]; then
             local broadcast
-            broadcast=$(slack_normalize_bool "${CLAUDE_CORCA_ATTENTION_REPLY_BROADCAST:-false}")
+            broadcast=$(slack_normalize_bool "${CWF_ATTENTION_REPLY_BROADCAST:-false}")
             payload+=", \"thread_ts\": \"${thread_ts}\", \"reply_broadcast\": ${broadcast}"
         fi
         payload+="}"
@@ -183,25 +185,17 @@ slack_diagnose() {
     echo "=== attention-hook Slack diagnostics ==="
     echo ""
 
-    # 1. Check legacy fallback file
-    local env_file="$HOME/.claude/.env"
-    if [ -f "$env_file" ]; then
-        echo "$pass ~/.claude/.env found (legacy fallback)"
-    else
-        echo "  ~/.claude/.env not found (ok if shell profile/environment is configured)"
-    fi
-
-    # 2. Load config
+    # 1. Load config
     slack_load_config
 
-    # 3. Check variables
+    # 2. Check variables
     echo ""
     echo "--- Configuration ---"
     if [ -n "${SLACK_BOT_TOKEN:-}" ]; then
         echo "$pass SLACK_BOT_TOKEN: set (${#SLACK_BOT_TOKEN} chars)"
     else
         echo "$fail SLACK_BOT_TOKEN: not set"
-        echo "  Set it in ~/.zshrc or ~/.bashrc (legacy fallback: ~/.claude/.env)"
+        echo "  Set it in ~/.zshrc or ~/.bashrc"
         has_error=1
     fi
 
@@ -209,7 +203,7 @@ slack_diagnose() {
         echo "$pass SLACK_CHANNEL_ID: $SLACK_CHANNEL_ID"
     else
         echo "$fail SLACK_CHANNEL_ID: not set"
-        echo "  Set it in ~/.zshrc or ~/.bashrc (legacy fallback: ~/.claude/.env)"
+        echo "  Set it in ~/.zshrc or ~/.bashrc"
         has_error=1
     fi
 
@@ -219,7 +213,7 @@ slack_diagnose() {
 
     [ "$has_error" -eq 1 ] && return 1
 
-    # 4. Check token validity
+    # 3. Check token validity
     echo ""
     echo "--- Token check (auth.test) ---"
     local auth_response
@@ -241,7 +235,7 @@ slack_diagnose() {
         return 1
     fi
 
-    # 5. Check channel access
+    # 4. Check channel access
     echo ""
     echo "--- Channel check ---"
     local ch_response

@@ -2,7 +2,7 @@
 set -euo pipefail
 # check-links-local.sh — PostToolUse blocking hook for Write|Edit
 # Runs check-links.sh --local on the edited .md file's directory context.
-# Skips silently when: not a .md file, file doesn't exist, or file is under prompt-log artifacts.
+# Skips silently when: not a .md file, file doesn't exist, or file is under project artifacts.
 # Blocks when deterministic tooling is unavailable (lychee/check-links.sh missing).
 
 HOOK_GROUP="lint_markdown"
@@ -26,9 +26,9 @@ case "$FILE_PATH" in
     *) exit 0 ;;
 esac
 
-# Skip prompt-log artifact paths
+# Skip project artifact paths
 case "$FILE_PATH" in
-    */prompt-logs/*|prompt-logs/*|*/.cwf/prompt-logs/*|.cwf/prompt-logs/*) exit 0 ;;
+    */.cwf/projects/*|.cwf/projects/*) exit 0 ;;
 esac
 
 # File doesn't exist

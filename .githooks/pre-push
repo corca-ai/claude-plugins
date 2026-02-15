@@ -7,7 +7,7 @@ cd "$REPO_ROOT"
 
 mapfile -t md_files < <(
   git ls-files '*.md' '*.mdx' \
-    | grep -Ev '^(\.cwf/prompt-logs/|prompt-logs/|references/anthropic-skills-guide/)' || true
+    | grep -Ev '^(\.cwf/projects/|references/anthropic-skills-guide/)' || true
 )
 
 if [ "${#md_files[@]}" -gt 0 ]; then

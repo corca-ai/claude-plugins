@@ -29,7 +29,7 @@ Identify good patterns one skill has that others should adopt:
 - Language adaptation: does every user-facing skill specify how to match the user's language?
 - Sub-agent usage: when skills use Task tool, do they follow the mature pattern (reference guide in `references/`, parallel execution, structured output)?
 - Usage message: do skills with subcommands show help when invoked with no args?
-- Configuration: are env vars named consistently (`CLAUDE_CORCA_{PLUGIN}_{SETTING}`)?
+- Configuration: are env vars named consistently (`CWF_{DOMAIN}_{SETTING}`)?
 - Output persistence: do skills that produce artifacts offer to save them?
 - Progressive Disclosure: do all skills follow the three-level hierarchy (metadata → body → references)?
 

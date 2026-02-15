@@ -6,7 +6,7 @@ Protocol for persisting planning artifacts and session learnings.
 
 ### Location
 
-`.cwf/prompt-logs/{YYMMDD}-{NN}-{title}/plan.md`
+`.cwf/projects/{YYMMDD}-{NN}-{title}/plan.md`
 
 **Path rule**:
 - If the user specifies a path, use it.
@@ -14,7 +14,7 @@ Protocol for persisting planning artifacts and session learnings.
 - Do not hand-calculate sequence numbers.
 - `YYMMDD` is the directory creation date, not a guarantee that all later work in that session happened on the same day.
 
-The `{title}` must reflect the current session's task, not a previous session's. Even if the input spec or reference document lives in an existing `.cwf/prompt-logs/` directory, always create a new directory named after the current task.
+The `{title}` must reflect the current session's task, not a previous session's. Even if the input spec or reference document lives in an existing `.cwf/projects/` directory, always create a new directory named after the current task.
 
 ### Required Sections
 
@@ -58,7 +58,7 @@ Create the plan document at session start, before implementation begins.
 
 ### Location
 
-`.cwf/prompt-logs/{YYMMDD}-{NN}-{title}/lessons.md` — same directory as the plan.
+`.cwf/projects/{YYMMDD}-{NN}-{title}/lessons.md` — same directory as the plan.
 
 ### What to Record
 
@@ -91,13 +91,13 @@ Accumulate incrementally throughout the session. Record learnings as they emerge
 
 ## Retro Document (optional)
 
-`.cwf/prompt-logs/{YYMMDD}-{NN}-{title}/retro.md` — produced by the `/retro` skill at session end.
+`.cwf/projects/{YYMMDD}-{NN}-{title}/retro.md` — produced by the `/retro` skill at session end.
 
 While lessons are accumulated incrementally during a session, the retro is a comprehensive end-of-session review covering: user/org context, collaboration preferences, prompting feedback, learning resources, and skill discovery. See the `/retro` skill for details if available.
 
 ## Handoff Document (milestone sessions)
 
-`.cwf/prompt-logs/{YYMMDD}-{NN}-{title}/next-session.md` — context transfer for the next session.
+`.cwf/projects/{YYMMDD}-{NN}-{title}/next-session.md` — context transfer for the next session.
 
 Create when the current session is part of a tracked sequence (e.g., sessions in `cwf-state.yaml`). Include: context files to read, task scope, don't-touch boundaries, lessons from prior sessions, success criteria, and a start command.
 
