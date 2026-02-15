@@ -27,7 +27,7 @@ cwf:review --human [--base <branch>]
 Persist HITL runtime state under:
 
 ```text
-.cwf/hitl/sessions/{session_id}/
+.cwf/projects/{session-dir}/hitl/
   state.yaml
   rules.yaml
   queue.json
@@ -42,8 +42,8 @@ live:
   phase: hitl
   hitl:
     session_id: "Sxx-hitl"
-    state_file: ".cwf/hitl/sessions/Sxx-hitl/state.yaml"
-    rules_file: ".cwf/hitl/sessions/Sxx-hitl/rules.yaml"
+    state_file: ".cwf/projects/{session-dir}/hitl/state.yaml"
+    rules_file: ".cwf/projects/{session-dir}/hitl/rules.yaml"
     updated_at: "YYYY-MM-DDTHH:MM:SSZ"
 ```
 
@@ -61,7 +61,7 @@ live:
    - fallback `main`
 2. Resolve review scope (`docs|code|all`, default `all`).
 3. Build diff target: `git diff --name-only <base>...HEAD`.
-4. If `--resume`, load the latest active state from `.cwf/hitl/sessions/`.
+4. If `--resume`, load from `live.hitl.state_file` pointer in `cwf-state.yaml` (fallback: latest `.cwf/projects/*/hitl/`).
 
 ## Phase 1: Build Deterministic Queue
 
@@ -138,7 +138,7 @@ On `--close` (or EOF completion):
 
 1. Persist state before every user pause.
 2. Never discard accepted rules within the active session.
-3. Pointer-only policy: keep detailed HITL state in `.cwf/hitl/**`; store only pointers in `cwf-state.yaml`.
+3. Pointer-only policy: keep detailed HITL state in `.cwf/projects/{session-dir}/hitl/`; store only pointers in `cwf-state.yaml`.
 4. During Phase 1 migration, do not move other skills' artifact paths automatically.
 5. Maintain meaningful commit-unit boundaries when applying fixes during HITL.
 6. Default policy: `in_review` fixes can be immediate; `reviewed` fixes go to `fix-queue` unless the user requests immediate application.

@@ -21,14 +21,13 @@ Current policy for CWF-generated artifacts under `.cwf/`.
 
 ```text
 .cwf/
-  hitl/
-    sessions/
-      {session_id}/
+  projects/                    # canonical session artifacts
+    {session-dir}/
+      hitl/
         state.yaml
         rules.yaml
         queue.json
         events.log
-  projects/                    # canonical session artifacts
   indexes/                     # generated indexes
 ```
 

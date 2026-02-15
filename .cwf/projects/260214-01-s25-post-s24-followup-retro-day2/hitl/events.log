@@ -1,0 +1,24 @@
+2026-02-15T10:08:47Z session_started scope=docs base=main file=README.ko.md chunk=README.ko.md:1-120
+2026-02-15T10:09:12Z chunk_presented file=README.ko.md range=1-120
+2026-02-15T10:43:14Z rule_added id=R1,R2 language=ko excerpt=expanded
+2026-02-15T10:43:14Z chunk_represented file=README.ko.md range=1-120 language=ko
+2026-02-15T10:47:28Z fix_applied file=README.ko.md lines=74,99,116
+2026-02-15T10:47:28Z decision_recorded singular_form=accepted_as_correct line=5
+2026-02-15T10:47:28Z chunk_presented file=README.ko.md range=122-248 language=ko
+2026-02-15T11:08:36Z rule_update language_rule=prompt_language_default
+2026-02-15T11:08:36Z immediate_edit_on_reviewed_area files=README.md,README.ko.md
+2026-02-15T11:08:36Z stale_marked file=README.ko.md chunk=README.ko.md:1-120 reason=framing-boundary-refactor
+2026-02-15T11:08:47Z framing_boundary_split_applied files=README.md,README.ko.md
+2026-02-15T11:10:24Z immediate_edit_on_reviewed_area file=README.ko.md reason=term_rename_to_operating_principles
+2026-02-15T11:10:24Z term_rename_applied files=README.md,README.ko.md old=framing_contract new=operating_principles
+2026-02-15T11:11:26Z chunk_represented file=README.ko.md range=122-248 language=ko
+2026-02-15T11:15:10Z rule_added id=R3 korean_doc_minimize_english=true
+2026-02-15T11:15:10Z fix_applied file=README.md line=124 type=direct_skill_link
+2026-02-15T11:15:10Z fix_applied file=README.ko.md range=126-251 type=order_and_korean_wording_normalization
+2026-02-15T11:15:42Z immediate_edit_on_reviewed_area file=README.ko.md line=56 reason=korean_wording_rule_R3
+2026-02-15T11:15:42Z fix_applied file=README.ko.md lines=56,121,151,220 type=nonessential_english_removed
+2026-02-15T21:45:19Z fix_applied file=README.ko.md line=126 term=입도->검토_단위
+2026-02-15T22:04:06Z immediate_edit_on_reviewed_area file=README.ko.md reason=user_feedback_batch
+2026-02-15T22:04:06Z fix_applied file=README.ko.md scope=terminology_links_structure
+2026-02-15T22:04:06Z fix_applied file=README.md scope=terminology_links_structure
+2026-02-15T22:04:06Z queue_blob_updated file=README.ko.md sha=114dd416c59de4251bea0eab55c5cd79e0cb0433

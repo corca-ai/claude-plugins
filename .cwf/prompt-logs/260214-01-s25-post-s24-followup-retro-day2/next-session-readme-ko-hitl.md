@@ -27,5 +27,5 @@ If the user mentions only this file, execute directly:
 ## Start Command
 
 ```text
-@.cwf/prompt-logs/260214-01-s25-post-s24-followup-retro-day2/next-session-readme-ko-hitl.md 시작합니다
+@.cwf/projects/260214-01-s25-post-s24-followup-retro-day2/next-session-readme-ko-hitl.md 시작합니다
 ```

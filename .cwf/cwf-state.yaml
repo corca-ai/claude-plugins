@@ -376,8 +376,8 @@ live:
   decision_journal: []
   hitl:
     session_id: "S25-hitl"
-    state_file: ".cwf/hitl/sessions/S25-hitl/state.yaml"
-    rules_file: ".cwf/hitl/sessions/S25-hitl/rules.yaml"
+    state_file: ".cwf/projects/260214-01-s25-post-s24-followup-retro-day2/hitl/state.yaml"
+    rules_file: ".cwf/projects/260214-01-s25-post-s24-followup-retro-day2/hitl/rules.yaml"
     updated_at: "2026-02-15T22:04:06Z"
 
 # Expert roster for domain expert sub-agents (used by clarify, review, retro)

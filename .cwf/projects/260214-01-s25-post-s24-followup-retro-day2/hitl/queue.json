@@ -1,0 +1,39 @@
+{
+  "session_id": "S25-hitl",
+  "scope": "docs",
+  "base": "main",
+  "generated_at": "2026-02-15T10:08:47Z",
+  "files": [
+    {
+      "path": "README.ko.md",
+      "status": "in_review",
+      "blob_sha": "114dd416c59de4251bea0eab55c5cd79e0cb0433",
+      "chunks": [
+        {
+          "id": "README.ko.md:1-120",
+          "start_line": 1,
+          "end_line": 120,
+          "status": "stale"
+        },
+        {
+          "id": "README.ko.md:122-248",
+          "start_line": 122,
+          "end_line": 248,
+          "status": "in_review"
+        },
+        {
+          "id": "README.ko.md:250-329",
+          "start_line": 250,
+          "end_line": 329,
+          "status": "pending"
+        },
+        {
+          "id": "README.ko.md:330-388",
+          "start_line": 330,
+          "end_line": 388,
+          "status": "pending"
+        }
+      ]
+    }
+  ]
+}

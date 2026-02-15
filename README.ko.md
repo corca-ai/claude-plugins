@@ -258,7 +258,7 @@ cwf:hitl --rule "<rule text>"        # 남은 큐에 적용할 리뷰 룰 추가
 cwf:review --human                   # 호환 별칭 (내부적으로 cwf:hitl로 라우팅)
 ```
 
-상태는 .cwf/hitl/sessions/(state.yaml, rules.yaml, queue.json, fix-queue.yaml, events.log)에 저장합니다. .cwf/cwf-state.yaml에는 활성 HITL 세션 포인터 메타데이터만 저장합니다.
+상태는 `.cwf/projects/<session-dir>/hitl/`(`state.yaml`, `rules.yaml`, `queue.json`, `fix-queue.yaml`, `events.log`)에 저장합니다. [`.cwf/cwf-state.yaml`](.cwf/cwf-state.yaml)에는 활성 HITL 세션 포인터 메타데이터만 저장합니다.
 
 ### [run](plugins/cwf/skills/run/SKILL.md)
 

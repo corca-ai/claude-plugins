@@ -1,0 +1,25 @@
+version: 1
+session_id: "S25-hitl"
+status: "in_progress"
+scope: "docs"
+base: "main"
+created_at: "2026-02-15T10:08:47Z"
+updated_at: "2026-02-15T22:04:06Z"
+cursor:
+  file: "README.ko.md"
+  chunk_id: "README.ko.md:122-248"
+  next_line: 249
+current:
+  file: "README.ko.md"
+  chunk_id: "README.ko.md:122-248"
+metrics:
+  files_total: 1
+  files_reviewed: 0
+  chunks_total: 4
+  chunks_reviewed: 0
+  chunks_stale: 1
+artifacts:
+  queue_file: ".cwf/hitl/sessions/S25-hitl/queue.json"
+  rules_file: ".cwf/hitl/sessions/S25-hitl/rules.yaml"
+  fix_queue_file: ".cwf/hitl/sessions/S25-hitl/fix-queue.yaml"
+  events_log: ".cwf/hitl/sessions/S25-hitl/events.log"
