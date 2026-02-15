@@ -1,18 +1,18 @@
 ---
 name: retro
-description: "Comprehensive session retrospective with adaptive depth. Light by default, deep on request with parallel sub-agent analysis. Triggers: \"cwf:retro\", \"retro\", \"retrospective\", \"회고\""
+description: "Comprehensive session retrospective with adaptive depth. Deep by default, with light mode via --light (and tiny-session auto-light). Triggers: \"cwf:retro\", \"retro\", \"retrospective\", \"회고\""
 ---
 
 # Session Retrospective
 
-Adaptive end-of-session review. Light by default, deep on request. Produces `retro.md` alongside `plan.md` and `lessons.md` in the session's prompt-logs directory.
+Adaptive end-of-session review. Deep by default; light mode is used with `--light` or for tiny routine sessions. Produces `retro.md` alongside `plan.md` and `lessons.md` in the session's prompt-logs directory.
 
 **Language**: Write retro.md in the user's language. Communicate with the user in their prompt language.
 
 ## Quick Start
 
 ```text
-/retro [path]            # adaptive (light by default)
+/retro [path]            # adaptive (deep by default)
 /retro --deep [path]     # full analysis with expert lens
 ```
 

@@ -119,3 +119,25 @@
 - Applied: added explicit sequence/guard text in `README.md` and `README.ko.md`:
   - plan -> `cwf:review --mode plan` before `cwf:impl`
   - impl flow includes post-impl `cwf:review --mode code`
+
+### Chunk Review 03
+
+1. Chunk: `README.md:118-201` (EOF: no)
+2. Excerpt: skills reference block for `gather`, `clarify`, `plan`, `impl`, `retro`, and `refactor`; each section provides command synopsis, concise behavior notes, and a pointer to skill-local `SKILL.md`.
+3. Meaning / Intent: maximize command discoverability in README while keeping implementation/policy detail delegated to per-skill source docs.
+4. Review Focus (Line-Anchored):
+   - `README.md:175` vs `README.md:178`: default-mode wording conflicts (`light by default` in section intro vs `deep by default` in command annotation); canonical default should be unified.
+   - `README.md:156` and `README.md:169`: plan/impl review-gate sequencing is now explicit; verify this sequencing language remains consistent with orchestration docs and run pipeline wording.
+5. Link Syntax Check: pass (`[]()` syntax used consistently for all skill reference links in this chunk).
+6. De-dup / What-Why Check: structure is mostly high-signal and scan-friendly; repeated "Full reference" lines are intentionally uniform and acceptable for quick navigation.
+7. Discussion Prompt:
+   - For `retro` default mode, should README follow the skill contract (`light by default`) and update line-level command annotation accordingly?
+   - In skills reference, do you want to keep behavior summaries at current density or tighten to one sentence per skill to reduce vertical length?
+
+### Follow-up Decision (From Discussion)
+
+- User decision: canonical `retro` default is `deep`.
+- Applied normalization:
+  - `README.md` retro intro wording aligned to deep-default.
+  - `README.ko.md` retro intro wording aligned to deep-default.
+  - `plugins/cwf/skills/retro/SKILL.md` description, opening summary, and quick-start comment aligned to deep-default with explicit `--light`/tiny-session light fallback note.

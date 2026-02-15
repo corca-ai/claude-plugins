@@ -172,7 +172,7 @@ Full reference: [SKILL.md](plugins/cwf/skills/impl/SKILL.md)
 
 ### retro
 
-Adaptive session retrospective — light by default, deep on request.
+Adaptive session retrospective — deep by default; use `--light` for lightweight mode.
 
 ```text
 cwf:retro            # Adaptive (deep by default)

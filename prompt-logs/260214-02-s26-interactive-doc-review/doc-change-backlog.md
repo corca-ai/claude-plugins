@@ -59,3 +59,7 @@ Status: Pending.
 13. `NON_AUTOMATABLE` — Clarify review-gate sequencing in README plan/impl descriptions.
 Reason: users may miss that implementation normally proceeds after plan review and is followed by code review.
 Status: Done.
+
+14. `NON_AUTOMATABLE` — Resolve `README.md` retro default-mode wording conflict (`light by default` vs `deep by default`).
+Reason: contradictory defaults in adjacent lines weaken operator trust and can cause wrong command expectations.
+Status: Done (resolved to deep-default wording).
