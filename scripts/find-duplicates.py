@@ -11,7 +11,7 @@ Options:
     --threshold N          Jaccard similarity threshold (default: 0.7)
     --shingle-size N       Word window size for similarity comparison (default: 3)
     --json                 Output as JSON array
-    --include-prompt-logs  Also scan prompt-logs/ directory (off by default)
+    --include-prompt-logs  Also scan prompt-log artifact directories (off by default)
     -h, --help             Show this help message and exit
 
 Exit codes:
@@ -173,7 +173,7 @@ def main():
         "--include-prompt-logs",
         action="store_true",
         default=False,
-        help="Also scan prompt-logs/ directory (off by default)",
+        help="Also scan prompt-log artifact directories (off by default)",
     )
     args = parser.parse_args()
 
@@ -194,13 +194,14 @@ def main():
         if not any(part == "node_modules" or part == ".git" for part in f.relative_to(repo_root).parts)
     ]
 
-    # Filter out prompt-logs unless requested
+    # Filter out prompt-log artifact directories unless requested
     if not args.include_prompt_logs:
         prompt_logs_dir = repo_root / "prompt-logs"
+        prompt_logs_cwf_dir = repo_root / ".cwf" / "prompt-logs"
         md_files = [
             f
             for f in md_files
-            if not _is_under(f, prompt_logs_dir)
+            if not _is_under(f, prompt_logs_dir) and not _is_under(f, prompt_logs_cwf_dir)
         ]
 
     if not md_files:

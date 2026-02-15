@@ -1,11 +1,11 @@
-# CWF Artifact Migration Plan (`.cwf` First)
+# CWF Artifact Migration Status (`.cwf` First)
 
-Stage-based migration plan for moving CWF-generated artifacts from repository root into `.cwf/` while minimizing breakage in existing skills and scripts.
+Current status for moving CWF-generated artifacts from repository root into `.cwf/`.
 
 ## Decision
 
 - Final target: CWF-generated artifacts live under `.cwf/`.
-- Immediate strategy: move high-churn machine state first, keep human-facing logs compatible until path migration is complete.
+- Current strategy: `.cwf` is the default write location for session artifacts and generated indexes.
 - `cwf-state.yaml` remains the project SSOT and stores pointer metadata for relocated state.
 
 ## Scope
@@ -16,10 +16,10 @@ Stage-based migration plan for moving CWF-generated artifacts from repository ro
 2. Session logs and narrative docs (`prompt-logs/**`)
 3. Generated indexes (`cwf-index`/repo index outputs)
 
-### Non-goals (Phase 1)
+### Compatibility policy
 
-- No immediate relocation of all `prompt-logs/**`.
-- No forced one-shot rewrite of every skill path in one commit.
+- Legacy reads from root `prompt-logs/**` remain supported during transition.
+- New writes default to `.cwf/prompt-logs/**`.
 
 ## Target Layout
 
@@ -32,13 +32,13 @@ Stage-based migration plan for moving CWF-generated artifacts from repository ro
         rules.yaml
         queue.json
         events.log
-  prompt-logs/                 # planned canonical location (phase 3+)
-  indexes/                     # planned generated-index location (phase 4+)
+  prompt-logs/                 # canonical session artifact location
+  indexes/                     # generated-index location
 ```
 
 ## Phase Plan
 
-## Phase 1 (Current) — HITL state-first migration
+## Phase 1 — HITL state-first migration (Completed)
 
 - Introduce `cwf:hitl` state under `.cwf/hitl/sessions/**`.
 - Keep `cwf-state.yaml` as pointer-only index for active HITL state.
@@ -48,7 +48,7 @@ Exit criteria:
 - HITL resume/restart works from `.cwf/hitl/**`.
 - `cwf-state.yaml` pointer is sufficient to recover state.
 
-## Phase 2 — Path abstraction for session artifacts
+## Phase 2 — Path abstraction for session artifacts (Completed)
 
 - Add shared resolver for legacy and next-generation artifact roots.
 - Update scripts/skills to consume resolver instead of hard-coded paths.
@@ -58,17 +58,16 @@ Exit criteria:
 - All session-aware skills resolve paths through shared abstraction.
 - No direct hard-coded `prompt-logs/` writes in critical skills.
 
-## Phase 3 — Prompt logs canonical move
+## Phase 3 — Prompt logs canonical move (Completed)
 
 - Set canonical session artifact root to `.cwf/prompt-logs/`.
-- Keep root `prompt-logs` compatibility via symlink or mirror mode.
-- Provide backfill migration command for existing repositories.
+- Keep root `prompt-logs` compatibility via dual-read support.
 
 Exit criteria:
 - New sessions write to `.cwf/prompt-logs/` by default.
 - Legacy readers continue to function.
 
-## Phase 4 — Generated index consolidation
+## Phase 4 — Generated index consolidation (Completed)
 
 - Consolidate generated index artifacts under `.cwf/indexes/`.
 - Preserve AGENTS managed-block update behavior for repository index.
@@ -78,10 +77,10 @@ Exit criteria:
 - Index generation no longer creates root-level transient artifacts.
 - Coverage/link checks remain deterministic.
 
-## Phase 5 — Compatibility sunset
+## Phase 5 — Compatibility sunset (Pending)
 
-- Remove legacy path fallbacks once migration window closes.
-- Simplify scripts to `.cwf`-first only.
+- Remove legacy root `prompt-logs` read fallbacks after migration window closes.
+- Simplify scripts to `.cwf`-only path resolution.
 - Update docs to remove transition notes.
 
 Exit criteria:

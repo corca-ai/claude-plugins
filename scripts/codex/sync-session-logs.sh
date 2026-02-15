@@ -8,7 +8,7 @@
 #
 # By default this script:
 # - Finds the latest Codex session for the current cwd
-# - Writes markdown to <prompt-logs-dir>/sessions as *.codex.md
+# - Writes markdown to ./.cwf/prompt-logs/sessions by default as *.codex.md
 # - Does not copy raw JSONL (use --raw to enable)
 
 set -euo pipefail
@@ -53,7 +53,7 @@ Options:
   --jsonl <path>       Export a specific JSONL file directly
   --cwd <path>         Prefer sessions whose session_meta.cwd matches path (default: $PWD)
   --since-epoch <sec>  Prefer sessions modified at/after this epoch seconds value
-  --out-dir <path>     Output directory (default: <prompt-logs-dir>/sessions)
+  --out-dir <path>     Output directory (default: ./.cwf/prompt-logs/sessions)
   --raw                Copy raw JSONL into out-dir/raw
   --no-raw             Backward-compatible alias for default behavior (no raw copy)
   --quiet              Suppress informational output

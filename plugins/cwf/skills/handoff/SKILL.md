@@ -33,7 +33,7 @@ Read `cwf-state.yaml`:
 
 Determine the current session by:
 
-1. Check for a session directory matching today's date in `prompt-logs/`
+1. Check for a session directory matching today's date in `.cwf/prompt-logs/`
 2. Match against the most recent entry in `cwf-state.yaml` `sessions`
 3. If ambiguous, use AskUserQuestion with candidates
 
@@ -48,8 +48,8 @@ Read the current session's artifacts (if they exist):
 - `retro.md` — retrospective (if available)
   - Identify action items not yet addressed
 - Runtime session logs (optional but recommended when available)
-  - Canonical unified path: `prompt-logs/sessions/*.claude.md`, `prompt-logs/sessions/*.codex.md`
-  - Legacy compatibility reads: `prompt-logs/sessions/*.md`, `prompt-logs/sessions-codex/*.md`
+  - Canonical unified path: `.cwf/prompt-logs/sessions/*.claude.md`, `.cwf/prompt-logs/sessions/*.codex.md`
+  - Legacy compatibility reads: `.cwf/prompt-logs/sessions/*.md`, `.cwf/prompt-logs/sessions-codex/*.md`, `prompt-logs/sessions/*.md`, `prompt-logs/sessions-codex/*.md`
   - Use these as additional evidence when extracting unresolved items and collaboration signals
 
 ---
@@ -58,7 +58,7 @@ Read the current session's artifacts (if they exist):
 
 ### 2.1 With master-plan.md
 
-If `master-plan.md` exists (search via Glob in `prompt-logs/`):
+If `master-plan.md` exists (search via Glob in `.cwf/prompt-logs/`):
 
 1. Read the session roadmap section
 2. Find the current session ID in the roadmap
@@ -82,7 +82,7 @@ Fall back to `cwf-state.yaml` stages and user input:
 
 ## Phase 3: Generate next-session.md
 
-Write `next-session.md` in the current session's prompt-logs directory. Follow the format defined in `plan-protocol.md` (Handoff Document section).
+Write `next-session.md` in the current session artifact directory. Follow the format defined in `plan-protocol.md` (Handoff Document section).
 
 ### 9 Required Sections
 
@@ -96,7 +96,7 @@ List files the next session agent must read before starting:
 1. `AGENTS.md` — shared project rules and protocols (cross-agent)
 2. `docs/plugin-dev-cheatsheet.md` — plugin development patterns
 3. `cwf-state.yaml` — session history and project state
-4. `prompt-logs/sessions/*.claude.md` / `*.codex.md` (or legacy `sessions-codex/*.md`) — runtime conversation evidence when available
+4. `.cwf/prompt-logs/sessions/*.claude.md` / `*.codex.md` (or legacy `sessions-codex/*.md`) — runtime conversation evidence when available
 5. {task-specific files from master-plan or plan.md}
 ```
 
@@ -244,7 +244,8 @@ The agent executing this skill holds the clarify/gather context in its active co
 
 1. **Context Files**: Which files must the next phase agent read? Always include AGENTS.md and `cwf-state.yaml`. Add files that emerged as critical during the clarify/gather phase. Include CLAUDE.md only if runtime-specific behavior matters.
    - When available, include runtime logs from canonical/legacy patterns:
-     `prompt-logs/sessions/*.claude.md`, `prompt-logs/sessions/*.codex.md`,
+     `.cwf/prompt-logs/sessions/*.claude.md`, `.cwf/prompt-logs/sessions/*.codex.md`,
+     `.cwf/prompt-logs/sessions/*.md`, `.cwf/prompt-logs/sessions-codex/*.md`,
      `prompt-logs/sessions/*.md`, `prompt-logs/sessions-codex/*.md`
 2. **Design Decisions**: Key choices made during clarify/gather with rationale. Source from clarification summaries, user decisions, and discussion outcomes
 3. **Protocols**: Rules and behavioral protocols discovered or established during the current phase. Source from `lessons.md` entries and explicit user instructions
@@ -254,7 +255,7 @@ The agent executing this skill holds the clarify/gather context in its active co
 
 ### 3b.3 Generate phase-handoff.md
 
-Write to `prompt-logs/{session-dir}/phase-handoff.md`:
+Write to `.cwf/prompt-logs/{session-dir}/phase-handoff.md`:
 
 ````markdown
 # Phase Handoff: {source phase} → {target phase}

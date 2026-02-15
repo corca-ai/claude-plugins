@@ -4,7 +4,7 @@ set -euo pipefail
 # Validates shell scripts using shellcheck after write/edit operations.
 # If violations are found, blocks with a reason so Claude can self-correct.
 # Skips silently when: not a .sh file, file doesn't exist, shellcheck not available,
-# or file is under prompt-logs/ (excluded from lint).
+# or file is under prompt-log artifacts (excluded from lint).
 
 HOOK_GROUP="lint_shell"
 # shellcheck source=cwf-hook-gate.sh
@@ -27,9 +27,9 @@ case "$FILE_PATH" in
     *) exit 0 ;;
 esac
 
-# Skip prompt-logs/ paths (these are session artifacts, not production code)
+# Skip prompt-log artifact paths (these are session artifacts, not production code)
 case "$FILE_PATH" in
-    */prompt-logs/*|prompt-logs/*) exit 0 ;;
+    */prompt-logs/*|prompt-logs/*|*/.cwf/prompt-logs/*|.cwf/prompt-logs/*) exit 0 ;;
 esac
 
 # File doesn't exist (may have been deleted or path is virtual)

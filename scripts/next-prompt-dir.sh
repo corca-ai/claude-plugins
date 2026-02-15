@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# next-prompt-dir.sh — Output the next prompt-logs directory path for today.
+# next-prompt-dir.sh — Output the next session directory path for today.
 # Usage: scripts/next-prompt-dir.sh <title>
 # Output: <prompt-logs-dir>/YYMMDD-NN-title (NN = zero-padded sequence number)
 # Optional env for deterministic testing:
 #   CWF_NEXT_PROMPT_DATE=YYMMDD   Override today's date
 #   CWF_PROMPT_LOGS_DIR=/path     Override prompt-logs scan directory
-#   CWF_ARTIFACT_ROOT=/path        Override artifact root (used when prompt dir not set)
+#   CWF_ARTIFACT_ROOT=/path        Override artifact root (default: ./.cwf)
 
 if [[ $# -lt 1 ]]; then
   echo "Usage: $0 <title>" >&2

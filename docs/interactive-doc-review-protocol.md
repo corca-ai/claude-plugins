@@ -1,6 +1,6 @@
 # Interactive Documentation Review Protocol
 
-Repeatable, resumable workflow for user-facing documentation outside [prompt-logs](../prompt-logs/).
+Repeatable, resumable workflow for user-facing documentation outside [session artifacts](../.cwf/prompt-logs/).
 
 ## Goal
 
@@ -31,7 +31,7 @@ Repeatable, resumable workflow for user-facing documentation outside [prompt-log
 
 ### Exclude
 
-- Session artifacts: [prompt-logs/**](../prompt-logs/)
+- Session artifacts: [.cwf/prompt-logs/**](../.cwf/prompt-logs/)
 - Skill definition files: [**/SKILL.md](../plugins/cwf/skills/)
 - Local runtime helper docs outside project-facing scope: [.claude/**](../.claude/)
 

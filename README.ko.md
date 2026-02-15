@@ -52,7 +52,7 @@ v3.0.0부터 독립 플러그인(gather-context, clarify, retro, refactor, atten
 
 ### 가정
 
-- 사용자가 `prompt-logs/`, `cwf-state.yaml` 같은 세션 산출물을 저장/활용할 수 있는 저장소에서 작업합니다.
+- 사용자가 `.cwf/prompt-logs/`, `cwf-state.yaml` 같은 세션 산출물을 저장/활용할 수 있는 저장소에서 작업합니다.
 - [AGENTS.md](AGENTS.md)에서 시작해 세부 문서를 읽는 progressive disclosure 방식에 동의합니다.
 - 반복 품질 이슈는 행동 지침보다 결정적 검증 스크립트로 관리하는 방식을 선호합니다.
 
@@ -155,7 +155,7 @@ cwf:clarify <requirement> --light  # 직접 Q&A, 서브에이전트 없음
 cwf:plan <task description>
 ```
 
-병렬 선행 사례 + 코드베이스 리서치 -> 단계, 파일, 성공 기준(BDD + 정성적)이 포함된 구조화된 계획 -> `prompt-logs/` 세션 디렉토리에 저장. 권장 흐름: 구현 전에 `cwf:review --mode plan`으로 계획을 먼저 검토해 plan 단계 우려사항을 해소합니다.
+병렬 선행 사례 + 코드베이스 리서치 -> 단계, 파일, 성공 기준(BDD + 정성적)이 포함된 구조화된 계획 -> `.cwf/prompt-logs/` 세션 디렉토리에 저장. 권장 흐름: 구현 전에 `cwf:review --mode plan`으로 계획을 먼저 검토해 plan 단계 우려사항을 해소합니다.
 
 전체 레퍼런스: [SKILL.md](plugins/cwf/skills/plan/SKILL.md)
 
@@ -287,7 +287,7 @@ cwf:setup --hooks        # 훅 그룹 선택만
 cwf:setup --tools        # 외부 도구 감지만
 cwf:setup --codex        # Codex 사용자 스코프(~/.agents/*)에 CWF 스킬/레퍼런스 연결
 cwf:setup --codex-wrapper # 세션 로그 자동 동기화를 위한 codex wrapper 설치
-cwf:setup --cap-index    # CWF capability 인덱스만 생성/갱신 (cwf-index.md)
+cwf:setup --cap-index    # CWF capability 인덱스만 생성/갱신 (.cwf/indexes/cwf-index.md)
 cwf:setup --repo-index   # 저장소 인덱스 명시적 생성/갱신
 cwf:setup --repo-index --target agents # AGENTS 기반 저장소용 AGENTS.md 관리 블록
 ```
@@ -308,7 +308,7 @@ cwf:setup --codex-wrapper
 적용되는 내용:
 - `~/.agents/skills/*`, `~/.agents/references`를 로컬 CWF에 심링크 (최신 파일 자동 반영)
 - `~/.local/bin/codex` wrapper 설치 + PATH 업데이트(`~/.zshrc`, `~/.bashrc`)
-- 이후 `codex` 실행 시 세션 markdown 로그가 `prompt-logs/sessions/`에 `*.codex.md` 형식으로 자동 동기화
+- 이후 `codex` 실행 시 세션 markdown 로그가 `.cwf/prompt-logs/sessions/`에 `*.codex.md` 형식으로 자동 동기화
 - 동기화 대상은 현재 실행에서 갱신된 세션으로 우선 고정되어, 같은 cwd에서 잘못된 세션 export를 줄입니다
 - raw JSONL 복사는 기본 비활성(옵션 `--raw`)이며, raw export 시에도 민감정보 마스킹(redaction)이 적용됩니다
 
@@ -378,7 +378,7 @@ CLAUDE_CORCA_SMART_READ_DENY_LINES=2000     # 이 줄 수 이상이면 전체 �
 ### 프롬프트 로거
 
 ```bash
-CLAUDE_CORCA_PROMPT_LOGGER_DIR="/custom/path"  # 출력 디렉토리 (기본값: {cwd}/prompt-logs/sessions)
+CLAUDE_CORCA_PROMPT_LOGGER_DIR="/custom/path"  # 출력 디렉토리 (기본값: {cwd}/.cwf/prompt-logs/sessions)
 CLAUDE_CORCA_PROMPT_LOGGER_ENABLED=false       # 로깅 비활성화 (기본값: true)
 CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE=20         # 축약 임계값 (줄 수, 기본값: 10)
 ```

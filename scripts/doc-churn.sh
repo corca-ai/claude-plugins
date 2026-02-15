@@ -7,7 +7,7 @@ set -euo pipefail
 #   --stale-days N         Threshold for stale classification (default: 90)
 #   --stale-only           Only show files classified as stale or archival
 #   --json                 Output machine-readable JSON
-#   --include-prompt-logs  Include prompt-logs/ directory (off by default)
+#   --include-prompt-logs  Include prompt-log artifact directories (off by default)
 #   -h|--help              Show this usage message
 # Exit 0 always (informational tool, not a linter)
 
@@ -87,12 +87,12 @@ CURRENT_EPOCH=$((NOW - 30 * 86400))
 # Collect .md files
 mapfile -t MD_FILES < <(find . -name "*.md" -type f ! -path "./.git/*" ! -path "*/node_modules/*" | sort)
 
-# Filter prompt-logs unless requested
+# Filter prompt-log artifact directories unless requested
 if [[ "$INCLUDE_PROMPT_LOGS" != "true" ]]; then
   FILTERED=()
   for f in "${MD_FILES[@]}"; do
     case "$f" in
-      ./prompt-logs/*) continue ;;
+      ./prompt-logs/*|./.cwf/prompt-logs/*) continue ;;
       *) FILTERED+=("$f") ;;
     esac
   done

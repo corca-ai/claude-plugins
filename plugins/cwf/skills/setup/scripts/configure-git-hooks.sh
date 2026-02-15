@@ -105,7 +105,7 @@ cd "$REPO_ROOT"
 
 mapfile -t md_files < <(
   git diff --cached --name-only --diff-filter=ACMR -- '*.md' '*.mdx' \
-    | grep -Ev '^(prompt-logs/|references/anthropic-skills-guide/)' || true
+    | grep -Ev '^(\.cwf/prompt-logs/|prompt-logs/|references/anthropic-skills-guide/)' || true
 )
 
 if [ "${#md_files[@]}" -gt 0 ]; then
@@ -156,7 +156,7 @@ cd "$REPO_ROOT"
 
 mapfile -t md_files < <(
   git ls-files '*.md' '*.mdx' \
-    | grep -Ev '^(prompt-logs/|references/anthropic-skills-guide/)' || true
+    | grep -Ev '^(\.cwf/prompt-logs/|prompt-logs/|references/anthropic-skills-guide/)' || true
 )
 
 if [ "${#md_files[@]}" -gt 0 ]; then
@@ -175,8 +175,8 @@ if [[ "$PROFILE" != "fast" ]]; then
     if [[ -f AGENTS.md ]]; then
       bash scripts/check-index-coverage.sh AGENTS.md --profile repo
     fi
-    if [[ -f cwf-index.md ]]; then
-      bash scripts/check-index-coverage.sh cwf-index.md --profile cap
+    if [[ -f .cwf/indexes/cwf-index.md ]]; then
+      bash scripts/check-index-coverage.sh .cwf/indexes/cwf-index.md --profile cap
     fi
   else
     echo "[pre-push] scripts/check-index-coverage.sh missing or not executable" >&2

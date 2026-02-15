@@ -45,6 +45,10 @@ if [ -z "$SESSION_ID" ] || [ -z "$TRANSCRIPT_PATH" ] || [ ! -f "$TRANSCRIPT_PATH
     exit 0
 fi
 
+if [ -z "$CWD" ]; then
+    CWD="$(pwd)"
+fi
+
 # ── Wait for transcript flush (async hook may race with file writes) ─────────
 sleep 0.3
 
@@ -53,14 +57,23 @@ cwf_env_load_vars \
   CLAUDE_CORCA_PROMPT_LOGGER_DIR \
   CLAUDE_CORCA_PROMPT_LOGGER_ENABLED \
   CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE \
-  CLAUDE_CORCA_PROMPT_LOGGER_AUTO_COMMIT
+  CLAUDE_CORCA_PROMPT_LOGGER_AUTO_COMMIT \
+  CWF_ARTIFACT_ROOT
 
 ENABLED="${CLAUDE_CORCA_PROMPT_LOGGER_ENABLED:-true}"
 if [ "$ENABLED" != "true" ]; then
     exit 0
 fi
 
-LOG_DIR="${CLAUDE_CORCA_PROMPT_LOGGER_DIR:-${CWD}/prompt-logs/sessions}"
+ARTIFACT_ROOT_RAW="${CWF_ARTIFACT_ROOT:-.cwf}"
+if [[ "$ARTIFACT_ROOT_RAW" == /* ]]; then
+    ARTIFACT_ROOT="$ARTIFACT_ROOT_RAW"
+else
+    ARTIFACT_ROOT="${CWD}/${ARTIFACT_ROOT_RAW}"
+fi
+
+DEFAULT_LOG_DIR="${ARTIFACT_ROOT}/prompt-logs/sessions"
+LOG_DIR="${CLAUDE_CORCA_PROMPT_LOGGER_DIR:-$DEFAULT_LOG_DIR}"
 TRUNCATE_THRESHOLD="${CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE:-10}"
 AUTO_COMMIT="${CLAUDE_CORCA_PROMPT_LOGGER_AUTO_COMMIT:-false}"
 

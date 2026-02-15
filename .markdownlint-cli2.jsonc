@@ -1,6 +1,7 @@
 {
   "ignores": [
     "prompt-logs/",
+    ".cwf/prompt-logs/",
     "node_modules/",
     "node_modules/**",
     "**/node_modules/",

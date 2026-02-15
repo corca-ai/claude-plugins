@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # cwf-artifact-paths.sh: shared path resolver for CWF artifacts.
+# Default artifact root: ./.cwf
 
 set -euo pipefail
 
@@ -16,7 +17,7 @@ resolve_cwf_abs_path() {
 
 resolve_cwf_artifact_root() {
   local base_dir="$1"
-  local raw_artifact_root="${CWF_ARTIFACT_ROOT:-$base_dir}"
+  local raw_artifact_root="${CWF_ARTIFACT_ROOT:-$base_dir/.cwf}"
 
   resolve_cwf_abs_path "$base_dir" "$raw_artifact_root"
 }
@@ -66,7 +67,7 @@ resolve_cwf_prompt_logs_relpath() {
       rel_path="$raw_artifact_root/prompt-logs"
     fi
   else
-    rel_path="prompt-logs"
+    rel_path=".cwf/prompt-logs"
   fi
 
   # normalize leading/trailing "./" and slash

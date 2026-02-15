@@ -10,6 +10,7 @@ extensions = ["md"]
 # Exclude directories from scanning
 exclude_path = [
   "^prompt-logs/",
+  "^\\.cwf/prompt-logs/",
   "^node_modules/",
   "(^|/)node_modules/",
   "^scripts/node_modules/",

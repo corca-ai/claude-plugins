@@ -7,7 +7,7 @@ cd "$REPO_ROOT"
 
 mapfile -t md_files < <(
   git diff --cached --name-only --diff-filter=ACMR -- '*.md' '*.mdx' \
-    | grep -Ev '^(prompt-logs/|references/anthropic-skills-guide/)' || true
+    | grep -Ev '^(\.cwf/prompt-logs/|prompt-logs/|references/anthropic-skills-guide/)' || true
 )
 
 if [ "${#md_files[@]}" -gt 0 ]; then

@@ -4,7 +4,7 @@ set -euo pipefail
 if [ "${1:-}" = "" ]; then
   echo "Usage: check-index-coverage.sh <index-file> [--profile repo|cap]"
   echo "Example: check-index-coverage.sh AGENTS.md --profile repo"
-  echo "Example: check-index-coverage.sh cwf-index.md --profile cap"
+  echo "Example: check-index-coverage.sh .cwf/indexes/cwf-index.md --profile cap"
   exit 2
 fi
 
@@ -124,13 +124,13 @@ collect_required_paths_repo() {
   fi
 
   find . \
-    \( -path "./.git" -o -path "./.claude" -o -path "./node_modules" -o -path "./prompt-logs" \) -prune -o \
+    \( -path "./.git" -o -path "./.claude" -o -path "./.cwf" -o -path "./node_modules" -o -path "./prompt-logs" \) -prune -o \
     -type f -name "SKILL.md" -print \
     | sed 's|^\./||' \
     | grep "/skills/" || true
 
   find . \
-    \( -path "./.git" -o -path "./.claude" -o -path "./node_modules" -o -path "./prompt-logs" \) -prune -o \
+    \( -path "./.git" -o -path "./.claude" -o -path "./.cwf" -o -path "./node_modules" -o -path "./prompt-logs" \) -prune -o \
     -type f -name "*.md" -print \
     | sed 's|^\./||' \
     | grep "/references/" \

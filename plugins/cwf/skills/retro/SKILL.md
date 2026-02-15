@@ -5,7 +5,7 @@ description: "Comprehensive session retrospective with adaptive depth. Deep by d
 
 # Session Retrospective
 
-Adaptive end-of-session review. Deep by default; light mode is used with `--light` or for tiny routine sessions. Produces `retro.md` alongside `plan.md` and `lessons.md` in the session's prompt-logs directory.
+Adaptive end-of-session review. Deep by default; light mode is used with `--light` or for tiny routine sessions. Produces `retro.md` alongside `plan.md` and `lessons.md` in the session artifact directory.
 
 **Language**: Write retro.md in the user's language. Communicate with the user in their prompt language.
 
@@ -29,7 +29,7 @@ Edit `cwf-state.yaml` `live` section: set `phase: retro`.
 
 Resolution order:
 1. If `[path]` argument provided, use it
-2. Reuse `prompt-logs/` path already used in this session (plan.md/lessons.md writes)
+2. Reuse `.cwf/prompt-logs/` path already used in this session (plan.md/lessons.md writes)
 3. If reused session path date prefix (`YYMMDD`) differs from today's local date, AskUserQuestion:
    - Continue existing session directory (recommended for same logical session across midnight/day rollover)
    - Start a new dated directory for today
@@ -195,10 +195,10 @@ Write to `{output-dir}/retro.md` using the format below.
 ### 6. Link Session Log
 
 Discover runtime logs using this order:
-1. Canonical path: `prompt-logs/sessions/`
+1. Canonical path: `.cwf/prompt-logs/sessions/`
    - Prefer suffix files: `{YYMMDD}-*.claude.md`, `{YYMMDD}-*.codex.md`
    - Also read legacy unsuffixed files: `{YYMMDD}-*.md`
-2. Legacy compatibility path: `prompt-logs/sessions-codex/`
+2. Legacy compatibility path: `.cwf/prompt-logs/sessions-codex/`
    - Read `{YYMMDD}-*.md` only when no canonical codex candidate exists
 
 Then:

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # redact-session-logs.sh: sanitize existing Codex session log artifacts in place.
+# Default target directory: ./.cwf/prompt-logs/sessions (unless argument is provided).
 
 set -euo pipefail
 

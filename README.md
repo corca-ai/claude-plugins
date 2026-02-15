@@ -52,7 +52,7 @@ As of v3.0.0, standalone plugins (gather-context, clarify, retro, refactor, atte
 
 ### Assumptions
 
-- Users work in repositories where session artifacts (`prompt-logs/`, `cwf-state.yaml`) are allowed and useful.
+- Users work in repositories where session artifacts (`.cwf/prompt-logs/`, `cwf-state.yaml`) are allowed and useful.
 - Users accept progressive disclosure: start from [AGENTS.md](AGENTS.md), then load deeper docs as needed.
 - Teams prefer deterministic validation scripts for recurring quality checks over relying on behavioral memory.
 
@@ -155,7 +155,7 @@ Agent-assisted plan drafting with parallel research and BDD success criteria.
 cwf:plan <task description>
 ```
 
-Parallel prior art + codebase research → structured plan with steps, files, success criteria (BDD + qualitative) → saved to `prompt-logs/` session directory. Recommended flow: run `cwf:review --mode plan` before implementation so plan-level concerns are resolved before `cwf:impl`.
+Parallel prior art + codebase research → structured plan with steps, files, success criteria (BDD + qualitative) → saved to `.cwf/prompt-logs/` session directory. Recommended flow: run `cwf:review --mode plan` before implementation so plan-level concerns are resolved before `cwf:impl`.
 
 Full reference: [SKILL.md](plugins/cwf/skills/plan/SKILL.md)
 
@@ -287,7 +287,7 @@ cwf:setup --hooks        # Hook group selection only
 cwf:setup --tools        # External tool detection only
 cwf:setup --codex        # Link CWF skills/references into Codex user scope (~/.agents/*)
 cwf:setup --codex-wrapper # Install codex wrapper for automatic session log sync
-cwf:setup --cap-index    # Generate/refresh CWF capability index only (cwf-index.md)
+cwf:setup --cap-index    # Generate/refresh CWF capability index only (.cwf/indexes/cwf-index.md)
 cwf:setup --repo-index   # Generate/refresh repository index output (explicit)
 cwf:setup --repo-index --target agents # AGENTS.md managed block (for AGENTS-based repositories)
 ```
@@ -308,7 +308,7 @@ cwf:setup --codex-wrapper
 What this enables:
 - `~/.agents/skills/*` and `~/.agents/references` symlinked to local CWF (latest files auto-loaded)
 - `~/.local/bin/codex` wrapper installation + PATH update (`~/.zshrc`, `~/.bashrc`)
-- Every `codex` run auto-syncs session markdown logs into `prompt-logs/sessions/` as `*.codex.md`
+- Every `codex` run auto-syncs session markdown logs into `.cwf/prompt-logs/sessions/` as `*.codex.md`
 - Sync is anchored to the session updated during the current run (reduces wrong-session exports on shared cwd)
 - Raw JSONL copy is opt-in (`--raw`); redaction still applies when raw export is enabled
 
@@ -384,7 +384,7 @@ CLAUDE_CORCA_SMART_READ_DENY_LINES=2000     # Lines above which full read is blo
 ### Prompt logger
 
 ```bash
-CLAUDE_CORCA_PROMPT_LOGGER_DIR="/custom/path"  # Output directory (default: {cwd}/prompt-logs/sessions)
+CLAUDE_CORCA_PROMPT_LOGGER_DIR="/custom/path"  # Output directory (default: {cwd}/.cwf/prompt-logs/sessions)
 CLAUDE_CORCA_PROMPT_LOGGER_ENABLED=false       # Disable logging (default: true)
 CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE=20         # Truncation threshold in lines (default: 10)
 ```

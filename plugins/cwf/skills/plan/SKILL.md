@@ -279,7 +279,7 @@ If no learnings yet, create with a header and note that learnings will be accumu
 After writing plan artifacts, suggest review:
 
 ```text
-Plan drafted at prompt-logs/{dir}/plan.md.
+Plan drafted at .cwf/prompt-logs/{dir}/plan.md.
 
 For a multi-perspective review before implementation, run:
   cwf:review --mode plan

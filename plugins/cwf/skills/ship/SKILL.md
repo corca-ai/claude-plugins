@@ -46,7 +46,7 @@ Create a GitHub issue for the current session and optionally a feature branch.
 ### Workflow
 
 1. **Detect session context**:
-   - Find the current session directory in `prompt-logs/` (most recent `YYMMDD-NN-*`)
+   - Find the current session directory in `.cwf/prompt-logs/` (most recent `YYMMDD-NN-*`)
    - Read `plan.md` if it exists for purpose, scope, success criteria
    - Read master-plan (search for `master-plan.md` or similar) for session number
 
@@ -103,7 +103,7 @@ Create a pull request from the current feature branch.
 2. **Auto-detect linked issue**:
    - If `--issue N` provided, use that
    - Otherwise: `gh issue list --label cwf-v3 --search "S{N}" --json number,title`
-   - Match by session number from current prompt-logs directory name
+   - Match by session number from the current session artifact directory name
    - If no match found, proceed without issue link (warn the user)
 
 3. **Build PR body** from `{SKILL_DIR}/references/pr-template.md`:
@@ -111,9 +111,9 @@ Create a pull request from the current feature branch.
    - `{PURPOSE}` — synthesize from `git log {base}..HEAD --oneline` and plan.md;
      describe **why** this change exists, not what files changed
    - `{DECISIONS}` — extract key decisions from:
-     - `prompt-logs/{session}/lessons.md` takeaways
-     - `prompt-logs/{session}/retro.md` CDM section
-     - `prompt-logs/{session}/plan.md` decision points
+     - `.cwf/prompt-logs/{session}/lessons.md` takeaways
+     - `.cwf/prompt-logs/{session}/retro.md` CDM section
+     - `.cwf/prompt-logs/{session}/plan.md` decision points
      - Format as markdown table: `| 결정 | 근거 | 대안 |`
      - If no decisions found, write `_세션 중 주요 결정사항 없음._`
    - `{VERIFICATION}` — concrete, reproducible verification steps:
@@ -127,9 +127,9 @@ Create a pull request from the current feature branch.
    - `{FUTURE_IMPACT}` — impact on future development (new patterns, constraints, tech debt)
    - `{GIT_DIFF_STAT}` — output of `git diff {base}...HEAD --stat`
      wrapped in a `` ```text `` code fence
-   - `{LESSONS}` — extract from `prompt-logs/{session}/lessons.md` if exists,
+   - `{LESSONS}` — extract from `.cwf/prompt-logs/{session}/lessons.md` if exists,
      otherwise write `_No lessons recorded for this session._`
-   - `{CDM}` — extract from `prompt-logs/{session}/retro.md` CDM section if exists,
+   - `{CDM}` — extract from `.cwf/prompt-logs/{session}/retro.md` CDM section if exists,
      otherwise write `_No CDM recorded yet._`
    - `{CONDITIONAL_ITEMS}` — add checklist items based on changed file types:
      - `*.sh` changed → `- [ ] Scripts are executable and pass shellcheck`
