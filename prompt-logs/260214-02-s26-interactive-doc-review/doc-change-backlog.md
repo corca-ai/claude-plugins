@@ -63,3 +63,15 @@ Status: Done.
 14. `NON_AUTOMATABLE` — Resolve `README.md` retro default-mode wording conflict (`light by default` vs `deep by default`).
 Reason: contradictory defaults in adjacent lines weaken operator trust and can cause wrong command expectations.
 Status: Done (resolved to deep-default wording).
+
+15. `NON_AUTOMATABLE` — Decide whether to add explicit `cwf:review --mode code` example in README review section.
+Reason: explicit mode symmetry may improve scan clarity for first-time operators even though code mode is default.
+Status: Done.
+
+16. `NON_AUTOMATABLE` — Decide whether README run summary should mention `ship` human confirmation explicitly.
+Reason: current one-liner emphasizes post-impl auto-chaining but may hide the final human gate nuance.
+Status: Done.
+
+17. `NON_AUTOMATABLE` — Decide whether README setup quick-start should keep bare `cwf:setup --repo-index` alongside `--repo-index --target agents`.
+Reason: keeping both preserves generic capability visibility, but this repository policy prefers AGENTS-managed output as the primary path.
+Status: Done (keep both for plugin-user-facing README; use neutral AGENTS-based wording).

@@ -141,3 +141,46 @@
   - `README.md` retro intro wording aligned to deep-default.
   - `README.ko.md` retro intro wording aligned to deep-default.
   - `plugins/cwf/skills/retro/SKILL.md` description, opening summary, and quick-start comment aligned to deep-default with explicit `--light`/tiny-session light fallback note.
+
+### Chunk Review 04
+
+1. Chunk: `README.md:203-259` (EOF: no)
+2. Excerpt: skills reference block for `handoff`, `ship`, `review`, and `run`; each section provides command synopsis, concise behavior notes, and a pointer to skill-local `SKILL.md`.
+3. Meaning / Intent: document downstream workflow-control skills (handoff/ship/review/run) in a quick-scan format so operators can chain the lifecycle without opening each skill doc first.
+4. Review Focus (Line-Anchored):
+   - `README.md:238-240`: review command examples cover default code mode plus `clarify`/`plan`; consider whether explicit `--mode code` example should be shown for symmetry with other mode lines.
+   - `README.md:257`: run summary says "automatic chaining after implementation by default"; ensure this phrasing remains consistent with stage-level human confirmation at `ship` in run skill behavior.
+5. Link Syntax Check: pass (`[]()` syntax used consistently for all skill reference links in this chunk).
+6. De-dup / What-Why Check: concise and consistent with prior skill blocks; no major overlap risk beyond intentional command-template repetition.
+7. Discussion Prompt:
+   - Do you want `cwf:review --mode code` listed explicitly in README command examples for mode symmetry?
+   - Keep current `run` one-line summary, or add a brief note that `ship` still includes a human confirmation gate?
+
+### Follow-up Decision (From Discussion 2)
+
+- User decision: apply both edits.
+- Applied:
+  - Added explicit `cwf:review --mode code` example in `README.md` and `README.ko.md`.
+  - Updated `run` summary in `README.md` and `README.ko.md` to explicitly mention user confirmation gate at `ship`.
+
+### Chunk Review 05
+
+1. Chunk: `README.md:262-318` (EOF: no)
+2. Excerpt: setup command matrix (`--hooks`, `--tools`, `--codex`, `--codex-wrapper`, `--cap-index`, `--repo-index --target agents`), AGENTS-first entry file guidance, and Codex wrapper integration/verification notes.
+3. Meaning / Intent: concentrate operator-facing setup discoverability (bootstrap + indexing + codex integration) while preserving AGENTS-managed repository navigation policy.
+4. Review Focus (Line-Anchored):
+   - `README.md:267-274`: setup command list is comprehensive; check whether keeping both `--repo-index` and `--repo-index --target agents` lines remains the right balance between generic capability and this repo's AGENTS-managed convention.
+   - `README.md:305-318`: codex wrapper verification and shell-refresh instructions are explicit; verify wording stays aligned with current wrapper install behavior and avoids implying mandatory wrapper usage.
+5. Link Syntax Check: pass (`[]()` syntax is valid for all local references in this chunk).
+6. De-dup / What-Why Check: section density is high but purposeful; repetition around AGENTS/indices appears intentional for operator safety and policy recall.
+7. Discussion Prompt:
+   - In this repository README, do you want to keep the bare `cwf:setup --repo-index` example, or show only `--repo-index --target agents` to reinforce single-policy discoverability?
+
+### Follow-up Decision (From Discussion 3)
+
+- User direction: README should prioritize plugin users over repository-internal operation notes.
+- Applied README restructuring (`README.md`, `README.ko.md`):
+  - Moved installation and update guidance to the top so first-time users see install/run/update paths first.
+  - Consolidated update guidance into the top installation section and removed the duplicated `### update` subsection in skills reference.
+  - Removed the repository-internal `Agent Entry Files` block (including interactive review playbook link) from user-facing README flow.
+  - Kept both `cwf:setup --repo-index` and `cwf:setup --repo-index --target agents` in quick start, but changed wording to neutral plugin-usage framing (`for AGENTS-based repositories`).

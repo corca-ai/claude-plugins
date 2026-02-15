@@ -178,10 +178,10 @@ review_state:
     references_done: false
   cursor:
     file: README.md
-    next_line: 203
+    next_line: 313
   completed_files: [AGENTS.md, CLAUDE.md]
   current_file_eof: false
-  last_chunk_range: "README.md:118-201"
+  last_chunk_range: "README.md:263-312"
   last_inbound_count: 5
   orphan_triage:
     intentional: []

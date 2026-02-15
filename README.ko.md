@@ -4,6 +4,38 @@
 
 구조화된 개발 세션을 반복 가능한 워크플로우로 전환하는 Claude Code 플러그인입니다 -- 컨텍스트 수집부터 회고 분석까지. [Corca](https://www.corca.ai/)에서 [AI-Native Product Team](AI_NATIVE_PRODUCT_TEAM.ko.md)을 위해 유지보수합니다.
 
+## 설치
+
+### 빠른 시작
+
+```bash
+# 마켓플레이스 추가
+claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
+
+# CWF 설치
+claude plugin install cwf@corca-plugins
+
+# 훅 적용을 위해 Claude Code 재시작
+```
+
+### 업데이트
+
+```bash
+claude plugin marketplace update corca-plugins
+claude plugin update cwf@corca-plugins
+```
+
+또는 Claude Code 내에서:
+
+```text
+cwf:update               # 새 버전이 있으면 확인 + 업데이트
+cwf:update --check       # 버전 확인만
+```
+
+### 독립 플러그인 (레거시)
+
+v3.0.0부터 독립 플러그인(gather-context, clarify, retro, refactor, attention-hook, smart-read, prompt-logger, markdown-guard, plan-and-lessons)은 마켓플레이스에서 제거되었습니다. 기존 설치가 있다면 제거하고 `cwf`를 설치하세요.
+
 ## 프레이밍 계약
 
 ### CWF가 하는 것
@@ -80,40 +112,9 @@ gather -> clarify -> plan -> impl -> retro
 | 9 | [review](#review) | `cwf:review` | 6명 병렬 리뷰어에 의한 범용 리뷰 -- 내부 + 외부 CLI + 도메인 전문가 |
 | 10 | [run](#run) | `cwf:run` | gather부터 ship까지 전체 파이프라인을 단계 게이트와 함께 오케스트레이션 |
 | 11 | [setup](#setup) | `cwf:setup` | 훅 그룹 설정, 도구 감지, 프로젝트 인덱스 선택 생성 |
-| 12 | [update](#update) | `cwf:update` | CWF 플러그인 업데이트 확인 및 적용 |
+| 12 | [업데이트](#업데이트) | `cwf:update` | CWF 플러그인 업데이트 확인 및 적용 |
 
 **개념 조합**: gather, clarify, plan, impl, retro, refactor, review, run은 모두 에이전트 오케스트레이션을 동기화합니다. clarify는 가장 풍부한 조합으로, 전문가 자문, 티어 분류, 에이전트 오케스트레이션, 결정 포인트를 하나의 워크플로우에서 동기화합니다. review는 전문가 자문과 에이전트 오케스트레이션을 외부 CLI 연동과 함께 동기화합니다. handoff는 핸드오프 개념의 주요 구현체입니다. refactor는 전체적 모드에서 출처 추적을 활성화합니다.
-
-## 설치
-
-### 빠른 시작
-
-```bash
-# 마켓플레이스 추가
-claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
-
-# CWF 설치
-claude plugin install cwf@corca-plugins
-
-# 훅 적용을 위해 Claude Code 재시작
-```
-
-### 업데이트
-
-```bash
-claude plugin marketplace update corca-plugins
-claude plugin update cwf@corca-plugins
-```
-
-또는 Claude Code 내에서:
-
-```text
-cwf:update
-```
-
-### 독립 플러그인 (레거시)
-
-v3.0.0부터 독립 플러그인(gather-context, clarify, retro, refactor, attention-hook, smart-read, prompt-logger, markdown-guard, plan-and-lessons)은 마켓플레이스에서 제거되었습니다. 기존 설치가 있다면 제거하고 `cwf`를 설치하세요.
 
 ## 스킬 레퍼런스
 
@@ -235,7 +236,8 @@ cwf:ship status                            # 이슈, PR, 체크 상태 조회
 6명 병렬 리뷰어에 의한 범용 리뷰 -- 내러티브 판정.
 
 ```text
-cwf:review                 # 코드 리뷰 (기본)
+cwf:review                 # 코드 리뷰 (기본: code mode)
+cwf:review --mode code     # 코드 리뷰 (명시적 code mode)
 cwf:review --mode plan     # 계획/스펙 리뷰
 cwf:review --mode clarify  # 요구사항 리뷰
 ```
@@ -254,7 +256,7 @@ cwf:run --from impl                  # impl 단계부터 재개
 cwf:run --skip review-plan,retro     # 특정 단계 건너뛰기
 ```
 
-기본 흐름은 gather → clarify → plan → review(plan) → impl → review(code) → retro → ship이며, 구현 전 단계는 인간 게이트를 두고 구현 이후 단계는 기본적으로 자동 연쇄 실행됩니다.
+기본 흐름은 gather → clarify → plan → review(plan) → impl → review(code) → retro → ship이며, 구현 전 단계는 인간 게이트를 두고 구현 이후 단계는 기본적으로 자동 연쇄 실행되며 `ship` 단계는 사용자 확인 게이트를 둡니다.
 
 전체 레퍼런스: [SKILL.md](plugins/cwf/skills/run/SKILL.md)
 
@@ -270,20 +272,12 @@ cwf:setup --codex        # Codex 사용자 스코프(~/.agents/*)에 CWF 스킬/
 cwf:setup --codex-wrapper # 세션 로그 자동 동기화를 위한 codex wrapper 설치
 cwf:setup --cap-index    # CWF capability 인덱스만 생성/갱신 (cwf-index.md)
 cwf:setup --repo-index   # 저장소 인덱스 명시적 생성/갱신
-cwf:setup --repo-index --target agents # AGENTS.md 관리 블록 (권장)
+cwf:setup --repo-index --target agents # AGENTS 기반 저장소용 AGENTS.md 관리 블록
 ```
 
 대화형 훅 그룹 토글, 외부 AI CLI 및 API 키 감지(Codex, Gemini, Tavily, Exa), 선택적 Codex 연동(스킬 + wrapper), 선택적 인덱스 생성을 제공합니다. CWF capability 인덱스는 `cwf:setup --cap-index`로 명시적으로 생성합니다. 저장소 인덱스 재생성은 `cwf:setup --repo-index --target agents`로 [AGENTS.md](AGENTS.md) 관리 블록을 갱신합니다.
 
 전체 레퍼런스: [SKILL.md](plugins/cwf/skills/setup/SKILL.md)
-
-### 에이전트 엔트리 파일
-
-- [AGENTS.md](AGENTS.md)는 공통 크로스-에이전트 엔트리포인트입니다(Codex, Claude Code, 호환 런타임).
-- [CLAUDE.md](CLAUDE.md)는 [AGENTS.md](AGENTS.md)를 참조하는 Claude 전용 thin adapter입니다.
-- 필요 시 `cwf:setup --cap-index`로 CWF capability 맵을 생성할 수 있습니다.
-- 저장소 인덱스는 `cwf:setup --repo-index --target agents`로 [AGENTS.md](AGENTS.md) 관리 블록에 반영합니다.
-- 사용자 관점 문서 인터랙티브 리뷰 플레이북(관계도 + 청크 리뷰 + 재개 상태): [docs/interactive-doc-review-protocol.md](docs/interactive-doc-review-protocol.md).
 
 ### Codex 연동
 
@@ -315,17 +309,6 @@ bash scripts/codex/redact-session-logs.sh
 ```
 
 설치 후 새 셸을 열거나 `source ~/.zshrc`를 실행하세요. `codex`를 호출하는 alias(예: `codexyolo='codex ...'`)도 동일하게 wrapper를 사용합니다.
-
-### update
-
-CWF 플러그인 업데이트 확인 및 적용.
-
-```text
-cwf:update               # 새 버전이 있으면 확인 + 업데이트
-cwf:update --check       # 버전 확인만
-```
-
-전체 레퍼런스: [SKILL.md](plugins/cwf/skills/update/SKILL.md)
 
 ## 훅
 

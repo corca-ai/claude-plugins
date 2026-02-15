@@ -4,6 +4,38 @@
 
 A Claude Code plugin that turns structured development sessions into a repeatable workflow — from gathering context through retrospective analysis. Maintained by [Corca](https://www.corca.ai/) for [AI-Native Product Teams](AI_NATIVE_PRODUCT_TEAM.md).
 
+## Installation
+
+### Quick start
+
+```bash
+# Add the marketplace
+claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
+
+# Install CWF
+claude plugin install cwf@corca-plugins
+
+# Restart Claude Code for hooks to take effect
+```
+
+### Update
+
+```bash
+claude plugin marketplace update corca-plugins
+claude plugin update cwf@corca-plugins
+```
+
+Or from inside Claude Code:
+
+```text
+cwf:update               # Check + update if newer version exists
+cwf:update --check       # Version check only
+```
+
+### Standalone plugins (legacy)
+
+As of v3.0.0, standalone plugins (gather-context, clarify, retro, refactor, attention-hook, smart-read, prompt-logger, markdown-guard, plan-and-lessons) have been removed from the marketplace. If you have any installed, uninstall them and install `cwf` instead.
+
 ## Framing Contract
 
 ### What CWF Is
@@ -83,37 +115,6 @@ gather → clarify → plan → impl → retro
 | 12 | [update](#update) | `cwf:update` | Check and apply CWF plugin updates |
 
 **Concept composition**: gather, clarify, plan, impl, retro, refactor, review, and run all synchronize Agent Orchestration. clarify is the richest composition — it synchronizes Expert Advisor, Tier Classification, Agent Orchestration, and Decision Point in a single workflow. review synchronizes Expert Advisor and Agent Orchestration with external CLI integration. handoff is the primary instantiation of the Handoff concept. refactor activates Provenance in holistic mode.
-
-## Installation
-
-### Quick start
-
-```bash
-# Add the marketplace
-claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
-
-# Install CWF
-claude plugin install cwf@corca-plugins
-
-# Restart Claude Code for hooks to take effect
-```
-
-### Update
-
-```bash
-claude plugin marketplace update corca-plugins
-claude plugin update cwf@corca-plugins
-```
-
-Or from inside Claude Code:
-
-```text
-cwf:update
-```
-
-### Standalone plugins (legacy)
-
-As of v3.0.0, standalone plugins (gather-context, clarify, retro, refactor, attention-hook, smart-read, prompt-logger, markdown-guard, plan-and-lessons) have been removed from the marketplace. If you have any installed, uninstall them and install `cwf` instead.
 
 ## Skills Reference
 
@@ -235,7 +236,8 @@ Full reference: [SKILL.md](plugins/cwf/skills/ship/SKILL.md)
 Multi-perspective review with 6 parallel reviewers.
 
 ```text
-cwf:review                       # Review current changes (code mode)
+cwf:review                       # Review current changes (defaults to code mode)
+cwf:review --mode code           # Review current changes (explicit code mode)
 cwf:review --mode clarify        # Review clarified requirements
 cwf:review --mode plan           # Review implementation plan
 ```
@@ -254,7 +256,7 @@ cwf:run --from impl                  # Resume from impl stage
 cwf:run --skip review-plan,retro     # Skip specific stages
 ```
 
-Executes gather → clarify → plan → review(plan) → impl → review(code) → retro → ship, with human gates before implementation and automatic chaining after implementation by default.
+Executes gather → clarify → plan → review(plan) → impl → review(code) → retro → ship, with human gates before implementation, automatic chaining after implementation by default, and user confirmation at `ship`.
 
 Full reference: [SKILL.md](plugins/cwf/skills/run/SKILL.md)
 
@@ -270,20 +272,12 @@ cwf:setup --codex        # Link CWF skills/references into Codex user scope (~/.
 cwf:setup --codex-wrapper # Install codex wrapper for automatic session log sync
 cwf:setup --cap-index    # Generate/refresh CWF capability index only (cwf-index.md)
 cwf:setup --repo-index   # Generate/refresh repository index output (explicit)
-cwf:setup --repo-index --target agents # AGENTS.md managed block (recommended)
+cwf:setup --repo-index --target agents # AGENTS.md managed block (for AGENTS-based repositories)
 ```
 
 Interactive hook group toggle, external AI CLI and API key detection (Codex, Gemini, Tavily, Exa), optional Codex integration (skills + wrapper), and optional index generation. CWF capability index generation is explicit via `cwf:setup --cap-index`. Repository index regeneration updates the managed block in [AGENTS.md](AGENTS.md) via `cwf:setup --repo-index --target agents`.
 
 Full reference: [SKILL.md](plugins/cwf/skills/setup/SKILL.md)
-
-### Agent Entry Files
-
-- [AGENTS.md](AGENTS.md) is the shared cross-agent entry point (Codex, Claude Code, and compatible runtimes).
-- [CLAUDE.md](CLAUDE.md) is a thin Claude-specific adapter that points to [AGENTS.md](AGENTS.md).
-- Optional CWF capability map can be generated on demand with `cwf:setup --cap-index`.
-- Repository-wide index output is managed in [AGENTS.md](AGENTS.md) via `cwf:setup --repo-index --target agents`.
-- Interactive user-facing doc review playbook (relationship map + chunked review + resume state): [docs/interactive-doc-review-protocol.md](docs/interactive-doc-review-protocol.md).
 
 ### Codex Integration
 
@@ -315,17 +309,6 @@ bash scripts/codex/redact-session-logs.sh
 ```
 
 After install, open a new shell (or `source ~/.zshrc`). Aliases that call `codex` (for example `codexyolo='codex ...'`) also use the wrapper.
-
-### update
-
-Check and apply CWF plugin updates.
-
-```text
-cwf:update               # Check + update if newer version exists
-cwf:update --check       # Version check only
-```
-
-Full reference: [SKILL.md](plugins/cwf/skills/update/SKILL.md)
 
 ## Hooks
 
