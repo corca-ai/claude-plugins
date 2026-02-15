@@ -3,10 +3,11 @@ set -euo pipefail
 
 # next-prompt-dir.sh — Output the next prompt-logs directory path for today.
 # Usage: scripts/next-prompt-dir.sh <title>
-# Output: prompt-logs/YYMMDD-NN-title (NN = zero-padded sequence number)
+# Output: <prompt-logs-dir>/YYMMDD-NN-title (NN = zero-padded sequence number)
 # Optional env for deterministic testing:
 #   CWF_NEXT_PROMPT_DATE=YYMMDD   Override today's date
 #   CWF_PROMPT_LOGS_DIR=/path     Override prompt-logs scan directory
+#   CWF_ARTIFACT_ROOT=/path        Override artifact root (used when prompt dir not set)
 
 if [[ $# -lt 1 ]]; then
   echo "Usage: $0 <title>" >&2
@@ -26,21 +27,28 @@ resolve_project_root() {
   script_dir="$(cd "$(dirname "$0")" && pwd)"
   for rel in .. ../.. ../../..; do
     candidate="$(cd "$script_dir/$rel" 2>/dev/null && pwd || true)"
-    if [[ -n "$candidate" && -d "$candidate/prompt-logs" ]]; then
+    if [[ -n "$candidate" && ( -f "$candidate/AGENTS.md" || -d "$candidate/.git" ) ]]; then
       printf '%s\n' "$candidate"
       return 0
     fi
   done
 
-  # Last-resort fallback keeps prior behavior if prompt-logs does not exist yet.
+  # Last-resort fallback keeps prior behavior for repository-level script layout.
   printf '%s\n' "$(cd "$script_dir/.." && pwd)"
 }
 
 project_root="$(resolve_project_root)"
-prompt_logs_dir="${CWF_PROMPT_LOGS_DIR:-$project_root/prompt-logs}"
-if [[ "$prompt_logs_dir" != /* ]]; then
-  prompt_logs_dir="$project_root/$prompt_logs_dir"
+resolver_script="$(cd "$(dirname "$0")" && pwd)/cwf-artifact-paths.sh"
+
+if [[ ! -f "$resolver_script" ]]; then
+  echo "Missing resolver script: $resolver_script" >&2
+  exit 1
 fi
+
+# shellcheck source=./cwf-artifact-paths.sh
+source "$resolver_script"
+prompt_logs_dir="$(resolve_cwf_prompt_logs_dir "$project_root")"
+prompt_logs_rel="$(resolve_cwf_prompt_logs_relpath "$project_root")"
 
 # Get date in YYMMDD format (overridable for fixture tests).
 today="${CWF_NEXT_PROMPT_DATE:-$(date +%y%m%d)}"
@@ -71,4 +79,8 @@ fi
 next_seq=$(( max_seq + 1 ))
 next_seq_padded=$(printf "%02d" "$next_seq")
 
-echo "prompt-logs/${today}-${next_seq_padded}-${title}"
+if [[ "$prompt_logs_rel" == "." ]]; then
+  echo "${today}-${next_seq_padded}-${title}"
+else
+  echo "${prompt_logs_rel}/${today}-${next_seq_padded}-${title}"
+fi

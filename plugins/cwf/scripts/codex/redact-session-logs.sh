@@ -6,7 +6,19 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REDACTOR_SCRIPT="$SCRIPT_DIR/redact-sensitive.pl"
 JSON_REDACTOR_SCRIPT="$SCRIPT_DIR/redact-jsonl.sh"
-TARGET_DIR="${1:-prompt-logs/sessions}"
+RESOLVER_SCRIPT="$SCRIPT_DIR/../cwf-artifact-paths.sh"
+
+if [ ! -f "$RESOLVER_SCRIPT" ]; then
+  echo "Missing resolver script: $RESOLVER_SCRIPT" >&2
+  exit 1
+fi
+
+# shellcheck source=../cwf-artifact-paths.sh
+source "$RESOLVER_SCRIPT"
+
+DEFAULT_CWD="$(pwd)"
+DEFAULT_TARGET_DIR="$(resolve_cwf_prompt_logs_dir "$DEFAULT_CWD")/sessions"
+TARGET_DIR="${1:-$DEFAULT_TARGET_DIR}"
 
 if [ ! -f "$REDACTOR_SCRIPT" ]; then
   echo "Missing redactor script: $REDACTOR_SCRIPT" >&2

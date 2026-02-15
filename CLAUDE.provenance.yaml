@@ -1,7 +1,7 @@
 target: CLAUDE.md
 written_session: S7
 last_reviewed: S26
-skill_count: 12
+skill_count: 13
 hook_count: 16
 designed_for:
   - "Project-level agent instructions for claude-plugins repository"

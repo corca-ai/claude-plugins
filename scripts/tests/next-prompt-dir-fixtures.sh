@@ -59,6 +59,13 @@ actual_plugin_next_day="$(CWF_PROMPT_LOGS_DIR="$PROMPT_LOGS_DIR" CWF_NEXT_PROMPT
 assert_eq "root script resets sequence across day boundary" "$expected_next_day" "$actual_root_next_day"
 assert_eq "plugin script resets sequence across day boundary" "$expected_next_day" "$actual_plugin_next_day"
 
+expected_artifact_root=".cwf/prompt-logs/990101-01-s26"
+actual_root_artifact="$(CWF_ARTIFACT_ROOT=".cwf" CWF_NEXT_PROMPT_DATE=990101 bash "$ROOT_SCRIPT" s26)"
+actual_plugin_artifact="$(CWF_ARTIFACT_ROOT=".cwf" CWF_NEXT_PROMPT_DATE=990101 bash "$PLUGIN_SCRIPT" s26)"
+
+assert_eq "root script supports artifact-root based output path" "$expected_artifact_root" "$actual_root_artifact"
+assert_eq "plugin script supports artifact-root based output path" "$expected_artifact_root" "$actual_plugin_artifact"
+
 set +e
 CWF_PROMPT_LOGS_DIR="$PROMPT_LOGS_DIR" CWF_NEXT_PROMPT_DATE=2026-02-14 bash "$ROOT_SCRIPT" bad >/dev/null 2>&1
 invalid_status=$?

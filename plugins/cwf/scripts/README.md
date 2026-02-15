@@ -4,6 +4,7 @@ This file maps scripts under [plugins/cwf/scripts](.).
 
 - [check-session.sh](check-session.sh): Validates session artifacts and semantic closure checks.
 - [next-prompt-dir.sh](next-prompt-dir.sh): Computes next session directory name.
+- [cwf-artifact-paths.sh](cwf-artifact-paths.sh): Resolves artifact root and prompt-log paths.
 - [codex/codex-with-log.sh](codex/codex-with-log.sh): Wrapper entrypoint that runs Codex and syncs logs.
 - [codex/install-wrapper.sh](codex/install-wrapper.sh): Installs, checks, or disables the Codex wrapper.
 - [codex/sync-skills.sh](codex/sync-skills.sh): Symlinks CWF skills/references into Codex user scope.
