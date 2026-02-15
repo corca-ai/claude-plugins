@@ -1,2 +1,3 @@
 .cwf/projects/
+.cwf/prompt-logs/
 node_modules/

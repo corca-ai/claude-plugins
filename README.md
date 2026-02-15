@@ -280,6 +280,7 @@ Initial CWF configuration.
 cwf:setup                # Full setup (hooks + tools + optional repo-index prompt)
 cwf:setup --hooks        # Hook group selection only
 cwf:setup --tools        # External tool detection only
+cwf:setup --env          # Environment variable migration/bootstrap only
 cwf:setup --codex        # Link CWF skills/references into Codex user scope (~/.agents/*)
 cwf:setup --codex-wrapper # Install codex wrapper for automatic session log sync
 cwf:setup --cap-index    # Generate/refresh CWF capability index only (.cwf/indexes/cwf-index.md)
@@ -287,7 +288,7 @@ cwf:setup --repo-index   # Generate/refresh repository index output (explicit)
 cwf:setup --repo-index --target agents # AGENTS.md managed block (for AGENTS-based repositories)
 ```
 
-Interactive hook group toggle, external AI CLI and API key detection (Codex, Gemini, Tavily, Exa), optional Codex integration (skills + wrapper), and optional index generation. CWF capability index generation is explicit via `cwf:setup --cap-index`. Repository index regeneration updates the managed block in AGENTS.md via `cwf:setup --repo-index --target agents`.
+Interactive hook group toggle, external AI CLI and API key detection (Codex, Gemini, Tavily, Exa), interactive env migration/bootstrap (legacy keys to canonical `CWF_*`), optional Codex integration (skills + wrapper), and optional index generation. CWF capability index generation is explicit via `cwf:setup --cap-index`. Repository index regeneration updates the managed block in AGENTS.md via `cwf:setup --repo-index --target agents`.
 
 ### [update](plugins/cwf/skills/update/SKILL.md)
 

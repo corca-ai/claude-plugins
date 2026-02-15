@@ -32,7 +32,7 @@ esac
 
 # Skip project artifact paths (these are session artifacts, not production docs)
 case "$FILE_PATH" in
-    */.cwf/projects/*|.cwf/projects/*) exit 0 ;;
+    */.cwf/projects/*|.cwf/projects/*|*/.cwf/prompt-logs/*|.cwf/prompt-logs/*) exit 0 ;;
 esac
 
 # File doesn't exist (may have been deleted or path is virtual)

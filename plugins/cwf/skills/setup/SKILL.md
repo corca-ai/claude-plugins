@@ -15,6 +15,7 @@ Initial CWF configuration. Interactive hook toggle, external tool detection, opt
 cwf:setup                # Full setup (hooks + tools + optional repo-index prompt)
 cwf:setup --hooks        # Hook group selection only
 cwf:setup --tools        # External tool detection only
+cwf:setup --env          # Environment variable migration/bootstrap only
 cwf:setup --codex        # Sync CWF skills into Codex user scope (~/.agents/skills)
 cwf:setup --codex-wrapper # Optional Codex wrapper install for session log sync
 cwf:setup --git-hooks both --gate-profile balanced  # Install repo git hooks and set gate depth
@@ -31,9 +32,10 @@ Parse input flags and run only the relevant phases:
 
 | Input | Phases |
 |-------|--------|
-| `cwf:setup` | 1 → 2 → 2.4 (if codex available) → 2.7 (always ask) → 4 (opt-in) → 5 |
+| `cwf:setup` | 1 → 2 → 2.8 → 2.4 (if codex available) → 2.7 (always ask) → 4 (opt-in) → 5 |
 | `cwf:setup --hooks` | 1 → 5 |
-| `cwf:setup --tools` | 2 → 5 |
+| `cwf:setup --tools` | 2 → 2.8 → 5 |
+| `cwf:setup --env` | 2.8 → 5 |
 | `cwf:setup --codex` | 2.5 → 5 |
 | `cwf:setup --codex-wrapper` | 2.6 → 5 |
 | `cwf:setup --git-hooks <none\|pre-commit\|pre-push\|both> [--gate-profile <fast\|balanced\|strict>]` | 2.7 → 5 |
@@ -43,6 +45,8 @@ Parse input flags and run only the relevant phases:
 When mode is full setup and Codex CLI is available, do not silently skip Codex integration; always run Phase 2.4 and ask the user which integration level to apply.
 
 When mode is full setup, do not expect users to supply optional flags manually. Always ask for git hook installation mode and gate profile in Phase 2.7.
+
+When mode is full setup or tools-only setup, always run Phase 2.8 so legacy env keys are migrated to canonical names with explicit user choice (auto-apply vs review vs skip).
 
 ---
 
@@ -376,6 +380,79 @@ And summarize:
 
 ---
 
+## Phase 2.8: Environment Variable Migration and Bootstrap
+
+Use this phase when:
+- Mode is full setup (`cwf:setup`)
+- User runs `cwf:setup --tools`
+- User runs `cwf:setup --env`
+
+### 2.8.1 Scan Existing Environment Config
+
+Run:
+
+```bash
+bash {SKILL_DIR}/scripts/migrate-env-vars.sh --scan
+```
+
+This scan checks `~/.zshrc`, `~/.bashrc`, and `~/.claude/.env` (if present), and reports:
+- legacy-to-canonical migration candidates (`CLAUDE_CORCA_*`/`CLAUDE_ATTENTION_*` → `CWF_*`)
+- missing required keys (`SLACK_BOT_TOKEN`, `SLACK_CHANNEL_ID`, `TAVILY_API_KEY`, `EXA_API_KEY`)
+
+### 2.8.2 Ask Apply Strategy
+
+Use AskUserQuestion (single choice):
+
+```text
+Apply environment variable migration now?
+```
+
+Options:
+- `Auto migrate now (recommended)`:
+  - apply canonical exports into active shell profile
+  - comment legacy assignments in scanned files
+  - include commented placeholders for missing required keys
+- `Review first`:
+  - show scan output and the exact apply command
+  - ask one additional confirm question before applying
+- `Skip for now`:
+  - no file modifications in this phase
+
+### 2.8.3 Apply Migration
+
+When apply is approved, run:
+
+```bash
+bash {SKILL_DIR}/scripts/migrate-env-vars.sh --apply --cleanup-legacy --include-placeholders
+```
+
+If the user wants a specific target profile, pass:
+
+```bash
+bash {SKILL_DIR}/scripts/migrate-env-vars.sh --apply --cleanup-legacy --include-placeholders --target-profile ~/.zshrc
+```
+
+### 2.8.4 Report Effective State
+
+Always report:
+- applied profile path
+- migrated key list
+- missing required keys still needing real values
+
+Provide verification command:
+
+```bash
+rg -n "CWF_|TAVILY_API_KEY|EXA_API_KEY|SLACK_BOT_TOKEN|SLACK_CHANNEL_ID" ~/.zshrc ~/.bashrc ~/.claude/.env
+```
+
+Include activation note:
+
+```text
+Open a new shell (or source ~/.zshrc / ~/.bashrc) so updated exports are loaded.
+```
+
+---
+
 ## Phase 3: Generate CWF Capability Index (Explicit)
 
 Generate a CWF-focused capability index. This phase runs only when `--cap-index` is explicitly requested.
@@ -569,6 +646,7 @@ Add `setup` to `cwf-state.yaml` current session's `stage_checkpoints` list.
 14. **All code fences must have language specifier**: Never use bare fences.
 15. **Codex sync uses symlink + backup move**: Do not delete user files directly.
 16. **Single-entry setup UX**: `cwf:setup` must ask and apply optional integrations (Codex mode, git hook mode/profile) instead of requiring users to remember flags.
+17. **Env migration UX**: `cwf:setup` must detect and offer migration of legacy env keys to canonical `CWF_*` names in setup flow; do not require users to know legacy key names or conversion rules.
 
 ## References
 
@@ -578,6 +656,7 @@ Add `setup` to `cwf-state.yaml` current session's `stage_checkpoints` list.
 - [sync-skills.sh](../../scripts/codex/sync-skills.sh) — Codex user-scope skill sync
 - [verify-skill-links.sh](../../scripts/codex/verify-skill-links.sh) — Codex skill link validation
 - [scripts/configure-git-hooks.sh](scripts/configure-git-hooks.sh) — installs and profiles repository git hook gates
+- [scripts/migrate-env-vars.sh](scripts/migrate-env-vars.sh) — legacy env detection and canonical CWF env migration
 - [scripts/check-index-coverage.sh](scripts/check-index-coverage.sh) — deterministic index coverage validation
 - .cwf-cap-index-ignore — optional intentional exclusion list for capability index coverage
 - .cwf-index-ignore — optional intentional exclusion list for repository index coverage

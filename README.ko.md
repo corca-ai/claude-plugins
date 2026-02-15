@@ -280,6 +280,7 @@ CWF 초기 설정.
 cwf:setup                # 전체 설정 (훅 + 도구 + repo-index 생성 여부 질문)
 cwf:setup --hooks        # 훅 그룹 선택만
 cwf:setup --tools        # 외부 도구 감지만
+cwf:setup --env          # 환경 변수 마이그레이션/부트스트랩만
 cwf:setup --codex        # Codex 사용자 스코프(~/.agents/*)에 CWF 스킬/레퍼런스 연결
 cwf:setup --codex-wrapper # 세션 로그 자동 동기화를 위한 codex wrapper 설치
 cwf:setup --cap-index    # CWF capability 인덱스만 생성/갱신 (.cwf/indexes/cwf-index.md)
@@ -287,7 +288,7 @@ cwf:setup --repo-index   # 저장소 인덱스 명시적 생성/갱신
 cwf:setup --repo-index --target agents # AGENTS 기반 저장소용 AGENTS.md 관리 블록
 ```
 
-대화형 훅 그룹 토글, 외부 AI CLI 및 API 키 감지(Codex, Gemini, Tavily, Exa), 선택적 Codex 연동(스킬 + wrapper), 선택적 인덱스 생성을 제공합니다. CWF capability 인덱스 생성은 `cwf:setup --cap-index`로 명시적으로 수행합니다. 저장소 인덱스 재생성은 `cwf:setup --repo-index --target agents`를 통해 AGENTS.md 관리 블록을 갱신합니다.
+대화형 훅 그룹 토글, 외부 AI CLI 및 API 키 감지(Codex, Gemini, Tavily, Exa), 대화형 환경 변수 마이그레이션/부트스트랩(레거시 키를 표준 `CWF_*`로 변환), 선택적 Codex 연동(스킬 + wrapper), 선택적 인덱스 생성을 제공합니다. CWF capability 인덱스 생성은 `cwf:setup --cap-index`로 명시적으로 수행합니다. 저장소 인덱스 재생성은 `cwf:setup --repo-index --target agents`를 통해 AGENTS.md 관리 블록을 갱신합니다.
 
 ### [update](plugins/cwf/skills/update/SKILL.md)
 
