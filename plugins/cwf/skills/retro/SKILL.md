@@ -170,23 +170,44 @@ Condition: Does the session contain topics where the user showed knowledge gaps 
 
 **Execution** (deep mode): Produced by Agent B from Batch 1. Integrate the agent's output here. Each resource: title + URL, 2-3 sentence summary of key takeaways, and why it matters for the user's work.
 
-#### Section 7: Relevant Skills
+#### Section 7: Relevant Tools (Skills Included)
 
-**Step 1 — Scan installed skills** (always, both modes):
+**Step 1 — Inventory available capabilities** (always, both modes):
 
-1. Glob for marketplace skills: `~/.claude/plugins/*/skills/*/SKILL.md`
-2. Glob for local skills: `.claude/skills/*/SKILL.md`
-3. For each found skill: read the frontmatter (name, description, triggers)
-4. Analyze: "Could any of these skills have helped in this session?" and "Should the user try a skill they haven't been using?"
-5. Report relevant installed skills with brief explanation of how they apply
+1. Scan installed agent skills first:
+   - Marketplace: `~/.claude/plugins/*/skills/*/SKILL.md`
+   - Local: `.claude/skills/*/SKILL.md`
+   - For each: read frontmatter (name, description, triggers)
+2. Inventory deterministic repo tools/checks already available (hooks, linters, validators, scripts).
+3. Summarize what was used vs available-but-unused in this session.
 
-**Step 2 — External skill discovery** (if workflow gap identified):
+**Step 2 — Tool gap analysis** (if workflow gap or repetition identified):
 
-Assess whether the session reveals a workflow gap or repetitive pattern not covered by installed skills. If no clear gap: state "No additional skill gaps identified." Otherwise:
+Assess whether the session reveals a repeated or high-impact gap not covered by current capabilities. If no clear gap: state "No additional tool gaps identified."
 
-- **Finding existing skills**: Use `/find-skills` to search for existing solutions and report findings.
-- **Creating new skills**: If no existing skill fits, use `/skill-creator` to describe and scaffold the needed skill.
-- **Prerequisite check**: If `find-skills` (by Vercel) or `skill-creator` (by Anthropic) are not installed, recommend installing them from https://skills.sh/ before proceeding.
+When a gap exists, classify proposals by category:
+- Missing or underused **agent skill**
+- Missing **static analysis** check/tool
+- Missing **validation/reachability** check
+- Missing **indexing/search/dedup** utility
+- Missing **workflow automation** (hook/CI/script)
+
+For each proposal, include:
+- Problem signal from this session
+- Candidate (skill and/or external tool)
+- Integration point (hook, script, CI, or manual command)
+- Expected gain and risk/cost
+- Pilot scope (small, reversible first step)
+
+**Step 3 — Action path by category**:
+
+- If primarily a skill gap:
+  - **Finding existing skills**: Use `/find-skills` to search for existing solutions and report findings.
+  - **Creating new skills**: If no existing skill fits, use `/skill-creator` to describe and scaffold the needed skill.
+- If primarily a non-skill tool gap:
+  - Recommend concrete tool candidates with a minimal pilot integration plan.
+- **Prerequisite check**:
+  - If `find-skills` (by Vercel) or `skill-creator` (by Anthropic) are not installed, recommend installing them from https://skills.sh/ when relevant.
 
 ### 5. Write retro.md
 
@@ -235,7 +256,7 @@ For each finding, evaluate enforcement mechanisms strongest-first:
 - **S2 Collaboration** → Evaluate each suggestion through tiers individually. AskUserQuestion "Apply?" for AGENTS.md/adapter changes.
 - **S3 Waste / Root causes** → For each 5 Whys structural cause, present: "**Finding**: X. **Recommended tier**: {1|2|3}. **Mechanism**: {specific change}." Right-placement check: AGENTS.md (or runtime adapters) for behavioral rules, `project-context.md` for architectural patterns, protocol/skill docs for process changes.
 - **S4 CDM** → Key lessons through tiers (most → Tier 3 `project-context.md`).
-- **S7 Skills** → AskUserQuestion "Implement now?" for actionable improvements.
+- **S7 Tools** → AskUserQuestion "Implement now?" for actionable capability improvements.
 
 **Expert Roster Maintenance** (deep mode only, when Section 5 was produced):
 
@@ -284,9 +305,9 @@ Do not prompt the user to start this discussion.
 > Run `/retro --deep` for expert analysis.
 ## 6. Learning Resources
 > Run `/retro --deep` for learning resources.
-## 7. Relevant Skills
-### Installed Skills
-### Skill Gaps
+## 7. Relevant Tools (Skills Included)
+### Installed Capabilities
+### Tool Gaps
 ```
 
 ### Deep mode
@@ -304,9 +325,9 @@ Do not prompt the user to start this discussion.
 ## 4. Critical Decision Analysis (CDM)
 ## 5. Expert Lens
 ## 6. Learning Resources
-## 7. Relevant Skills
-### Installed Skills
-### Skill Gaps
+## 7. Relevant Tools (Skills Included)
+### Installed Capabilities
+### Tool Gaps
 ```
 
 ## Rules
@@ -319,7 +340,7 @@ Do not prompt the user to start this discussion.
 6. CDM analysis (Section 4) is unconditional — every session has decisions to analyze
 7. Expert Lens (Section 5) is deep-mode only — in light mode, output a one-line pointer to `--deep`
 8. Learning Resources (Section 6) is deep-mode only — in light mode, output a one-line pointer to `--deep`
-9. Section 7 always scans installed skills first, before suggesting external skill discovery
+9. Section 7 always inventories installed capabilities first (skills + deterministic repo tools), before suggesting new external tools
 10. When writing code fences in retro.md or any markdown output, always include a language specifier (`bash`, `json`, `yaml`, `text`, `markdown`, etc.). Never use bare code fences.
 11. In deep mode, analysis sections (CDM, Expert Lens, Learning Resources) run as parallel sub-agents in two batches. Do not run them inline.
 12. Persist findings follow the eval > state > doc hierarchy. Never suggest adding a doc rule when a deterministic check is possible.
