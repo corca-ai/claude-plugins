@@ -75,3 +75,7 @@ Status: Done.
 17. `NON_AUTOMATABLE` — Decide whether README setup quick-start should keep bare `cwf:setup --repo-index` alongside `--repo-index --target agents`.
 Reason: keeping both preserves generic capability visibility, but this repository policy prefers AGENTS-managed output as the primary path.
 Status: Done (keep both for plugin-user-facing README; use neutral AGENTS-based wording).
+
+18. `NON_AUTOMATABLE` — Decide placement of screenshot-deprecation note currently under README Hooks section.
+Reason: this line is migration-oriented and may be low-signal noise in user-focused runtime behavior docs.
+Status: Done (removed from README and README.ko; no migration/changelog carry-over).

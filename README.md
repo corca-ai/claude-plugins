@@ -324,10 +324,6 @@ CWF includes 7 hook groups that run automatically. All are enabled by default; u
 | `websearch_redirect` | PreToolUse → WebSearch | Redirect Claude's WebSearch to `cwf:gather --search` |
 | `compact_recovery` | SessionStart → compact | Inject live session state after auto-compact for context recovery |
 
-Notification behavior:
-
-Screenshots were deprecated in v3 and removed from the repository. Refer to the hook table above and [plugins/cwf/hooks/scripts/attention.sh](plugins/cwf/hooks/scripts/attention.sh) for behavior details.
-
 ## Configuration
 
 Set environment variables in your shell profile (`~/.zshrc` or `~/.bashrc`). Legacy fallback (`~/.claude/.env`) is still supported.

@@ -324,10 +324,6 @@ CWF는 자동으로 실행되는 7개 훅 그룹을 포함합니다. 모두 기�
 | `websearch_redirect` | PreToolUse -> WebSearch | Claude의 WebSearch를 `cwf:gather --search`로 리다이렉트 |
 | `compact_recovery` | SessionStart -> compact | auto-compact 후 컨텍스트 복구를 위해 라이브 세션 상태 주입 |
 
-알림 동작:
-
-스크린샷은 v3에서 deprecated 처리되어 저장소에서 제거되었습니다. 동작은 위 훅 표와 [plugins/cwf/hooks/scripts/attention.sh](plugins/cwf/hooks/scripts/attention.sh)를 참고하세요.
-
 ## 설정
 
 셸 프로파일(`~/.zshrc` 또는 `~/.bashrc`)에 환경 변수를 설정하세요. 레거시 하위호환으로 `~/.claude/.env`도 계속 지원합니다.

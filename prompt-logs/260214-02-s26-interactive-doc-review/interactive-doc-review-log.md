@@ -184,3 +184,27 @@
   - Consolidated update guidance into the top installation section and removed the duplicated `### update` subsection in skills reference.
   - Removed the repository-internal `Agent Entry Files` block (including interactive review playbook link) from user-facing README flow.
   - Kept both `cwf:setup --repo-index` and `cwf:setup --repo-index --target agents` in quick start, but changed wording to neutral plugin-usage framing (`for AGENTS-based repositories`).
+
+### Chunk Review 06
+
+1. Chunk: `README.md:313-381` (EOF: yes)
+2. Excerpt: hook-group overview table, runtime configuration environment variables, and license footer.
+3. Meaning / Intent: provide practical operator controls after skill/setup usage has been introduced, with default-safe values and optional overrides.
+4. Review Focus (Line-Anchored):
+   - `README.md:327-329`: "Notification behavior" subsection currently contains only screenshot deprecation guidance; assess whether this belongs in user-facing README or should move to changelog/migration notes.
+   - `README.md:337-376`: env-var examples are concrete and mostly aligned to script defaults; verify that mixed "example value" vs "(default: ...)" comments remain clear to first-time users.
+5. Link Syntax Check: pass (`[]()` syntax valid; local path link to attention script resolves).
+6. De-dup / What-Why Check: configuration section is functional and low-ambiguity; minor low-signal residue exists in the screenshot deprecation sentence for new users.
+7. Discussion Prompt:
+   - Keep the screenshot deprecation note in README, or move it to migration/changelog context and keep Hooks section strictly behavior-focused?
+
+### File Boundary Gate
+
+- Inbound links: `5` (orphan: no)
+
+### Follow-up Decision (From Discussion 4)
+
+- User decision: remove screenshot-deprecation note entirely (no migration/changelog carry-over), and apply the same policy to Korean README.
+- Applied:
+  - Removed screenshot-deprecation text block from `README.md` Hooks section.
+  - Removed screenshot-deprecation text block from `README.ko.md` Hooks section.
