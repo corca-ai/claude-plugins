@@ -259,7 +259,7 @@ cwf:hitl --rule "<rule text>"        # Add review rule for remaining queue
 cwf:review --human                   # Compatibility alias (routes to cwf:hitl)
 ```
 
-State is persisted under `.cwf/hitl/sessions/` (`state.yaml`, `rules.yaml`, `queue.json`, `events.log`). [`.cwf/cwf-state.yaml`](.cwf/cwf-state.yaml) stores only live pointer metadata to the active HITL session.
+State is persisted under `.cwf/hitl/sessions/` (`state.yaml`, `rules.yaml`, `queue.json`, `fix-queue.yaml`, `events.log`). [`.cwf/cwf-state.yaml`](.cwf/cwf-state.yaml) stores only live pointer metadata to the active HITL session.
 
 Full reference: [SKILL.md](plugins/cwf/skills/hitl/SKILL.md)
 

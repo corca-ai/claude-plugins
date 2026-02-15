@@ -31,6 +31,7 @@ Persist HITL runtime state under:
   state.yaml
   rules.yaml
   queue.json
+  fix-queue.yaml
   events.log
 ```
 
@@ -46,6 +47,12 @@ live:
     updated_at: "YYYY-MM-DDTHH:MM:SSZ"
 ```
 
+`queue.json` tracks per-file/per-chunk status for resumable delta-review:
+
+- file status: `pending | in_review | reviewed | stale`
+- chunk status: `pending | reviewed | stale`
+- each file entry stores `blob_sha` captured when the queue was built.
+
 ## Phase 0: Resolve Target
 
 1. Resolve base branch:
@@ -59,11 +66,13 @@ live:
 ## Phase 1: Build Deterministic Queue
 
 1. Build file queue from diff files in stable sorted order.
-2. Build chunk queue per file:
+2. Capture each file's `blob_sha` and set initial file status to `pending`.
+3. Build chunk queue per file:
    - Markdown: heading/fence-safe semantic chunks (typically 60-120 lines)
    - Code/text: prefer git hunk boundaries; fallback fixed windows
-3. Save queue to `queue.json`.
-4. Initialize `state.yaml` and `events.log`.
+4. Assign chunk IDs and initial chunk status `pending`.
+5. Save queue to `queue.json`.
+6. Initialize `state.yaml`, `fix-queue.yaml`, and `events.log`.
 
 ## Phase 2: Chunk Review Loop
 
@@ -81,6 +90,14 @@ Then pause and wait for user acknowledgement.
 
 Before each pause, persist cursor/progress.
 
+### Review-Fix Policy During Loop
+
+1. Mark the current file/chunk as `in_review` while presenting it.
+2. If the user asks to fix the currently open chunk, apply immediately (natural conversational flow).
+3. If a fix targets an already reviewed file/chunk, default action is to append to `fix-queue.yaml` first (do not silently rewrite previously closed sections).
+4. If the user explicitly requests immediate edit on a reviewed area, apply the edit and mark overlapping reviewed chunks as `stale`.
+5. Stale chunks are revisited via delta-review before final close.
+
 ## Phase 3: Rule Capture and Propagation
 
 When user gives an improvement rule:
@@ -92,6 +109,8 @@ When user gives an improvement rule:
 
 All accepted rules are applied to remaining chunks in the same HITL session.
 
+When a new rule affects already reviewed regions, add those targets to `fix-queue.yaml` and mark overlapping chunks `stale` only when an edit is actually applied.
+
 ## Phase 4: Resume and Close
 
 ### Resume
@@ -100,8 +119,11 @@ On `--resume`:
 
 1. Read `state.yaml` cursor.
 2. Validate queued file/chunk still exists.
-3. If lines drift, re-anchor by nearest previous heading/hunk.
-4. Continue with same chunk contract.
+3. Compare saved `blob_sha` with current file blob:
+   - unchanged: preserve statuses
+   - changed: mark previously `reviewed` overlapping chunks as `stale`
+4. If lines drift, re-anchor by nearest previous heading/hunk.
+5. Continue with same chunk contract, prioritizing `stale` before untouched `pending`.
 
 ### Close
 
@@ -110,7 +132,7 @@ On `--close` (or EOF completion):
 1. Mark session state `completed` (or `closed_by_user`).
 2. Keep rule history and event log immutable.
 3. Update `cwf-state.yaml` pointer `updated_at`.
-4. Output concise completion summary (`files/chunks reviewed`, `rules applied`).
+4. Output concise completion summary (`files/chunks reviewed`, `rules applied`, `fix-queue pending/applied`, `stale re-reviewed count`).
 
 ## Rules
 
@@ -119,3 +141,5 @@ On `--close` (or EOF completion):
 3. Pointer-only policy: keep detailed HITL state in `.cwf/hitl/**`; store only pointers in `cwf-state.yaml`.
 4. During Phase 1 migration, do not move other skills' artifact paths automatically.
 5. Maintain meaningful commit-unit boundaries when applying fixes during HITL.
+6. Default policy: `in_review` fixes can be immediate; `reviewed` fixes go to `fix-queue` unless the user requests immediate application.
+7. Any edit touching previously reviewed content must mark overlapping chunks `stale` and trigger delta-review before close.
