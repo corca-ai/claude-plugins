@@ -31,5 +31,5 @@ Code-level patterns, hook configuration, and plugin integration conventions accu
 
 ## Plugin System
 
-- CWF plugin (`plugins/cwf/`) consolidates all workflow skills (12 skills: setup, update, gather, clarify, plan, impl, retro, refactor, handoff, ship, review, run) and infrastructure hooks (7 groups).
+- CWF plugin (`plugins/cwf/`) consolidates all workflow skills (13 skills: setup, update, gather, clarify, plan, impl, retro, refactor, handoff, ship, review, hitl, run) and infrastructure hooks (7 groups).
 - **Env var backward-compat**: `attention-hook` supports legacy `CLAUDE_ATTENTION_*` alongside `CLAUDE_CORCA_ATTENTION_*`. New plugins should not add backward-compat — use `CLAUDE_CORCA_{PLUGIN}_{SETTING}` only.

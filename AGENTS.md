@@ -41,6 +41,7 @@ Select autonomously what to read or update using the file descriptions in the bl
 - [clarify](plugins/cwf/skills/clarify/SKILL.md): Requirement clarification workflow.
 - [plan](plugins/cwf/skills/plan/SKILL.md): Plan drafting workflow.
 - [review](plugins/cwf/skills/review/SKILL.md): Multi-review orchestration.
+- [hitl](plugins/cwf/skills/hitl/SKILL.md): Human-in-the-loop diff/chunk review with resumable state.
 - [impl](plugins/cwf/skills/impl/SKILL.md): Plan-to-implementation orchestration.
 - [retro](plugins/cwf/skills/retro/SKILL.md): Retrospective workflow.
 - [handoff](plugins/cwf/skills/handoff/SKILL.md): Session and phase handoff synthesis.
@@ -84,6 +85,7 @@ Runtime behavior belongs in [plugins/cwf/hooks](plugins/cwf/hooks/); repository 
 
 - [project-context](docs/project-context.md): Project/org facts and long-lived conventions.
 - [architecture-patterns](docs/architecture-patterns.md): Implementation and integration patterns.
+- [cwf-artifact-migration-plan](docs/cwf-artifact-migration-plan.md): Stage-based `.cwf` artifact migration roadmap.
 - [documentation-guide](docs/documentation-guide.md): Documentation quality principles and scope rules.
 - [plugin-dev-cheatsheet](docs/plugin-dev-cheatsheet.md): Practical development/testing/deploy workflows.
 - [interactive-doc-review-protocol](docs/interactive-doc-review-protocol.md): Interactive documentation review process and chunking strategy.

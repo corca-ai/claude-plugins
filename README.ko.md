@@ -71,9 +71,9 @@ v3.0.0부터 독립 플러그인(gather-context, clarify, retro, refactor, atten
 
 AI 코딩 세션은 모든 경계에서 컨텍스트를 잃습니다. 세션이 끝나면 다음 세션은 처음부터 시작합니다. 요구사항이 명확화에서 구현으로 넘어갈 때 프로토콜과 제약 조건이 잊혀집니다. 5개 스킬 시스템을 위해 작성된 품질 기준은 시스템이 성장하면서 조용히 무의미해집니다.
 
-CWF는 12개 스킬에 걸쳐 조합되는 6가지 빌딩 블록 개념으로 이 문제를 해결합니다. 독립된 도구 묶음이 아니라, 각 스킬이 동일한 기반 행동 패턴을 동기화하는 하나의 통합 플러그인입니다 -- 전문가 자문은 요구사항 명확화와 세션 회고 모두에서 사각지대를 드러내고, 티어 분류는 의사결정을 일관되게 증거나 인간에게 라우팅하며, 에이전트 오케스트레이션은 리서치부터 구현까지 작업을 병렬화합니다.
+CWF는 13개 스킬에 걸쳐 조합되는 6가지 빌딩 블록 개념으로 이 문제를 해결합니다. 독립된 도구 묶음이 아니라, 각 스킬이 동일한 기반 행동 패턴을 동기화하는 하나의 통합 플러그인입니다 -- 전문가 자문은 요구사항 명확화와 세션 회고 모두에서 사각지대를 드러내고, 티어 분류는 의사결정을 일관되게 증거나 인간에게 라우팅하며, 에이전트 오케스트레이션은 리서치부터 구현까지 작업을 병렬화합니다.
 
-결과: 하나의 플러그인(`cwf`), 12개 스킬, 7개 훅 그룹. 컨텍스트가 세션 경계를 넘어 유지됩니다. 의사결정에 증거가 뒷받침됩니다. 품질 기준이 시스템과 함께 진화합니다.
+결과: 하나의 플러그인(`cwf`), 13개 스킬, 7개 훅 그룹. 컨텍스트가 세션 경계를 넘어 유지됩니다. 의사결정에 증거가 뒷받침됩니다. 품질 기준이 시스템과 함께 진화합니다.
 
 ## 핵심 개념
 
@@ -110,11 +110,12 @@ gather -> clarify -> plan -> impl -> retro
 | 7 | [handoff](#handoff) | `cwf:handoff` | 세션 또는 페이즈 핸드오프 문서 생성 |
 | 8 | [ship](#ship) | `cwf:ship` | GitHub 워크플로우 자동화 -- 이슈 생성, PR, 머지 관리 |
 | 9 | [review](#review) | `cwf:review` | 6명 병렬 리뷰어에 의한 범용 리뷰 -- 내부 + 외부 CLI + 도메인 전문가 |
-| 10 | [run](#run) | `cwf:run` | gather부터 ship까지 전체 파이프라인을 단계 게이트와 함께 오케스트레이션 |
-| 11 | [setup](#setup) | `cwf:setup` | 훅 그룹 설정, 도구 감지, 프로젝트 인덱스 선택 생성 |
-| 12 | [업데이트](#업데이트) | `cwf:update` | CWF 플러그인 업데이트 확인 및 적용 |
+| 10 | [hitl](#hitl) | `cwf:hitl` | 재개 가능한 상태 저장과 룰 전파를 갖춘 human-in-the-loop diff/chunk 리뷰 |
+| 11 | [run](#run) | `cwf:run` | gather부터 ship까지 전체 파이프라인을 단계 게이트와 함께 오케스트레이션 |
+| 12 | [setup](#setup) | `cwf:setup` | 훅 그룹 설정, 도구 감지, 프로젝트 인덱스 선택 생성 |
+| 13 | [업데이트](#업데이트) | `cwf:update` | CWF 플러그인 업데이트 확인 및 적용 |
 
-**개념 조합**: gather, clarify, plan, impl, retro, refactor, review, run은 모두 에이전트 오케스트레이션을 동기화합니다. clarify는 가장 풍부한 조합으로, 전문가 자문, 티어 분류, 에이전트 오케스트레이션, 결정 포인트를 하나의 워크플로우에서 동기화합니다. review는 전문가 자문과 에이전트 오케스트레이션을 외부 CLI 연동과 함께 동기화합니다. handoff는 핸드오프 개념의 주요 구현체입니다. refactor는 전체적 모드에서 출처 추적을 활성화합니다.
+**개념 조합**: gather, clarify, plan, impl, retro, refactor, review, hitl, run은 모두 에이전트 오케스트레이션을 동기화합니다. clarify는 가장 풍부한 조합으로, 전문가 자문, 티어 분류, 에이전트 오케스트레이션, 결정 포인트를 하나의 워크플로우에서 동기화합니다. review와 hitl은 서로 다른 입도(병렬 리뷰어 vs 청크 기반 인터랙티브 루프)에서 인간 판단이 포함된 리뷰 오케스트레이션을 수행합니다. handoff는 핸드오프 개념의 주요 구현체입니다. refactor는 전체적 모드에서 출처 추적을 활성화합니다.
 
 ## 스킬 레퍼런스
 
@@ -245,6 +246,22 @@ cwf:review --mode clarify  # 요구사항 리뷰
 2명 내부 리뷰어(Security, UX/DX) + 2명 외부 CLI 리뷰어(Codex, Gemini) + 2명 도메인 전문가가 병렬로 리뷰합니다. 외부 CLI가 없으면 Task 에이전트로 우아하게 폴백합니다. 판정은 Pass / Conditional Pass / Revise 세 단계입니다. plan.md의 BDD 성공 기준을 자동 검증합니다.
 
 전체 레퍼런스: [SKILL.md](plugins/cwf/skills/review/SKILL.md)
+
+### hitl
+
+브랜치 diff를 human-in-the-loop 방식으로 청크 리뷰하며, 재개 가능한 상태와 룰 전파를 지원합니다.
+
+```text
+cwf:hitl                             # 기본 베이스(upstream/main) 기준으로 시작
+cwf:hitl --base <branch>             # 명시적 베이스 브랜치 기준 리뷰
+cwf:hitl --resume                    # 저장된 커서에서 재개
+cwf:hitl --rule "<rule text>"        # 남은 큐에 적용할 리뷰 룰 추가
+cwf:review --human                   # 호환 alias (내부적으로 cwf:hitl로 라우팅)
+```
+
+상태는 `.cwf/hitl/sessions/`(`state.yaml`, `rules.yaml`, `queue.json`, `events.log`)에 저장합니다. `cwf-state.yaml`에는 활성 HITL 세션 포인터 메타데이터만 저장합니다.
+
+전체 레퍼런스: [SKILL.md](plugins/cwf/skills/hitl/SKILL.md)
 
 ### run
 

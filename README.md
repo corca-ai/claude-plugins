@@ -71,9 +71,9 @@ As of v3.0.0, standalone plugins (gather-context, clarify, retro, refactor, atte
 
 AI coding sessions lose context at every boundary. When a session ends, the next one starts from scratch. When requirements shift from clarification to implementation, protocols and constraints are forgotten. When quality criteria are written for a five-skill system, they silently become irrelevant as the system grows.
 
-CWF addresses this with six building-block concepts that compose across twelve skills. Rather than independent tools, CWF is one integrated plugin where each skill synchronizes the same underlying behavioral patterns — expert advisors surface blind spots in both requirement clarification and session retrospectives; tier classification routes decisions to evidence or humans consistently; agent orchestration parallelizes work from research through implementation.
+CWF addresses this with six building-block concepts that compose across thirteen skills. Rather than independent tools, CWF is one integrated plugin where each skill synchronizes the same underlying behavioral patterns — expert advisors surface blind spots in both requirement clarification and session retrospectives; tier classification routes decisions to evidence or humans consistently; agent orchestration parallelizes work from research through implementation.
 
-The result: one plugin (`cwf`), twelve skills, seven hook groups. Context survives session boundaries. Decisions are evidence-backed. Quality criteria evolve with the system.
+The result: one plugin (`cwf`), thirteen skills, seven hook groups. Context survives session boundaries. Decisions are evidence-backed. Quality criteria evolve with the system.
 
 ## Core Concepts
 
@@ -110,11 +110,12 @@ gather → clarify → plan → impl → retro
 | 7 | [handoff](#handoff) | `cwf:handoff` | Generate session or phase handoff documents |
 | 8 | [ship](#ship) | `cwf:ship` | Automate GitHub workflow — issues, PRs, and merge management |
 | 9 | [review](#review) | `cwf:review` | Multi-perspective review with 6 parallel reviewers |
-| 10 | [run](#run) | `cwf:run` | Orchestrate full pipeline chaining from gather to ship with stage gates |
-| 11 | [setup](#setup) | `cwf:setup` | Configure hook groups, detect tools, optionally generate project index |
-| 12 | [update](#update) | `cwf:update` | Check and apply CWF plugin updates |
+| 10 | [hitl](#hitl) | `cwf:hitl` | Human-in-the-loop diff/chunk review with resumable state and rule propagation |
+| 11 | [run](#run) | `cwf:run` | Orchestrate full pipeline chaining from gather to ship with stage gates |
+| 12 | [setup](#setup) | `cwf:setup` | Configure hook groups, detect tools, optionally generate project index |
+| 13 | [update](#update) | `cwf:update` | Check and apply CWF plugin updates |
 
-**Concept composition**: gather, clarify, plan, impl, retro, refactor, review, and run all synchronize Agent Orchestration. clarify is the richest composition — it synchronizes Expert Advisor, Tier Classification, Agent Orchestration, and Decision Point in a single workflow. review synchronizes Expert Advisor and Agent Orchestration with external CLI integration. handoff is the primary instantiation of the Handoff concept. refactor activates Provenance in holistic mode.
+**Concept composition**: gather, clarify, plan, impl, retro, refactor, review, hitl, and run all synchronize Agent Orchestration. clarify is the richest composition — it synchronizes Expert Advisor, Tier Classification, Agent Orchestration, and Decision Point in a single workflow. review and hitl both combine human judgment with structured review orchestration at different granularity (parallel reviewers vs chunked interactive loop). handoff is the primary instantiation of the Handoff concept. refactor activates Provenance in holistic mode.
 
 ## Skills Reference
 
@@ -245,6 +246,22 @@ cwf:review --mode plan           # Review implementation plan
 6 parallel reviewers: 2 internal (Security, UX/DX) via Task agents + 2 external (Codex, Gemini) via CLI + 2 domain experts via Task agents. Graceful fallback when external CLIs are unavailable.
 
 Full reference: [SKILL.md](plugins/cwf/skills/review/SKILL.md)
+
+### hitl
+
+Human-in-the-loop review over branch diff, with resumable chunk state and rule propagation.
+
+```text
+cwf:hitl                             # Start from default base (upstream/main)
+cwf:hitl --base <branch>             # Review diff against explicit base
+cwf:hitl --resume                    # Resume from saved cursor
+cwf:hitl --rule "<rule text>"        # Add review rule for remaining queue
+cwf:review --human                   # Compatibility alias (routes to cwf:hitl)
+```
+
+State is persisted under `.cwf/hitl/sessions/` (`state.yaml`, `rules.yaml`, `queue.json`, `events.log`). `cwf-state.yaml` stores only live pointer metadata to the active HITL session.
+
+Full reference: [SKILL.md](plugins/cwf/skills/hitl/SKILL.md)
 
 ### run
 
