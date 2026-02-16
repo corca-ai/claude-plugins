@@ -66,6 +66,81 @@ actual_plugin_artifact="$(CWF_ARTIFACT_ROOT=".cwf" CWF_NEXT_PROMPT_DATE=990101 b
 assert_eq "root script supports artifact-root based output path" "$expected_artifact_root" "$actual_root_artifact"
 assert_eq "plugin script supports artifact-root based output path" "$expected_artifact_root" "$actual_plugin_artifact"
 
+STATE_FILE="$TMP_DIR/cwf-state.yaml"
+cat > "$STATE_FILE" <<'EOF'
+workflow:
+  current_stage: harden
+sessions:
+  - id: S-prev
+    title: "Previous Session"
+    dir: ".cwf/projects/260214-00-prev"
+    branch: "main"
+tools: {}
+hooks: {}
+live:
+  session_id: ""
+  dir: ""
+  branch: ""
+  phase: ""
+  task: ""
+EOF
+
+root_bootstrap_path="$(CWF_PROJECTS_DIR="$PROJECTS_DIR" CWF_STATE_FILE="$STATE_FILE" CWF_NEXT_PROMPT_DATE=260214 bash "$ROOT_SCRIPT" --bootstrap boot-root)"
+expected_root_bootstrap="$PROJECTS_DIR/260214-03-boot-root"
+assert_eq "root bootstrap returns resolved path" "$expected_root_bootstrap" "$root_bootstrap_path"
+
+if [[ -d "$expected_root_bootstrap" ]]; then
+  pass "root bootstrap creates session directory"
+else
+  fail "root bootstrap creates session directory"
+fi
+
+if [[ -f "$expected_root_bootstrap/plan.md" ]]; then
+  pass "root bootstrap initializes plan.md"
+else
+  fail "root bootstrap initializes plan.md"
+fi
+
+if [[ -f "$expected_root_bootstrap/lessons.md" ]]; then
+  pass "root bootstrap initializes lessons.md"
+else
+  fail "root bootstrap initializes lessons.md"
+fi
+
+if grep -Fq "dir: \"$expected_root_bootstrap\"" "$STATE_FILE"; then
+  pass "root bootstrap registers session dir in state"
+else
+  fail "root bootstrap registers session dir in state"
+fi
+
+plugin_bootstrap_path="$(CWF_PROJECTS_DIR="$PROJECTS_DIR" CWF_STATE_FILE="$STATE_FILE" CWF_NEXT_PROMPT_DATE=260214 bash "$PLUGIN_SCRIPT" --bootstrap boot-plugin)"
+expected_plugin_bootstrap="$PROJECTS_DIR/260214-04-boot-plugin"
+assert_eq "plugin bootstrap returns resolved path" "$expected_plugin_bootstrap" "$plugin_bootstrap_path"
+
+if [[ -d "$expected_plugin_bootstrap" ]]; then
+  pass "plugin bootstrap creates session directory"
+else
+  fail "plugin bootstrap creates session directory"
+fi
+
+if [[ -f "$expected_plugin_bootstrap/plan.md" ]]; then
+  pass "plugin bootstrap initializes plan.md"
+else
+  fail "plugin bootstrap initializes plan.md"
+fi
+
+if [[ -f "$expected_plugin_bootstrap/lessons.md" ]]; then
+  pass "plugin bootstrap initializes lessons.md"
+else
+  fail "plugin bootstrap initializes lessons.md"
+fi
+
+if grep -Fq "dir: \"$expected_plugin_bootstrap\"" "$STATE_FILE"; then
+  pass "plugin bootstrap registers session dir in state"
+else
+  fail "plugin bootstrap registers session dir in state"
+fi
+
 set +e
 CWF_PROJECTS_DIR="$PROJECTS_DIR" CWF_NEXT_PROMPT_DATE=2026-02-14 bash "$ROOT_SCRIPT" bad >/dev/null 2>&1
 invalid_status=$?

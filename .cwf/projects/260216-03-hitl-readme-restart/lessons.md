@@ -13,3 +13,10 @@
 
 - Keep `.cwf/sessions` as preferred log target and preserve `.cwf/projects/sessions` compatibility.
 - Continue using deterministic validation (`shellcheck`, link checks, live-state checks) before closing sessions.
+
+## Post-Retro Addendum
+
+1. Path migration work must include deterministic gate migration in the same change unit (lint filters, hook filters, post-run checks).
+2. Session tooling should prioritize operator ergonomics (`--help`, path selectors, explicit error messages) to reduce diagnosis loops.
+3. If session artifacts are contract-required, backfill should be immediate and explicit rather than deferred.
+4. Generated runtime logs should not silently become commit blockers due policy drift; gate scope must match artifact intent.

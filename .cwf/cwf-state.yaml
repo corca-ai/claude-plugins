@@ -342,6 +342,24 @@ sessions:
     summary: "Executed full pre-Step4 evidence package with 12-skill coverage, script-path audit, README/discoverability gates, and interactive Step4 prompt. Added commit-checkpoint rule to handoff execution contracts."
     artifacts: [plan.md, lessons.md, retro.md, refactor-evidence.md, skill-coverage-matrix.md, script-coverage-matrix.md, readme-framing-audit.md, discoverability-audit.md, readiness-prestep4.md, step4-interactive-prompt.md, next-session.md]
 
+  - id: S260216-01
+    title: "README review restart"
+    dir: .cwf/projects/260216-01-readme-review-restart
+    branch: marketplace-v3
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md]
+
+  - id: S260216-02
+    title: "HITL README update"
+    dir: .cwf/projects/260216-02-hitl-readme
+    branch: marketplace-v3
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md]
+
+  - id: S260216-03
+    title: "HITL README restart"
+    dir: .cwf/projects/260216-03-hitl-readme-restart
+    branch: marketplace-v3
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md, session-log.md]
+
 # External tool availability (detected by cwf:setup)
 tools:
   codex: available

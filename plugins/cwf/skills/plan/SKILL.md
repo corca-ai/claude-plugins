@@ -273,8 +273,8 @@ Always use the **two-layer format**:
 Determine the session directory following plan-protocol.md location rules:
 
 1. If the user provided an output path, use it.
-2. Otherwise run `{SKILL_DIR}/../../scripts/next-prompt-dir.sh <title>` and use its output path.
-3. Create the resolved directory path.
+2. Otherwise run `{SKILL_DIR}/../../scripts/next-prompt-dir.sh --bootstrap <title>` and use its output path.
+   - `--bootstrap` creates the resolved directory, initializes missing `plan.md`/`lessons.md`, and pre-registers the session in `cwf-state.yaml` `sessions` when state exists.
 
 Write two files:
 

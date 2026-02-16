@@ -216,3 +216,21 @@
 - No additional tool gaps identified.
 - 이번 세션의 핵심 gap(누락 의존성 인터랙션 부재)은 setup/skill 계약 및 설치 스크립트로 이미 1차 해소됨.
 
+### Post-Retro Findings
+
+- Finding 1: Session-log path migration(`.cwf/projects/sessions` -> `.cwf/sessions`) introduced gate mismatch in markdownlint/pre-commit filtering.
+  - Recommended tier: Tier 1 (Eval/Hook)
+  - Mechanism: Update `.markdownlint-cli2.jsonc`, git-hook generators, and post-run checks to exclude `.cwf/sessions`.
+  - Status: Applied in this session.
+- Finding 2: `check-session.sh` usability and parsing had practical gaps (`--help` missing, session-dir selector unsupported, nested `session_id` misread in live state).
+  - Recommended tier: Tier 1 (Eval/Tooling)
+  - Mechanism: Add CLI help + session-dir selector support + top-level live key parsing constraints.
+  - Status: Applied in this session.
+- Finding 3: Recent session directories were missing baseline artifacts (`plan.md`, `lessons.md`), causing late verification friction.
+  - Recommended tier: Tier 2 (State) + Tier 1 (Check enforcement)
+  - Mechanism: Backfill missing artifacts and keep `session_defaults.always` contract enforced through `check-session`.
+  - Status: Backfill applied for `260216-01`, `260216-02`, `260216-03`.
+- Finding 4: Generated Codex session markdown (`*.codex.md`) can block commits if staged unintentionally.
+  - Recommended tier: Tier 1 (Gate policy)
+  - Mechanism: Keep generated logs out of staged markdown lint scope; optionally add explicit ignore policy if commit-by-default is not desired.
+  - Status: Gate scope updated; repository-level ignore policy remains optional.

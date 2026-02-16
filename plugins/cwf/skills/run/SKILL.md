@@ -28,7 +28,8 @@ Operational note:
 ## Phase 1: Initialize
 
 1. Parse task description and flags (`--from`, `--skip`)
-1. Create session directory via `{SKILL_DIR}/../../scripts/next-prompt-dir.sh <sanitized-title>`
+1. Bootstrap session directory via `{SKILL_DIR}/../../scripts/next-prompt-dir.sh --bootstrap <sanitized-title>`
+   - This creates the directory, initializes `plan.md`/`lessons.md` if missing, and pre-registers the session in `cwf-state.yaml` `sessions` when state exists.
 1. Initialize live state (session-first write path):
 
    ```bash
@@ -163,7 +164,7 @@ After all stages complete (or the pipeline is halted):
 
 1. Update state:
    - Set final phase: `bash {SKILL_DIR}/../../scripts/cwf-live-state.sh set . phase="done"`
-   - Append session entry to root `sessions` list in `cwf-state.yaml`
+   - Ensure the current session entry in `cwf-state.yaml` stays consistent with final artifacts/summary (registration is initialized during Phase 1 bootstrap)
 1. Report pipeline summary:
 
 ```markdown
