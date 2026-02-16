@@ -9,6 +9,8 @@
 // - inline code spans only
 // - skips already-linked labels: [`path`](path)
 
+const path = require("path");
+
 const RULE_NAME = "CORCA001";
 const RULE_ALIASES = [
   "no-inline-file-path-literals",
@@ -29,6 +31,27 @@ const ROOT_DOCS = new Set([
   "AI_NATIVE_PRODUCT_TEAM.md",
   "AI_NATIVE_PRODUCT_TEAM.ko.md"
 ]);
+
+const README_INLINE_PATH_EXEMPT = new Set(["README.md", "README.ko.md"]);
+const README_INLINE_PATH_EXEMPT_ABS = new Set(
+  ["README.md", "README.ko.md"].map((p) => path.resolve(process.cwd(), p))
+);
+
+function isReadmeInlinePathExempt(fileName) {
+  if (!fileName) {
+    return false;
+  }
+  if (README_INLINE_PATH_EXEMPT.has(fileName)) {
+    return true;
+  }
+
+  const withoutDotPrefix = fileName.replace(/^\.\//, "");
+  if (README_INLINE_PATH_EXEMPT.has(withoutDotPrefix)) {
+    return true;
+  }
+
+  return README_INLINE_PATH_EXEMPT_ABS.has(path.resolve(fileName));
+}
 
 function isLinkableRepoPath(content) {
   if (
@@ -61,6 +84,13 @@ module.exports = [
       "Inline-code repository paths must be markdown links, not code literals",
     tags: ["links", "accessibility", "style"],
     function: function noInlineFilePathLiterals(params, onError) {
+      const fileName = String(params.name || params.fileName || params.filename || "")
+        .replace(/\\/g, "/")
+        .trim();
+      if (isReadmeInlinePathExempt(fileName)) {
+        return;
+      }
+
       let inFence = false;
 
       params.lines.forEach((line, index) => {
