@@ -183,7 +183,13 @@ cwf:gather --search code <query>  # Code search (Exa)
 cwf:gather --local <topic>        # Explore local codebase
 ```
 
-Auto-detects Google Docs/Slides/Sheets, Slack threads, Notion pages, GitHub PRs/issues, and generic web URLs. It downloads source content into `.cwf/projects/`, normalizes outputs into agent-friendly markdown, and keeps provenance links. Google Docs and Notion exports require public/published sharing settings. The WebSearch redirect hook currently routes Claude's WebSearch to `cwf:gather --search` regardless of API-key presence; without `TAVILY_API_KEY`/`EXA_API_KEY`, it returns setup guidance for search while URL collection and `--local` continue to work. A future fallback mode will route back to Claude WebSearch when keys are missing.
+**Design Intent**
+
+Consolidate scattered information into agent-readable local artifacts. URL, web search, and local exploration results are unified as file-based outputs so downstream stages reason from evidence files, not links. Uses Tavily/Exa instead of Claude's built-in WebSearch for better search quality and consistent result formatting.
+
+**What It Does**
+
+Auto-detects Google Docs/Slides/Sheets, Slack threads, Notion pages, GitHub PRs/issues, and generic web URLs. Downloads content into `.cwf/projects/`, normalizes into agent-friendly markdown, and preserves provenance links. Google Docs and Notion exports require public/published sharing settings. The `websearch_redirect` hook routes Claude's WebSearch to `cwf:gather --search`; without `TAVILY_API_KEY`/`EXA_API_KEY`, it returns setup guidance for search while URL collection and `--local` continue to work. A future fallback mode will route back to Claude WebSearch when keys are missing.
 
 ### [clarify](plugins/cwf/skills/clarify/SKILL.md)
 
@@ -194,7 +200,13 @@ cwf:clarify <requirement>          # Research-first (default)
 cwf:clarify <requirement> --light  # Direct Q&A, no sub-agents
 ```
 
-Default mode decomposes requirements into decision points → parallel research (codebase + web) → expert analysis → tier classification (T1: codebase evidence, T2: standards/best practices, T3: preference/policy choices with no single correct answer) → persistent why-questioning. To fix the v1 pattern where agents asked users about discoverable facts too often, T1/T2 are handled autonomously by default and only T3 is escalated. Light mode keeps a faster interactive Q&A loop without sub-agents.
+**Design Intent**
+
+Decompose requirements into decision points before planning to reduce "questions arriving too late" rework. Classifies decisions into 3 tiers (T1: codebase evidence, T2: standards/best practices, T3: subjective preference/policy), handling T1/T2 autonomously so agents don't ask users about discoverable facts.
+
+**What It Does**
+
+Default mode decomposes and classifies via parallel research (codebase + web) → expert analysis → tier classification → persistent why-questioning. Light mode provides a faster interactive Q&A loop without sub-agents.
 
 ### [plan](plugins/cwf/skills/plan/SKILL.md)
 
@@ -203,6 +215,12 @@ JTBD: create an implementation contract that downstream implementation and revie
 ```text
 cwf:plan <task description>
 ```
+
+**Design Intent**
+
+Pre-v3, CWF augmented planning via Claude Code's Plan mode hooks. v3 restructured this into a runtime-independent `cwf:plan` skill because: (a) `gather`+`clarify` provide more consistent planning input quality; (b) context continuity is maintained through file-based artifacts (`plan.md`, `lessons.md`, optional `phase-handoff.md`) rather than shifting context management to the user; (c) planning conversations that reveal constraints/preferences are immediately recorded in `lessons.md` for reuse.
+
+**What It Does**
 
 Parallel prior art + codebase research produce a structured plan with steps, files, and success criteria (BDD + qualitative), saved to `.cwf/projects/`. Recommended flow: run `cwf:review --mode plan` before implementation so plan-level concerns are resolved before `cwf:impl`.
 
@@ -215,7 +233,13 @@ cwf:impl                    # Auto-detect most recent plan.md
 cwf:impl <path/to/plan.md>  # Explicit plan path
 ```
 
-Loads the plan (+ phase handoff if present), decomposes work by domain and dependency, sizes an adaptive agent team (1-4), executes parallel batches, and verifies against BDD criteria. Typical sequence: `cwf:plan` → `cwf:review --mode plan` → `cwf:impl` → `cwf:review --mode code`.
+**Design Intent**
+
+Treats the approved plan as an execution contract to prevent scope drift. Uses adaptive [Agent Team](https://code.claude.com/docs/agent-teams) sizing (1-4) based on task complexity and dependency, avoiding the coordination overhead of fixed-size teams. Records decision history (`decision_journal`) and lessons (`lessons.md`) for context recovery across boundaries.
+
+**What It Does**
+
+Loads `plan.md` (+ phase handoff if present), decomposes by domain/dependency, executes parallel batches, and verifies against BDD criteria. Typical sequence: `cwf:plan` → `cwf:review --mode plan` → `cwf:impl` → `cwf:review --mode code`.
 
 ### [retro](plugins/cwf/skills/retro/SKILL.md)
 
@@ -226,6 +250,12 @@ cwf:retro            # Adaptive (deep by default)
 cwf:retro --deep     # Full analysis with expert lens
 cwf:retro --light    # Sections 1-4 + 7 only, no sub-agents
 ```
+
+**Design Intent**
+
+Converts single-session outcomes into durable environment improvements, not just records. Decomposes retrospective into sections separating "what happened" from "what to change next." Connects insights to document/check/backlog changes to prevent recurring friction.
+
+**What It Does**
 
 Outputs are saved to session `retro.md`; deep mode also writes companion files (`retro-cdm-analysis.md`, `retro-expert-alpha.md`, `retro-expert-beta.md`, `retro-learning-resources.md`). The 7 sections are:
 1. `Context Worth Remembering`: background/decision context for next sessions, then promoted to project docs only when durable.
@@ -248,7 +278,13 @@ cwf:refactor --skill --holistic     # Cross-plugin analysis
 cwf:refactor --docs                 # Documentation consistency review
 ```
 
-Quick scan exists to catch global drift in a codebase where skills, scripts, docs, and code keep growing together. `--skill <name>` exists for focused diagnosis when one skill misbehaves or is being authored/customized. Code tidying analyzes commits for safe refactoring (Kent Beck's "Tidy First?"). Holistic mode detects cross-plugin pattern issues. Docs mode checks cross-document consistency.
+**Design Intent**
+
+In a growing codebase where features, skills, docs, and operational scripts evolve together, cleaning code alone doesn't restore quality. Refactor inspects code/skills/docs against the same standard to catch global drift and standard deviations early. Included in every default `cwf:run` chain for this reason.
+
+**What It Does**
+
+Quick scan checks structural metrics and warning flags across all skills. `--skill <name>` provides focused structural/quality/concept diagnosis. `--code` finds safe tidy candidates from recent commits (Kent Beck's "Tidy First?"). `--holistic` analyzes cross-plugin convention compliance, concept integrity, and workflow coherence. `--docs` checks cross-document consistency.
 
 ### [handoff](plugins/cwf/skills/handoff/SKILL.md)
 
@@ -274,7 +310,13 @@ cwf:ship merge [--squash|--merge|--rebase]    # Merge approved PR
 cwf:ship status                            # Show issues, PRs, and checks
 ```
 
-Builds issue/PR bodies from session context (`plan.md`, `lessons.md`, `retro.md`) including CDM/decision summaries, verification checklist, and human-judgment guardrails for merge decisions. Default policy keeps final merge judgment human-gated; when there are no blocking issues and the user explicitly requests it, an exceptional merge path (for example, admin merge) can be used. Before merge, `cwf:hitl` can add one continuous human loop: agreement on key decisions and user concerns, followed by chunked change review.
+**Design Intent**
+
+Automates GitHub issue/PR/merge from session artifacts while keeping final merge judgment human-gated. Maximizes automation up to the point of merge, where human control remains explicit.
+
+**What It Does**
+
+Builds issue/PR bodies from session context (`plan.md`, `lessons.md`, `retro.md`) with decision summaries, verification checklists, and human-judgment guardrails. Default policy keeps merge human-gated; when there are no blocking issues and the user explicitly requests it, an exceptional merge path can be used. `cwf:hitl` can be added before merge for agreement on key decisions and chunked change review.
 
 ### [review](plugins/cwf/skills/review/SKILL.md)
 
@@ -287,7 +329,13 @@ cwf:review --mode clarify        # Review clarified requirements
 cwf:review --mode plan           # Review implementation plan
 ```
 
-Use `--mode plan` after `cwf:plan` to validate scope/assumptions before code is written, and use `--mode code` after `cwf:impl` to catch regressions before shipping. The skill runs 6 parallel reviewers: 2 internal (Security, UX/DX) via Task agents + 2 external (Codex, Gemini) via CLI + 2 domain experts via Task agents. Provider routing is the same even when the main runtime agent is Codex; unavailable external CLIs fall back to Task-based reviewers.
+**Design Intent**
+
+Applies the same multi-perspective parallel review frame before implementation (requirements/plan) and after (code) to catch risks early. Built with fallback paths so external provider unavailability doesn't block the review gate.
+
+**What It Does**
+
+Use `--mode plan` after `cwf:plan` to validate scope/assumptions before code is written, and `--mode code` after `cwf:impl` to catch regressions. Runs 6 parallel reviewers: 2 internal (Security, UX/DX), 2 external (Codex/Gemini slots), 2 domain experts. Provider routing is the same regardless of main runtime; unavailable external CLIs fall back to Task-based reviewers.
 
 ### [hitl](plugins/cwf/skills/hitl/SKILL.md)
 
@@ -300,7 +348,13 @@ cwf:hitl --resume                    # Resume from saved cursor
 cwf:hitl --rule "<rule text>"        # Add review rule for remaining queue
 ```
 
-Default flow starts with an agreement round: collect major decision points and user concerns, record consensus in `hitl-scratchpad.md`, apply high-impact edits if needed, then proceed to chunk review. Runtime state is persisted under `.cwf/projects/<session-dir>/hitl/` (`hitl-scratchpad.md`, `state.yaml`, `rules.yaml`, `queue.json`, `fix-queue.yaml`, `events.log`). [`.cwf/cwf-state.yaml`](.cwf/cwf-state.yaml) stores only live pointer metadata to the active HITL session.
+**Design Intent**
+
+Structures subjective human judgment — tone, documentation quality, consensus fitness — that automated review can miss. Persists state and rules to files so long reviews can be interrupted and resumed without context loss.
+
+**What It Does**
+
+Starts with an agreement round: collect major decision points and user concerns, record consensus in `hitl-scratchpad.md`, apply high-impact edits, then proceed to chunk review. Runtime state is persisted under `.cwf/projects/<session-dir>/hitl/` (`hitl-scratchpad.md`, `state.yaml`, `rules.yaml`, `queue.json`, `fix-queue.yaml`, `events.log`). [`.cwf/cwf-state.yaml`](.cwf/cwf-state.yaml) stores only live pointer metadata to the active HITL session.
 
 ### [run](plugins/cwf/skills/run/SKILL.md)
 
@@ -312,7 +366,13 @@ cwf:run --from impl                  # Resume from impl stage
 cwf:run --skip review-plan,retro     # Skip specific stages
 ```
 
-Executes gather → clarify → plan → review(plan) → impl → review(code) → refactor → retro → ship, with human gates before implementation, automatic chaining after implementation by default, and user confirmation at `ship`. Including `refactor` in the default chain adds a maintainability pass for skill/docs/code drift before retrospective and shipping.
+**Design Intent**
+
+Enables reproducible end-to-end workflow without requiring users to specify individual skill commands. Separates human gates (pre-impl) from automatic chaining (post-impl) to balance control and speed.
+
+**What It Does**
+
+Executes gather → clarify → plan → review(plan) → impl → review(code) → refactor → retro → ship, with human gates before implementation, automatic chaining after, and user confirmation at `ship`. Including `refactor` in the default chain adds a maintainability pass for skill/docs/code drift before retrospective and shipping.
 
 ### [setup](plugins/cwf/skills/setup/SKILL.md)
 
@@ -330,7 +390,13 @@ cwf:setup --repo-index   # Generate/refresh repository index output (explicit)
 cwf:setup --repo-index --target agents # AGENTS.md managed block (for AGENTS-based repositories)
 ```
 
-Interactive hook-group toggles, external AI CLI/API detection (Codex, Gemini, Tavily, Exa), env migration (legacy keys to canonical `CWF_*`), project config bootstrap (`.cwf/config.yaml`, `.cwf/config.local.yaml`), optional Codex integration (skills + wrapper), and optional index generation/refresh. Index generation exists to improve agent routing: capability index helps CWF-internal routing, repository index keeps AGENTS managed blocks aligned for progressive disclosure. Use `cwf:setup --cap-index` for capability index and `cwf:setup --repo-index --target agents` for repository index.
+**Design Intent**
+
+Standardizes hooks, tool detection, and environment contracts in one initial pass to reduce execution variance. `--cap-index` creates a CWF capability routing map; `--repo-index` keeps AGENTS managed blocks aligned for progressive disclosure (see [documentation guide](docs/documentation-guide.md)).
+
+**What It Does**
+
+Interactive hook-group toggles, external AI CLI/API detection (Codex, Gemini, Tavily, Exa), env migration (legacy keys to canonical `CWF_*`), project config bootstrap (`.cwf/config.yaml`, `.cwf/config.local.yaml`), optional Codex integration (skills + wrapper), and optional index generation/refresh. Use `cwf:setup --cap-index` for capability index and `cwf:setup --repo-index --target agents` for repository index.
 
 ### [update](plugins/cwf/skills/update/SKILL.md)
 
@@ -341,7 +407,13 @@ cwf:update               # Check + update if newer version exists
 cwf:update --check       # Version check only
 ```
 
-Update checks are frequent and easy to skip when done manually. `cwf:update` standardizes the sequence (`check -> user approval -> apply`) so version alignment becomes routine instead of ad hoc.
+**Design Intent**
+
+Created because the author frequently forgot to update the plugin manually. Standardizes the `check → user approval → apply` sequence so version alignment becomes routine.
+
+**What It Does**
+
+Refreshes marketplace metadata, compares installed vs latest version. `--check` is read-only; update requires user confirmation before applying.
 
 ### Codex Integration
 
