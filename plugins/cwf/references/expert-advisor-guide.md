@@ -112,6 +112,15 @@ Reference actual session events. Cover both what worked and what could improve.}
 
 Adapt language to the user's language (detected from conversation).
 
+## Roster Maintenance
+
+After any skill stage that used experts, the orchestrator updates `cwf-state.yaml` `expert_roster:`:
+
+1. For each expert used: if already in roster, increment `usage_count` by 1; if new, add entry with `name`, `domain`, `source`, `rationale`, `introduced: {current session}`, `usage_count: 1`
+2. Apply changes directly without user confirmation; report changes in the skill output for visibility
+
+**Retro-specific additions** (deep mode only): After step 1, also analyze the session's domain for roster gaps — are there frameworks or disciplines that would have been valuable but are not represented? Add gap recommendations automatically if the expert has a clear published framework.
+
 ## Constraints
 
 1. **Stay in character** as the named expert throughout

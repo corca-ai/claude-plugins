@@ -292,20 +292,8 @@ For each finding, evaluate enforcement mechanisms strongest-first:
 **Expert Roster Maintenance** (deep mode only, when Section 5 was produced):
 
 1. Extract expert names from Section 5 (Expert Lens) output
-2. Read `cwf-state.yaml` `expert_roster:`
-3. For each expert used in Section 5:
-   - If already in roster: increment `usage_count` by 1
-   - If new: add entry with `name`, `domain`, `source`, `rationale`, `introduced: {current session}`, `usage_count: 1`
-4. Analyze the session's domain for roster gaps — are there frameworks or disciplines
-   that would have been valuable but are not represented in the roster?
-5. Apply all changes directly to `cwf-state.yaml` `expert_roster:` section:
-   - usage_count increments: apply automatically
-   - New expert additions: apply automatically
-   - Gap recommendations: add automatically if the expert has a clear published framework
-6. Report changes to the user in the retro output (Section 5 or post-section note)
-   for visibility, but do not gate on approval
-
-This is fully automatic: both usage tracking and roster expansion are applied without requiring user confirmation. The retro output provides visibility into all changes made.
+2. Follow the Roster Maintenance procedure in `{CWF_PLUGIN_DIR}/references/expert-advisor-guide.md` (including the retro-specific gap analysis step)
+3. Report changes to the user in the retro output (Section 5 or post-section note) for visibility
 
 ### 8. Direct Invocation Report (Mandatory)
 

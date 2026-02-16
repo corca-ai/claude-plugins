@@ -611,7 +611,7 @@ The Provenance table adapts to actual results: if an external CLI succeeded, sho
 
 ### 3. Expert Roster Update
 
-When expert reviewers (Slot 5-6) were used: Read `cwf-state.yaml` `expert_roster:`. For each expert used: if already in roster, increment `usage_count` by 1; if new, add entry with `name`, `domain`, `source`, `rationale`, `introduced: {current session}`, `usage_count: 1`. Apply changes directly without user confirmation.
+When expert reviewers (Slot 5-6) were used: Follow the Roster Maintenance procedure in `{CWF_PLUGIN_DIR}/references/expert-advisor-guide.md`.
 
 ### 4. Cleanup
 
