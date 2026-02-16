@@ -31,17 +31,12 @@ Every skill MUST follow this section order:
 ```yaml
 ---
 name: {skill-name}
-description: |
-  {One-line description.}
-  Triggers: "{cwf:name}", "{natural language triggers}"
-allowed-tools:
-  - {tool list — alphabetical order recommended}
+description: "{One-line description.} Triggers: \"{cwf:name}\", \"{natural language triggers}\""
 ---
 ```
 
 - `name`: lowercase, matches directory name
-- `description`: multi-line with `|`, includes `Triggers:` line
-- `allowed-tools`: only tools the skill actually uses
+- `description`: single-line with embedded `Triggers:` clause (CORCA003 lint rule enforces single-line for runtime portability; do not use block scalar `|` or `>`)
 
 ## Language Declaration
 
@@ -191,7 +186,7 @@ This applies to analysis reports, quick scans, review summaries, and any skill o
 
 ## Checklist for New Skills
 
-- [ ] Frontmatter: name, description (with Triggers), allowed-tools
+- [ ] Frontmatter: name, description (with Triggers)
 - [ ] Language declaration after title (standard pattern)
 - [ ] Quick Start section with usage examples
 - [ ] Phase-based workflow (numbered phases)

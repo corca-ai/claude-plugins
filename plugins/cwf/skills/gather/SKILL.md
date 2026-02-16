@@ -1,6 +1,6 @@
 ---
 name: gather
-description: "Unified information acquisition that stabilizes context before reasoning: URL auto-detect (Google/Slack/Notion/GitHub/web), web search (Tavily/Exa), and local codebase exploration. Trigger on: - \"cwf:gather\" command - When the user provides external content URLs matching supported services - When a reference file contains URLs that need to be fetched - When the user requests web search or code search"
+description: "Unified information acquisition that stabilizes context before reasoning: URL auto-detect (Google/Slack/Notion/GitHub/web), web search (Tavily/Exa), and local codebase exploration. Triggers: \"cwf:gather\", \"gather <url>\", \"web search\", \"code search\""
 ---
 
 # Gather Context (cwf:gather)
