@@ -78,7 +78,11 @@ Before chunk review starts, run one agreement round in the same `cwf:hitl` flow 
    - open questions
    - pending implementation items
 4. Apply high-impact agreed edits that should be reflected before chunk-by-chunk review.
-5. Ask whether to start chunk review now.
+5. Immediately update `hitl-scratchpad.md` again after edits:
+   - mark items as `Applied` / `In progress`
+   - note what was changed and what remains
+   - refresh the `Updated` timestamp
+6. Ask whether to start chunk review now.
 
 When `--resume` is used, refresh the same scratchpad first (new agreements or changed priorities), then continue from cursor.
 
@@ -166,3 +170,4 @@ On `--close` (or EOF completion):
 7. Any edit touching previously reviewed content must mark overlapping chunks `stale` and trigger delta-review before close.
 8. Default entry behavior: start with the agreement round (Phase 0.5), then move to chunk review.
 9. Keep artifacts separated by role: `fix-queue.yaml` for actionable edits, `hitl-scratchpad.md` for agreements/rationale.
+10. After any agreed edit is applied, update `hitl-scratchpad.md` before continuing.

@@ -1,7 +1,7 @@
 # HITL Scratchpad
 
 Session: `260216-02-hitl-readme`
-Updated: `2026-02-16T04:31:10Z`
+Updated: `2026-02-16T04:35:08Z`
 
 ## Purpose
 
@@ -69,6 +69,12 @@ Single source of truth for HITL consensus, rationale, and unresolved questions.
     - Add to `문제`: in long parallel work, final bottleneck shifts to human cognition/review throughput; token minimization alone does not reduce end-to-end lead time.
   - Applied to `README.ko.md` and synchronized in `README.md`.
 
+- D-012 (Applied): HITL must update scratchpad after applying agreed edits.
+  - Direction:
+    - agreement capture alone is insufficient; post-edit state must be written back to `hitl-scratchpad.md` in the same loop.
+    - keep status (`Applied/In progress`), rationale, and remaining items synchronized before continuing chunk review.
+  - Applied to `plugins/cwf/skills/hitl/SKILL.md`.
+
 - I-001 (Applied): Make agreement-capture notes a default HITL behavior.
   - Implemented in `plugins/cwf/skills/hitl/SKILL.md` as default agreement round before chunk review.
   - `hitl-scratchpad.md` is now explicit state artifact and rationale log.
@@ -84,15 +90,20 @@ Single source of truth for HITL consensus, rationale, and unresolved questions.
   - Keep `queue.json` and `fix-queue.yaml` as execution queues.
   - Keep `hitl-scratchpad.md` as rationale/consensus log (separate role, linked workflow).
 
-- I-003 (In progress, v1): Add a repository-wide growth tracking design tied to provenance/state.
+- I-003 (Applied, v1): Add a repository-wide growth tracking design tied to provenance/state.
   - Why: CWF assumes skills/scripts will keep growing per user environment; growth impact must be visible across the whole codebase, not only per-skill.
   - Direction: design a mechanism that detects and reports cross-surface mismatch (skills/docs/hooks/scripts/state), then reflect it in runtime checks and docs.
   - v1 scope:
     - add `check-growth-drift.sh` to report mismatches across skills/docs/scripts/state/provenance
     - wire report into strict pre-push profile as non-blocking (`--level inform`)
     - update setup/dev docs to include this report in strict profile behavior
+  - Implemented by:
+    - `scripts/check-growth-drift.sh`, `plugins/cwf/scripts/check-growth-drift.sh`
+    - strict profile hook integration (`configure-git-hooks.sh`)
+    - setup/dev docs updates
+  - Commit: `433f3b2`
 
-- I-004 (In progress): Add project-level runtime configuration layer.
+- I-004 (Applied): Add project-level runtime configuration layer.
   - Files:
     - `.cwf/config.yaml` (shared, non-secret)
     - `.cwf/config.local.yaml` (local/secret, gitignored)
@@ -102,12 +113,11 @@ Single source of truth for HITL consensus, rationale, and unresolved questions.
     3) process environment
     4) shell profiles
   - Scope: update env loader, setup/migration flow, and README/README.ko alignment.
-  - Progress:
-    - env-loader and artifact path resolver updated with project-config precedence
-    - setup bootstrap script added (`bootstrap-project-config.sh`)
-    - README.ko/README env section and quick-start rationale updated
-  - Remaining:
-    - finalize deterministic checks and commit
+  - Implemented by:
+    - env-loader and artifact path resolver project-config precedence
+    - setup bootstrap script (`bootstrap-project-config.sh`)
+    - README.ko/README env + quick-start alignment
+  - Commit: `2e31c47`
 
 ## Open Questions
 
@@ -122,7 +132,7 @@ Single source of truth for HITL consensus, rationale, and unresolved questions.
 
 ## Next Pending Item
 
-- Resolve the next unresolved README comment after D-005 and record agreement.
+- Wait for the next `README.ko.md` comment batch, then repeat the same agreement → apply → sync loop.
 
 ## Notes
 
