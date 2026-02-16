@@ -94,12 +94,15 @@ As of v3.0.0, legacy standalone plugins have been removed from the marketplace. 
 - Users work in repositories where session artifacts (.cwf/projects/, .cwf/cwf-state.yaml) are allowed and useful.
 - Users accept progressive disclosure: start from AGENTS.md, then load deeper docs as needed.
 - Users prefer deterministic validation scripts for recurring quality checks over relying on behavioral memory.
+- Users assume tokens are already cheap and likely to get cheaper (CWF targets heavy coding-agent usage patterns, including Claude Code/Codex `$200 Max` plan users). CWF is designed for effectiveness first: spend tokens to reduce human review bottlenecks, use agent assistance during human review, then improve efficiency session-by-session through retrospectives.
 
 ## Why CWF?
 
 ### Problem
 
 AI coding sessions lose context at every boundary. When a session ends, the next one starts from scratch. When requirements shift from clarification to implementation, protocols and constraints are forgotten. When quality criteria are written for a five-skill system, they silently become irrelevant as the system grows.
+
+As long-running work is parallelized, the final bottleneck shifts to human cognition and review throughput. Agent output can scale faster than human decision/verification capacity, so token minimization alone does not reduce end-to-end lead time.
 
 ### Approach
 

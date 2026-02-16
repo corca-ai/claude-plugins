@@ -1,7 +1,7 @@
 # HITL Scratchpad
 
 Session: `260216-02-hitl-readme`
-Updated: `2026-02-16T04:13:42Z`
+Updated: `2026-02-16T04:17:01Z`
 
 ## Purpose
 
@@ -62,6 +62,12 @@ Single source of truth for HITL consensus, rationale, and unresolved questions.
     - `.cwf/config.yaml`: shared, non-secret project settings.
     - `.cwf/config.local.yaml`: local/secret settings, excluded from version control.
     - Priority: project settings override global settings.
+
+- D-011 (Applied): Add token-economics/effectiveness-first assumption and human-bottleneck framing.
+  - Direction:
+    - Add to `가정`: CWF targets heavy coding-agent usage (including `$200 Max` plan users), prioritizing effectiveness over immediate token efficiency.
+    - Add to `문제`: in long parallel work, final bottleneck shifts to human cognition/review throughput; token minimization alone does not reduce end-to-end lead time.
+  - Applied to `README.ko.md` and synchronized in `README.md`.
 
 - I-001 (Applied): Make agreement-capture notes a default HITL behavior.
   - Implemented in `plugins/cwf/skills/hitl/SKILL.md` as default agreement round before chunk review.
