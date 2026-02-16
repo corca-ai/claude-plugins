@@ -15,6 +15,9 @@ set -euo pipefail
 #     Print effective live-state file path.
 #   sync [base_dir]
 #     Copy root live section to session live-state file and upsert live.state_file pointer.
+#   set [base_dir] key=value [key=value ...]
+#     Update top-level scalar fields in live state (session-first write target)
+#     and synchronize root live summary fields for compatibility.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RESOLVER_SCRIPT="$SCRIPT_DIR/cwf-artifact-paths.sh"
@@ -185,6 +188,71 @@ cwf_live_upsert_state_file_pointer() {
   return 0
 }
 
+cwf_live_escape_dq() {
+  local value="$1"
+  value="${value//\\/\\\\}"
+  value="${value//\"/\\\"}"
+  printf '%s' "$value"
+}
+
+cwf_live_upsert_live_scalar() {
+  local state_file="$1"
+  local key="$2"
+  local value="$3"
+  local tmp_file
+  local escaped_value
+
+  escaped_value="$(cwf_live_escape_dq "$value")"
+  tmp_file="$(mktemp)"
+  awk -v key="$key" -v value="$escaped_value" '
+    BEGIN { in_live=0; replaced=0; inserted=0; saw_live=0 }
+    /^live:/ { in_live=1; saw_live=1; print; next }
+    in_live && /^[^[:space:]]/ {
+      if (!inserted) {
+        print "  " key ": \"" value "\""
+        inserted=1
+      }
+      in_live=0
+    }
+    in_live {
+      pat = "^[[:space:]]{2}" key ":[[:space:]]*"
+      if ($0 ~ pat) {
+        if (!replaced) {
+          print "  " key ": \"" value "\""
+          replaced=1
+          inserted=1
+        }
+        next
+      }
+    }
+    { print }
+    END {
+      if (in_live && !inserted) {
+        print "  " key ": \"" value "\""
+        inserted=1
+      }
+      if (!saw_live) {
+        print ""
+        print "live:"
+        print "  " key ": \"" value "\""
+      }
+    }
+  ' "$state_file" > "$tmp_file"
+  mv "$tmp_file" "$state_file"
+}
+
+cwf_live_validate_scalar_key() {
+  local key="$1"
+  case "$key" in
+    ""|state_file|hitl|key_files|dont_touch|decisions|decision_journal)
+      return 1
+      ;;
+    *)
+      return 0
+      ;;
+  esac
+}
+
 cwf_live_sync_from_root() {
   local base_dir="${1:-.}"
   local root_state=""
@@ -226,21 +294,111 @@ cwf_live_sync_from_root() {
   printf '%s\n' "$target_state"
 }
 
+cwf_live_set_scalars() {
+  local base_dir="${1:-.}"
+  shift || true
+  local root_state=""
+  local effective_state=""
+  local synced_state=""
+  local rel_path=""
+  local assignment=""
+  local key=""
+  local value=""
+  local keys=()
+  local values=()
+  local idx=0
+
+  if [[ "$#" -eq 0 ]]; then
+    echo "set requires at least one key=value assignment" >&2
+    return 2
+  fi
+
+  while [[ "$#" -gt 0 ]]; do
+    assignment="$1"
+    shift
+    if [[ "$assignment" != *=* ]]; then
+      echo "Invalid assignment: $assignment (expected key=value)" >&2
+      return 2
+    fi
+    key="${assignment%%=*}"
+    value="${assignment#*=}"
+    if ! cwf_live_validate_scalar_key "$key"; then
+      echo "Unsupported scalar key for set: $key" >&2
+      return 2
+    fi
+    keys+=("$key")
+    values+=("$value")
+  done
+
+  root_state="$(cwf_live_resolve_root_state_file "$base_dir")"
+  [[ -f "$root_state" ]] || return 1
+  effective_state="$(cwf_live_resolve_file "$base_dir")"
+  [[ -n "$effective_state" ]] || return 1
+
+  if [[ "$effective_state" == "$root_state" ]]; then
+    # Apply incoming fields to root first so sync can derive session path from
+    # possibly updated live.dir.
+    for idx in "${!keys[@]}"; do
+      cwf_live_upsert_live_scalar "$root_state" "${keys[$idx]}" "${values[$idx]}"
+    done
+
+    synced_state="$(cwf_live_sync_from_root "$base_dir" 2>/dev/null || true)"
+    if [[ -n "$synced_state" && -f "$synced_state" ]]; then
+      for idx in "${!keys[@]}"; do
+        cwf_live_upsert_live_scalar "$synced_state" "${keys[$idx]}" "${values[$idx]}"
+      done
+      printf '%s\n' "$synced_state"
+      return 0
+    fi
+
+    printf '%s\n' "$root_state"
+    return 0
+  fi
+
+  # Session-local state exists: write there first, then sync summary fields
+  # in root live for backward-compatible readers.
+  for idx in "${!keys[@]}"; do
+    cwf_live_upsert_live_scalar "$effective_state" "${keys[$idx]}" "${values[$idx]}"
+  done
+  for idx in "${!keys[@]}"; do
+    cwf_live_upsert_live_scalar "$root_state" "${keys[$idx]}" "${values[$idx]}"
+  done
+
+  rel_path="$(cwf_live_to_repo_rel_path "$base_dir" "$effective_state")"
+  cwf_live_upsert_state_file_pointer "$root_state" "$rel_path" >/dev/null || true
+
+  printf '%s\n' "$effective_state"
+}
+
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   cmd="${1:-}"
-  base_dir="${2:-.}"
+  base_dir=""
+  shift || true
   case "$cmd" in
     resolve)
+      base_dir="${1:-.}"
       cwf_live_resolve_file "$base_dir"
       ;;
     sync)
+      base_dir="${1:-.}"
       cwf_live_sync_from_root "$base_dir"
       ;;
+    set)
+      base_dir="."
+      if [[ "${1:-}" == *=* || -z "${1:-}" ]]; then
+        cwf_live_set_scalars "$base_dir" "$@"
+      else
+        base_dir="$1"
+        shift
+        cwf_live_set_scalars "$base_dir" "$@"
+      fi
+      ;;
     -h|--help)
-      sed -n '3,19p' "$0" | sed 's/^# \?//'
+      sed -n '3,22p' "$0" | sed 's/^# \?//'
       ;;
     *)
       echo "Usage: $0 {resolve|sync} [base_dir]" >&2
+      echo "       $0 set [base_dir] key=value [key=value ...]" >&2
       exit 2
       ;;
   esac

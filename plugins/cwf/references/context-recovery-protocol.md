@@ -4,10 +4,14 @@ Shared validation protocol for sub-agent output file persistence and recovery af
 
 ## Session Directory Resolution
 
-Read `cwf-state.yaml` → `live.dir` to get the current session directory path.
+Resolve the effective live-state file first, then read `live.dir`.
+
+```bash
+live_state_file=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh resolve)
+```
 
 ```yaml
-session_dir: "{live.dir value from cwf-state.yaml}"
+session_dir: "{live.dir value from resolved live-state file}"
 ```
 
 ## File Validation

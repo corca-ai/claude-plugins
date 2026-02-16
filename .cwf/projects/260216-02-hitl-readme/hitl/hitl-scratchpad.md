@@ -1,7 +1,7 @@
 # HITL Scratchpad
 
 Session: `260216-02-hitl-readme`
-Updated: `2026-02-16T04:52:24Z`
+Updated: `2026-02-16T05:14:26Z`
 
 ## Purpose
 
@@ -24,19 +24,19 @@ Single source of truth for HITL consensus, rationale, and unresolved questions.
   - Include index reason explicitly (progressive disclosure / agent routing via managed AGENTS index), not vague "optional index generation".
   - Keep detailed flags deferred to the `#setup` section.
 
-- D-003 (Applied, v1): Hybrid live-state resolver/sync foundation implemented.
+- D-003 (Applied, v2): Session-first live-state writes + root summary compatibility implemented.
   - Root state keeps global/index metadata and optional `live.state_file` pointer.
-  - Session-local state file (`session-state.yaml`) is resolved as effective live state when present.
+  - Session-local state file (`session-state.yaml`) is resolved as effective live state when present and now acts as the default write target for scalar phase/task/session metadata.
   - Implemented by:
-    - `scripts/cwf-live-state.sh`, `plugins/cwf/scripts/cwf-live-state.sh` (`resolve`/`sync`)
+    - `scripts/cwf-live-state.sh`, `plugins/cwf/scripts/cwf-live-state.sh` (`resolve`/`sync`/`set`)
+    - `set` writes effective session live state first, then synchronizes root `live` summary fields + `live.state_file` pointer
     - `plugins/cwf/hooks/scripts/compact-context.sh` now reads effective live-state file (session-first, root fallback)
     - `scripts/check-session.sh --live` and `plugins/cwf/scripts/check-session.sh --live` now validate effective live state
-    - `plugins/cwf/scripts/check-growth-drift.sh` now validates hybrid pointer semantics (`live.state_file` + effective live file)
+    - `plugins/cwf/scripts/check-growth-drift.sh` now validates hybrid pointer semantics and root-summary/effective-state scalar consistency
     - mirror-drift pair list + script map updated for `cwf-live-state.sh`
-  - v2 follow-up direction:
-    - make session-local live state the default write target at phase transitions
-    - keep root `live` as compatibility pointer/summary layer
-    - migrate skill docs/instructions from direct root-live edits to helper-script contract
+    - core skill docs migrated from direct root-live edits to helper-script contract (`plan`, `clarify`, `run`, `impl`, `retro`, `review`, `refactor`, `context-recovery-protocol`)
+  - Remaining note:
+    - list-field writes (`key_files`, `decision_journal`) still use manual edit on the resolved live-state file; scalar phase/session metadata is now script-managed.
 
 - D-004 (Agreed final wording): In the "CWF role" sentence, use flow-style wording:
   - `컨텍스트 수집 → 요구사항 명확화 → 계획 → 구현 → 리뷰 → 리팩토링 → 회고 → 배포 준비(GitHub 이슈 및 PR)`
@@ -142,7 +142,7 @@ Single source of truth for HITL consensus, rationale, and unresolved questions.
 ## Next Pending Item
 
 - Continue `README.ko.md` agreement/apply loop.
-- Start D-003 v2 design when requested (writer-path switch + migration policy).
+- Reflect remaining README.ko intent comments into README.md and related skill docs one chunk at a time via HITL.
 
 ## Notes
 

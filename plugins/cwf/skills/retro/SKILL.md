@@ -23,7 +23,11 @@ Adaptive end-of-session review that converts outcomes into durable process/conte
 
 ### 0. Update Live State
 
-Edit `cwf-state.yaml` `live` section: set `phase: retro`.
+Run:
+
+```bash
+bash {SKILL_DIR}/../../scripts/cwf-live-state.sh set . phase="retro"
+```
 
 ### 1. Locate Output Directory
 
@@ -63,10 +67,14 @@ Analyze the full conversation to produce sections 1-4 and 7 inline. No sub-agent
 
 Draft sections 1-3 inline (these require full conversation access), then launch parallel sub-agents in two batches.
 
-**Resolve session directory**: Read `cwf-state.yaml` → `live.dir` to get the current session directory path.
+**Resolve session directory**: Resolve the effective live-state file, then read `live.dir`.
+
+```bash
+live_state_file=$(bash {SKILL_DIR}/../../scripts/cwf-live-state.sh resolve)
+```
 
 ```yaml
-session_dir: "{live.dir value from cwf-state.yaml}"
+session_dir: "{live.dir value from resolved live-state file}"
 ```
 
 Apply the [context recovery protocol](../../references/context-recovery-protocol.md) to these files before launching each batch:

@@ -4,7 +4,7 @@ set -euo pipefail
 # check-growth-drift.sh — Detect cross-surface mismatches as CWF evolves.
 # Usage: check-growth-drift.sh [--level inform|warn|stop] [-h|--help]
 #
-# Surfaces checked (v1):
+# Surfaces checked (v2):
 #   1) Skill inventory vs README.ko workflow table
 #   2) Default workflow chain sync (README.ko, README, run/SKILL)
 #   3) Root/plugin mirrored script drift
@@ -309,6 +309,10 @@ check_live_state_pointers() {
   local dir_path=""
   local hitl_state_raw=""
   local hitl_rules_raw=""
+  local summary_key=""
+  local root_summary_val=""
+  local effective_summary_val=""
+  local summary_sync_ok=1
   local phase_ok=0
   local p=""
 
@@ -351,6 +355,19 @@ check_live_state_pointers() {
     if [[ ! -f "$state_pointer_path" ]]; then
       record_fail "$category" "live.state_file missing: $state_pointer_raw"
     fi
+  fi
+
+  if [[ "$effective_state_file" != "$state_file" ]]; then
+    for summary_key in session_id dir branch phase task; do
+      root_summary_val="$(extract_live_field "$state_file" "$summary_key" || true)"
+      effective_summary_val="$(extract_live_field "$effective_state_file" "$summary_key" || true)"
+      root_summary_val="$(normalize_yaml_scalar "$root_summary_val")"
+      effective_summary_val="$(normalize_yaml_scalar "$effective_summary_val")"
+      if [[ "$root_summary_val" != "$effective_summary_val" ]]; then
+        record_fail "$category" "root live.${summary_key} != effective live.${summary_key} ($root_summary_val != $effective_summary_val)"
+        summary_sync_ok=0
+      fi
+    done
   fi
 
   phase="$(extract_live_field "$effective_state_file" "phase" || true)"
@@ -411,7 +428,7 @@ check_live_state_pointers() {
     fi
   fi
 
-  if [[ "$phase_ok" -eq 1 ]]; then
+  if [[ "$phase_ok" -eq 1 && "$summary_sync_ok" -eq 1 ]]; then
     record_pass "$category" "live pointers are structurally valid (effective=$(basename "$effective_state_file"))"
   fi
 }
@@ -455,7 +472,7 @@ check_mirror_script_drift
 check_live_state_pointers
 check_provenance_freshness_summary
 
-echo "CWF Growth Drift Check (v1)"
+echo "CWF Growth Drift Check (v2)"
 echo "Level: $LEVEL"
 echo "---"
 

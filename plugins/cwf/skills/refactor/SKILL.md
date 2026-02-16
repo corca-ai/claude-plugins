@@ -74,10 +74,14 @@ bash {SKILL_DIR}/scripts/tidy-target-commits.sh 5 [branch]
 
 ### 2. Parallel Analysis with Sub-agents
 
-**Resolve session directory**: Read `cwf-state.yaml` → `live.dir` to get the current session directory path.
+**Resolve session directory**: Resolve the effective live-state file, then read `live.dir`.
+
+```bash
+live_state_file=$(bash {SKILL_DIR}/../../scripts/cwf-live-state.sh resolve)
+```
 
 ```yaml
-session_dir: "{live.dir value from cwf-state.yaml}"
+session_dir: "{live.dir value from resolved live-state file}"
 ```
 
 Apply the [context recovery protocol](../../references/context-recovery-protocol.md) — for each commit N (1-indexed), check `{session_dir}/refactor-tidy-commit-{N}.md`.
@@ -136,10 +140,14 @@ Read `{SKILL_DIR}/references/review-criteria.md` for the evaluation checklist.
 
 ### 4. Parallel Evaluation with Sub-agents
 
-**Resolve session directory**: Read `cwf-state.yaml` → `live.dir` to get the current session directory path.
+**Resolve session directory**: Resolve the effective live-state file, then read `live.dir`.
+
+```bash
+live_state_file=$(bash {SKILL_DIR}/../../scripts/cwf-live-state.sh resolve)
+```
 
 ```yaml
-session_dir: "{live.dir value from cwf-state.yaml}"
+session_dir: "{live.dir value from resolved live-state file}"
 ```
 
 Apply the [context recovery protocol](../../references/context-recovery-protocol.md) to these files:
@@ -222,10 +230,14 @@ Read `{SKILL_DIR}/references/holistic-criteria.md` for the three analysis axes.
 
 ### 3. Parallel Analysis with Sub-agents
 
-**Resolve session directory**: Read `cwf-state.yaml` → `live.dir` to get the current session directory path.
+**Resolve session directory**: Resolve the effective live-state file, then read `live.dir`.
+
+```bash
+live_state_file=$(bash {SKILL_DIR}/../../scripts/cwf-live-state.sh resolve)
+```
 
 ```yaml
-session_dir: "{live.dir value from cwf-state.yaml}"
+session_dir: "{live.dir value from resolved live-state file}"
 ```
 
 Apply the [context recovery protocol](../../references/context-recovery-protocol.md) to these files:

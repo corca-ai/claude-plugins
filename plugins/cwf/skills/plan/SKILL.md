@@ -33,7 +33,13 @@ CWF v3 moved planning from runtime-specific plan-mode hooks to a runtime-indepen
 
 ## Phase 0: Update Live State
 
-Edit `cwf-state.yaml` `live` section: set `phase: plan`, `task` to the task summary.
+Use the live-state helper (session-first write target):
+
+```bash
+bash {SKILL_DIR}/../../scripts/cwf-live-state.sh set . \
+  phase="plan" \
+  task="{task summary}"
+```
 
 ## Phase 1: Parse & Scope
 
@@ -58,10 +64,14 @@ Edit `cwf-state.yaml` `live` section: set `phase: plan`, `task` to the task summ
 
 ### 2.0 Resolve session directory
 
-Read `cwf-state.yaml` → `live.dir` to get the current session directory path.
+Resolve the effective live-state file, then read `live.dir`.
+
+```bash
+live_state_file=$(bash {SKILL_DIR}/../../scripts/cwf-live-state.sh resolve)
+```
 
 ```yaml
-session_dir: "{live.dir value from cwf-state.yaml}"
+session_dir: "{live.dir value from resolved live-state file}"
 ```
 
 ### 2.1 Context recovery check

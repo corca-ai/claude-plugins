@@ -40,7 +40,16 @@ This heuristic can be overridden by explicit `--light` flag or user instruction.
 
 ### Phase 0: Update Live State
 
-Edit `cwf-state.yaml` `live` section: set `phase: clarify`, `task` to the requirement summary, and `key_files` to files relevant to the requirement.
+Use the live-state helper for scalar fields, then edit list fields in the resolved live-state file:
+
+```bash
+bash {SKILL_DIR}/../../scripts/cwf-live-state.sh set . \
+  phase="clarify" \
+  task="{requirement summary}"
+live_state_file=$(bash {SKILL_DIR}/../../scripts/cwf-live-state.sh resolve)
+```
+
+Set `live.key_files` in `{live_state_file}` to files relevant to the requirement.
 
 ### Phase 1: Capture & Decompose
 
@@ -341,10 +350,10 @@ Then ask: "Save this clarified requirement to a file?" If yes: save to a project
 
 **Completion tracking** (after saving the summary file):
 
-1. Edit `cwf-state.yaml` → set `live.clarify_completed_at` to current
-   ISO 8601 timestamp (e.g., `"2026-02-10T14:30:00Z"`)
-2. Edit `cwf-state.yaml` → set `live.clarify_result_file` to the path of
-   the saved clarification summary file
+1. Run:
+   `bash {SKILL_DIR}/../../scripts/cwf-live-state.sh set . clarify_completed_at="{ISO 8601 UTC timestamp}"`
+2. Run:
+   `bash {SKILL_DIR}/../../scripts/cwf-live-state.sh set . clarify_result_file="{saved summary file path}"`
 
 This state is what `cwf:impl` Phase 1.0 checks as a pre-condition.
 
@@ -407,10 +416,10 @@ Then offer to save.
 
 **Completion tracking** (after saving the summary file):
 
-1. Edit `cwf-state.yaml` → set `live.clarify_completed_at` to current
-   ISO 8601 timestamp (e.g., `"2026-02-10T14:30:00Z"`)
-2. Edit `cwf-state.yaml` → set `live.clarify_result_file` to the path of
-   the saved clarification summary file
+1. Run:
+   `bash {SKILL_DIR}/../../scripts/cwf-live-state.sh set . clarify_completed_at="{ISO 8601 UTC timestamp}"`
+2. Run:
+   `bash {SKILL_DIR}/../../scripts/cwf-live-state.sh set . clarify_result_file="{saved summary file path}"`
 
 This state is what `cwf:impl` Phase 1.0 checks as a pre-condition.
 

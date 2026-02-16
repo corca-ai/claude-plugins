@@ -6,7 +6,7 @@ This file maps scripts under [plugins/cwf/scripts](.).
 - [check-growth-drift.sh](check-growth-drift.sh): Reports cross-surface drift across skills/docs/scripts/state/provenance.
 - [next-prompt-dir.sh](next-prompt-dir.sh): Computes next session directory name.
 - [cwf-artifact-paths.sh](cwf-artifact-paths.sh): Resolves artifact/state/projects paths with project-config precedence (.cwf/config.local.yaml → .cwf/config.yaml → env).
-- [cwf-live-state.sh](cwf-live-state.sh): Resolves and syncs hybrid live-state files (root state pointer + session `session-state.yaml`).
+- [cwf-live-state.sh](cwf-live-state.sh): Resolves/syncs hybrid live-state files and updates top-level live scalars with session-first writes plus root-summary sync (`resolve`, `sync`, `set key=value`).
 - [codex/codex-with-log.sh](codex/codex-with-log.sh): Wrapper entrypoint that runs Codex and syncs logs.
 - [codex/install-wrapper.sh](codex/install-wrapper.sh): Installs, checks, or disables the Codex wrapper.
 - [codex/sync-skills.sh](codex/sync-skills.sh): Symlinks CWF skills/references into Codex user scope.

@@ -28,16 +28,16 @@ Operational note:
 
 1. Parse task description and flags (`--from`, `--skip`)
 1. Create session directory via `{SKILL_DIR}/../../scripts/next-prompt-dir.sh <sanitized-title>`
-1. Update `cwf-state.yaml` `live` section:
+1. Initialize live state (session-first write path):
 
-```yaml
-live:
-  session_id: "{next session ID}"
-  dir: "{session directory}"
-  branch: "{current branch}"
-  phase: "gather"
-  task: "{task description}"
-```
+   ```bash
+   bash {SKILL_DIR}/../../scripts/cwf-live-state.sh set . \
+     session_id="{next session ID}" \
+     dir="{session directory}" \
+     branch="{current branch}" \
+     phase="gather" \
+     task="{task description}"
+   ```
 
 1. Report initialization:
 
@@ -70,7 +70,11 @@ Execute stages in order. Each stage invokes the corresponding CWF skill via the 
 
 For each stage (respecting `--from` and `--skip` flags):
 
-1. Update `cwf-state.yaml` `live.phase` to the current stage name
+1. Update phase using the live-state helper:
+
+   ```bash
+   bash {SKILL_DIR}/../../scripts/cwf-live-state.sh set . phase="{current stage name}"
+   ```
 1. Invoke the skill using the Skill tool:
 
    ```text
@@ -156,9 +160,9 @@ After all stages complete (or the pipeline is halted):
 
    If any FAIL items are reported, fix them before proceeding. This is a forced function — the pipeline is not complete until all checks pass.
 
-1. Update `cwf-state.yaml`:
-   - Set `live.phase` to `"done"`
-   - Append session entry to `sessions` list
+1. Update state:
+   - Set final phase: `bash {SKILL_DIR}/../../scripts/cwf-live-state.sh set . phase="done"`
+   - Append session entry to root `sessions` list in `cwf-state.yaml`
 1. Report pipeline summary:
 
 ```markdown
@@ -191,7 +195,7 @@ After all stages complete (or the pipeline is halted):
 1. **Decision #19**: Pre-impl stages require human gates. Post-impl stages chain automatically. This is the core design principle.
 1. **One auto-fix attempt**: Never loop more than once on a review failure. Escalate to user after 1 retry.
 1. **Skill invocation only**: Use the Skill tool to invoke CWF skills. Do not inline skill logic.
-1. **State tracking**: Update `cwf-state.yaml` `live.phase` at every stage transition. This enables compact recovery to know where the pipeline was interrupted.
+1. **State tracking**: Use `cwf-live-state.sh set` at every stage transition so session-local live state stays current while root summary remains synchronized.
 1. **Preserve skill autonomy**: Each invoked skill manages its own sub-agents, artifacts, and output. `cwf:run` orchestrates but does not micromanage.
 1. **Flags compose**: `--from impl --skip retro` is valid. Apply both filters.
 1. **Graceful halt**: When the user chooses "Stop", update state and report what was completed. Do not leave state in an inconsistent phase.

@@ -22,7 +22,16 @@ cwf:impl --skip-clarify     # Skip Phase 1.0 clarify pre-condition check
 
 ## Phase 0: Update Live State
 
-Edit `cwf-state.yaml` `live` section: set `phase: impl`, `task` to the plan's goal summary, and `key_files` to the plan's key files list. Initialize `decision_journal` as an empty list:
+Use the live-state helper for scalar fields, then initialize list fields in the resolved live-state file:
+
+```bash
+bash {SKILL_DIR}/../../scripts/cwf-live-state.sh set . \
+  phase="impl" \
+  task="{plan goal summary}"
+live_state_file=$(bash {SKILL_DIR}/../../scripts/cwf-live-state.sh resolve)
+```
+
+In `{live_state_file}`, set `live.key_files` to the plan's key files list and initialize `live.decision_journal` as an empty list:
 
 ```yaml
 live:
@@ -33,7 +42,7 @@ live:
 
 ### Decision Journal
 
-Throughout Phases 2-4, append significant decisions to `live.decision_journal` in `cwf-state.yaml`. Record decisions when:
+Throughout Phases 2-4, append significant decisions to `live.decision_journal` in the resolved live-state file (`bash {SKILL_DIR}/../../scripts/cwf-live-state.sh resolve`). Record decisions when:
 - A design choice is made between alternatives
 - A deviation from the plan occurs
 - A trade-off is resolved
