@@ -1,7 +1,7 @@
 # HITL Scratchpad
 
 Session: `260216-02-hitl-readme`
-Updated: `2026-02-16T04:35:08Z`
+Updated: `2026-02-16T04:52:24Z`
 
 ## Purpose
 
@@ -24,10 +24,19 @@ Single source of truth for HITL consensus, rationale, and unresolved questions.
   - Include index reason explicitly (progressive disclosure / agent routing via managed AGENTS index), not vague "optional index generation".
   - Keep detailed flags deferred to the `#setup` section.
 
-- D-003 (Agreed as implementation-plan item): Move toward a hybrid state model.
-  - Root state keeps global/index metadata.
-  - Session-local state handles volatile per-session execution state.
-  - README/document updates follow after implementation design is finalized.
+- D-003 (Applied, v1): Hybrid live-state resolver/sync foundation implemented.
+  - Root state keeps global/index metadata and optional `live.state_file` pointer.
+  - Session-local state file (`session-state.yaml`) is resolved as effective live state when present.
+  - Implemented by:
+    - `scripts/cwf-live-state.sh`, `plugins/cwf/scripts/cwf-live-state.sh` (`resolve`/`sync`)
+    - `plugins/cwf/hooks/scripts/compact-context.sh` now reads effective live-state file (session-first, root fallback)
+    - `scripts/check-session.sh --live` and `plugins/cwf/scripts/check-session.sh --live` now validate effective live state
+    - `plugins/cwf/scripts/check-growth-drift.sh` now validates hybrid pointer semantics (`live.state_file` + effective live file)
+    - mirror-drift pair list + script map updated for `cwf-live-state.sh`
+  - v2 follow-up direction:
+    - make session-local live state the default write target at phase transitions
+    - keep root `live` as compatibility pointer/summary layer
+    - migrate skill docs/instructions from direct root-live edits to helper-script contract
 
 - D-004 (Agreed final wording): In the "CWF role" sentence, use flow-style wording:
   - `컨텍스트 수집 → 요구사항 명확화 → 계획 → 구현 → 리뷰 → 리팩토링 → 회고 → 배포 준비(GitHub 이슈 및 PR)`
@@ -132,7 +141,8 @@ Single source of truth for HITL consensus, rationale, and unresolved questions.
 
 ## Next Pending Item
 
-- Wait for the next `README.ko.md` comment batch, then repeat the same agreement → apply → sync loop.
+- Continue `README.ko.md` agreement/apply loop.
+- Start D-003 v2 design when requested (writer-path switch + migration policy).
 
 ## Notes
 

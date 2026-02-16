@@ -18,6 +18,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/cwf-hook-gate.sh"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd)}"
 RESOLVER_SCRIPT="${PLUGIN_ROOT}/scripts/cwf-artifact-paths.sh"
+LIVE_RESOLVER_SCRIPT="${PLUGIN_ROOT}/scripts/cwf-live-state.sh"
 
 if [[ ! -f "$RESOLVER_SCRIPT" ]]; then
     exit 0
@@ -25,6 +26,10 @@ fi
 
 # shellcheck source=../../scripts/cwf-artifact-paths.sh
 source "$RESOLVER_SCRIPT"
+if [[ -f "$LIVE_RESOLVER_SCRIPT" ]]; then
+    # shellcheck source=../../scripts/cwf-live-state.sh
+    source "$LIVE_RESOLVER_SCRIPT"
+fi
 
 # Read stdin to extract session_id for session log lookup
 INPUT=$(cat)
@@ -32,9 +37,16 @@ HOOK_SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty' 2>/dev/null || tr
 
 # Find CWF state file relative to project root
 STATE_BASE_DIR="${CLAUDE_PROJECT_DIR:-.}"
-STATE_FILE="$(resolve_cwf_state_file "$STATE_BASE_DIR")"
-if [[ ! -f "$STATE_FILE" ]]; then
+ROOT_STATE_FILE="$(resolve_cwf_state_file "$STATE_BASE_DIR")"
+if [[ ! -f "$ROOT_STATE_FILE" ]]; then
     exit 0
+fi
+STATE_FILE="$ROOT_STATE_FILE"
+if declare -F cwf_live_resolve_file >/dev/null 2>&1; then
+    RESOLVED_LIVE_STATE="$(cwf_live_resolve_file "$STATE_BASE_DIR" 2>/dev/null || true)"
+    if [[ -n "$RESOLVED_LIVE_STATE" && -f "$RESOLVED_LIVE_STATE" ]]; then
+        STATE_FILE="$RESOLVED_LIVE_STATE"
+    fi
 fi
 
 # Parse live section from the state file using simple line-by-line parsing

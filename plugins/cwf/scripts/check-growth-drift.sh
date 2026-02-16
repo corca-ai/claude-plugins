@@ -8,7 +8,7 @@ set -euo pipefail
 #   1) Skill inventory vs README.ko workflow table
 #   2) Default workflow chain sync (README.ko, README, run/SKILL)
 #   3) Root/plugin mirrored script drift
-#   4) live state pointer validity (.cwf/cwf-state.yaml)
+#   4) hybrid live state pointer validity (root + session live state)
 #   5) Provenance freshness summary
 #
 # Exit behavior:
@@ -111,7 +111,7 @@ extract_live_field() {
     /^live:/ { in_live=1; next }
     in_live && /^[^[:space:]]/ { exit }
     in_live {
-      pat = "^[[:space:]]+" key ":[[:space:]]*"
+      pat = "^[[:space:]]{2}" key ":[[:space:]]*"
       if ($0 ~ pat) {
         sub(pat, "", $0)
         print $0
@@ -281,6 +281,7 @@ check_mirror_script_drift() {
 scripts/check-session.sh|plugins/cwf/scripts/check-session.sh
 scripts/next-prompt-dir.sh|plugins/cwf/scripts/next-prompt-dir.sh
 scripts/cwf-artifact-paths.sh|plugins/cwf/scripts/cwf-artifact-paths.sh
+scripts/cwf-live-state.sh|plugins/cwf/scripts/cwf-live-state.sh
 scripts/codex/codex-with-log.sh|plugins/cwf/scripts/codex/codex-with-log.sh
 scripts/codex/verify-skill-links.sh|plugins/cwf/scripts/codex/verify-skill-links.sh
 scripts/codex/sync-session-logs.sh|plugins/cwf/scripts/codex/sync-session-logs.sh
@@ -297,7 +298,12 @@ EOF
 check_live_state_pointers() {
   local category="state_pointer_validity"
   local resolver="scripts/cwf-artifact-paths.sh"
+  local live_resolver="scripts/cwf-live-state.sh"
   local state_file=""
+  local effective_state_file=""
+  local resolved_effective=""
+  local state_pointer_raw=""
+  local state_pointer_path=""
   local phase=""
   local dir_raw=""
   local dir_path=""
@@ -310,9 +316,15 @@ check_live_state_pointers() {
     record_fail "$category" "Resolver script not found: $resolver"
     return
   fi
+  if [[ ! -f "$live_resolver" ]]; then
+    record_fail "$category" "Live resolver script not found: $live_resolver"
+    return
+  fi
 
   # shellcheck source=./cwf-artifact-paths.sh
   source "$resolver"
+  # shellcheck source=./cwf-live-state.sh
+  source "$live_resolver"
   state_file="$(resolve_cwf_state_file "$REPO_ROOT")"
 
   if [[ ! -f "$state_file" ]]; then
@@ -320,7 +332,28 @@ check_live_state_pointers() {
     return
   fi
 
-  phase="$(extract_live_field "$state_file" "phase" || true)"
+  effective_state_file="$state_file"
+  if declare -F cwf_live_resolve_file >/dev/null 2>&1; then
+    resolved_effective="$(cwf_live_resolve_file "$REPO_ROOT" 2>/dev/null || true)"
+    if [[ -n "$resolved_effective" && -f "$resolved_effective" ]]; then
+      effective_state_file="$resolved_effective"
+    fi
+  fi
+
+  state_pointer_raw="$(extract_live_field "$state_file" "state_file" || true)"
+  state_pointer_raw="$(normalize_yaml_scalar "$state_pointer_raw")"
+  if [[ -n "$state_pointer_raw" ]]; then
+    if [[ "$state_pointer_raw" == /* ]]; then
+      state_pointer_path="$state_pointer_raw"
+    else
+      state_pointer_path="$REPO_ROOT/$state_pointer_raw"
+    fi
+    if [[ ! -f "$state_pointer_path" ]]; then
+      record_fail "$category" "live.state_file missing: $state_pointer_raw"
+    fi
+  fi
+
+  phase="$(extract_live_field "$effective_state_file" "phase" || true)"
   phase="$(normalize_yaml_scalar "$phase")"
   if [[ -z "$phase" ]]; then
     record_fail "$category" "live.phase is empty"
@@ -336,7 +369,7 @@ check_live_state_pointers() {
     fi
   fi
 
-  dir_raw="$(extract_live_field "$state_file" "dir" || true)"
+  dir_raw="$(extract_live_field "$effective_state_file" "dir" || true)"
   dir_raw="$(normalize_yaml_scalar "$dir_raw")"
   if [[ -z "$dir_raw" ]]; then
     record_fail "$category" "live.dir is empty"
@@ -351,8 +384,8 @@ check_live_state_pointers() {
     fi
   fi
 
-  hitl_state_raw="$(extract_live_hitl_field "$state_file" "state_file" || true)"
-  hitl_rules_raw="$(extract_live_hitl_field "$state_file" "rules_file" || true)"
+  hitl_state_raw="$(extract_live_hitl_field "$effective_state_file" "state_file" || true)"
+  hitl_rules_raw="$(extract_live_hitl_field "$effective_state_file" "rules_file" || true)"
   hitl_state_raw="$(normalize_yaml_scalar "$hitl_state_raw")"
   hitl_rules_raw="$(normalize_yaml_scalar "$hitl_rules_raw")"
 
@@ -379,7 +412,7 @@ check_live_state_pointers() {
   fi
 
   if [[ "$phase_ok" -eq 1 ]]; then
-    record_pass "$category" "live.phase/live.dir pointers are structurally valid"
+    record_pass "$category" "live pointers are structurally valid (effective=$(basename "$effective_state_file"))"
   fi
 }
 

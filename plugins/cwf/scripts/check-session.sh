@@ -21,6 +21,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || (cd "$SCRIPT_DIR/.." && pwd))"
 RESOLVER_SCRIPT="$SCRIPT_DIR/cwf-artifact-paths.sh"
+LIVE_RESOLVER_SCRIPT="$SCRIPT_DIR/cwf-live-state.sh"
 
 if [[ ! -f "$RESOLVER_SCRIPT" ]]; then
   echo "Error: resolver script not found: $RESOLVER_SCRIPT" >&2
@@ -29,6 +30,10 @@ fi
 
 # shellcheck source=./cwf-artifact-paths.sh
 source "$RESOLVER_SCRIPT"
+if [[ -f "$LIVE_RESOLVER_SCRIPT" ]]; then
+  # shellcheck source=./cwf-live-state.sh
+  source "$LIVE_RESOLVER_SCRIPT"
+fi
 
 PHASE=""
 if [[ "${1:-}" == "--impl" ]]; then
@@ -55,7 +60,19 @@ fi
 
 # --live: validate live section has required fields
 if [[ "$PHASE" == "live" ]]; then
+  live_state_file="$STATE_FILE"
+  if declare -F cwf_live_resolve_file >/dev/null 2>&1; then
+    resolved_live_state="$(cwf_live_resolve_file "$REPO_ROOT" 2>/dev/null || true)"
+    if [[ -n "$resolved_live_state" && -f "$resolved_live_state" ]]; then
+      live_state_file="$resolved_live_state"
+    fi
+  fi
+
   echo "Checking CWF state live section..."
+  echo "Root state: $STATE_FILE"
+  if [[ "$live_state_file" != "$STATE_FILE" ]]; then
+    echo "Resolved live state: $live_state_file"
+  fi
   echo "---"
 
   live_pass=0
@@ -85,7 +102,7 @@ if [[ "$PHASE" == "live" ]]; then
         live_task="${BASH_REMATCH[1]}"
       fi
     fi
-  done < "$STATE_FILE"
+  done < "$live_state_file"
 
   for field_name in session_id dir phase task; do
     eval "val=\$live_${field_name}"
