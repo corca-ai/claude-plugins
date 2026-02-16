@@ -102,6 +102,7 @@ set -euo pipefail
 PROFILE="__PROFILE__"
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
+CWF_LINK_CHECKER="plugins/cwf/skills/refactor/scripts/check-links.sh"
 
   mapfile -t md_files < <(
   git diff --cached --name-only --diff-filter=ACMR -- '*.md' '*.mdx' \
@@ -120,7 +121,7 @@ if [ "${#md_files[@]}" -gt 0 ]; then
           continue
           ;;
       esac
-      bash scripts/check-links.sh --local --json --file "$file" >/dev/null
+      bash "$CWF_LINK_CHECKER" --local --json --file "$file" >/dev/null
     done
   fi
 fi
@@ -153,6 +154,10 @@ set -euo pipefail
 PROFILE="__PROFILE__"
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
+CWF_LINK_CHECKER="plugins/cwf/skills/refactor/scripts/check-links.sh"
+CWF_INDEX_COVERAGE="plugins/cwf/skills/setup/scripts/check-index-coverage.sh"
+CWF_PROVENANCE="plugins/cwf/scripts/provenance-check.sh"
+CWF_GROWTH_DRIFT="plugins/cwf/scripts/check-growth-drift.sh"
 
 mapfile -t md_files < <(
   git ls-files '*.md' '*.mdx' \
@@ -168,35 +173,35 @@ fi
 
 if [[ "$PROFILE" != "fast" ]]; then
   echo "[pre-push] local link validation..."
-  bash scripts/check-links.sh --local --json
+  bash "$CWF_LINK_CHECKER" --local --json
 
-  if [[ -x scripts/check-index-coverage.sh ]]; then
+  if [[ -x "$CWF_INDEX_COVERAGE" ]]; then
     echo "[pre-push] index coverage checks..."
     if [[ -f AGENTS.md ]]; then
-      bash scripts/check-index-coverage.sh AGENTS.md --profile repo
+      bash "$CWF_INDEX_COVERAGE" AGENTS.md --profile repo
     fi
     if [[ -f .cwf/indexes/cwf-index.md ]]; then
-      bash scripts/check-index-coverage.sh .cwf/indexes/cwf-index.md --profile cap
+      bash "$CWF_INDEX_COVERAGE" .cwf/indexes/cwf-index.md --profile cap
     fi
   else
-    echo "[pre-push] scripts/check-index-coverage.sh missing or not executable" >&2
+    echo "[pre-push] $CWF_INDEX_COVERAGE missing or not executable" >&2
     exit 1
   fi
 fi
 
 if [[ "$PROFILE" == "strict" ]]; then
-  if [[ -x scripts/provenance-check.sh ]]; then
+  if [[ -x "$CWF_PROVENANCE" ]]; then
     echo "[pre-push] provenance freshness report (inform)..."
-    bash scripts/provenance-check.sh --level inform
+    bash "$CWF_PROVENANCE" --level inform
   else
-    echo "[pre-push] scripts/provenance-check.sh missing; skipping provenance report" >&2
+    echo "[pre-push] $CWF_PROVENANCE missing; skipping provenance report" >&2
   fi
 
-  if [[ -x scripts/check-growth-drift.sh ]]; then
+  if [[ -x "$CWF_GROWTH_DRIFT" ]]; then
     echo "[pre-push] growth-drift report (inform)..."
-    bash scripts/check-growth-drift.sh --level inform
+    bash "$CWF_GROWTH_DRIFT" --level inform
   else
-    echo "[pre-push] scripts/check-growth-drift.sh missing; skipping growth-drift report" >&2
+    echo "[pre-push] $CWF_GROWTH_DRIFT missing; skipping growth-drift report" >&2
   fi
 fi
 SCRIPT

@@ -45,7 +45,7 @@ Parse JSON output. If `error` field exists → report and stop.
 
 - `detected_new: true` → new plugin: needs marketplace entry, README sections, AI_NATIVE check
 - `detected_new: false` → modified plugin: needs version bump check, marketplace sync
-- `name == "cwf"` → include Codex user-scope sync step via [scripts/codex/sync-skills.sh](../../../scripts/codex/sync-skills.sh)
+- `name == "cwf"` → include Codex user-scope sync step via [plugins/cwf/scripts/codex/sync-skills.sh](../../../plugins/cwf/scripts/codex/sync-skills.sh)
 - `--dry-run` → display report, list actions, stop
 
 ### 3. Fix Gaps
@@ -72,10 +72,10 @@ Re-run check-consistency.sh → confirm `gap_count: 0`. Fix iteratively if gaps 
 For `cwf` plugin deployments, run:
 
 ```bash
-bash {SKILL_DIR}/../../../scripts/codex/sync-skills.sh --cleanup-legacy
+bash {SKILL_DIR}/../../../plugins/cwf/scripts/codex/sync-skills.sh --cleanup-legacy
 ```
 
-This includes post-sync link validation ([scripts/codex/verify-skill-links.sh](../../../scripts/codex/verify-skill-links.sh)). If sync or validation fails, report exact stderr and stop (do not continue with stale links).
+This includes post-sync link validation ([plugins/cwf/scripts/codex/verify-skill-links.sh](../../../plugins/cwf/scripts/codex/verify-skill-links.sh)). If sync or validation fails, report exact stderr and stop (do not continue with stale links).
 
 ### 6. Local Test (unless --skip-test)
 

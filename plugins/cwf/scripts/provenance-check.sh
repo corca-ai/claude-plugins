@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# shellcheck disable=SC2001
 
 # provenance-check.sh — Verify provenance sidecar files against current system state
 # Usage: provenance-check.sh [--level inform|warn|stop] [--json] [-h|--help]
@@ -107,18 +108,23 @@ for pfile in "${PROVENANCE_FILES[@]}"; do
   while IFS= read -r line; do
     case "$line" in
       target:*)
+        # shellcheck disable=SC2001
         target=$(echo "$line" | sed 's/^target:[[:space:]]*//')
         ;;
       written_session:*)
+        # shellcheck disable=SC2001
         written_session=$(echo "$line" | sed 's/^written_session:[[:space:]]*//')
         ;;
       last_reviewed:*)
+        # shellcheck disable=SC2001
         last_reviewed=$(echo "$line" | sed 's/^last_reviewed:[[:space:]]*//')
         ;;
       skill_count:*)
+        # shellcheck disable=SC2001
         recorded_skills=$(echo "$line" | sed 's/^skill_count:[[:space:]]*//')
         ;;
       hook_count:*)
+        # shellcheck disable=SC2001
         recorded_hooks=$(echo "$line" | sed 's/^hook_count:[[:space:]]*//')
         ;;
     esac

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # next-prompt-dir.sh — Resolve or bootstrap the next session directory for today.
-# Usage: scripts/next-prompt-dir.sh [--bootstrap] <title>
+# Usage: plugins/cwf/scripts/next-prompt-dir.sh [--bootstrap] <title>
 # Output: <projects-dir>/YYMMDD-NN-title (NN = zero-padded sequence number)
 # --bootstrap:
 #   - create session directory
@@ -16,7 +16,7 @@ set -euo pipefail
 
 usage() {
   cat >&2 <<'EOF'
-Usage: scripts/next-prompt-dir.sh [--bootstrap] <title>
+Usage: plugins/cwf/scripts/next-prompt-dir.sh [--bootstrap] <title>
 
 Options:
   --bootstrap   Create the resolved session directory, initialize plan/lessons,

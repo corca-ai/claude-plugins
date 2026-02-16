@@ -237,7 +237,7 @@ Default executor for plugin changes: [plugin-deploy](../.claude/skills/plugin-de
 5. New plugins: check [AI_NATIVE_PRODUCT_TEAM.md](../AI_NATIVE_PRODUCT_TEAM.md) for link opportunities
 6. Test locally
 7. Commit and push
-8. On **main branch**: run `bash scripts/update-all.sh` (skip on feature branches — pulls from default branch only)
+8. On **main branch**: run `cwf:update` to sync installed behavior with latest plugin changes
 
 Inform users after deploy:
 ```text

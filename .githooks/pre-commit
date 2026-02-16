@@ -4,8 +4,9 @@ set -euo pipefail
 PROFILE="strict"
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
+CWF_LINK_CHECKER="plugins/cwf/skills/refactor/scripts/check-links.sh"
 
-mapfile -t md_files < <(
+  mapfile -t md_files < <(
   git diff --cached --name-only --diff-filter=ACMR -- '*.md' '*.mdx' \
     | grep -Ev '^(\.cwf/projects/|\.cwf/sessions/|\.cwf/prompt-logs/|references/anthropic-skills-guide/)' || true
 )
@@ -22,7 +23,7 @@ if [ "${#md_files[@]}" -gt 0 ]; then
           continue
           ;;
       esac
-      bash scripts/check-links.sh --local --json --file "$file" >/dev/null
+      bash "$CWF_LINK_CHECKER" --local --json --file "$file" >/dev/null
     done
   fi
 fi

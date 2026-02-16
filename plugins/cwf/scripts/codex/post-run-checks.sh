@@ -8,6 +8,12 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PLUGIN_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+REFACTOR_CHECK_LINKS="$PLUGIN_ROOT/skills/refactor/scripts/check-links.sh"
+LIVE_STATE_SCRIPT="$PLUGIN_ROOT/scripts/cwf-live-state.sh"
+CHECK_SESSION_SCRIPT="$PLUGIN_ROOT/scripts/check-session.sh"
+
 CWD="$(pwd)"
 SINCE_EPOCH=""
 MODE="warn"
@@ -206,12 +212,12 @@ check_hitl_scratchpad_sync() {
     return 0
   fi
 
-  if [[ ! -x scripts/cwf-live-state.sh ]]; then
+  if [[ ! -x "$LIVE_STATE_SCRIPT" ]]; then
     log "cwf-live-state.sh not found; skipping HITL scratchpad sync gate"
     return 0
   fi
 
-  live_state_file="$(bash scripts/cwf-live-state.sh resolve 2>/dev/null || true)"
+  live_state_file="$(bash "$LIVE_STATE_SCRIPT" resolve 2>/dev/null || true)"
   if [[ -z "$live_state_file" || ! -f "$live_state_file" ]]; then
     log "live-state file not found; skipping HITL scratchpad sync gate"
     return 0
@@ -407,7 +413,7 @@ if [[ "${#md_files[@]}" -gt 0 ]]; then
   fi
 
   check_count=$((check_count + 1))
-  if [[ -x scripts/check-links.sh ]]; then
+  if [[ -x "$REFACTOR_CHECK_LINKS" ]]; then
     log "local link checks on changed markdown files"
     for file in "${md_files[@]}"; do
       case "$file" in
@@ -415,13 +421,13 @@ if [[ "${#md_files[@]}" -gt 0 ]]; then
           continue
           ;;
       esac
-      if ! bash scripts/check-links.sh --local --json --file "$file" >/dev/null; then
+      if ! bash "$REFACTOR_CHECK_LINKS" --local --json --file "$file" >/dev/null; then
         warn "local link check failed: $file"
         fail_count=$((fail_count + 1))
       fi
     done
   else
-    warn "scripts/check-links.sh not found; skipping link checks"
+    warn "plugins/cwf/skills/refactor/scripts/check-links.sh not found; skipping link checks"
   fi
 fi
 
@@ -449,10 +455,10 @@ if ! check_hitl_scratchpad_sync "$SINCE_EPOCH"; then
 fi
 
 check_count=$((check_count + 1))
-if [[ -x scripts/check-session.sh && -f .cwf/cwf-state.yaml ]]; then
+if [[ -x "$CHECK_SESSION_SCRIPT" && -f .cwf/cwf-state.yaml ]]; then
   log "live session-state check"
-  if ! bash scripts/check-session.sh --live >/dev/null; then
-    warn "live session-state check failed (scripts/check-session.sh --live)"
+  if ! bash "$CHECK_SESSION_SCRIPT" --live >/dev/null; then
+    warn "live session-state check failed ($CHECK_SESSION_SCRIPT --live)"
     fail_count=$((fail_count + 1))
   fi
 else

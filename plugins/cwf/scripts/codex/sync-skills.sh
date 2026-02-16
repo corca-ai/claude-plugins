@@ -6,9 +6,9 @@
 # - Symlinks let Codex load the latest local skill files without reinstallation.
 #
 # Usage:
-#   scripts/codex/sync-skills.sh
-#   scripts/codex/sync-skills.sh --cleanup-legacy
-#   scripts/codex/sync-skills.sh --dry-run
+#   plugins/cwf/scripts/codex/sync-skills.sh
+#   plugins/cwf/scripts/codex/sync-skills.sh --cleanup-legacy
+#   plugins/cwf/scripts/codex/sync-skills.sh --dry-run
 #
 # Notes:
 # - This script never uses rm. When replacing files/dirs, it moves them to backup.
@@ -144,9 +144,11 @@ done
 if [[ -d "$REPO_ROOT/skills" ]]; then
   SOURCE_SKILLS_DIR="$REPO_ROOT/skills"
   SOURCE_REFERENCES_DIR="$REPO_ROOT/references"
+  SCRIPT_ROOT="$REPO_ROOT/scripts"
 else
   SOURCE_SKILLS_DIR="$REPO_ROOT/plugins/$PLUGIN_NAME/skills"
   SOURCE_REFERENCES_DIR="$REPO_ROOT/plugins/$PLUGIN_NAME/references"
+  SCRIPT_ROOT="$REPO_ROOT/plugins/$PLUGIN_NAME/scripts"
 fi
 BACKUP_BASE="$AGENTS_HOME/.skill-sync-backup"
 
@@ -218,7 +220,7 @@ if [[ "$CLEANUP_LEGACY" == "true" ]]; then
 fi
 
 if [[ "$VERIFY_LINKS" == "true" ]]; then
-  verify_script="$REPO_ROOT/scripts/codex/verify-skill-links.sh"
+  verify_script="$SCRIPT_ROOT/codex/verify-skill-links.sh"
   if [[ ! -x "$verify_script" ]]; then
     echo "Verification script missing or not executable: $verify_script" >&2
     exit 1

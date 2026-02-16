@@ -5,7 +5,7 @@ Project and organizational facts accumulated from retrospectives.
 ## Project
 
 - corca-plugins is a Claude Code plugin marketplace for "AI Native Product Teams"
-- Plan & Lessons Protocol creates `.cwf/projects/{YYMMDD}-{NN}-{title}/` per session with plan.md, lessons.md, and optionally retro.md. Sequence is allocated by [scripts/next-prompt-dir.sh](../scripts/next-prompt-dir.sh) (date-scoped `YYMMDD-NN-*`), so numbering resets to `01` each day. When a session spans midnight or another day, the directory name usually keeps the original start-date prefix unless the workflow explicitly rolls over to a new directory.
+- Plan & Lessons Protocol creates `.cwf/projects/{YYMMDD}-{NN}-{title}/` per session with plan.md, lessons.md, and optionally retro.md. Sequence is allocated by [plugins/cwf/scripts/next-prompt-dir.sh](../plugins/cwf/scripts/next-prompt-dir.sh) (date-scoped `YYMMDD-NN-*`), so numbering resets to `01` each day. When a session spans midnight or another day, the directory name usually keeps the original start-date prefix unless the workflow explicitly rolls over to a new directory.
 
 ## Design Principles
 

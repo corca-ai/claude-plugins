@@ -18,7 +18,7 @@ Keep stable invariants here; keep implementation detail in scoped docs.
 
 - Read [docs/documentation-guide.md](docs/documentation-guide.md) first (principles and scope ownership).
 - Read [plugins/cwf/skills/refactor/references/docs-criteria.md](plugins/cwf/skills/refactor/references/docs-criteria.md) section 0 before proposing new doc rules.
-- For automatable issues, update deterministic gates first ([.markdownlint-cli2.jsonc](.markdownlint-cli2.jsonc), [plugins/cwf/hooks/hooks.json](plugins/cwf/hooks/hooks.json), [scripts/check-links.sh](scripts/check-links.sh), [scripts/doc-graph.mjs](scripts/doc-graph.mjs)); keep prose changes for non-automatable policy.
+- For automatable issues, update deterministic gates first ([.markdownlint-cli2.jsonc](.markdownlint-cli2.jsonc), [plugins/cwf/hooks/hooks.json](plugins/cwf/hooks/hooks.json), [plugins/cwf/skills/refactor/scripts/check-links.sh](plugins/cwf/skills/refactor/scripts/check-links.sh), [plugins/cwf/skills/refactor/scripts/doc-graph.mjs](plugins/cwf/skills/refactor/scripts/doc-graph.mjs)); keep prose changes for non-automatable policy.
 
 ## Document Map
 
@@ -76,12 +76,9 @@ Skill-internal files are documented in each skill-local README (for example, [cl
 
 Runtime behavior belongs in [plugins/cwf/hooks](plugins/cwf/hooks/); repository operations belong in [scripts](scripts/).
 
-- [install](scripts/install.sh): Main install and synchronization entrypoint.
-- [update-all](scripts/update-all.sh): Bulk update workflow across managed artifacts.
-- [check-session](scripts/check-session.sh): Session completeness and consistency checks.
-- [check-links](scripts/check-links.sh): Link-validation wrapper used in docs checks.
-- [check-index-coverage](scripts/check-index-coverage.sh): Index coverage validator for skills/docs/references.
-- [doc-graph](scripts/doc-graph.mjs): Documentation graph and orphan analysis.
+- [check-schemas](scripts/check-schemas.sh): JSON schema validation for tracked CWF config/manifests.
+- [doc-churn](scripts/doc-churn.sh): Documentation churn/staleness reporting from git history.
+- [find-duplicates](scripts/find-duplicates.py): Near-duplicate markdown block detection.
 
 ### docs — Project standards, architectural decisions, and documentation policy
 

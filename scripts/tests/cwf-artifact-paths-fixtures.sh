@@ -2,7 +2,6 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-ROOT_RESOLVER="$REPO_ROOT/scripts/cwf-artifact-paths.sh"
 PLUGIN_RESOLVER="$REPO_ROOT/plugins/cwf/scripts/cwf-artifact-paths.sh"
 
 PASS=0
@@ -132,7 +131,6 @@ EOF
   trap - RETURN
 }
 
-run_suite "$ROOT_RESOLVER" "root resolver"
 run_suite "$PLUGIN_RESOLVER" "plugin resolver"
 
 echo "---"

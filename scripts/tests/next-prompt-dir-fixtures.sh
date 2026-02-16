@@ -2,7 +2,6 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-ROOT_SCRIPT="$REPO_ROOT/scripts/next-prompt-dir.sh"
 PLUGIN_SCRIPT="$REPO_ROOT/plugins/cwf/scripts/next-prompt-dir.sh"
 
 PASS=0
@@ -46,24 +45,18 @@ mkdir -p \
   "$PROJECTS_DIR/260213-11-prev-day"
 
 expected_today="$PROJECTS_DIR/260214-03-s26"
-actual_root_today="$(CWF_PROJECTS_DIR="$PROJECTS_DIR" CWF_NEXT_PROMPT_DATE=260214 bash "$ROOT_SCRIPT" s26)"
 actual_plugin_today="$(CWF_PROJECTS_DIR="$PROJECTS_DIR" CWF_NEXT_PROMPT_DATE=260214 bash "$PLUGIN_SCRIPT" s26)"
 
-assert_eq "root script uses max same-day sequence" "$expected_today" "$actual_root_today"
-assert_eq "plugin script matches root sequence logic" "$expected_today" "$actual_plugin_today"
+assert_eq "plugin script uses max same-day sequence" "$expected_today" "$actual_plugin_today"
 
 expected_next_day="$PROJECTS_DIR/260215-01-s26"
-actual_root_next_day="$(CWF_PROJECTS_DIR="$PROJECTS_DIR" CWF_NEXT_PROMPT_DATE=260215 bash "$ROOT_SCRIPT" s26)"
 actual_plugin_next_day="$(CWF_PROJECTS_DIR="$PROJECTS_DIR" CWF_NEXT_PROMPT_DATE=260215 bash "$PLUGIN_SCRIPT" s26)"
 
-assert_eq "root script resets sequence across day boundary" "$expected_next_day" "$actual_root_next_day"
 assert_eq "plugin script resets sequence across day boundary" "$expected_next_day" "$actual_plugin_next_day"
 
 expected_artifact_root=".cwf/projects/990101-01-s26"
-actual_root_artifact="$(CWF_ARTIFACT_ROOT=".cwf" CWF_NEXT_PROMPT_DATE=990101 bash "$ROOT_SCRIPT" s26)"
 actual_plugin_artifact="$(CWF_ARTIFACT_ROOT=".cwf" CWF_NEXT_PROMPT_DATE=990101 bash "$PLUGIN_SCRIPT" s26)"
 
-assert_eq "root script supports artifact-root based output path" "$expected_artifact_root" "$actual_root_artifact"
 assert_eq "plugin script supports artifact-root based output path" "$expected_artifact_root" "$actual_plugin_artifact"
 
 STATE_FILE="$TMP_DIR/cwf-state.yaml"
@@ -85,36 +78,8 @@ live:
   task: ""
 EOF
 
-root_bootstrap_path="$(CWF_PROJECTS_DIR="$PROJECTS_DIR" CWF_STATE_FILE="$STATE_FILE" CWF_NEXT_PROMPT_DATE=260214 bash "$ROOT_SCRIPT" --bootstrap boot-root)"
-expected_root_bootstrap="$PROJECTS_DIR/260214-03-boot-root"
-assert_eq "root bootstrap returns resolved path" "$expected_root_bootstrap" "$root_bootstrap_path"
-
-if [[ -d "$expected_root_bootstrap" ]]; then
-  pass "root bootstrap creates session directory"
-else
-  fail "root bootstrap creates session directory"
-fi
-
-if [[ -f "$expected_root_bootstrap/plan.md" ]]; then
-  pass "root bootstrap initializes plan.md"
-else
-  fail "root bootstrap initializes plan.md"
-fi
-
-if [[ -f "$expected_root_bootstrap/lessons.md" ]]; then
-  pass "root bootstrap initializes lessons.md"
-else
-  fail "root bootstrap initializes lessons.md"
-fi
-
-if grep -Fq "dir: \"$expected_root_bootstrap\"" "$STATE_FILE"; then
-  pass "root bootstrap registers session dir in state"
-else
-  fail "root bootstrap registers session dir in state"
-fi
-
 plugin_bootstrap_path="$(CWF_PROJECTS_DIR="$PROJECTS_DIR" CWF_STATE_FILE="$STATE_FILE" CWF_NEXT_PROMPT_DATE=260214 bash "$PLUGIN_SCRIPT" --bootstrap boot-plugin)"
-expected_plugin_bootstrap="$PROJECTS_DIR/260214-04-boot-plugin"
+expected_plugin_bootstrap="$PROJECTS_DIR/260214-03-boot-plugin"
 assert_eq "plugin bootstrap returns resolved path" "$expected_plugin_bootstrap" "$plugin_bootstrap_path"
 
 if [[ -d "$expected_plugin_bootstrap" ]]; then
@@ -142,7 +107,7 @@ else
 fi
 
 set +e
-CWF_PROJECTS_DIR="$PROJECTS_DIR" CWF_NEXT_PROMPT_DATE=2026-02-14 bash "$ROOT_SCRIPT" bad >/dev/null 2>&1
+CWF_PROJECTS_DIR="$PROJECTS_DIR" CWF_NEXT_PROMPT_DATE=2026-02-14 bash "$PLUGIN_SCRIPT" bad >/dev/null 2>&1
 invalid_status=$?
 set -e
 

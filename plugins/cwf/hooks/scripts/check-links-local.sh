@@ -5,8 +5,10 @@ set -euo pipefail
 # Skips silently when: not a .md file, file doesn't exist, or file is under project artifacts.
 # Blocks when deterministic tooling is unavailable (lychee/check-links.sh missing).
 
+# shellcheck disable=SC2034
 HOOK_GROUP="lint_markdown"
 # shellcheck source=cwf-hook-gate.sh
+# shellcheck disable=SC1091
 source "$(dirname "${BASH_SOURCE[0]}")/cwf-hook-gate.sh"
 
 # --- Parse stdin ---
@@ -45,12 +47,12 @@ EOF
     exit 0
 fi
 
-# --- Find repo root and check-links.sh ---
+# --- Find repo root and plugin check-links.sh ---
 REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || exit 0)
-CHECK_LINKS="${REPO_ROOT}/scripts/check-links.sh"
+CHECK_LINKS="${REPO_ROOT}/plugins/cwf/skills/refactor/scripts/check-links.sh"
 
 if [ ! -x "$CHECK_LINKS" ]; then
-    REASON=$(printf 'Link checker unavailable for %s: scripts/check-links.sh is missing or not executable.' "$FILE_PATH" | jq -Rs .)
+    REASON=$(printf 'Link checker unavailable for %s: plugins/cwf/skills/refactor/scripts/check-links.sh is missing or not executable.' "$FILE_PATH" | jq -Rs .)
     cat <<EOF
 {"decision":"block","reason":${REASON}}
 EOF

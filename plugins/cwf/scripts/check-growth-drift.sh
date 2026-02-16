@@ -7,7 +7,7 @@ set -euo pipefail
 # Surfaces checked (v2):
 #   1) Skill inventory vs README.ko workflow table
 #   2) Default workflow chain sync (README.ko, README, run/SKILL)
-#   3) Root/plugin mirrored script drift
+#   3) Plugin runtime script integrity
 #   4) hybrid live state pointer validity (root + session live state)
 #   5) Provenance freshness summary
 #
@@ -253,54 +253,46 @@ check_run_chain_sync() {
   record_pass "$category" "Default chain aligned: $line_run"
 }
 
-check_mirror_script_drift() {
-  local category="mirror_script_drift"
-  local pair_count=0
-  local drift_count=0
-  local pair=""
-  local left=""
-  local right=""
+check_plugin_runtime_scripts() {
+  local category="plugin_runtime_scripts"
+  local required_count=0
+  local missing_count=0
+  local file=""
 
-  while IFS= read -r pair; do
-    [[ -n "$pair" ]] || continue
-    left="${pair%%|*}"
-    right="${pair#*|}"
-    pair_count=$((pair_count + 1))
-
-    if [[ ! -f "$left" || ! -f "$right" ]]; then
-      record_fail "$category" "Missing mirror pair file: $left | $right"
-      drift_count=$((drift_count + 1))
-      continue
-    fi
-
-    if ! cmp -s "$left" "$right"; then
-      record_fail "$category" "Mirror drift detected: $left != $right"
-      drift_count=$((drift_count + 1))
+  while IFS= read -r file; do
+    [[ -n "$file" ]] || continue
+    required_count=$((required_count + 1))
+    if [[ ! -f "$file" ]]; then
+      record_fail "$category" "Missing runtime script: $file"
+      missing_count=$((missing_count + 1))
     fi
   done <<'EOF'
-scripts/check-session.sh|plugins/cwf/scripts/check-session.sh
-scripts/next-prompt-dir.sh|plugins/cwf/scripts/next-prompt-dir.sh
-scripts/cwf-artifact-paths.sh|plugins/cwf/scripts/cwf-artifact-paths.sh
-scripts/cwf-live-state.sh|plugins/cwf/scripts/cwf-live-state.sh
-scripts/retro-collect-evidence.sh|plugins/cwf/scripts/retro-collect-evidence.sh
-scripts/codex/codex-with-log.sh|plugins/cwf/scripts/codex/codex-with-log.sh
-scripts/codex/post-run-checks.sh|plugins/cwf/scripts/codex/post-run-checks.sh
-scripts/codex/verify-skill-links.sh|plugins/cwf/scripts/codex/verify-skill-links.sh
-scripts/codex/sync-session-logs.sh|plugins/cwf/scripts/codex/sync-session-logs.sh
-scripts/codex/redact-session-logs.sh|plugins/cwf/scripts/codex/redact-session-logs.sh
-scripts/codex/redact-jsonl.sh|plugins/cwf/scripts/codex/redact-jsonl.sh
-scripts/codex/redact-sensitive.pl|plugins/cwf/scripts/codex/redact-sensitive.pl
+plugins/cwf/scripts/check-session.sh
+plugins/cwf/scripts/next-prompt-dir.sh
+plugins/cwf/scripts/cwf-artifact-paths.sh
+plugins/cwf/scripts/cwf-live-state.sh
+plugins/cwf/scripts/retro-collect-evidence.sh
+plugins/cwf/scripts/provenance-check.sh
+plugins/cwf/scripts/codex/codex-with-log.sh
+plugins/cwf/scripts/codex/install-wrapper.sh
+plugins/cwf/scripts/codex/post-run-checks.sh
+plugins/cwf/scripts/codex/sync-skills.sh
+plugins/cwf/scripts/codex/verify-skill-links.sh
+plugins/cwf/scripts/codex/sync-session-logs.sh
+plugins/cwf/scripts/codex/redact-session-logs.sh
+plugins/cwf/scripts/codex/redact-jsonl.sh
+plugins/cwf/scripts/codex/redact-sensitive.pl
 EOF
 
-  if [[ "$drift_count" -eq 0 ]]; then
-    record_pass "$category" "All mirror script pairs aligned ($pair_count pairs)"
+  if [[ "$missing_count" -eq 0 ]]; then
+    record_pass "$category" "All plugin runtime scripts present ($required_count files)"
   fi
 }
 
 check_live_state_pointers() {
   local category="state_pointer_validity"
-  local resolver="scripts/cwf-artifact-paths.sh"
-  local live_resolver="scripts/cwf-live-state.sh"
+  local resolver="plugins/cwf/scripts/cwf-artifact-paths.sh"
+  local live_resolver="plugins/cwf/scripts/cwf-live-state.sh"
   local state_file=""
   local effective_state_file=""
   local resolved_effective=""
@@ -437,7 +429,7 @@ check_live_state_pointers() {
 
 check_provenance_freshness_summary() {
   local category="provenance_freshness"
-  local checker="scripts/provenance-check.sh"
+  local checker="plugins/cwf/scripts/provenance-check.sh"
   local output=""
   local stale=""
   local total=""
@@ -470,7 +462,7 @@ check_provenance_freshness_summary() {
 
 check_skill_inventory_vs_readme_ko
 check_run_chain_sync
-check_mirror_script_drift
+check_plugin_runtime_scripts
 check_live_state_pointers
 check_provenance_freshness_summary
 

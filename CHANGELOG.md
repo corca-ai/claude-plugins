@@ -40,7 +40,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Hooks: `smart-read` (1.0.0) — PreToolUse hook that enforces intelligent file reading based on file size (warn >500 lines, deny >2000 lines)
 - Skills (local): `plugin-deploy` — local skill to automate post-modification plugin lifecycle
 - Docs: [docs/plugin-dev-cheatsheet.md](docs/plugin-dev-cheatsheet.md) — quick reference to reduce repeated doc reads
-- Scripts: [scripts/update-all.sh](scripts/update-all.sh) — bulk marketplace + plugin update script
+- Scripts: `update-all.sh` — bulk marketplace + plugin update script (removed in later plugin-internal consolidation)
 
 ### Changed
 

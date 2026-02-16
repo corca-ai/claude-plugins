@@ -82,7 +82,7 @@ Reference command:
 Before the first chunk in each session, run:
 
 ```bash
-node scripts/doc-graph.mjs --json > docs/doc-graph.snapshot.json || true
+node plugins/cwf/skills/refactor/scripts/doc-graph.mjs --json > docs/doc-graph.snapshot.json || true
 jq '.stats' docs/doc-graph.snapshot.json
 ```
 
@@ -92,7 +92,7 @@ Then present:
 - Baseline metrics: `total_docs`, `total_links`, `orphan_count`, `broken_ref_count`.
 - One-line interpretation of current graph density and orphan risk.
 
-[scripts/doc-graph.mjs](../scripts/doc-graph.mjs) respects [`.doc-graph-ignore`](../.doc-graph-ignore). Files listed there are excluded from graph checks by design.
+[plugins/cwf/skills/refactor/scripts/doc-graph.mjs](../plugins/cwf/skills/refactor/scripts/doc-graph.mjs) respects [`.doc-graph-ignore`](../.doc-graph-ignore). Files listed there are excluded from graph checks by design.
 
 If structure or links were edited during the session, regenerate [docs/doc-graph.snapshot.json](doc-graph.snapshot.json) before the next file group.
 

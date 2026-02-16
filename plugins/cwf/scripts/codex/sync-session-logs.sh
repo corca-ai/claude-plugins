@@ -2,9 +2,9 @@
 # sync-session-logs.sh: Export Codex session JSONL into persistent markdown logs.
 #
 # Usage examples:
-#   scripts/codex/sync-session-logs.sh
-#   scripts/codex/sync-session-logs.sh --session-id <id>
-#   scripts/codex/sync-session-logs.sh --jsonl <path>
+#   plugins/cwf/scripts/codex/sync-session-logs.sh
+#   plugins/cwf/scripts/codex/sync-session-logs.sh --session-id <id>
+#   plugins/cwf/scripts/codex/sync-session-logs.sh --jsonl <path>
 #
 # By default this script:
 # - Finds the latest Codex session for the current cwd

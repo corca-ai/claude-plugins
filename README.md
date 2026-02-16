@@ -368,14 +368,14 @@ What this enables:
 Verify:
 
 ```bash
-bash scripts/codex/install-wrapper.sh --status
+bash plugins/cwf/scripts/codex/install-wrapper.sh --status
 type -a codex
 ```
 
 For one-time cleanup of existing session logs:
 
 ```bash
-bash scripts/codex/redact-session-logs.sh
+bash plugins/cwf/scripts/codex/redact-session-logs.sh
 ```
 
 After install, open a new shell (or `source ~/.zshrc`). Aliases that call `codex` (for example `codexyolo='codex ...'`) also use the wrapper.
