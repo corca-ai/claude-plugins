@@ -132,8 +132,8 @@ Gate behavior after Batch 1:
 
 **Batch 2** — launch in a single message with 2 parallel Task calls (after Batch 1, only for agents whose result files are missing or invalid):
 
-- **Agent C — Expert alpha**: `subagent_type: general-purpose`, `max_turns: 20`. Prompt: "Read `{SKILL_DIR}/references/expert-lens-guide.md`. You are Expert alpha. Session summary: {Sections 1-4 summary, including CDM results from Agent A}. Deep-clarify experts: {names or 'not available'}. Analyze through your framework. Use web search to verify expert identity and cite published work (follow Web Research Protocol in {CWF_PLUGIN_DIR}/references/agent-patterns.md; you have Bash access for agent-browser fallback). Output your Expert alpha section. **Output Persistence**: Write your complete analysis to: `{session_dir}/retro-expert-alpha.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`"
-- **Agent D — Expert beta**: `subagent_type: general-purpose`, `max_turns: 20`. Prompt: "Read `{SKILL_DIR}/references/expert-lens-guide.md`. You are Expert beta. Session summary: {Sections 1-4 summary, including CDM results from Agent A}. Deep-clarify experts: {names or 'not available'}. Analyze through your framework. Use web search to verify expert identity and cite published work (follow Web Research Protocol in {CWF_PLUGIN_DIR}/references/agent-patterns.md; you have Bash access for agent-browser fallback). Output your Expert beta section. **Output Persistence**: Write your complete analysis to: `{session_dir}/retro-expert-beta.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`"
+- **Agent C — Expert alpha**: `subagent_type: general-purpose`, `max_turns: 20`. Prompt: "Read `{CWF_PLUGIN_DIR}/references/expert-advisor-guide.md`. You are Expert α, operating in **retro mode**. Session summary: {Sections 1-4 summary, including CDM results from Agent A}. Deep-clarify experts: {names or 'not available'}. Analyze through your framework. Use web search to verify expert identity and cite published work (follow Web Research Protocol in {CWF_PLUGIN_DIR}/references/agent-patterns.md; you have Bash access for agent-browser fallback). Output your Expert α section. **Output Persistence**: Write your complete analysis to: `{session_dir}/retro-expert-alpha.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`"
+- **Agent D — Expert beta**: `subagent_type: general-purpose`, `max_turns: 20`. Prompt: "Read `{CWF_PLUGIN_DIR}/references/expert-advisor-guide.md`. You are Expert β, operating in **retro mode**. Session summary: {Sections 1-4 summary, including CDM results from Agent A}. Deep-clarify experts: {names or 'not available'}. Analyze through your framework. Use web search to verify expert identity and cite published work (follow Web Research Protocol in {CWF_PLUGIN_DIR}/references/agent-patterns.md; you have Bash access for agent-browser fallback). Output your Expert β section. **Output Persistence**: Write your complete analysis to: `{session_dir}/retro-expert-beta.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`"
 
 After Batch 2: read output files from session directory (`{session_dir}/retro-expert-alpha.md`, `{session_dir}/retro-expert-beta.md`). Draft Section 7 inline (capability/tool scan), then integrate all results into retro.md.
 
@@ -185,9 +185,7 @@ Identify 2-4 critical decision moments from the session. Apply CDM probes to eac
 
 Condition: Does the session contain decisions that domain experts would analyze differently? If the session is too lightweight (simple config changes, routine tasks), skip this section with a brief note.
 
-**Expert selection**:
-1. Scan the conversation for `/deep-clarify` invocations. If found, extract expert names and use them as preferred starting points.
-2. If no deep-clarify experts available, select independently per `{SKILL_DIR}/references/expert-lens-guide.md`.
+**Expert selection**: Follow the Expert Selection rules in `{CWF_PLUGIN_DIR}/references/expert-advisor-guide.md` (read `expert_roster` from `cwf-state.yaml`, match domain, select 2 with contrast, fill gaps independently). If the conversation includes `/deep-clarify` or `cwf:clarify` expert names, use them as preferred starting points per the retro mode override.
 
 **Execution** (deep mode): Produced by Agent C (Expert alpha) and Agent D (Expert beta) from Batch 2. Integrate both results into Section 5.
 
@@ -411,5 +409,5 @@ Do not prompt the user to start this discussion.
 ## References
 
 - `{SKILL_DIR}/references/cdm-guide.md` — CDM probe methodology and output format
-- `{SKILL_DIR}/references/expert-lens-guide.md` — Expert identity, grounding, and analysis format
+- [expert-advisor-guide.md](../../references/expert-advisor-guide.md) — Expert identity, grounding, selection, and retro mode format
 - [agent-patterns.md](../../references/agent-patterns.md) — Shared agent orchestration patterns

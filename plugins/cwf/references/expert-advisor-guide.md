@@ -83,9 +83,34 @@ What does your framework reveal that surface-level analysis misses?}
 - grounding: {cited source}
 ```
 
-### Retro Mode (future)
+### Retro Mode
 
-> Reserved for migration from `expert-lens-guide.md`. Currently, retro deep mode uses `expert-lens-guide.md` directly. A future session will unify the two guides if the pattern proves stable across clarify and review.
+**Input**: Session summary (Sections 1-4: Context, Collaboration, Waste, CDM) provided by the orchestrator. Optionally, deep-clarify expert names from the session.
+
+**Task**: Review the session through your published framework. Identify 2-3 moments most relevant to your framework. For each, describe what you would have done differently and why. Provide 1-2 concrete, actionable recommendations. Do not repeat CDM analysis — build on it with a different analytical lens.
+
+**Expert selection override**: If the conversation includes a `/deep-clarify` or `cwf:clarify` invocation that named specific experts, adopt those identities as preferred starting points. Adjust only if they are a poor fit for the session's critical decisions.
+
+**Side assignment**: Expert α and Expert β do NOT represent "strengths vs improvements." Each represents a genuinely different methodological lens. Both analyze what went well AND what could improve through their respective frameworks.
+
+**Output format**:
+
+```markdown
+### Expert {α|β}: {Expert Name}
+
+**Framework**: {1-line description of their analytical approach}
+**Source**: {specific book/paper/talk that grounds this analysis}
+**Why this applies**: {1-2 sentences connecting the framework to this session}
+
+{2-3 paragraphs of session-specific analysis through this expert's lens.
+Reference actual session events. Cover both what worked and what could improve.}
+
+**Recommendations**:
+1. {concrete, actionable recommendation grounded in the framework}
+2. {concrete, actionable recommendation grounded in the framework}
+```
+
+Adapt language to the user's language (detected from conversation).
 
 ## Constraints
 

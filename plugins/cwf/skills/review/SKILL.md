@@ -43,8 +43,11 @@ Both are optional — the skill falls back to Claude Task agents when CLIs are m
 | No args or `--mode code` | Code review |
 | `--mode plan` | Plan review |
 | `--mode clarify` | Clarify review |
+| `--human` | Route to `cwf:hitl` (do not run review; invoke hitl skill directly) |
 
 Default: `--mode code`.
+
+When `--human` is detected (with or without `--mode`), stop review processing and invoke `cwf:hitl` instead, passing through any `--base` flag. This routes the F-8 alias declared in hitl's triggers.
 
 ---
 
@@ -539,7 +542,7 @@ Conservative default: when reviewers disagree, the stricter assessment wins.
 
 ### 2. Render Review Synthesis
 
-Output to the conversation (do NOT write to a file unless the user asks):
+Output to the conversation **and** persist to `{session_dir}/review-synthesis-{mode}.md`:
 
 ```markdown
 ## Review Synthesis
@@ -606,7 +609,11 @@ Output to the conversation (do NOT write to a file unless the user asks):
 
 The Provenance table adapts to actual results: if an external CLI succeeded, show `REAL_EXECUTION` with the CLI tool name and measured duration. If it fell back, show `FALLBACK` with `claude-task-fallback`.
 
-### 3. Cleanup
+### 3. Expert Roster Update
+
+When expert reviewers (Slot 5-6) were used: Read `cwf-state.yaml` `expert_roster:`. For each expert used: if already in roster, increment `usage_count` by 1; if new, add entry with `name`, `domain`, `source`, `rationale`, `introduced: {current session}`, `usage_count: 1`. Apply changes directly without user confirmation.
+
+### 4. Cleanup
 
 After rendering the synthesis, remove the temp directory:
 
@@ -647,8 +654,7 @@ This prevents sensitive review content (diffs, plans) from persisting in `/tmp/`
    synthesizes but does not review directly.
 4. **Conservative default** — stricter reviewer determines the verdict when
    reviewers disagree.
-5. **Output to conversation** — review results are communication, not state.
-   Do not write files unless the user explicitly asks.
+5. **Output to conversation + persist** — review synthesis is both communication and downstream input. Always write `{session_dir}/review-synthesis-{mode}.md` alongside the conversation output so retro/handoff can consume it.
 6. **Criteria from plan** — review verifies plan criteria, it does not
    invent its own. If no criteria exist, review on general best practices and note the absence.
 7. **Graceful degradation** — external CLI failure (missing binary,

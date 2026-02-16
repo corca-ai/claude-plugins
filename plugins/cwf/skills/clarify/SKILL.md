@@ -423,6 +423,8 @@ Then offer to save.
 
 This state is what `cwf:impl` Phase 1.0 checks as a pre-condition.
 
+**Expert Roster Update** (when experts were used in Phase 2.5): Read `cwf-state.yaml` `expert_roster:`. For each expert used: if already in roster, increment `usage_count` by 1; if new, add entry with `name`, `domain`, `source`, `rationale`, `introduced: {current session}`, `usage_count: 1`. Apply changes directly without user confirmation; report changes in the output summary for visibility.
+
 **Follow-up** (when CWF plugin is loaded): Suggest `cwf:handoff --phase` if the user plans to clear context before implementation.
 
 ---
