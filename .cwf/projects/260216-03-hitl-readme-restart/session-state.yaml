@@ -2,11 +2,11 @@
 # Synced from .cwf/cwf-state.yaml live section.
 
 live:
-  session_id: "260216-03"
-  dir: ".cwf/projects/260216-03-hitl-readme-restart"
+  session_id: "260216-04"
+  dir: ".cwf/projects/260216-04-full-repo-refactor"
   branch: "marketplace-v3"
-  phase: "retro"
-  task: "README.ko reflection update and HITL review loop"
+  phase: "refactor"
+  task: "Full repository refactoring - all modes (holistic, skill, docs, code)"
   key_files:
     - README.ko.md
     - .cwf/projects/260216-03-hitl-readme-restart/next-session.md

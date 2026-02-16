@@ -361,6 +361,13 @@ sessions:
     artifacts: [plan.md, lessons.md, retro.md, next-session.md, session-log.md]
 
 # External tool availability (detected by cwf:setup)
+
+  - id: "S260216-04"
+    title: "full-repo-refactor"
+    dir: ".cwf/projects/260216-04-full-repo-refactor"
+    branch: "marketplace-v3"
+    artifacts: [plan.md, lessons.md]
+
 tools:
   codex: available
   gemini: available
@@ -383,11 +390,11 @@ hooks:
 # read by SessionStart(compact) hook for context recovery after auto-compact.
 # check-session.sh --live validates required fields are populated.
 live:
-  session_id: "260216-03"
-  dir: ".cwf/projects/260216-03-hitl-readme-restart"
+  session_id: "260216-04"
+  dir: ".cwf/projects/260216-04-full-repo-refactor"
   branch: "marketplace-v3"
-  phase: "retro"
-  task: "README.ko reflection update and HITL review loop"
+  phase: "refactor"
+  task: "Full repository refactoring - all modes (holistic, skill, docs, code)"
   key_files:
     - README.ko.md
     - .cwf/projects/260216-03-hitl-readme-restart/next-session.md
