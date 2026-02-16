@@ -24,6 +24,7 @@ claude plugin install cwf@corca-plugins
 - v3 이전 레거시 환경 변수를 표준 `CWF_*` 키로 마이그레이션
 - 프로젝트 설정 파일(`.cwf/config.yaml`, `.cwf/config.local.yaml`) 부트스트랩
 - 외부 도구 감지(Codex/Gemini/Tavily/Exa) 및 선택적 Codex 연동
+- 로컬 실행 의존성(`shellcheck`, `jq`, `gh`, `node`, `python3`) 점검 및 설치 선택
 - 에이전트가 CWF 사용법 및 저장소 탐색을 돕는 인덱스 문서 생성(별도 파일로, 또는 AGENTS.md에 통합)
 
 플래그별 세부 동작은 [setup](#setup) 섹션을 참고하세요.
@@ -71,7 +72,7 @@ v3부터 레거시 독립 플러그인은 마켓플레이스에서 제거되었�
 
 ### CWF의 역할
 
-CWF는 컨텍스트 수집 → 요구사항 명확화 → 계획 → 구현 → 리뷰 → 리팩토링 → 회고 → 배포 준비(GitHub 이슈 및 PR)를 하나의 반복 가능한 워크플로우로 통합해둔 플러그인입니다. 실제 머지 이후 CI/CD 실행은 각 저장소의 운영 책임 범위에 두고, CWF는 그 직전 단계까지를 자동화·정형화합니다. 사용자의 컨텍스트 관리 부담을 최소화하기 위해 세션 상태 기록, 세션 로그 산출물, 훅을 통해 페이즈/세션 경계를 넘어 의사결정 사항과 교훈을 보존합니다.
+CWF는 컨텍스트 수집 → 요구사항 명확화 → 계획 → 구현 → 리뷰 → 리팩토링 → 회고 → 배포 준비(GitHub 이슈 및 PR)를 하나의 반복 가능한 워크플로우로 통합해둔 플러그인입니다. 실제 머지 이후 CI/CD 실행은 각 저장소의 운영 책임 범위에 두고, CWF는 그 직전 단계까지를 자동화·정형화합니다. 사용자의 컨텍스트 관리 부담을 최소화하기 위해 세션 상태 기록, 세션 로그 산출물, 훅을 통해 페이즈/세션 경계를 넘어 의사결정 사항과 교훈을 보존합니다. 모든 스킬의 공통 계약은 `context-deficit resilience`입니다. 즉, auto-compact나 세션 재시작 이후에도 `.cwf/cwf-state.yaml`, 세션 산출물, 핸드오프 파일만으로 실행을 복구해야 하며, 암묵적 대화 메모리에 의존하면 계약 위반으로 간주합니다.
 
 각 스킬은 전문가 자문, 티어 분류, 에이전트 조율, 의사결정 포인트, 핸드오프, 출처 추적이라는 6가지 핵심 컨셉을 조립해 재구성한 것입니다. 여기서 '컨셉'이란 [Daniel Jackson의 정의](references/essence-of-software/distillation.md)에 따라, '사용자에게 보이는 기능을 명확하고 이해 가능한 목적으로 묶은 재사용 가능한 단위'를 뜻합니다. 각 컨셉은 자신의 상태를 유지하고 사용자(및 다른 컨셉)와 원자적 액션으로 상호작용하며, CWF는 이를 스킬 간 공용 설계 규약으로 사용합니다.
 
@@ -86,6 +87,8 @@ CWF는 컨텍스트 수집 → 요구사항 명확화 → 계획 → 구현 → 
 - 사용자는 `.cwf/projects`와 `.cwf/cwf-state.yaml` 같은 세션 산출물을 저장하고 활용할 수 있는 저장소에서 작업합니다.
 - 사용자는 `AGENTS.md`에서 시작해 필요할 때 더 깊은 문서를 읽는 점진적 공개 방식에 동의합니다.
 - 사용자는 반복되는 품질 검사를 행동 기억에 의존하기보다 결정적 검증 스크립트로 관리하는 방식을 선호합니다.
+- 사용자는 필수 의존성/키가 없을 때 스킬이 즉시 설치·설정 여부를 묻고, 승인 시 설치/설정을 시도한 뒤 재시도하는 흐름을 기대합니다.
+- 사용자는 이전 대화가 손실되어도 스킬이 상태/산출물/핸드오프로 복구되는 실행 계약(`context-deficit resilience`)을 전제로 작업합니다.
 - 사용자는 토큰이 이미 충분히 싸고 앞으로 더 싸질 것이라는 전제를 수용합니다. CWF는 코딩 에이전트를 사실상 무제한(예: Claude Code / Codex $200 플랜)으로 사용할 수 있는 사람을 대상으로 설계됐습니다.
 
 ## 왜 CWF인가?
@@ -262,13 +265,13 @@ cwf:retro --light    # 핵심 항목만 빠르게 점검 (서브에이전트 없
 기본은 심층 분석이며, `--light` 또는 작은 세션에서는 경량 점검으로 줄일 수 있습니다. 산출물은 세션 디렉토리의 `retro.md`에 저장되고, 심층 모드에서는 `retro-cdm-analysis.md`, `retro-expert-alpha.md`, `retro-expert-beta.md`, `retro-learning-resources.md` 같은 보조 분석 파일이 함께 남습니다.
 
 회고는 아래 7개 섹션으로 정리됩니다.
-1. `Context Worth Remembering`: 다음 세션에 필요한 배경/결정 맥락. -> 어디에 저장?
-2. `Collaboration Preferences`: 사용자-에이전트 협업 패턴과 개선 포인트. -> 어디에 저장?
+1. `Context Worth Remembering`: 다음 세션에 필요한 배경/결정 맥락. 기본은 `retro.md`에 남기고, 재사용 가치가 높은 항목은 `project-context.md`나 AGENTS 계열 문서로 승격합니다.
+2. `Collaboration Preferences`: 사용자-에이전트 협업 패턴과 개선 포인트. 기본은 `retro.md`에 남기고, 반복 적용할 운영 규칙은 AGENTS 계열 문서나 스킬 규약으로 반영합니다.
 3. `Waste Reduction (5 Whys)`: 재작업/오해/불필요 작업의 구조적 원인.
-4. `Critical Decision Moment Analysis`: 핵심 의사결정의 근거, 대안, 리스크. -> 세션의 진도를 결정적으로 쫙 빼게 해준 순간들을 돌아본다는 의도.
-5. `Expert Lens`(심층): 서로 다른 전문 프레임에서 본 보완 관점. -> 이 세션을 전문가라면 어떻게 더 잘 진행했을까?
-6. `Learning Resources`(심층): 다음 실행 품질을 높일 학습 입력. -> 의도가 전혀 안 드러남. 사용자 수준을 추측해 도움이 될 만한 학습자료를 준다는 게 되어야 함
-7. `Relevant Tools & Tool Gaps`: 실제 활용 도구와 새로 필요한 도구 후보. -> 이런 도구(스킬, 자동화 툴 등 포함)을 썼는데, 이런 도구를 쓸 수 있었고, 이런 도구를 만들 수 있을 것 같다는 의도 드러나야 함
+4. `Critical Decision Moment Analysis`: 세션의 진도를 결정적으로 바꾼 의사결정 순간을 돌아보며, 당시 신호/대안/근거/리스크를 복기합니다.
+5. `Expert Lens`(심층): 이 세션을 관련 전문가가 진행했다면 무엇을 다르게 했을지 서로 다른 전문 프레임으로 비교합니다.
+6. `Learning Resources`(심층): 사용자의 현재 수준과 이번 세션의 지식 공백을 기준으로 다음 실행 품질을 올릴 학습자료를 제안합니다.
+7. `Relevant Tools & Tool Gaps`: 이번에 실제로 사용한 도구, 사용할 수 있었던 도구, 새로 만들면 효과가 큰 도구(스킬/자동화 포함)를 함께 정리합니다.
 
 ### [refactor](plugins/cwf/skills/refactor/SKILL.md)
 
@@ -394,7 +397,7 @@ cwf:setup --hooks        # 훅 그룹 선택만
 cwf:setup --tools        # 외부 도구 감지만
 cwf:setup --env          # 환경 변수 마이그레이션/부트스트랩만
 cwf:setup --codex        # Codex 사용자 스코프(~/.agents/*)에 CWF 스킬/레퍼런스 연결
-cwf:setup --codex-wrapper # 세션 로그 자동 동기화를 위한 Codex wrapper 설치
+cwf:setup --codex-wrapper # Codex wrapper 설치 (세션 로그 동기화 + 실행 후 품질 점검)
 cwf:setup --cap-index    # CWF capability 인덱스만 생성/갱신 (.cwf/indexes/cwf-index.md)
 cwf:setup --repo-index   # 저장소 인덱스 명시적 생성/갱신
 cwf:setup --repo-index --target agents # AGENTS 기반 저장소용 AGENTS.md 관리 블록
@@ -438,8 +441,10 @@ cwf:setup --codex-wrapper
 
 연동 후 동작:
 - `cwf:setup --codex`: CWF 스킬/레퍼런스를 Codex 사용자 스코프(`~/.agents/*`)에 연결해 Codex에서도 동일한 CWF 지식을 사용합니다.
-- `cwf:setup --codex-wrapper`: `~/.local/bin/codex` wrapper를 설치해 Codex 실행 종료 후 세션 로그를 `.cwf/projects/sessions/`로 자동 동기화합니다.
-- `wrapper`는 현재 세션 로그 동기화에 집중합니다. Codex에는 Claude처럼 Pre/PostTool 훅 체인이 없어 동일 자동화를 그대로 이식할 수는 없습니다. 세션 단위 후처리(예: 종료 후 검증/상태 동기화) 확장은 별도 설계·합의가 필요한 검토 항목입니다.
+- `cwf:setup --codex-wrapper`: `~/.local/bin/codex` wrapper를 설치해 Codex 실행 종료 후 세션 로그를 기본 `.cwf/sessions/`(레거시 폴백: `.cwf/projects/sessions/`)로 자동 동기화하고, 이번 실행에서 바뀐 파일 기준으로 post-run 품질 점검을 수행합니다.
+- 세션 아티팩트 디렉토리(`plan.md`, `retro.md`, `next-session.md`)는 기존처럼 `.cwf/projects/{YYMMDD}-{NN}-{title}/`에 유지됩니다.
+- post-run 점검 항목은 기본 품질 체크(markdownlint, 로컬 링크, shellcheck, live state) 외에 `apply_patch via exec_command` 위생 감지와 HITL 활성 상태에서 문서 변경 대비 scratchpad 동기화 감지도 포함합니다.
+- post-run 점검은 기본 `warn` 모드로 동작하며(실패를 경고로만 보고), 필요하면 `CWF_CODEX_POST_RUN_MODE=strict`로 실패를 종료코드에 반영할 수 있습니다. 끄려면 `CWF_CODEX_POST_RUN_CHECKS=false`, 로그를 줄이려면 `CWF_CODEX_POST_RUN_QUIET=true`를 사용하세요.
 
 ## 훅
 
@@ -479,7 +484,7 @@ CWF 런타임은 아래 우선순위로 설정을 읽습니다.
 # CWF_GATHER_OUTPUT_DIR: ".cwf/projects"
 # CWF_READ_WARN_LINES: 500
 # CWF_READ_DENY_LINES: 2000
-# CWF_SESSION_LOG_DIR: ".cwf/projects/sessions"
+# CWF_SESSION_LOG_DIR: ".cwf/sessions"
 # CWF_SESSION_LOG_ENABLED: true
 # CWF_SESSION_LOG_TRUNCATE: 10
 # CWF_SESSION_LOG_AUTO_COMMIT: false
@@ -520,7 +525,7 @@ CWF_ATTENTION_USER_ID="U0123456789"              # 기본값: 미설정
 CWF_GATHER_OUTPUT_DIR=".cwf/projects"               # 기본값: .cwf/projects
 CWF_READ_WARN_LINES=700                             # 기본값: 500
 CWF_READ_DENY_LINES=2500                            # 기본값: 2000
-CWF_SESSION_LOG_DIR=".cwf/projects/sessions"        # 기본값: .cwf/projects/sessions
+CWF_SESSION_LOG_DIR=".cwf/sessions"                 # 기본값: .cwf/sessions (레거시 폴백: .cwf/projects/sessions)
 CWF_SESSION_LOG_ENABLED=false                       # 기본값: true
 CWF_SESSION_LOG_TRUNCATE=20                         # 기본값: 10
 CWF_SESSION_LOG_AUTO_COMMIT=true                    # 기본값: false

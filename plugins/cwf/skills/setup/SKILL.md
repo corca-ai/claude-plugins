@@ -18,7 +18,7 @@ cwf:setup --tools        # External tool detection only
 cwf:setup --env          # Environment variable migration/bootstrap only
 cwf:setup --agent-teams  # Agent Team mode setup only
 cwf:setup --codex        # Codex integration-only rerun (skills/references sync)
-cwf:setup --codex-wrapper # Codex wrapper-only rerun (session log sync)
+cwf:setup --codex-wrapper # Codex wrapper-only rerun (session log sync + post-run checks)
 cwf:setup --git-hooks both --gate-profile balanced  # Install repo git hooks and set gate depth
 cwf:setup --git-hooks pre-commit --gate-profile fast # Lightweight local-only git gate
 cwf:setup --git-hooks none # Remove repo-managed git hooks
@@ -120,7 +120,7 @@ hooks:
 
 ## Phase 2: External Tool Detection
 
-Detect availability of external AI tools and search APIs.
+Detect availability of external AI/search tools and local runtime dependencies used by CWF checks/skills.
 
 ### 2.1 Check Tools
 
@@ -129,6 +129,11 @@ Run the following checks via Bash:
 ```bash
 command -v codex >/dev/null 2>&1     # Codex CLI
 command -v gemini >/dev/null 2>&1 || npx @google/gemini-cli --version 2>/dev/null  # Gemini CLI
+command -v shellcheck >/dev/null 2>&1 # Shell lint gate
+command -v jq >/dev/null 2>&1         # JSON parsing for scripts
+command -v gh >/dev/null 2>&1         # GitHub CLI for ship
+command -v node >/dev/null 2>&1       # Node runtime for gather/review helpers
+command -v python3 >/dev/null 2>&1    # Python runtime for gather helpers
 ```
 
 Check environment variables:
@@ -140,7 +145,7 @@ Check environment variables:
 
 ### 2.2 Update cwf-state.yaml
 
-Edit `cwf-state.yaml` `tools:` section with results:
+Edit `cwf-state.yaml` `tools:` section with AI/search results:
 
 ```yaml
 tools:
@@ -152,7 +157,9 @@ tools:
 
 ### 2.3 Report Results
 
-Display results as a table:
+Display two result groups:
+
+1) AI/search tools + API keys:
 
 ```text
 Tool Detection Results:
@@ -161,6 +168,59 @@ Tool Detection Results:
   tavily  : unavailable (TAVILY_API_KEY not set)
   exa     : unavailable (EXA_API_KEY not set)
 ```
+
+1) Local runtime dependencies:
+
+```text
+Local Dependency Results:
+  shellcheck : available|unavailable
+  jq         : available|unavailable
+  gh         : available|unavailable
+  node       : available|unavailable
+  python3    : available|unavailable
+```
+
+### 2.3.1 Missing Dependency Install Prompt (Required)
+
+If any local runtime dependency is missing, use AskUserQuestion (single choice):
+
+```text
+Some CWF runtime dependencies are missing. Install missing tools now?
+```
+
+Options:
+- `Install missing now (recommended)`:
+  - run installer script for missing tools
+  - re-check and report unresolved items with exact commands
+- `Show commands only`:
+  - do not install
+  - print exact install commands per missing tool
+- `Skip for now`:
+  - continue setup without installation
+
+If user selects `Install missing now (recommended)`, run:
+
+```bash
+bash {SKILL_DIR}/scripts/install-tooling-deps.sh --install missing
+```
+
+If user selects `Show commands only`, run:
+
+```bash
+bash {SKILL_DIR}/scripts/install-tooling-deps.sh --check
+```
+
+Then print manual install commands for each missing tool from script output.
+
+### 2.3.2 Retry Check (After Install Attempt)
+
+After `Install missing now` path, re-run:
+
+```bash
+bash {SKILL_DIR}/scripts/install-tooling-deps.sh --check
+```
+
+If still missing, explicitly list unresolved tools and ask whether to continue setup or stop for manual installation.
 
 ---
 
@@ -181,7 +241,7 @@ Codex CLI was detected. How should CWF integrate with Codex?
 Options:
 - `Skills + wrapper (recommended)`:
   - Link CWF skills/references into `~/.agents/*`
-  - Install `codex` wrapper and PATH line for automatic session log sync
+  - Install `codex` wrapper and PATH line for automatic session log sync + post-run quality checks (tool-hygiene + HITL sync gates included)
 - `Skills only`:
   - Link skills/references only (no wrapper install)
 - `Skip for now`:
@@ -219,6 +279,8 @@ And include this note in plain language:
 ```text
 Open a new shell (or source ~/.zshrc). After that, running `codex` will auto-sync session logs.
 Aliases that call `codex` (for example: codexyolo='codex ...') also inherit this behavior.
+Post-run checks run in `warn` mode by default (`CWF_CODEX_POST_RUN_MODE=strict` to enforce non-zero exit on check failures).
+Current post-run gates include markdown/shell/link/live-state checks, `apply_patch via exec_command` hygiene detection, and HITL scratchpad sync detection for doc edits.
 ```
 
 ---
@@ -261,14 +323,14 @@ ls -la ~/.agents/skills
 
 Use this phase when:
 - User runs `cwf:setup --codex-wrapper`
-- Full setup and user wants Codex session logs auto-synced into repo artifacts
+- Full setup and user wants Codex session logs auto-synced into repo artifacts with post-run quality checks
 
 ### 2.6.1 Ask for Opt-In
 
 Use AskUserQuestion before making shell-level changes:
 
 ```text
-Enable Codex wrapper for automatic session log sync?
+Enable Codex wrapper for automatic session log sync and post-run quality checks (including tool-hygiene + HITL sync gates)?
 ```
 
 If user declines, skip this phase.
@@ -291,9 +353,10 @@ The wrapper preserves normal Codex behavior and runs:
 
 ```bash
 bash {SKILL_DIR}/../../scripts/codex/sync-session-logs.sh --cwd "$PWD"
+bash {SKILL_DIR}/../../scripts/codex/post-run-checks.sh --cwd "$PWD" --mode warn
 ```
 
-after each Codex run to persist markdown logs under `.cwf/projects/sessions/` as `*.codex.md` (`raw` JSONL copy is opt-in via `--raw`).
+after each Codex run. Logs are persisted under `.cwf/sessions/` by default (legacy fallback: `.cwf/projects/sessions/`) as `*.codex.md` (`raw` JSONL copy is opt-in via `--raw`), and changed-file quality checks are executed in `warn` mode by default.
 
 ### 2.6.3 Report and Reversal
 
@@ -313,6 +376,10 @@ Include activation note:
 
 ```text
 If wrapper is active, restart shell (or source ~/.zshrc) before testing `codex`.
+Post-run behavior can be tuned with:
+- `CWF_CODEX_POST_RUN_CHECKS=true|false` (default: true)
+- `CWF_CODEX_POST_RUN_MODE=warn|strict` (default: warn)
+- `CWF_CODEX_POST_RUN_QUIET=true|false` (default: false)
 ```
 
 ---
@@ -763,6 +830,8 @@ Add `setup` to `cwf-state.yaml` current session's `stage_checkpoints` list.
 16. **Single-entry setup UX**: `cwf:setup` must ask and apply optional integrations (Codex mode, git hook mode/profile) instead of requiring users to remember flags.
 17. **Env/project-config UX**: `cwf:setup` must detect and offer migration of legacy env keys to canonical `CWF_*` names, then offer project config bootstrap (.cwf/config.yaml, .cwf/config.local.yaml) with explicit user choice.
 18. **Agent Team UX**: `cwf:setup` must include explicit Agent Team mode setup so multi-agent skills do not silently depend on an unset runtime flag.
+19. **Dependency install UX**: When local runtime dependencies are missing, `cwf:setup` must ask whether to install now and run [scripts/install-tooling-deps.sh](scripts/install-tooling-deps.sh) on approval.
+20. **No passive missing-only report**: Missing prerequisites must end with either an install attempt or explicit manual install commands plus continue/stop choice.
 
 ## References
 
@@ -775,6 +844,7 @@ Add `setup` to `cwf-state.yaml` current session's `stage_checkpoints` list.
 - [scripts/migrate-env-vars.sh](scripts/migrate-env-vars.sh) — legacy env detection and canonical CWF env migration
 - [scripts/bootstrap-project-config.sh](scripts/bootstrap-project-config.sh) — project config template/bootstrap and `.gitignore` sync
 - [scripts/configure-agent-teams.sh](scripts/configure-agent-teams.sh) — toggles Claude Agent Team runtime mode in `~/.claude/settings.json`
+- [scripts/install-tooling-deps.sh](scripts/install-tooling-deps.sh) — checks/installs missing local runtime dependencies for CWF workflows
 - [scripts/check-index-coverage.sh](scripts/check-index-coverage.sh) — deterministic index coverage validation
 - .cwf-cap-index-ignore — optional intentional exclusion list for capability index coverage
 - .cwf-index-ignore — optional intentional exclusion list for repository index coverage

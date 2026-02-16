@@ -86,6 +86,11 @@ For `github.com` URLs, use the `gh` CLI to extract content as markdown.
 
 **Prerequisite check**: Verify `command -v gh` first. If `gh` is not available, fall through to Generic handler.
 
+When `gh` is missing for a GitHub URL, do not silently downgrade only. Ask the user:
+1. `Install gh now (recommended)` — run `bash {SKILL_DIR}/../setup/scripts/install-tooling-deps.sh --install gh`, then retry GitHub handler once.
+2. `Continue with Generic handler` — proceed with reduced metadata extraction.
+3. `Skip this URL` — do not process this GitHub URL in this run.
+
 | URL type | Command |
 |----------|---------|
 | PR (path pattern: /pull/N) | `gh pr view <url> --json title,body,state,author,comments --template '...'` |
@@ -153,7 +158,11 @@ Web and code search via external APIs.
    ```
 5. Display results to user (scripts output formatted markdown)
 
-**Graceful degradation**: If API key is missing, scripts print setup instructions to stderr. Display the error message to the user. See [references/search-api-reference.md](references/search-api-reference.md).
+**Graceful degradation**: If API key is missing, scripts print setup instructions to stderr. Do not stop at an error message only. Ask whether to configure now:
+- `Configure now (recommended)` — run `cwf:setup --env` (and `cwf:setup --tools` if runtime dependencies are also missing), then retry the same search once.
+- `Skip search for now` — continue without search results.
+- `Show setup commands only` — print exact export/setup commands.
+See [references/search-api-reference.md](references/search-api-reference.md).
 
 ### Data Privacy
 
@@ -242,6 +251,7 @@ Environment variables:
 4. **Data privacy**: Do not include confidential code or sensitive information in search queries
 5. **Sub-agent for --local**: Always use Task tool, never inline exploration
 6. **All code fences must have language specifier**: Never use bare fences
+7. **Missing dependency interaction**: For missing required tools/keys, ask to install/configure now; do not only report unavailability.
 
 ## References
 

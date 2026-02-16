@@ -32,6 +32,7 @@ cwf:setup
 - legacy env migration to canonical `CWF_*` keys
 - project config bootstrap (`.cwf/config.yaml`, `.cwf/config.local.yaml`)
 - tool detection (Codex/Gemini/Tavily/Exa) and optional Codex integration
+- local runtime dependency checks with install prompts (`shellcheck`, `jq`, `gh`, `node`, `python3`)
 - optional index generation (improves agent routing and progressive-disclosure navigation)
 
 For detailed flags, see [setup](#setup).
@@ -82,6 +83,7 @@ As of v3.0.0, legacy standalone plugins have been removed from the marketplace. 
 - A single workflow plugin (`cwf`) that integrates context gathering, requirement clarification, planning, implementation, review, retrospective, handoff, and shipping.
 - A stateful workflow system where .cwf/cwf-state.yaml, session-log artifacts, and hooks preserve context across phase/session boundaries.
 - A composable skill framework built on shared concepts (Expert Advisor, Tier Classification, Agent Orchestration, Decision Point, Handoff, Provenance Tracking).
+- A cross-skill context-deficit resilience contract: after auto-compact/session restart, skills recover from persisted state/artifacts/handoff files instead of implicit chat memory.
 - A roadmap toward lower user bottlenecks by chaining smaller approval units (for example, dark-factory-style operating patterns).
 
 ### What CWF Is Not
@@ -95,6 +97,8 @@ As of v3.0.0, legacy standalone plugins have been removed from the marketplace. 
 - Users work in repositories where session artifacts (.cwf/projects/, .cwf/cwf-state.yaml) are allowed and useful.
 - Users accept progressive disclosure: start from AGENTS.md, then load deeper docs as needed.
 - Users prefer deterministic validation scripts for recurring quality checks over relying on behavioral memory.
+- Users expect missing prerequisites to trigger an install/configure prompt with retry, not a passive unavailable-only message.
+- Users expect skills to remain operable when prior conversation context is missing, using persisted state/artifacts/handoff contracts.
 - Users assume tokens are already cheap and likely to get cheaper (CWF targets heavy coding-agent usage patterns, including Claude Code/Codex `$200 Max` plan users).
 
 ## Why CWF?
@@ -166,8 +170,6 @@ gather → clarify → plan → review(plan) → impl → review(code) → refac
 | 12 | [setup](#setup) | `cwf:setup` | Configure hook groups, detect tools, bootstrap env/index contracts |
 | 13 | [update](#update) | `cwf:update` | Check and apply CWF plugin updates |
 
-**Concept composition**: gather, clarify, plan, impl, retro, refactor, review, hitl, and run all synchronize Agent Orchestration. clarify is the richest composition — it synchronizes Expert Advisor, Tier Classification, Agent Orchestration, and Decision Point in a single workflow. review and hitl both combine human judgment with structured review orchestration at different granularity (parallel reviewers vs chunked interactive loop). handoff is the primary instantiation of the Handoff concept. refactor activates Provenance Tracking in holistic mode.
-
 ## Skills Reference
 
 ### [gather](plugins/cwf/skills/gather/SKILL.md)
@@ -225,7 +227,14 @@ cwf:retro --deep     # Full analysis with expert lens
 cwf:retro --light    # Sections 1-4 + 7 only, no sub-agents
 ```
 
-Sections: Context Worth Remembering, Collaboration Preferences, Waste Reduction (5 Whys), Critical Decision Analysis (CDM), Expert Lens (deep), Learning Resources (deep), Relevant Tools, and Tool Gaps. It separates currently used/usable tools from missing capabilities that cause repeated friction, then feeds those findings into setup/refactor/backlog decisions.
+Outputs are saved to session `retro.md`; deep mode also writes companion files (`retro-cdm-analysis.md`, `retro-expert-alpha.md`, `retro-expert-beta.md`, `retro-learning-resources.md`). The 7 sections are:
+1. `Context Worth Remembering`: background/decision context for next sessions, then promoted to project docs only when durable.
+2. `Collaboration Preferences`: collaboration patterns and improvements, then promoted to agent-guide/skill rules when repeatedly useful.
+3. `Waste Reduction (5 Whys)`: structural causes behind rework/misalignment.
+4. `Critical Decision Moment Analysis`: decision moments that changed session trajectory, including signals/alternatives/risks.
+5. `Expert Lens` (deep): how domain experts would run the same session differently.
+6. `Learning Resources` (deep): resources calibrated to the user's current level and observed knowledge gaps.
+7. `Relevant Tools & Tool Gaps`: used tools, available-but-unused tools, and candidate tools worth creating (including skills/automation).
 
 ### [refactor](plugins/cwf/skills/refactor/SKILL.md)
 
@@ -315,7 +324,7 @@ cwf:setup --hooks        # Hook group selection only
 cwf:setup --tools        # External tool detection only
 cwf:setup --env          # Environment variable migration/bootstrap only
 cwf:setup --codex        # Link CWF skills/references into Codex user scope (~/.agents/*)
-cwf:setup --codex-wrapper # Install codex wrapper for automatic session log sync
+cwf:setup --codex-wrapper # Install codex wrapper (session log sync + post-run quality checks)
 cwf:setup --cap-index    # Generate/refresh CWF capability index only (.cwf/indexes/cwf-index.md)
 cwf:setup --repo-index   # Generate/refresh repository index output (explicit)
 cwf:setup --repo-index --target agents # AGENTS.md managed block (for AGENTS-based repositories)
@@ -346,10 +355,15 @@ cwf:setup --codex-wrapper
 What this enables:
 - `~/.agents/skills/*` and `~/.agents/references` symlinked to local CWF (latest files auto-loaded)
 - `~/.local/bin/codex` wrapper installation + PATH update (`~/.zshrc`, `~/.bashrc`)
-- Every `codex` run auto-syncs session markdown logs into `.cwf/projects/sessions/` as `*.codex.md`
+- Every `codex` run auto-syncs session markdown logs into `.cwf/sessions/` by default (legacy fallback: `.cwf/projects/sessions/`) as `*.codex.md`
+- Session artifact directories (`plan.md`, `retro.md`, `next-session.md`) remain under `.cwf/projects/{YYMMDD}-{NN}-{title}/`
 - Sync is anchored to the session updated during the current run (reduces wrong-session exports on shared cwd)
 - Raw JSONL copy is opt-in (`--raw`); redaction still applies when raw export is enabled
-- Wrapper scope is currently session-log sync. Codex does not expose Claude-style Pre/PostTool hook lifecycles, but session-level post-run automation (for example validation/state sync) can still be extended through the wrapper.
+- Post-run quality checks on changed files (markdownlint, local link checks, shellcheck when available, live state check, `apply_patch via exec_command` hygiene detection, and HITL scratchpad sync detection for doc edits) with `warn|strict` mode control
+- Runtime controls:
+  - `CWF_CODEX_POST_RUN_CHECKS=true|false` (default: `true`)
+  - `CWF_CODEX_POST_RUN_MODE=warn|strict` (default: `warn`)
+  - `CWF_CODEX_POST_RUN_QUIET=true|false` (default: `false`)
 
 Verify:
 
@@ -404,7 +418,7 @@ Use `.cwf/config.yaml` for shared non-secret defaults:
 # CWF_GATHER_OUTPUT_DIR: ".cwf/projects"
 # CWF_READ_WARN_LINES: 500
 # CWF_READ_DENY_LINES: 2000
-# CWF_SESSION_LOG_DIR: ".cwf/projects/sessions"
+# CWF_SESSION_LOG_DIR: ".cwf/sessions"
 # CWF_SESSION_LOG_ENABLED: true
 # CWF_SESSION_LOG_TRUNCATE: 10
 # CWF_SESSION_LOG_AUTO_COMMIT: false
@@ -445,7 +459,7 @@ CWF_ATTENTION_USER_ID="U0123456789"             # default: unset
 CWF_GATHER_OUTPUT_DIR=".cwf/projects"               # default: .cwf/projects
 CWF_READ_WARN_LINES=700                            # default: 500
 CWF_READ_DENY_LINES=2500                           # default: 2000
-CWF_SESSION_LOG_DIR=".cwf/projects/sessions"       # default: .cwf/projects/sessions
+CWF_SESSION_LOG_DIR=".cwf/sessions"                # default: .cwf/sessions (legacy fallback: .cwf/projects/sessions)
 CWF_SESSION_LOG_ENABLED=false                      # default: true
 CWF_SESSION_LOG_TRUNCATE=20                        # default: 10
 CWF_SESSION_LOG_AUTO_COMMIT=true                   # default: false

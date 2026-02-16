@@ -470,8 +470,8 @@ When an external CLI exits non-zero, parse stderr **immediately** for error type
 1. Apply the action:
    - **CAPACITY**: Skip exit code check. Launch fallback immediately.
    - **INTERNAL**: Re-run the CLI command once. If still fails, launch fallback.
-   - **AUTH**: Do NOT launch fallback. Report: `Slot N ({tool}) AUTH error. Configure the selected provider (codex auth login or npx @google/gemini-cli).`
-   - **TOOL_ERROR**: Skip exit code check. Launch fallback immediately. Note in Confidence Note: `Slot N ({tool}) TOOL_ERROR — CLI attempted unavailable tool.`
+   - **AUTH**: Do NOT stop with report only. Ask whether to configure now (`codex auth login` or `npx @google/gemini-cli`) and retry that slot once. If user declines, continue with Task fallback and record in Confidence Note.
+   - **TOOL_ERROR**: Skip exit code check. Ask whether to install now (recommended via `cwf:setup --tools`), then retry once if approved; otherwise launch fallback immediately. Record outcome in Confidence Note.
 1. If **no pattern matches**, fall through to exit code classification below.
 
 #### Exit code classification
@@ -630,7 +630,7 @@ This prevents sensitive review content (diffs, plans) from persisting in `/tmp/`
 | No git changes found (code mode) | AskUserQuestion: ask user to specify target |
 | No plan.md found | AskUserQuestion: ask user to specify target |
 | All 6 reviewers report no issues | Verdict = Pass. Note "clean review" in synthesis |
-| Configured external provider unavailable | Route per provider policy (`auto` fallback chain or explicit `claude`). |
+| Configured external provider unavailable | Ask whether to install/configure now (recommended), retry once if approved, otherwise route per fallback policy (`auto` chain or explicit `claude`). |
 | External CLI timeout (120s) | Mark `FAILED`. Spawn Task agent fallback. Note in Confidence Note. |
 | External CLI auth error | Mark `FAILED`. Spawn Task agent fallback. Note in Confidence Note. |
 | External output malformed | Extract by pattern matching. Note in Confidence Note. |
@@ -653,13 +653,14 @@ This prevents sensitive review content (diffs, plans) from persisting in `/tmp/`
    invent its own. If no criteria exist, review on general best practices and note the absence.
 7. **Graceful degradation** — external CLI failure (missing binary,
    timeout, auth error) never blocks the review. Fall back to a Task sub-agent with the same perspective. Always record the fallback in the Provenance table and Confidence Note.
-8. **No silent holdout bypass** — when `--scenarios` is provided, the
+8. **Missing dependency interaction** — when failures are caused by missing tools/auth, ask whether to install/configure now before final fallback-only completion.
+9. **No silent holdout bypass** — when `--scenarios` is provided, the
    scenario file must be validated and assessed. Never downgrade to "best effort" silently.
-9. **Base strategy must be explicit in output** — for code mode, always
+10. **Base strategy must be explicit in output** — for code mode, always
    report which base path was used (explicit `--base`, upstream, or fallback).
-10. **Critical reviewer outputs hard-fail** — if any required review file
+11. **Critical reviewer outputs hard-fail** — if any required review file
     remains invalid after bounded retry, stop synthesis with explicit file-level error.
-11. **Commit-boundary split for mixed follow-up work** — when review findings
+12. **Commit-boundary split for mixed follow-up work** — when review findings
     imply both `tidy` and `behavior-policy` changes, recommend separate commit
     units and `tidy` first.
 

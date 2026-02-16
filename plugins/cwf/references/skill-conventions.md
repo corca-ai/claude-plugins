@@ -59,6 +59,28 @@ Place immediately after the 1-2 line description, before any sections.
 **Language**: Write {artifact} in the user's language. Communicate with the user in their prompt language.
 ```
 
+## Context-Deficit Resilience (Global Contract)
+
+All CWF skills must remain executable when prior conversation context is missing or truncated.
+
+- Do not depend on implicit chat memory.
+- Recover intent from persisted state/artifacts/handoff files first.
+- If required artifacts are missing, fail with explicit remediation steps (which file is missing and how to regenerate it).
+
+Minimum fallback path for context-deficit conditions:
+1. Resolve effective live-state file (`cwf-live-state.sh resolve`).
+2. Load session directory artifacts (`plan.md`, `lessons.md`, `retro.md`, `next-session.md`, `phase-handoff.md` as applicable).
+3. Apply skill-specific deterministic recovery gates before continuing.
+
+## Missing Dependency Handling (Global Contract)
+
+When a required executable/library/key is missing:
+
+- Do not end with a passive "missing/unavailable" message only.
+- Ask whether the user wants to install/configure now.
+- If install is approved, run the concrete install/config command and retry the failed step once.
+- If installation is declined or fails, provide exact follow-up commands and continue with explicit fallback (or stop if no safe fallback exists).
+
 ## Rules Section
 
 Every skill MUST have a `## Rules` section before `## References`.
@@ -72,6 +94,8 @@ These rules apply to all CWF skills. Include them verbatim:
    (Only for skills that read/write cwf-state.yaml.)
 3. **cwf-state.yaml auto-init**: If cwf-state.yaml does not exist in the project root,
    create it with the minimum schema before proceeding. See [cwf-state-init](#cwf-stateyaml-auto-init) below.
+4. **Context-deficit resilience**: Skills must execute using persisted state/artifacts/handoff files when prior conversation context is unavailable.
+5. **Missing dependency interaction**: When prerequisites are missing, ask to install/configure now; do not only report unavailability.
 
 ## cwf-state.yaml Auto-Init
 

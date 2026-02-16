@@ -14,10 +14,12 @@ Adaptive end-of-session review that converts outcomes into durable process/conte
 ```text
 /retro [path]            # adaptive (deep by default)
 /retro --deep [path]     # full analysis with expert lens
+/retro --from-run [path] # internal flag when invoked by cwf:run
 ```
 
 - `path`: optional override for output directory
 - `--deep`: force full 7-section analysis (expert lens, learning resources, web search)
+- `--from-run`: internal invocation context flag; enables compact report for run-chain orchestration
 
 ## Workflow
 
@@ -43,7 +45,13 @@ Resolution order:
 
 ### 2. Read Existing Artifacts
 
-Read `plan.md`, `lessons.md` (if they exist in target dir), AGENTS.md from project root (plus CLAUDE.md when runtime-specific behavior matters), project context document (e.g. docs/project-context.md), and `cwf-state.yaml` (if it exists) — to understand session goals, project stage, and avoid duplicating content.
+Before reading artifacts, run the evidence collector:
+
+```bash
+bash {SKILL_DIR}/../../scripts/retro-collect-evidence.sh --session-dir "{output-dir}"
+```
+
+Then read `retro-evidence.md` (if generated), `plan.md`, `lessons.md` (if they exist in target dir), AGENTS.md from project root (plus CLAUDE.md when runtime-specific behavior matters), project context document (e.g. docs/project-context.md), and `cwf-state.yaml` (if it exists) — to understand session goals, project stage, and avoid duplicating content.
 
 ### 3. Select Mode
 
@@ -54,6 +62,19 @@ Parse the `--deep` flag from the invocation arguments.
 **If `--deep` is absent**: assess session weight to decide mode:
 - **Light** (Sections 1-4 + 7): Only when `--light` is explicitly specified, OR session < 3 turns with routine/simple tasks (config changes, small fixes, doc edits)
 - **Default bias**: Deep. Invoking retro is itself a signal that the session warrants analysis. Use `--light` to explicitly request lightweight mode when cost savings is desired.
+
+### 3.1 Detect Invocation Context
+
+Determine invocation context from arguments and live task:
+
+- **Run-chain invocation**: `--from-run` present, or live task explicitly indicates `cwf:run`.
+- **Direct user invocation**: all other cases.
+
+Persist this as:
+
+```yaml
+invocation_mode: run_chain | direct
+```
 
 ### 4. Draft Retro
 
@@ -211,6 +232,7 @@ For each proposal, include:
 
 - If primarily a skill gap:
   - **Finding existing skills**: Use `/find-skills` to search for existing solutions and report findings.
+  - Record command/result evidence in Section 7. If unavailable, record explicit evidence (`command -v find-skills`) and fallback rationale.
   - **Creating new skills**: If no existing skill fits, use `/skill-creator` to describe and scaffold the needed skill.
 - If primarily a non-skill tool gap:
   - Recommend concrete tool candidates with a minimal pilot integration plan.
@@ -223,7 +245,11 @@ Write to `{output-dir}/retro.md` using the format below.
 
 ### 6. Link Session Log
 
-Discover runtime logs under `.cwf/projects/sessions/`.
+Discover runtime logs under:
+
+1. Preferred: `.cwf/sessions/`
+2. Legacy fallback: `.cwf/projects/sessions/`
+
 - Prefer suffix files: `{YYMMDD}-*.claude.md`, `{YYMMDD}-*.codex.md`
 - Also allow unsuffixed files: `{YYMMDD}-*.md`
 
@@ -233,7 +259,7 @@ Then:
 3. Ensure `{output-dir}/session-logs/` exists.
 4. For each verified log, create a relative symlink:
    ```bash
-   ln -s "../sessions/{filename}" "{output-dir}/session-logs/{filename}"
+   ln -s "{relative-log-path}/{filename}" "{output-dir}/session-logs/{filename}"
    ```
 5. Compatibility alias: if `{output-dir}/session-log.md` is missing (or already a symlink), point it to one representative file in `session-logs/` (prefer latest).
 6. If no candidates or directories do not exist, skip silently.
@@ -283,7 +309,30 @@ For each finding, evaluate enforcement mechanisms strongest-first:
 
 This is fully automatic: both usage tracking and roster expansion are applied without requiring user confirmation. The retro output provides visibility into all changes made.
 
-### 8. Post-Retro Discussion
+### 8. Direct Invocation Report (Mandatory)
+
+After writing `retro.md`, always report outcomes to the user.
+
+If `invocation_mode=direct` (user-triggered `/retro` or `cwf:retro`):
+
+1. Provide `Retro Brief` with 4-6 bullets:
+   - session objective/result
+   - top waste/root-cause signal
+   - most important CDM lesson
+   - critical tool/capability takeaway
+2. Provide `Persist Proposals` with 2-5 concrete items:
+   - Finding
+   - Recommended tier (`Eval-Hook`, `State`, `Doc`)
+   - Target file/script
+   - Apply-now recommendation
+3. Ask whether to apply persist proposals now (yes/no).
+
+If `invocation_mode=run_chain`:
+
+- Provide compact 1-2 bullet completion report (pipeline continuity first).
+- Still include a short `Persist Proposals` pointer (at least 1 line) so persistence opportunities are not dropped.
+
+### 9. Post-Retro Discussion
 
 The user may continue the conversation after the retro. During post-retro discussion:
 - Update `retro.md` — append under `### Post-Retro Findings`
@@ -353,6 +402,11 @@ Do not prompt the user to start this discussion.
 12. Persist findings follow the eval > state > doc hierarchy. Never suggest adding a doc rule when a deterministic check is possible.
 13. Read cwf-state.yaml (if it exists) during artifact reading to understand project lifecycle context.
 14. Apply stage-tier persistence gates in deep mode: CDM output hard-fails when invalid after bounded retry; Expert/Learning outputs use warning + explicit omission notes.
+15. Deep mode contract must be mode-accurate: if retro.md is labeled `Mode: deep`, ensure all four deep artifact files exist and each ends with `<!-- AGENT_COMPLETE -->`; otherwise downgrade to light mode with explicit reason.
+16. In deep mode, Section 6 must include external web resources (URLs) discovered during this run; internal repository docs can only be supplemental.
+17. If Section 7 includes a skill-gap branch, run `/find-skills` first and record command/result (or explicit tool-unavailable evidence).
+18. `retro-collect-evidence.sh` is the default evidence path; include its output (`retro-evidence.md`) in the evidence set when available.
+19. If retro is directly invoked by the user (not run-chain), the assistant response must include both `Retro Brief` and `Persist Proposals`; do not end with file-write confirmation only.
 
 ## References
 

@@ -48,7 +48,8 @@ Read the current session's artifacts (if they exist):
 - `retro.md` — retrospective (if available)
   - Identify action items not yet addressed
 - Runtime session logs (optional but recommended when available)
-  - Path: `.cwf/projects/sessions/*.claude.md`, `.cwf/projects/sessions/*.codex.md`, `.cwf/projects/sessions/*.md`
+  - Preferred path: `.cwf/sessions/*.claude.md`, `.cwf/sessions/*.codex.md`, `.cwf/sessions/*.md`
+  - Legacy fallback: `.cwf/projects/sessions/*.claude.md`, `.cwf/projects/sessions/*.codex.md`, `.cwf/projects/sessions/*.md`
   - Use these as additional evidence when extracting unresolved items and collaboration signals
 
 ---
@@ -95,7 +96,7 @@ List files the next session agent must read before starting:
 1. `AGENTS.md` — shared project rules and protocols (cross-agent)
 2. `docs/plugin-dev-cheatsheet.md` — plugin development patterns
 3. `cwf-state.yaml` — session history and project state
-4. `.cwf/projects/sessions/*.claude.md` / `*.codex.md` / `*.md` — runtime conversation evidence when available
+4. `.cwf/sessions/*.claude.md` / `*.codex.md` / `*.md` (fallback: `.cwf/projects/sessions/*`) — runtime conversation evidence when available
 5. {task-specific files from master-plan or plan.md}
 ```
 
@@ -243,7 +244,8 @@ The agent executing this skill holds the clarify/gather context in its active co
 
 1. **Context Files**: Which files must the next phase agent read? Always include AGENTS.md and `cwf-state.yaml`. Add files that emerged as critical during the clarify/gather phase. Include CLAUDE.md only if runtime-specific behavior matters.
    - When available, include runtime logs:
-     `.cwf/projects/sessions/*.claude.md`, `.cwf/projects/sessions/*.codex.md`, `.cwf/projects/sessions/*.md`
+     `.cwf/sessions/*.claude.md`, `.cwf/sessions/*.codex.md`, `.cwf/sessions/*.md`
+     (fallback: `.cwf/projects/sessions/*.claude.md`, `.cwf/projects/sessions/*.codex.md`, `.cwf/projects/sessions/*.md`)
 2. **Design Decisions**: Key choices made during clarify/gather with rationale. Source from clarification summaries, user decisions, and discussion outcomes
 3. **Protocols**: Rules and behavioral protocols discovered or established during the current phase. Source from `lessons.md` entries and explicit user instructions
 4. **Prohibitions**: Explicit "do not" constraints. Source from user instructions, clarify decisions, and scope boundaries

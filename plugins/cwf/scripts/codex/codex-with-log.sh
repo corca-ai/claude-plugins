@@ -5,6 +5,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SYNC_SCRIPT="$SCRIPT_DIR/sync-session-logs.sh"
+POST_RUN_SCRIPT="$SCRIPT_DIR/post-run-checks.sh"
 SELF_PATH="$(cd "$SCRIPT_DIR" && pwd)/$(basename "${BASH_SOURCE[0]}")"
 
 is_same_file() {
@@ -51,6 +52,28 @@ if [ -x "$SYNC_SCRIPT" ]; then
   else
     "$SYNC_SCRIPT" --cwd "$PWD" --quiet || true
   fi
+fi
+
+POST_RUN_ENABLED="${CWF_CODEX_POST_RUN_CHECKS:-true}"
+POST_RUN_MODE="${CWF_CODEX_POST_RUN_MODE:-warn}"
+POST_RUN_EXIT=0
+if [ "$POST_RUN_ENABLED" = "true" ] && [ -x "$POST_RUN_SCRIPT" ]; then
+  post_args=(--cwd "$PWD" --mode "$POST_RUN_MODE")
+  if [ -n "$RUN_START_EPOCH" ]; then
+    post_args+=(--since-epoch "$RUN_START_EPOCH")
+  fi
+  if [ "${CWF_CODEX_POST_RUN_QUIET:-false}" = "true" ]; then
+    post_args+=(--quiet)
+  fi
+  if "$POST_RUN_SCRIPT" "${post_args[@]}"; then
+    :
+  else
+    POST_RUN_EXIT=$?
+  fi
+fi
+
+if [ "$EXIT_CODE" -eq 0 ] && [ "$POST_RUN_EXIT" -ne 0 ]; then
+  EXIT_CODE="$POST_RUN_EXIT"
 fi
 
 exit "$EXIT_CODE"

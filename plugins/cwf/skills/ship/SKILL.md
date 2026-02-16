@@ -35,7 +35,15 @@ command -v gh >/dev/null 2>&1 || { echo "gh CLI not found"; exit 1; }
 gh auth status 2>&1 | grep -q "Logged in" || { echo "Not authenticated — run: gh auth login"; exit 1; }
 ```
 
-If either fails, report the issue and stop. Do not proceed.
+If either fails, do not stop with a passive failure only. Ask the user:
+- `Install/configure now (recommended)`:
+  - if `gh` is missing, run `bash {SKILL_DIR}/../setup/scripts/install-tooling-deps.sh --install gh`
+  - if auth is missing, run `gh auth login`
+  - then retry prerequisite checks once
+- `Show commands only`:
+  - print exact install/auth commands and stop
+- `Skip ship for now`:
+  - stop without executing ship actions
 
 ---
 
@@ -252,7 +260,7 @@ Read-only overview of current GitHub state.
 
 | Situation | Action |
 |-----------|--------|
-| `gh` not installed | Report, suggest `brew install gh` or `apt install gh`, stop |
+| `gh` not installed | Ask whether to install now via setup installer script; if declined/fails, print manual commands and stop |
 | Not authenticated | Report, suggest `gh auth login`, stop |
 | No commits ahead of base | Report "nothing to PR", stop |
 | Issue already exists for session | Show existing issue, ask user before creating duplicate |
@@ -287,6 +295,7 @@ Defaults: base=marketplace-v3, merge=squash
 4. Never auto-merge when human-judgment items are present in the PR body.
 5. Preserve user-created files and branches; do not perform destructive cleanup beyond explicit merge cleanup.
 6. All code fences must have language specifiers.
+7. Missing prerequisites must trigger an install/configure choice prompt, not a passive "missing tool" report only.
 
 ## References
 

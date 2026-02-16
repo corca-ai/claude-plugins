@@ -8,13 +8,13 @@
 #
 # By default this script:
 # - Finds the latest Codex session for the current cwd
-# - Writes markdown to ./.cwf/projects/sessions by default as *.codex.md
+# - Writes markdown to resolve_cwf_session_logs_dir output (prefers ./.cwf/sessions,
+#   falls back to legacy ./.cwf/projects/sessions when needed) as *.codex.md
 # - Does not copy raw JSONL (use --raw to enable)
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 REDACTOR_SCRIPT="$SCRIPT_DIR/redact-sensitive.pl"
 JSON_REDACTOR_SCRIPT="$SCRIPT_DIR/redact-jsonl.sh"
 RESOLVER_SCRIPT="$SCRIPT_DIR/../cwf-artifact-paths.sh"
@@ -26,11 +26,11 @@ if [ ! -f "$RESOLVER_SCRIPT" ]; then
 fi
 
 # shellcheck source=../cwf-artifact-paths.sh
+# shellcheck disable=SC1090,SC1091
 source "$RESOLVER_SCRIPT"
 
 DEFAULT_CWD="$(pwd)"
-DEFAULT_PROJECTS_DIR="$(resolve_cwf_projects_dir "$DEFAULT_CWD")"
-DEFAULT_OUT_DIR="$DEFAULT_PROJECTS_DIR/sessions"
+DEFAULT_OUT_DIR="$(resolve_cwf_session_logs_dir "$DEFAULT_CWD")"
 CODEX_SESSIONS_DIR="${CODEX_SESSIONS_DIR:-$HOME/.codex/sessions}"
 TRUNCATE_THRESHOLD="${CODEX_SESSION_LOG_TRUNCATE:-20}"
 
@@ -54,7 +54,7 @@ Options:
   --jsonl <path>       Export a specific JSONL file directly
   --cwd <path>         Prefer sessions whose session_meta.cwd matches path (default: $PWD)
   --since-epoch <sec>  Prefer sessions modified at/after this epoch seconds value
-  --out-dir <path>     Output directory (default: ./.cwf/projects/sessions)
+  --out-dir <path>     Output directory (default: CWF_SESSION_LOG_DIR/.cwf/sessions with legacy fallback)
   --raw                Copy raw JSONL into out-dir/raw
   --no-raw             Backward-compatible alias for default behavior (no raw copy)
   --quiet              Suppress informational output

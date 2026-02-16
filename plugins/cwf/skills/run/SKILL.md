@@ -21,6 +21,7 @@ cwf:run --skip review-plan,retro     # Skip specific stages
 Operational note:
 - Default `cwf:run` chain is: gather → clarify → plan → review(plan) → impl → review(code) → refactor → retro → ship.
 - `refactor` runs before retro/ship to catch cross-skill and docs drift as part of the default delivery quality loop.
+- Context-deficit resilience applies: stage orchestration must recover from persisted state/artifacts/handoff files, not prior chat memory.
 
 ---
 
@@ -63,7 +64,7 @@ Execute stages in order. Each stage invokes the corresponding CWF skill via the 
 | 5 | impl | `cwf:impl --skip-clarify` | — | true |
 | 6 | review-code | `cwf:review --mode code` | Verdict-based | true |
 | 7 | refactor | `cwf:refactor` | — | true |
-| 8 | retro | `cwf:retro` | — | true |
+| 8 | retro | `cwf:retro --from-run` | — | true |
 | 9 | ship | `cwf:ship` | User confirms PR | false |
 
 ### Stage Execution Loop
@@ -200,6 +201,7 @@ After all stages complete (or the pipeline is halted):
 1. **Flags compose**: `--from impl --skip retro` is valid. Apply both filters.
 1. **Graceful halt**: When the user chooses "Stop", update state and report what was completed. Do not leave state in an inconsistent phase.
 1. **Do not bypass impl branch gate by default**: `cwf:run` must not pass `--skip-branch` to `cwf:impl` unless the user explicitly requests bypass.
+1. **Context-deficit resilience**: On resume/restart, reconstruct stage context from `cwf-state.yaml`, session artifacts, and handoff docs before invoking downstream skills.
 
 ## References
 

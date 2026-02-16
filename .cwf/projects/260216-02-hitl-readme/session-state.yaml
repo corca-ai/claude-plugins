@@ -1,0 +1,20 @@
+# session-state.yaml — volatile session live state
+# Synced from .cwf/cwf-state.yaml live section.
+
+live:
+  session_id: "260216-02"
+  dir: ".cwf/projects/260216-02-hitl-readme"
+  branch: "marketplace-v3"
+  phase: "retro"
+  task: "README.ko reflection update and HITL review loop"
+  key_files:
+    - README.ko.md
+    - .cwf/projects/260216-02-hitl-readme/readme-reflect-plan.md
+    - .cwf/cwf-state.yaml
+  decisions: []
+  decision_journal: []
+  hitl:
+    session_id: "260216-02-hitl"
+    state_file: ".cwf/projects/260216-02-hitl-readme/hitl/state.yaml"
+    rules_file: ".cwf/projects/260216-02-hitl-readme/hitl/rules.yaml"
+    updated_at: "2026-02-16T02:42:35Z"

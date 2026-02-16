@@ -118,6 +118,36 @@ resolve_cwf_projects_dir() {
   fi
 }
 
+resolve_cwf_session_logs_dir() {
+  local base_dir="$1"
+  local artifact_root
+  local projects_dir
+  local modern_default
+  local legacy_default
+  local raw_log_dir=""
+
+  raw_log_dir="$(_cwf_resolve_config_value "$base_dir" "CWF_SESSION_LOG_DIR" 2>/dev/null || true)"
+  if [[ -n "$raw_log_dir" ]]; then
+    resolve_cwf_abs_path "$base_dir" "$raw_log_dir"
+    return 0
+  fi
+
+  artifact_root="$(resolve_cwf_artifact_root "$base_dir")"
+  projects_dir="$(resolve_cwf_projects_dir "$base_dir")"
+  modern_default="$artifact_root/sessions"
+  legacy_default="$projects_dir/sessions"
+
+  # Prefer the modern path when available. If only legacy exists, keep using it
+  # so existing repositories don't split logs across two locations.
+  if [[ -d "$modern_default" ]]; then
+    printf '%s\n' "$modern_default"
+  elif [[ -d "$legacy_default" ]]; then
+    printf '%s\n' "$legacy_default"
+  else
+    printf '%s\n' "$modern_default"
+  fi
+}
+
 resolve_cwf_state_file() {
   local base_dir="$1"
   local artifact_root
@@ -145,7 +175,7 @@ resolve_cwf_projects_relpath() {
   if [[ "$projects_dir" == "$base_dir" ]]; then
     printf '%s\n' "."
   elif [[ "$projects_dir" == "$base_dir/"* ]]; then
-    rel_path="${projects_dir#$base_dir/}"
+    rel_path="${projects_dir#"$base_dir"/}"
     rel_path="${rel_path#./}"
     rel_path="${rel_path%/}"
     if [[ -z "$rel_path" || "$rel_path" == "." ]]; then

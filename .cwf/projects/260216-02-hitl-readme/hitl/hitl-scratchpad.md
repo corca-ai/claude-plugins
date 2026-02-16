@@ -1,7 +1,7 @@
 # HITL Scratchpad
 
 Session: `260216-02-hitl-readme`
-Updated: `2026-02-16T08:30:06Z`
+Updated: `2026-02-16T09:27:26Z`
 
 ## Purpose
 
@@ -274,6 +274,51 @@ Single source of truth for HITL consensus, rationale, and unresolved questions.
     - `Before/After/After Intent`와 넓은 문맥 제시 규약은 유지
     - 진행 방식은 더 창의적/지능적으로 운영하되, 별도 모드 플래그는 도입하지 않음
 
+- D-038 (Applied, v1): Codex wrapper post-run quality checks (option 2 only).
+  - Direction:
+    - `cwf:setup --codex-wrapper`로 설치되는 wrapper 실행 뒤, "이번 실행에서 바뀐 파일" 기준의 경량 품질 점검을 자동 수행
+    - 기본은 경고 모드(`warn`)로 보고만 하고, 필요 시 `strict`로 실패를 종료코드에 반영
+    - 문서/셸/링크/라이브 상태 점검을 후처리로 묶어 사용자 검토 전에 기본 안전망을 제공
+  - Implemented by:
+    - `plugins/cwf/scripts/codex/post-run-checks.sh`, `scripts/codex/post-run-checks.sh` (new)
+    - `plugins/cwf/scripts/codex/codex-with-log.sh`, `scripts/codex/codex-with-log.sh` (post-run hook + strict exit propagation)
+    - `plugins/cwf/scripts/README.md` (script map)
+    - `plugins/cwf/scripts/check-growth-drift.sh`, `scripts/check-growth-drift.sh` (mirror pair update)
+  - Runtime controls:
+    - `CWF_CODEX_POST_RUN_CHECKS=true|false` (default: `true`)
+    - `CWF_CODEX_POST_RUN_MODE=warn|strict` (default: `warn`)
+    - `CWF_CODEX_POST_RUN_QUIET=true|false` (default: `false`)
+
+- D-039 (Applied): `README.ko.md`의 `retro` 7개 섹션 설명에 남아 있던 인라인 코멘트를 의도 문장으로 반영.
+  - Direction:
+    - 저장 위치 질문(`어디에 저장?`)은 `retro.md` 기본 + 재사용 가치 시 상위 문서 승격으로 명확화
+    - CDM/Expert/Learning/Tool Gaps 항목은 \"왜 필요한가\"가 드러나도록 목적 문장으로 재작성
+  - Applied to:
+    - `README.ko.md` (`retro`의 7개 섹션 설명 목록)
+
+- D-040 (Applied): SoT 기준으로 wrapper 설명과 README 동기화 정리.
+  - Direction:
+    - 구현된 wrapper 동작(세션 로그 동기화 + post-run 품질 점검)이 README/Setup 문서에 동일하게 반영되도록 정합화
+    - `README.md`의 워크플로우 설명에서 SoT와 어긋난 보조 문단(`Concept composition`) 제거
+  - Applied to:
+    - `README.ko.md` (`setup`, `Codex 연동`의 wrapper 설명)
+    - `README.md` (`retro`, `setup`, `Codex Integration` 설명 + concept composition 문단 제거)
+    - `plugins/cwf/skills/setup/SKILL.md` (wrapper phase/옵션 설명)
+
+- D-041 (Applied): 리트로 후속 반영 완료.
+  - Direction:
+    - 리트로 작성 뒤 완료된 수정사항(`README.ko` 잔여 코멘트 반영, README/Setup 동기화)을 회고 산출물에 반영
+    - 이번 세션에서 발생한 범위 이탈/도구 위생 이슈의 원인과 방지책을 고정
+  - Applied to:
+    - `.cwf/projects/260216-02-hitl-readme/retro.md` (`Post-Retro Findings`)
+
+- D-042 (Applied): 다음 세션 핸드오프에 retro 재발 방지 규약을 명시.
+  - Direction:
+    - deep retro 필수 절차(2-batch sub-agent, deep artifact + AGENT_COMPLETE, external learning resources, `/find-skills` 실행 근거)를 next-session에 강제 체크리스트로 고정
+    - 다음 세션 구현 범위를 `2/4/5/6`만으로 명시하고 `3`은 제외
+  - Applied to:
+    - `.cwf/projects/260216-02-hitl-readme/next-session.md`
+
 - I-001 (Applied): Make agreement-capture notes a default HITL behavior.
   - Implemented in `plugins/cwf/skills/hitl/SKILL.md` as default agreement round before chunk review.
   - `hitl-scratchpad.md` is now explicit state artifact and rationale log.
@@ -322,7 +367,6 @@ Single source of truth for HITL consensus, rationale, and unresolved questions.
 
 - Q-002: Codex 연동에서 wrapper 이후 확장할 세션 후처리(검증/상태 동기화) 훅 후보 정의.
 - Q-003: HITL 기본 흐름의 체감 경직성을, 플래그 추가 없이 운영 방식 개선으로 어떻게 줄일지.
-- Q-004: `README.ko.md` 변경 의도 동기화를 위한 `README.md`(영문) 반영 타이밍과 번역 정책.
 
 ## Skill Update Backlog
 
@@ -333,8 +377,8 @@ Single source of truth for HITL consensus, rationale, and unresolved questions.
 
 ## Next Pending Item
 
-- Continue `README.ko.md` agreement/apply loop.
-- Reflect remaining README.ko intent comments into README.md and related skill docs one chunk at a time via HITL.
+- Define the next concrete implementation slice for Q-002 (wrapper post-run checks V2 candidate set).
+- Implement a deterministic HITL intent-resync/state-check mechanism for Q-003.
 
 ## Notes
 

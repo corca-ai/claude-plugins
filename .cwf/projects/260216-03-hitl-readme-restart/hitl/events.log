@@ -1,0 +1,4 @@
+2026-02-16T02:42:35Z session_started scope=docs base=main file=README.ko.md chunk=README.ko.md:1-120
+2026-02-16T02:42:35Z chunk_presented file=README.ko.md range=1-120
+2026-02-16T02:54:56Z agreement_recorded d005=accepted i002=accepted artifact=hitl-scratchpad.md
+2026-02-16T09:45:52Z session_forked from=.cwf/projects/260216-02-hitl-readme reason=long-session-new-dir

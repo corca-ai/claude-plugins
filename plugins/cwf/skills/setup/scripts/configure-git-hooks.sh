@@ -103,9 +103,9 @@ PROFILE="__PROFILE__"
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
-mapfile -t md_files < <(
+  mapfile -t md_files < <(
   git diff --cached --name-only --diff-filter=ACMR -- '*.md' '*.mdx' \
-    | grep -Ev '^(\.cwf/projects/|\.cwf/prompt-logs/|references/anthropic-skills-guide/)' || true
+    | grep -Ev '^(\.cwf/projects/|\.cwf/sessions/|\.cwf/prompt-logs/|references/anthropic-skills-guide/)' || true
 )
 
 if [ "${#md_files[@]}" -gt 0 ]; then
@@ -156,7 +156,7 @@ cd "$REPO_ROOT"
 
 mapfile -t md_files < <(
   git ls-files '*.md' '*.mdx' \
-    | grep -Ev '^(\.cwf/projects/|\.cwf/prompt-logs/|references/anthropic-skills-guide/)' || true
+    | grep -Ev '^(\.cwf/projects/|\.cwf/sessions/|\.cwf/prompt-logs/|references/anthropic-skills-guide/)' || true
 )
 
 if [ "${#md_files[@]}" -gt 0 ]; then

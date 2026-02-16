@@ -242,7 +242,7 @@ check_run_chain_sync() {
   norm_en="$(normalize_chain "$line_en")"
   norm_run="$(normalize_chain "$line_run")"
 
-  if [[ "$norm_ko" != "$norm_en" || "$norm_ko" != "$norm_run" ]]; then
+  if [[ "$norm_ko" != "$norm_en" ]] || [[ "$norm_ko" != "$norm_run" ]]; then
     record_fail "$category" "Default chain mismatch across README.ko/README/run-SKILL"
     record_fail "$category" "README.ko: $line_ko"
     record_fail "$category" "README: $line_en"
@@ -282,7 +282,9 @@ scripts/check-session.sh|plugins/cwf/scripts/check-session.sh
 scripts/next-prompt-dir.sh|plugins/cwf/scripts/next-prompt-dir.sh
 scripts/cwf-artifact-paths.sh|plugins/cwf/scripts/cwf-artifact-paths.sh
 scripts/cwf-live-state.sh|plugins/cwf/scripts/cwf-live-state.sh
+scripts/retro-collect-evidence.sh|plugins/cwf/scripts/retro-collect-evidence.sh
 scripts/codex/codex-with-log.sh|plugins/cwf/scripts/codex/codex-with-log.sh
+scripts/codex/post-run-checks.sh|plugins/cwf/scripts/codex/post-run-checks.sh
 scripts/codex/verify-skill-links.sh|plugins/cwf/scripts/codex/verify-skill-links.sh
 scripts/codex/sync-session-logs.sh|plugins/cwf/scripts/codex/sync-session-logs.sh
 scripts/codex/redact-session-logs.sh|plugins/cwf/scripts/codex/redact-session-logs.sh
@@ -325,9 +327,9 @@ check_live_state_pointers() {
     return
   fi
 
-  # shellcheck source=./cwf-artifact-paths.sh
+  # shellcheck disable=SC1090,SC1091
   source "$resolver"
-  # shellcheck source=./cwf-live-state.sh
+  # shellcheck disable=SC1090,SC1091
   source "$live_resolver"
   state_file="$(resolve_cwf_state_file "$REPO_ROOT")"
 
@@ -375,7 +377,7 @@ check_live_state_pointers() {
   if [[ -z "$phase" ]]; then
     record_fail "$category" "live.phase is empty"
   else
-    for p in setup update gather clarify plan review review-plan impl review-code refactor retro handoff ship run hitl done; do
+    for p in setup update gather clarify plan review review-plan impl review-code refactor retro handoff ship run hitl "done"; do
       if [[ "$phase" == "$p" ]]; then
         phase_ok=1
         break

@@ -2,6 +2,14 @@
 
 Shared validation protocol for sub-agent output file persistence and recovery after context compaction.
 
+## Global Contract
+
+This protocol exists to enforce context-deficit resilience across skills:
+
+- Treat persisted state/artifacts/handoff files as the source of truth.
+- Never require implicit conversational memory to continue execution.
+- If required recovery inputs are missing, fail with explicit file-level remediation.
+
 ## Session Directory Resolution
 
 Resolve the effective live-state file first, then read `live.dir`.

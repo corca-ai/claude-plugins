@@ -365,23 +365,24 @@ hooks:
 # read by SessionStart(compact) hook for context recovery after auto-compact.
 # check-session.sh --live validates required fields are populated.
 live:
-  session_id: "260216-02"
-  dir: ".cwf/projects/260216-02-hitl-readme"
+  session_id: "260216-03"
+  dir: ".cwf/projects/260216-03-hitl-readme-restart"
   branch: "marketplace-v3"
-  phase: "hitl"
+  phase: "retro"
   task: "README.ko reflection update and HITL review loop"
   key_files:
     - README.ko.md
-    - .cwf/projects/260216-02-hitl-readme/readme-reflect-plan.md
-    - .cwf/cwf-state.yaml
+    - .cwf/projects/260216-03-hitl-readme-restart/next-session.md
+    - .cwf/projects/260216-03-hitl-readme-restart/hitl/hitl-scratchpad.md
   decisions: []
   decision_journal: []
   hitl:
-    session_id: "260216-02-hitl"
-    state_file: ".cwf/projects/260216-02-hitl-readme/hitl/state.yaml"
-    rules_file: ".cwf/projects/260216-02-hitl-readme/hitl/rules.yaml"
+    session_id: "260216-03-hitl"
+    state_file: ".cwf/projects/260216-03-hitl-readme-restart/hitl/state.yaml"
+    rules_file: ".cwf/projects/260216-03-hitl-readme-restart/hitl/rules.yaml"
     updated_at: "2026-02-16T02:42:35Z"
 
+  state_file: ".cwf/projects/260216-03-hitl-readme-restart/session-state.yaml"
 # Expert roster for domain expert sub-agents (used by clarify, review, retro)
 # Semi-automatic evolution: usage_count auto-incremented, new experts user-approved
 # verified: true = skip web identity verification, cite source field directly
@@ -426,7 +427,7 @@ expert_roster:
     source: "Drift into Failure (Ashgate, 2011)"
     rationale: "Applied to agent behavioral drift analysis"
     introduced: "S13.5-B3"
-    usage_count: 1
+    usage_count: 2
     verified: true
   - name: "Frederick P. Brooks Jr."
     domain: "conceptual integrity, communication overhead, plan-to-throw-one-away, essential vs accidental complexity"
@@ -447,7 +448,7 @@ expert_roster:
     source: "Out of the Crisis (MIT Press, 1986), Point 3: cease dependence on inspection"
     rationale: "Applied to convention-vs-structure enforcement gap, commit strategy recurrence as common cause variation, check-session.sh as inspection-to-process conversion, TOOL_ERROR as common cause variation, Check vs Study distinction in review orchestration, S24 retro: 5 inspection tools as Point 3 tension, 4/6 agent failure as common cause variation, datasketch threshold as PDCA cycle, additionalProperties as statistical process control"
     introduced: "S33"
-    usage_count: 3
+    usage_count: 4
     verified: true
   - name: "Chris Argyris"
     domain: "espoused theory vs theory-in-use, single-loop vs double-loop learning, defensive routines"

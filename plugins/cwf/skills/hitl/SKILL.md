@@ -56,6 +56,17 @@ live:
 - `fix-queue.yaml` is an execution queue for concrete edits.
 - `hitl-scratchpad.md` is the agreement/rationale log (decisions, open questions, and intent).
 
+`state.yaml` must include intent resync gate fields:
+
+```yaml
+session_id: "Sxx-hitl"
+status: "in_progress"
+intent_resync_required: false
+last_user_manual_edit_at: ""
+last_intent_resync_at: ""
+intent_resync_note: ""
+```
+
 ## Phase 0: Resolve Target
 
 1. Resolve base branch:
@@ -86,6 +97,22 @@ Before chunk review starts, run one agreement round in the same `cwf:hitl` flow 
 
 When `--resume` is used, refresh the same scratchpad first (new agreements or changed priorities), then continue from cursor.
 
+## Phase 0.75: Intent Resync Gate
+
+This gate prevents stale intent from leaking into the next chunk.
+
+1. If the user reports manual edits/overwrites (or HITL detects out-of-band file changes), set in `state.yaml`:
+   - `intent_resync_required: true`
+   - `last_user_manual_edit_at: {UTC timestamp}`
+   - `intent_resync_note: {what changed}`
+2. Before presenting any next chunk, check `intent_resync_required`.
+3. If `true`, run resync first:
+   - re-read the changed target files
+   - summarize what changed and confirm updated intent with the user
+   - update `hitl-scratchpad.md` with the confirmed intent delta
+   - set `intent_resync_required: false` and `last_intent_resync_at: {UTC timestamp}`
+4. Only continue chunk review after the flag is cleared.
+
 ## Phase 1: Build Deterministic Queue
 
 1. Build file queue from diff files in stable sorted order.
@@ -100,6 +127,8 @@ When `--resume` is used, refresh the same scratchpad first (new agreements or ch
 If high-impact edits were applied during Phase 0.5, build/rebuild queue after those edits so chunk boundaries and blob hashes are fresh.
 
 ## Phase 2: Chunk Review Loop
+
+Before every chunk presentation, enforce Phase 0.75 gate (`intent_resync_required` must be `false`).
 
 For each chunk, output exactly:
 
@@ -174,3 +203,7 @@ On `--close` (or EOF completion):
 11. For comment-driven doc HITL (for example README reflection), present each item in this order: `Before` (current text), `After` (proposed text), `After Intent` (why this reflects the user's concern and any trade-off/opinion).
     - `Before`/`After` must include enough surrounding context for user judgment (for example, the full paragraph or subsection, not a single isolated sentence).
 12. Do not ask a separate "proceed to next item?" question. When the current item is agreed, present the next pending item immediately; if not agreed, keep discussing the same item until agreement.
+13. If user manual edits are detected/reported, set `intent_resync_required=true` immediately and record the trigger in `events.log`.
+14. Never present a next chunk while `intent_resync_required=true`.
+15. Clearing `intent_resync_required` requires both: (a) scratchpad intent update and (b) `last_intent_resync_at` timestamp update.
+16. During active HITL doc review, document edits and scratchpad state must stay synchronized; post-run checks should flag missing scratchpad updates.

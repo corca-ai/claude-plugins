@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # check-session.sh — Verify session completion artifacts
-# Usage: check-session.sh [--impl|--live|--semantic-gap] [session-id]
+# Usage: check-session.sh [--impl|--live|--semantic-gap] [session-id|session-dir]
 #   --impl    Check impl_complete artifacts only (plan.md, lessons.md, next-session.md)
 #             Use after implementation, before retro. Prevents dismissing FAIL
 #             because "retro.md is expected to be missing at this stage."
@@ -14,7 +14,7 @@ set -euo pipefail
 #             (1) GAP(Unresolved/Unknown) -> BL linkage, (2) CW -> GAP linkage,
 #             (3) optional RANGE consistency.
 #   (default) Check all artifacts (always + milestone)
-# If no session-id, checks the most recent session in the CWF state file
+# If no selector, checks the most recent session in the CWF state file
 # Reads expected artifacts from session entry or session_defaults
 # Exit 0 = all good, Exit 1 = missing/empty artifacts
 
@@ -29,9 +29,11 @@ if [[ ! -f "$RESOLVER_SCRIPT" ]]; then
 fi
 
 # shellcheck source=./cwf-artifact-paths.sh
+# shellcheck disable=SC1090,SC1091
 source "$RESOLVER_SCRIPT"
 if [[ -f "$LIVE_RESOLVER_SCRIPT" ]]; then
   # shellcheck source=./cwf-live-state.sh
+  # shellcheck disable=SC1090,SC1091
   source "$LIVE_RESOLVER_SCRIPT"
 fi
 
@@ -45,6 +47,25 @@ elif [[ "${1:-}" == "--live" ]]; then
 elif [[ "${1:-}" == "--semantic-gap" ]]; then
   PHASE="semantic_gap"
   shift
+fi
+
+usage() {
+  cat <<'USAGE'
+Usage:
+  check-session.sh [--impl|--live|--semantic-gap] [session-id|session-dir]
+
+Examples:
+  check-session.sh
+  check-session.sh S14
+  check-session.sh .cwf/projects/260216-03-hitl-readme-restart
+  check-session.sh --impl S14
+  check-session.sh --live
+USAGE
+}
+
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+  usage
+  exit 0
 fi
 
 STATE_FILE="$(resolve_cwf_state_file "$REPO_ROOT")"
@@ -92,28 +113,46 @@ if [[ "$PHASE" == "live" ]]; then
       break
     fi
     if $in_live; then
-      if [[ "$line" =~ ^[[:space:]]+session_id:[[:space:]]*\"?([^\"]*)\"? ]]; then
+      if [[ "$line" =~ ^[[:space:]]{2}session_id:[[:space:]]*\"?([^\"]*)\"? ]]; then
         live_session_id="${BASH_REMATCH[1]}"
-      elif [[ "$line" =~ ^[[:space:]]+dir:[[:space:]]*(.+) ]]; then
+      elif [[ "$line" =~ ^[[:space:]]{2}dir:[[:space:]]*(.+) ]]; then
         live_dir="${BASH_REMATCH[1]}"
-      elif [[ "$line" =~ ^[[:space:]]+phase:[[:space:]]*(.+) ]]; then
+      elif [[ "$line" =~ ^[[:space:]]{2}phase:[[:space:]]*(.+) ]]; then
         live_phase="${BASH_REMATCH[1]}"
-      elif [[ "$line" =~ ^[[:space:]]+task:[[:space:]]*\"?([^\"]*)\"? ]]; then
+      elif [[ "$line" =~ ^[[:space:]]{2}task:[[:space:]]*\"?([^\"]*)\"? ]]; then
         live_task="${BASH_REMATCH[1]}"
       fi
     fi
   done < "$live_state_file"
 
-  for field_name in session_id dir phase task; do
-    eval "val=\$live_${field_name}"
-    if [[ -n "$val" ]]; then
-      echo -e "  ${GREEN}✓${NC} ${field_name}: ${val}"
-      live_pass=$((live_pass + 1))
-    else
-      echo -e "  ${RED}✗${NC} ${field_name}: (empty)"
-      live_fail=$((live_fail + 1))
-    fi
-  done
+  if [[ -n "$live_session_id" ]]; then
+    echo -e "  ${GREEN}✓${NC} session_id: ${live_session_id}"
+    live_pass=$((live_pass + 1))
+  else
+    echo -e "  ${RED}✗${NC} session_id: (empty)"
+    live_fail=$((live_fail + 1))
+  fi
+  if [[ -n "$live_dir" ]]; then
+    echo -e "  ${GREEN}✓${NC} dir: ${live_dir}"
+    live_pass=$((live_pass + 1))
+  else
+    echo -e "  ${RED}✗${NC} dir: (empty)"
+    live_fail=$((live_fail + 1))
+  fi
+  if [[ -n "$live_phase" ]]; then
+    echo -e "  ${GREEN}✓${NC} phase: ${live_phase}"
+    live_pass=$((live_pass + 1))
+  else
+    echo -e "  ${RED}✗${NC} phase: (empty)"
+    live_fail=$((live_fail + 1))
+  fi
+  if [[ -n "$live_task" ]]; then
+    echo -e "  ${GREEN}✓${NC} task: ${live_task}"
+    live_pass=$((live_pass + 1))
+  else
+    echo -e "  ${RED}✗${NC} task: (empty)"
+    live_fail=$((live_fail + 1))
+  fi
 
   echo "---"
   total=$((live_pass + live_fail))
@@ -153,13 +192,13 @@ parse_defaults() {
       fi
       if [[ "$in_artifacts" == "true" ]]; then
         if [[ "$line" =~ ^[[:space:]]*impl_complete: ]]; then
-          DEFAULTS_IMPL_COMPLETE=$(echo "$line" | sed 's/.*impl_complete:\s*//')
+          DEFAULTS_IMPL_COMPLETE="$(trim_ws "${line#*:}")"
         fi
         if [[ "$line" =~ ^[[:space:]]*always: ]]; then
-          DEFAULTS_ALWAYS=$(echo "$line" | sed 's/.*always:\s*//')
+          DEFAULTS_ALWAYS="$(trim_ws "${line#*:}")"
         fi
         if [[ "$line" =~ ^[[:space:]]*milestone: ]]; then
-          DEFAULTS_MILESTONE=$(echo "$line" | sed 's/.*milestone:\s*//')
+          DEFAULTS_MILESTONE="$(trim_ws "${line#*:}")"
         fi
       fi
     fi
@@ -345,11 +384,94 @@ run_semantic_gap_checks() {
 
 parse_defaults
 
-SESSION_ID="${1:-}"
+normalize_session_dir_selector() {
+  local selector="$1"
+  local abs=""
 
-# Find the session block in the CWF state file
-# If no session ID given, use the last session entry
-if [[ -z "$SESSION_ID" ]]; then
+  if [[ "$selector" == /* ]]; then
+    abs="$selector"
+  else
+    abs="$REPO_ROOT/$selector"
+  fi
+
+  [[ -d "$abs" ]] || return 1
+
+  if command -v realpath >/dev/null 2>&1; then
+    abs="$(realpath "$abs")"
+  else
+    abs="$(cd "$abs" && pwd)"
+  fi
+
+  if [[ "$abs" == "$REPO_ROOT/"* ]]; then
+    printf '%s\n' "${abs#"$REPO_ROOT"/}"
+  else
+    printf '%s\n' "$abs"
+  fi
+}
+
+find_session_by_dir() {
+  local target_dir="$1"
+  local current_id=""
+  local current_dir=""
+  local current_artifacts=""
+  local in_sessions=false
+
+  while IFS= read -r line; do
+    if [[ "$line" =~ ^sessions: ]]; then
+      in_sessions=true
+      continue
+    fi
+    if [[ "$in_sessions" == "true" && "$line" =~ ^[a-z#] ]]; then
+      break
+    fi
+    if [[ "$in_sessions" != "true" ]]; then
+      continue
+    fi
+
+    if [[ "$line" =~ ^[[:space:]]*-[[:space:]]*id:[[:space:]]*\"?([^\"[:space:]]+)\"?[[:space:]]*$ ]]; then
+      if [[ -n "$current_id" && "$current_dir" == "$target_dir" ]]; then
+        SESSION_ID="$current_id"
+        SESSION_DIR="$current_dir"
+        ARTIFACTS_LINE="$current_artifacts"
+        return 0
+      fi
+      current_id="${BASH_REMATCH[1]}"
+      current_dir=""
+      current_artifacts=""
+      continue
+    fi
+
+    if [[ "$line" =~ ^[[:space:]]*dir:[[:space:]]*(.+)$ ]]; then
+      current_dir=$(echo "${BASH_REMATCH[1]}" | tr -d '"')
+      continue
+    fi
+
+    if [[ "$line" =~ ^[[:space:]]*artifacts:[[:space:]]*(.+)$ ]]; then
+      current_artifacts="${BASH_REMATCH[1]}"
+      continue
+    fi
+  done < "$STATE_FILE"
+
+  if [[ -n "$current_id" && "$current_dir" == "$target_dir" ]]; then
+    SESSION_ID="$current_id"
+    SESSION_DIR="$current_dir"
+    ARTIFACTS_LINE="$current_artifacts"
+    return 0
+  fi
+
+  return 1
+}
+
+SESSION_SELECTOR="${1:-}"
+SESSION_ID=""
+SESSION_DIR=""
+ARTIFACTS_LINE=""
+
+# Selector resolution priority:
+#   1) empty selector -> most recent session ID
+#   2) existing directory selector -> check by explicit session dir
+#   3) fallback -> treat selector as session ID
+if [[ -z "$SESSION_SELECTOR" ]]; then
   # Get the last session ID
   SESSION_ID=$(grep '^\s*- id:' "$STATE_FILE" | tail -1 | sed 's/.*id:\s*//' | tr -d ' "')
   if [[ -z "$SESSION_ID" ]]; then
@@ -357,43 +479,61 @@ if [[ -z "$SESSION_ID" ]]; then
     exit 1
   fi
   echo -e "${YELLOW}No session ID specified, checking most recent: ${SESSION_ID}${NC}"
-fi
-
-# Extract session dir and artifacts
-SESSION_DIR=""
-ARTIFACTS_LINE=""
-found=false
-while IFS= read -r line; do
-  if [[ "$found" == "true" ]]; then
-    # Check if we hit the next session entry or left the sessions block
-    if [[ "$line" =~ ^[[:space:]]*-[[:space:]]*id: ]] && [[ "$line" != *"$SESSION_ID"* ]]; then
-      break
+else
+  selector_dir="$(normalize_session_dir_selector "$SESSION_SELECTOR" 2>/dev/null || true)"
+  if [[ -n "$selector_dir" ]]; then
+    SESSION_DIR="$selector_dir"
+    if find_session_by_dir "$selector_dir"; then
+      :
+    else
+      # Path mode without matching session metadata: use defaults for artifact set.
+      SESSION_ID="$(basename "$selector_dir")"
+      echo -e "${YELLOW}Session dir selector provided; no matching session ID found in state. Using defaults for: ${SESSION_DIR}${NC}"
     fi
-    # Top-level key (not indented) means we've left the sessions block
-    if [[ "$line" =~ ^[a-z#] ]]; then
-      break
+  else
+    if [[ "$SESSION_SELECTOR" == */* ]]; then
+      echo -e "${RED}Error: Session directory selector not found: $SESSION_SELECTOR${NC}" >&2
+      exit 1
     fi
-    if [[ "$line" =~ ^[[:space:]]*dir: ]]; then
-      SESSION_DIR=$(echo "$line" | sed 's/.*dir:\s*//' | tr -d ' "')
-    fi
-    if [[ "$line" =~ ^[[:space:]]*artifacts: ]]; then
-      ARTIFACTS_LINE=$(echo "$line" | sed 's/.*artifacts:\s*//')
-    fi
+    SESSION_ID="$SESSION_SELECTOR"
   fi
-  if [[ "$line" =~ ^[[:space:]]*-[[:space:]]*id:[[:space:]]*\"?${SESSION_ID}\"?$ ]] || \
-     [[ "$line" =~ ^[[:space:]]*-[[:space:]]*id:[[:space:]]*${SESSION_ID}[[:space:]]*$ ]]; then
-    found=true
-  fi
-done < "$STATE_FILE"
-
-if [[ "$found" != "true" ]]; then
-  echo -e "${RED}Error: Session '$SESSION_ID' not found in $STATE_FILE${NC}" >&2
-  exit 1
 fi
 
 if [[ -z "$SESSION_DIR" ]]; then
-  echo -e "${RED}Error: No dir found for session '$SESSION_ID'${NC}" >&2
-  exit 1
+  # Extract session dir and artifacts by SESSION_ID
+  found=false
+  while IFS= read -r line; do
+    if [[ "$found" == "true" ]]; then
+      # Check if we hit the next session entry or left the sessions block
+      if [[ "$line" =~ ^[[:space:]]*-[[:space:]]*id: ]] && [[ "$line" != *"$SESSION_ID"* ]]; then
+        break
+      fi
+      # Top-level key (not indented) means we've left the sessions block
+      if [[ "$line" =~ ^[a-z#] ]]; then
+        break
+      fi
+      if [[ "$line" =~ ^[[:space:]]*dir: ]]; then
+        SESSION_DIR=$(echo "$line" | sed 's/.*dir:\s*//' | tr -d ' "')
+      fi
+      if [[ "$line" =~ ^[[:space:]]*artifacts: ]]; then
+        ARTIFACTS_LINE="$(trim_ws "${line#*:}")"
+      fi
+    fi
+    if [[ "$line" =~ ^[[:space:]]*-[[:space:]]*id:[[:space:]]*\"?${SESSION_ID}\"?$ ]] || \
+       [[ "$line" =~ ^[[:space:]]*-[[:space:]]*id:[[:space:]]*${SESSION_ID}[[:space:]]*$ ]]; then
+      found=true
+    fi
+  done < "$STATE_FILE"
+
+  if [[ "$found" != "true" ]]; then
+    echo -e "${RED}Error: Session '$SESSION_ID' not found in $STATE_FILE${NC}" >&2
+    exit 1
+  fi
+
+  if [[ -z "$SESSION_DIR" ]]; then
+    echo -e "${RED}Error: No dir found for session '$SESSION_ID'${NC}" >&2
+    exit 1
+  fi
 fi
 
 if [[ "$PHASE" == "semantic_gap" ]]; then

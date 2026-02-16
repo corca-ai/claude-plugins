@@ -5,21 +5,32 @@ set -euo pipefail
 # Idempotent — safe to call multiple times per turn.
 # SessionEnd passes "session_end" arg to trigger auto-commit.
 
+# shellcheck disable=SC2034
 HOOK_GROUP="log"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=cwf-hook-gate.sh
+# shellcheck disable=SC1090,SC1091
 source "$SCRIPT_DIR/cwf-hook-gate.sh"
 # shellcheck source=text-format.sh
+# shellcheck disable=SC1090,SC1091
 source "$SCRIPT_DIR/text-format.sh"
 # shellcheck source=env-loader.sh
+# shellcheck disable=SC1090,SC1091
 source "$SCRIPT_DIR/env-loader.sh"
 
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd)}"
 REDACTOR_SCRIPT="${PLUGIN_ROOT}/scripts/codex/redact-sensitive.pl"
 LIVE_RESOLVER_SCRIPT="${PLUGIN_ROOT}/scripts/cwf-live-state.sh"
+RESOLVER_SCRIPT="${PLUGIN_ROOT}/scripts/cwf-artifact-paths.sh"
 CAN_REDACT="false"
 if command -v perl >/dev/null 2>&1 && [ -f "$REDACTOR_SCRIPT" ]; then
     CAN_REDACT="true"
+fi
+
+if [ -f "$RESOLVER_SCRIPT" ]; then
+    # shellcheck source=../../scripts/cwf-artifact-paths.sh
+    # shellcheck disable=SC1090,SC1091
+    source "$RESOLVER_SCRIPT"
 fi
 
 redact_sensitive_text() {
@@ -146,6 +157,15 @@ else
 fi
 
 DEFAULT_LOG_DIR="${ARTIFACT_ROOT}/projects/sessions"
+if declare -F resolve_cwf_session_logs_dir >/dev/null 2>&1; then
+    DEFAULT_LOG_DIR="$(resolve_cwf_session_logs_dir "$CWD")"
+else
+    DEFAULT_LOG_DIR="${ARTIFACT_ROOT}/sessions"
+    LEGACY_LOG_DIR="${ARTIFACT_ROOT}/projects/sessions"
+    if [ ! -d "$DEFAULT_LOG_DIR" ] && [ -d "$LEGACY_LOG_DIR" ]; then
+        DEFAULT_LOG_DIR="$LEGACY_LOG_DIR"
+    fi
+fi
 LOG_DIR="${CWF_SESSION_LOG_DIR:-$DEFAULT_LOG_DIR}"
 TRUNCATE_THRESHOLD="${CWF_SESSION_LOG_TRUNCATE:-10}"
 AUTO_COMMIT="${CWF_SESSION_LOG_AUTO_COMMIT:-false}"
