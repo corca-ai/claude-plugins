@@ -37,7 +37,7 @@ Current policy for CWF-generated artifacts under `.cwf/`.
 - Default resolver output must point to `.cwf/projects/`.
 - User overrides can be set in .cwf/config.local.yaml / .cwf/config.yaml (preferred) or via `CWF_ARTIFACT_ROOT` and `CWF_PROJECTS_DIR` environment variables.
 - New session runtime logs are written under `.cwf/projects/sessions/`.
-- Session log symlink filename in session dirs is `session-log.md`.
+- Session log symlinks in session dirs are stored under `session-logs/*.md` (multi-log support). `session-log.md` is a compatibility alias to one representative log.
 
 ## Guardrails
 

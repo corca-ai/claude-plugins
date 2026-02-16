@@ -16,6 +16,7 @@ source "$SCRIPT_DIR/env-loader.sh"
 
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd)}"
 REDACTOR_SCRIPT="${PLUGIN_ROOT}/scripts/codex/redact-sensitive.pl"
+LIVE_RESOLVER_SCRIPT="${PLUGIN_ROOT}/scripts/cwf-live-state.sh"
 CAN_REDACT="false"
 if command -v perl >/dev/null 2>&1 && [ -f "$REDACTOR_SCRIPT" ]; then
     CAN_REDACT="true"
@@ -31,6 +32,78 @@ redact_sensitive_text() {
     fi
 
     printf '%s' "$raw_text"
+}
+
+extract_live_dir_value() {
+    local state_file="$1"
+    awk '
+        /^live:/ { in_live=1; next }
+        in_live && /^[^[:space:]]/ { exit }
+        in_live && /^[[:space:]]{2}dir:[[:space:]]*/ {
+            sub(/^[[:space:]]{2}dir:[[:space:]]*/, "", $0)
+            gsub(/^[\"\047]|[\"\047]$/, "", $0)
+            print $0
+            exit
+        }
+    ' "$state_file"
+}
+
+resolve_live_session_dir() {
+    local base_dir="$1"
+    local project_root=""
+    local resolved_live_state=""
+    local live_dir=""
+
+    if [ ! -f "$LIVE_RESOLVER_SCRIPT" ]; then
+        return 1
+    fi
+
+    project_root=$(git -C "$base_dir" rev-parse --show-toplevel 2>/dev/null || printf '%s' "$base_dir")
+    resolved_live_state=$(bash "$LIVE_RESOLVER_SCRIPT" resolve "$project_root" 2>/dev/null || true)
+    if [ -z "$resolved_live_state" ] || [ ! -f "$resolved_live_state" ]; then
+        return 1
+    fi
+
+    live_dir=$(extract_live_dir_value "$resolved_live_state")
+    if [ -z "$live_dir" ]; then
+        return 1
+    fi
+
+    if [[ "$live_dir" == /* ]]; then
+        printf '%s\n' "$live_dir"
+    else
+        printf '%s\n' "$project_root/$live_dir"
+    fi
+}
+
+link_log_into_live_session() {
+    local log_file="$1"
+    local session_dir=""
+    local links_dir=""
+    local session_log_link=""
+    local session_log_alias=""
+
+    [ -f "$log_file" ] || return 0
+
+    session_dir=$(resolve_live_session_dir "$CWD" 2>/dev/null || true)
+    if [ -z "$session_dir" ] || [ ! -d "$session_dir" ]; then
+        return 0
+    fi
+
+    links_dir="${session_dir}/session-logs"
+    mkdir -p "$links_dir"
+
+    session_log_link="${links_dir}/$(basename "$log_file")"
+    if [ -e "$session_log_link" ] && [ ! -L "$session_log_link" ]; then
+        return 0
+    fi
+    ln -sfn "$log_file" "$session_log_link"
+
+    # Compatibility alias for readers that still expect a single session-log.md.
+    session_log_alias="${session_dir}/session-log.md"
+    if [ ! -e "$session_log_alias" ] || [ -L "$session_log_alias" ]; then
+        ln -sfn "session-logs/$(basename "$log_file")" "$session_log_alias"
+    fi
 }
 
 HOOK_TYPE="${1:-stop}"
@@ -145,6 +218,10 @@ else
         OUT_FILE="${LOG_DIR}/${DATE_STR}-${START_TIME}-${HASH}.claude.md"
     fi
     echo "$OUT_FILE" > "$OUT_FILE_STATE"
+fi
+
+if [ -f "$OUT_FILE" ]; then
+    link_log_into_live_session "$OUT_FILE" || true
 fi
 
 # ── Detect team membership ──────────────────────────────────────────────────
@@ -299,9 +376,14 @@ if [ ! -f "$OUT_FILE" ]; then
         echo "# Session: ${HASH}"
         echo "Model: ${MODEL} | Branch: ${BRANCH}"
         [ -n "$TEAM_NAME" ] && echo "Team: ${TEAM_NAME} (${TEAM_ROLE})"
+        echo "Recorded by: ${USER:-unknown}@$(hostname 2>/dev/null || echo unknown)"
         echo "CWD: ${CWD}"
         echo "Started: ${STARTED} ${LOCAL_TZ} | Claude Code v${VERSION}"
     } > "$OUT_FILE"
+fi
+
+if [ -f "$OUT_FILE" ]; then
+    link_log_into_live_session "$OUT_FILE" || true
 fi
 
 # ── Handle rewind: mark and skip already-logged turns ────────────────────────

@@ -1,7 +1,7 @@
 # HITL Scratchpad
 
 Session: `260216-02-hitl-readme`
-Updated: `2026-02-16T05:14:26Z`
+Updated: `2026-02-16T05:40:19Z`
 
 ## Purpose
 
@@ -83,6 +83,23 @@ Single source of truth for HITL consensus, rationale, and unresolved questions.
     - agreement capture alone is insufficient; post-edit state must be written back to `hitl-scratchpad.md` in the same loop.
     - keep status (`Applied/In progress`), rationale, and remaining items synchronized before continuing chunk review.
   - Applied to `plugins/cwf/skills/hitl/SKILL.md`.
+
+- D-013 (Applied): `README.ko.md` setup 문장에 인덱스의 저장소 전역 탐색/라우팅 목적을 명시.
+  - Final wording:
+    - `에이전트가 CWF 사용법 및 저장소 전역을 빠르게 탐색하는 걸 돕는 인덱스 문서를 생성(별도 파일 또는 AGENTS.md 통합)`
+  - Applied to `README.ko.md`.
+
+- D-014 (Applied): 세션 로그는 Claude/Codex 공통으로 다중 로그 심링크를 세션 디렉토리에 유지.
+  - Direction:
+    - runtime 로그 원본은 `.cwf/projects/sessions/`에 저장
+    - 각 세션 디렉토리에는 단일 파일이 아니라 `session-logs/*.md`로 다중 심링크
+    - 기존 소비자 호환용으로 `session-log.md`는 대표 로그 alias로 유지
+    - 로그 헤더에 기록 주체(`Recorded by: {user}@{host}`)를 남김
+  - Implemented by:
+    - `plugins/cwf/hooks/scripts/log-turn.sh` (Claude logs)
+    - `plugins/cwf/scripts/codex/sync-session-logs.sh` + `scripts/codex/sync-session-logs.sh` (Codex logs)
+    - `plugins/cwf/skills/retro/SKILL.md` (multi-link policy)
+    - `docs/cwf-artifact-migration-plan.md` (path policy update)
 
 - I-001 (Applied): Make agreement-capture notes a default HITL behavior.
   - Implemented in `plugins/cwf/skills/hitl/SKILL.md` as default agreement round before chunk review.

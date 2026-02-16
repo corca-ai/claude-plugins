@@ -18,6 +18,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 REDACTOR_SCRIPT="$SCRIPT_DIR/redact-sensitive.pl"
 JSON_REDACTOR_SCRIPT="$SCRIPT_DIR/redact-jsonl.sh"
 RESOLVER_SCRIPT="$SCRIPT_DIR/../cwf-artifact-paths.sh"
+LIVE_RESOLVER_SCRIPT="$SCRIPT_DIR/../cwf-live-state.sh"
 
 if [ ! -f "$RESOLVER_SCRIPT" ]; then
   echo "Missing resolver script: $RESOLVER_SCRIPT" >&2
@@ -89,6 +90,78 @@ redact_file_in_place() {
     perl -i "$REDACTOR_SCRIPT" "$target_file"
   else
     log "Warning: redaction skipped for $target_file (missing perl or $REDACTOR_SCRIPT)"
+  fi
+}
+
+extract_live_dir_value() {
+  local state_file="$1"
+  awk '
+    /^live:/ { in_live=1; next }
+    in_live && /^[^[:space:]]/ { exit }
+    in_live && /^[[:space:]]{2}dir:[[:space:]]*/ {
+      sub(/^[[:space:]]{2}dir:[[:space:]]*/, "", $0)
+      gsub(/^[\"\047]|[\"\047]$/, "", $0)
+      print $0
+      exit
+    }
+  ' "$state_file"
+}
+
+resolve_live_session_dir() {
+  local base_dir="$1"
+  local project_root=""
+  local live_state_file=""
+  local live_dir=""
+
+  if [ ! -f "$LIVE_RESOLVER_SCRIPT" ]; then
+    return 1
+  fi
+
+  project_root=$(git -C "$base_dir" rev-parse --show-toplevel 2>/dev/null || printf '%s' "$base_dir")
+  live_state_file=$(bash "$LIVE_RESOLVER_SCRIPT" resolve "$project_root" 2>/dev/null || true)
+  if [ -z "$live_state_file" ] || [ ! -f "$live_state_file" ]; then
+    return 1
+  fi
+
+  live_dir=$(extract_live_dir_value "$live_state_file")
+  if [ -z "$live_dir" ]; then
+    return 1
+  fi
+
+  if [[ "$live_dir" == /* ]]; then
+    printf '%s\n' "$live_dir"
+  else
+    printf '%s\n' "$project_root/$live_dir"
+  fi
+}
+
+link_log_into_live_session() {
+  local log_file="$1"
+  local session_dir=""
+  local links_dir=""
+  local log_link=""
+  local alias_link=""
+
+  [ -f "$log_file" ] || return 0
+
+  session_dir=$(resolve_live_session_dir "$CWD_FILTER" 2>/dev/null || true)
+  if [ -z "$session_dir" ] || [ ! -d "$session_dir" ]; then
+    return 0
+  fi
+
+  links_dir="${session_dir}/session-logs"
+  mkdir -p "$links_dir"
+
+  log_link="${links_dir}/$(basename "$log_file")"
+  if [ -e "$log_link" ] && [ ! -L "$log_link" ]; then
+    return 0
+  fi
+  ln -sfn "$log_file" "$log_link"
+
+  # Compatibility alias for readers that still expect one session-log.md file.
+  alias_link="${session_dir}/session-log.md"
+  if [ ! -e "$alias_link" ] || [ -L "$alias_link" ]; then
+    ln -sfn "session-logs/$(basename "$log_file")" "$alias_link"
   fi
 }
 
@@ -367,6 +440,7 @@ fi
 {
   echo "# Session: ${HASH}"
   echo "Engine: codex | Model: ${MODEL}"
+  echo "Recorded by: ${USER:-unknown}@$(hostname 2>/dev/null || echo unknown)"
   echo "CWD: ${SESSION_CWD}"
   echo "Started: ${STARTED_LOCAL} | Codex CLI v${CLI_VERSION}"
   echo "Session ID: ${SESSION_ID}"
@@ -512,6 +586,8 @@ if [ "$COPY_RAW" = "true" ]; then
   cp "$JSONL_PATH" "$RAW_FILE"
   redact_file_in_place "$RAW_FILE"
 fi
+
+link_log_into_live_session "$OUT_FILE" || true
 
 log "Codex session exported: $OUT_FILE"
 exit 0

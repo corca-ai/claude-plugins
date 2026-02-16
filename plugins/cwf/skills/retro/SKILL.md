@@ -230,11 +230,13 @@ Discover runtime logs under `.cwf/projects/sessions/`.
 Then:
 1. Filter out already-symlinked candidates.
 2. Read a sample of each candidate to verify it matches the current session.
-3. If verified and `{output-dir}/session-log.md` does not exist, create a relative symlink:
+3. Ensure `{output-dir}/session-logs/` exists.
+4. For each verified log, create a relative symlink:
    ```bash
-   ln -s "../sessions/{filename}" "{output-dir}/session-log.md"
+   ln -s "../sessions/{filename}" "{output-dir}/session-logs/{filename}"
    ```
-4. If no candidates or directories do not exist, skip silently.
+5. Compatibility alias: if `{output-dir}/session-log.md` is missing (or already a symlink), point it to one representative file in `session-logs/` (prefer latest).
+6. If no candidates or directories do not exist, skip silently.
 
 ### 7. Persist Findings
 
