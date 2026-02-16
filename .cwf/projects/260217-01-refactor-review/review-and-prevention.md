@@ -234,44 +234,77 @@ For each triage item that references an analysis document:
 
 이 스크립트가 있었다면 csv-to-toon.sh 삭제 시점(fc9919b push 시)에 즉시 차단했을 것이다. 현재의 link checker는 markdown link만 검사하고 스크립트 간 호출 관계는 검사하지 않는다.
 
-### Proposal E: cwf:run 강제 사용 알림 (즉시 적용 가능)
+### Proposal E: Hook-based workflow enforcement gate (P0 — 핵심 제안)
 
-**문제**: 코드 변경이 포함된 세션에서 cwf:run 없이 수동 실행하면 review(code) 등 핵심 게이트가 생략된다.
+**문제**: "cwf:run을 써라"는 사용자 지시가 컴팩션 4회를 거치며 희석되어 review(code) 게이트가 완전히 생략되었다. AGENTS.md에 규칙을 추가해도 동일한 희석이 발생한다 — 문서는 컴팩션에 취약하지만, **hooks는 매 turn마다 새로 주입되므로 컴팩션을 살아남는다.**
 
-**해결**: Lessons 또는 AGENTS.md에 다음 규칙 추가:
+**설계 원칙**: CWF의 핵심 가치는 "컴팩션을 거쳐도 워크플로가 유지되는 것"이다. 이것이 훼손되면 CWF의 존재 이유가 사라진다. 따라서 이 문제는 문서 수준이 아니라 **런타임 게이트 수준**에서 해결해야 한다.
 
-```markdown
-When a session includes code changes (git diff is non-empty):
-- cwf:review --mode code MUST run before commit/push
-- If using manual skill sequencing instead of cwf:run, the agent must
-  explicitly confirm that review(code) was not skipped
+**해결**: cwf-state.yaml의 `phase` + `workflow` 필드를 읽는 hook을 추가하여, 활성 워크플로가 있을 때 매 turn마다 에이전트에게 현재 상태를 주입:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  cwf-state.yaml                                         │
+│  workflow: cwf:run                                      │
+│  phase: impl                                            │
+│  remaining_gates: [review-code, refactor, retro, ship]  │
+│  user_directive: "cwf:run 최대한 사용"                    │
+└───────────────────────┬─────────────────────────────────┘
+                        │ read by hook on every turn
+                        ▼
+┌─────────────────────────────────────────────────────────┐
+│  UserPromptSubmit or Notification hook output            │
+│  ⚠ Active workflow: cwf:run (phase: impl)               │
+│  Remaining gates: review-code → refactor → retro → ship │
+│  Do NOT skip gates. Use Skill tool to invoke next stage. │
+└─────────────────────────────────────────────────────────┘
 ```
 
----
+**구현 세부사항**:
+
+1. **cwf-state.yaml 확장**: `cwf:run`이 시작할 때 `workflow`, `remaining_gates`, `user_directive` 필드를 기록. `cwf-live-state.sh set`으로 관리.
+
+2. **Hook 추가**: `hooks/scripts/workflow-gate.sh` — `cwf-state.yaml`를 읽어 `workflow`가 활성이면 phase와 remaining gates를 출력. 기존 `attention.sh` (Notification hook)에 통합하거나 별도 UserPromptSubmit hook으로 추가.
+
+3. **cwf:run SKILL.md 연동**: cwf:run의 Phase 1(Initialize)에서 workflow 필드를 등록하고, 각 stage 완료 시 remaining_gates를 업데이트. Phase 3(Completion)에서 workflow 필드를 정리.
+
+4. **cwf:setup 연동**: `cwf:setup`이 이 hook을 hook group에 포함하여 설치. 기존 `attention` 그룹에 추가하거나 신규 `workflow-gate` 그룹으로 분리.
+
+**효과**: 컴팩션이 100회 발생해도, 매 turn마다 hook이 cwf-state.yaml에서 현재 워크플로 상태를 읽어 주입한다. 에이전트가 "직접 Edit"을 시도하려 해도 "review-code 게이트가 남아있다"는 알림을 매번 받게 된다.
+
+**왜 AGENTS.md가 아닌가**: AGENTS.md는 "CWF를 사용하세요" 수준의 안내에는 적합하지만, 특정 워크플로 단계를 강제하기에는 부적합하다. 사용자가 "CWF 사용해서"라고만 말해도 cwf:run이 잘 돌아가게 하는 것이 목표이므로, 강제 로직은 CWF 내부(hook + state)에 있어야 한다.
 
 ### Proposal F: cwf:review에 세션 로그 리뷰 모드 추가 (중기)
 
 **문제**: cwf:review가 코드 diff만 분석하고 세션 로그(의사결정 과정)를 보지 않아 "계획과 실행의 불일치"를 감지하지 못한다.
 
-**해결**: `cwf:review --mode code`에 선택적 `--with-session-log` 플래그를 추가하거나, 기본 동작으로 세션 로그를 함께 분석:
+**해결**: `cwf:review --mode code`가 세션 디렉토리에 세션 로그가 있으면 자동으로 교차 검증:
 
 ```markdown
-### Session Log Cross-Check (when session log is available)
+### Session Log Cross-Check (auto, when session log exists)
 
-1. Read session log from `.cwf/sessions/` or `.cwf/projects/{session}/session-logs/`
+1. Read session log from `.cwf/projects/{session}/session-logs/`
 2. Compare stated task plan (TaskCreate entries) with actual execution
-3. Flag: planned gates that were never executed (e.g., "cwf:run" planned but never invoked)
+3. Flag: planned gates that were never executed
 4. Flag: user instructions that appear in messages but not in execution trace
 5. Flag: analysis recommendations that were inverted during implementation
 ```
 
-### Proposal G: 컨텍스트 컴팩션 시 사용자 원문 지시 보존 강화 (장기)
+### Proposal G: cwf:run의 gate 상태를 cwf-state.yaml에 영속화 (Proposal E의 전제 조건)
 
-**문제**: 컨텍스트 컴팩션이 4회 발생하면서 사용자의 원래 지시("cwf:run 최대한 사용")가 "Optional Next Step: Edit frontmatter"로 희석되었다.
+**문제**: 현재 cwf:run은 `phase`만 기록하고 remaining gates는 에이전트 메모리에만 존재. 컴팩션 시 사라짐.
 
-**해결**: cwf:run 또는 cwf:impl이 활성 상태일 때, 컴팩션 summary에 `## User Directives (Must Preserve)`를 포함하도록 강제. 또는 `cwf-state.yaml`의 `task` 필드에 사용자 원문 지시를 기록하여 컴팩션과 무관하게 참조 가능하도록 함.
+**해결**: cwf:run이 매 stage 전환 시 `remaining_gates` 리스트를 cwf-state.yaml에 기록. cwf-live-state.sh 확장:
 
-이것은 CWF 수준에서 해결하기 어려운 런타임 한계일 수 있으나, `cwf-state.yaml`의 `task` 필드와 `lessons.md`에 명시적으로 기록함으로써 부분적으로 완화 가능.
+```bash
+bash cwf-live-state.sh set . \
+  phase="impl" \
+  workflow="cwf:run" \
+  remaining_gates="review-code,refactor,retro,ship" \
+  user_directive="cwf:run 최대한 사용"
+```
+
+이 필드들이 있어야 Proposal E의 hook이 읽을 데이터가 생긴다. Proposal E와 G는 함께 구현해야 한다.
 
 ---
 
@@ -279,13 +312,14 @@ When a session includes code changes (git diff is non-empty):
 
 | Proposal | Prevention strength | Effort | Priority |
 |----------|-------------------|--------|----------|
-| A: Deletion safety gate | High (direct prevention) | Small (add rule text) | **P0 — do now** |
-| B: Broken-link triage | High (prevents signal elimination) | Small (add protocol) | **P0 — do now** |
-| E: cwf:run enforcement | High (ensures review gate) | Small (add rule text) | **P1 — do soon** |
+| A: Deletion safety gate | High (direct prevention) | Small (add rule text to impl) | **P0 — do now** |
+| B: Broken-link triage | High (prevents signal elimination) | Small (add protocol to agent-patterns) | **P0 — do now** |
+| E+G: Workflow enforcement hook + state | **Very high** (compaction-immune gate) | Medium (new hook + state fields + cwf:run update) | **P0 — do now** |
 | C: Fidelity check | Medium (prevents triage distortion) | Medium (impl rule + examples) | P2 |
 | F: Session log review mode | High (detects plan-execution gap) | Medium (review skill extension) | P2 |
 | D: Script dep graph | Very high (deterministic gate) | Large (new script + hook) | P3 (next-session candidate) |
-| G: Compaction directive preservation | Medium (prevents instruction dilution) | Large (runtime limitation) | P3 |
+
+**Proposal E+G가 최우선**: 이번 사고의 근본 원인은 컴팩션에 의한 워크플로 게이트 소실이다. A/B는 특정 증상(삭제, broken link)에 대한 방어이고, E+G는 구조적 방어이다. CWF의 핵심 가치("컴팩션을 거쳐도 워크플로 유지")를 직접 보호한다.
 
 ---
 
