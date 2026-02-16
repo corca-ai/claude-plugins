@@ -465,7 +465,7 @@ CWF includes 7 hook groups that run automatically. All are enabled by default; u
 | `lint_markdown` | PostToolUse → Write\|Edit | Markdown lint + local link validation — lint violations trigger self-correction, broken links reported async |
 | `lint_shell` | PostToolUse → Write\|Edit | ShellCheck validation for shell scripts |
 | `websearch_redirect` | PreToolUse → WebSearch | Redirect Claude's WebSearch to `cwf:gather --search` |
-| `compact_recovery` | SessionStart → compact | Inject live session state after auto-compact for context recovery |
+| `compact_recovery` | SessionStart → compact, UserPromptSubmit | Inject live session state after auto-compact and guard session↔worktree binding on prompts |
 
 ## Configuration
 

@@ -37,6 +37,8 @@ Operational note:
      session_id="{next session ID}" \
      dir="{session directory}" \
      branch="{current branch}" \
+     worktree_root="{current git worktree root (absolute path)}" \
+     worktree_branch="{current branch}" \
      phase="gather" \
      task="{task description}"
    ```
@@ -71,6 +73,27 @@ Execute stages in order. Each stage invokes the corresponding CWF skill via the 
 ### Stage Execution Loop
 
 For each stage (respecting `--from` and `--skip` flags):
+
+1. Verify worktree consistency (compact/restart safety gate):
+
+   ```bash
+   live_state_file=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh resolve .)
+   expected_worktree=$(awk '
+     /^live:/ { in_live=1; next }
+     in_live && /^[^[:space:]]/ { exit }
+     in_live && /^[[:space:]]{2}worktree_root:[[:space:]]*/ {
+       sub(/^[[:space:]]{2}worktree_root:[[:space:]]*/, "", $0)
+       gsub(/^[\"\047]|[\"\047]$/, "", $0)
+       print $0
+       exit
+     }
+   ' "$live_state_file")
+   current_worktree=$(git rev-parse --show-toplevel)
+   if [[ -n "$expected_worktree" && "$expected_worktree" != "$current_worktree" ]]; then
+     echo "WORKTREE_MISMATCH: expected $expected_worktree, got $current_worktree"
+     # Halt and ask user before continuing
+   fi
+   ```
 
 1. Update phase using the live-state helper:
 
@@ -203,6 +226,7 @@ After all stages complete (or the pipeline is halted):
 1. **Graceful halt**: When the user chooses "Stop", update state and report what was completed. Do not leave state in an inconsistent phase.
 1. **Do not bypass impl branch gate by default**: `cwf:run` must not pass `--skip-branch` to `cwf:impl` unless the user explicitly requests bypass.
 1. **Context-deficit resilience**: On resume/restart, reconstruct stage context from `cwf-state.yaml`, session artifacts, and handoff docs before invoking downstream skills.
+1. **Worktree consistency gate**: During an active pipeline, if current worktree root diverges from `live.worktree_root`, stop immediately and request explicit user decision before any write/edit/ship action.
 
 ## References
 

@@ -458,7 +458,7 @@ CWF는 자동으로 실행되는 7개 훅 그룹을 포함합니다. 모두 기�
 | `lint_markdown` | PostToolUse → Write\|Edit | 마크다운 린트 + 로컬 링크 검증 -- 린트 위반 시 자동 수정 유도, 깨진 링크 비동기 보고 |
 | `lint_shell` | PostToolUse → Write\|Edit | 셸 스크립트용 ShellCheck 검증 |
 | `websearch_redirect` | PreToolUse → WebSearch | Claude의 WebSearch를 `cwf:gather --search`로 리다이렉트 |
-| `compact_recovery` | SessionStart → compact | auto-compact 후 컨텍스트 복구를 위해 라이브 세션 상태 주입 |
+| `compact_recovery` | SessionStart → compact, UserPromptSubmit | auto-compact 후 라이브 상태를 주입하고, 프롬프트 제출 시 세션-워크트리 바인딩 불일치를 차단 |
 
 ## 환경 설정
 

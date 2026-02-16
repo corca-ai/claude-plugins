@@ -34,6 +34,42 @@ fi
 # Read stdin to extract session_id for session log lookup
 INPUT=$(cat)
 HOOK_SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty' 2>/dev/null || true)
+HOOK_CWD=$(echo "$INPUT" | jq -r '.cwd // empty' 2>/dev/null || true)
+if [[ -z "$HOOK_CWD" ]]; then
+    HOOK_CWD="${CLAUDE_PROJECT_DIR:-$PWD}"
+fi
+
+session_map_file_for_cwd() {
+    local cwd="$1"
+    local repo_root=""
+    local common_dir=""
+
+    repo_root=$(git -C "$cwd" rev-parse --show-toplevel 2>/dev/null || true)
+    common_dir=$(git -C "$cwd" rev-parse --git-common-dir 2>/dev/null || true)
+    if [[ -z "$repo_root" || -z "$common_dir" ]]; then
+        return 1
+    fi
+
+    if [[ "$common_dir" == /* ]]; then
+        printf '%s\n' "$common_dir/cwf-session-worktree-map.tsv"
+    else
+        printf '%s\n' "$repo_root/$common_dir/cwf-session-worktree-map.tsv"
+    fi
+}
+
+session_map_lookup() {
+    local map_file="$1"
+    local sid="$2"
+    [[ -f "$map_file" ]] || return 1
+    awk -F '\t' -v sid="$sid" '
+        $1 == sid {
+            print $2 "\t" $3 "\t" $4
+            found=1
+            exit
+        }
+        END { exit(found ? 0 : 1) }
+    ' "$map_file"
+}
 
 # Find CWF state file relative to project root
 STATE_BASE_DIR="${CLAUDE_PROJECT_DIR:-.}"
@@ -57,6 +93,8 @@ dir=""
 branch=""
 phase=""
 task=""
+worktree_root=""
+worktree_branch=""
 key_files=()
 dont_touch=()
 decisions=()
@@ -92,6 +130,12 @@ while IFS= read -r line; do
         elif [[ "$line" =~ ^[[:space:]]+task:[[:space:]]*\"?([^\"]*)\"? ]]; then
             task="${BASH_REMATCH[1]}"
             current_list=""
+        elif [[ "$line" =~ ^[[:space:]]+worktree_root:[[:space:]]*\"?([^\"]*)\"? ]]; then
+            worktree_root="${BASH_REMATCH[1]}"
+            current_list=""
+        elif [[ "$line" =~ ^[[:space:]]+worktree_branch:[[:space:]]*\"?([^\"]*)\"? ]]; then
+            worktree_branch="${BASH_REMATCH[1]}"
+            current_list=""
         elif [[ "$line" =~ ^[[:space:]]+key_files: ]]; then
             current_list="key_files"
         elif [[ "$line" =~ ^[[:space:]]+dont_touch: ]]; then
@@ -126,11 +170,66 @@ if [[ -z "$session_id" ]] && [[ -z "$task" ]]; then
     exit 0
 fi
 
+# Resolve expected worktree from session map (preferred) or live fields (fallback).
+expected_worktree=""
+expected_branch=""
+expected_recorded_at=""
+current_worktree_root=$(git -C "$HOOK_CWD" rev-parse --show-toplevel 2>/dev/null || true)
+
+if [[ -n "$HOOK_SESSION_ID" ]]; then
+    SESSION_MAP_FILE=$(session_map_file_for_cwd "$HOOK_CWD" 2>/dev/null || true)
+    if [[ -n "$SESSION_MAP_FILE" ]]; then
+        SESSION_MAP_ROW=$(session_map_lookup "$SESSION_MAP_FILE" "$HOOK_SESSION_ID" 2>/dev/null || true)
+        if [[ -n "$SESSION_MAP_ROW" ]]; then
+            expected_worktree=$(printf '%s' "$SESSION_MAP_ROW" | awk -F '\t' '{print $1}')
+            expected_branch=$(printf '%s' "$SESSION_MAP_ROW" | awk -F '\t' '{print $2}')
+            expected_recorded_at=$(printf '%s' "$SESSION_MAP_ROW" | awk -F '\t' '{print $3}')
+        fi
+    fi
+fi
+
+if [[ -z "$expected_worktree" && -n "$worktree_root" ]]; then
+    if [[ "$worktree_root" == /* ]]; then
+        expected_worktree="$worktree_root"
+    else
+        expected_worktree="${CLAUDE_PROJECT_DIR:-.}/$worktree_root"
+    fi
+fi
+if [[ -z "$expected_branch" && -n "$worktree_branch" ]]; then
+    expected_branch="$worktree_branch"
+fi
+
 # Assemble context string
 context="[Compact Recovery] Session: ${session_id} | Phase: ${phase}
 Task: ${task}
 Branch: ${branch}
 Session dir: ${dir}"
+
+if [[ -n "$expected_worktree" ]]; then
+    context="${context}
+Expected worktree: ${expected_worktree}"
+fi
+
+if [[ -n "$expected_branch" ]]; then
+    context="${context}
+Expected worktree branch: ${expected_branch}"
+fi
+
+if [[ -n "$expected_worktree" && -n "$current_worktree_root" && "$current_worktree_root" != "$expected_worktree" ]]; then
+    context="${context}
+
+[WORKTREE ALERT] Current worktree (${current_worktree_root}) does not match bound session worktree (${expected_worktree}).
+Switch before continuing:
+  cd ${expected_worktree}"
+    if [[ -n "$expected_branch" ]]; then
+        context="${context}
+  git switch ${expected_branch}"
+    fi
+    if [[ -n "$expected_recorded_at" ]]; then
+        context="${context}
+Binding recorded at epoch: ${expected_recorded_at}"
+    fi
+fi
 
 if [[ ${#key_files[@]} -gt 0 ]]; then
     context="${context}

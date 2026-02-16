@@ -78,7 +78,7 @@ Use AskUserQuestion with `multiSelect: true`. Present 7 hook groups with descrip
 | `lint_markdown` | Markdown validation after Write/Edit |
 | `lint_shell` | ShellCheck validation after Write/Edit |
 | `websearch_redirect` | Redirect WebSearch to cwf:gather |
-| `compact_recovery` | Inject live session state after auto-compact |
+| `compact_recovery` | Inject live session state after auto-compact and guard session↔worktree binding on prompts |
 
 Pre-select groups that are currently enabled in `cwf-state.yaml`.
 
