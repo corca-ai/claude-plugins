@@ -89,6 +89,17 @@ By `plugin_type`:
 
 Report: plugin name, type, version change, files modified, remaining manual steps (commit).
 
+## Rules
+
+1. **All code fences must have language specifier**: Never use bare fences.
+2. **Consistency check is the source of truth**: Always run `check-consistency.sh` before and after changes.
+3. **Missing dependency interaction**: When prerequisites are missing, ask to install/configure now; do not only report unavailability.
+4. **Never auto-commit**: Report modified files but leave committing to the user.
+
+## References
+
+- [checklist.md](references/checklist.md) — Detailed edge cases and README formatting examples
+
 ## Usage Message
 
 ```text

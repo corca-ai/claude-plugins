@@ -85,7 +85,19 @@ Apply the [context recovery protocol](../../references/context-recovery-protocol
 
 Skip to Phase 3 if both files are valid. These two files are **critical outputs** for plan synthesis.
 
-### 2.2 Launch sub-agents
+### 2.2 Adaptive Sizing Gate
+
+Assess task complexity to decide research depth:
+
+| Complexity signal | Agent decision |
+|-------------------|----------------|
+| Task has clear scope + few files + well-known patterns | Skip Prior Art Researcher; launch Codebase Analyst only |
+| Task has moderate scope OR unfamiliar domain | Launch both agents (default) |
+| Task scope is explicitly narrow (e.g., single-file typo fix) | Skip Phase 2 entirely; go to Phase 3 |
+
+Default to launching both agents when uncertain.
+
+### 2.3 Launch sub-agents
 
 Launch sub-agents **simultaneously** using the Task tool — only for agents whose result files are missing or invalid.
 
@@ -152,7 +164,7 @@ Task tool:
 
 Wait for all launched sub-agents to complete. Re-validate each launched file using the context recovery protocol.
 
-### 2.3 Read output files
+### 2.4 Read output files
 
 After sub-agents complete, read the result files from the session directory (not in-memory return values):
 
@@ -161,7 +173,7 @@ After sub-agents complete, read the result files from the session directory (not
 
 Use these file contents as input for Phase 3 synthesis.
 
-### 2.4 Persistence Gate (Critical)
+### 2.5 Persistence Gate (Critical)
 
 Apply the stage-tier policy from the context recovery protocol:
 
@@ -245,6 +257,12 @@ Given [context] When [action] Then [expected outcome]
 | File | Action | Purpose |
 |------|--------|---------|
 | ... | Create/Edit | ... |
+
+## Decision Log
+
+| # | Decision | Rationale | Alternatives Considered |
+|---|----------|-----------|------------------------|
+| 1 | ... | ... | ... |
 
 ## Don't Touch
 

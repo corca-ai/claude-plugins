@@ -7,9 +7,9 @@ description: "Automate GitHub workflow so validated session artifacts become shi
 
 Convert validated CWF session artifacts into issue → PR → merge execution with explicit human merge control.
 
-**Language**: Issue/PR body는 한글로 작성. Code blocks, file paths, commit hashes, CLI output은 원문 유지.
+**Language**: Write issue/PR bodies in the user's language. Keep code blocks, file paths, commit hashes, and CLI output verbatim.
 
-## Commands
+## Quick Start
 
 ```text
 /ship                                  Show usage
@@ -23,7 +23,7 @@ No args or `help` → print the usage block above and stop.
 
 ## Defaults
 
-- **Base branch**: `marketplace-v3` (override with `--base`)
+- **Base branch**: `main` (override with `--base`)
 - **Merge strategy**: `--squash` (override with `--merge` or `--rebase`)
 
 ## Prerequisites
@@ -122,15 +122,15 @@ Create a pull request from the current feature branch.
      - `.cwf/projects/{session}/lessons.md` takeaways
      - `.cwf/projects/{session}/retro.md` CDM section
      - `.cwf/projects/{session}/plan.md` decision points
-     - Format as markdown table: `| 결정 | 근거 | 대안 |`
-     - If no decisions found, write `_세션 중 주요 결정사항 없음._`
+     - Format as markdown table: `| Decision | Rationale | Alternatives |` (in user's language)
+     - If no decisions found, write a brief "no significant decisions" note (in user's language)
    - `{VERIFICATION}` — concrete, reproducible verification steps:
      - Include exact commands to run (e.g., `claude --plugin-dir ... -p "..."`)
      - Describe expected output/behavior
      - Cover both happy path and edge cases if relevant
    - `{HUMAN_JUDGMENT}` — agent self-assessment of items needing human review:
      - Architecture changes, UX decisions, security implications, breaking changes
-     - If none, write `없음` (this enables autonomous merge — see `/ship merge`)
+     - If none, write `None` (this enables autonomous merge — see `/ship merge`)
    - `{SYSTEM_IMPACT}` — behavioral changes visible to end users or dependent systems
    - `{FUTURE_IMPACT}` — impact on future development (new patterns, constraints, tech debt)
    - `{GIT_DIFF_STAT}` — output of `git diff {base}...HEAD --stat`
@@ -190,15 +190,15 @@ Check PR status and merge if ready.
    - `mergeable` = `MERGEABLE`
 
    **Review requirement** (conditional):
-   - Parse the PR body for `## 인간 판단 필요 사항` section
+   - Parse the PR body for `## Human Judgment Required` section
    - Check branch protection: `gh api repos/{owner}/{repo}/branches/{base}/protection 2>&1`
 
    Decision matrix:
 
    | Human judgment | Branch protected | Review required |
    |---|---|---|
-   | `없음` or empty | No | **Skip** — autonomous merge |
-   | `없음` or empty | Yes | `reviewDecision` = `APPROVED` required |
+   | `None` or empty | No | **Skip** — autonomous merge |
+   | `None` or empty | Yes | `reviewDecision` = `APPROVED` required |
    | Items listed | Any | Report items, **stop** — do not merge |
 
    If not ready, report which conditions are blocking and stop. Do not attempt to merge.
@@ -284,7 +284,7 @@ Usage:
   /ship merge [--squash|--merge|--rebase]    Merge approved PR
   /ship status                           Show issues, PRs, checks
 
-Defaults: base=marketplace-v3, merge=squash
+Defaults: base=main, merge=squash
 ```
 
 ## Rules

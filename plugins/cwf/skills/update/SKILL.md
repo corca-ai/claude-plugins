@@ -25,10 +25,10 @@ cwf:update --check       # Version check only, no install
 Locate the installed plugin.json using Glob:
 
 ```text
-~/.claude/plugins/cache/corca-plugins/cwf/*/.claude-plugin/plugin.json
+~/.claude/plugins/cache/*/cwf/*/.claude-plugin/plugin.json
 ```
 
-Read the `version` field. If not found, report that CWF is not installed and suggest installing via marketplace (`claude plugin install cwf@corca-plugins`).
+Read the `version` field. If not found, report that CWF is not installed and suggest installing via marketplace.
 
 ### 1.2 Update Marketplace
 
