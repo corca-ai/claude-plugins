@@ -23,7 +23,6 @@ claude plugin install cwf@corca-plugins
 
 - v3 이전 레거시 환경 변수를 표준 `CWF_*` 키로 마이그레이션
 - 프로젝트 설정 파일(`.cwf/config.yaml`, `.cwf/config.local.yaml`) 부트스트랩
-- Claude Code Agent Team 실행 모드 설정(권장)
 - 외부 도구 감지(Codex/Gemini/Tavily/Exa) 및 선택적 Codex 연동
 - 에이전트가 CWF 사용법 및 저장소 탐색을 돕는 인덱스 문서 생성(별도 파일로, 또는 AGENTS.md에 통합)
 
@@ -158,7 +157,7 @@ gather → clarify → plan → review(plan) → impl → review(code) → refac
 | 9 | [review](#review) | `cwf:review` | 요구/계획/코드에 공통 품질 게이트를 적용하는 다각도 리뷰 |
 | 10 | [hitl](#hitl) | `cwf:hitl` | 합의 라운드와 청크 검토를 재개 가능한 상태로 운영 |
 | 11 | [run](#run) | `cwf:run` | gather부터 ship까지 전체 파이프라인을 단계 게이트로 조율 |
-| 12 | [setup](#setup) | `cwf:setup` | 훅/도구/환경/Agent Team/인덱스 계약을 초기 표준값으로 부트스트랩 |
+| 12 | [setup](#setup) | `cwf:setup` | 훅/도구/환경/인덱스 계약을 초기 표준값으로 부트스트랩 |
 | 13 | [update](#update) | `cwf:update` | CWF 동작을 최신 계약/수정사항과 동기화 |
 
 ## 스킬 레퍼런스
@@ -263,15 +262,13 @@ cwf:retro --light    # 핵심 항목만 빠르게 점검 (서브에이전트 없
 기본은 심층 분석이며, `--light` 또는 작은 세션에서는 경량 점검으로 줄일 수 있습니다. 산출물은 세션 디렉토리의 `retro.md`에 저장되고, 심층 모드에서는 `retro-cdm-analysis.md`, `retro-expert-alpha.md`, `retro-expert-beta.md`, `retro-learning-resources.md` 같은 보조 분석 파일이 함께 남습니다.
 
 회고는 아래 7개 섹션으로 정리됩니다.
-1. `Context Worth Remembering`: 다음 세션에 필요한 배경/결정 맥락.
-2. `Collaboration Preferences`: 사용자-에이전트 협업 패턴과 개선 포인트.
+1. `Context Worth Remembering`: 다음 세션에 필요한 배경/결정 맥락. -> 어디에 저장?
+2. `Collaboration Preferences`: 사용자-에이전트 협업 패턴과 개선 포인트. -> 어디에 저장?
 3. `Waste Reduction (5 Whys)`: 재작업/오해/불필요 작업의 구조적 원인.
-4. `Critical Decision Analysis (CDM)`: 핵심 의사결정의 근거, 대안, 리스크.
-5. `Expert Lens`(심층): 서로 다른 전문 프레임에서 본 보완 관점.
-6. `Learning Resources`(심층): 다음 실행 품질을 높일 학습 입력.
-7. `Relevant Tools & Tool Gaps`: 실제 활용 도구와 새로 필요한 도구 후보.
-
-여기서 `관련 도구`는 이번 세션에서 실제 사용했거나 바로 활용 가능한 도구를, `도구 갭`은 반복 마찰을 줄이기 위해 새로 도입/개선이 필요한 후보를 뜻합니다.
+4. `Critical Decision Moment Analysis`: 핵심 의사결정의 근거, 대안, 리스크. -> 세션의 진도를 결정적으로 쫙 빼게 해준 순간들을 돌아본다는 의도.
+5. `Expert Lens`(심층): 서로 다른 전문 프레임에서 본 보완 관점. -> 이 세션을 전문가라면 어떻게 더 잘 진행했을까?
+6. `Learning Resources`(심층): 다음 실행 품질을 높일 학습 입력. -> 의도가 전혀 안 드러남. 사용자 수준을 추측해 도움이 될 만한 학습자료를 준다는 게 되어야 함
+7. `Relevant Tools & Tool Gaps`: 실제 활용 도구와 새로 필요한 도구 후보. -> 이런 도구(스킬, 자동화 툴 등 포함)을 썼는데, 이런 도구를 쓸 수 있었고, 이런 도구를 만들 수 있을 것 같다는 의도 드러나야 함
 
 ### [refactor](plugins/cwf/skills/refactor/SKILL.md)
 
@@ -396,7 +393,6 @@ cwf:setup                # 전체 설정 (훅 + 도구 + repo-index 생성 여�
 cwf:setup --hooks        # 훅 그룹 선택만
 cwf:setup --tools        # 외부 도구 감지만
 cwf:setup --env          # 환경 변수 마이그레이션/부트스트랩만
-cwf:setup --agent-teams  # Claude Code Agent Team 모드 설정만
 cwf:setup --codex        # Codex 사용자 스코프(~/.agents/*)에 CWF 스킬/레퍼런스 연결
 cwf:setup --codex-wrapper # 세션 로그 자동 동기화를 위한 Codex wrapper 설치
 cwf:setup --cap-index    # CWF capability 인덱스만 생성/갱신 (.cwf/indexes/cwf-index.md)
@@ -407,13 +403,12 @@ cwf:setup --repo-index --target agents # AGENTS 기반 저장소용 AGENTS.md �
 **설계 의도**
 
 - 초기 1회 설정으로 훅, 도구 감지, 환경 변수 계약을 표준화해 실행 편차를 줄입니다.
-- `--agent-teams`는 Claude Code의 Agent Team 실행 모드를 설정해, 병렬 실행을 사용하는 CWF 스킬들의 런타임 전제를 안정적으로 맞춥니다.
 - `--cap-index`는 CWF 내부 기능 지도를 생성해 에이전트가 스킬/레퍼런스를 빠르게 라우팅하도록 돕습니다.
 - `--repo-index`는 AGENTS 관리 블록을 갱신해 저장소 문서를 점진적 공개 방식으로 탐색할 수 있게 합니다([문서 원칙](docs/documentation-guide.md) 참고).
 
 **무엇을 하는가**
 
-`cwf:setup`은 훅 그룹 토글, 외부 도구 감지(Codex/Gemini/Tavily/Exa), 환경 변수 마이그레이션(레거시 키 → `CWF_*`), 프로젝트 설정 파일 부트스트랩(`.cwf/config.yaml`, `.cwf/config.local.yaml`), Agent Team 실행 모드 설정(`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`), 선택적 Codex 연동, 선택적 인덱스 생성/갱신을 대화형으로 수행합니다. 여기서 인덱스 생성은 에이전트가 필요한 문서를 짧은 경로로 찾아가도록 라우팅 품질을 높이기 위한 단계입니다. Agent Team 설정만 다시 적용할 때는 `--agent-teams`, Codex 연동만 다시 적용할 때는 `--codex`/`--codex-wrapper`를 사용합니다.
+`cwf:setup`은 훅 그룹 토글, 외부 도구 감지(Codex/Gemini/Tavily/Exa), 환경 변수 마이그레이션(레거시 키 → `CWF_*`), 프로젝트 설정 파일 부트스트랩(`.cwf/config.yaml`, `.cwf/config.local.yaml`), 선택적 Codex 연동, 선택적 인덱스 생성/갱신을 대화형으로 수행합니다. 여기서 인덱스 생성은 에이전트가 필요한 문서를 짧은 경로로 찾아가도록 라우팅 품질을 높이기 위한 단계입니다. Codex 연동만 다시 적용할 때는 `--codex`/`--codex-wrapper`를 사용합니다.
 
 ### [update](plugins/cwf/skills/update/SKILL.md)
 
