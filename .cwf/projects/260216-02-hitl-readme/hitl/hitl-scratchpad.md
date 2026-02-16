@@ -1,7 +1,7 @@
 # HITL Scratchpad
 
 Session: `260216-02-hitl-readme`
-Updated: `2026-02-16T04:09:13Z`
+Updated: `2026-02-16T04:13:42Z`
 
 ## Purpose
 
@@ -63,12 +63,12 @@ Single source of truth for HITL consensus, rationale, and unresolved questions.
     - `.cwf/config.local.yaml`: local/secret settings, excluded from version control.
     - Priority: project settings override global settings.
 
-- I-001 (Planned implementation change): Make agreement-capture notes a default HITL behavior.
-  - Current state: not implemented as default (current HITL state model has `state.yaml`, `rules.yaml`, `queue.json`, `fix-queue.yaml`, `events.log`).
-  - Candidate artifact: `hitl-scratchpad.md`.
+- I-001 (Applied): Make agreement-capture notes a default HITL behavior.
+  - Implemented in `plugins/cwf/skills/hitl/SKILL.md` as default agreement round before chunk review.
+  - `hitl-scratchpad.md` is now explicit state artifact and rationale log.
   - Goal: persist ongoing agreements/decisions during HITL so context is not lost between turns.
 
-- I-002 (Agreed HITL default flow direction): Keep one default `cwf:hitl` flow (no extra flag), but start with an agreement round before chunk-by-chunk discussion.
+- I-002 (Applied): Keep one default `cwf:hitl` flow (no extra flag), but start with an agreement round before chunk-by-chunk discussion.
   - Steps:
     1) collect major decision points (prefer ship artifacts when available),
     2) merge user-provided issues,

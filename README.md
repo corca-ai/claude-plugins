@@ -286,7 +286,7 @@ cwf:hitl --rule "<rule text>"        # Add review rule for remaining queue
 cwf:review --human                   # Compatibility alias (routes to cwf:hitl)
 ```
 
-State is persisted under `.cwf/projects/<session-dir>/hitl/` (`state.yaml`, `rules.yaml`, `queue.json`, `fix-queue.yaml`, `events.log`). [`.cwf/cwf-state.yaml`](.cwf/cwf-state.yaml) stores only live pointer metadata to the active HITL session.
+Default flow starts with an agreement round: collect major decision points and user concerns, record consensus in `hitl-scratchpad.md`, apply high-impact edits if needed, then proceed to chunk review. Runtime state is persisted under `.cwf/projects/<session-dir>/hitl/` (`hitl-scratchpad.md`, `state.yaml`, `rules.yaml`, `queue.json`, `fix-queue.yaml`, `events.log`). [`.cwf/cwf-state.yaml`](.cwf/cwf-state.yaml) stores only live pointer metadata to the active HITL session.
 
 ### [run](plugins/cwf/skills/run/SKILL.md)
 

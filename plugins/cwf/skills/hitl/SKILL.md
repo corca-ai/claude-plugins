@@ -1,6 +1,6 @@
 ---
 name: hitl
-description: "Human-in-the-loop diff/chunk review to inject deliberate human judgment where automated review is insufficient, with resumable state and rule propagation. Triggers: \"cwf:hitl\", \"hitl\", \"interactive review\", \"human review\", \"cwf:review --human\""
+description: "Human-in-the-loop diff/chunk review to inject deliberate human judgment where automated review is insufficient, with resumable state, agreement-round kickoff, and rule propagation. Triggers: \"cwf:hitl\", \"hitl\", \"interactive review\", \"human review\", \"cwf:review --human\""
 ---
 
 # HITL Review (cwf:hitl)
@@ -28,6 +28,7 @@ Persist HITL runtime state under:
 
 ```text
 .cwf/projects/{session-dir}/hitl/
+  hitl-scratchpad.md
   state.yaml
   rules.yaml
   queue.json
@@ -52,6 +53,8 @@ live:
 - file status: `pending | in_review | reviewed | stale`
 - chunk status: `pending | reviewed | stale`
 - each file entry stores `blob_sha` captured when the queue was built.
+- `fix-queue.yaml` is an execution queue for concrete edits.
+- `hitl-scratchpad.md` is the agreement/rationale log (decisions, open questions, and intent).
 
 ## Phase 0: Resolve Target
 
@@ -63,6 +66,22 @@ live:
 3. Build diff target: `git diff --name-only <base>...HEAD`.
 4. If `--resume`, load from `live.hitl.state_file` pointer in `cwf-state.yaml` (fallback: latest `.cwf/projects/*/hitl/`).
 
+## Phase 0.5: Agreement Round (Default)
+
+Before chunk review starts, run one agreement round in the same `cwf:hitl` flow (no extra mode/flag):
+
+1. Collect major decision points from available ship artifacts first (issue/PR body, review summaries, merge notes).
+2. Merge user-provided concerns/questions for this HITL run.
+3. Record agreements in `hitl-scratchpad.md`:
+   - agreed wording/policy decisions
+   - rationale
+   - open questions
+   - pending implementation items
+4. Apply high-impact agreed edits that should be reflected before chunk-by-chunk review.
+5. Ask whether to start chunk review now.
+
+When `--resume` is used, refresh the same scratchpad first (new agreements or changed priorities), then continue from cursor.
+
 ## Phase 1: Build Deterministic Queue
 
 1. Build file queue from diff files in stable sorted order.
@@ -73,6 +92,8 @@ live:
 4. Assign chunk IDs and initial chunk status `pending`.
 5. Save queue to `queue.json`.
 6. Initialize `state.yaml`, `fix-queue.yaml`, and `events.log`.
+
+If high-impact edits were applied during Phase 0.5, build/rebuild queue after those edits so chunk boundaries and blob hashes are fresh.
 
 ## Phase 2: Chunk Review Loop
 
@@ -143,3 +164,5 @@ On `--close` (or EOF completion):
 5. Maintain meaningful commit-unit boundaries when applying fixes during HITL.
 6. Default policy: `in_review` fixes can be immediate; `reviewed` fixes go to `fix-queue` unless the user requests immediate application.
 7. Any edit touching previously reviewed content must mark overlapping chunks `stale` and trigger delta-review before close.
+8. Default entry behavior: start with the agreement round (Phase 0.5), then move to chunk review.
+9. Keep artifacts separated by role: `fix-queue.yaml` for actionable edits, `hitl-scratchpad.md` for agreements/rationale.
