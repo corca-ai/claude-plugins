@@ -1,21 +1,22 @@
 ---
 name: setup
-description: "Initial CWF configuration to standardize environment/tool contracts before workflow execution: hook group selection, external tool detection, env migration + project config bootstrap, optional Codex integration, optional git hook gate installation, optional CWF capability index generation, and optional repository index generation. Triggers: \"cwf:setup\", \"setup hooks\", \"configure cwf\""
+description: "Initial CWF configuration to standardize environment/tool contracts before workflow execution: hook group selection, external tool detection, env migration + project config bootstrap, optional Agent Team mode setup, optional Codex integration, optional git hook gate installation, optional CWF capability index generation, and optional repository index generation. Triggers: \"cwf:setup\", \"setup hooks\", \"configure cwf\""
 ---
 
 # Setup
 
-Standardize hooks, tool contracts, and environment wiring once so later workflow runs stay reproducible. Includes interactive hook toggles, external tool detection, optional Codex integration, optional git hook gate installation, optional CWF capability index generation, and optional repository index generation.
+Standardize hooks, tool contracts, and environment wiring once so later workflow runs stay reproducible. Includes interactive hook toggles, external tool detection, env migration/bootstrap, optional Agent Team mode setup, optional Codex integration, optional git hook gate installation, optional CWF capability index generation, and optional repository index generation.
 
 **Language**: Write config files in English. Communicate with the user in their prompt language.
 
 ## Quick Start
 
 ```text
-cwf:setup                # Full setup (hooks + tools + optional Codex/repo-index prompts)
+cwf:setup                # Full setup (hooks + tools + env + Agent Team + optional Codex/repo-index prompts)
 cwf:setup --hooks        # Hook group selection only
 cwf:setup --tools        # External tool detection only
 cwf:setup --env          # Environment variable migration/bootstrap only
+cwf:setup --agent-teams  # Agent Team mode setup only
 cwf:setup --codex        # Codex integration-only rerun (skills/references sync)
 cwf:setup --codex-wrapper # Codex wrapper-only rerun (session log sync)
 cwf:setup --git-hooks both --gate-profile balanced  # Install repo git hooks and set gate depth
@@ -36,10 +37,11 @@ Parse input flags and run only the relevant phases:
 
 | Input | Phases |
 |-------|--------|
-| `cwf:setup` | 1 → 2 → 2.8 → 2.4 (if codex available) → 2.7 (always ask) → 4 (opt-in) → 5 |
+| `cwf:setup` | 1 → 2 → 2.8 → 2.9 → 2.4 (if codex available) → 2.7 (always ask) → 4 (opt-in) → 5 |
 | `cwf:setup --hooks` | 1 → 5 |
-| `cwf:setup --tools` | 2 → 2.8 → 5 |
+| `cwf:setup --tools` | 2 → 2.8 → 2.9 → 5 |
 | `cwf:setup --env` | 2.8 → 5 |
+| `cwf:setup --agent-teams` | 2.9 → 5 |
 | `cwf:setup --codex` | 2.5 → 5 |
 | `cwf:setup --codex-wrapper` | 2.6 → 5 |
 | `cwf:setup --git-hooks <none\|pre-commit\|pre-push\|both> [--gate-profile <fast\|balanced\|strict>]` | 2.7 → 5 |
@@ -51,6 +53,8 @@ When mode is full setup and Codex CLI is available, do not silently skip Codex i
 When mode is full setup, do not expect users to supply optional flags manually. Always ask for git hook installation mode and gate profile in Phase 2.7.
 
 When mode is full setup or tools-only setup, always run Phase 2.8 so legacy env keys are migrated to canonical names and project config files are bootstrapped with explicit user choice.
+
+When mode is full setup or tools-only setup, always run Phase 2.9 so Agent Team mode is explicitly aligned with CWF's multi-agent workflow assumptions.
 
 ---
 
@@ -505,6 +509,65 @@ Keep shell exports as global fallback.
 
 ---
 
+## Phase 2.9: Agent Team Mode Setup
+
+Use this phase when:
+- Mode is full setup (`cwf:setup`)
+- User runs `cwf:setup --tools`
+- User runs `cwf:setup --agent-teams`
+
+### 2.9.1 Ask Team Mode Policy
+
+Use AskUserQuestion (single choice):
+
+```text
+Configure Claude Code Agent Team mode now?
+```
+
+Options:
+- `Enable Agent Team mode (recommended)`:
+  - sets `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` in `~/.claude/settings.json` `env`
+- `Keep current setting`:
+  - no modification, status report only
+- `Disable Agent Team mode`:
+  - removes `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` from `~/.claude/settings.json` `env`
+
+### 2.9.2 Apply Selection
+
+When user selects `Enable Agent Team mode (recommended)`, run:
+
+```bash
+bash {SKILL_DIR}/scripts/configure-agent-teams.sh --enable
+```
+
+When user selects `Keep current setting`, run:
+
+```bash
+bash {SKILL_DIR}/scripts/configure-agent-teams.sh --status
+```
+
+When user selects `Disable Agent Team mode`, run:
+
+```bash
+bash {SKILL_DIR}/scripts/configure-agent-teams.sh --disable
+```
+
+### 2.9.3 Report Effective State
+
+Always report:
+
+```bash
+bash {SKILL_DIR}/scripts/configure-agent-teams.sh --status
+```
+
+And include this note in plain language:
+
+```text
+Restart Claude Code (or open a new session) so Agent Team mode changes are applied consistently.
+```
+
+---
+
 ## Phase 3: Generate CWF Capability Index (Explicit)
 
 Generate a CWF-focused capability index. This phase runs only when `--cap-index` is explicitly requested.
@@ -699,6 +762,7 @@ Add `setup` to `cwf-state.yaml` current session's `stage_checkpoints` list.
 15. **Codex sync uses symlink + backup move**: Do not delete user files directly.
 16. **Single-entry setup UX**: `cwf:setup` must ask and apply optional integrations (Codex mode, git hook mode/profile) instead of requiring users to remember flags.
 17. **Env/project-config UX**: `cwf:setup` must detect and offer migration of legacy env keys to canonical `CWF_*` names, then offer project config bootstrap (.cwf/config.yaml, .cwf/config.local.yaml) with explicit user choice.
+18. **Agent Team UX**: `cwf:setup` must include explicit Agent Team mode setup so multi-agent skills do not silently depend on an unset runtime flag.
 
 ## References
 
@@ -710,6 +774,7 @@ Add `setup` to `cwf-state.yaml` current session's `stage_checkpoints` list.
 - [scripts/configure-git-hooks.sh](scripts/configure-git-hooks.sh) — installs and profiles repository git hook gates
 - [scripts/migrate-env-vars.sh](scripts/migrate-env-vars.sh) — legacy env detection and canonical CWF env migration
 - [scripts/bootstrap-project-config.sh](scripts/bootstrap-project-config.sh) — project config template/bootstrap and `.gitignore` sync
+- [scripts/configure-agent-teams.sh](scripts/configure-agent-teams.sh) — toggles Claude Agent Team runtime mode in `~/.claude/settings.json`
 - [scripts/check-index-coverage.sh](scripts/check-index-coverage.sh) — deterministic index coverage validation
 - .cwf-cap-index-ignore — optional intentional exclusion list for capability index coverage
 - .cwf-index-ignore — optional intentional exclusion list for repository index coverage

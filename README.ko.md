@@ -23,6 +23,7 @@ claude plugin install cwf@corca-plugins
 
 - v3 이전 레거시 환경 변수를 표준 `CWF_*` 키로 마이그레이션
 - 프로젝트 설정 파일(`.cwf/config.yaml`, `.cwf/config.local.yaml`) 부트스트랩
+- Claude Code Agent Team 실행 모드 설정(권장)
 - 외부 도구 감지(Codex/Gemini/Tavily/Exa) 및 선택적 Codex 연동
 - 에이전트가 CWF 사용법 및 저장소 탐색을 돕는 인덱스 문서 생성(별도 파일로, 또는 AGENTS.md에 통합)
 
@@ -157,7 +158,7 @@ gather → clarify → plan → review(plan) → impl → review(code) → refac
 | 9 | [review](#review) | `cwf:review` | 요구/계획/코드에 공통 품질 게이트를 적용하는 다각도 리뷰 |
 | 10 | [hitl](#hitl) | `cwf:hitl` | 합의 라운드와 청크 검토를 재개 가능한 상태로 운영 |
 | 11 | [run](#run) | `cwf:run` | gather부터 ship까지 전체 파이프라인을 단계 게이트로 조율 |
-| 12 | [setup](#setup) | `cwf:setup` | 훅/도구/환경/인덱스 계약을 초기 표준값으로 부트스트랩 |
+| 12 | [setup](#setup) | `cwf:setup` | 훅/도구/환경/Agent Team/인덱스 계약을 초기 표준값으로 부트스트랩 |
 | 13 | [update](#update) | `cwf:update` | CWF 동작을 최신 계약/수정사항과 동기화 |
 
 ## 스킬 레퍼런스
@@ -234,7 +235,7 @@ cwf:impl <path/to/plan.md>  # 명시적 계획 경로
 **설계 의도**
 
 - 승인된 계획을 실행 계약으로 간주해 범위 이탈 없이 구현을 진행합니다.
-- 기본적으로 [Agent Team](https://code.claude.com/docs/ko/agent-teams)을 사용하되, 작업 복잡도와 의존성에 맞춰 병렬도/팀 크기를 적응형으로 조정합니다. 고정 전략에서 생기는 과도한 조율 비용을 줄이기 위함입니다. -> 영어 리드미는 링크 /docs/en/ 으로. setup에서 agent-team 셋업도 하나??? 이거 전에도 적어놨었는데.
+- 기본적으로 [Agent Team](https://code.claude.com/docs/ko/agent-teams) 실행 모델을 활용하되, 작업 복잡도와 의존성에 맞춰 병렬도/팀 크기를 적응형으로 조정합니다. 고정 전략에서 생기는 과도한 조율 비용을 줄이기 위함입니다.
 - 실행 중 결정 이력(`decision_journal`)과 교훈(`lessons.md`)을 남겨 컨텍스트 경계 이후에도 의사결정 근거를 복원할 수 있게 합니다.
 
 **무엇을 하는가**
@@ -253,21 +254,24 @@ cwf:retro --light    # 핵심 항목만 빠르게 점검 (서브에이전트 없
 
 **설계 의도**
 
-단일 세션 결과를 기록으로 끝내지 않고, 다음 세션 품질을 높이는 환경 개선으로 환원합니다. -> 이 밑에 제발좀 섹션별 의도 설명하자. 제발 제발. 몇번 말하는거냐.
-
-<이 아래는 코멘트를 달긴 했지만 아예 필요없어보임>
-- 반복 마찰을 개인 실수보다 도구 체계의 빈틈으로 다뤄, `관련 도구`와 `도구 갭`을 분리 기록합니다.
-- 이렇게 분리한 기록을 다음 세션의 `setup`/`refactor`/백로그 입력으로 재사용해 개선 항목이 실제 운영 변경으로 이어지게 합니다. -> 다음 세션의 셋업으로 이어진다? cwf:setup 을 뜻하는 건 아닐텐데 뭐지? '운영 변경'도 모호함.
+- 단일 세션 결과를 기록으로 끝내지 않고, 다음 세션 품질을 높이는 환경 개선 입력으로 환원합니다.
+- 회고를 섹션 단위로 분해해 "무슨 일이 있었는가"와 "다음에 무엇을 바꿀 것인가"를 분리해 남깁니다.
+- 정리된 결과가 문서/체크/백로그 변경으로 이어지도록 연결해 같은 마찰이 반복되지 않게 합니다.
 
 **무엇을 하는가**
 
-기본은 심층 분석이며, `--light` 또는 작은 세션에서는 경량 점검으로 줄일 수 있습니다. 
+기본은 심층 분석이며, `--light` 또는 작은 세션에서는 경량 점검으로 줄일 수 있습니다. 산출물은 세션 디렉토리의 `retro.md`에 저장되고, 심층 모드에서는 `retro-cdm-analysis.md`, `retro-expert-alpha.md`, `retro-expert-beta.md`, `retro-learning-resources.md` 같은 보조 분석 파일이 함께 남습니다.
 
-<위에서 섹션 설명을 했으니 AGENTS.md, expert slot 등 무엇이 어디에 남게 되는지, 어떻게 분석하는지 등등 동작 방식 설명. 이 아래는 필요없음>
+회고는 아래 7개 섹션으로 정리됩니다.
+1. `Context Worth Remembering`: 다음 세션에 필요한 배경/결정 맥락.
+2. `Collaboration Preferences`: 사용자-에이전트 협업 패턴과 개선 포인트.
+3. `Waste Reduction (5 Whys)`: 재작업/오해/불필요 작업의 구조적 원인.
+4. `Critical Decision Analysis (CDM)`: 핵심 의사결정의 근거, 대안, 리스크.
+5. `Expert Lens`(심층): 서로 다른 전문 프레임에서 본 보완 관점.
+6. `Learning Resources`(심층): 다음 실행 품질을 높일 학습 입력.
+7. `Relevant Tools & Tool Gaps`: 실제 활용 도구와 새로 필요한 도구 후보.
 
-회고는 기억할 만한 컨텍스트, 협업 선호도, 낭비 감소(5 Whys), CDM 기반 핵심 의사결정, 전문가 렌즈(심층), 학습 자료(심층), 관련 도구, 도구 갭을 정리해 프로젝트 문서에 보존합니다.
-
-여기서 `관련 도구`는 이번 세션에서 실제로 사용했거나 활용 가능했던 도구를 뜻하고, `도구 갭`은 반복 마찰을 줄이기 위해 새로 도입/개선할 후보를 뜻합니다.
+여기서 `관련 도구`는 이번 세션에서 실제 사용했거나 바로 활용 가능한 도구를, `도구 갭`은 반복 마찰을 줄이기 위해 새로 도입/개선이 필요한 후보를 뜻합니다.
 
 ### [refactor](plugins/cwf/skills/refactor/SKILL.md)
 
@@ -277,7 +281,7 @@ cwf:retro --light    # 핵심 항목만 빠르게 점검 (서브에이전트 없
 cwf:refactor                        # 모든 스킬 퀵 스캔
 cwf:refactor --code [branch]        # 커밋 기반 정리
 cwf:refactor --skill <name>         # 단일 스킬 심층 리뷰
-cwf:refactor --skill --holistic     # 크로스 플러그인 분석 -> 뭘 하는 거지?
+cwf:refactor --skill --holistic     # 스킬/훅 전반의 교차 패턴·규약 정합성 분석
 cwf:refactor --docs                 # 문서 일관성 리뷰
 ```
 
@@ -287,7 +291,7 @@ cwf:refactor --docs                 # 문서 일관성 리뷰
 
 **무엇을 하는가**
 
-퀵 스캔은 전체 건강 상태를 빠르게 확인하는 정기 점검입니다. `--skill <name>`은 특정 스킬 커스터마이즈/이상 동작 진단을 위한 집중 모드입니다. `--code`는 커밋 기반 정리, `--holistic`은 크로스 플러그인 패턴 분석, `--docs`는 문서 일관성 점검을 수행합니다. -> 좀 더 구체적으로 뭘 하는지 설명 필요
+퀵 스캔은 모든 스킬의 구조 지표와 경고 플래그를 빠르게 점검해 이상 후보를 찾습니다. `--skill <name>`은 특정 스킬의 구조/품질/컨셉 정합성을 깊게 검토하는 집중 모드입니다. `--code`는 최근 커밋 기준 정리(tidy) 후보를 찾고, `--holistic`은 플러그인/훅 간 규약 준수와 워크플로우 연결성을 교차 분석하며, `--docs`는 문서 간 일관성·중복·연결 상태를 점검합니다.
 
 ### [handoff](plugins/cwf/skills/handoff/SKILL.md)
 
@@ -381,7 +385,7 @@ cwf:run --skip review-plan,retro     # 특정 단계 건너뛰기
 
 **무엇을 하는가**
 
-기본 체인은 gather → clarify → plan → review(plan) → impl → review(code) → refactor → retro → ship입니다. 구현 전 단계는 사용자 확인 게이트를 두고, 구현 후 단계는 자동 진행하되 `ship`에서 최종 사용자 확인을 받습니다. -> '사용자 확인 게이트' 좀 어색함. 그리고 cwf-state 의 역할에 대해 여기서 기술해야 하지 않을까?
+기본 체인은 gather → clarify → plan → review(plan) → impl → review(code) → refactor → retro → ship입니다. 구현 전 단계는 사용자와 합의가 필요한 포인트를 확인하고, 구현 후 단계는 자동 진행하되 `ship`에서 최종 판단을 사용자에게 남깁니다. 단계 진행 상태는 각 프로젝트의 `.cwf/cwf-state.yaml`에 포인터로 기록되고, 세부 세션 상태는 해당 프로젝트의 세션 파일에 저장되어 중단 이후에도 같은 흐름으로 재개할 수 있습니다.
 
 ### [setup](plugins/cwf/skills/setup/SKILL.md)
 
@@ -392,6 +396,7 @@ cwf:setup                # 전체 설정 (훅 + 도구 + repo-index 생성 여�
 cwf:setup --hooks        # 훅 그룹 선택만
 cwf:setup --tools        # 외부 도구 감지만
 cwf:setup --env          # 환경 변수 마이그레이션/부트스트랩만
+cwf:setup --agent-teams  # Claude Code Agent Team 모드 설정만
 cwf:setup --codex        # Codex 사용자 스코프(~/.agents/*)에 CWF 스킬/레퍼런스 연결
 cwf:setup --codex-wrapper # 세션 로그 자동 동기화를 위한 Codex wrapper 설치
 cwf:setup --cap-index    # CWF capability 인덱스만 생성/갱신 (.cwf/indexes/cwf-index.md)
@@ -399,15 +404,16 @@ cwf:setup --repo-index   # 저장소 인덱스 명시적 생성/갱신
 cwf:setup --repo-index --target agents # AGENTS 기반 저장소용 AGENTS.md 관리 블록
 ```
 
-**설계 의도** -> 셋업이 agent team 설정할 수 있게 해야 함. 지금은 아닌듯? 스킬 수정 필요.
+**설계 의도**
 
 - 초기 1회 설정으로 훅, 도구 감지, 환경 변수 계약을 표준화해 실행 편차를 줄입니다.
+- `--agent-teams`는 Claude Code의 Agent Team 실행 모드를 설정해, 병렬 실행을 사용하는 CWF 스킬들의 런타임 전제를 안정적으로 맞춥니다.
 - `--cap-index`는 CWF 내부 기능 지도를 생성해 에이전트가 스킬/레퍼런스를 빠르게 라우팅하도록 돕습니다.
 - `--repo-index`는 AGENTS 관리 블록을 갱신해 저장소 문서를 점진적 공개 방식으로 탐색할 수 있게 합니다([문서 원칙](docs/documentation-guide.md) 참고).
 
 **무엇을 하는가**
 
-`cwf:setup`은 훅 그룹 토글, 외부 도구 감지(Codex/Gemini/Tavily/Exa), 환경 변수 마이그레이션(레거시 키 → `CWF_*`), 프로젝트 설정 파일 부트스트랩(`.cwf/config.yaml`, `.cwf/config.local.yaml`), 선택적 Codex 연동, 선택적 인덱스 생성/갱신을 대화형으로 수행합니다. 여기서 인덱스 생성은 에이전트가 필요한 문서를 짧은 경로로 찾아가도록 라우팅 품질을 높이기 위한 단계입니다. Codex 연동만 다시 적용할 때는 `--codex`/`--codex-wrapper`를 사용합니다.
+`cwf:setup`은 훅 그룹 토글, 외부 도구 감지(Codex/Gemini/Tavily/Exa), 환경 변수 마이그레이션(레거시 키 → `CWF_*`), 프로젝트 설정 파일 부트스트랩(`.cwf/config.yaml`, `.cwf/config.local.yaml`), Agent Team 실행 모드 설정(`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`), 선택적 Codex 연동, 선택적 인덱스 생성/갱신을 대화형으로 수행합니다. 여기서 인덱스 생성은 에이전트가 필요한 문서를 짧은 경로로 찾아가도록 라우팅 품질을 높이기 위한 단계입니다. Agent Team 설정만 다시 적용할 때는 `--agent-teams`, Codex 연동만 다시 적용할 때는 `--codex`/`--codex-wrapper`를 사용합니다.
 
 ### [update](plugins/cwf/skills/update/SKILL.md)
 
@@ -420,7 +426,7 @@ cwf:update --check       # 버전 확인만
 
 **설계 의도**
 
-제가 개밥먹기를 통해 플러그인을 자주 업데이트하는데, 제가 플러그인 업데이트를 자주 까먹어서 만들었습니다. "상태 확인 -> 사용자 승인 -> 적용"을 하나의 명령으로 묶어 점검 루틴을 표준화합니다.
+제가 개밥먹기를 하면서 플러그인을 자주 업데이트하는데, 이걸 자주 까먹어서 `update`를 만들었습니다. "상태 확인 → 사용자 승인 → 적용"을 하나의 명령으로 묶어 점검 루틴을 표준화합니다.
 
 **무엇을 하는가**
 
@@ -439,8 +445,6 @@ cwf:setup --codex-wrapper
 - `cwf:setup --codex`: CWF 스킬/레퍼런스를 Codex 사용자 스코프(`~/.agents/*`)에 연결해 Codex에서도 동일한 CWF 지식을 사용합니다.
 - `cwf:setup --codex-wrapper`: `~/.local/bin/codex` wrapper를 설치해 Codex 실행 종료 후 세션 로그를 `.cwf/projects/sessions/`로 자동 동기화합니다.
 - `wrapper`는 현재 세션 로그 동기화에 집중합니다. Codex에는 Claude처럼 Pre/PostTool 훅 체인이 없어 동일 자동화를 그대로 이식할 수는 없습니다. 세션 단위 후처리(예: 종료 후 검증/상태 동기화) 확장은 별도 설계·합의가 필요한 검토 항목입니다.
-
--> hook 중 뭘 더 추가해야 할지 논의 좀 합시다. hitl에서 검토도 해야 하는데 지금 너무 딱딱하네요.
 
 ## 훅
 

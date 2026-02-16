@@ -8,3 +8,4 @@ File-level map for [setup](SKILL.md).
 - [scripts/configure-git-hooks.sh](scripts/configure-git-hooks.sh): Installs/removes repo git hooks and applies gate profiles (`fast`, `balanced`, `strict`).
 - [scripts/migrate-env-vars.sh](scripts/migrate-env-vars.sh): Migrates legacy env keys to canonical `CWF_*` keys in shell profiles.
 - [scripts/bootstrap-project-config.sh](scripts/bootstrap-project-config.sh): Bootstraps .cwf/config.yaml + .cwf/config.local.yaml and ensures local config gitignore.
+- [scripts/configure-agent-teams.sh](scripts/configure-agent-teams.sh): Toggles Claude Agent Team runtime mode by editing `~/.claude/settings.json` env key.

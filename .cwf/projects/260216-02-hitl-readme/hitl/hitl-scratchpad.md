@@ -1,7 +1,7 @@
 # HITL Scratchpad
 
 Session: `260216-02-hitl-readme`
-Updated: `2026-02-16T07:46:57Z`
+Updated: `2026-02-16T08:30:06Z`
 
 ## Purpose
 
@@ -237,6 +237,43 @@ Single source of truth for HITL consensus, rationale, and unresolved questions.
   - Applied to:
     - `README.ko.md` (`gather`, `hitl` 설명 문단)
 
+- D-033 (Applied): `retro` 설명을 섹션 단위로 명시화.
+  - Direction:
+    - "섹션별 설명이 필요" 요구에 맞춰 `무엇을 하는가`에 7개 섹션 목적을 번호로 명시
+    - 심층 모드 보조 산출물 파일(`retro-cdm-analysis.md`, `retro-expert-*.md`, `retro-learning-resources.md`)을 README에 직접 표기
+  - Applied to:
+    - `README.ko.md` (`retro`의 설계 의도/무엇을 하는가)
+
+- D-034 (Applied): `update` 설명은 사용자 문장(1인칭 동기)을 최대한 유지.
+  - Direction:
+    - 공식 문체보다 실제 도입 동기를 드러내는 문장을 우선
+    - `계약과 동기화` 표현 제거
+  - Applied to:
+    - `README.ko.md` (`update`의 설계 의도)
+
+- D-035 (Applied): `run` 설명에 프로젝트별 `cwf-state` 역할을 명시.
+  - Direction:
+    - `run`의 상태 관리 설명에서 전역/추상 표현 대신 "각 프로젝트의 `.cwf/cwf-state.yaml`"을 직접 표기
+    - `cwf-state`는 포인터, 세부 상태는 세션 파일이라는 역할 분리를 명확화
+  - Applied to:
+    - `README.ko.md` (`run`의 무엇을 하는가)
+
+- D-036 (Applied): `setup`에 Agent Team 설정 단계를 구현.
+  - Direction:
+    - `cwf:setup` 실행 흐름에 Agent Team 설정(Phase 2.9)을 추가
+    - Agent Team 설정만 재실행 가능한 `cwf:setup --agent-teams` 경로 추가
+    - 실제 적용은 스크립트로 수행해(`configure-agent-teams.sh`) 상태 조회/enable/disable을 결정적으로 처리
+  - Implemented by:
+    - `plugins/cwf/skills/setup/SKILL.md` (mode routing + phase 2.9 + rules/references)
+    - `plugins/cwf/skills/setup/scripts/configure-agent-teams.sh` (new)
+    - `plugins/cwf/skills/setup/README.md` (file map update)
+    - `README.ko.md` (`setup` quick start/table/설계 의도/무엇을 하는가 동기화)
+
+- D-037 (Agreed): HITL 완화는 새 플래그를 추가하지 않고 기존 규약 안에서 개선.
+  - Direction:
+    - `Before/After/After Intent`와 넓은 문맥 제시 규약은 유지
+    - 진행 방식은 더 창의적/지능적으로 운영하되, 별도 모드 플래그는 도입하지 않음
+
 - I-001 (Applied): Make agreement-capture notes a default HITL behavior.
   - Implemented in `plugins/cwf/skills/hitl/SKILL.md` as default agreement round before chunk review.
   - `hitl-scratchpad.md` is now explicit state artifact and rationale log.
@@ -283,7 +320,9 @@ Single source of truth for HITL consensus, rationale, and unresolved questions.
 
 ## Open Questions
 
-- None currently. Continue with remaining implementation backlog.
+- Q-002: Codex 연동에서 wrapper 이후 확장할 세션 후처리(검증/상태 동기화) 훅 후보 정의.
+- Q-003: HITL 기본 흐름의 체감 경직성을, 플래그 추가 없이 운영 방식 개선으로 어떻게 줄일지.
+- Q-004: `README.ko.md` 변경 의도 동기화를 위한 `README.md`(영문) 반영 타이밍과 번역 정책.
 
 ## Skill Update Backlog
 
