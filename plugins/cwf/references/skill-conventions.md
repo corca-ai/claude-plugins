@@ -72,14 +72,6 @@ Minimum fallback path for context-deficit conditions:
 2. Load session directory artifacts (`plan.md`, `lessons.md`, `retro.md`, `next-session.md`, `phase-handoff.md` as applicable).
 3. Apply skill-specific deterministic recovery gates before continuing.
 
-## Runtime Script Path Placeholder (Global Contract)
-
-For CWF runtime helper commands in SKILL/references docs:
-
-- Use `{CWF_PLUGIN_DIR}/scripts/...` as the canonical placeholder form.
-- Do not use `{SKILL_DIR}/../../scripts/...` in new or updated instructions.
-- In this repository, `{CWF_PLUGIN_DIR}` resolves to [plugins/cwf](..).
-
 ## Missing Dependency Handling (Global Contract)
 
 When a required executable/library/key is missing:

@@ -10,6 +10,7 @@ set -euo pipefail
 #   3) Plugin runtime script integrity
 #   4) hybrid live state pointer validity (root + session live state)
 #   5) Provenance freshness summary
+#   6) Runtime script placeholder style in skills/references
 #
 # Exit behavior:
 #   inform: always exit 0
@@ -460,11 +461,40 @@ check_provenance_freshness_summary() {
   fi
 }
 
+check_runtime_placeholder_style() {
+  local category="runtime_placeholder_style"
+  local hits_file="$TMP_DIR/runtime-placeholder-hits.txt"
+  local hit_count=0
+
+  : > "$hits_file"
+  if command -v rg >/dev/null 2>&1; then
+    rg -n '\{SKILL_DIR\}/\.\./\.\./scripts/' plugins/cwf/skills plugins/cwf/references -S >"$hits_file" || true
+  else
+    grep -R -n -- '{SKILL_DIR}/../../scripts/' plugins/cwf/skills plugins/cwf/references >"$hits_file" || true
+  fi
+
+  if [[ -s "$hits_file" ]]; then
+    while IFS= read -r hit; do
+      [[ -n "$hit" ]] || continue
+      record_fail "$category" "Forbidden placeholder found: $hit"
+      hit_count=$((hit_count + 1))
+      if [[ "$hit_count" -ge 5 ]]; then
+        record_fail "$category" "More matches omitted after first 5; replace with {CWF_PLUGIN_DIR}/scripts/..."
+        break
+      fi
+    done < "$hits_file"
+    return
+  fi
+
+  record_pass "$category" "No legacy {SKILL_DIR}/../../scripts placeholders in skills/references"
+}
+
 check_skill_inventory_vs_readme_ko
 check_run_chain_sync
 check_plugin_runtime_scripts
 check_live_state_pointers
 check_provenance_freshness_summary
+check_runtime_placeholder_style
 
 echo "CWF Growth Drift Check (v2)"
 echo "Level: $LEVEL"
