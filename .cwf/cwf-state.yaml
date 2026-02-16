@@ -436,16 +436,16 @@ expert_roster:
   - name: "Gary Klein"
     domain: "naturalistic decision-making, recognition-primed decision model"
     source: "Sources of Power: How People Make Decisions (MIT Press, 1998)"
-    rationale: "Applied to agreement bias analysis and mental simulation protocols"
+    rationale: "Applied to agreement bias analysis and mental simulation protocols, S260217-01: RPD analysis of triage distortion and deletion decision-point intervention"
     introduced: "S13.5-B2"
-    usage_count: 1
+    usage_count: 2
     verified: true
   - name: "James Reason"
     domain: "organizational accidents, Swiss cheese model, defense-in-depth"
     source: "Managing the Risks of Organizational Accidents (Ashgate, 1997)"
-    rationale: "Applied to hook chain defense layer analysis"
+    rationale: "Applied to hook chain defense layer analysis, S260217-01: Swiss cheese model applied to prevention proposal defense layers (empty recovery layer finding)"
     introduced: "S13.5-B3"
-    usage_count: 1
+    usage_count: 2
     verified: true
   - name: "Sidney Dekker"
     domain: "drift into failure, local rationality, just culture"
