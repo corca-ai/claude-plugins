@@ -267,7 +267,7 @@ blocked_files="${blocked_files%, }"
 caller_preview=""
 if [[ ${#CALLER_LINES[@]} -gt 0 ]]; then
   caller_preview="$(printf '%s; ' "${CALLER_LINES[@]}")"
-  caller_preview="${caller_preview%, }"
+  caller_preview="${caller_preview%; }"
 fi
 
 reason="BLOCKED: deleted file(s) have runtime callers: ${blocked_files}."

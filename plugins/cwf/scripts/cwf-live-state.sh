@@ -207,8 +207,9 @@ cwf_live_sanitize_yaml_value() {
   local value="$1"
   # Defense-in-depth: strip characters that could break YAML structure
   # even inside double-quoted strings. cwf_live_escape_dq handles \ " \n;
-  # this additionally neutralizes : [ ] { } which could confuse parsers
-  # operating on the raw file.
+  # this additionally neutralizes [ ] which could confuse YAML list parsers
+  # operating on the raw file. Colons and braces are safe inside
+  # double-quoted YAML strings and are not sanitized.
   value="${value//[/（}"
   value="${value//]/）}"
   value="$(cwf_live_escape_dq "$value")"
