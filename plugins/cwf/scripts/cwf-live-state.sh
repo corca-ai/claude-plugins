@@ -764,9 +764,9 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
         cwf_live_remove_list_item "$root_state" "$rl_key" "$rl_item"
       fi
       if [[ "$rl_key" == "remaining_gates" ]]; then
-        cwf_live_bump_state_version "$effective_state" >/dev/null
+        rl_version="$(cwf_live_bump_state_version "$effective_state")"
         if [[ "$effective_state" != "$root_state" ]]; then
-          cwf_live_bump_state_version "$root_state" >/dev/null
+          cwf_live_upsert_live_scalar "$root_state" "state_version" "$rl_version"
         fi
       fi
       printf '%s\n' "$effective_state"

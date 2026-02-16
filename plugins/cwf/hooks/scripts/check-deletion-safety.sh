@@ -25,6 +25,10 @@ if [[ -z "$REPO_ROOT" ]]; then
   exit 0
 fi
 
+# Per-invocation temp file for grep stderr (avoids race with concurrent hooks)
+STDERR_TMP="$(mktemp /tmp/cwf-deletion-safety-XXXXXX.err 2>/dev/null || echo "/tmp/cwf-deletion-safety-$$.err")"
+trap 'rm -f "$STDERR_TMP"' EXIT
+
 json_block() {
   local reason="$1"
   if command -v jq >/dev/null 2>&1; then
@@ -144,18 +148,18 @@ search_callers() {
     --exclude-dir=projects \
     --exclude-dir=prompt-logs \
     --exclude-dir=sessions \
-    "$needle" . 2>/tmp/cwf-deletion-safety.err)"
+    "$needle" . 2>"$STDERR_TMP")"
   rc=$?
   set -e
 
   if [[ $rc -gt 1 ]]; then
     SEARCH_FAILED=1
-    SEARCH_ERROR="$(head -n 1 /tmp/cwf-deletion-safety.err 2>/dev/null || true)"
-    rm -f /tmp/cwf-deletion-safety.err
+    SEARCH_ERROR="$(head -n 1 "$STDERR_TMP" 2>/dev/null || true)"
+    rm -f "$STDERR_TMP"
     return 0
   fi
 
-  rm -f /tmp/cwf-deletion-safety.err
+  rm -f "$STDERR_TMP"
   printf '%s\n' "$output"
 }
 
