@@ -436,7 +436,8 @@ the plan's success criteria, run:
 13. **Stage specific files, never `git add -A`**: Only stage files known to belong to the current work item. Prevent accidental inclusion of unrelated changes.
 14. **Lesson-driven changes get separate commits**: If a lesson triggers a code change, commit it independently. See [Lesson-Driven Commits](references/impl-gates.md#lesson-driven-commits).
 15. **Incremental lessons are mandatory**: Update `lessons.md` as implementation progresses, not only at the end.
-16. **Language split is mandatory**: implementation/code artifacts stay in English, while `lessons.md` stays in the user's language.
+16. **Recommendation Fidelity Check** (stopgap — structural fix deferred: modify triage output format to carry original recommendation): For each triage item referencing an analysis document, read the original analysis recommendation before acting. If the triage action contradicts or simplifies the original recommendation: follow the original, not the triage summary. For file deletions specifically: apply a pre-mortem simulation — "if this file is deleted, what breaks?" — by checking for runtime callers before proceeding.
+17. **Language split is mandatory**: implementation/code artifacts stay in English, while `lessons.md` stays in the user's language.
 
 ## References
 
