@@ -3,7 +3,7 @@ set -euo pipefail
 # check-deletion-safety.sh — PreToolUse fail-closed guard for destructive deletions.
 # Blocks BEFORE execution when the command would delete files that have in-repo callers.
 #
-# Detection boundary: grep/rg uses literal string matching only. Variable-interpolated
+# Detection boundary: grep -rl detects literal string matches only. Variable-interpolated
 # references (e.g., "$SCRIPT_DIR/csv-to-toon.sh", source "$DIR/lib.sh") will NOT be
 # detected. This is an accepted residual risk — static analysis cannot resolve all
 # dynamic references.
@@ -38,7 +38,7 @@ EOF
 {"decision":"block","reason":"Deletion safety gate requires jq for safe parsing."}
 EOF
   fi
-  exit 0
+  exit 1
 }
 
 trim_ws() {
@@ -131,22 +131,19 @@ search_callers() {
   local rc=0
   local output=""
 
-  if ! command -v rg >/dev/null 2>&1; then
-    SEARCH_FAILED=1
-    SEARCH_ERROR="rg is required for deletion safety search"
-    return 0
-  fi
-
   set +e
-  output="$(cd "$REPO_ROOT" && rg -n --fixed-strings \
-    --glob '*.sh' \
-    --glob '*.md' \
-    --glob '*.mjs' \
-    --glob '*.yaml' \
-    --glob '*.json' \
-    --glob '*.py' \
-    --glob 'hooks.json' \
-    --glob 'package.json' \
+  output="$(cd "$REPO_ROOT" && grep -rl --fixed-strings \
+    --include='*.sh' \
+    --include='*.md' \
+    --include='*.mjs' \
+    --include='*.yaml' \
+    --include='*.json' \
+    --include='*.py' \
+    --exclude-dir=node_modules \
+    --exclude-dir=.git \
+    --exclude-dir=projects \
+    --exclude-dir=prompt-logs \
+    --exclude-dir=sessions \
     "$needle" . 2>/tmp/cwf-deletion-safety.err)"
   rc=$?
   set -e
@@ -244,7 +241,8 @@ for rel_path in "${DELETED_REL[@]}"; do
   fi
 
   combined_hits="$(printf '%s\n' "$combined_hits" | sed '/^$/d' | sed 's#^\./##' | sort -u)"
-  combined_hits="$(printf '%s\n' "$combined_hits" | grep -v "^${rel_path}:" || true)"
+  # Exclude the deleted file itself from caller results (grep -rl returns bare paths)
+  combined_hits="$(printf '%s\n' "$combined_hits" | grep -vxF "$rel_path" || true)"
   if [[ -z "$combined_hits" ]]; then
     continue
   fi
