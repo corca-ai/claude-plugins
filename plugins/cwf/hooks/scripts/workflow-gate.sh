@@ -160,7 +160,7 @@ fi
 # pipeline belongs to a previous session and should be cleaned up.
 STORED_SESSION_ID="$(normalize_scalar "$(extract_live_scalar "$LIVE_STATE_FILE" "session_id" || true)")"
 if [[ -n "$SESSION_ID" && -n "$STORED_SESSION_ID" && "$SESSION_ID" != "$STORED_SESSION_ID" ]]; then
-  json_allow "[WARNING] Stale pipeline detected: active_pipeline='${ACTIVE_PIPELINE}' belongs to session '${STORED_SESSION_ID}' but current session is '${SESSION_ID}'. Run: bash cwf-live-state.sh set . active_pipeline=\"\" to clean up."
+  json_allow "[WARNING] Stale pipeline detected: active_pipeline='${ACTIVE_PIPELINE}' belongs to session '${STORED_SESSION_ID}' but current session is '${SESSION_ID}'. Run: bash ${LIVE_STATE_SCRIPT} set . active_pipeline=\"\" to clean up."
 fi
 
 PHASE="$(normalize_scalar "$(extract_live_scalar "$LIVE_STATE_FILE" "phase" || true)")"

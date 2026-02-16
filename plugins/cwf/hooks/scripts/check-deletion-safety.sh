@@ -25,10 +25,6 @@ if [[ -z "$REPO_ROOT" ]]; then
   exit 0
 fi
 
-# Per-invocation temp file for grep stderr (avoids race with concurrent hooks)
-STDERR_TMP="$(mktemp /tmp/cwf-deletion-safety-XXXXXX.err 2>/dev/null || echo "/tmp/cwf-deletion-safety-$$.err")"
-trap 'rm -f "$STDERR_TMP"' EXIT
-
 json_block() {
   local reason="$1"
   if command -v jq >/dev/null 2>&1; then
@@ -134,6 +130,14 @@ search_callers() {
   local needle="$1"
   local rc=0
   local output=""
+  local stderr_tmp=""
+
+  stderr_tmp="$(mktemp "${TMPDIR:-/tmp}/cwf-deletion-safety-XXXXXX.err" 2>/dev/null || true)"
+  if [[ -z "$stderr_tmp" ]]; then
+    SEARCH_FAILED=1
+    SEARCH_ERROR="failed to allocate temporary file for deletion-safety search"
+    return 0
+  fi
 
   set +e
   output="$(cd "$REPO_ROOT" && grep -rl --fixed-strings \
@@ -148,18 +152,18 @@ search_callers() {
     --exclude-dir=projects \
     --exclude-dir=prompt-logs \
     --exclude-dir=sessions \
-    "$needle" . 2>"$STDERR_TMP")"
+    "$needle" . 2>"$stderr_tmp")"
   rc=$?
   set -e
 
   if [[ $rc -gt 1 ]]; then
     SEARCH_FAILED=1
-    SEARCH_ERROR="$(head -n 1 "$STDERR_TMP" 2>/dev/null || true)"
-    rm -f "$STDERR_TMP"
+    SEARCH_ERROR="$(head -n 1 "$stderr_tmp" 2>/dev/null || true)"
+    rm -f "$stderr_tmp"
     return 0
   fi
 
-  rm -f "$STDERR_TMP"
+  rm -f "$stderr_tmp"
   printf '%s\n' "$output"
 }
 
