@@ -1,11 +1,11 @@
 ---
 name: refactor
-description: "Multi-mode code and skill review. Quick scan all plugins, deep-review a single skill, holistic cross-plugin analysis, commit-based tidying, or docs consistency check. Triggers: \"cwf:refactor\", \"/refactor\", \"tidy\", \"review skill\", \"cleanup code\", \"check docs consistency\""
+description: "Multi-mode code and skill review for controlling drift as capability surface grows. Quick scan all plugins, deep-review a single skill, holistic cross-plugin analysis, commit-based tidying, or docs consistency check. Triggers: \"cwf:refactor\", \"/refactor\", \"tidy\", \"review skill\", \"cleanup code\", \"check docs consistency\""
 ---
 
 # Refactor (cwf:refactor)
 
-Multi-mode code and skill review tool.
+Control drift across code, skills, and docs as teams install and author more capabilities.
 
 **Language**: Write review reports in English. Communicate with the user in their prompt language.
 
@@ -18,6 +18,10 @@ cwf:refactor --skill <name>         Deep review of a single skill (parallel sub-
 cwf:refactor --skill --holistic     Cross-plugin analysis (parallel sub-agents)
 cwf:refactor --docs                 Documentation consistency review
 ```
+
+Philosophy:
+- `cwf:refactor` (no args) is a maintenance heartbeat for ecosystem-level drift detection.
+- `cwf:refactor --skill <name>` is for focused diagnosis when one authored/installed skill needs targeted correction without paying the cost of full holistic analysis.
 
 ## Mode Routing
 

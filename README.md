@@ -18,6 +18,12 @@ claude plugin install cwf@corca-plugins
 # Restart Claude Code for hooks to take effect
 ```
 
+After restart, run one-time bootstrap in Claude Code / Codex CLI:
+
+```text
+cwf:setup
+```
+
 ### Codex users (recommended)
 
 If you use Codex CLI, run this right after installation:
@@ -27,6 +33,18 @@ cwf:setup --codex
 cwf:setup --codex-wrapper
 ```
 
+### First workflow scenario
+
+In Claude Code / Codex CLI, start with a plain prompt:
+
+```text
+I need to solve <problem>. Please use CWF and drive the workflow.
+```
+
+The agent can invoke `cwf:run` and chain gather → clarify → plan → review(plan) → impl → review(code) → retro → ship. If you want an explicit cleanup pass before shipping, run `cwf:refactor`. If you want chunk-by-chunk human approval on diffs, run `cwf:hitl`.
+
+You do not need to memorize every skill. The sections below explain why each skill exists and when to use it.
+
 ### Update to latest version
 
 ```bash
@@ -34,7 +52,7 @@ claude plugin marketplace update corca-plugins
 claude plugin update cwf@corca-plugins
 ```
 
-Or from inside Claude Code:
+Or from inside Claude Code / Codex CLI:
 
 ```text
 cwf:update               # Check + update if newer version exists
@@ -43,7 +61,7 @@ cwf:update --check       # Version check only
 
 ### Standalone plugins (legacy)
 
-As of v3.0.0, legacy standalone plugins have been removed from the marketplace. If you have older standalone plugins installed, uninstall them and install `cwf` instead.
+As of v3.0.0, legacy standalone plugins have been removed from the marketplace. If pre-v3.0 standalone plugins are installed, uninstall them and install `cwf` instead.
 
 ## Operating Principles
 
@@ -51,32 +69,19 @@ As of v3.0.0, legacy standalone plugins have been removed from the marketplace. 
 
 - A single workflow plugin (`cwf`) that integrates context gathering, requirement clarification, planning, implementation, review, retrospective, handoff, and shipping.
 - A stateful workflow system where .cwf/cwf-state.yaml, session-log artifacts, and hooks preserve context across phase/session boundaries.
-- A composable skill framework built on shared concepts (Expert Advisor, Tier Classification, Agent Orchestration, Decision Point, Handoff, Provenance).
+- A composable skill framework built on shared concepts (Expert Advisor, Tier Classification, Agent Orchestration, Decision Point, Handoff, Provenance Tracking).
 
 ### What CWF Is Not
 
 - Not a replacement for project-specific engineering standards, CI gates, or human product ownership decisions.
 - Not a guarantee that every decision can be fully automated; subjective decisions still require user confirmation.
-- Not a generic plugin bundle where each skill is isolated; CWF skills are intentionally interdependent.
+- While each skill can be invoked independently, CWF is intentionally designed as a tightly coupled system and works best when skills are used together.
 
 ### Assumptions
 
 - Users work in repositories where session artifacts (.cwf/projects/, .cwf/cwf-state.yaml) are allowed and useful.
 - Users accept progressive disclosure: start from AGENTS.md, then load deeper docs as needed.
-- Teams prefer deterministic validation scripts for recurring quality checks over relying on behavioral memory.
-
-### Key Decisions and Why
-
-1. **Unified plugin over standalone plugins**
-   - Why: prevent context loss and protocol drift between phases.
-2. **Pre-impl human gates, post-impl autonomous chaining (`run`)**
-   - Why: keep high-judgment decisions human-controlled while preserving execution speed after scope is fixed.
-3. **File-path-only handoff start contracts**
-   - Why: make session continuation deterministic and reduce startup ambiguity.
-4. **Provenance checks for concept/review references**
-   - Why: detect stale criteria when skill/hook inventory changes.
-
-The sections above define the operating principles for how CWF is used.
+- Users prefer deterministic validation scripts for recurring quality checks over relying on behavioral memory.
 
 ## Why CWF?
 
@@ -86,7 +91,18 @@ AI coding sessions lose context at every boundary. When a session ends, the next
 
 ### Approach
 
-CWF addresses this with six building-block concepts that compose across thirteen skills. Each skill synchronizes the same underlying behavioral patterns — expert advisors surface blind spots in both requirement clarification and session retrospectives; tier classification routes decisions to evidence or humans consistently; agent orchestration parallelizes work from research through implementation.
+CWF addresses this with six building-block concepts that compose across thirteen skills.
+
+Design choices behind this approach:
+
+1. **Unified plugin over standalone plugins**
+   - Why: prevent context loss and protocol drift between phases.
+2. **Pre-impl human gates, post-impl autonomous chaining (`run`)**
+   - Why: keep high-judgment decisions human-controlled while preserving execution speed after scope is fixed.
+3. **File-path-only handoff start contracts**
+   - Why: make session continuation deterministic and reduce startup ambiguity.
+4. **Provenance Tracking checks for concept/review references**
+   - Why: detect stale criteria when skill/hook inventory changes.
 
 ### Result
 
@@ -94,19 +110,19 @@ The result: one plugin (`cwf`), thirteen skills, seven hook groups. Context surv
 
 ## Core Concepts
 
-Six reusable behavioral patterns that CWF skills compose. Understanding these explains why the skills work together, not just what each one does.
+Six reusable behavioral patterns that CWF skills compose. Each concept below describes a job CWF must do to keep long-running AI sessions reliable.
 
-**Expert Advisor** — Reduce blind spots by introducing contrasting expert frameworks. Two domain experts with different analytical lenses evaluate problems independently; their disagreements surface hidden assumptions.
+**Expert Advisor** — JTBD: expose hidden assumptions before they become expensive rework. Contrasting experts analyze the same problem independently; disagreements reveal blind spots early.
 
-**Tier Classification** — Route decisions to the right authority. Codebase evidence (T1) and best-practice consensus (T2) are resolved autonomously; genuinely subjective decisions (T3) are queued for the human.
+**Tier Classification** — JTBD: route each decision to the right authority at the right time. Evidence-backed decisions (T1/T2) stay autonomous; genuinely subjective decisions (T3) are escalated to the user.
 
-**Agent Orchestration** — Parallelize work without sacrificing quality. The orchestrator assesses complexity, spawns the minimum agents needed, executes in dependency-respecting batches, and synthesizes results.
+**Agent Orchestration** — JTBD: increase throughput without losing consistency. The orchestrator sizes agent teams by complexity, executes dependency-aware batches, and synthesizes outputs into one coherent result.
 
-**Decision Point** — Capture ambiguity explicitly. Requirements are decomposed into concrete questions before anyone decides, ensuring every choice has recorded evidence and rationale.
+**Decision Point** — JTBD: turn ambiguity into explicit, reviewable choices. Requirements are decomposed into concrete questions so every decision has recorded evidence and rationale.
 
-**Handoff** — Preserve context across boundaries. Session handoffs carry task scope and lessons; phase handoffs carry protocols and constraints. The next agent starts informed, not blank.
+**Handoff** — JTBD: prevent restart-from-zero at phase/session boundaries. Session handoffs preserve task context and lessons, while phase handoffs preserve protocols and constraints.
 
-**Provenance** — Detect criteria staleness. Reference documents carry metadata about the system state when they were written; skills check this before applying outdated standards.
+**Provenance Tracking** — JTBD: prevent stale standards from silently driving current work. Reference docs carry system-state metadata and are checked before reuse.
 
 ## The Workflow
 
@@ -132,13 +148,13 @@ gather → clarify → plan → impl → retro
 | 12 | [setup](#setup) | `cwf:setup` | Configure hook groups, detect tools, optionally generate project index |
 | 13 | [update](#update) | `cwf:update` | Check and apply CWF plugin updates |
 
-**Concept composition**: gather, clarify, plan, impl, retro, refactor, review, hitl, and run all synchronize Agent Orchestration. clarify is the richest composition — it synchronizes Expert Advisor, Tier Classification, Agent Orchestration, and Decision Point in a single workflow. review and hitl both combine human judgment with structured review orchestration at different granularity (parallel reviewers vs chunked interactive loop). handoff is the primary instantiation of the Handoff concept. refactor activates Provenance in holistic mode.
+**Concept composition**: gather, clarify, plan, impl, retro, refactor, review, hitl, and run all synchronize Agent Orchestration. clarify is the richest composition — it synchronizes Expert Advisor, Tier Classification, Agent Orchestration, and Decision Point in a single workflow. review and hitl both combine human judgment with structured review orchestration at different granularity (parallel reviewers vs chunked interactive loop). handoff is the primary instantiation of the Handoff concept. refactor activates Provenance Tracking in holistic mode.
 
 ## Skills Reference
 
 ### [gather](plugins/cwf/skills/gather/SKILL.md)
 
-Unified information acquisition — URLs, web search, local code exploration.
+JTBD: turn scattered external context into local, reusable artifacts before reasoning and implementation start.
 
 ```text
 cwf:gather <url>                  # Auto-detect service (Google/Slack/Notion/GitHub/web)
@@ -147,43 +163,43 @@ cwf:gather --search code <query>  # Code search (Exa)
 cwf:gather --local <topic>        # Explore local codebase
 ```
 
-Auto-detects Google Docs/Slides/Sheets, Slack threads, Notion pages, GitHub PRs/issues, and generic web URLs. Built-in WebSearch redirect hook routes Claude's WebSearch to `cwf:gather --search`.
+Auto-detects Google Docs/Slides/Sheets, Slack threads, Notion pages, GitHub PRs/issues, and generic web URLs. It downloads source content into `.cwf/projects/`, normalizes outputs into agent-friendly markdown, and keeps provenance links. Google Docs and Notion exports require public/published sharing settings. Built-in WebSearch redirect hook routes Claude's WebSearch to `cwf:gather --search`.
 
 ### [clarify](plugins/cwf/skills/clarify/SKILL.md)
 
-Research-first requirement clarification with autonomous decision-making.
+JTBD: prevent costly implementation churn by resolving ambiguity before planning.
 
 ```text
 cwf:clarify <requirement>          # Research-first (default)
 cwf:clarify <requirement> --light  # Direct Q&A, no sub-agents
 ```
 
-Default mode: decomposes requirements into decision points → parallel research (codebase + web) → expert analysis → tier classification (T1/T2 auto-decide, T3 ask human) → persistent questioning with why-digging. Light mode: iterative Q&A without sub-agents.
+Default mode decomposes requirements into decision points → parallel research (codebase + web) → expert analysis → tier classification (T1/T2 auto-decide, T3 ask human) → persistent why-questioning. Light mode keeps a faster interactive Q&A loop without sub-agents.
 
 ### [plan](plugins/cwf/skills/plan/SKILL.md)
 
-Agent-assisted plan drafting with parallel research and BDD success criteria.
+JTBD: create an implementation contract that downstream implementation and review can enforce.
 
 ```text
 cwf:plan <task description>
 ```
 
-Parallel prior art + codebase research → structured plan with steps, files, success criteria (BDD + qualitative) → saved to `.cwf/projects/` session directory. Recommended flow: run `cwf:review --mode plan` before implementation so plan-level concerns are resolved before `cwf:impl`.
+Parallel prior art + codebase research produce a structured plan with steps, files, and success criteria (BDD + qualitative), saved to `.cwf/projects/`. Recommended flow: run `cwf:review --mode plan` before implementation so plan-level concerns are resolved before `cwf:impl`.
 
 ### [impl](plugins/cwf/skills/impl/SKILL.md)
 
-Implementation orchestration from a structured plan.
+JTBD: convert an approved plan into predictable execution without losing constraints.
 
 ```text
 cwf:impl                    # Auto-detect most recent plan.md
 cwf:impl <path/to/plan.md>  # Explicit plan path
 ```
 
-Loads plan (+ phase handoff if present) → decomposes into work items by domain and dependency → sizes agent team adaptively (1-4 agents) → executes in parallel batches → verifies against BDD criteria. Typical sequence: `cwf:plan` → `cwf:review --mode plan` → `cwf:impl` → `cwf:review --mode code`.
+Loads the plan (+ phase handoff if present), decomposes work by domain and dependency, sizes an adaptive agent team (1-4), executes parallel batches, and verifies against BDD criteria. Typical sequence: `cwf:plan` → `cwf:review --mode plan` → `cwf:impl` → `cwf:review --mode code`.
 
 ### [retro](plugins/cwf/skills/retro/SKILL.md)
 
-Adaptive session retrospective — deep by default; use `--light` for lightweight mode.
+JTBD: convert one session's outcomes into durable operating improvements and capability decisions.
 
 ```text
 cwf:retro            # Adaptive (deep by default)
@@ -191,11 +207,11 @@ cwf:retro --deep     # Full analysis with expert lens
 cwf:retro --light    # Sections 1-4 + 7 only, no sub-agents
 ```
 
-Sections: Context Worth Remembering, Collaboration Preferences, Waste Reduction (5 Whys), Critical Decision Analysis (CDM), Expert Lens (deep), Learning Resources (deep), Relevant Skills. Persists findings to project-level documents.
+Sections: Context Worth Remembering, Collaboration Preferences, Waste Reduction (5 Whys), Critical Decision Analysis (CDM), Expert Lens (deep), Learning Resources (deep), Relevant Tools (including installed skills), and Tool Gaps. Persists findings to project-level documents.
 
 ### [refactor](plugins/cwf/skills/refactor/SKILL.md)
 
-Multi-mode code and skill review with five operating modes.
+JTBD: keep a growing skill/tool ecosystem coherent as teams install or author more capabilities.
 
 ```text
 cwf:refactor                        # Quick scan all skills
@@ -205,7 +221,7 @@ cwf:refactor --skill --holistic     # Cross-plugin analysis
 cwf:refactor --docs                 # Documentation consistency review
 ```
 
-Quick scan runs structural checks. Code tidying analyzes commits for safe refactoring (Kent Beck's "Tidy First?"). Deep review evaluates against progressive disclosure criteria. Holistic mode detects cross-plugin pattern issues. Docs mode checks cross-document consistency.
+Quick scan exists to catch global drift across all installed skills. `--skill <name>` exists for focused diagnosis when one skill misbehaves or is being authored/customized. Code tidying analyzes commits for safe refactoring (Kent Beck's "Tidy First?"). Holistic mode detects cross-plugin pattern issues. Docs mode checks cross-document consistency.
 
 ### [handoff](plugins/cwf/skills/handoff/SKILL.md)
 
@@ -235,7 +251,7 @@ Builds issue/PR bodies from session context (`plan.md`, `lessons.md`, `retro.md`
 
 ### [review](plugins/cwf/skills/review/SKILL.md)
 
-Multi-perspective review with 6 parallel reviewers.
+JTBD: apply a consistent quality gate at two leverage points: before implementation and after implementation.
 
 ```text
 cwf:review                       # Review current changes (defaults to code mode)
@@ -244,11 +260,11 @@ cwf:review --mode clarify        # Review clarified requirements
 cwf:review --mode plan           # Review implementation plan
 ```
 
-6 parallel reviewers: 2 internal (Security, UX/DX) via Task agents + 2 external (Codex, Gemini) via CLI + 2 domain experts via Task agents. Graceful fallback when external CLIs are unavailable.
+Use `--mode plan` after `cwf:plan` to validate scope/assumptions before code is written, and use `--mode code` after `cwf:impl` to catch regressions before shipping. The skill runs 6 parallel reviewers: 2 internal (Security, UX/DX) via Task agents + 2 external (Codex, Gemini) via CLI + 2 domain experts via Task agents, with graceful fallback when external CLIs are unavailable.
 
 ### [hitl](plugins/cwf/skills/hitl/SKILL.md)
 
-Human-in-the-loop review over branch diff, with resumable chunk state and rule propagation.
+JTBD: insert deliberate human judgment when parallel reviewers are not enough for merge confidence.
 
 ```text
 cwf:hitl                             # Start from default base (upstream/main)
@@ -262,7 +278,7 @@ State is persisted under `.cwf/projects/<session-dir>/hitl/` (`state.yaml`, `rul
 
 ### [run](plugins/cwf/skills/run/SKILL.md)
 
-Full CWF pipeline auto-chaining with configurable stage gates.
+JTBD: let users delegate end-to-end workflow orchestration without memorizing individual skills.
 
 ```text
 cwf:run <task description>           # Full pipeline from scratch
@@ -270,11 +286,11 @@ cwf:run --from impl                  # Resume from impl stage
 cwf:run --skip review-plan,retro     # Skip specific stages
 ```
 
-Executes gather → clarify → plan → review(plan) → impl → review(code) → retro → ship, with human gates before implementation, automatic chaining after implementation by default, and user confirmation at `ship`.
+Executes gather → clarify → plan → review(plan) → impl → review(code) → retro → ship, with human gates before implementation, automatic chaining after implementation by default, and user confirmation at `ship`. Teams often run `cwf:refactor` before `ship` when plugin/skill maintainability needs an explicit pass.
 
 ### [setup](plugins/cwf/skills/setup/SKILL.md)
 
-Initial CWF configuration.
+JTBD: standardize environment and tool contracts once so later stages stay reproducible.
 
 ```text
 cwf:setup                # Full setup (hooks + tools + optional repo-index prompt)
@@ -288,11 +304,11 @@ cwf:setup --repo-index   # Generate/refresh repository index output (explicit)
 cwf:setup --repo-index --target agents # AGENTS.md managed block (for AGENTS-based repositories)
 ```
 
-Interactive hook group toggle, external AI CLI and API key detection (Codex, Gemini, Tavily, Exa), interactive env migration/bootstrap (legacy keys to canonical `CWF_*`), optional Codex integration (skills + wrapper), and optional index generation. CWF capability index generation is explicit via `cwf:setup --cap-index`. Repository index regeneration updates the managed block in AGENTS.md via `cwf:setup --repo-index --target agents`.
+Interactive hook-group toggles, external AI CLI/API detection (Codex, Gemini, Tavily, Exa), env migration/bootstrap (legacy keys to canonical `CWF_*`), optional Codex integration (skills + wrapper), and optional index generation. CWF capability index generation is explicit via `cwf:setup --cap-index`. Repository index regeneration updates the managed block in AGENTS.md via `cwf:setup --repo-index --target agents`.
 
 ### [update](plugins/cwf/skills/update/SKILL.md)
 
-Check and apply CWF plugin updates.
+JTBD: keep local workflow behavior aligned with the latest contracts, fixes, and guardrails.
 
 ```text
 cwf:update               # Check + update if newer version exists

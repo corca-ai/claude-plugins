@@ -1,11 +1,11 @@
 ---
 name: ship
-description: "Automate GitHub workflow: issue creation, PR with lessons/CDM/checklist, and merge management. Triggers: \"/ship\""
+description: "Automate GitHub workflow so validated session artifacts become ship-ready issue/PR/merge actions with explicit human control points. Triggers: \"/ship\""
 ---
 
 # Ship (/ship)
 
-Automate the GitHub issue → PR → merge cycle for cwf sessions.
+Convert validated CWF session artifacts into issue → PR → merge execution with explicit human merge control.
 
 **Language**: Issue/PR body는 한글로 작성. Code blocks, file paths, commit hashes, CLI output은 원문 유지.
 

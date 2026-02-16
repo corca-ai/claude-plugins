@@ -1,11 +1,11 @@
 ---
 name: handoff
-description: "Auto-generate session or phase handoff documents from cwf-state.yaml and session artifacts. --phase mode generates phase-to-phase context transfer (HOW) separate from plan.md (WHAT). Triggers: \"cwf:handoff\", \"cwf:handoff --phase\", \"handoff\", \"핸드오프\", \"다음 세션\", \"phase handoff\""
+description: "Auto-generate session or phase handoff documents so the next agent starts with context, constraints, and scope already loaded. Source: cwf-state.yaml and session artifacts. --phase mode generates phase-to-phase context transfer (HOW) separate from plan.md (WHAT). Triggers: \"cwf:handoff\", \"cwf:handoff --phase\", \"handoff\", \"핸드오프\", \"다음 세션\", \"phase handoff\""
 ---
 
 # Handoff
 
-Auto-generate session handoff documents (`next-session.md`) or phase handoff documents (`phase-handoff.md`) from project state and session artifacts. Reads `cwf-state.yaml` for session history and `master-plan.md` (when available) for next session scope.
+Preserve execution continuity across boundaries by generating handoff documents (`next-session.md` or `phase-handoff.md`) from project state and artifacts. Reads `cwf-state.yaml` for session history and `master-plan.md` (when available) for next-session scope.
 
 **Language**: Write handoff documents in English. Communicate with the user in their prompt language.
 

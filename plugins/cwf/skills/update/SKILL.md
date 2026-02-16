@@ -1,11 +1,11 @@
 ---
 name: update
-description: "Check and update CWF plugin to the latest version. Triggers: \"cwf:update\", \"update cwf\", \"check for updates\""
+description: "Check and update CWF plugin to keep installed behavior aligned with latest contracts and fixes. Triggers: \"cwf:update\", \"update cwf\", \"check for updates\""
 ---
 
 # Update
 
-Check and update the CWF plugin to the latest version from the marketplace.
+Keep installed CWF behavior aligned with the latest marketplace version and fixes.
 
 **Language**: Write artifacts in English. Communicate with the user in their prompt language.
 

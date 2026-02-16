@@ -1,11 +1,11 @@
 ---
 name: plan
-description: "Agent-assisted plan drafting with parallel research, BDD success criteria, and cwf:review integration. Complements the plan-protocol hook (passive injection) with active, structured plan creation. Triggers: \"cwf:plan\", \"plan this task\""
+description: "Agent-assisted plan drafting to define a reviewable execution contract before coding. Includes parallel research, BDD success criteria, and cwf:review integration. Complements the plan-protocol hook (passive injection) with active, structured plan creation. Triggers: \"cwf:plan\", \"plan this task\""
 ---
 
 # Plan
 
-Turn a task description into a structured, research-backed plan with BDD success criteria.
+Create a reviewable execution contract (scope, files, success criteria) before code changes begin.
 
 **Language**: Write all plan artifacts in English. Communicate with the user in their prompt language.
 

@@ -1,11 +1,11 @@
 ---
 name: impl
-description: "Implementation orchestration from a plan. Decomposes plan steps into parallelizable work items, spawns domain-appropriate agents, and verifies completion against BDD success criteria. Triggers: \"cwf:impl\", \"implement this plan\""
+description: "Implementation orchestration from a plan to execute approved scope predictably without losing constraints. Decomposes steps into parallelizable work items, spawns domain-appropriate agents, and verifies completion against BDD success criteria. Triggers: \"cwf:impl\", \"implement this plan\""
 ---
 
 # Impl
 
-Orchestrate autonomous implementation from a structured plan.
+Execute an approved plan predictably while preserving constraints, dependencies, and BDD validation.
 
 **Language**: Write all implementation artifacts in English. Communicate with the user in their prompt language.
 

@@ -1,11 +1,11 @@
 ---
 name: run
-description: "Full CWF pipeline auto-chaining. Orchestrates the complete workflow: gather → clarify → plan → review(plan) → impl → review(code) → retro → ship. Respects Decision #19: human gates pre-impl, autonomous post-impl. Triggers: \"cwf:run\", \"run workflow\""
+description: "Full CWF pipeline auto-chaining for end-to-end delegation without manual stage sequencing. Orchestrates: gather → clarify → plan → review(plan) → impl → review(code) → retro → ship. Respects Decision #19: human gates pre-impl, autonomous post-impl. Triggers: \"cwf:run\", \"run workflow\""
 ---
 
 # Run
 
-Full CWF pipeline orchestration with configurable user gates.
+Delegate end-to-end workflow orchestration when users do not want to manually sequence each skill.
 
 **Language**: Communicate with the user in their prompt language. Artifacts in English.
 

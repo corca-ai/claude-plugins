@@ -1,11 +1,11 @@
 ---
 name: retro
-description: "Comprehensive session retrospective with adaptive depth. Deep by default, with light mode via --light (and tiny-session auto-light). Triggers: \"cwf:retro\", \"retro\", \"retrospective\", \"회고\""
+description: "Comprehensive session retrospective that turns one session's outcomes into persistent improvements. Adaptive depth: deep by default, with light mode via --light (and tiny-session auto-light). Triggers: \"cwf:retro\", \"retro\", \"retrospective\", \"회고\""
 ---
 
 # Session Retrospective
 
-Adaptive end-of-session review. Deep by default; light mode is used with `--light` or for tiny routine sessions. Produces `retro.md` alongside `plan.md` and `lessons.md` in the session artifact directory.
+Adaptive end-of-session review that converts outcomes into durable process/context/tool improvements. Deep by default; light mode is used with `--light` or for tiny routine sessions. Produces `retro.md` alongside `plan.md` and `lessons.md` in the session artifact directory.
 
 **Language**: Write retro.md in the user's language. Communicate with the user in their prompt language.
 
@@ -106,7 +106,7 @@ Gate behavior after Batch 1:
 - **Agent C — Expert alpha**: `subagent_type: general-purpose`, `max_turns: 20`. Prompt: "Read `{SKILL_DIR}/references/expert-lens-guide.md`. You are Expert alpha. Session summary: {Sections 1-4 summary, including CDM results from Agent A}. Deep-clarify experts: {names or 'not available'}. Analyze through your framework. Use web search to verify expert identity and cite published work (follow Web Research Protocol in {CWF_PLUGIN_DIR}/references/agent-patterns.md; you have Bash access for agent-browser fallback). Output your Expert alpha section. **Output Persistence**: Write your complete analysis to: `{session_dir}/retro-expert-alpha.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`"
 - **Agent D — Expert beta**: `subagent_type: general-purpose`, `max_turns: 20`. Prompt: "Read `{SKILL_DIR}/references/expert-lens-guide.md`. You are Expert beta. Session summary: {Sections 1-4 summary, including CDM results from Agent A}. Deep-clarify experts: {names or 'not available'}. Analyze through your framework. Use web search to verify expert identity and cite published work (follow Web Research Protocol in {CWF_PLUGIN_DIR}/references/agent-patterns.md; you have Bash access for agent-browser fallback). Output your Expert beta section. **Output Persistence**: Write your complete analysis to: `{session_dir}/retro-expert-beta.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`"
 
-After Batch 2: read output files from session directory (`{session_dir}/retro-expert-alpha.md`, `{session_dir}/retro-expert-beta.md`). Draft Section 7 inline (skills scan), then integrate all results into retro.md.
+After Batch 2: read output files from session directory (`{session_dir}/retro-expert-alpha.md`, `{session_dir}/retro-expert-beta.md`). Draft Section 7 inline (capability/tool scan), then integrate all results into retro.md.
 
 Gate behavior after Batch 2:
 - If either expert file remains invalid after retry: continue with warning and
@@ -170,7 +170,7 @@ Condition: Does the session contain topics where the user showed knowledge gaps 
 
 **Execution** (deep mode): Produced by Agent B from Batch 1. Integrate the agent's output here. Each resource: title + URL, 2-3 sentence summary of key takeaways, and why it matters for the user's work.
 
-#### Section 7: Relevant Tools (Skills Included)
+#### Section 7: Relevant Tools (Capabilities Included)
 
 **Step 1 — Inventory available capabilities** (always, both modes):
 
@@ -302,7 +302,7 @@ Do not prompt the user to start this discussion.
 > Run `/retro --deep` for expert analysis.
 ## 6. Learning Resources
 > Run `/retro --deep` for learning resources.
-## 7. Relevant Tools (Skills Included)
+## 7. Relevant Tools (Capabilities Included)
 ### Installed Capabilities
 ### Tool Gaps
 ```
@@ -322,7 +322,7 @@ Do not prompt the user to start this discussion.
 ## 4. Critical Decision Analysis (CDM)
 ## 5. Expert Lens
 ## 6. Learning Resources
-## 7. Relevant Tools (Skills Included)
+## 7. Relevant Tools (Capabilities Included)
 ### Installed Capabilities
 ### Tool Gaps
 ```

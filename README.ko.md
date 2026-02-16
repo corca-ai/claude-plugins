@@ -2,7 +2,7 @@
 
 [English](README.md)
 
-구조화된 개발 세션을 컨텍스트 수집부터 회고 분석까지 반복 가능한 워크플로우로 전환하는 Claude Code 플러그인입니다. [Corca](https://www.corca.ai/)가 [AI-Native Product Team](AI_NATIVE_PRODUCT_TEAM.ko.md)을 위해 유지 관리합니다.
+구조화된 개발 세션을 컨텍스트 수집부터 회고 분석까지 반복 가능한 워크플로우로 전환하는 Claude Code 및 Codex 플러그인입니다. [Corca](https://www.corca.ai/)가 [AI-Native Product Team](AI_NATIVE_PRODUCT_TEAM.ko.md)을 위해 개발했습니다.
 
 ## 설치
 
@@ -18,14 +18,32 @@ claude plugin install cwf@corca-plugins
 # 스킬 및 훅 적용을 위해 Claude Code 재시작
 ```
 
+재시작 후 `cwf:setup`을 1회 실행하세요. 같은 저장소 기준으로는 한 번만 실행하면 충분합니다.
+
+```text
+cwf:setup
+```
+
 ### Codex 사용자(권장)
 
-Codex CLI를 사용한다면 설치 직후 아래를 실행하세요.
+Codex CLI도 함께 사용한다면 아래 연동 명령을 추가로 1회 실행하세요. 이미 연동이 끝났다면 반복할 필요는 없습니다.
 
 ```bash
 cwf:setup --codex
 cwf:setup --codex-wrapper
 ```
+
+### 사용 시나리오
+
+Claude Code / Codex CLI에서 아래처럼 자연어로 시작하면 됩니다.
+
+```text
+<문제>를 해결하려고 합니다. CWF를 사용해 워크플로우를 진행해 주세요.
+```
+
+이렇게 하면 에이전트가 `cwf:run`을 호출해 gather → clarify → plan → review(plan) → impl → review(code) → retro → ship까지 이어갈 수 있습니다. 배포 전 명시적인 정리/일관성 점검이 필요할 때는 `cwf:refactor`를 추가로 실행하고, diff를 청크 단위로 사람 확인하고 싶다면 `cwf:hitl`을 사용하세요. `refactor`까지 자동으로 포함하고 싶다면 시작 프롬프트에서 그 의도를 함께 명시하면 됩니다.
+
+플러그인 내의 각 스킬은 기본적으로 에이전트를 위한 도구들이며, 자율적으로 실행되게 되어있으므로 사용자가 자세히 사용법을 이해하는 게 필수는 아닙니다. 각 스킬의 존재 이유와 구조가 궁금하신 분들은 아래 설명을 읽어보시길 바랍니다.
 
 ### 최신 버전으로 업데이트
 
@@ -34,7 +52,7 @@ claude plugin marketplace update corca-plugins
 claude plugin update cwf@corca-plugins
 ```
 
-또는 Claude Code 내에서:
+또는 Claude Code / Codex CLI 내에서:
 
 ```text
 cwf:update               # 새 버전이 있으면 확인 + 업데이트
@@ -43,29 +61,47 @@ cwf:update --check       # 버전 확인만
 
 ### 독립 플러그인 (레거시)
 
-v3.0.0부터 레거시 독립 플러그인은 마켓플레이스에서 제거되었습니다. 기존 독립 플러그인 설치가 있다면 제거하고 `cwf`를 설치하세요.
+v3.0.0부터 레거시 독립 플러그인은 마켓플레이스에서 제거되었습니다. v3.0 이전의 플러그인이 설치되어있다면 제거하고 `cwf`를 설치하세요.
 
 ## 운영 원칙
 
 ### CWF의 역할
 
-- 컨텍스트 수집, 요구사항 명확화, 계획, 구현, 리뷰, 회고, 핸드오프, 배포를 통합한 단일 워크플로우 플러그인(`cwf`)입니다.
-- .cwf/cwf-state.yaml, 세션 로그 산출물, 훅을 통해 페이즈/세션 경계를 넘어 컨텍스트를 보존하는 상태 기반 워크플로우 시스템입니다.
-- Expert Advisor, Tier Classification, Agent Orchestration, Decision Point, Handoff, Provenance라는 공통 개념으로 구성된 조합형 스킬 프레임워크입니다.
+CWF는 컨텍스트 수집, 요구사항 명확화, 계획, 구현, 리뷰, 회고, 핸드오프, 배포를 통합한 단일 워크플로우 플러그인입니다. 세션 상태 기록, 세션 로그 산출물, 훅을 통해 페이즈/세션 경계를 넘어 컨텍스트를 보존합니다.
+
+각 스킬은 전문가 자문, 티어 분류, 에이전트 조율, 결정 포인트, 핸드오프, 출처 추적이라는 '컨셉'(Daniel Jackson)으로 조합됩니다. 여기서 컨셉은 반복되는 설계 구조를 압축해 공유하고 재사용하는 추상 단위이며, CWF는 이 컨셉을 스킬 간 공용 규약처럼 사용합니다.
 
 ### CWF의 범위 밖
 
-- 프로젝트별 엔지니어링 표준, CI 게이트, 사람의 제품 책임 의사결정을 대체하지 않습니다.
-- 모든 결정을 완전히 자동화할 수 있다고 보장하지 않으며, 주관적 결정에는 여전히 사용자 확인이 필요합니다.
-- 각 스킬이 분리된 범용 플러그인 묶음이 아니며, CWF 스킬은 의도적으로 상호 의존적으로 설계되어 있습니다.
+- CWF는 프로젝트별 엔지니어링 표준, CI 게이트, 사람의 제품 책임 의사결정을 대체하지 않습니다.
+- CWF는 모든 결정을 완전히 자동화할 수 있다고 보장하지 않으며, 주관적 결정에는 여전히 사용자 확인이 필요합니다.
+- CWF 플러그인 내의 각 스킬을 독립적으로 설치해서 사용하는 것도 가능하나, 스킬간 강결합을 의도해서 설계했기 때문에 함께 사용하기를 권장합니다.
 
 ### 가정
 
-- 사용자는 .cwf/projects/, .cwf/cwf-state.yaml 같은 세션 산출물을 저장하고 활용할 수 있는 저장소에서 작업합니다.
-- 사용자는 AGENTS.md에서 시작해 필요할 때 더 깊은 문서를 읽는 점진적 공개 방식에 동의합니다.
-- 팀은 반복되는 품질 검사를 행동 기억에 의존하기보다 결정적 검증 스크립트로 관리하는 방식을 선호합니다.
+- 사용자는 [`.cwf/projects/`](.cwf/projects/)와 [`.cwf/cwf-state.yaml`](.cwf/cwf-state.yaml) 같은 세션 산출물을 저장하고 활용할 수 있는 저장소에서 작업합니다.
+- 사용자는 [AGENTS.md](AGENTS.md)에서 시작해 필요할 때 더 깊은 문서를 읽는 점진적 공개 방식에 동의합니다.
+- 사용자는 반복되는 품질 검사를 행동 기억에 의존하기보다 결정적 검증 스크립트로 관리하는 방식을 선호합니다.
 
-### 주요 결정과 이유
+## 왜 CWF인가?
+
+### 문제
+
+에이전트는 충분히 똑똑해도, 긴 작업을 안정적으로 수행하려면 맥락과 결정 이력이 계속 보존되어야 합니다. 세션/페이즈 경계에서 컨텍스트가 끊기면 다음 작업은 다시 탐색부터 시작되고, 사람과 합의한 제약도 쉽게 누락됩니다. 규모가 커질수록 기준 문서와 실제 시스템이 어긋나기 쉬워지고, 품질 게이트가 최신 상태를 반영하지 못하는 문제가 반복됩니다.
+
+### 접근
+
+CWF는 13개 스킬 전반에 조합되는 6가지 빌딩 블록 개념으로 이 문제를 해결합니다.
+
+핵심은 다음 다섯 가지입니다.
+
+1. 충분한 맥락을 먼저 수집하고(가설보다 증거 우선)
+2. 사람과 합의한 의사결정/계획을 파일 기반 지속 메모리로 남기며
+3. 훅과 결정적 검증으로 실행 경로를 안정화하고
+4. 회고로 프로세스와 도구를 계속 개선하는 self-healing 루프를 유지하고
+5. 필요한 지점에서는 사람이 쉽게 개입하도록 설계하는 것
+
+이 접근을 구성하는 설계 결정은 다음과 같습니다.
 
 1. **독립 플러그인 대신 통합 플러그인**
    - 이유: 페이즈 간 컨텍스트 손실과 프로토콜 드리프트를 방지하기 위해서입니다.
@@ -73,20 +109,8 @@ v3.0.0부터 레거시 독립 플러그인은 마켓플레이스에서 제거되
    - 이유: 높은 판단이 필요한 결정은 사람의 통제 하에 두고, 범위가 확정된 이후에는 실행 속도를 유지하기 위해서입니다.
 3. **파일 경로만 입력해도 시작되는 핸드오프 계약**
    - 이유: 세션 연속성을 결정적으로 만들고 시작 시 모호성을 줄이기 위해서입니다.
-4. **개념/리뷰 기준에 대한 Provenance 점검**
+4. **개념/리뷰 기준에 대한 출처 추적 점검**
    - 이유: 스킬/훅 인벤토리가 변경될 때 기준의 노후화를 탐지하기 위해서입니다.
-
-위 항목은 CWF를 사용할 때 적용되는 운영 원칙입니다.
-
-## 왜 CWF인가?
-
-### 문제
-
-AI 코딩 세션은 경계가 생길 때마다 컨텍스트를 잃습니다. 세션이 끝나면 다음 세션은 다시 처음부터 시작합니다. 요구사항이 명확화에서 구현으로 넘어갈 때 프로토콜과 제약 조건이 사라집니다. 5개 스킬 시스템을 기준으로 작성된 품질 기준은 시스템이 확장되면서 조용히 무의미해집니다.
-
-### 접근
-
-CWF는 13개 스킬 전반에 조합되는 6가지 빌딩 블록 개념으로 이 문제를 해결합니다. 각 스킬은 동일한 기반 행동 패턴을 공유하며, Expert Advisor는 요구사항 명확화와 세션 회고 모두에서 사각지대를 드러내고, Tier Classification은 의사결정을 일관되게 증거 또는 사람에게 라우팅하며, Agent Orchestration은 리서치부터 구현까지 작업을 병렬화합니다.
 
 ### 결과
 
@@ -94,26 +118,26 @@ CWF는 13개 스킬 전반에 조합되는 6가지 빌딩 블록 개념으로 �
 
 ## 핵심 개념
 
-CWF 스킬이 조합하는 6가지 재사용 가능한 행동 패턴입니다. 이를 이해하면 각 스킬이 무엇을 하는지뿐 아니라 왜 함께 작동하는지도 알 수 있습니다.
+CWF 스킬이 조합하는 6가지 재사용 가능한 행동 패턴입니다. 각 개념은 장기 세션을 안정적으로 운영하기 위해 CWF가 반드시 해결해야 하는 일을 정의합니다.
 
-**전문가 자문 (Expert Advisor)** -- 대조되는 전문가 프레임워크를 도입해 사각지대를 줄입니다. 서로 다른 분석 렌즈를 가진 두 도메인 전문가가 문제를 독립적으로 평가하고, 의견 차이가 숨은 가정을 드러냅니다.
+**전문가 자문** -- 뒤늦은 재작업으로 번지기 전에 숨은 가정을 드러냅니다. 서로 다른 분석 렌즈를 가진 전문가가 같은 문제를 독립적으로 검토해 사각지대를 조기에 노출합니다.
 
-**티어 분류 (Tier Classification)** -- 의사결정을 적절한 권한으로 라우팅합니다. 코드베이스 증거(T1)와 베스트 프랙티스 합의(T2)는 자율적으로 해결하고, 진정으로 주관적인 결정(T3)만 사람에게 전달합니다.
+**티어 분류** -- 의사결정을 시점에 맞는 권한으로 라우팅합니다. 증거 기반 결정(T1/T2)은 자율 처리하고, 진정으로 주관적인 결정(T3)만 사용자에게 올립니다.
 
-**에이전트 조율 (Agent Orchestration)** -- 품질을 희생하지 않고 작업을 병렬화합니다. 조율자가 복잡도를 평가해 필요한 최소 에이전트를 구성하고, 의존성을 지키는 배치로 실행한 뒤 결과를 종합합니다.
+**에이전트 조율** -- 처리량을 늘리면서도 결과 일관성을 유지합니다. 복잡도에 맞춰 최소 팀을 구성하고 의존성 기반 배치로 실행한 뒤 결과를 하나로 종합합니다.
 
-**결정 포인트 (Decision Point)** -- 모호성을 명시적으로 포착합니다. 누군가가 결정을 내리기 전에 요구사항을 구체적 질문으로 분해해, 모든 선택에 증거와 근거가 기록되도록 합니다.
+**결정 포인트** -- 모호한 요구를 검토 가능한 선택지로 변환합니다. 결정을 내리기 전에 질문 단위로 분해해 모든 선택의 근거를 기록합니다.
 
-**핸드오프 (Handoff)** -- 경계를 넘어 컨텍스트를 보존합니다. 세션 핸드오프는 작업 범위와 교훈을, 페이즈 핸드오프는 프로토콜과 제약 조건을 전달합니다. 다음 에이전트는 백지 상태가 아니라 맥락을 가진 상태로 시작합니다.
+**핸드오프** -- 페이즈/세션 경계에서 다시 시작하는 비용을 없앱니다. 세션 핸드오프는 맥락과 교훈을, 페이즈 핸드오프는 프로토콜과 제약을 전달합니다.
 
-**출처 추적 (Provenance)** -- 기준의 노후화를 감지합니다. 참조 문서는 작성 당시 시스템 상태 메타데이터를 포함하고, 스킬은 오래된 기준을 적용하기 전에 이를 확인합니다.
+**출처 추적** -- 오래된 기준이 현재 작업을 조용히 오염시키지 않게 합니다. 참조 문서의 시스템 상태 메타데이터를 확인한 뒤에만 기준을 재사용합니다.
 
 ## 워크플로우
 
-CWF 스킬은 컨텍스트 수집에서 학습 추출까지 자연스러운 흐름을 따릅니다:
+CWF의 기본 실행 체인은 아래와 같습니다(`refactor`는 필요할 때 추가):
 
 ```text
-gather → clarify → plan → impl → retro
+gather → clarify → plan → review(plan) → impl → review(code) → retro → ship
 ```
 
 | # | 스킬 | 트리거 | 하는 일 |
@@ -138,7 +162,7 @@ gather → clarify → plan → impl → retro
 
 ### [gather](plugins/cwf/skills/gather/SKILL.md)
 
-통합 정보 수집 -- URL, 웹 검색, 로컬 코드 탐색.
+흩어진 외부 컨텍스트를 로컬에서 재사용 가능한, 에이전트가 읽기 유리한 산출물로 바꿔 추론/구현 전에 기준 입력을 고정합니다.
 
 ```text
 cwf:gather <url>                  # 서비스 자동 감지 (Google/Slack/Notion/GitHub/웹)
@@ -147,55 +171,63 @@ cwf:gather --search code <query>  # 코드 검색 (Exa)
 cwf:gather --local <topic>        # 로컬 코드베이스 탐색
 ```
 
-Google Docs/Slides/Sheets, Slack 스레드, Notion 페이지, GitHub PR/이슈, 일반 웹 URL을 자동 감지합니다. 내장 WebSearch 리다이렉트 훅이 Claude의 WebSearch를 `cwf:gather --search`로 라우팅합니다.
+Google Docs/Slides/Sheets, Slack 스레드, Notion 페이지, GitHub PR/이슈, 일반 웹 URL을 자동 감지합니다. 소스 내용을 [`.cwf/projects/`](.cwf/projects/)로 내려받아 에이전트 친화적인 포맷(대개 마크다운)으로 정규화하고 출처 링크를 남깁니다. Google Docs와 Notion 내보내기는 공개/퍼블릭 공유 설정이 필요합니다. 또한 검색 결과를 저장 가능한 동일 포맷으로 맞추기 위해, 내장 WebSearch 리다이렉트 훅이 Claude의 WebSearch를 `cwf:gather --search`로 라우팅합니다.
 
 ### [clarify](plugins/cwf/skills/clarify/SKILL.md)
 
-리서치 우선 요구사항 명확화와 자율적 의사결정.
+구현 단계에서의 재작업 비용을 줄이기 위해 계획 전에 모호성을 제거합니다.
 
 ```text
 cwf:clarify <requirement>          # 리서치 기반 (기본)
 cwf:clarify <requirement> --light  # 직접 질의응답, 서브에이전트 없음
 ```
 
-기본 모드: 요구사항을 결정 포인트로 분해 → 병렬 리서치(코드베이스 + 웹) → 전문가 분석 → 티어 분류(T1/T2 자동 결정, T3는 사람에게 질문) → 이유를 반복 탐색하는 방식으로 지속 질문. 라이트 모드: 서브에이전트 없이 질의응답을 반복합니다.
+이 스킬은 모호함을 티어 1/2/3으로 분리합니다. 코드베이스 증거로 해소 가능한 결정(티어 1)과 외부 베스트 프랙티스로 정리 가능한 결정(티어 2)은 자율 처리하고, 정책/취향처럼 정답이 없는 결정(티어 3)만 사용자에게 올립니다.
+
+기본 모드는 요구사항을 결정 포인트로 분해하고 병렬 리서치(코드베이스 + 웹)와 전문가 분석, 티어 분류(T1/T2 자동 결정, T3 사용자 질의)를 거쳐 이유를 반복 확인합니다. 라이트 모드는 서브에이전트 없이 빠른 질의응답 루프를 제공합니다.
 
 ### [plan](plugins/cwf/skills/plan/SKILL.md)
 
-병렬 리서치와 BDD 성공 기준을 갖춘 에이전트 지원 계획 작성.
+구현과 리뷰가 공통으로 따를 수 있는 실행 계약(범위/파일/성공 기준)을 만듭니다.
 
 ```text
 cwf:plan <task description>
 ```
 
-병렬 선행 사례 + 코드베이스 리서치 → 단계, 파일, 성공 기준(BDD + 정성적)을 포함한 구조화된 계획 → `.cwf/projects/` 세션 디렉토리에 저장. 권장 흐름: 구현 전에 `cwf:review --mode plan`을 실행해 계획 단계 우려사항을 먼저 해소합니다.
+구현을 바로 시작하면 승인 지점과 편집 범위가 쉽게 흐려집니다. `plan.md`를 먼저 고정하면 사용자 승인 경계가 분명해지고, 구현 단계에서의 재작업과 누락을 줄일 수 있습니다.
+
+병렬 선행 사례 + 코드베이스 리서치를 통해 단계, 파일, 성공 기준(BDD + 정성적)을 포함한 구조화된 계획을 만들고 `.cwf/projects/`에 저장합니다. 권장 흐름은 구현 전에 `cwf:review --mode plan`으로 계획 리스크를 먼저 제거하는 것입니다.
 
 ### [impl](plugins/cwf/skills/impl/SKILL.md)
 
-구조화된 계획에 기반한 구현 조율.
+승인된 계획을 제약 누락 없이 예측 가능한 실행으로 변환합니다.
 
 ```text
 cwf:impl                    # 가장 최근 plan.md 자동 감지
 cwf:impl <path/to/plan.md>  # 명시적 계획 경로
 ```
 
-계획을 로드하고(+ 페이즈 핸드오프가 있으면 함께), 도메인/의존성별 작업 항목으로 분해한 뒤, 적응형 에이전트 팀(1-4명)을 구성해 병렬 배치로 실행하고 BDD 기준으로 검증합니다. 일반 순서: `cwf:plan` → `cwf:review --mode plan` → `cwf:impl` → `cwf:review --mode code`.
+적응형 에이전트 팀은 작업 복잡도와 의존성에 따라 에이전트 수를 1~4명으로 자동 조정하는 방식입니다. 멀티 에이전트 협업 개념은 [Agent Teams 문서](https://code.claude.com/docs/ko/agent-teams)를 참고하세요.
+
+계획(+ 페이즈 핸드오프)을 로드하고 도메인/의존성 단위 작업으로 분해한 뒤, 적응형 에이전트 팀(1-4명)으로 병렬 실행하고 BDD 기준으로 검증합니다. 일반 순서는 `cwf:plan` → `cwf:review --mode plan` → `cwf:impl` → `cwf:review --mode code`입니다.
 
 ### [retro](plugins/cwf/skills/retro/SKILL.md)
 
-적응형 세션 회고 -- 기본은 심층, 경량 모드는 `--light`로 선택.
+단발성 세션 결과를 재사용 가능한 운영 개선과 도구 전략으로 전환합니다.
 
 ```text
 cwf:retro            # 적응형 (기본은 심층)
 cwf:retro --deep     # 전문가 렌즈 포함 전체 분석
-cwf:retro --light    # 섹션 1-4 + 7만, 서브에이전트 없음
+cwf:retro --light    # 핵심 항목만 빠르게 점검 (서브에이전트 없음)
 ```
 
-섹션: 기억할 만한 컨텍스트, 협업 선호도, 낭비 감소(5 Whys), 핵심 의사결정 분석(CDM), 전문가 렌즈(심층), 학습 자료(심층), 관련 스킬. 발견 사항은 프로젝트 수준 문서에 기록해 보존합니다.
+회고는 세션이 끝난 뒤 학습 이자를 쌓는 단계입니다. 이 과정을 통해 다음 세션의 탐색 비용이 줄고, 사용자와 에이전트 모두의 의사결정 품질이 올라갑니다. 여기서 `관련 도구`는 이번 세션에서 실제로 사용했거나 활용 가능했던 도구를 뜻하고, `도구 갭`은 반복적인 마찰을 줄이기 위해 새로 도입/개선해야 할 후보를 뜻합니다.
+
+섹션: 기억할 만한 컨텍스트, 협업 선호도, 낭비 감소(5 Whys), 핵심 의사결정 분석(CDM), 전문가 렌즈(심층), 학습 자료(심층), 관련 도구(설치된 스킬 포함), 도구 갭. 발견 사항은 프로젝트 수준 문서에 기록해 보존합니다.
 
 ### [refactor](plugins/cwf/skills/refactor/SKILL.md)
 
-5가지 운영 모드를 갖춘 다중 모드 코드/스킬 리뷰.
+사용자가 스킬을 계속 설치/작성하는 환경에서 전체 생태계 일관성을 유지합니다.
 
 ```text
 cwf:refactor                        # 모든 스킬 퀵 스캔
@@ -205,11 +237,13 @@ cwf:refactor --skill --holistic     # 크로스 플러그인 분석
 cwf:refactor --docs                 # 문서 일관성 리뷰
 ```
 
-퀵 스캔은 구조적 검사를 실행합니다. 코드 정리는 커밋을 분석해 안전한 리팩토링을 찾습니다(Kent Beck의 "Tidy First?"). 심층 리뷰는 점진적 공개 원칙 기준으로 평가합니다. `--holistic` 모드는 크로스 플러그인 패턴 이슈를 감지합니다. `--docs` 모드는 문서 간 일관성을 점검합니다.
+리포지토리에서 계속 문서/스크립트/스킬이 늘어나면, 코드만 정리해서는 운영 품질이 회복되지 않습니다. 그래서 `refactor`는 코드뿐 아니라 스킬/문서까지 같은 관점으로 점검해 환경 전체의 유지보수성을 관리합니다.
+
+퀵 스캔은 설치된 스킬 전반의 드리프트를 빠르게 감지하기 위해 존재합니다. `--skill <name>`은 특정 스킬을 커스터마이즈하거나 이상 동작을 진단할 때 집중 분석하기 위한 모드입니다. 코드 정리는 커밋을 분석해 안전한 리팩토링을 찾고(Kent Beck의 "Tidy First?"), `--holistic`은 크로스 플러그인 패턴 이슈를 감지하며, `--docs`는 문서 간 일관성을 점검합니다.
 
 ### [handoff](plugins/cwf/skills/handoff/SKILL.md)
 
-프로젝트 상태와 산출물로부터 세션 또는 페이즈 핸드오프 문서를 생성합니다.
+세션 전환, 페이즈 전환, auto-compact 이후에도 다시 시작 비용 없이 이어가기 위해 세션/페이즈 핸드오프 문서를 생성합니다.
 
 ```text
 cwf:handoff                # next-session.md 생성 + 등록
@@ -221,7 +255,7 @@ cwf:handoff --phase        # phase-handoff.md 생성 (작동 방식 컨텍스트
 
 ### [ship](plugins/cwf/skills/ship/SKILL.md)
 
-GitHub 워크플로우 자동화 -- 이슈 생성, PR, 머지 관리.
+GitHub 워크플로우에서 이슈/PR/머지 단계를 일관되게 연결하고, 사람의 최종 판단 지점을 명확히 유지합니다.
 
 ```text
 cwf:ship                                   # 사용법 표시
@@ -231,11 +265,11 @@ cwf:ship merge [--squash|--merge|--rebase]    # 승인된 PR 머지
 cwf:ship status                            # 이슈, PR, 체크 상태 조회
 ```
 
-세션 컨텍스트(`plan.md`, `lessons.md`, `retro.md`)를 바탕으로 이슈/PR 본문을 구성하며, 머지 의사결정을 위한 CDM/결정 요약, 검증 체크리스트, 사람 판단 가드레일을 포함합니다.
+세션 컨텍스트(`plan.md`, `lessons.md`, `retro.md`)를 바탕으로 이슈/PR 본문을 구성하며, 머지 의사결정을 위한 CDM/결정 요약, 검증 체크리스트, 사람 판단 가드레일을 포함합니다. 필요하면 머지 전 `cwf:hitl`로 사람 검토를 추가해 세부 diff 기준을 강화할 수 있습니다.
 
 ### [review](plugins/cwf/skills/review/SKILL.md)
 
-6명 병렬 리뷰어가 수행하는 다각도 리뷰.
+구현 전/후의 핵심 지점에 같은 품질 게이트를 적용해 리스크를 조기에 차단합니다.
 
 ```text
 cwf:review                 # 코드 리뷰 (기본)
@@ -244,11 +278,11 @@ cwf:review --mode clarify  # 요구사항 리뷰
 cwf:review --mode plan     # 계획/스펙 리뷰
 ```
 
-2명 내부 리뷰어(Security, UX/DX)는 Task agents로, 2명 외부 리뷰어(Codex, Gemini)는 CLI로, 2명 도메인 전문가는 Task agents로 병렬 리뷰합니다. 외부 CLI를 사용할 수 없을 때는 우아하게 대체 경로로 전환합니다.
+`cwf:plan` 직후에는 `--mode plan`으로 스코프/가정 리스크를 확인하고, `cwf:impl` 직후에는 `--mode code`로 회귀와 품질 이슈를 점검하는 흐름이 기본입니다. 2명 내부 리뷰어(Security, UX/DX)는 Task agents로, 2명 외부 리뷰어(Codex, Gemini)는 CLI로, 2명 도메인 전문가는 Task agents로 병렬 리뷰하며, 외부 CLI를 사용할 수 없을 때는 대체 경로로 전환합니다.
 
 ### [hitl](plugins/cwf/skills/hitl/SKILL.md)
 
-브랜치 diff를 사람 참여형 방식으로 청크 리뷰하며, 재개 가능한 상태와 룰 전파를 지원합니다.
+자동 리뷰만으로 불충분할 때 병합 전 사람의 판단을 청크 단위로 안정적으로 반영합니다.
 
 ```text
 cwf:hitl                             # 기본 베이스(upstream/main) 기준으로 시작
@@ -262,7 +296,7 @@ cwf:review --human                   # 호환 별칭 (내부적으로 cwf:hitl�
 
 ### [run](plugins/cwf/skills/run/SKILL.md)
 
-단계 게이트를 포함한 전체 CWF 파이프라인 자동 체이닝.
+개별 스킬 문법을 몰라도 문제 해결 흐름 전체를 위임할 수 있게 합니다.
 
 ```text
 cwf:run <task description>           # 처음부터 전체 파이프라인 실행
@@ -270,11 +304,11 @@ cwf:run --from impl                  # impl 단계부터 재개
 cwf:run --skip review-plan,retro     # 특정 단계 건너뛰기
 ```
 
-기본 흐름은 gather → clarify → plan → review(plan) → impl → review(code) → retro → ship이며, 구현 전에는 인간 게이트를 두고 구현 후에는 기본적으로 자동 체이닝하며 `ship`에서 사용자 확인을 받습니다.
+기본 흐름은 gather → clarify → plan → review(plan) → impl → review(code) → retro → ship이며, 구현 전에는 인간 게이트를 두고 구현 후에는 기본적으로 자동 체이닝하며 `ship`에서 사용자 확인을 받습니다. 플러그인/스킬 유지보수 관점 점검이 필요하면 `ship` 전 `cwf:refactor`를 추가합니다.
 
 ### [setup](plugins/cwf/skills/setup/SKILL.md)
 
-CWF 초기 설정.
+초기에 환경/도구 계약을 표준화해 이후 워크플로우의 재현성을 확보합니다.
 
 ```text
 cwf:setup                # 전체 설정 (훅 + 도구 + repo-index 생성 여부 질문)
@@ -288,11 +322,11 @@ cwf:setup --repo-index   # 저장소 인덱스 명시적 생성/갱신
 cwf:setup --repo-index --target agents # AGENTS 기반 저장소용 AGENTS.md 관리 블록
 ```
 
-대화형 훅 그룹 토글, 외부 AI CLI 및 API 키 감지(Codex, Gemini, Tavily, Exa), 대화형 환경 변수 마이그레이션/부트스트랩(레거시 키를 표준 `CWF_*`로 변환), 선택적 Codex 연동(스킬 + wrapper), 선택적 인덱스 생성을 제공합니다. CWF capability 인덱스 생성은 `cwf:setup --cap-index`로 명시적으로 수행합니다. 저장소 인덱스 재생성은 `cwf:setup --repo-index --target agents`를 통해 AGENTS.md 관리 블록을 갱신합니다.
+대화형 훅 그룹 토글, 외부 AI CLI/API 키 감지(Codex, Gemini, Tavily, Exa), 환경 변수 마이그레이션/부트스트랩(레거시 키를 표준 `CWF_*`로 변환), 선택적 Codex 연동(스킬 + wrapper), 선택적 인덱스 생성을 제공합니다. CWF capability 인덱스 생성은 `cwf:setup --cap-index`, 저장소 인덱스 갱신은 `cwf:setup --repo-index --target agents`로 수행합니다.
 
 ### [update](plugins/cwf/skills/update/SKILL.md)
 
-CWF 플러그인 업데이트를 확인하고 적용합니다.
+로컬 CWF 동작을 최신 계약/수정사항/가드레일과 정렬된 상태로 유지합니다.
 
 ```text
 cwf:update               # 새 버전이 있으면 확인 + 업데이트
@@ -301,38 +335,22 @@ cwf:update --check       # 버전 확인만
 
 ### Codex 연동
 
-Codex CLI가 설치되어 있다면 다음 설정을 권장합니다.
+Codex CLI를 함께 쓴다면 아래 연동 명령을 1회 실행하세요(빠른 시작의 Codex 사용자 섹션과 동일).
 
 ```bash
 cwf:setup --codex
 cwf:setup --codex-wrapper
 ```
 
-적용되는 내용:
-- `~/.agents/skills/*`, `~/.agents/references`를 로컬 CWF에 심링크 (최신 파일 자동 반영)
-- `~/.local/bin/codex` wrapper 설치 + PATH 업데이트(`~/.zshrc`, `~/.bashrc`)
-- 이후 `codex` 실행 시 세션 markdown 로그가 `.cwf/projects/sessions/`에 `*.codex.md` 형식으로 자동 동기화
-- 동기화 대상은 현재 실행에서 갱신된 세션으로 우선 고정되어, 같은 cwd에서 잘못된 세션 export를 줄입니다
-- raw JSONL 복사는 기본 비활성(옵션 `--raw`)이며, raw export 시에도 민감정보 마스킹(redaction)이 적용됩니다
-
-검증:
-
-```bash
-bash scripts/codex/install-wrapper.sh --status
-type -a codex
-```
-
-기존 세션 로그를 일괄 마스킹하려면:
-
-```bash
-bash scripts/codex/redact-session-logs.sh
-```
-
-설치 후 새 셸을 열거나 `source ~/.zshrc`를 실행하세요. `codex`를 호출하는 alias(예: `codexyolo='codex ...'`)도 동일하게 wrapper를 사용합니다.
+연동 후 동작:
+- Codex에서도 CWF 스킬/레퍼런스를 같은 기준으로 불러옵니다.
+- `codex` 실행 시 세션 로그가 `.cwf/projects/sessions/`로 자동 동기화됩니다.
+- 동기화 대상은 현재 실행에서 갱신된 세션 기준으로 고정되어, 잘못된 세션 export를 줄입니다.
+- 참고: Claude Code 훅은 Codex CLI에서 직접 실행되지 않습니다.
 
 ## 훅
 
-CWF는 자동으로 실행되는 7개 훅 그룹을 포함합니다. 모두 기본 활성화되어 있으며, `cwf:setup --hooks`로 개별 그룹을 토글할 수 있습니다.
+CWF는 자동으로 실행되는 7개 훅 그룹을 포함합니다. 모두 기본 활성화되어 있으며, `cwf:setup --hooks`로 개별 그룹을 토글할 수 있습니다. 이 훅은 Claude Code 런타임에서 동작하며, Codex CLI에서는 동일 훅이 자동 실행되지 않습니다.
 
 | 그룹 | 훅 유형 | 하는 일 |
 |------|---------|---------|
@@ -358,7 +376,7 @@ SLACK_CHANNEL_ID="D0123456789"                   # 봇 DM 채널 ID (또는 C...
 TAVILY_API_KEY="tvly-..."                        # 웹 검색 및 URL 추출 (https://app.tavily.com)
 EXA_API_KEY="..."                                # 코드 검색 (https://dashboard.exa.ai)
 
-# 선택 오버라이드 — attention
+# 오버라이드 — attention
 CWF_ATTENTION_DELAY=45                           # 기본값: 30
 CWF_ATTENTION_REPLY_BROADCAST=true               # 기본값: false
 CWF_ATTENTION_TRUNCATE=20                        # 기본값: 10
@@ -366,7 +384,7 @@ CWF_ATTENTION_USER_ID="U0123456789"              # 기본값: 미설정
 # CWF_ATTENTION_USER_HANDLE="your-handle"        # 기본값: 미설정
 # CWF_ATTENTION_PARENT_MENTION="<@U0123456789>"  # 기본값: 미설정
 
-# 선택 오버라이드 — gather/read/session-log
+# 오버라이드 — gather/read/session-log
 CWF_GATHER_OUTPUT_DIR=".cwf/projects"               # 기본값: .cwf/projects
 CWF_READ_WARN_LINES=700                             # 기본값: 500
 CWF_READ_DENY_LINES=2500                            # 기본값: 2000
@@ -375,7 +393,7 @@ CWF_SESSION_LOG_ENABLED=false                       # 기본값: true
 CWF_SESSION_LOG_TRUNCATE=20                         # 기본값: 10
 CWF_SESSION_LOG_AUTO_COMMIT=true                    # 기본값: false
 
-# 선택 오버라이드 — 아티팩트 경로(고급)
+# 오버라이드 — 아티팩트 경로(고급)
 # CWF_ARTIFACT_ROOT=".cwf-data"                     # 기본값: .cwf
 # CWF_PROJECTS_DIR=".cwf/projects"                  # 기본값: {CWF_ARTIFACT_ROOT}/projects
 ```

@@ -1,11 +1,11 @@
 ---
 name: setup
-description: "Initial CWF configuration: hook group selection, external tool detection, optional Codex integration, optional git hook gate installation, optional CWF capability index generation, and optional repository index generation. Triggers: \"cwf:setup\", \"setup hooks\", \"configure cwf\""
+description: "Initial CWF configuration to standardize environment/tool contracts before workflow execution: hook group selection, external tool detection, optional Codex integration, optional git hook gate installation, optional CWF capability index generation, and optional repository index generation. Triggers: \"cwf:setup\", \"setup hooks\", \"configure cwf\""
 ---
 
 # Setup
 
-Initial CWF configuration. Interactive hook toggle, external tool detection, optional Codex integration, optional git hook gate installation, optional CWF capability index generation, and optional repository index generation.
+Standardize hooks, tool contracts, and environment wiring once so later workflow runs stay reproducible. Includes interactive hook toggles, external tool detection, optional Codex integration, optional git hook gate installation, optional CWF capability index generation, and optional repository index generation.
 
 **Language**: Write config files in English. Communicate with the user in their prompt language.
 

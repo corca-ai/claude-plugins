@@ -1,11 +1,11 @@
 ---
 name: gather
-description: "Unified information acquisition: URL auto-detect (Google/Slack/Notion/GitHub/web), web search (Tavily/Exa), and local codebase exploration. Trigger on: - \"cwf:gather\" command - When the user provides external content URLs matching supported services - When a reference file contains URLs that need to be fetched - When the user requests web search or code search"
+description: "Unified information acquisition that stabilizes context before reasoning: URL auto-detect (Google/Slack/Notion/GitHub/web), web search (Tavily/Exa), and local codebase exploration. Trigger on: - \"cwf:gather\" command - When the user provides external content URLs matching supported services - When a reference file contains URLs that need to be fetched - When the user requests web search or code search"
 ---
 
 # Gather Context (cwf:gather)
 
-Unified information acquisition — gather URLs, search the web, or explore local code.
+Convert scattered sources into local, reusable artifacts so later phases reason over stable context instead of transient links.
 
 **Language**: Write gathered artifacts in English. Communicate with the user in their prompt language.
 
@@ -22,6 +22,10 @@ cwf:gather --local <query>        Local codebase exploration
 cwf:gather                        Usage guide
 cwf:gather help                   Usage guide
 ```
+
+Why this exists:
+- Normalize heterogeneous sources into local markdown artifacts that downstream skills can cite and diff reliably.
+- Enforce source-access constraints explicitly (for example, Google Docs/Notion exports require public or published sharing).
 
 ## Workflow
 

@@ -1,11 +1,11 @@
 ---
 name: review
-description: "Universal review with narrative verdicts. 6 parallel reviewers: 2 internal (Security, UX/DX) via Task + 2 external slots via available providers (Codex/Gemini CLI, Claude Task fallback) + 2 domain experts via Task. Graceful fallback when CLIs are unavailable. Modes: --mode clarify/plan/code. Triggers: \"/review\""
+description: "Universal review with narrative verdicts for consistent quality gates before and after implementation. 6 parallel reviewers: 2 internal (Security, UX/DX) via Task + 2 external slots via available providers (Codex/Gemini CLI, Claude Task fallback) + 2 domain experts via Task. Graceful fallback when CLIs are unavailable. Modes: --mode clarify/plan/code. Triggers: \"/review\""
 ---
 
 # Review (/review)
 
-Universal review with narrative verdicts via 6 parallel reviewers (2 internal + 2 external slots + 2 domain experts).
+Apply consistent multi-perspective quality gates before implementation (plan) and after implementation (code) via 6 parallel reviewers (2 internal + 2 external slots + 2 domain experts).
 
 **Language**: Match the user's language for synthesis. Reviewer prompts in English.
 
@@ -18,6 +18,10 @@ Universal review with narrative verdicts via 6 parallel reviewers (2 internal + 
 /review --mode code --base marketplace-v3 --scenarios .cwf/projects/holdout.md
 /review --mode code --correctness-provider gemini --architecture-provider claude
 ```
+
+Recommended linkage:
+- `cwf:plan` → `cwf:review --mode plan` before `cwf:impl`
+- `cwf:impl` → `cwf:review --mode code` before `cwf:ship`
 
 ## External CLI Setup (one-time)
 

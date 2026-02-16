@@ -1,11 +1,11 @@
 ---
 name: clarify
-description: "Unified requirement clarification. Default: research-first with autonomous decision-making and persistent questioning. --light: direct iterative Q&A. Triggers: \"cwf:clarify\", \"clarify this\", \"refine requirements\""
+description: "Unified requirement clarification to prevent downstream implementation churn by resolving ambiguity early. Default: research-first with autonomous decision-making and persistent questioning. --light: direct iterative Q&A. Triggers: \"cwf:clarify\", \"clarify this\", \"refine requirements\""
 ---
 
 # Clarify
 
-Turn vague requirements into precise, actionable specifications.
+Resolve ambiguity before planning so implementation starts from explicit decisions, not assumptions.
 
 **Language**: Write clarification artifacts in English. Communicate with the user in their prompt language.
 
