@@ -5,8 +5,8 @@ live:
   session_id: "260216-04"
   dir: ".cwf/projects/260216-04-full-repo-refactor"
   branch: "marketplace-v3"
-  phase: "refactor"
-  task: "Full repository refactoring - all modes (holistic, skill, docs, code)"
+  phase: "retro"
+  task: "Full repository refactoring retro"
   key_files:
     - README.ko.md
     - .cwf/projects/260216-03-hitl-readme-restart/next-session.md

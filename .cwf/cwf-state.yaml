@@ -366,7 +366,7 @@ sessions:
     title: "full-repo-refactor"
     dir: ".cwf/projects/260216-04-full-repo-refactor"
     branch: "marketplace-v3"
-    artifacts: [plan.md, lessons.md]
+    artifacts: [plan.md, lessons.md, retro.md]
 
 tools:
   codex: available
@@ -393,8 +393,8 @@ live:
   session_id: "260216-04"
   dir: ".cwf/projects/260216-04-full-repo-refactor"
   branch: "marketplace-v3"
-  phase: "refactor"
-  task: "Full repository refactoring - all modes (holistic, skill, docs, code)"
+  phase: "retro"
+  task: "Full repository refactoring retro"
   key_files:
     - README.ko.md
     - .cwf/projects/260216-03-hitl-readme-restart/next-session.md
@@ -450,9 +450,9 @@ expert_roster:
   - name: "Sidney Dekker"
     domain: "drift into failure, local rationality, just culture"
     source: "Drift into Failure (Ashgate, 2011)"
-    rationale: "Applied to agent behavioral drift analysis"
+    rationale: "Applied to agent behavioral drift analysis, S260216-04: practical drift in ship skill hardcoding accumulation, decrementalism in lint-convention doc silent divergence, erosion of safety margins in README structural misalignment"
     introduced: "S13.5-B3"
-    usage_count: 2
+    usage_count: 3
     verified: true
   - name: "Frederick P. Brooks Jr."
     domain: "conceptual integrity, communication overhead, plan-to-throw-one-away, essential vs accidental complexity"
@@ -499,9 +499,9 @@ expert_roster:
   - name: "Martin Fowler"
     domain: "refactoring patterns, knowledge duplication (Rule of Three), shared abstractions, evolutionary design"
     source: "Refactoring: Improving the Design of Existing Code 2nd ed. (2018), Is Design Dead? (martinfowler.com), BeckDesignRules (martinfowler.com/bliki)"
-    rationale: "Applied to inline rule duplication as Duplicated Code smell, protocol reference extraction as Extract Function structural extension, Shotgun Surgery smell for partial category updates"
+    rationale: "Applied to inline rule duplication as Duplicated Code smell, protocol reference extraction as Extract Function structural extension, Shotgun Surgery smell for partial category updates, S260216-04: unenforced convention Aspirational demotion via Fewest Elements, extraction priority reranking by change-frequency × instance-count"
     introduced: "S15"
-    usage_count: 1
+    usage_count: 2
     verified: true
   - name: "Charles Perrow"
     domain: "normal accident theory, interactive complexity vs linear interaction, tight/loose coupling, common-mode failure"

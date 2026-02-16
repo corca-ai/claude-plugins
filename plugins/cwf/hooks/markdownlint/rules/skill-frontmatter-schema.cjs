@@ -3,6 +3,7 @@
 // Custom markdownlint rule:
 // Validate SKILL.md frontmatter against Agent Skills spec-oriented keys,
 // while enforcing a portability-safe subset for multi-runtime compatibility.
+// Convention doc: skill-conventions.md §Frontmatter (single-line description, allowed keys)
 
 const fs = require("fs");
 

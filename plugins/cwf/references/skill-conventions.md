@@ -27,6 +27,7 @@ Every skill MUST follow this section order:
 ```
 
 ## Frontmatter
+<!-- Gate: CORCA003 (skill-frontmatter-schema.cjs) — enforces key allowlist, name format, single-line description -->
 
 ```yaml
 ---
@@ -80,17 +81,21 @@ When a required executable/library/key is missing:
 
 Every skill MUST have a `## Rules` section before `## References`.
 
-### Universal rules (include in every skill)
+### Universal rules — enforced
 
-These rules apply to all CWF skills. Include them verbatim:
+These rules have deterministic enforcement (lint, hook, or script). Include verbatim:
 
 1. **All code fences must have language specifier**: Never use bare fences.
-2. **cwf-state.yaml is SSOT**: Read before modifying. Edit, do not overwrite.
-   (Only for skills that read/write cwf-state.yaml.)
-3. **cwf-state.yaml auto-init**: If cwf-state.yaml does not exist in the project root,
-   create it with the minimum schema before proceeding. See [cwf-state-init](#cwf-stateyaml-auto-init) below.
-4. **Context-deficit resilience**: Skills must execute using persisted state/artifacts/handoff files when prior conversation context is unavailable.
-5. **Missing dependency interaction**: When prerequisites are missing, ask to install/configure now; do not only report unavailability.
+   <!-- Gate: markdownlint MD040 -->
+
+### Universal rules — aspirational (not yet enforced)
+
+These rules express design intent but lack deterministic enforcement. Current compliance: 0–2/13 skills. Each is an automation candidate — promote to enforced when a lint/hook/script can check it.
+
+1. **cwf-state.yaml is SSOT**: Read before modifying. Edit, do not overwrite. (Only for skills that read/write cwf-state.yaml.) *Automation candidate*: pre-write check script that verifies read-before-modify pattern.
+2. **cwf-state.yaml auto-init**: If cwf-state.yaml does not exist in the project root, create it with the minimum schema before proceeding. See [cwf-state-init](#cwf-stateyaml-auto-init) below. *Automation candidate*: existence check hook at skill start.
+3. **Context-deficit resilience**: Skills must execute using persisted state/artifacts/handoff files when prior conversation context is unavailable. *Non-automatable*: behavioral judgment. Partial enforcement via recovery gate scripts per skill.
+4. **Missing dependency interaction**: When prerequisites are missing, ask to install/configure now; do not only report unavailability. *Non-automatable*: behavioral judgment. See §Missing Dependency Handling above for the full contract.
 
 ## cwf-state.yaml Auto-Init
 
