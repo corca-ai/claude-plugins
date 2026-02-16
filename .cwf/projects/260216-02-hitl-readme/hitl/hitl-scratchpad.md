@@ -1,7 +1,7 @@
 # HITL Scratchpad
 
 Session: `260216-02-hitl-readme`
-Updated: `2026-02-16T06:51:14Z`
+Updated: `2026-02-16T07:46:57Z`
 
 ## Purpose
 
@@ -148,6 +148,94 @@ Single source of truth for HITL consensus, rationale, and unresolved questions.
     - 단일 문장만 떼어 보여주는 방식은 지양
   - Applied to:
     - `plugins/cwf/skills/hitl/SKILL.md` (Rule 11 context requirement)
+
+- D-021 (Applied): 사용자 수정분 기준으로 상단~핵심 개념 구간 정합성 정리.
+  - Direction:
+    - 비워둔 링크는 실제 섹션 앵커로 연결
+    - 코멘트가 섞인 코드펜스/문장 잔여를 문서 본문 규칙으로 정리
+    - 핵심 개념 순서를 운영 흐름(`결정 포인트 -> 전문가 자문 -> 티어 분류 -> ...`) 기준으로 재배치
+    - 모호 표현(`시점에 맞는 권한`, `기준`)을 구체 용어로 치환
+  - Applied to:
+    - `README.ko.md` (설치/Codex 설정/접근/핵심 개념)
+
+- D-022 (Applied): 핵심 개념 순서 변경에 맞춰 `개념 조합` 문단의 내부 나열 순서를 동기화.
+  - Direction:
+    - `clarify` 조합 설명도 `결정 포인트 -> 전문가 자문 -> 티어 분류 -> 에이전트 조율` 순서로 맞춤
+  - Applied to:
+    - `README.ko.md` (`개념 조합` 문단)
+
+- D-023 (Applied): 용어/표기 통일.
+  - Direction:
+    - 문서 본문의 `결정 포인트`를 `의사결정 포인트`로 통일
+    - 단독 표기 `` `cwf` ``는 사용하지 않고 `CWF`로 통일
+    - `cwf:...` 명령 표기만 예외로 유지
+  - Applied to:
+    - `README.ko.md` (사용 시나리오/레거시 안내/핵심 개념/clarify/개념 조합/결과)
+
+- D-024 (Applied): `ship` 문장 톤/표현 교정.
+  - Direction:
+    - `차단 이슈가 없고` -> `없거나`
+    - `예외 머지` 표현 대신 `머지를 강행할 수 있습니다`
+    - `같은 흐름으로 추가` 표현 제거, `머지 전에 cwf:hitl 추가`로 단순화
+  - Applied to:
+    - `README.ko.md` (`ship`의 설계 의도/무엇을 하는가)
+
+- D-025 (Applied): `review/hitl/run` 구간의 사람/인간 표현을 사용자 중심으로 정렬.
+  - Direction:
+    - `사람 판단` -> `사용자 판단`
+    - `사람이 직접 검토` -> `사용자가 직접 검토`
+    - `인간 게이트` -> `사용자 게이트`
+  - Applied to:
+    - `README.ko.md` (`hitl` 소개/설계 의도, `run` 설계 의도)
+
+- D-026 (Applied): `Codex 연동` 명령 블록 코드펜스 유형 정렬.
+  - Direction:
+    - 코딩 에이전트 내 명령 예시 표기 원칙에 맞춰 `bash` 대신 `text` 사용
+  - Applied to:
+    - `README.ko.md` (`### Codex 연동` 명령 블록)
+
+- D-027 (Applied): `setup`/`Codex 연동` 내 `wrapper` 표기 정리.
+  - Direction:
+    - `codex wrapper` -> `Codex wrapper`
+    - 본문 식별자 표기는 `` `wrapper` ``로 명확화
+  - Applied to:
+    - `README.ko.md` (`setup` 명령 주석, `Codex 연동` 설명 문장)
+
+- D-028 (Applied): `Codex 연동`의 미합의 결론형 문장 완화 + 훅 표기 정리.
+  - Direction:
+    - `확장 가능합니다` 같은 결론형 표현 제거
+    - 확장은 별도 설계/합의가 필요한 검토 항목으로 명시
+    - 훅 표의 `->` 표기를 `→`로 통일하고, `cwf:setup` 조사(`를`)를 `을`로 교정
+  - Applied to:
+    - `README.ko.md` (`Codex 연동`, `훅`, `환경 설정` 도입 문장)
+
+- D-029 (Applied): `가정` 문단 예시 표기만 국문화.
+  - Direction:
+    - `e.g.` -> `예:`로 교체
+    - 반복 회피 목적의 `사람` 표현은 유지
+  - Applied to:
+    - `README.ko.md` (`가정` 마지막 bullet)
+
+- D-030 (Applied): 워크플로우 테이블 `하는 일` 문구를 why/what 기준으로 전면 교정.
+  - Direction:
+    - `clarify`는 "스펙으로 전환" 대신 의사결정 포인트 분해 + 티어 분류로 입력 정제로 표현
+    - `impl`/`retro`는 추상 문구를 줄이고 실제 실행/환원 동작을 명시
+    - `refactor`는 `review`와의 역할 중복을 피하도록 "정리/정합성 회복" 중심으로 표현
+    - `hitl`의 `사람 참여형` 표현을 자연스러운 사용자 합의/청크 검토 문장으로 교체
+  - Applied to:
+    - `README.ko.md` (`워크플로우` 테이블)
+
+- D-031 (Applied): `개념 조합` 문단 제거.
+  - Direction:
+    - 워크플로우 소개에서 필수성이 낮고 중복 설명이 발생하므로 삭제
+  - Applied to:
+    - `README.ko.md` (`워크플로우` 직후 문단)
+
+- D-032 (Applied): README 설명 문맥의 경로 표기는 링크 대신 백틱 경로로 유지.
+  - Direction:
+    - 문서 탐색 목적 링크가 아닌 설명용 경로(`.cwf/projects/`, `.cwf/cwf-state.yaml`)는 인라인 코드로 표기
+  - Applied to:
+    - `README.ko.md` (`gather`, `hitl` 설명 문단)
 
 - I-001 (Applied): Make agreement-capture notes a default HITL behavior.
   - Implemented in `plugins/cwf/skills/hitl/SKILL.md` as default agreement round before chunk review.
