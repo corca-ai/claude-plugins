@@ -383,7 +383,7 @@ Add `handoff` to `cwf-state.yaml` current session's `stage_checkpoints` list.
 Execute the session artifact checker:
 
 ```bash
-bash {SKILL_DIR}/../../scripts/check-session.sh --impl
+bash {CWF_PLUGIN_DIR}/scripts/check-session.sh --impl
 ```
 
 Report results. If any artifacts are missing, list them and suggest fixes.

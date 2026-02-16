@@ -25,10 +25,10 @@ cwf:impl --skip-clarify     # Skip Phase 1.0 clarify pre-condition check
 Use the live-state helper for scalar fields, then initialize list fields in the resolved live-state file:
 
 ```bash
-bash {SKILL_DIR}/../../scripts/cwf-live-state.sh set . \
+bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh set . \
   phase="impl" \
   task="{plan goal summary}"
-live_state_file=$(bash {SKILL_DIR}/../../scripts/cwf-live-state.sh resolve)
+live_state_file=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh resolve)
 ```
 
 In `{live_state_file}`, set `live.key_files` to the plan's key files list and initialize `live.decision_journal` as an empty list:
@@ -42,7 +42,7 @@ live:
 
 ### Decision Journal
 
-Throughout Phases 2-4, append significant decisions to `live.decision_journal` in the resolved live-state file (`bash {SKILL_DIR}/../../scripts/cwf-live-state.sh resolve`). Record decisions when:
+Throughout Phases 2-4, append significant decisions to `live.decision_journal` in the resolved live-state file (`bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh resolve`). Record decisions when:
 - A design choice is made between alternatives
 - A deviation from the plan occurs
 - A trade-off is resolved
@@ -402,7 +402,7 @@ If any BDD criteria are uncovered:
 Run the session completeness check:
 
 ```bash
-bash {SKILL_DIR}/../../scripts/check-session.sh --impl
+bash {CWF_PLUGIN_DIR}/scripts/check-session.sh --impl
 ```
 
 If any FAIL items are reported, fix them before suggesting review. This ensures all required artifacts (plan.md, lessons.md, next-session.md) exist and cwf-state.yaml is properly updated.

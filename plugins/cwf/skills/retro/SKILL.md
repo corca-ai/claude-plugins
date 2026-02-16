@@ -28,7 +28,7 @@ Adaptive end-of-session review that converts outcomes into durable process/conte
 Run:
 
 ```bash
-bash {SKILL_DIR}/../../scripts/cwf-live-state.sh set . phase="retro"
+bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh set . phase="retro"
 ```
 
 ### 1. Locate Output Directory
@@ -39,16 +39,16 @@ Resolution order:
 3. If reused session path date prefix (`YYMMDD`) differs from today's local date, AskUserQuestion:
    - Continue existing session directory (recommended for same logical session across midnight/day rollover)
    - Start a new dated directory for today
-4. If user selects a new dated directory, run `{SKILL_DIR}/../../scripts/next-prompt-dir.sh --bootstrap <title>`, then copy `plan.md` and `lessons.md` from the previous session directory when present so retro context is preserved.
+4. If user selects a new dated directory, run `{CWF_PLUGIN_DIR}/scripts/next-prompt-dir.sh --bootstrap <title>`, then copy `plan.md` and `lessons.md` from the previous session directory when present so retro context is preserved.
 5. If multiple candidates exist, AskUserQuestion with candidates
-6. Otherwise run `{SKILL_DIR}/../../scripts/next-prompt-dir.sh --bootstrap <title>`
+6. Otherwise run `{CWF_PLUGIN_DIR}/scripts/next-prompt-dir.sh --bootstrap <title>`
 
 ### 2. Read Existing Artifacts
 
 Before reading artifacts, run the evidence collector:
 
 ```bash
-bash {SKILL_DIR}/../../scripts/retro-collect-evidence.sh --session-dir "{output-dir}"
+bash {CWF_PLUGIN_DIR}/scripts/retro-collect-evidence.sh --session-dir "{output-dir}"
 ```
 
 Then read `retro-evidence.md` (if generated), `plan.md`, `lessons.md` (if they exist in target dir), AGENTS.md from project root (plus CLAUDE.md when runtime-specific behavior matters), project context document (e.g. docs/project-context.md), and `cwf-state.yaml` (if it exists) — to understand session goals, project stage, and avoid duplicating content.
@@ -91,7 +91,7 @@ Draft sections 1-3 inline (these require full conversation access), then launch 
 **Resolve session directory**: Resolve the effective live-state file, then read `live.dir`.
 
 ```bash
-live_state_file=$(bash {SKILL_DIR}/../../scripts/cwf-live-state.sh resolve)
+live_state_file=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh resolve)
 ```
 
 ```yaml

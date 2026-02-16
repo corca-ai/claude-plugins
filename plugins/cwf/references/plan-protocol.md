@@ -10,7 +10,7 @@ Protocol for persisting planning artifacts and session learnings.
 
 **Path rule**:
 - If the user specifies a path, use it.
-- Otherwise run `{SKILL_DIR}/../../scripts/next-prompt-dir.sh <title>` and use its output path as-is.
+- Otherwise run `{CWF_PLUGIN_DIR}/scripts/next-prompt-dir.sh <title>` and use its output path as-is.
 - Do not hand-calculate sequence numbers.
 - `YYMMDD` is the directory creation date, not a guarantee that all later work in that session happened on the same day.
 

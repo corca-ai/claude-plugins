@@ -43,10 +43,10 @@ This heuristic can be overridden by explicit `--light` flag or user instruction.
 Use the live-state helper for scalar fields, then edit list fields in the resolved live-state file:
 
 ```bash
-bash {SKILL_DIR}/../../scripts/cwf-live-state.sh set . \
+bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh set . \
   phase="clarify" \
   task="{requirement summary}"
-live_state_file=$(bash {SKILL_DIR}/../../scripts/cwf-live-state.sh resolve)
+live_state_file=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh resolve)
 ```
 
 Set `live.key_files` in `{live_state_file}` to files relevant to the requirement.
@@ -351,9 +351,9 @@ Then ask: "Save this clarified requirement to a file?" If yes: save to a project
 **Completion tracking** (after saving the summary file):
 
 1. Run:
-   `bash {SKILL_DIR}/../../scripts/cwf-live-state.sh set . clarify_completed_at="{ISO 8601 UTC timestamp}"`
+   `bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh set . clarify_completed_at="{ISO 8601 UTC timestamp}"`
 2. Run:
-   `bash {SKILL_DIR}/../../scripts/cwf-live-state.sh set . clarify_result_file="{saved summary file path}"`
+   `bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh set . clarify_result_file="{saved summary file path}"`
 
 This state is what `cwf:impl` Phase 1.0 checks as a pre-condition.
 
@@ -417,9 +417,9 @@ Then offer to save.
 **Completion tracking** (after saving the summary file):
 
 1. Run:
-   `bash {SKILL_DIR}/../../scripts/cwf-live-state.sh set . clarify_completed_at="{ISO 8601 UTC timestamp}"`
+   `bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh set . clarify_completed_at="{ISO 8601 UTC timestamp}"`
 2. Run:
-   `bash {SKILL_DIR}/../../scripts/cwf-live-state.sh set . clarify_result_file="{saved summary file path}"`
+   `bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh set . clarify_result_file="{saved summary file path}"`
 
 This state is what `cwf:impl` Phase 1.0 checks as a pre-condition.
 

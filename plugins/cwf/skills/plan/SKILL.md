@@ -36,7 +36,7 @@ CWF v3 moved planning from runtime-specific plan-mode hooks to a runtime-indepen
 Use the live-state helper (session-first write target):
 
 ```bash
-bash {SKILL_DIR}/../../scripts/cwf-live-state.sh set . \
+bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh set . \
   phase="plan" \
   task="{task summary}"
 ```
@@ -67,7 +67,7 @@ bash {SKILL_DIR}/../../scripts/cwf-live-state.sh set . \
 Resolve the effective live-state file, then read `live.dir`.
 
 ```bash
-live_state_file=$(bash {SKILL_DIR}/../../scripts/cwf-live-state.sh resolve)
+live_state_file=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh resolve)
 ```
 
 ```yaml
@@ -273,7 +273,7 @@ Always use the **two-layer format**:
 Determine the session directory following plan-protocol.md location rules:
 
 1. If the user provided an output path, use it.
-2. Otherwise run `{SKILL_DIR}/../../scripts/next-prompt-dir.sh --bootstrap <title>` and use its output path.
+2. Otherwise run `{CWF_PLUGIN_DIR}/scripts/next-prompt-dir.sh --bootstrap <title>` and use its output path.
    - `--bootstrap` creates the resolved directory, initializes missing `plan.md`/`lessons.md`, and pre-registers the session in `cwf-state.yaml` `sessions` when state exists.
 
 Write two files:

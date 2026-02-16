@@ -252,15 +252,15 @@ Options:
 If `Skills + wrapper (recommended)`:
 
 ```bash
-bash {SKILL_DIR}/../../scripts/codex/sync-skills.sh --cleanup-legacy
-bash {SKILL_DIR}/../../scripts/codex/install-wrapper.sh --enable --add-path
-bash {SKILL_DIR}/../../scripts/codex/install-wrapper.sh --status
+bash {CWF_PLUGIN_DIR}/scripts/codex/sync-skills.sh --cleanup-legacy
+bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --enable --add-path
+bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --status
 ```
 
 If `Skills only`:
 
 ```bash
-bash {SKILL_DIR}/../../scripts/codex/sync-skills.sh --cleanup-legacy
+bash {CWF_PLUGIN_DIR}/scripts/codex/sync-skills.sh --cleanup-legacy
 ```
 
 If `Skip for now`: no command execution in this phase.
@@ -270,7 +270,7 @@ If `Skip for now`: no command execution in this phase.
 When wrapper install was selected, always report:
 
 ```bash
-bash {SKILL_DIR}/../../scripts/codex/install-wrapper.sh --status
+bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --status
 type -a codex
 ```
 
@@ -296,14 +296,14 @@ Use this phase when:
 Run:
 
 ```bash
-bash {SKILL_DIR}/../../scripts/codex/sync-skills.sh --cleanup-legacy
+bash {CWF_PLUGIN_DIR}/scripts/codex/sync-skills.sh --cleanup-legacy
 ```
 
 Expected behavior:
 - Link CWF skills from `plugins/cwf/skills/*` into `~/.agents/skills`
 - Link shared references into `~/.agents/references`
 - Move legacy custom entries from `~/.codex/skills` to backup (`.system` is kept)
-- Validate relative skill references via `{SKILL_DIR}/../../scripts/codex/verify-skill-links.sh`
+- Validate relative skill references via `{CWF_PLUGIN_DIR}/scripts/codex/verify-skill-links.sh`
 
 ### 2.5.2 Report Results
 
@@ -340,20 +340,20 @@ If user declines, skip this phase.
 Run:
 
 ```bash
-bash {SKILL_DIR}/../../scripts/codex/install-wrapper.sh --enable --add-path
+bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --enable --add-path
 ```
 
 This installs a wrapper symlink at `~/.local/bin/codex` pointing to:
 
 ```text
-{SKILL_DIR}/../../scripts/codex/codex-with-log.sh
+{CWF_PLUGIN_DIR}/scripts/codex/codex-with-log.sh
 ```
 
 The wrapper preserves normal Codex behavior and runs:
 
 ```bash
-bash {SKILL_DIR}/../../scripts/codex/sync-session-logs.sh --cwd "$PWD"
-bash {SKILL_DIR}/../../scripts/codex/post-run-checks.sh --cwd "$PWD" --mode warn
+bash {CWF_PLUGIN_DIR}/scripts/codex/sync-session-logs.sh --cwd "$PWD"
+bash {CWF_PLUGIN_DIR}/scripts/codex/post-run-checks.sh --cwd "$PWD" --mode warn
 ```
 
 after each Codex run. Logs are persisted under `.cwf/sessions/` by default (legacy fallback: `.cwf/projects/sessions/`) as `*.codex.md` (`raw` JSONL copy is opt-in via `--raw`), and changed-file quality checks are executed in `warn` mode by default.
@@ -363,13 +363,13 @@ after each Codex run. Logs are persisted under `.cwf/sessions/` by default (lega
 Report current status:
 
 ```bash
-bash {SKILL_DIR}/../../scripts/codex/install-wrapper.sh --status
+bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --status
 ```
 
 Provide rollback command:
 
 ```bash
-bash {SKILL_DIR}/../../scripts/codex/install-wrapper.sh --disable
+bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --disable
 ```
 
 Include activation note:

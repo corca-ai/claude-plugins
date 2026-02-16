@@ -28,12 +28,12 @@ Operational note:
 ## Phase 1: Initialize
 
 1. Parse task description and flags (`--from`, `--skip`)
-1. Bootstrap session directory via `{SKILL_DIR}/../../scripts/next-prompt-dir.sh --bootstrap <sanitized-title>`
+1. Bootstrap session directory via `{CWF_PLUGIN_DIR}/scripts/next-prompt-dir.sh --bootstrap <sanitized-title>`
    - This creates the directory, initializes `plan.md`/`lessons.md` if missing, and pre-registers the session in `cwf-state.yaml` `sessions` when state exists.
 1. Initialize live state (session-first write path):
 
    ```bash
-   bash {SKILL_DIR}/../../scripts/cwf-live-state.sh set . \
+   bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh set . \
      session_id="{next session ID}" \
      dir="{session directory}" \
      branch="{current branch}" \
@@ -75,7 +75,7 @@ For each stage (respecting `--from` and `--skip` flags):
 1. Update phase using the live-state helper:
 
    ```bash
-   bash {SKILL_DIR}/../../scripts/cwf-live-state.sh set . phase="{current stage name}"
+   bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh set . phase="{current stage name}"
    ```
 1. Invoke the skill using the Skill tool:
 
@@ -157,13 +157,13 @@ After all stages complete (or the pipeline is halted):
 1. Run session completeness check:
 
    ```bash
-   bash {SKILL_DIR}/../../scripts/check-session.sh --impl
+   bash {CWF_PLUGIN_DIR}/scripts/check-session.sh --impl
    ```
 
    If any FAIL items are reported, fix them before proceeding. This is a forced function — the pipeline is not complete until all checks pass.
 
 1. Update state:
-   - Set final phase: `bash {SKILL_DIR}/../../scripts/cwf-live-state.sh set . phase="done"`
+   - Set final phase: `bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh set . phase="done"`
    - Ensure the current session entry in `cwf-state.yaml` stays consistent with final artifacts/summary (registration is initialized during Phase 1 bootstrap)
 1. Report pipeline summary:
 

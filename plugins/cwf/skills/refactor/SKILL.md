@@ -77,7 +77,7 @@ bash {SKILL_DIR}/scripts/tidy-target-commits.sh 5 [branch]
 **Resolve session directory**: Resolve the effective live-state file, then read `live.dir`.
 
 ```bash
-live_state_file=$(bash {SKILL_DIR}/../../scripts/cwf-live-state.sh resolve)
+live_state_file=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh resolve)
 ```
 
 ```yaml
@@ -143,7 +143,7 @@ Read `{SKILL_DIR}/references/review-criteria.md` for the evaluation checklist.
 **Resolve session directory**: Resolve the effective live-state file, then read `live.dir`.
 
 ```bash
-live_state_file=$(bash {SKILL_DIR}/../../scripts/cwf-live-state.sh resolve)
+live_state_file=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh resolve)
 ```
 
 ```yaml
@@ -233,7 +233,7 @@ Read `{SKILL_DIR}/references/holistic-criteria.md` for the three analysis axes.
 **Resolve session directory**: Resolve the effective live-state file, then read `live.dir`.
 
 ```bash
-live_state_file=$(bash {SKILL_DIR}/../../scripts/cwf-live-state.sh resolve)
+live_state_file=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh resolve)
 ```
 
 ```yaml

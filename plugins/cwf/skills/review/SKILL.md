@@ -170,7 +170,7 @@ Launch **six** reviewers in parallel: 2 internal (Task agents) + 2 external (CLI
 Resolve the effective live-state file, then read `live.dir`.
 
 ```bash
-live_state_file=$(bash {SKILL_DIR}/../../scripts/cwf-live-state.sh resolve)
+live_state_file=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh resolve)
 ```
 
 ```yaml
@@ -299,7 +299,7 @@ Task(subagent_type="general-purpose", name="uxdx-reviewer", max_turns={max_turns
 If Slot 3 provider resolves to `codex`:
 
 ```text
-Bash(timeout=300000, command="START_MS=$(date +%s%3N); CODEX_RUNNER='{SKILL_DIR}/../../scripts/codex/codex-with-log.sh'; [ -x \"$CODEX_RUNNER\" ] || CODEX_RUNNER='codex'; timeout 120 \"$CODEX_RUNNER\" exec --sandbox read-only -c model_reasoning_effort='high' - < '{tmp_dir}/correctness-prompt.md' > '{tmp_dir}/slot3-output.md' 2>'{tmp_dir}/slot3-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"TOOL=codex EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/slot3-meta.txt'")
+Bash(timeout=300000, command="START_MS=$(date +%s%3N); CODEX_RUNNER='{CWF_PLUGIN_DIR}/scripts/codex/codex-with-log.sh'; [ -x \"$CODEX_RUNNER\" ] || CODEX_RUNNER='codex'; timeout 120 \"$CODEX_RUNNER\" exec --sandbox read-only -c model_reasoning_effort='high' - < '{tmp_dir}/correctness-prompt.md' > '{tmp_dir}/slot3-output.md' 2>'{tmp_dir}/slot3-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"TOOL=codex EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/slot3-meta.txt'")
 ```
 
 For `--mode code`, use `model_reasoning_effort='xhigh'` instead. Single quotes around config values avoid double-quote conflicts in the Bash wrapper.
@@ -344,7 +344,7 @@ Uses stdin redirection (`< prompt.md`) instead of `-p "$(cat ...)"` to prevent s
 If Slot 4 provider resolves to `codex`:
 
 ```text
-Bash(timeout=300000, command="START_MS=$(date +%s%3N); CODEX_RUNNER='{SKILL_DIR}/../../scripts/codex/codex-with-log.sh'; [ -x \"$CODEX_RUNNER\" ] || CODEX_RUNNER='codex'; timeout 120 \"$CODEX_RUNNER\" exec --sandbox read-only -c model_reasoning_effort='high' - < '{tmp_dir}/architecture-prompt.md' > '{tmp_dir}/slot4-output.md' 2>'{tmp_dir}/slot4-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"TOOL=codex EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/slot4-meta.txt'")
+Bash(timeout=300000, command="START_MS=$(date +%s%3N); CODEX_RUNNER='{CWF_PLUGIN_DIR}/scripts/codex/codex-with-log.sh'; [ -x \"$CODEX_RUNNER\" ] || CODEX_RUNNER='codex'; timeout 120 \"$CODEX_RUNNER\" exec --sandbox read-only -c model_reasoning_effort='high' - < '{tmp_dir}/architecture-prompt.md' > '{tmp_dir}/slot4-output.md' 2>'{tmp_dir}/slot4-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"TOOL=codex EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/slot4-meta.txt'")
 ```
 
 For `--mode code`, use `model_reasoning_effort='xhigh'` instead.
