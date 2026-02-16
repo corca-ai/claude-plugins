@@ -7,7 +7,7 @@ description: "Implementation orchestration from a plan to execute approved scope
 
 Execute an approved plan predictably while preserving constraints, dependencies, and BDD validation.
 
-**Language**: Write all implementation artifacts in English. Communicate with the user in their prompt language.
+**Language**: Write code/technical implementation artifacts in English. Keep `lessons.md` in the user's language. Communicate with the user in their prompt language.
 
 ## Quick Start
 
@@ -132,6 +132,17 @@ Proceed with implementation?
 
 Use `AskUserQuestion` with options: "Proceed", "Review plan first", "Cancel".
 
+### 1.4 Lessons Baseline
+
+Resolve `lessons.md` in the same directory as the selected `plan.md`.
+
+1. If `lessons.md` does not exist, create it immediately using the structure from `plan-protocol.md`.
+2. Treat lesson accumulation as continuous behavior:
+   - user clarifications discovered during implementation
+   - plan-vs-execution gaps
+   - runtime/tooling constraints discovered mid-flight
+3. Keep lesson entries in the user's language.
+
 ---
 
 ## Phase 2: Analyze & Decompose
@@ -223,9 +234,10 @@ For simple plans (1 work item, ≤3 files).
 3. Follow the plan's step descriptions precisely
 4. Respect the "Don't Touch" list — never modify those files
 5. If phase-handoff.md was loaded, apply its Implementation Hints during execution and respect its "Do NOT" constraints
-6. **Commit Gate**: Apply the [Commit Gate](references/impl-gates.md#commit-gate). Stage specific files and commit with Conventional Commit format.
+6. Append newly discovered learnings to `lessons.md` before commit (user language).
+7. **Commit Gate**: Apply the [Commit Gate](references/impl-gates.md#commit-gate). Stage specific files and commit with Conventional Commit format.
 
-7. After commit, proceed to Phase 4
+8. After commit, proceed to Phase 4
 
 ---
 
@@ -294,6 +306,16 @@ Batch {N} committed:
 ### 3b.3.6 Lesson-Driven Commits
 
 Apply the [Lesson-Driven Commits](references/impl-gates.md#lesson-driven-commits) protocol. Lesson-driven changes get separate commits with "Driven by lesson:" reference.
+
+### 3b.3.7 Lessons Checkpoint per Batch
+
+After each batch (and before launching the next), update `lessons.md` with any new findings:
+
+- corrected assumptions from user feedback
+- design/implementation gaps discovered during execution
+- constraints/tooling behavior that changed execution strategy
+
+Keep entries concise and in the user's language.
 
 ### 3b.4 Result Collection
 
@@ -404,6 +426,8 @@ the plan's success criteria, run:
 12. **Commit boundary = change pattern**: When changes are cross-cutting (Phase 2.6), commit by concept/pattern. When modular, commit per work item. See [Commit Gate](references/impl-gates.md#commit-gate).
 13. **Stage specific files, never `git add -A`**: Only stage files known to belong to the current work item. Prevent accidental inclusion of unrelated changes.
 14. **Lesson-driven changes get separate commits**: If a lesson triggers a code change, commit it independently. See [Lesson-Driven Commits](references/impl-gates.md#lesson-driven-commits).
+15. **Incremental lessons are mandatory**: Update `lessons.md` as implementation progresses, not only at the end.
+16. **Language split is mandatory**: implementation/code artifacts stay in English, while `lessons.md` stays in the user's language.
 
 ## References
 

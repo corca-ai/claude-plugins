@@ -1,11 +1,7 @@
 # CWF (Corca Workflow Framework)
 
----
-추가로 생각난 것들
-- 맨 위에 Disclaimer 추가. 이 문서가 SOT다. 이 문서의 내용이 플러그인 구현과 다르면 플러그인을 고쳐야 하니 제보 바란다. 같은 내용
-- 빠른 시작에서, cwf:setup 이 뭘 해주는지 이야기해야겠음. 환경변수 설정(구버전 스킬 삭제 및 환경변수 마이그레이션 포함), 필요한 라이브러리 설치, AGENTS.md를 위한 인덱스 등. AGENTS.md 인덱스는 이유를 명확하게 기술. 그리고 셋업의 각 플래그가 하는 일에 대해서는 [링크](#setup) 참조시키는 식으로.
-- cwf-state.yaml 을 .cwf/ 하위에 하나만 두는 것과 .cwf/projects 별로 두는 것, 둘 다 두는 것의 트레이드오프를 생각해봐야겠다. git worktree를 비롯한 병렬 작업을 고려하면 projects 하위에 존재하는 게 유리한 면이 확실히 있을 것.
----
+> **Disclaimer (SoT)**  
+> 이 문서는 CWF 사용자 문서의 단일 기준(SoT)입니다. 문서와 플러그인 구현이 다르면 문서 기준으로 구현을 고쳐야 합니다. 불일치를 발견하면 이슈/PR로 제보해주세요.
 
 [English](README.md)
 
@@ -30,6 +26,15 @@ claude plugin install cwf@corca-plugins
 ```text
 cwf:setup
 ```
+
+`cwf:setup`은 초기 실행 편차를 줄이기 위해 다음을 정리합니다.
+
+- 레거시 환경 변수를 표준 `CWF_*` 키로 마이그레이션
+- 프로젝트 설정 파일(`.cwf/config.yaml`, `.cwf/config.local.yaml`) 부트스트랩
+- 외부 도구 감지(Codex/Gemini/Tavily/Exa) 및 선택적 Codex 연동
+- 선택적 인덱스 생성(에이전트 라우팅과 점진적 공개 탐색 품질 개선 목적)
+
+세부 플래그 동작은 [setup](#setup) 섹션을 참고하세요.
 
 ### Codex 사용자(권장)
 
@@ -162,7 +167,7 @@ gather → clarify → plan → review(plan) → impl → review(code) → refac
 | 9 | [review](#review) | `cwf:review` | 6명 병렬 리뷰어를 통한 다각도 리뷰 |
 | 10 | [hitl](#hitl) | `cwf:hitl` | 재개 가능한 상태 저장과 룰 전파를 갖춘 사람 참여형 변경사항/청크 리뷰 |
 | 11 | [run](#run) | `cwf:run` | gather부터 ship까지 전체 파이프라인을 단계 게이트와 함께 조율 |
-| 12 | [setup](#setup) | `cwf:setup` | 훅 그룹 설정, 도구 감지, 프로젝트 인덱스 선택 생성 |
+| 12 | [setup](#setup) | `cwf:setup` | 훅 그룹 설정, 도구 감지, 환경/인덱스 부트스트랩 |
 | 13 | [update](#update) | `cwf:update` | CWF 플러그인 업데이트 확인 및 적용 |
 
 **개념 조합**: `gather`, `clarify`, `plan`, `impl`, `retro`, `refactor`, `review`, `hitl`, `run`은 모두 에이전트 조율 개념을 공유합니다. `clarify`는 전문가 자문, 티어 분류, 에이전트 조율, 결정 포인트를 하나의 워크플로우에서 함께 사용합니다. `review`와 `hitl`은 서로 다른 검토 단위(병렬 리뷰어 vs 청크 기반 상호작용 루프)에서 사람의 판단과 구조화된 리뷰 조율을 결합합니다. `handoff`는 핸드오프 개념의 주요 구현체이며, `refactor`는 전체 분석 모드에서 출처 추적을 활성화합니다.
@@ -416,7 +421,7 @@ cwf:setup --repo-index --target agents # AGENTS 기반 저장소용 AGENTS.md �
 
 **무엇을 하는가**
 
-`cwf:setup`은 훅 그룹 토글, 외부 도구 감지(Codex/Gemini/Tavily/Exa), 환경 변수 마이그레이션(레거시 키 → `CWF_*`), 선택적 Codex 연동, 선택적 인덱스 생성을 대화형으로 수행합니다. Codex 연동만 다시 적용할 때는 `--codex`/`--codex-wrapper`를 사용합니다.
+`cwf:setup`은 훅 그룹 토글, 외부 도구 감지(Codex/Gemini/Tavily/Exa), 환경 변수 마이그레이션(레거시 키 → `CWF_*`), 프로젝트 설정 파일 부트스트랩(`.cwf/config.yaml`, `.cwf/config.local.yaml`), 선택적 Codex 연동, 선택적 인덱스 생성/갱신을 대화형으로 수행합니다. 여기서 인덱스 생성은 에이전트가 필요한 문서를 짧은 경로로 찾아가도록 라우팅 품질을 높이기 위한 단계입니다. Codex 연동만 다시 적용할 때는 `--codex`/`--codex-wrapper`를 사용합니다.
 
 ### [update](plugins/cwf/skills/update/SKILL.md)
 
@@ -461,9 +466,46 @@ CWF는 자동으로 실행되는 7개 훅 그룹을 포함합니다. 모두 기�
 
 ## 환경 설정
 
-현재 구현 기준으로 CWF 런타임은 셸 프로파일(`~/.zshrc`, `~/.bashrc`)과 프로세스 환경 변수에서 설정을 읽습니다. 표준 변수는 `CWF_*`를 사용합니다(`TAVILY_API_KEY`, `EXA_API_KEY`는 예외).
+CWF 런타임은 아래 우선순위로 설정을 읽습니다.
 
-향후 방향으로 프로젝트 설정 계층을 도입할 예정입니다. `.cwf/config.yaml`은 팀이 공유 가능한 비밀값 없는 설정, `.cwf/config.local.yaml`은 로컬 전용/비밀값 설정(버전 관리 제외)으로 분리합니다. 우선순위는 프로젝트 설정(로컬/공유) → 글로벌 설정(프로세스/셸) 순서로 적용합니다.
+1. `.cwf/config.local.yaml` (로컬/비밀값, 최고 우선순위)
+2. `.cwf/config.yaml` (팀 공유 기본값)
+3. 프로세스 환경 변수
+4. 셸 프로파일(`~/.zshenv`, `~/.zprofile`, `~/.zshrc`, `~/.bash_profile`, `~/.bashrc`, `~/.profile`)
+
+`cwf:setup`의 환경 단계는 레거시 키를 `CWF_*`로 마이그레이션하고, 프로젝트 설정 템플릿을 부트스트랩하며, `.cwf/config.local.yaml`을 `.gitignore`에 등록합니다.
+
+팀 공유 기본값은 `.cwf/config.yaml`에 두세요(비밀값 제외).
+
+```yaml
+# .cwf/config.yaml
+# Optional artifact path overrides
+# CWF_ARTIFACT_ROOT: ".cwf"
+# CWF_PROJECTS_DIR: ".cwf/projects"
+# CWF_STATE_FILE: ".cwf/cwf-state.yaml"
+
+# Optional runtime overrides (non-secret)
+# CWF_GATHER_OUTPUT_DIR: ".cwf/projects"
+# CWF_READ_WARN_LINES: 500
+# CWF_READ_DENY_LINES: 2000
+# CWF_SESSION_LOG_DIR: ".cwf/projects/sessions"
+# CWF_SESSION_LOG_ENABLED: true
+# CWF_SESSION_LOG_TRUNCATE: 10
+# CWF_SESSION_LOG_AUTO_COMMIT: false
+```
+
+개인/비밀값은 `.cwf/config.local.yaml`에 두세요(버전 관리 제외).
+
+```yaml
+# .cwf/config.local.yaml
+SLACK_BOT_TOKEN: "xoxb-your-bot-token"
+SLACK_CHANNEL_ID: "D0123456789"
+TAVILY_API_KEY: "tvly-your-key"
+EXA_API_KEY: "your-key"
+# SLACK_WEBHOOK_URL: "https://hooks.slack.com/services/..."
+```
+
+프로젝트 파일을 쓰지 않거나 글로벌 기본값을 유지하려면 기존 환경 변수 방식도 그대로 사용할 수 있습니다.
 
 ```bash
 # 필수 — Slack 알림(attention 훅)
@@ -495,6 +537,7 @@ CWF_SESSION_LOG_AUTO_COMMIT=true                    # 기본값: false
 # 오버라이드 — 아티팩트 경로(고급)
 # CWF_ARTIFACT_ROOT=".cwf-data"                     # 기본값: .cwf
 # CWF_PROJECTS_DIR=".cwf/projects"                  # 기본값: {CWF_ARTIFACT_ROOT}/projects
+# CWF_STATE_FILE=".cwf/custom-state.yaml"           # 기본값: {CWF_ARTIFACT_ROOT}/cwf-state.yaml
 ```
 
 ## 라이선스

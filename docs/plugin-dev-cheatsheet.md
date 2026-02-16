@@ -123,6 +123,8 @@ Priority: CLI argument > environment variable > hardcoded default
 Plugin directories are replaced on update (version-specific cache). User config **must** live outside the skill directory — environment variables in shell profile survive any plugin update.
 
 Use the shared loader ([plugins/cwf/hooks/scripts/env-loader.sh](../plugins/cwf/hooks/scripts/env-loader.sh)) and keep this source order:
+- project-local config (.cwf/config.local.yaml)
+- project-shared config (.cwf/config.yaml)
 - process env
 - shell profiles (`~/.zshenv`, `~/.zprofile`, `~/.zshrc`, `~/.bash_profile`, `~/.bashrc`, `~/.profile`)
 

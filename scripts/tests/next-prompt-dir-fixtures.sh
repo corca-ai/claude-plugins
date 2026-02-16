@@ -45,14 +45,14 @@ mkdir -p \
   "$PROJECTS_DIR/260214-99" \
   "$PROJECTS_DIR/260213-11-prev-day"
 
-expected_today="projects/260214-03-s26"
+expected_today="$PROJECTS_DIR/260214-03-s26"
 actual_root_today="$(CWF_PROJECTS_DIR="$PROJECTS_DIR" CWF_NEXT_PROMPT_DATE=260214 bash "$ROOT_SCRIPT" s26)"
 actual_plugin_today="$(CWF_PROJECTS_DIR="$PROJECTS_DIR" CWF_NEXT_PROMPT_DATE=260214 bash "$PLUGIN_SCRIPT" s26)"
 
 assert_eq "root script uses max same-day sequence" "$expected_today" "$actual_root_today"
 assert_eq "plugin script matches root sequence logic" "$expected_today" "$actual_plugin_today"
 
-expected_next_day="projects/260215-01-s26"
+expected_next_day="$PROJECTS_DIR/260215-01-s26"
 actual_root_next_day="$(CWF_PROJECTS_DIR="$PROJECTS_DIR" CWF_NEXT_PROMPT_DATE=260215 bash "$ROOT_SCRIPT" s26)"
 actual_plugin_next_day="$(CWF_PROJECTS_DIR="$PROJECTS_DIR" CWF_NEXT_PROMPT_DATE=260215 bash "$PLUGIN_SCRIPT" s26)"
 

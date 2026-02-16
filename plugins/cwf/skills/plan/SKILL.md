@@ -1,19 +1,33 @@
 ---
 name: plan
-description: "Agent-assisted plan drafting to define a reviewable execution contract before coding. Includes parallel research, BDD success criteria, and cwf:review integration. Complements the plan-protocol hook (passive injection) with active, structured plan creation. Triggers: \"cwf:plan\", \"plan this task\""
+description: "Agent-assisted plan drafting to define a reviewable execution contract before coding. Includes parallel research, BDD success criteria, and cwf:review integration, then persists plan+lessons as runtime-independent files for plan→impl→review continuity. Triggers: \"cwf:plan\", \"plan this task\""
 ---
 
 # Plan
 
 Create a reviewable execution contract (scope, files, success criteria) before code changes begin.
 
-**Language**: Write all plan artifacts in English. Communicate with the user in their prompt language.
+**Language**: Write `plan.md` in English. Write `lessons.md` in the user's language. Communicate with the user in their prompt language.
 
 ## Quick Start
 
 ```text
 cwf:plan <task description>
 ```
+
+## Design Intent (Post-v3 Architecture)
+
+CWF v3 moved planning from runtime-specific plan-mode hooks to a runtime-independent skill (`cwf:plan`) with file-based contracts.
+
+1. **Better planning input quality before drafting**
+   - `gather` + `clarify` collect evidence and decision points before planning starts.
+   - Planning conversations can reveal constraints/preferences that must be recorded in `lessons.md` immediately, not after implementation.
+2. **Context continuity without user-managed reset choreography**
+   - Some runtimes expose context-reset workflows after planning discussions.
+   - CWF keeps continuity by default through `plan.md`, `lessons.md`, and optional `cwf:handoff --phase`, instead of shifting context-management burden to the user.
+3. **Stable cross-runtime contract for long autonomous work**
+   - `plan.md` (WHAT) + `phase-handoff.md` (HOW, optional) + `lessons.md` (learned constraints) define a persistent contract for impl/review stages.
+   - This keeps execution safe and reliable across auto-compact and runtime boundaries (Claude/Codex).
 
 ---
 
@@ -262,6 +276,8 @@ The complete plan from Phase 3, following all plan-protocol.md requirements.
 
 Initialize with any learnings from the planning process:
 
+Write `lessons.md` in the user's language, following the shared structure:
+
 ```markdown
 # Lessons — {title}
 
@@ -299,6 +315,7 @@ For a multi-perspective review before implementation, run:
 8. **Commit Strategy is required**: Every plan must include a Commit Strategy section. Default is one commit per Step.
 9. **Preparatory refactoring check**: When a target file is 300+ lines with 3+ planned changes, add Step 0 to extract separable blocks first
 10. **Critical persistence outputs hard-fail**: If `plan-prior-art-research.md` or `plan-codebase-analysis.md` remains invalid after bounded retry, stop with explicit error instead of drafting from partial data
+11. **Language split is mandatory**: `plan.md` is in English; `lessons.md` is in the user's language
 
 ## References
 

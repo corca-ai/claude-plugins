@@ -1,5 +1,8 @@
 # CWF (Corca Workflow Framework)
 
+> **Disclaimer (SoT)**  
+> `README.ko.md` is the single source of truth for CWF user-facing policy. If docs and implementation diverge, fix the plugin to match docs and report the mismatch via issue/PR.
+
 [한국어](README.ko.md)
 
 A Claude Code plugin that turns structured development sessions into a repeatable workflow — from gathering context through retrospective analysis. Maintained by [Corca](https://www.corca.ai/) for [AI-Native Product Teams](AI_NATIVE_PRODUCT_TEAM.md).
@@ -23,6 +26,15 @@ After restart, run one-time bootstrap in Claude Code / Codex CLI:
 ```text
 cwf:setup
 ```
+
+`cwf:setup` standardizes first-run behavior by handling:
+
+- legacy env migration to canonical `CWF_*` keys
+- project config bootstrap (`.cwf/config.yaml`, `.cwf/config.local.yaml`)
+- tool detection (Codex/Gemini/Tavily/Exa) and optional Codex integration
+- optional index generation (improves agent routing and progressive-disclosure navigation)
+
+For detailed flags, see [setup](#setup).
 
 ### Codex users (recommended)
 
@@ -145,7 +157,7 @@ gather → clarify → plan → review(plan) → impl → review(code) → refac
 | 9 | [review](#review) | `cwf:review` | Multi-perspective review with 6 parallel reviewers |
 | 10 | [hitl](#hitl) | `cwf:hitl` | Human-in-the-loop diff/chunk review with resumable state and rule propagation |
 | 11 | [run](#run) | `cwf:run` | Orchestrate full pipeline chaining from gather to ship with stage gates |
-| 12 | [setup](#setup) | `cwf:setup` | Configure hook groups, detect tools, optionally generate project index |
+| 12 | [setup](#setup) | `cwf:setup` | Configure hook groups, detect tools, bootstrap env/index contracts |
 | 13 | [update](#update) | `cwf:update` | Check and apply CWF plugin updates |
 
 **Concept composition**: gather, clarify, plan, impl, retro, refactor, review, hitl, and run all synchronize Agent Orchestration. clarify is the richest composition — it synchronizes Expert Advisor, Tier Classification, Agent Orchestration, and Decision Point in a single workflow. review and hitl both combine human judgment with structured review orchestration at different granularity (parallel reviewers vs chunked interactive loop). handoff is the primary instantiation of the Handoff concept. refactor activates Provenance Tracking in holistic mode.
@@ -304,7 +316,7 @@ cwf:setup --repo-index   # Generate/refresh repository index output (explicit)
 cwf:setup --repo-index --target agents # AGENTS.md managed block (for AGENTS-based repositories)
 ```
 
-Interactive hook-group toggles, external AI CLI/API detection (Codex, Gemini, Tavily, Exa), env migration/bootstrap (legacy keys to canonical `CWF_*`), optional Codex integration (skills + wrapper), and optional index generation. CWF capability index generation is explicit via `cwf:setup --cap-index`. Repository index regeneration updates the managed block in AGENTS.md via `cwf:setup --repo-index --target agents`.
+Interactive hook-group toggles, external AI CLI/API detection (Codex, Gemini, Tavily, Exa), env migration (legacy keys to canonical `CWF_*`), project config bootstrap (`.cwf/config.yaml`, `.cwf/config.local.yaml`), optional Codex integration (skills + wrapper), and optional index generation/refresh. Index generation exists to improve agent routing: capability index helps CWF-internal routing, repository index keeps AGENTS managed blocks aligned for progressive disclosure. Use `cwf:setup --cap-index` for capability index and `cwf:setup --repo-index --target agents` for repository index.
 
 ### [update](plugins/cwf/skills/update/SKILL.md)
 
@@ -362,7 +374,46 @@ CWF includes 7 hook groups that run automatically. All are enabled by default; u
 
 ## Configuration
 
-Set environment variables in your shell profile (`~/.zshrc` or `~/.bashrc`). Canonical names use `CWF_*` (except `TAVILY_API_KEY`, `EXA_API_KEY`).
+CWF runtime loads configuration in this priority order:
+
+1. `.cwf/config.local.yaml` (local/secret, highest priority)
+2. `.cwf/config.yaml` (team-shared defaults)
+3. Process environment
+4. Shell profiles (`~/.zshenv`, `~/.zprofile`, `~/.zshrc`, `~/.bash_profile`, `~/.bashrc`, `~/.profile`)
+
+`cwf:setup` environment flow migrates legacy keys to canonical `CWF_*`, bootstraps project config templates, and ensures `.cwf/config.local.yaml` is gitignored.
+
+Use `.cwf/config.yaml` for shared non-secret defaults:
+
+```yaml
+# .cwf/config.yaml
+# Optional artifact path overrides
+# CWF_ARTIFACT_ROOT: ".cwf"
+# CWF_PROJECTS_DIR: ".cwf/projects"
+# CWF_STATE_FILE: ".cwf/cwf-state.yaml"
+
+# Optional runtime overrides (non-secret)
+# CWF_GATHER_OUTPUT_DIR: ".cwf/projects"
+# CWF_READ_WARN_LINES: 500
+# CWF_READ_DENY_LINES: 2000
+# CWF_SESSION_LOG_DIR: ".cwf/projects/sessions"
+# CWF_SESSION_LOG_ENABLED: true
+# CWF_SESSION_LOG_TRUNCATE: 10
+# CWF_SESSION_LOG_AUTO_COMMIT: false
+```
+
+Use `.cwf/config.local.yaml` for local/secret values:
+
+```yaml
+# .cwf/config.local.yaml
+SLACK_BOT_TOKEN: "xoxb-your-bot-token"
+SLACK_CHANNEL_ID: "D0123456789"
+TAVILY_API_KEY: "tvly-your-key"
+EXA_API_KEY: "your-key"
+# SLACK_WEBHOOK_URL: "https://hooks.slack.com/services/..."
+```
+
+If you prefer global fallback defaults, environment variables are still supported:
 
 ```bash
 # Required — Slack notifications (attention hook)
@@ -394,6 +445,7 @@ CWF_SESSION_LOG_AUTO_COMMIT=true                   # default: false
 # Optional overrides — artifact layout (advanced)
 # CWF_ARTIFACT_ROOT=".cwf-data"                    # default: .cwf
 # CWF_PROJECTS_DIR=".cwf/projects"                 # default: {CWF_ARTIFACT_ROOT}/projects
+# CWF_STATE_FILE=".cwf/custom-state.yaml"          # default: {CWF_ARTIFACT_ROOT}/cwf-state.yaml
 ```
 
 ## License

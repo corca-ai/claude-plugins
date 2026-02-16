@@ -4,6 +4,7 @@ work-in-progress
 
 # Plugin secrets
 .env.local
+.cwf/config.local.yaml
 .cache/
 **/__pycache__/
 /tmux

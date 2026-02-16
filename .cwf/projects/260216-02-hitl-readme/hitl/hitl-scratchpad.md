@@ -1,7 +1,7 @@
 # HITL Scratchpad
 
 Session: `260216-02-hitl-readme`
-Updated: `2026-02-16T03:55:21Z`
+Updated: `2026-02-16T04:09:13Z`
 
 ## Purpose
 
@@ -57,7 +57,7 @@ Single source of truth for HITL consensus, rationale, and unresolved questions.
 - D-009 (Wording correction): Replace `작업 흐름` heading with `무엇을 하는가` across skill references.
   - Reason: README skill reference should be `why + what` by default; detailed `how` belongs to each `SKILL.md` unless non-obvious.
 
-- D-010 (Agreed env direction): Document future project-level config direction in README now, implement later.
+- D-010 (Applied): Project-level config direction has been implemented and reflected in README.
   - Direction:
     - `.cwf/config.yaml`: shared, non-secret project settings.
     - `.cwf/config.local.yaml`: local/secret settings, excluded from version control.
@@ -83,7 +83,7 @@ Single source of truth for HITL consensus, rationale, and unresolved questions.
   - Direction: design a mechanism that detects and reports cross-surface mismatch (skills/docs/hooks/scripts/state), then reflect it in runtime checks and docs.
   - Status: requires joint design discussion before implementation.
 
-- I-004 (Planned implementation/design): Add project-level runtime configuration layer.
+- I-004 (In progress): Add project-level runtime configuration layer.
   - Files:
     - `.cwf/config.yaml` (shared, non-secret)
     - `.cwf/config.local.yaml` (local/secret, gitignored)
@@ -93,30 +93,23 @@ Single source of truth for HITL consensus, rationale, and unresolved questions.
     3) process environment
     4) shell profiles
   - Scope: update env loader, setup/migration flow, and README/README.ko alignment.
+  - Progress:
+    - env-loader and artifact path resolver updated with project-config precedence
+    - setup bootstrap script added (`bootstrap-project-config.sh`)
+    - README.ko/README env section and quick-start rationale updated
+  - Remaining:
+    - finalize deterministic checks and commit
 
 ## Open Questions
 
-- README top temporary memo block (`추가로 생각난 것들`) finalization and conversion to polished prose.
+- None currently. Continue with remaining implementation backlog.
 
 ## Skill Update Backlog
 
-- S-001 (Plan skill wording cleanup): `plugins/cwf/skills/plan/SKILL.md` description still mentions "plan-protocol hook (passive injection)" even though plan mode hooks were removed.
-  - Direction: rewrite rationale around file-based execution contract (`plan.md` + `lessons.md`) and CWF pipeline integration.
-
-- S-002 (Language policy consistency): lessons language rule is inconsistent across docs.
-  - Evidence:
-    - `plugins/cwf/references/plan-protocol.md` says lessons are in user language.
-    - `plugins/cwf/skills/plan/SKILL.md` and `plugins/cwf/skills/impl/SKILL.md` currently say all implementation artifacts are in English.
-  - Direction: explicitly separate `plan.md` language vs `lessons.md` language and align all references.
-
-- S-003 (Lesson accumulation clarity in impl): lesson recording is strong for lesson-driven commits, but weaker as an explicit ongoing behavior.
-  - Direction: in `plugins/cwf/skills/impl/SKILL.md`, add a clear rule to update `lessons.md` incrementally during implementation (not only when commit protocol is triggered).
-
-- S-004 (Plan rationale alignment across README/skills): update plan why-text to reflect post-plan-mode architecture.
-  - Direction: encode the agreed rationale that CWF replaces legacy plan-mode value via
-    1) gather+clarify for higher-quality planning context,
-    2) handoff for context-boundary recovery,
-    3) file-based contracts for reliable plan→impl→review continuity across runtimes (including Codex).
+- S-001 (Applied): `plan/SKILL.md` description/rationale rewritten around runtime-independent file contracts (`plan.md` + `lessons.md` + optional `phase-handoff.md`).
+- S-002 (Applied): language policy aligned (`plan.md` in English, `lessons.md` in user language) across `plan/SKILL.md`, `impl/SKILL.md`, and `plan-protocol.md`.
+- S-003 (Applied): `impl/SKILL.md` now requires incremental `lessons.md` updates during direct and batch execution.
+- S-004 (Applied): plan why-text aligned with post-plan-mode architecture (gather+clarify quality input, handoff continuity, file-contract reliability across runtimes).
 
 ## Next Pending Item
 

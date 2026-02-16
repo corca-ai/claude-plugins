@@ -1,6 +1,6 @@
 ---
 name: setup
-description: "Initial CWF configuration to standardize environment/tool contracts before workflow execution: hook group selection, external tool detection, optional Codex integration, optional git hook gate installation, optional CWF capability index generation, and optional repository index generation. Triggers: \"cwf:setup\", \"setup hooks\", \"configure cwf\""
+description: "Initial CWF configuration to standardize environment/tool contracts before workflow execution: hook group selection, external tool detection, env migration + project config bootstrap, optional Codex integration, optional git hook gate installation, optional CWF capability index generation, and optional repository index generation. Triggers: \"cwf:setup\", \"setup hooks\", \"configure cwf\""
 ---
 
 # Setup
@@ -50,7 +50,7 @@ When mode is full setup and Codex CLI is available, do not silently skip Codex i
 
 When mode is full setup, do not expect users to supply optional flags manually. Always ask for git hook installation mode and gate profile in Phase 2.7.
 
-When mode is full setup or tools-only setup, always run Phase 2.8 so legacy env keys are migrated to canonical names with explicit user choice (auto-apply vs review vs skip).
+When mode is full setup or tools-only setup, always run Phase 2.8 so legacy env keys are migrated to canonical names and project config files are bootstrapped with explicit user choice.
 
 ---
 
@@ -384,7 +384,7 @@ And summarize:
 
 ---
 
-## Phase 2.8: Environment Variable Migration and Bootstrap
+## Phase 2.8: Environment Migration and Project Config Bootstrap
 
 Use this phase when:
 - Mode is full setup (`cwf:setup`)
@@ -453,6 +453,54 @@ Include activation note:
 
 ```text
 Open a new shell (or source ~/.zshrc / ~/.bashrc) so updated exports are loaded.
+```
+
+### 2.8.5 Bootstrap Project Config Files
+
+Ask whether to create project-level config files (.cwf/config.yaml, .cwf/config.local.yaml) now:
+
+```text
+Create project config templates now? (.cwf/config.yaml + .cwf/config.local.yaml)
+```
+
+Options:
+- `Yes (recommended)`:
+  - create missing config templates
+  - keep existing files unchanged
+  - ensure .cwf/config.local.yaml is listed in `.gitignore`
+- `Overwrite templates`:
+  - re-write both templates (`--force`)
+  - ensure .cwf/config.local.yaml is listed in `.gitignore`
+- `Skip for now`:
+  - no file changes in this sub-phase
+
+When user selects `Yes (recommended)`, run:
+
+```bash
+bash {SKILL_DIR}/scripts/bootstrap-project-config.sh
+```
+
+When user selects `Overwrite templates`, run:
+
+```bash
+bash {SKILL_DIR}/scripts/bootstrap-project-config.sh --force
+```
+
+### 2.8.6 Explain Runtime Priority
+
+After migration/bootstrap decisions, always report the effective CWF config source priority:
+
+1. .cwf/config.local.yaml
+2. .cwf/config.yaml
+3. Process environment
+4. Shell profile exports (`~/.zshenv`, `~/.zprofile`, `~/.zshrc`, `~/.bash_profile`, `~/.bashrc`, `~/.profile`)
+
+Include this operational guidance:
+
+```text
+Use .cwf/config.yaml for team-shared, non-secret defaults.
+Use .cwf/config.local.yaml for local/secret values.
+Keep shell exports as global fallback.
 ```
 
 ---
@@ -650,7 +698,7 @@ Add `setup` to `cwf-state.yaml` current session's `stage_checkpoints` list.
 14. **All code fences must have language specifier**: Never use bare fences.
 15. **Codex sync uses symlink + backup move**: Do not delete user files directly.
 16. **Single-entry setup UX**: `cwf:setup` must ask and apply optional integrations (Codex mode, git hook mode/profile) instead of requiring users to remember flags.
-17. **Env migration UX**: `cwf:setup` must detect and offer migration of legacy env keys to canonical `CWF_*` names in setup flow; do not require users to know legacy key names or conversion rules.
+17. **Env/project-config UX**: `cwf:setup` must detect and offer migration of legacy env keys to canonical `CWF_*` names, then offer project config bootstrap (.cwf/config.yaml, .cwf/config.local.yaml) with explicit user choice.
 
 ## References
 
@@ -661,6 +709,7 @@ Add `setup` to `cwf-state.yaml` current session's `stage_checkpoints` list.
 - [verify-skill-links.sh](../../scripts/codex/verify-skill-links.sh) — Codex skill link validation
 - [scripts/configure-git-hooks.sh](scripts/configure-git-hooks.sh) — installs and profiles repository git hook gates
 - [scripts/migrate-env-vars.sh](scripts/migrate-env-vars.sh) — legacy env detection and canonical CWF env migration
+- [scripts/bootstrap-project-config.sh](scripts/bootstrap-project-config.sh) — project config template/bootstrap and `.gitignore` sync
 - [scripts/check-index-coverage.sh](scripts/check-index-coverage.sh) — deterministic index coverage validation
 - .cwf-cap-index-ignore — optional intentional exclusion list for capability index coverage
 - .cwf-index-ignore — optional intentional exclusion list for repository index coverage
