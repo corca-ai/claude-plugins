@@ -1,7 +1,7 @@
 # HITL Scratchpad
 
 Session: `260216-02-hitl-readme`
-Updated: `2026-02-16T05:40:19Z`
+Updated: `2026-02-16T06:51:14Z`
 
 ## Purpose
 
@@ -100,6 +100,54 @@ Single source of truth for HITL consensus, rationale, and unresolved questions.
     - `plugins/cwf/scripts/codex/sync-session-logs.sh` + `scripts/codex/sync-session-logs.sh` (Codex logs)
     - `plugins/cwf/skills/retro/SKILL.md` (multi-link policy)
     - `docs/cwf-artifact-migration-plan.md` (path policy update)
+
+- D-015 (Applied): README/문서 코멘트 HITL 진행 형식을 고정.
+  - Direction:
+    - 각 항목을 `Before / After / After Intent` 순서로 제시
+    - 사용자가 중단하지 않는 한 "다음 항목 진행 여부"를 묻지 않고 연속 진행
+  - Applied to:
+    - `plugins/cwf/skills/hitl/SKILL.md` (Rules 11, 12)
+    - `README.ko.md` (운영 원칙의 향후 방향 문장 정리)
+
+- D-016 (Applied): `README.ko.md`의 남은 인라인 코멘트 구간을 why/what 톤으로 정리.
+  - Applied sections:
+    - `retro`: 도구 관점 기록 이유 명확화
+    - `refactor`: 설계 의도 불렛 구조 단순화
+    - `ship`: 사용자 명시 요청 기반 예외 머지 정책 문장 반영
+    - `review`: Codex 메인 에이전트 상황의 외부 슬롯 동작 명시
+    - `hitl`: 합의 라운드 중심 목적 문장 + 불필요한 alias 노출 제거
+    - `update`: 설계 의도 섹션 신설
+    - `Codex 연동`: wrapper 확장 가능 범위(세션 단위 후처리) 명시
+
+- D-017 (Applied): HITL 진행 규칙 해석 보정.
+  - Clarification:
+    - "다음 항목 진행 여부를 묻지 않는다"는 전체 자율 진행이 아니라, 현재 항목 합의 직후 다음 청크를 즉시 제시한다는 의미
+    - 현재 항목이 미합의 상태면 같은 항목에서 계속 합의
+  - Applied to:
+    - `plugins/cwf/skills/hitl/SKILL.md` (Rule 12 wording fix)
+
+- D-018 (Applied): `CWF의 역할`에서 향후 방향 문장을 제거.
+  - Direction:
+    - 현재 역할/범위 설명은 현재 동작만 유지하고, 미래 계획 문구는 제외
+  - Applied to:
+    - `README.ko.md` (`CWF의 역할` 문단)
+
+- D-019 (Applied): `접근` 섹션 문장 구조 재구성.
+  - Direction:
+    - "토큰은 이미 싸고 더 싸질 것"을 전제로 효과 중심 설계를 첫 문단에 명시
+    - "효율을 완전히 등한시하지 않는다"는 문장을 같은 문단 안에서 회고 루프와 연결
+    - "실행 경로 안정화"를 "올바른 문서/코드 작성 강제"로 구체화
+    - 운영 결정은 번호+이유 분리 대신 `항목: 이유` 형태의 간결한 목록으로 정리
+    - 출처 추적 별도 운영 결정 문단은 제거
+  - Applied to:
+    - `README.ko.md` (`접근` 문단/목록/운영 결정 블록)
+
+- D-020 (Applied): 문서 HITL의 `Before/After` 제시 범위를 확대.
+  - Direction:
+    - 판단 가능한 수준의 주변 맥락(문단/소절 전체)을 함께 제시
+    - 단일 문장만 떼어 보여주는 방식은 지양
+  - Applied to:
+    - `plugins/cwf/skills/hitl/SKILL.md` (Rule 11 context requirement)
 
 - I-001 (Applied): Make agreement-capture notes a default HITL behavior.
   - Implemented in `plugins/cwf/skills/hitl/SKILL.md` as default agreement round before chunk review.

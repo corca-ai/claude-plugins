@@ -171,3 +171,6 @@ On `--close` (or EOF completion):
 8. Default entry behavior: start with the agreement round (Phase 0.5), then move to chunk review.
 9. Keep artifacts separated by role: `fix-queue.yaml` for actionable edits, `hitl-scratchpad.md` for agreements/rationale.
 10. After any agreed edit is applied, update `hitl-scratchpad.md` before continuing.
+11. For comment-driven doc HITL (for example README reflection), present each item in this order: `Before` (current text), `After` (proposed text), `After Intent` (why this reflects the user's concern and any trade-off/opinion).
+    - `Before`/`After` must include enough surrounding context for user judgment (for example, the full paragraph or subsection, not a single isolated sentence).
+12. Do not ask a separate "proceed to next item?" question. When the current item is agreed, present the next pending item immediately; if not agreed, keep discussing the same item until agreement.
