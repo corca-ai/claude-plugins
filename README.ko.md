@@ -2,8 +2,6 @@
 
 [English](README.md)
 
-문서 동기화 정책: 이 파일([README.ko.md](README.ko.md))을 SoT로 유지합니다. 의도를 수정하면 [README.md](README.md)와 관련 스킬 설명도 함께 동기화합니다.
-
 구조화된 개발 세션을 컨텍스트 수집부터 회고 분석까지 반복 가능한 워크플로우로 전환하는 Claude Code 및 Codex 플러그인입니다. [Corca](https://www.corca.ai/)가 [AI-Native Product Team](AI_NATIVE_PRODUCT_TEAM.ko.md)을 위해 개발했습니다.
 
 ## 설치

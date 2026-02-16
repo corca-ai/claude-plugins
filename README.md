@@ -2,8 +2,6 @@
 
 [한국어](README.ko.md)
 
-Documentation sync policy: [README.ko.md](README.ko.md) is the source of truth. When intent changes there, sync this English mirror and related skill-summary wording accordingly.
-
 A Claude Code plugin that turns structured development sessions into a repeatable workflow — from gathering context through retrospective analysis. Maintained by [Corca](https://www.corca.ai/) for [AI-Native Product Teams](AI_NATIVE_PRODUCT_TEAM.md).
 
 ## Installation
