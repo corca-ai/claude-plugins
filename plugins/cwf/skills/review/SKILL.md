@@ -34,7 +34,7 @@ npx @google/gemini-cli    # Google Gemini (interactive first-run setup)
 
 Both are optional — the skill falls back to Claude Task agents when CLIs are missing or unauthenticated. But real CLI reviews provide diverse model perspectives beyond Claude.
 
-**Fallback latency**: If both external CLIs fail, the skill incurs a two-round-trip penalty — first the CLI attempts run (up to 120s timeout each), then fallback Task agents are launched sequentially. Error-type classification (Phase 3.2) enables fail-fast for CAPACITY errors, reducing wasted time.
+**Fallback latency**: If both external CLIs fail, the skill incurs a two-round-trip penalty — first the CLI attempts run (up to {cli_timeout}s timeout each, scaled by prompt size), then fallback Task agents are launched sequentially. Error-type classification (Phase 3.2) enables fail-fast for CAPACITY errors, reducing wasted time.
 
 ## Mode Routing
 
@@ -161,6 +161,16 @@ diff_lines=$(echo "$review_target" | wc -l)
 | > 2000 | 28 | Large diffs need exploration + writing |
 
 For `--mode plan` and `--mode clarify`, use the document line count instead of diff lines. Store the resolved `max_turns` value for use in Phase 2.
+
+**CLI timeout scaling** (applies to external CLI invocations in Phase 2):
+
+| Prompt lines | `cli_timeout` | Rationale |
+|-------------|---------------|-----------|
+| < 300 | 120 | Standard timeout for small/medium reviews |
+| 300–800 | 180 | Extended for plan reviews with spec documents |
+| > 800 | 240 | Large reviews (multi-file diffs, complex plans) |
+
+Store the resolved `cli_timeout` value for use in Phase 2.
 
 ---
 
@@ -302,7 +312,7 @@ Task(subagent_type="general-purpose", name="uxdx-reviewer", max_turns={max_turns
 If Slot 3 provider resolves to `codex`:
 
 ```text
-Bash(timeout=300000, command="START_MS=$(date +%s%3N); CODEX_RUNNER='{CWF_PLUGIN_DIR}/scripts/codex/codex-with-log.sh'; [ -x \"$CODEX_RUNNER\" ] || CODEX_RUNNER='codex'; timeout 120 \"$CODEX_RUNNER\" exec --sandbox read-only -c model_reasoning_effort='high' - < '{tmp_dir}/correctness-prompt.md' > '{tmp_dir}/slot3-output.md' 2>'{tmp_dir}/slot3-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"TOOL=codex EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/slot3-meta.txt'")
+Bash(timeout=300000, command="START_MS=$(date +%s%3N); CODEX_RUNNER='{CWF_PLUGIN_DIR}/scripts/codex/codex-with-log.sh'; [ -x \"$CODEX_RUNNER\" ] || CODEX_RUNNER='codex'; timeout {cli_timeout} \"$CODEX_RUNNER\" exec --sandbox read-only -c model_reasoning_effort='high' - < '{tmp_dir}/correctness-prompt.md' > '{tmp_dir}/slot3-output.md' 2>'{tmp_dir}/slot3-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"TOOL=codex EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/slot3-meta.txt'")
 ```
 
 For `--mode code`, use `model_reasoning_effort='xhigh'` instead. Single quotes around config values avoid double-quote conflicts in the Bash wrapper.
@@ -310,7 +320,7 @@ For `--mode code`, use `model_reasoning_effort='xhigh'` instead. Single quotes a
 If Slot 3 provider resolves to `gemini`:
 
 ```text
-Bash(timeout=300000, command="START_MS=$(date +%s%3N); timeout 120 npx @google/gemini-cli -o text < '{tmp_dir}/correctness-prompt.md' > '{tmp_dir}/slot3-output.md' 2>'{tmp_dir}/slot3-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"TOOL=gemini EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/slot3-meta.txt'")
+Bash(timeout=300000, command="START_MS=$(date +%s%3N); timeout {cli_timeout} npx @google/gemini-cli -o text < '{tmp_dir}/correctness-prompt.md' > '{tmp_dir}/slot3-output.md' 2>'{tmp_dir}/slot3-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"TOOL=gemini EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/slot3-meta.txt'")
 ```
 
 If Slot 3 provider resolves to `claude`:
@@ -339,7 +349,7 @@ echo '<!-- AGENT_COMPLETE -->' >> '{session_dir}/review-correctness-{mode}.md'
 If Slot 4 provider resolves to `gemini`:
 
 ```text
-Bash(timeout=300000, command="START_MS=$(date +%s%3N); timeout 120 npx @google/gemini-cli -o text < '{tmp_dir}/architecture-prompt.md' > '{tmp_dir}/slot4-output.md' 2>'{tmp_dir}/slot4-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"TOOL=gemini EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/slot4-meta.txt'")
+Bash(timeout=300000, command="START_MS=$(date +%s%3N); timeout {cli_timeout} npx @google/gemini-cli -o text < '{tmp_dir}/architecture-prompt.md' > '{tmp_dir}/slot4-output.md' 2>'{tmp_dir}/slot4-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"TOOL=gemini EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/slot4-meta.txt'")
 ```
 
 Uses stdin redirection (`< prompt.md`) instead of `-p "$(cat ...)"` to prevent shell injection from review target content containing `$()` or backticks.
@@ -347,7 +357,7 @@ Uses stdin redirection (`< prompt.md`) instead of `-p "$(cat ...)"` to prevent s
 If Slot 4 provider resolves to `codex`:
 
 ```text
-Bash(timeout=300000, command="START_MS=$(date +%s%3N); CODEX_RUNNER='{CWF_PLUGIN_DIR}/scripts/codex/codex-with-log.sh'; [ -x \"$CODEX_RUNNER\" ] || CODEX_RUNNER='codex'; timeout 120 \"$CODEX_RUNNER\" exec --sandbox read-only -c model_reasoning_effort='high' - < '{tmp_dir}/architecture-prompt.md' > '{tmp_dir}/slot4-output.md' 2>'{tmp_dir}/slot4-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"TOOL=codex EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/slot4-meta.txt'")
+Bash(timeout=300000, command="START_MS=$(date +%s%3N); CODEX_RUNNER='{CWF_PLUGIN_DIR}/scripts/codex/codex-with-log.sh'; [ -x \"$CODEX_RUNNER\" ] || CODEX_RUNNER='codex'; timeout {cli_timeout} \"$CODEX_RUNNER\" exec --sandbox read-only -c model_reasoning_effort='high' - < '{tmp_dir}/architecture-prompt.md' > '{tmp_dir}/slot4-output.md' 2>'{tmp_dir}/slot4-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"TOOL=codex EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/slot4-meta.txt'")
 ```
 
 For `--mode code`, use `model_reasoning_effort='xhigh'` instead.
