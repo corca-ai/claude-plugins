@@ -1,20 +1,2 @@
 version: 1
-rules:
-  - id: R1
-    text: "HITL review outputs must match the user's language unless explicitly requested otherwise."
-    scope: "docs"
-    status: "accepted"
-    created_at: "2026-02-15T10:10:30Z"
-    source: "user"
-  - id: R2
-    text: "Excerpt must be sufficiently detailed for Korean document review (include concrete Korean content and line coverage)."
-    scope: "docs"
-    status: "accepted"
-    created_at: "2026-02-15T10:10:30Z"
-    source: "user"
-  - id: R3
-    text: "For Korean docs, remove non-essential English mixed wording; keep English only when technically required (commands, proper nouns, standard acronyms)."
-    scope: "docs"
-    status: "accepted"
-    created_at: "2026-02-15T11:14:25Z"
-    source: "user"
+rules: []
