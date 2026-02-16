@@ -51,7 +51,7 @@ External CLI not found → Task agent with same perspective prompt. Never falls 
 
 ### #12 Persistent Workflow State
 
-[`.cwf/cwf-state.yaml`](../.cwf/cwf-state.yaml) is the single source of truth: current stage, 24-session history, tool availability, hook config, and live session state. Read by compact recovery hook, handoff skill, and check-session.sh.
+[`.cwf/cwf-state.yaml`](../.cwf/cwf-state.yaml) is the single source of truth: current stage, 24-session history, tool availability, hook config, and live session state. Read by compact recovery hook, handoff skill, and [plugins/cwf/scripts/check-session.sh](../plugins/cwf/scripts/check-session.sh).
 
 ### #19 Shift Work (Human Gates)
 
@@ -61,7 +61,7 @@ Pre-impl stages (gather, clarify, plan) require human input — decisions are op
 
 ### #15 Per-Session Discipline
 
-Each session reviews its own output, tests, and updates docs. Quality is not deferred to a final session. Enforced by `check-session.sh` as a forced function (not optional memory).
+Each session reviews its own output, tests, and updates docs. Quality is not deferred to a final session. Enforced by [plugins/cwf/scripts/check-session.sh](../plugins/cwf/scripts/check-session.sh) as a forced function (not optional memory).
 
 ### #16 Scenario-Driven Verification
 

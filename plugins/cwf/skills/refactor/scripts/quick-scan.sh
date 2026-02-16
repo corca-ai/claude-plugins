@@ -15,6 +15,43 @@ total_skills=0
 warn_count=0
 error_count=0
 
+get_frontmatter_description_length() {
+  local skill_md="$1"
+
+  python3 - "$skill_md" <<'PY'
+import re
+import sys
+
+path = sys.argv[1]
+try:
+    with open(path, encoding="utf-8") as f:
+        text = f.read()
+except Exception:
+    print(0)
+    raise SystemExit
+
+if not text.startswith("---\n"):
+    print(0)
+    raise SystemExit
+
+frontmatter = re.match(r"---\n(.*?)\n---\n", text, re.S)
+if not frontmatter:
+    print(0)
+    raise SystemExit
+
+description = None
+for line in frontmatter.group(1).splitlines():
+    if line.lstrip().startswith("description:"):
+        description = line.split(":", 1)[1].strip()
+        break
+
+if description is None:
+    print(0)
+else:
+    print(len(description))
+PY
+}
+
 scan_skill() {
   local plugin_name="$1"
   local skill_name="$2"
@@ -98,7 +135,10 @@ print(len(d.get('description', '')))
 
   # Check frontmatter description length in SKILL.md
   local skill_desc
-  skill_desc=$(sed -n '/^---$/,/^---$/p' "$skill_md" | grep -A 100 'description:' | grep -v 'description:' | grep -v '^---$' | sed '/^[a-z]/q' | head -n -1 | tr -d '\n' | wc -c | tr -d ' ')
+  skill_desc="$(get_frontmatter_description_length "$skill_md")"
+  if ! [[ "$skill_desc" =~ ^[0-9]+$ ]]; then
+    skill_desc=0
+  fi
   if [[ "$skill_desc" -gt 1024 ]]; then
     anthropic_flags+=("skill_description_too_long: ${skill_desc} chars")
   fi
