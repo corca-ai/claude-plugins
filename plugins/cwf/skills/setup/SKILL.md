@@ -344,7 +344,7 @@ Resolution order:
 Gate profile values:
 - `fast`: markdownlint only
 - `balanced`: markdownlint + local link checks + staged shellcheck + push-time index coverage checks
-- `strict`: balanced + provenance freshness report on push
+- `strict`: balanced + provenance freshness and growth-drift reports on push
 
 Resolution order:
 1. If command includes `--gate-profile <value>`, use it.

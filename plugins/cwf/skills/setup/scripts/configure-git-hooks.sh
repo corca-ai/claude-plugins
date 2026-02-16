@@ -17,7 +17,7 @@ Options:
 Profiles:
   fast      pre-commit: staged markdownlint; pre-push: repo markdownlint
   balanced  fast + local link checks + staged shellcheck (if available) + index coverage checks on push
-  strict    balanced + provenance freshness report on push (inform level)
+  strict    balanced + provenance freshness + growth-drift reports on push (inform level)
 USAGE
 }
 
@@ -190,6 +190,13 @@ if [[ "$PROFILE" == "strict" ]]; then
     bash scripts/provenance-check.sh --level inform
   else
     echo "[pre-push] scripts/provenance-check.sh missing; skipping provenance report" >&2
+  fi
+
+  if [[ -x scripts/check-growth-drift.sh ]]; then
+    echo "[pre-push] growth-drift report (inform)..."
+    bash scripts/check-growth-drift.sh --level inform
+  else
+    echo "[pre-push] scripts/check-growth-drift.sh missing; skipping growth-drift report" >&2
   fi
 fi
 SCRIPT

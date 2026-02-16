@@ -1,7 +1,7 @@
 # HITL Scratchpad
 
 Session: `260216-02-hitl-readme`
-Updated: `2026-02-16T04:17:01Z`
+Updated: `2026-02-16T04:31:10Z`
 
 ## Purpose
 
@@ -84,10 +84,13 @@ Single source of truth for HITL consensus, rationale, and unresolved questions.
   - Keep `queue.json` and `fix-queue.yaml` as execution queues.
   - Keep `hitl-scratchpad.md` as rationale/consensus log (separate role, linked workflow).
 
-- I-003 (Planned implementation/design): Add a repository-wide growth tracking design tied to provenance/state.
+- I-003 (In progress, v1): Add a repository-wide growth tracking design tied to provenance/state.
   - Why: CWF assumes skills/scripts will keep growing per user environment; growth impact must be visible across the whole codebase, not only per-skill.
   - Direction: design a mechanism that detects and reports cross-surface mismatch (skills/docs/hooks/scripts/state), then reflect it in runtime checks and docs.
-  - Status: requires joint design discussion before implementation.
+  - v1 scope:
+    - add `check-growth-drift.sh` to report mismatches across skills/docs/scripts/state/provenance
+    - wire report into strict pre-push profile as non-blocking (`--level inform`)
+    - update setup/dev docs to include this report in strict profile behavior
 
 - I-004 (In progress): Add project-level runtime configuration layer.
   - Files:
