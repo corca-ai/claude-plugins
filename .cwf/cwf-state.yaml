@@ -385,6 +385,8 @@ hooks:
   lint_shell: true
   websearch_redirect: true
   compact_recovery: true
+  deletion_safety: true
+  workflow_gate: true
 
 # Live session state — updated by CWF skills at phase transitions,
 # read by SessionStart(compact) hook for context recovery after auto-compact.

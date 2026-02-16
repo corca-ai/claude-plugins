@@ -38,7 +38,13 @@ Operational note:
      dir="{session directory}" \
      branch="{current branch}" \
      phase="gather" \
-     task="{task description}"
+     task="{task description}" \
+     active_pipeline="cwf:run" \
+     user_directive="{original user directive}" \
+     pipeline_override_reason="" \
+     state_version="1"
+   bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh list-set . \
+     remaining_gates="review-code,refactor,retro,ship"
    ```
 
 1. Report initialization:
@@ -76,6 +82,8 @@ For each stage (respecting `--from` and `--skip` flags):
 
    ```bash
    bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh set . phase="{current stage name}"
+   bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh list-set . \
+     remaining_gates="{remaining gate stages in order}"
    ```
 1. Invoke the skill using the Skill tool:
 
@@ -163,7 +171,10 @@ After all stages complete (or the pipeline is halted):
    If any FAIL items are reported, fix them before proceeding. This is a forced function — the pipeline is not complete until all checks pass.
 
 1. Update state:
-   - Set final phase: `bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh set . phase="done"`
+   - Set final phase and clear active pipeline:
+     `bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh set . phase="done" active_pipeline="" user_directive="" pipeline_override_reason=""`
+   - Clear pending gates:
+     `bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh list-set . remaining_gates=""`
    - Ensure the current session entry in `cwf-state.yaml` stays consistent with final artifacts/summary (registration is initialized during Phase 1 bootstrap)
 1. Report pipeline summary:
 
@@ -197,12 +208,13 @@ After all stages complete (or the pipeline is halted):
 1. **Decision #19**: Pre-impl stages require human gates. Post-impl stages chain automatically. This is the core design principle.
 1. **One auto-fix attempt**: Never loop more than once on a review failure. Escalate to user after 1 retry.
 1. **Skill invocation only**: Use the Skill tool to invoke CWF skills. Do not inline skill logic.
-1. **State tracking**: Use `cwf-live-state.sh set` at every stage transition so session-local live state stays current while root summary remains synchronized.
+1. **State tracking**: Use `cwf-live-state.sh set` and `list-set` at every stage transition so session-local live state stays current while root summary remains synchronized.
 1. **Preserve skill autonomy**: Each invoked skill manages its own sub-agents, artifacts, and output. `cwf:run` orchestrates but does not micromanage.
 1. **Flags compose**: `--from impl --skip retro` is valid. Apply both filters.
 1. **Graceful halt**: When the user chooses "Stop", update state and report what was completed. Do not leave state in an inconsistent phase.
 1. **Do not bypass impl branch gate by default**: `cwf:run` must not pass `--skip-branch` to `cwf:impl` unless the user explicitly requests bypass.
 1. **Context-deficit resilience**: On resume/restart, reconstruct stage context from `cwf-state.yaml`, session artifacts, and handoff docs before invoking downstream skills.
+1. **Fail-closed run gates**: While `active_pipeline="cwf:run"` and `remaining_gates` includes `review-code`, ship/push/commit intents must be blocked unless `pipeline_override_reason` is explicitly set.
 
 ## References
 
