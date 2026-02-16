@@ -55,7 +55,7 @@ Scan input for all URLs. Classify each by pattern table (most specific first):
 {SKILL_DIR}/scripts/g-export.sh <url> [format] [output-dir]
 ```
 
-**Prerequisites**: Public documents only (Share > Publish to web). Sheets default to TOON format — see [references/TOON.md](references/TOON.md). Details: [references/google-export.md](references/google-export.md)
+**Prerequisites**: Public documents only (Share > Publish to web). Sheets default to TOON format — `g-export.sh` converts CSV via [scripts/csv-to-toon.sh](scripts/csv-to-toon.sh). See [references/TOON.md](references/TOON.md). Details: [references/google-export.md](references/google-export.md)
 
 ### Slack Export
 

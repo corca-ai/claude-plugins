@@ -11,6 +11,7 @@ File-level map for [gather](SKILL.md).
 - [references/search-api-reference.md](references/search-api-reference.md): Reference file used by this skill (search-api-reference).
 - [references/slack-export.md](references/slack-export.md): Reference file used by this skill (slack-export).
 - [scripts/code-search.sh](scripts/code-search.sh): Helper script used by this skill (code-search.sh).
+- [scripts/csv-to-toon.sh](scripts/csv-to-toon.sh): Helper script used by this skill (CSV to TOON conversion, called by g-export.sh).
 - [scripts/extract.sh](scripts/extract.sh): Helper script used by this skill (extract.sh).
 - [scripts/g-export.sh](scripts/g-export.sh): Helper script used by this skill (g-export.sh).
 - [scripts/notion-to-md.py](scripts/notion-to-md.py): Helper script used by this skill (notion-to-md.py).

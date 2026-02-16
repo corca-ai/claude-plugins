@@ -142,7 +142,7 @@ Gate behavior after Batch 2:
   render Section 5 from available expert output(s) plus explicit omission note.
 - Record soft gate path in output (`PERSISTENCE_GATE=SOFT_CONTINUE` or equivalent).
 
-**Rationale for 2-batch design**: Expert Lens requires CDM results ("Sections 1-4 provided by orchestrator" per expert-lens-guide.md). CDM and Learning Resources are independent → Batch 1 parallel. Expert alpha and Expert beta both need CDM results → Batch 2 after Batch 1.
+**Rationale for 2-batch design**: Expert Lens requires CDM results ("Sections 1-4 provided by orchestrator" per expert-advisor-guide.md). CDM and Learning Resources are independent → Batch 1 parallel. Expert alpha and Expert beta both need CDM results → Batch 2 after Batch 1.
 
 #### Section 1: Context Worth Remembering
 
