@@ -1,6 +1,6 @@
 ---
 name: run
-description: "Full CWF pipeline auto-chaining for end-to-end delegation without manual stage sequencing. Orchestrates: gather → clarify → plan → review(plan) → impl → review(code) → retro → ship. Respects Decision #19: human gates pre-impl, autonomous post-impl. Triggers: \"cwf:run\", \"run workflow\""
+description: "Full CWF pipeline auto-chaining for end-to-end delegation without manual stage sequencing. Orchestrates: gather → clarify → plan → review(plan) → impl → review(code) → refactor → retro → ship. Respects Decision #19: human gates pre-impl, autonomous post-impl. Triggers: \"cwf:run\", \"run workflow\""
 ---
 
 # Run
@@ -17,6 +17,10 @@ cwf:run --from impl                  # Resume from impl stage
 cwf:run --skip ship                  # Full pipeline, skip ship
 cwf:run --skip review-plan,retro     # Skip specific stages
 ```
+
+Operational note:
+- Default `cwf:run` chain is: gather → clarify → plan → review(plan) → impl → review(code) → refactor → retro → ship.
+- `refactor` runs before retro/ship to catch cross-skill and docs drift as part of the default delivery quality loop.
 
 ---
 
@@ -58,8 +62,9 @@ Execute stages in order. Each stage invokes the corresponding CWF skill via the 
 | 4 | review-plan | `cwf:review --mode plan` | Verdict-based | true |
 | 5 | impl | `cwf:impl --skip-clarify` | — | true |
 | 6 | review-code | `cwf:review --mode code` | Verdict-based | true |
-| 7 | retro | `cwf:retro` | — | true |
-| 8 | ship | `cwf:ship` | User confirms PR | false |
+| 7 | refactor | `cwf:refactor` | — | true |
+| 8 | retro | `cwf:retro` | — | true |
+| 9 | ship | `cwf:ship` | User confirms PR | false |
 
 ### Stage Execution Loop
 
@@ -94,7 +99,7 @@ For review stages, check the verdict:
 - **Pass** or **Conditional Pass** — proceed automatically
 - **Revise** — attempt auto-fix (see Review Failure Handling)
 
-For non-review auto stages (impl, retro) — proceed automatically.
+For non-review auto stages (impl, refactor, retro) — proceed automatically.
 
 ### Review Failure Handling
 
@@ -121,7 +126,8 @@ When `--from <stage>` is provided:
 1. Verify prerequisites exist:
    - `--from impl`: plan.md must exist
    - `--from review-code`: implementation must be committed
-   - `--from retro`: review must have run
+   - `--from refactor`: code review must have run
+   - `--from retro`: refactor must have run (or be explicitly skipped)
 1. If prerequisites are missing, report and ask user whether to proceed anyway
 
 ### --skip Flag
@@ -167,6 +173,7 @@ After all stages complete (or the pipeline is halted):
 | review-plan | Pass | — |
 | impl | completed | 3 commits |
 | review-code | Conditional Pass | 1 concern addressed |
+| refactor | completed | docs/skills drift check |
 | retro | completed | — |
 | ship | skipped | --skip flag |
 

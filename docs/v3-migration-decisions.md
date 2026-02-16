@@ -124,7 +124,7 @@ During impl phase, significant decisions are appended to [`.cwf/cwf-state.yaml`]
 
 ### Auto-Chaining — cwf:run (S33)
 
-Full pipeline orchestration: gather → clarify → plan → review(plan) → impl → review(code) → retro → ship. Configurable with `--from` and `--skip` flags. Max 1 auto-fix attempt on review failure before escalating to user.
+Full pipeline orchestration: gather → clarify → plan → review(plan) → impl → review(code) → refactor → retro → ship. Configurable with `--from` and `--skip` flags. Max 1 auto-fix attempt on review failure before escalating to user.
 
 ### Review Fail-Fast (S33)
 

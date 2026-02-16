@@ -12,12 +12,12 @@ Standardize hooks, tool contracts, and environment wiring once so later workflow
 ## Quick Start
 
 ```text
-cwf:setup                # Full setup (hooks + tools + optional repo-index prompt)
+cwf:setup                # Full setup (hooks + tools + optional Codex/repo-index prompts)
 cwf:setup --hooks        # Hook group selection only
 cwf:setup --tools        # External tool detection only
 cwf:setup --env          # Environment variable migration/bootstrap only
-cwf:setup --codex        # Sync CWF skills into Codex user scope (~/.agents/skills)
-cwf:setup --codex-wrapper # Optional Codex wrapper install for session log sync
+cwf:setup --codex        # Codex integration-only rerun (skills/references sync)
+cwf:setup --codex-wrapper # Codex wrapper-only rerun (session log sync)
 cwf:setup --git-hooks both --gate-profile balanced  # Install repo git hooks and set gate depth
 cwf:setup --git-hooks pre-commit --gate-profile fast # Lightweight local-only git gate
 cwf:setup --git-hooks none # Remove repo-managed git hooks
@@ -25,6 +25,10 @@ cwf:setup --cap-index    # Generate/refresh CWF capability index only
 cwf:setup --repo-index   # Generate/refresh repository index (explicit)
 cwf:setup --repo-index --target agents # AGENTS.md managed block (recommended)
 ```
+
+Operational note:
+- Prefer `cwf:setup` first; it is the default entrypoint and asks for optional integrations when relevant.
+- Use `--codex` / `--codex-wrapper` when reapplying only Codex-related integration pieces.
 
 ## Mode Routing
 

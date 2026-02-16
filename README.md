@@ -2,6 +2,8 @@
 
 [한국어](README.ko.md)
 
+Documentation sync policy: [README.ko.md](README.ko.md) is the source of truth. When intent changes there, sync this English mirror and related skill-summary wording accordingly.
+
 A Claude Code plugin that turns structured development sessions into a repeatable workflow — from gathering context through retrospective analysis. Maintained by [Corca](https://www.corca.ai/) for [AI-Native Product Teams](AI_NATIVE_PRODUCT_TEAM.md).
 
 ## Installation
@@ -26,7 +28,7 @@ cwf:setup
 
 ### Codex users (recommended)
 
-If you use Codex CLI, run this right after installation:
+If you also use Codex CLI, running only `cwf:setup` is enough to get guided defaults. Use the commands below when you want to re-apply Codex integration only:
 
 ```bash
 cwf:setup --codex
@@ -41,7 +43,7 @@ In Claude Code / Codex CLI, start with a plain prompt:
 I need to solve <problem>. Please use CWF and drive the workflow.
 ```
 
-The agent can invoke `cwf:run` and chain gather → clarify → plan → review(plan) → impl → review(code) → retro → ship. If you want an explicit cleanup pass before shipping, run `cwf:refactor`. If you want chunk-by-chunk human approval on diffs, run `cwf:hitl`.
+The agent can invoke `cwf:run` and chain gather → clarify → plan → review(plan) → impl → review(code) → refactor → retro → ship. If you want chunk-by-chunk human approval on diffs, run `cwf:hitl`.
 
 You do not need to memorize every skill. The sections below explain why each skill exists and when to use it.
 
@@ -126,10 +128,10 @@ Six reusable behavioral patterns that CWF skills compose. Each concept below des
 
 ## The Workflow
 
-CWF skills follow a natural arc from context gathering to learning extraction:
+CWF's default `cwf:run` chain is:
 
 ```text
-gather → clarify → plan → impl → retro
+gather → clarify → plan → review(plan) → impl → review(code) → refactor → retro → ship
 ```
 
 | # | Skill | Trigger | What It Does |
@@ -286,7 +288,7 @@ cwf:run --from impl                  # Resume from impl stage
 cwf:run --skip review-plan,retro     # Skip specific stages
 ```
 
-Executes gather → clarify → plan → review(plan) → impl → review(code) → retro → ship, with human gates before implementation, automatic chaining after implementation by default, and user confirmation at `ship`. Teams often run `cwf:refactor` before `ship` when plugin/skill maintainability needs an explicit pass.
+Executes gather → clarify → plan → review(plan) → impl → review(code) → refactor → retro → ship, with human gates before implementation, automatic chaining after implementation by default, and user confirmation at `ship`. Including `refactor` in the default chain adds a maintainability pass for skill/docs/code drift before retrospective and shipping.
 
 ### [setup](plugins/cwf/skills/setup/SKILL.md)
 

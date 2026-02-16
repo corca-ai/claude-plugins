@@ -63,8 +63,8 @@ Check README.md and README.ko.md:
 | Overview table doesn't match .claude-plugin/marketplace.json | Missing, extra, or mismatched entries |
 | Active plugin missing install/update commands | Incomplete section |
 | Deprecated plugin not clearly marked | Missing deprecation notice |
-| Korean version structure differs from English | Structural mismatch |
-| Korean version content is stale | Content mismatch with English version |
+| English version structure differs from Korean SoT | Structural mismatch vs README.ko.md |
+| English version content diverges from Korean SoT intent | README.md is not synchronized to latest README.ko.md decisions |
 | Dead links (internal file references) | Broken link |
 
 ## 4. Cross-Document Consistency
