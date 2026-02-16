@@ -37,14 +37,14 @@ if [ ! -f "$FILE_PATH" ]; then
     exit 0
 fi
 
-# shellcheck not available
+# ShellCheck not available
 if ! command -v shellcheck >/dev/null 2>&1; then
     exit 0
 fi
 
 # --- Run shellcheck ---
 set +e
-LINT_OUTPUT=$(shellcheck -f gcc "$FILE_PATH" 2>&1)
+LINT_OUTPUT=$(shellcheck -x -P SCRIPTDIR -f gcc "$FILE_PATH" 2>&1)
 LINT_EXIT=$?
 set -e
 

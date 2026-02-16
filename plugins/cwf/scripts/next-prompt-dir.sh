@@ -92,7 +92,6 @@ if [[ ! -f "$resolver_script" ]]; then
 fi
 
 # shellcheck source=./cwf-artifact-paths.sh
-# shellcheck disable=SC1091
 source "$resolver_script"
 projects_dir="$(resolve_cwf_projects_dir "$project_root")"
 projects_rel="$(resolve_cwf_projects_relpath "$project_root")"

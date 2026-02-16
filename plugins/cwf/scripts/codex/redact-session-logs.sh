@@ -16,7 +16,6 @@ if [ ! -f "$RESOLVER_SCRIPT" ]; then
 fi
 
 # shellcheck source=../cwf-artifact-paths.sh
-# shellcheck disable=SC1090,SC1091
 source "$RESOLVER_SCRIPT"
 
 DEFAULT_CWD="$(pwd)"

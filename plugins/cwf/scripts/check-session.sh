@@ -29,11 +29,9 @@ if [[ ! -f "$RESOLVER_SCRIPT" ]]; then
 fi
 
 # shellcheck source=./cwf-artifact-paths.sh
-# shellcheck disable=SC1090,SC1091
 source "$RESOLVER_SCRIPT"
 if [[ -f "$LIVE_RESOLVER_SCRIPT" ]]; then
   # shellcheck source=./cwf-live-state.sh
-  # shellcheck disable=SC1090,SC1091
   source "$LIVE_RESOLVER_SCRIPT"
 fi
 

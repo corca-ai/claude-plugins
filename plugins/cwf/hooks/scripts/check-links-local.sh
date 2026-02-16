@@ -5,10 +5,8 @@ set -euo pipefail
 # Skips silently when: not a .md file, file doesn't exist, or file is under project artifacts.
 # Blocks when deterministic tooling is unavailable (lychee/check-links.sh missing).
 
-# shellcheck disable=SC2034
 HOOK_GROUP="lint_markdown"
 # shellcheck source=cwf-hook-gate.sh
-# shellcheck disable=SC1091
 source "$(dirname "${BASH_SOURCE[0]}")/cwf-hook-gate.sh"
 
 # --- Parse stdin ---

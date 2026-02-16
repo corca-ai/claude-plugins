@@ -5,17 +5,13 @@ set -euo pipefail
 # Idempotent — safe to call multiple times per turn.
 # SessionEnd passes "session_end" arg to trigger auto-commit.
 
-# shellcheck disable=SC2034
 HOOK_GROUP="log"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=cwf-hook-gate.sh
-# shellcheck disable=SC1090,SC1091
 source "$SCRIPT_DIR/cwf-hook-gate.sh"
 # shellcheck source=text-format.sh
-# shellcheck disable=SC1090,SC1091
 source "$SCRIPT_DIR/text-format.sh"
 # shellcheck source=env-loader.sh
-# shellcheck disable=SC1090,SC1091
 source "$SCRIPT_DIR/env-loader.sh"
 
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd)}"
@@ -29,7 +25,6 @@ fi
 
 if [ -f "$RESOLVER_SCRIPT" ]; then
     # shellcheck source=../../scripts/cwf-artifact-paths.sh
-    # shellcheck disable=SC1090,SC1091
     source "$RESOLVER_SCRIPT"
 fi
 

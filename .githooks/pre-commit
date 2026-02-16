@@ -33,7 +33,7 @@ if [[ "$PROFILE" != "fast" ]]; then
   if [ "${#sh_files[@]}" -gt 0 ]; then
     if command -v shellcheck >/dev/null 2>&1; then
       echo "[pre-commit] shellcheck on staged shell scripts..."
-      shellcheck -x "${sh_files[@]}"
+      shellcheck -x -P SCRIPTDIR "${sh_files[@]}"
     else
       echo "[pre-commit] shellcheck not found; skipping shell lint" >&2
     fi

@@ -320,9 +320,9 @@ check_live_state_pointers() {
     return
   fi
 
-  # shellcheck disable=SC1090,SC1091
+  # shellcheck source=./cwf-artifact-paths.sh
   source "$resolver"
-  # shellcheck disable=SC1090,SC1091
+  # shellcheck source=./cwf-live-state.sh
   source "$live_resolver"
   state_file="$(resolve_cwf_state_file "$REPO_ROOT")"
 

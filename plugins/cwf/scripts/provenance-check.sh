@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# shellcheck disable=SC2001
 
 # provenance-check.sh — Verify provenance sidecar files against current system state
 # Usage: provenance-check.sh [--level inform|warn|stop] [--json] [-h|--help]
@@ -15,6 +14,13 @@ set -euo pipefail
 usage() {
   sed -n '3,11p' "$0" | sed 's/^# \?//'
   exit 0
+}
+
+strip_yaml_field_prefix() {
+  local line="$1"
+  line="${line#*:}"
+  line="${line#"${line%%[![:space:]]*}"}"
+  printf '%s' "$line"
 }
 
 LEVEL="warn"
@@ -108,24 +114,19 @@ for pfile in "${PROVENANCE_FILES[@]}"; do
   while IFS= read -r line; do
     case "$line" in
       target:*)
-        # shellcheck disable=SC2001
-        target=$(echo "$line" | sed 's/^target:[[:space:]]*//')
+        target=$(strip_yaml_field_prefix "$line")
         ;;
       written_session:*)
-        # shellcheck disable=SC2001
-        written_session=$(echo "$line" | sed 's/^written_session:[[:space:]]*//')
+        written_session=$(strip_yaml_field_prefix "$line")
         ;;
       last_reviewed:*)
-        # shellcheck disable=SC2001
-        last_reviewed=$(echo "$line" | sed 's/^last_reviewed:[[:space:]]*//')
+        last_reviewed=$(strip_yaml_field_prefix "$line")
         ;;
       skill_count:*)
-        # shellcheck disable=SC2001
-        recorded_skills=$(echo "$line" | sed 's/^skill_count:[[:space:]]*//')
+        recorded_skills=$(strip_yaml_field_prefix "$line")
         ;;
       hook_count:*)
-        # shellcheck disable=SC2001
-        recorded_hooks=$(echo "$line" | sed 's/^hook_count:[[:space:]]*//')
+        recorded_hooks=$(strip_yaml_field_prefix "$line")
         ;;
     esac
   done < "$pfile"
