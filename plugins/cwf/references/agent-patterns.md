@@ -156,6 +156,57 @@ When `--mode plan` or `--mode code` is used, `cwf:review` receives the plan's su
 - **Behavioral criteria** (BDD-style Given/When/Then): checked as a pass/fail list
 - **Qualitative criteria** (narrative): addressed in the verdict prose
 
+## Broken Link Triage Protocol
+
+When a broken link is detected (e.g., by `check-links-local.sh`), the agent should **NOT** default to "remove the reference." Instead, follow this triage:
+
+### 1. Check git log
+
+Was the target recently deleted?
+
+```bash
+git log --diff-filter=D --name-only -- <path>
+```
+
+If yes, investigate **why** the file was deleted before deciding how to handle the broken link.
+
+### 2. Classify callers by type
+
+For each file that references the missing target, classify the reference:
+
+| Caller Type | Examples |
+|-------------|----------|
+| **Runtime** | Script `source`/`.` includes, `bash <path>`, `exec` calls, import statements |
+| **Build/Test** | CI configs, test fixtures, Makefile targets, package.json scripts |
+| **Documentation** | READMEs, comments, inline doc references, SKILL.md references |
+| **Stale** | No recent usage, dead code, orphaned references |
+
+### 3. Decision matrix
+
+| Caller Type | Action |
+|-------------|--------|
+| Runtime caller exists | **STOP. Restore the deleted file.** |
+| Build/test dependency | Restore file or update build config |
+| Documentation reference | Update docs to reflect removal |
+| No callers / stale ref | Remove the broken reference |
+
+Rule: never treat "broken link" as "remove reference" by default. Determine why the file is missing before editing references.
+
+### 4. Record the triage decision
+
+Persist the triage decision in the current session's artifacts — either `lessons.md` or `live.decision_journal` in the resolved live-state file.
+
+### Integration with check-links-local.sh hook
+
+The `check-links-local.sh` PostToolUse hook automatically checks for broken links when markdown files are edited. When the hook blocks an edit due to broken links, its error message includes a reference to this protocol.
+
+This means agents encountering a hook block should:
+
+1. Read the broken link details from the hook output
+2. Follow the triage protocol above (git log → classify callers → decision matrix)
+3. Take the appropriate action from the decision matrix — **not** simply remove the reference to make the hook pass
+4. Record the triage decision before re-attempting the edit
+
 ## Web Research Protocol
 
 All sub-agents that use WebSearch/WebFetch must follow these rules. Include this protocol (or reference this section) in every sub-agent prompt that involves web research.
