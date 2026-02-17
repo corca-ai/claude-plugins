@@ -39,7 +39,7 @@ For detailed flags, see [setup](#setup).
 
 ### Codex users (recommended)
 
-If you also use Codex CLI, running only `cwf:setup` is enough to get guided defaults. Use the commands below when you want to re-apply Codex integration only:
+If you also use Codex CLI, running only `cwf:setup` is enough to get guided defaults. Codex integration now follows the active plugin scope by default (`local > project > user`). Use the commands below when you want to re-apply Codex integration only:
 
 ```bash
 cwf:setup --codex
@@ -383,8 +383,8 @@ cwf:setup                # Full setup (hooks + tools + optional repo-index promp
 cwf:setup --hooks        # Hook group selection only
 cwf:setup --tools        # External tool detection only
 cwf:setup --env          # Environment variable migration/bootstrap only
-cwf:setup --codex        # Link CWF skills/references into Codex user scope (~/.agents/*)
-cwf:setup --codex-wrapper # Install codex wrapper (session log sync + post-run quality checks)
+cwf:setup --codex        # Scope-aware skill/reference sync (user or project/local)
+cwf:setup --codex-wrapper # Scope-aware codex wrapper install (user or project/local)
 cwf:setup --cap-index    # Generate/refresh CWF capability index only (.cwf/indexes/cwf-index.md)
 cwf:setup --repo-index   # Generate/refresh repository index output (explicit)
 cwf:setup --repo-index --target agents # AGENTS.md managed block (for AGENTS-based repositories)
@@ -396,7 +396,7 @@ Standardizes hooks, tool detection, and environment contracts in one initial pas
 
 **What It Does**
 
-Interactive hook-group toggles, external AI CLI/API detection (Codex, Gemini, Tavily, Exa), env migration (legacy keys to canonical `CWF_*`), project config bootstrap (`.cwf-config.yaml`, `.cwf-config.local.yaml`), optional Codex integration (skills + wrapper), and optional index generation/refresh. Use `cwf:setup --cap-index` for capability index and `cwf:setup --repo-index --target agents` for repository index.
+Interactive hook-group toggles, external AI CLI/API detection (Codex, Gemini, Tavily, Exa), env migration (legacy keys to canonical `CWF_*`), project config bootstrap (`.cwf-config.yaml`, `.cwf-config.local.yaml`), optional scope-aware Codex integration (skills + wrapper), and optional index generation/refresh. For Codex integration, setup resolves active plugin scope with deterministic precedence (`local > project > user`) and defaults integration to that scope. Use `cwf:setup --cap-index` for capability index and `cwf:setup --repo-index --target agents` for repository index.
 
 ### [update](plugins/cwf/skills/update/SKILL.md)
 
@@ -413,7 +413,7 @@ Created because the author frequently forgot to update the plugin manually. Stan
 
 **What It Does**
 
-Refreshes marketplace metadata, compares installed vs latest version. `--check` is read-only; update requires user confirmation before applying.
+Refreshes marketplace metadata, compares installed vs latest version for selected scope, applies scoped update after user confirmation, and reconciles existing Codex links/wrapper targets when install paths changed. `--check` is read-only.
 
 ### Codex Integration
 
@@ -426,13 +426,16 @@ cwf:setup --codex-wrapper
 
 What this enables:
 - Script map for Codex/session helpers: [plugins/cwf/scripts/README.md](plugins/cwf/scripts/README.md)
-- `~/.agents/skills/*` and `~/.agents/references` symlinked to local CWF (latest files auto-loaded)
-- `~/.local/bin/codex` wrapper installation + PATH update (`~/.zshrc`, `~/.bashrc`)
+- Scope-aware target resolution (active plugin scope precedence: `local > project > user`)
+- User scope targets: `~/.agents/skills/*`, `~/.agents/references`, `~/.local/bin/codex`
+- Project/local scope targets: `{projectRoot}/.codex/skills/*`, `{projectRoot}/.codex/references`, `{projectRoot}/.codex/bin/codex`
+- Non-user runs do not mutate user-global Codex paths unless explicitly confirmed
 - Every `codex` run auto-syncs session markdown logs into `.cwf/sessions/` by default (legacy fallback: `.cwf/projects/sessions/`) as `*.codex.md`
 - Session artifact directories (`plan.md`, `retro.md`, `next-session.md`) remain under `.cwf/projects/{YYMMDD}-{NN}-{title}/`
 - Sync is anchored to the session updated during the current run (reduces wrong-session exports on shared cwd)
 - Raw JSONL copy is opt-in (`--raw`); redaction still applies when raw export is enabled
 - Post-run quality checks on changed files (markdownlint, local link checks, shellcheck when available, live state check, `apply_patch via exec_command` hygiene detection, and HITL scratchpad sync detection for doc edits) with `warn|strict` mode control
+- `cwf:update` reconciles stale Codex symlink/wrapper targets for the selected scope after plugin update
 - Runtime controls:
   - `CWF_CODEX_POST_RUN_CHECKS=true|false` (default: `true`)
   - `CWF_CODEX_POST_RUN_MODE=warn|strict` (default: `warn`)
@@ -441,7 +444,9 @@ What this enables:
 Verify:
 
 ```bash
-bash plugins/cwf/scripts/codex/install-wrapper.sh --status
+bash plugins/cwf/scripts/codex/install-wrapper.sh --scope user --status
+# or for project/local scope
+bash plugins/cwf/scripts/codex/install-wrapper.sh --scope project --project-root "$PWD" --status
 type -a codex
 ```
 

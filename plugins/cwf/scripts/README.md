@@ -13,12 +13,13 @@ This file maps scripts under [plugins/cwf/scripts](.).
 - [next-prompt-dir.sh](next-prompt-dir.sh): Computes next session directory name, with optional `--bootstrap` to initialize artifacts and register `cwf-state.yaml` session metadata.
 - [cwf-artifact-paths.sh](cwf-artifact-paths.sh): Resolves artifact/state/projects paths with project-config precedence (.cwf-config.local.yaml → .cwf-config.yaml → env).
 - [cwf-live-state.sh](cwf-live-state.sh): Resolves/syncs hybrid live-state files, reads live scalars/lists (`get`, `list-get`), updates top-level live fields (`set`, `list-set`, `list-remove`), and appends replay-safe decision entries (`journal-append`).
+- [detect-plugin-scope.sh](detect-plugin-scope.sh): Detects active Claude plugin scope (`user`/`project`/`local`) for a cwd with deterministic precedence.
 - [retro-collect-evidence.sh](retro-collect-evidence.sh): Collects retro evidence snapshot (token-limit signals, HITL decisions/events, warning lines, changed-files context).
 - [provenance-check.sh](provenance-check.sh): Verifies provenance sidecar freshness against current CWF skill/hook counts.
 - [codex/codex-with-log.sh](codex/codex-with-log.sh): Wrapper entrypoint that runs Codex and syncs logs.
 - [codex/post-run-checks.sh](codex/post-run-checks.sh): Post-run quality checks (changed files only) for markdown/shell/link/live-state gates plus tool-hygiene and HITL scratchpad sync guards.
-- [codex/install-wrapper.sh](codex/install-wrapper.sh): Installs, checks, or disables the Codex wrapper.
-- [codex/sync-skills.sh](codex/sync-skills.sh): Symlinks CWF skills/references into Codex user scope.
+- [codex/install-wrapper.sh](codex/install-wrapper.sh): Installs, checks, or disables a Codex wrapper for `user`/`project`/`local` scopes.
+- [codex/sync-skills.sh](codex/sync-skills.sh): Symlinks CWF skills/references into Codex scope-specific destinations.
 - [codex/verify-skill-links.sh](codex/verify-skill-links.sh): Verifies linked skill references resolve correctly.
 - [codex/sync-session-logs.sh](codex/sync-session-logs.sh): Exports session logs into repository project artifacts.
 - [codex/redact-session-logs.sh](codex/redact-session-logs.sh): Batch-redacts existing markdown session logs.

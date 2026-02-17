@@ -6,9 +6,12 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WRAPPER_SRC="$SCRIPT_DIR/codex-with-log.sh"
 
-BIN_DIR="${CODEX_WRAPPER_BIN_DIR:-$HOME/.local/bin}"
-DEST_BIN="$BIN_DIR/codex"
-BACKUP_ROOT="$HOME/.codex/tmp"
+SCOPE="${CWF_CLAUDE_PLUGIN_SCOPE:-user}"
+PROJECT_ROOT=""
+
+BIN_DIR=""
+DEST_BIN=""
+BACKUP_ROOT=""
 
 MODE="status"
 ADD_PATH=false
@@ -23,12 +26,43 @@ Usage:
   install-wrapper.sh --disable
 
 Options:
-  --enable          Install/activate wrapper at ~/.local/bin/codex
+  --scope <user|project|local>
+                    Wrapper scope (default: user)
+  --project-root <path>
+                    Project root for project/local scope (default: git root or cwd)
+  --enable          Install/activate wrapper at scope-specific codex path
   --disable         Remove wrapper symlink if managed by this script
   --status          Show current status (default)
-  --add-path        Append ~/.local/bin PATH export to ~/.zshrc and ~/.bashrc if missing
+  --add-path        Add PATH line to shell rc files (user scope only)
   -h, --help        Show help
 USAGE
+}
+
+resolve_scope_paths() {
+  case "$SCOPE" in
+    user)
+      BIN_DIR="${CODEX_WRAPPER_BIN_DIR:-$HOME/.local/bin}"
+      BACKUP_ROOT="$HOME/.codex/tmp"
+      ;;
+    project|local)
+      if [ -z "$PROJECT_ROOT" ]; then
+        PROJECT_ROOT="$(git -C "$PWD" rev-parse --show-toplevel 2>/dev/null || printf '%s' "$PWD")"
+      fi
+      if [ ! -d "$PROJECT_ROOT" ]; then
+        echo "Project root not found: $PROJECT_ROOT" >&2
+        exit 1
+      fi
+      PROJECT_ROOT="$(cd "$PROJECT_ROOT" && pwd)"
+      BIN_DIR="${CODEX_WRAPPER_BIN_DIR:-$PROJECT_ROOT/.codex/bin}"
+      BACKUP_ROOT="$PROJECT_ROOT/.codex/tmp"
+      ;;
+    *)
+      echo "Invalid scope: $SCOPE (allowed: user|project|local)" >&2
+      exit 1
+      ;;
+  esac
+
+  DEST_BIN="$BIN_DIR/codex"
 }
 
 ensure_path_line() {
@@ -56,6 +90,10 @@ status() {
     active="true"
   fi
 
+  echo "Scope         : $SCOPE"
+  if [ "$SCOPE" = "project" ] || [ "$SCOPE" = "local" ]; then
+    echo "Project root  : $PROJECT_ROOT"
+  fi
   echo "Wrapper source: $WRAPPER_SRC"
   echo "Wrapper link  : $DEST_BIN"
   echo "Active        : $active"
@@ -96,19 +134,28 @@ enable_wrapper() {
   fi
 
   if [ "$ADD_PATH" = "true" ]; then
-    if [ "$BIN_DIR" = "$HOME/.local/bin" ]; then
-      path_line='export PATH="$HOME/.local/bin:$PATH"'
-    else
-      path_line="export PATH=\"$BIN_DIR:\$PATH\""
-    fi
+    if [ "$SCOPE" = "user" ]; then
+      if [ "$BIN_DIR" = "$HOME/.local/bin" ]; then
+        path_line="export PATH=\"\$HOME/.local/bin:\$PATH\""
+      else
+        path_line="export PATH=\"$BIN_DIR:\$PATH\""
+      fi
 
-    ensure_path_line "$HOME/.zshrc" "$path_line"
-    ensure_path_line "$HOME/.bashrc" "$path_line"
-    echo "Ensured PATH line in ~/.zshrc and ~/.bashrc"
+      ensure_path_line "$HOME/.zshrc" "$path_line"
+      ensure_path_line "$HOME/.bashrc" "$path_line"
+      echo "Ensured PATH line in ~/.zshrc and ~/.bashrc"
+    else
+      echo "Skipping --add-path for scope '$SCOPE'."
+      echo "Add PATH manually when needed: export PATH=\"$BIN_DIR:\$PATH\""
+    fi
   fi
 
   status
-  echo "Open a new shell (or run: source ~/.zshrc) before testing codex."
+  if [ "$SCOPE" = "user" ]; then
+    echo "Open a new shell (or run: source ~/.zshrc) before testing codex."
+  else
+    echo "Use PATH override to activate project wrapper: export PATH=\"$BIN_DIR:\$PATH\""
+  fi
   echo "Aliases that call 'codex' (e.g., codexyolo='codex ...') will also use the wrapper."
 }
 
@@ -125,6 +172,14 @@ disable_wrapper() {
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
+    --scope)
+      SCOPE="${2:-}"
+      shift 2
+      ;;
+    --project-root)
+      PROJECT_ROOT="${2:-}"
+      shift 2
+      ;;
     --enable)
       MODE="enable"
       shift
@@ -152,6 +207,8 @@ while [ "$#" -gt 0 ]; do
       ;;
   esac
 done
+
+resolve_scope_paths
 
 case "$MODE" in
   enable)

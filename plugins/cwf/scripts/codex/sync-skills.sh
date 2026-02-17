@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# sync-skills.sh: Link CWF skills into Codex user scope (~/.agents/skills).
+# sync-skills.sh: Link CWF skills into Codex scope-specific destinations.
 #
 # Why:
 # - CWF is developed in-repo and updated frequently.
@@ -12,7 +12,7 @@
 #
 # Notes:
 # - This script never uses rm. When replacing files/dirs, it moves them to backup.
-# - Legacy ~/.codex/skills cleanup is opt-in via --cleanup-legacy.
+# - Legacy ~/.codex/skills cleanup is user-scope only and opt-in.
 
 set -euo pipefail
 
@@ -23,6 +23,8 @@ PLUGIN_NAME="cwf"
 AGENTS_HOME="${AGENTS_HOME:-$HOME/.agents}"
 DEST_SKILLS_DIR="$AGENTS_HOME/skills"
 DEST_REFERENCES_PATH="$AGENTS_HOME/references"
+SCOPE="${CWF_CLAUDE_PLUGIN_SCOPE:-user}"
+PROJECT_ROOT=""
 
 CODEX_HOME_LEGACY="${CODEX_HOME:-$HOME/.codex}"
 LEGACY_SKILLS_DIR="$CODEX_HOME_LEGACY/skills"
@@ -34,12 +36,15 @@ VERIFY_LINKS=true
 
 usage() {
   cat <<'EOF'
-Sync CWF skills into Codex user scope via symlinks.
+Sync CWF skills into Codex scope-specific paths via symlinks.
 
 Usage:
   sync-skills.sh [options]
 
 Options:
+  --scope <user|project|local>
+                        Integration scope (default: user)
+  --project-root <path> Project root for project/local scope (default: git root or cwd)
   --repo-root <path>      Repository root (default: auto-detect from script location)
   --agents-home <path>    Agents home (default: ~/.agents or $AGENTS_HOME)
   --skills-dir <path>     Destination skills dir (overrides --agents-home)
@@ -90,6 +95,14 @@ safe_replace_with_symlink() {
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --scope)
+      SCOPE="${2:-}"
+      shift 2
+      ;;
+    --project-root)
+      PROJECT_ROOT="${2:-}"
+      shift 2
+      ;;
     --repo-root)
       REPO_ROOT="${2:-}"
       shift 2
@@ -136,6 +149,30 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+case "$SCOPE" in
+  user|project|local) ;;
+  *)
+    echo "Invalid scope: $SCOPE (allowed: user|project|local)" >&2
+    exit 1
+    ;;
+esac
+
+if [[ "$SCOPE" == "project" || "$SCOPE" == "local" ]]; then
+  if [[ -z "$PROJECT_ROOT" ]]; then
+    PROJECT_ROOT="$(git -C "$PWD" rev-parse --show-toplevel 2>/dev/null || printf '%s' "$PWD")"
+  fi
+  if [[ ! -d "$PROJECT_ROOT" ]]; then
+    echo "Project root not found: $PROJECT_ROOT" >&2
+    exit 1
+  fi
+  PROJECT_ROOT="$(cd "$PROJECT_ROOT" && pwd)"
+  DEST_SKILLS_DIR="$PROJECT_ROOT/.codex/skills"
+  DEST_REFERENCES_PATH="$PROJECT_ROOT/.codex/references"
+  BACKUP_BASE="$PROJECT_ROOT/.codex/.skill-sync-backup"
+else
+  BACKUP_BASE="$AGENTS_HOME/.skill-sync-backup"
+fi
+
 # Support both layouts:
 # 1) Plugin-local layout (marketplace source = ./plugins/cwf)
 #    {REPO_ROOT}/skills, {REPO_ROOT}/references
@@ -150,7 +187,6 @@ else
   SOURCE_REFERENCES_DIR="$REPO_ROOT/plugins/$PLUGIN_NAME/references"
   SCRIPT_ROOT="$REPO_ROOT/plugins/$PLUGIN_NAME/scripts"
 fi
-BACKUP_BASE="$AGENTS_HOME/.skill-sync-backup"
 
 if [[ ! -d "$SOURCE_SKILLS_DIR" ]]; then
   echo "Source skills directory not found: $SOURCE_SKILLS_DIR" >&2
@@ -182,7 +218,9 @@ if [[ "$LINK_REFERENCES" == "true" ]]; then
 fi
 
 if [[ "$CLEANUP_LEGACY" == "true" ]]; then
-  if [[ "$LEGACY_SKILLS_DIR" == "$DEST_SKILLS_DIR" ]]; then
+  if [[ "$SCOPE" != "user" ]]; then
+    echo "Skipping legacy cleanup for scope '$SCOPE' (legacy path is user-scoped: $LEGACY_SKILLS_DIR)."
+  elif [[ "$LEGACY_SKILLS_DIR" == "$DEST_SKILLS_DIR" ]]; then
     echo "Skipping legacy cleanup: destination and legacy path are identical."
   elif [[ -d "$LEGACY_SKILLS_DIR" ]]; then
     run_cmd mkdir -p "$CODEX_HOME_LEGACY/tmp"
@@ -233,4 +271,8 @@ if [[ "$VERIFY_LINKS" == "true" ]]; then
   run_cmd "${verify_cmd[@]}"
 fi
 
+echo "Scope: $SCOPE"
+if [[ "$SCOPE" == "project" || "$SCOPE" == "local" ]]; then
+  echo "Project root: $PROJECT_ROOT"
+fi
 echo "Done. Linked $linked_count skill(s) into $DEST_SKILLS_DIR."

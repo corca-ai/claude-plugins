@@ -18,8 +18,8 @@ cwf:setup --tools        # External tool detection only
 cwf:setup --env          # Environment variable migration/bootstrap only
 cwf:setup --agent-teams  # Agent Team mode setup only
 cwf:setup --run-mode     # Configure default cwf:run ambiguity mode only
-cwf:setup --codex        # Codex integration-only rerun (skills/references sync)
-cwf:setup --codex-wrapper # Codex wrapper-only rerun (session log sync + post-run checks)
+cwf:setup --codex        # Codex integration-only rerun (scope-aware skills/references sync)
+cwf:setup --codex-wrapper # Codex wrapper-only rerun (scope-aware wrapper setup)
 cwf:setup --git-hooks both --gate-profile balanced  # Install repo git hooks and set gate depth
 cwf:setup --git-hooks pre-commit --gate-profile fast # Lightweight local-only git gate
 cwf:setup --git-hooks none # Remove repo-managed git hooks
@@ -244,60 +244,142 @@ This step is mandatory even when some dependencies remain unresolved.
 
 ---
 
-## Phase 2.4: Codex Integration on Full Setup
+## Phase 2.4: Codex Integration on Full Setup (Scope-Aware)
 
 Use this phase when:
 - Mode is full setup (`cwf:setup`)
 - Phase 2 detected `codex: available`
 
-### 2.4.1 Ask Integration Level
+### 2.4.1 Resolve Active Plugin Scope
+
+Resolve active CWF plugin scope for current cwd first:
+
+```bash
+scope_info="$(bash {CWF_PLUGIN_DIR}/scripts/detect-plugin-scope.sh --plugin cwf --cwd "$PWD" 2>/dev/null || true)"
+```
+
+If `scope_info` is available, parse:
+
+```bash
+eval "$scope_info"
+selected_scope="${active_scope:-user}"
+selected_project_root="${active_project_path:-}"
+if [ "$selected_scope" = "none" ]; then
+  selected_scope="user"
+fi
+```
+
+Deterministic precedence for active scope is:
+1. `local` (nearest matching `projectPath`)
+2. `project` (nearest matching `projectPath`)
+3. `user`
+4. `none` (fallback to `user` for setup continuity)
+
+If `selected_scope` is `project`/`local` and `selected_project_root` is empty, resolve fallback root:
+
+```bash
+selected_project_root="$(git -C "$PWD" rev-parse --show-toplevel 2>/dev/null || printf '%s' "$PWD")"
+```
+
+Always print detected values before asking integration options:
+- active scope
+- installed scopes
+- active install path
+- active project path (if any)
+
+### 2.4.2 Ask Integration Scope + Level
+
+When detected scope is `project` or `local`, ask scope target first:
+
+```text
+Codex integration target for this setup run?
+```
+
+Options:
+- `Use active plugin scope (recommended)`:
+  - keep Codex integration project-bounded
+  - skills/references under `{projectRoot}/.codex/*`
+  - wrapper under `{projectRoot}/.codex/bin/codex`
+- `Use user-global scope`:
+  - skills/references under `~/.agents/*`
+  - wrapper under `~/.local/bin/codex`
+- `Skip Codex integration for now`:
+  - do not change Codex integration in this run
+
+If `Use user-global scope` is selected from non-user context, require a second explicit confirmation:
+
+```text
+This run is in {active_scope} scope, but selected target is user-global (~/.agents, ~/.local/bin). Continue?
+```
+
+Then ask integration level (single choice):
 
 Use AskUserQuestion (single choice):
 
 ```text
-Codex CLI was detected. How should CWF integrate with Codex?
+Codex CLI was detected. How should CWF integrate with Codex for scope {selected_scope}?
 ```
 
 Options:
 - `Skills + wrapper (recommended)`:
-  - Link CWF skills/references into `~/.agents/*`
-  - Install `codex` wrapper and PATH line for automatic session log sync + post-run quality checks (tool-hygiene + HITL sync gates included)
+  - Link CWF skills/references into scope-aware destination
+  - Install scope-aware `codex` wrapper (`--add-path` only for `user` scope)
 - `Skills only`:
   - Link skills/references only (no wrapper install)
 - `Skip for now`:
   - Do not change Codex integration in this run
 
-### 2.4.2 Execute Selection
+### 2.4.3 Execute Selection
 
 If `Skills + wrapper (recommended)`:
 
 ```bash
-bash {CWF_PLUGIN_DIR}/scripts/codex/sync-skills.sh --cleanup-legacy
-bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --enable --add-path
-bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --status
+bash {CWF_PLUGIN_DIR}/scripts/codex/sync-skills.sh --scope "$selected_scope" ${selected_project_root:+--project-root "$selected_project_root"} --cleanup-legacy
+if [ "$selected_scope" = "user" ]; then
+  bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --scope "$selected_scope" --enable --add-path
+else
+  bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --scope "$selected_scope" --project-root "$selected_project_root" --enable
+fi
+bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --scope "$selected_scope" ${selected_project_root:+--project-root "$selected_project_root"} --status
 ```
 
 If `Skills only`:
 
 ```bash
-bash {CWF_PLUGIN_DIR}/scripts/codex/sync-skills.sh --cleanup-legacy
+bash {CWF_PLUGIN_DIR}/scripts/codex/sync-skills.sh --scope "$selected_scope" ${selected_project_root:+--project-root "$selected_project_root"} --cleanup-legacy
 ```
 
 If `Skip for now`: no command execution in this phase.
 
-### 2.4.3 Always Print Post-Setup Verification
+### 2.4.4 Always Print Post-Setup Verification + Rollback
 
 When wrapper install was selected, always report:
 
 ```bash
-bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --status
+bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --scope "$selected_scope" ${selected_project_root:+--project-root "$selected_project_root"} --status
 type -a codex
 ```
+
+Also print a before-vs-after summary:
+- selected scope
+- touched paths (skills/references/wrapper)
+- rollback commands
+
+Rollback commands:
+
+```bash
+bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --scope "$selected_scope" ${selected_project_root:+--project-root "$selected_project_root"} --disable
+```
+
+For skills/references rollback, instruct restoring from scope backup roots:
+- user: `~/.agents/.skill-sync-backup/*`
+- project/local: `{projectRoot}/.codex/.skill-sync-backup/*`
 
 And include this note in plain language:
 
 ```text
-Open a new shell (or source ~/.zshrc). After that, running `codex` will auto-sync session logs.
+If scope is user: open a new shell (or source ~/.zshrc). After that, running `codex` will auto-sync session logs.
+If scope is project/local: add `{projectRoot}/.codex/bin` to PATH in that shell before running `codex`.
 Aliases that call `codex` (for example: codexyolo='codex ...') also inherit this behavior.
 Post-run checks run in `warn` mode by default (`CWF_CODEX_POST_RUN_MODE=strict` to enforce non-zero exit on check failures).
 Current post-run gates include markdown/shell/link/live-state checks, `apply_patch via exec_command` hygiene detection, and HITL scratchpad sync detection for doc edits.
@@ -305,65 +387,98 @@ Current post-run gates include markdown/shell/link/live-state checks, `apply_pat
 
 ---
 
-## Phase 2.5: Codex User-Scope Skill Sync (Optional)
+## Phase 2.5: Codex Scope-Aware Skill Sync (Optional)
 
 Use this phase when:
 - User runs `cwf:setup --codex`
 - Full setup and user wants Codex to load CWF from local repo via symlink
 
-### 2.5.1 Run Sync Script
+### 2.5.1 Resolve Scope
+
+Reuse [Phase 2.4.1](#241-resolve-active-plugin-scope) scope detection.
+
+Default target scope = detected active scope.
+
+When detected scope is `project`/`local`, allow user override to user-global scope only with explicit confirmation:
+
+```text
+Apply --codex integration to user-global scope instead of {active_scope} scope?
+```
+
+### 2.5.2 Run Sync Script
 
 Run:
 
 ```bash
-bash {CWF_PLUGIN_DIR}/scripts/codex/sync-skills.sh --cleanup-legacy
+bash {CWF_PLUGIN_DIR}/scripts/codex/sync-skills.sh --scope "$selected_scope" ${selected_project_root:+--project-root "$selected_project_root"} --cleanup-legacy
 ```
 
 Expected behavior:
-- Link CWF skills from `plugins/cwf/skills/*` into `~/.agents/skills`
-- Link shared references into `~/.agents/references`
-- Move legacy custom entries from `~/.codex/skills` to backup (`.system` is kept)
+- `user`: link into `~/.agents/skills` and `~/.agents/references`
+- project/local scope: link into `{projectRoot}/.codex/skills` and `{projectRoot}/.codex/references`
+- Move legacy custom entries from `~/.codex/skills` to backup (`.system` is kept) only for `user` scope
 - Validate relative skill references via `{CWF_PLUGIN_DIR}/scripts/codex/verify-skill-links.sh`
 
-### 2.5.2 Report Results
+### 2.5.3 Report Results
 
 Report:
 - Number of linked skills
-- Destination paths (`~/.agents/skills`, `~/.agents/references`)
-- Whether legacy `~/.codex/skills` was moved and backup path
-- Quick verification command:
+- Destination paths for selected scope
+- Whether legacy `~/.codex/skills` was moved (user scope only) and backup path
+- Before-vs-after summary for touched paths
+- Rollback guidance from `.skill-sync-backup` for selected scope
+- Quick verification command by scope:
 
 ```bash
+# user
 ls -la ~/.agents/skills
+
+# project/local
+ls -la "$selected_project_root/.codex/skills"
 ```
 
 ---
 
-## Phase 2.6: Codex Wrapper Opt-In (Optional)
+## Phase 2.6: Codex Scope-Aware Wrapper Opt-In (Optional)
 
 Use this phase when:
 - User runs `cwf:setup --codex-wrapper`
 - Full setup and user wants Codex session logs auto-synced into repo artifacts with post-run quality checks
 
-### 2.6.1 Ask for Opt-In
+### 2.6.1 Resolve Scope
+
+Reuse [Phase 2.4.1](#241-resolve-active-plugin-scope) scope detection.
+
+Default target scope = detected active scope.
+
+When detected scope is `project`/`local`, allow user override to user-global scope only with explicit confirmation.
+
+### 2.6.2 Ask for Opt-In
 
 Use AskUserQuestion before making shell-level changes:
 
 ```text
-Enable Codex wrapper for automatic session log sync and post-run quality checks (including tool-hygiene + HITL sync gates)?
+Enable Codex wrapper for scope {selected_scope} with automatic session log sync and post-run quality checks (including tool-hygiene + HITL sync gates)?
 ```
 
 If user declines, skip this phase.
 
-### 2.6.2 Install Wrapper (Approved Only)
+### 2.6.3 Install Wrapper (Approved Only)
 
 Run:
 
 ```bash
-bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --enable --add-path
+if [ "$selected_scope" = "user" ]; then
+  bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --scope "$selected_scope" --enable --add-path
+else
+  bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --scope "$selected_scope" --project-root "$selected_project_root" --enable
+fi
 ```
 
-This installs a wrapper symlink at `~/.local/bin/codex` pointing to:
+This installs a wrapper symlink pointing to:
+
+- user: `~/.local/bin/codex`
+- project/local: `{projectRoot}/.codex/bin/codex`
 
 ```text
 {CWF_PLUGIN_DIR}/scripts/codex/codex-with-log.sh
@@ -378,24 +493,30 @@ bash {CWF_PLUGIN_DIR}/scripts/codex/post-run-checks.sh --cwd "$PWD" --mode warn
 
 after each Codex run. Logs are persisted under `.cwf/sessions/` by default (legacy fallback: `.cwf/projects/sessions/`) as `*.codex.md` (`raw` JSONL copy is opt-in via `--raw`), and changed-file quality checks are executed in `warn` mode by default.
 
-### 2.6.3 Report and Reversal
+### 2.6.4 Report and Reversal
 
 Report current status:
 
 ```bash
-bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --status
+bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --scope "$selected_scope" ${selected_project_root:+--project-root "$selected_project_root"} --status
 ```
 
 Provide rollback command:
 
 ```bash
-bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --disable
+bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --scope "$selected_scope" ${selected_project_root:+--project-root "$selected_project_root"} --disable
 ```
+
+Also report:
+- before-vs-after wrapper path summary
+- whether PATH was auto-updated (`user` only)
+- manual PATH export command for project/local scope
 
 Include activation note:
 
 ```text
-If wrapper is active, restart shell (or source ~/.zshrc) before testing `codex`.
+If wrapper is active in user scope, restart shell (or source ~/.zshrc) before testing `codex`.
+If wrapper is active in project/local scope, export PATH to include `{projectRoot}/.codex/bin` before testing `codex`.
 Post-run behavior can be tuned with:
 - `CWF_CODEX_POST_RUN_CHECKS=true|false` (default: true)
 - `CWF_CODEX_POST_RUN_MODE=warn|strict` (default: warn)
@@ -928,20 +1049,23 @@ Add `setup` to `cwf-state.yaml` current session's `stage_checkpoints` list.
 ## Rules
 
 1. **State SSOT + idempotency**: Read and edit `cwf-state.yaml` (do not overwrite wholesale), and keep reruns safe/idempotent across all phases.
-2. **Always explicit user choices**: Use AskUserQuestion for each decision point in [Phase 1](#phase-1-hook-group-selection), [Phase 2.3.1](#231-missing-dependency-install-prompt-required), [Phase 2.4](#phase-24-codex-integration-on-full-setup), [Phase 2.7](#phase-27-git-hook-gate-installation), [Phase 2.8](#phase-28-environment-migration-and-project-config-bootstrap), [Phase 2.9](#phase-29-agent-team-mode-setup), and Phase 2.10 (cwf:run ambiguity mode setup).
+2. **Always explicit user choices**: Use AskUserQuestion for each decision point in [Phase 1](#phase-1-hook-group-selection), [Phase 2.3.1](#231-missing-dependency-install-prompt-required), [Phase 2.4](#phase-24-codex-integration-on-full-setup-scope-aware), [Phase 2.7](#phase-27-git-hook-gate-installation), [Phase 2.8](#phase-28-environment-migration-and-project-config-bootstrap), [Phase 2.9](#phase-29-agent-team-mode-setup), and Phase 2.10 (cwf:run ambiguity mode setup).
 3. **Post-install re-detection is mandatory**: After an install attempt, re-run [Phase 2.1](#21-check-tools) → [Phase 2.2](#22-update-cwf-stateyaml) → [Phase 2.3](#23-report-results) per [Phase 2.3.3](#233-post-install-re-detection--cwf-stateyaml-rewrite-required).
-4. **Single-entry setup UX**: Full setup (`cwf:setup`) must run optional integration prompts/actions for [Phase 2.4](#phase-24-codex-integration-on-full-setup), [Phase 2.7](#phase-27-git-hook-gate-installation), [Phase 2.8](#phase-28-environment-migration-and-project-config-bootstrap), [Phase 2.9](#phase-29-agent-team-mode-setup), and Phase 2.10 (cwf:run ambiguity mode setup).
+4. **Single-entry setup UX**: Full setup (`cwf:setup`) must run optional integration prompts/actions for [Phase 2.4](#phase-24-codex-integration-on-full-setup-scope-aware), [Phase 2.7](#phase-27-git-hook-gate-installation), [Phase 2.8](#phase-28-environment-migration-and-project-config-bootstrap), [Phase 2.9](#phase-29-agent-team-mode-setup), and Phase 2.10 (cwf:run ambiguity mode setup).
 5. **Index generation is explicit and deterministic**: Capability index runs only via `--cap-index` ([Phase 3](#phase-3-generate-cwf-capability-index-explicit)); repository index is AGENTS-managed via `--repo-index` ([Phase 4](#phase-4-generate-repository-index-optional)).
 6. **Coverage/link policy for generated indexes**: Use Markdown relative links and pass coverage validation via [Phase 3.4](#34-capability-coverage-validation-required) and [Phase 4.4](#44-repository-coverage-validation-required), with ignore files only for intentional exclusions.
-7. **File safety**: Codex sync must use symlink + backup move (no direct user file deletion) as defined in [Phase 2.5](#phase-25-codex-user-scope-skill-sync-optional).
-8. **Formatting invariant**: All code fences in this skill must include language specifiers.
+7. **File safety**: Codex sync must use symlink + backup move (no direct user file deletion) as defined in [Phase 2.5](#phase-25-codex-scope-aware-skill-sync-optional).
+8. **Scope-aware Codex integration**: Always resolve active plugin scope first; non-user context must not mutate user-global Codex paths without explicit user confirmation.
+9. **Formatting invariant**: All code fences in this skill must include language specifiers.
 
 ## References
 
 - [cwf-hook-gate.sh](../../hooks/scripts/cwf-hook-gate.sh) — hook gate mechanism
 - [hooks.json](../../hooks/hooks.json) — hook definitions
 - [agent-patterns.md](../../references/agent-patterns.md) — Single pattern
-- [sync-skills.sh](../../scripts/codex/sync-skills.sh) — Codex user-scope skill sync
+- [detect-plugin-scope.sh](../../scripts/detect-plugin-scope.sh) — active Claude plugin scope detection for cwd
+- [sync-skills.sh](../../scripts/codex/sync-skills.sh) — Codex scope-aware skill sync
+- [install-wrapper.sh](../../scripts/codex/install-wrapper.sh) — Codex scope-aware wrapper management
 - [verify-skill-links.sh](../../scripts/codex/verify-skill-links.sh) — Codex skill link validation
 - [scripts/configure-git-hooks.sh](scripts/configure-git-hooks.sh) — installs and profiles repository git hook gates
 - [scripts/migrate-env-vars.sh](scripts/migrate-env-vars.sh) — legacy env detection and canonical CWF env migration

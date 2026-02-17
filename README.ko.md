@@ -31,7 +31,7 @@ claude plugin install cwf@corca-plugins
 
 ### Codex 사용자용 설정
 
-`cwf:setup`만 실행해도 Codex를 위한 안내를 받을 수 있습니다. 아래 명령은 Codex 연동만 별도로 다시 적용하고 싶을 때 사용하시면 됩니다. 자세한 내용은 [Codex 연동](#codex-연동) 섹션을 참고하세요.
+`cwf:setup`만 실행해도 Codex를 위한 안내를 받을 수 있습니다. Codex 연동은 기본적으로 활성 플러그인 스코프(`local > project > user`)를 따릅니다. 아래 명령은 Codex 연동만 별도로 다시 적용하고 싶을 때 사용하시면 됩니다. 자세한 내용은 [Codex 연동](#codex-연동) 섹션을 참고하세요.
 
 ```text
 cwf:setup --codex
@@ -396,8 +396,8 @@ cwf:setup                # 전체 설정 (훅 + 도구 + repo-index 생성 여�
 cwf:setup --hooks        # 훅 그룹 선택만
 cwf:setup --tools        # 외부 도구 감지만
 cwf:setup --env          # 환경 변수 마이그레이션/부트스트랩만
-cwf:setup --codex        # Codex 사용자 스코프(~/.agents/*)에 CWF 스킬/레퍼런스 연결
-cwf:setup --codex-wrapper # Codex wrapper 설치 (세션 로그 동기화 + 실행 후 품질 점검)
+cwf:setup --codex        # 스코프 인지형 스킬/레퍼런스 연결 (user 또는 project/local)
+cwf:setup --codex-wrapper # 스코프 인지형 Codex wrapper 설치 (user 또는 project/local)
 cwf:setup --cap-index    # CWF capability 인덱스만 생성/갱신 (.cwf/indexes/cwf-index.md)
 cwf:setup --repo-index   # 저장소 인덱스 명시적 생성/갱신
 cwf:setup --repo-index --target agents # AGENTS 기반 저장소용 AGENTS.md 관리 블록
@@ -411,7 +411,7 @@ cwf:setup --repo-index --target agents # AGENTS 기반 저장소용 AGENTS.md �
 
 **무엇을 하는가**
 
-`cwf:setup`은 훅 그룹 토글, 외부 도구 감지(Codex/Gemini/Tavily/Exa), 환경 변수 마이그레이션(레거시 키 → `CWF_*`), 프로젝트 설정 파일 부트스트랩(`.cwf-config.yaml`, `.cwf-config.local.yaml`), 선택적 Codex 연동, 선택적 인덱스 생성/갱신을 대화형으로 수행합니다. 여기서 인덱스 생성은 에이전트가 필요한 문서를 짧은 경로로 찾아가도록 라우팅 품질을 높이기 위한 단계입니다. Codex 연동만 다시 적용할 때는 `--codex`/`--codex-wrapper`를 사용합니다.
+`cwf:setup`은 훅 그룹 토글, 외부 도구 감지(Codex/Gemini/Tavily/Exa), 환경 변수 마이그레이션(레거시 키 → `CWF_*`), 프로젝트 설정 파일 부트스트랩(`.cwf-config.yaml`, `.cwf-config.local.yaml`), 선택적 Codex 연동, 선택적 인덱스 생성/갱신을 대화형으로 수행합니다. Codex 연동은 활성 플러그인 스코프를 `local > project > user` 우선순위로 해석한 뒤 해당 스코프를 기본 대상으로 적용합니다. 여기서 인덱스 생성은 에이전트가 필요한 문서를 짧은 경로로 찾아가도록 라우팅 품질을 높이기 위한 단계입니다. Codex 연동만 다시 적용할 때는 `--codex`/`--codex-wrapper`를 사용합니다.
 
 ### [update](plugins/cwf/skills/update/SKILL.md)
 
@@ -428,7 +428,7 @@ cwf:update --check       # 버전 확인만
 
 **무엇을 하는가**
 
-마켓플레이스 메타데이터를 먼저 갱신한 뒤 설치 버전과 최신 버전을 비교합니다. `--check`는 조회만 수행하고, 업데이트는 사용자 확인 후 적용합니다.
+마켓플레이스 메타데이터를 먼저 갱신한 뒤 선택한 스코프의 설치 버전과 최신 버전을 비교합니다. 업데이트는 사용자 확인 후 스코프 지정으로 적용되며, 업데이트 이후 기존 Codex 링크/래퍼가 있으면 경로 드리프트를 자동 재조정합니다. `--check`는 조회만 수행합니다.
 
 ### Codex 연동
 
@@ -440,11 +440,16 @@ cwf:setup --codex-wrapper
 ```
 
 연동 후 동작:
-- `cwf:setup --codex`: CWF 스킬/레퍼런스를 Codex 사용자 스코프(`~/.agents/*`)에 연결해 Codex에서도 동일한 CWF 지식을 사용합니다.
-- `cwf:setup --codex-wrapper`: `~/.local/bin/codex` wrapper를 설치해 Codex 실행 종료 후 세션 로그를 기본 `.cwf/sessions/`(레거시 폴백: `.cwf/projects/sessions/`)로 자동 동기화하고, 이번 실행에서 바뀐 파일 기준으로 post-run 품질 점검을 수행합니다.
+- setup은 활성 플러그인 스코프를 `local > project > user` 순서로 결정하고, 그 스코프에 맞춰 Codex 경로를 설정합니다.
+- 사용자 스코프 대상: `~/.agents/skills/*`, `~/.agents/references`, `~/.local/bin/codex`
+- 프로젝트/로컬 스코프 대상: `{projectRoot}/.codex/skills/*`, `{projectRoot}/.codex/references`, `{projectRoot}/.codex/bin/codex`
+- 프로젝트/로컬 스코프 실행 시 사용자 전역 경로(`~/.agents`, `~/.local/bin`)를 수정하려면 추가 명시적 확인이 필요합니다.
+- `cwf:setup --codex`: 선택된 스코프 경로에 CWF 스킬/레퍼런스를 연결해 Codex에서도 동일한 CWF 지식을 사용합니다.
+- `cwf:setup --codex-wrapper`: 선택된 스코프 경로에 codex wrapper를 설치해 Codex 실행 종료 후 세션 로그를 기본 `.cwf/sessions/`(레거시 폴백: `.cwf/projects/sessions/`)로 자동 동기화하고, 이번 실행에서 바뀐 파일 기준으로 post-run 품질 점검을 수행합니다.
 - 세션 아티팩트 디렉토리(`plan.md`, `retro.md`, `next-session.md`)는 기존처럼 `.cwf/projects/{YYMMDD}-{NN}-{title}/`에 유지됩니다.
 - post-run 점검 항목은 기본 품질 체크(markdownlint, 로컬 링크, shellcheck, live state) 외에 `apply_patch via exec_command` 위생 감지와 HITL 활성 상태에서 문서 변경 대비 scratchpad 동기화 감지도 포함합니다.
 - post-run 점검은 기본 `warn` 모드로 동작하며(실패를 경고로만 보고), 필요하면 `CWF_CODEX_POST_RUN_MODE=strict`로 실패를 종료코드에 반영할 수 있습니다. 끄려면 `CWF_CODEX_POST_RUN_CHECKS=false`, 로그를 줄이려면 `CWF_CODEX_POST_RUN_QUIET=true`를 사용하세요.
+- `cwf:update`는 선택 스코프 업데이트 후 기존 Codex 연동이 있을 때 stale symlink/wrapper 경로를 재조정합니다.
 
 ## 훅
 
