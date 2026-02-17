@@ -172,6 +172,17 @@ For `--mode plan` and `--mode clarify`, use the document line count instead of d
 
 Store the resolved `cli_timeout` value for use in Phase 2.
 
+**External CLI cutoff (deterministic):**
+
+- Compute `prompt_lines` from the final external prompt content (same basis used for timeout scaling).
+- If `prompt_lines > 1200`, set:
+  - `external_cli_allowed=false`
+  - `external_cli_cutoff_reason=prompt_lines_gt_1200`
+  - `external_cli_cutoff_value=1200`
+- When `external_cli_allowed=false`, skip external CLI detection/attempts and route Slot 3/4 directly to `claude` Task fallbacks.
+- Persist the cutoff evidence in synthesis Confidence Note:
+  - `External CLI skipped: prompt_lines={prompt_lines} cutoff=1200 reason=prompt_lines_gt_1200`
+
 ---
 
 ## Phase 2: Launch All Reviewers
@@ -264,7 +275,9 @@ Parse the output:
 
 Note: `NPX_FOUND` only confirms npx is installed, not that Gemini CLI is authenticated or cached. Runtime failures are handled in Phase 3.2.
 
-Resolve providers for external slots:
+If `external_cli_allowed=false` (from the 1200-line cutoff), skip detection and set both slots to `claude`.
+
+Otherwise, resolve providers for external slots:
 
 - Slot 3 (Correctness):
   - `--correctness-provider auto` → prefer `codex`, then `gemini`, then `claude`
@@ -641,6 +654,7 @@ This prevents sensitive review content (diffs, plans) from persisting in `/tmp/`
 |-----------|--------|
 | No review target found | AskUserQuestion: "What should I review?" |
 | Reviewer output malformed | Extract by pattern matching, note in Confidence Note |
+| External prompt lines > 1200 | Skip external CLIs for Slot 3/4, use Task fallbacks directly, and record cutoff evidence in Confidence Note. |
 | `--scenarios <path>` file missing/unreadable | Stop with explicit error. Ask for a valid scenarios path. |
 | `--scenarios <path>` has zero parseable checks | Stop with explicit error. Ask for GWT/checklist-formatted scenarios. |
 | `--base <branch>` not found in local/origin refs | Stop with explicit error. Ask for a valid base branch. |
@@ -706,6 +720,11 @@ Then /review deterministically uses that base and records base_strategy=explicit
 Given review findings include both structural tidy changes and behavior-policy changes
 When /review renders synthesis
 Then the synthesis includes commit-boundary guidance to split tidy and behavior-policy commits
+
+Given a review target whose external prompt length is 1201 lines
+When /review resolves external reviewer routing
+Then Slot 3 and Slot 4 skip CLI execution and run Task fallback directly
+And synthesis confidence note includes the deterministic cutoff evidence
 ```
 
 ---

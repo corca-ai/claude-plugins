@@ -192,7 +192,26 @@ For each file that references the missing target, classify the reference:
 
 Rule: never treat "broken link" as "remove reference" by default. Determine why the file is missing before editing references.
 
-### 4. Record the triage decision
+### 4. Triage record contract (structural)
+
+Each triage item must carry the original recommendation and runtime impact evidence, not a summary-only action:
+
+```yaml
+triage_item:
+  source_ref: "<analysis file>:<line>"
+  source_recommendation: "<original recommendation>"
+  triage_action: "<restore|update-docs|remove-stale-ref|defer>"
+  runtime_caller_check: "<command + result>"
+  deletion_premortem: "<what breaks if deleted>"
+  decision_id: "<stable id>"
+```
+
+Contract rules:
+- If `source_recommendation` is missing, the triage item is invalid.
+- If `triage_action` differs from `source_recommendation`, ask the user before applying the change.
+- For deletion actions, `runtime_caller_check` and `deletion_premortem` are mandatory.
+
+### 5. Record the triage decision
 
 Persist the triage decision in the current session's artifacts — either `lessons.md` or `live.decision_journal` in the resolved live-state file.
 
@@ -205,7 +224,8 @@ This means agents encountering a hook block should:
 1. Read the broken link details from the hook output
 2. Follow the triage protocol above (git log → classify callers → decision matrix)
 3. Take the appropriate action from the decision matrix — **not** simply remove the reference to make the hook pass
-4. Record the triage decision before re-attempting the edit
+4. Ensure the triage item satisfies the structural contract
+5. Record the triage decision before re-attempting the edit
 
 ## Web Research Protocol
 

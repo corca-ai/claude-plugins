@@ -68,7 +68,7 @@ Read `cwf-state.yaml` `hooks:` section for current toggle state.
 
 ### 1.2 Present Selection
 
-Use AskUserQuestion with `multiSelect: true`. Present 7 hook groups with descriptions:
+Use AskUserQuestion with `multiSelect: true`. Present 9 hook groups with descriptions:
 
 | Group | Description |
 |-------|-------------|
@@ -77,6 +77,8 @@ Use AskUserQuestion with `multiSelect: true`. Present 7 hook groups with descrip
 | `read` | File-size aware reading guard |
 | `lint_markdown` | Markdown validation after Write/Edit |
 | `lint_shell` | ShellCheck validation after Write/Edit |
+| `deletion_safety` | Blocks risky file deletions and requires policy-compliant justification |
+| `workflow_gate` | Enforces workflow stage/branch safety rules before edits and commands |
 | `websearch_redirect` | Redirect WebSearch to cwf:gather |
 | `compact_recovery` | Inject live session state after auto-compact and guard session↔worktree binding on prompts |
 
@@ -93,6 +95,8 @@ export HOOK_LOG_ENABLED="true"
 export HOOK_READ_ENABLED="true"
 export HOOK_LINT_MARKDOWN_ENABLED="false"
 export HOOK_LINT_SHELL_ENABLED="true"
+export HOOK_DELETION_SAFETY_ENABLED="true"
+export HOOK_WORKFLOW_GATE_ENABLED="true"
 export HOOK_WEBSEARCH_REDIRECT_ENABLED="true"
 export HOOK_COMPACT_RECOVERY_ENABLED="true"
 ```
@@ -112,6 +116,8 @@ hooks:
   read: true
   lint_markdown: false
   lint_shell: true
+  deletion_safety: true
+  workflow_gate: true
   websearch_redirect: true
   compact_recovery: true
 ```
