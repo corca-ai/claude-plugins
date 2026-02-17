@@ -1,0 +1,788 @@
+OpenAI Codex v0.101.0 (research preview)
+--------
+workdir: /home/hwidong/codes/claude-plugins
+model: gpt-5.3-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+session id: 019c6ae7-dac8-7763-ae00-d57aa1ef05cd
+--------
+user
+You are a correctness and performance reviewer for CODE review mode.
+
+Review commit range: 524d016..0b9300b
+Focus files:
+- plugins/cwf/references/concept-map.md
+- plugins/cwf/skills/clarify/SKILL.md
+- plugins/cwf/skills/clarify/references/questioning-guide.md
+- plugins/cwf/skills/clarify/references/research-guide.md
+- plugins/cwf/skills/gather/SKILL.md
+- plugins/cwf/skills/handoff/SKILL.md
+- plugins/cwf/skills/hitl/README.md
+- plugins/cwf/skills/hitl/SKILL.md
+- plugins/cwf/skills/hitl/references/hitl-state-model.md
+- plugins/cwf/skills/impl/SKILL.md
+- plugins/cwf/skills/impl/references/agent-prompts.md
+- plugins/cwf/skills/impl/references/impl-gates.md
+- plugins/cwf/skills/plan/SKILL.md
+- plugins/cwf/skills/refactor/SKILL.md
+- plugins/cwf/skills/retro/README.md
+- plugins/cwf/skills/retro/SKILL.md
+- plugins/cwf/skills/retro/references/retro-gates-checklist.md
+- plugins/cwf/skills/review/references/external-review.md
+- plugins/cwf/skills/review/references/prompts.md
+- plugins/cwf/skills/run/SKILL.md
+- plugins/cwf/skills/setup/SKILL.md
+- plugins/cwf/skills/update/SKILL.md
+
+Assess for:
+- behavioral regressions and contradiction risks
+- deterministic gate compatibility and missing failure branches
+- script/skill contract mismatches and unsafe defaults
+
+Required output format:
+## Correctness Review
+### Concerns (blocking)
+- **[C1]** ...
+  Severity: critical | security | moderate
+(If none: "No blocking concerns identified.")
+### Suggestions (non-blocking)
+- **[S1]** ...
+(If none: "No suggestions.")
+### Behavioral Criteria Assessment
+- [x] ... or [ ] ...
+### Provenance
+source: REAL_EXECUTION
+tool: codex
+reviewer: Correctness
+duration_ms: —
+command: codex exec --sandbox read-only -c model_reasoning_effort='high' -
+
+mcp startup: no servers
+2026-02-17T09:21:45.697688Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c5c1a-1ba3-7c90-a572-1930457798a4
+2026-02-17T09:21:45.719556Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a83-6f31-7562-939f-e1374a0adf4b
+2026-02-17T09:21:45.741450Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6aba-7ec8-7220-8e21-c0a05e458292
+2026-02-17T09:21:45.762940Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6ae3-68eb-7960-953f-62f8f6f479a6
+2026-02-17T09:21:45.784511Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6aab-576a-7f50-861f-e9d3ff8007b0
+2026-02-17T09:21:45.806512Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6aaf-ff34-7d92-a6d8-a5b4d388a644
+2026-02-17T09:21:45.828227Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a88-9fba-7540-bd33-3d3223e67c5e
+2026-02-17T09:21:45.850056Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a88-a018-7a81-b159-8655b02db26d
+2026-02-17T09:21:45.871938Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a7f-a705-7583-bc92-0c8b2ee8c361
+2026-02-17T09:21:45.893954Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6aba-7eb5-7421-877a-b2a7d250067d
+2026-02-17T09:21:45.915777Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a8d-7d7d-7c83-8257-340c7a61c8e2
+2026-02-17T09:21:45.937832Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a85-5583-7b12-b053-9d168817aebb
+2026-02-17T09:21:45.960213Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6aab-57c5-7b53-923f-3e12249bef20
+2026-02-17T09:21:45.982401Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6ad3-5816-7172-94ce-14d275077720
+2026-02-17T09:21:46.004546Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6aaf-ff5c-7ed3-8980-794042ccc47d
+2026-02-17T09:21:46.026753Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a83-6f53-73a3-bfe3-08fa3e974454
+2026-02-17T09:21:46.048917Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6aaf-ff49-7ec2-b186-092ee91ebbc4
+2026-02-17T09:21:46.070791Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6aab-57d4-77e0-b877-70111be6ddc2
+2026-02-17T09:21:46.092424Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a8d-7da6-72f0-896d-b8443d1b9f9f
+2026-02-17T09:21:46.114240Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6ad8-74db-75a1-b824-dfd4ba4ca922
+2026-02-17T09:21:46.136049Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c5c1a-1be7-7621-95f8-c7cb7c620e26
+2026-02-17T09:21:46.157882Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6aab-57b5-7c33-91b4-0215e7266d69
+2026-02-17T09:21:46.179208Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a7f-a69d-7520-b946-f126d79e81b4
+2026-02-17T09:21:46.200721Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c68bd-6e2b-7982-89be-fa3ea9b60d42
+2026-02-17T09:21:46.222171Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6ad3-36f5-7763-9974-f0125f03cc11
+2026-02-17T09:21:46.243944Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c5c1a-1bb3-7b23-9980-28a39c92f9cc
+2026-02-17T09:21:46.265783Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a7a-de59-79f3-b7f7-9d3396417c55
+2026-02-17T09:21:46.287557Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6aba-7ea2-7492-99f5-f8dab61739e4
+2026-02-17T09:21:46.309254Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6aaf-ff83-7d20-ae14-b915ff076515
+2026-02-17T09:21:46.330888Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6ad3-7354-7f33-ab1a-7602254ed8b0
+2026-02-17T09:21:46.352622Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c5c1a-1bd8-7061-a6e5-1786773c1e89
+2026-02-17T09:21:46.374615Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a7f-a715-7803-8142-bdc8072d538b
+2026-02-17T09:21:46.396508Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6899-6d93-75d3-b8fc-fc876181af32
+2026-02-17T09:21:46.418208Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a7f-a6ab-7041-a38f-575dad852e76
+2026-02-17T09:21:46.440051Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6aaf-ff6d-7a12-bd60-ff647d9a289f
+2026-02-17T09:21:46.461762Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a88-a00c-7242-82e2-043f50e5247d
+2026-02-17T09:21:46.483721Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6aab-57e5-77f3-8b0c-15d0ae4122da
+2026-02-17T09:21:46.505350Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a8d-c0ac-7193-b7a6-3e87a765150c
+2026-02-17T09:21:46.527266Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a88-a027-7422-98ec-7dd48b7fbb2d
+2026-02-17T09:21:46.548922Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6ad3-20ac-7dc0-9727-6afdb128d873
+2026-02-17T09:21:46.570238Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6aaa-8170-7203-93e1-3731534e5fd7
+2026-02-17T09:21:46.591858Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a8d-c0bd-7543-af1b-f51a19dc58b4
+2026-02-17T09:21:46.613143Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6ae3-689a-7e61-8bbe-84a2c1eb729e
+2026-02-17T09:21:46.634538Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c68bc-916c-7853-9dfb-7012361f9a3c
+2026-02-17T09:21:46.655882Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a7f-a728-77a2-b6c4-016e5329618c
+2026-02-17T09:21:46.677368Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c5bdf-18bd-78d3-9f82-ba816d4c136a
+2026-02-17T09:21:46.698759Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a85-55c6-78c2-bdce-ccb825d63613
+
+thinking
+**Planning code review workflow**
+codex
+요청하신 커밋 범위(`524d016..0b9300b`)를 correctness/performance 관점으로 점검하겠습니다. 먼저 해당 범위의 실제 변경(diff)과 포커스 파일별 내용을 수집한 뒤, 블로킹 이슈 중심으로 정리하겠습니다.
+
+thinking
+**Listing changed files**
+exec
+/usr/bin/zsh -lc 'git rev-parse --verify 524d016 && git rev-parse --verify 0b9300b && git diff --name-only 524d016..0b9300b' in /home/hwidong/codes/claude-plugins succeeded in 51ms:
+524d016850a2527c61953777ff921c54b4a8ebf9
+0b9300b00fb42ccbb92c566ca73bdc2c0a990780
+.cwf/projects/260217-05-full-skill-refactor-run/impl-refactor-apply-round1.md
+.cwf/projects/260217-05-full-skill-refactor-run/refactor-deep-quality-ship.md
+.cwf/projects/260217-05-full-skill-refactor-run/refactor-deep-quality-update.md
+.cwf/projects/260217-05-full-skill-refactor-run/refactor-deep-structural-ship.md
+.cwf/projects/260217-05-full-skill-refactor-run/refactor-deep-structural-update.md
+.cwf/projects/260217-05-full-skill-refactor-run/refactor-skill-clarify.md
+.cwf/projects/260217-05-full-skill-refactor-run/refactor-skill-gather.md
+.cwf/projects/260217-05-full-skill-refactor-run/refactor-skill-handoff.md
+.cwf/projects/260217-05-full-skill-refactor-run/refactor-skill-hitl.md
+.cwf/projects/260217-05-full-skill-refactor-run/refactor-skill-impl.md
+.cwf/projects/260217-05-full-skill-refactor-run/refactor-skill-plan.md
+.cwf/projects/260217-05-full-skill-refactor-run/refactor-skill-refactor.md
+.cwf/projects/260217-05-full-skill-refactor-run/refactor-skill-retro.md
+.cwf/projects/260217-05-full-skill-refactor-run/refactor-skill-review.md
+.cwf/projects/260217-05-full-skill-refactor-run/refactor-skill-run.md
+.cwf/projects/260217-05-full-skill-refactor-run/refactor-skill-setup.md
+.cwf/projects/260217-05-full-skill-refactor-run/refactor-skill-ship.md
+.cwf/projects/260217-05-full-skill-refactor-run/refactor-skill-update.md
+exec
+/usr/bin/zsh -lc "sed -n '1,220p' plugins/cwf/skills/review/SKILL.md" in /home/hwidong/codes/claude-plugins succeeded in 51ms:
+---
+name: review
+description: "Universal review with narrative verdicts for consistent quality gates before and after implementation. 6 parallel reviewers: 2 internal (Security, UX/DX) via Task + 2 external slots via available providers (Codex/Gemini CLI, Claude Task fallback) + 2 domain experts via Task. Graceful fallback when CLIs are unavailable. Modes: --mode clarify/plan/code. Triggers: \"/review\""
+---
+
+# Review (/review)
+
+Apply consistent multi-perspective quality gates before implementation (plan) and after implementation (code) via 6 parallel reviewers (2 internal + 2 external slots + 2 domain experts).
+
+**Language**: Match the user's language for synthesis. Reviewer prompts in English.
+
+## Quick Reference
+
+```text
+/review                 Code review (default)
+/review --mode plan     Plan/spec review
+/review --mode clarify  Requirement review
+/review --mode code --base marketplace-v3 --scenarios .cwf/projects/holdout.md
+/review --mode code --correctness-provider gemini --architecture-provider claude
+```
+
+thinking
+**Planning focused diff extraction**
+codex
+변경 의도와 리스크를 정확히 잡기 위해 포커스 파일의 diff와 커밋 통계를 먼저 확인하고 있습니다. 이어서 파일별로 계약(게이트/실패 분기/기본값) 충돌 여부를 대조하겠습니다.
+exec
+/usr/bin/zsh -lc 'git log --oneline --decorate 524d016..0b9300b' in /home/hwidong/codes/claude-pluginsexec
+/usr/bin/zsh -lc 'git diff --stat 524d016..0b9300b -- plugins/cwf/references/concept-map.md plugins/cwf/skills/clarify/SKILL.md plugins/cwf/skills/clarify/references/questioning-guide.md plugins/cwf/skills/clarify/references/research-guide.md plugins/cwf/skills/gather/SKILL.md plugins/cwf/skills/handoff/SKILL.md plugins/cwf/skills/hitl/README.md plugins/cwf/skills/hitl/SKILL.md plugins/cwf/skills/hitl/references/hitl-state-model.md plugins/cwf/skills/impl/SKILL.md plugins/cwf/skills/impl/references/agent-prompts.md plugins/cwf/skills/impl/references/impl-gates.md plugins/cwf/skills/plan/SKILL.md plugins/cwf/skills/refactor/SKILL.md plugins/cwf/skills/retro/README.md plugins/cwf/skills/retro/SKILL.md plugins/cwf/skills/retro/references/retro-gates-checklist.md plugins/cwf/skills/review/references/external-review.md plugins/cwf/skills/review/references/prompts.md plugins/cwf/skills/run/SKILL.md plugins/cwf/skills/setup/SKILL.md plugins/cwf/skills/update/SKILL.md' in /home/hwidong/codes/claude-plugins succeeded in 51ms:
+0b9300b refactor(cwf): apply cross-skill deterministic workflow hardening
+54501d4 docs(cwf-run): persist full skill deep-refactor outputs and impl provenance
+ succeeded in 51ms:
+ plugins/cwf/references/concept-map.md              |   6 +-
+ plugins/cwf/skills/clarify/SKILL.md                |  36 +++--
+ .../skills/clarify/references/questioning-guide.md |  10 ++
+ .../skills/clarify/references/research-guide.md    |   5 +
+ plugins/cwf/skills/gather/SKILL.md                 |  88 +++++++---
+ plugins/cwf/skills/handoff/SKILL.md                | 178 ++++++---------------
+ plugins/cwf/skills/hitl/README.md                  |   1 +
+ plugins/cwf/skills/hitl/SKILL.md                   |  57 ++-----
+ .../cwf/skills/hitl/references/hitl-state-model.md |  90 +++++++++++
+ plugins/cwf/skills/impl/SKILL.md                   |  15 +-
+ .../cwf/skills/impl/references/agent-prompts.md    |   7 +
+ plugins/cwf/skills/impl/references/impl-gates.md   |   6 +
+ plugins/cwf/skills/plan/SKILL.md                   | 101 +++---------
+ plugins/cwf/skills/refactor/SKILL.md               |  70 +++++++-
+ plugins/cwf/skills/retro/README.md                 |   1 +
+ plugins/cwf/skills/retro/SKILL.md                  |  40 ++---
+ .../retro/references/retro-gates-checklist.md      |  40 +++++
+ .../skills/review/references/external-review.md    |   8 +
+ plugins/cwf/skills/review/references/prompts.md    |   6 +
+ plugins/cwf/skills/run/SKILL.md                    |  85 +++++++++-
+
+thinking
+**Planning detailed diff inspection**
+exec
+/usr/bin/zsh -lc 'git diff --unified=3 524d016..0b9300b -- plugins/cwf/references/concept-map.md plugins/cwf/skills/clarify/SKILL.md plugins/cwf/skills/clarify/references/questioning-guide.md plugins/cwf/skills/clarify/references/research-guide.md plugins/cwf/skills/gather/SKILL.md' in /home/hwidong/codes/claude-pluginsexec
+/usr/bin/zsh -lc 'git diff --unified=3 524d016..0b9300b -- plugins/cwf/skills/handoff/SKILL.md plugins/cwf/skills/hitl/README.md plugins/cwf/skills/hitl/SKILL.md plugins/cwf/skills/hitl/references/hitl-state-model.md' in /home/hwidong/codes/claude-plugins succeeded in 51ms:
+diff --git a/plugins/cwf/references/concept-map.md b/plugins/cwf/references/concept-map.md
+index 8fe6dd7..0171ca0 100644
+--- a/plugins/cwf/references/concept-map.md
++++ b/plugins/cwf/references/concept-map.md
+@@ -1,8 +1,8 @@
+ # Concept Synchronization Map
+ 
+-<!-- Provenance: reviewed at 12 skills, 15 hooks (S24). Source: concept-distillation.md -->
++<!-- Provenance: reviewed at 13 skills, 15 hooks (S24). Source: concept-distillation.md -->
+ 
+-Reference for refactor agents: 6 generic concepts with verification criteria, and a 12×6 synchronization map showing which concepts each skill composes.
++Reference for refactor agents: 6 generic concepts with verification criteria, and a 13×6 synchronization map showing which concepts each skill composes.
+ 
+ ## 1. Generic Concepts
+ 
+@@ -166,6 +166,7 @@ Which generic concepts each skill composes:
+ | review | x | | x | | | |
+ | run | | | x | | | |
+ | handoff | | | | | x | |
++| hitl | | | | x | x | |
+ succeeded in 51ms:
+diff --git a/plugins/cwf/skills/handoff/SKILL.md b/plugins/cwf/skills/handoff/SKILL.md
+index dd8b62a..08ea4dd 100644
+--- a/plugins/cwf/skills/handoff/SKILL.md
++++ b/plugins/cwf/skills/handoff/SKILL.md
+@@ -82,139 +82,50 @@ Fall back to `cwf-state.yaml` stages and user input:
+ 
+ ## Phase 3: Generate next-session.md
+ 
+-Write `next-session.md` in the current session artifact directory. Follow the format defined in `plan-protocol.md` (Handoff Document section).
++Write `next-session.md` in the current session artifact directory.
+ 
+-### 9 Required Sections
++Use [plan-protocol.md](../../references/plan-protocol.md) as the canonical source:
+ 
+-#### 1. Context Files to Read
++- `Handoff Document (milestone sessions)` for required section structure
++- `Execution Contract (Mention-Only Safe)` for mandatory contract clauses
+ 
+-List files the next session agent must read before starting:
++Do not replicate or improvise template structure from recent examples.
+
+thinking
+**Preparing second batch diff**
+codex
+첫 번째 묶음에서 구조 리팩터링(특히 handoff/hitl/gather) 변경을 확인했습니다. 이제 나머지 스킬(impl/plan/refactor/retro/review/run/setup/update) diff를 읽고 상호 모순 여부를 교차검증하겠습니다.
+exec
+/usr/bin/zsh -lc 'git diff --unified=3 524d016..0b9300b -- plugins/cwf/skills/retro/README.md plugins/cwf/skills/retro/SKILL.md plugins/cwf/skills/retro/references/retro-gates-checklist.md plugins/cwf/skills/review/references/external-review.md plugins/cwf/skills/review/references/prompts.md plugins/cwf/skills/run/SKILL.md plugins/cwf/skills/setup/SKILL.md plugins/cwf/skills/update/SKILL.md' in /home/hwidong/codes/claude-pluginsexec
+/usr/bin/zsh -lc 'git diff --unified=3 524d016..0b9300b -- plugins/cwf/skills/impl/SKILL.md plugins/cwf/skills/impl/references/agent-prompts.md plugins/cwf/skills/impl/references/impl-gates.md plugins/cwf/skills/plan/SKILL.md plugins/cwf/skills/refactor/SKILL.md' in /home/hwidong/codes/claude-plugins succeeded in 51ms:
+diff --git a/plugins/cwf/skills/retro/README.md b/plugins/cwf/skills/retro/README.md
+index 73b6d1c..962251b 100644
+--- a/plugins/cwf/skills/retro/README.md
++++ b/plugins/cwf/skills/retro/README.md
+@@ -6,3 +6,4 @@ File-level map for [retro](SKILL.md).
+ - [SKILL.md](SKILL.md): Primary instructions and execution workflow for this skill.
+ - [references/cdm-guide.md](references/cdm-guide.md): Reference file used by this skill (cdm-guide).
+ - [references/expert-lens-guide.md](references/expert-lens-guide.md): Reference file used by this skill (expert-lens-guide).
++- [references/retro-gates-checklist.md](references/retro-gates-checklist.md): Deterministic gate checklist referenced by this skill.
+diff --git a/plugins/cwf/skills/retro/SKILL.md b/plugins/cwf/skills/retro/SKILL.md
+index 0b8c0f4..3b5a138 100644
+--- a/plugins/cwf/skills/retro/SKILL.md
++++ b/plugins/cwf/skills/retro/SKILL.md
+@@ -133,10 +133,10 @@ Gate behavior after Batch 1:
+ 
+ **Batch 2** — launch in a single message with 2 parallel Task calls (after Batch 1, only for agents whose result files are missing or invalid):
+ 
+-- **Agent C — Expert alpha**: `subagent_type: general-purpose`, `max_turns: 20`. Prompt: "Read `{CWF_PLUGIN_DIR}/references/expert-advisor-guide.md`. You are Expert α, operating in **retro mode**. Session summary: {Sections 1-4 summary, including CDM results from Agent A}. Deep-clarify experts: {names or 'not available'}. Analyze through your framework. Use web search to verify expert identity and cite published work (follow Web Research Protocol in {CWF_PLUGIN_DIR}/references/agent-patterns.md; you have Bash access for agent-browser fallback). Output your Expert α section. **Output Persistence**: Write your complete analysis to: `{session_dir}/retro-expert-alpha.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`"
+-- **Agent D — Expert beta**: `subagent_type: general-purpose`, `max_turns: 20`. Prompt: "Read `{CWF_PLUGIN_DIR}/references/expert-advisor-guide.md`. You are Expert β, operating in **retro mode**. Session summary: {Sections 1-4 summary, including CDM results from Agent A}. Deep-clarify experts: {names or 'not available'}. Analyze through your framework. Use web search to verify expert identity and cite published work (follow Web Research Protocol in {CWF_PLUGIN_DIR}/references/agent-patterns.md; you have Bash access for agent-browser fallback). Output your Expert β section. **Output Persistence**: Write your complete analysis to: `{session_dir}/retro-expert-beta.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`"
++- **Agent C — Expert alpha**: `subagent_type: general-purpose`, `max_turns: 20`. Prompt: "Read `{CWF_PLUGIN_DIR}/references/expert-advisor-guide.md` and `{SKILL_DIR}/references/expert-lens-guide.md`. You are Expert α, operating in **retro mode**. Session summary: {Sections 1-4 summary, including CDM results from Agent A}. Deep-clarify experts: {names or 'not available'}. Analyze through your framework. Use web search to verify expert identity and cite published work (follow Web Research Protocol in {CWF_PLUGIN_DIR}/references/agent-patterns.md; you have Bash access for agent-browser fallback). Output your Expert α section. **Output Persistence**: Write your complete analysis to: `{session_dir}/retro-expert-alpha.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`"
+ succeeded in 51ms:
+diff --git a/plugins/cwf/skills/impl/SKILL.md b/plugins/cwf/skills/impl/SKILL.md
+index 80ac36f..8d56f24 100644
+--- a/plugins/cwf/skills/impl/SKILL.md
++++ b/plugins/cwf/skills/impl/SKILL.md
+@@ -75,9 +75,18 @@ Apply the [Clarify Completion Gate](references/impl-gates.md#clarify-completion-
+ 
+ If an explicit path was provided, use it. Otherwise:
+ 
+-1. Scan `.cwf/projects/*/plan.md` using Glob
+-2. Sort by directory name (most recent date-sequence first)
+-3. Select the most recent `plan.md`
++1. Scan `.cwf/projects/*/plan.md` using Glob.
++1. Rank candidates with this priority (highest first):
++   - **Session pin from live state**: if `plan.md` exists inside `live.dir` from the resolved live-state file, prefer it.
++   - **Plan metadata timestamp**: newest parseable ISO-8601 from plan metadata/frontmatter (`updated_at`, `created_at`, `generated_at`, `date`).
++   - **Filesystem timestamp**: newest `plan.md` modification time.
++   - **Directory name order**: use only as a final deterministic tiebreaker after timestamp signals.
++1. Select the top-ranked candidate only when it is unambiguous.
++
++Ambiguity behavior (fail-closed):
+
+thinking
+**Identifying potential contract and logic inconsistencies**
+exec
+/usr/bin/zsh -lc "nl -ba plugins/cwf/skills/run/SKILL.md | sed -n '1,260p'" in /home/hwidong/codes/claude-pluginsexec
+/usr/bin/zsh -lc "nl -ba plugins/cwf/skills/run/SKILL.md | sed -n '260,520p'" in /home/hwidong/codes/claude-plugins succeeded in 50ms:
+     1	---
+     2	name: run
+     3	description: "Full CWF pipeline auto-chaining for end-to-end delegation without manual stage sequencing. Orchestrates: gather → clarify → plan → review(plan) → impl → review(code) → refactor → retro → ship. Respects Decision #19: human gates pre-impl, autonomous post-impl. Triggers: \"cwf:run\", \"run workflow\""
+     4	---
+     5	
+     6	# Run
+     7	
+     8	Delegate end-to-end workflow orchestration when users do not want to manually sequence each skill.
+     9	
+    10	**Language**: Communicate with the user in their prompt language. Artifacts in English.
+    11	
+    12	## Quick Start
+    13	
+    14	```text
+    15	cwf:run <task description>           # Full pipeline from scratch
+    16	cwf:run --from impl                  # Resume from impl stage
+    17	cwf:run --skip ship                  # Full pipeline, skip ship
+    18	cwf:run --skip review-plan,retro     # Skip specific stages
+    19	cwf:run --ambiguity-mode strict      # Override T3 handling policy for this run
+    20	```
+ succeeded in 50ms:
+   260	   bash {CWF_PLUGIN_DIR}/scripts/check-run-gate-artifacts.sh \
+   261	     --session-dir "$session_dir" \
+   262	     --stage "{current stage name}" \
+   263	     --strict \
+   264	     --record-lessons
+   265	   ```
+   266	
+   267	   - If this gate fails, stop immediately.
+   268	   - Report the failure to the user with file-level details.
+   269	   - Ask the user whether to revise and re-run the stage.
+   270	
+   271	1. After skill completes, apply the gate:
+   272	
+   273	#### User Gates (auto: false)
+   274	
+   275	Ask the user with `AskUserQuestion`:
+   276	
+   277	```text
+   278	{stage} complete. How to proceed?
+   279	```
+
+thinking
+**Inspecting gather file for gaps**
+codex
+`run` 스킬 본문을 확인했고, stage provenance/Fail 처리 주변의 누락 분기를 더 점검 중입니다. 이어서 `gather`, `handoff`, `update`의 새 계약이 실제로 fail-closed인지 확인하겠습니다.
+exec
+/usr/bin/zsh -lc "nl -ba plugins/cwf/skills/gather/SKILL.md | sed -n '1,300p'" in /home/hwidong/codes/claude-pluginsexec
+/usr/bin/zsh -lc "nl -ba plugins/cwf/skills/handoff/SKILL.md | sed -n '1,420p'" in /home/hwidong/codes/claude-plugins succeeded in 50ms:
+     1	---
+     2	name: gather
+     3	description: "Unified information acquisition that stabilizes context before reasoning: URL auto-detect (Google/Slack/Notion/GitHub/web), web search (Tavily/Exa), and local codebase exploration. Triggers: \"cwf:gather\", \"gather <url>\", \"web search\", \"code search\""
+     4	---
+     5	
+     6	# Gather Context (cwf:gather)
+     7	
+     8	Convert scattered sources into local, reusable artifacts so later phases reason over stable context instead of transient links.
+     9	
+    10	**Language**: Write gathered artifacts in English. Communicate with the user in their prompt language.
+    11	
+    12	## Quick Reference
+    13	
+    14	```text
+    15	cwf:gather <url>                  URL auto-detect → download to OUTPUT_DIR
+    16	cwf:gather <url1> <url2> ...      Multiple URLs
+    17	cwf:gather --search <query>       Web search (Tavily)
+    18	cwf:gather --search --news <q>    News search (Tavily)
+    19	cwf:gather --search --deep <q>    Advanced depth search (Tavily)
+    20	cwf:gather --search code <query>  Code/technical search (Exa)
+ succeeded in 51ms:
+     1	---
+     2	name: handoff
+     3	description: "Auto-generate session or phase handoff documents so the next agent starts with context, constraints, and scope already loaded. Source: cwf-state.yaml and session artifacts. --phase mode generates phase-to-phase context transfer (HOW) separate from plan.md (WHAT). Triggers: \"cwf:handoff\", \"cwf:handoff --phase\", \"handoff\", \"핸드오프\", \"다음 세션\", \"phase handoff\""
+     4	---
+     5	
+     6	# Handoff
+     7	
+     8	Preserve execution continuity across boundaries by generating handoff documents (`next-session.md` or `phase-handoff.md`) from project state and artifacts. Reads `cwf-state.yaml` for session history and `master-plan.md` (when available) for next-session scope.
+     9	
+    10	**Language**: Write handoff documents in English. Communicate with the user in their prompt language.
+    11	
+    12	## Quick Start
+    13	
+    14	```text
+    15	cwf:handoff                # Full: generate next-session.md + register
+    16	cwf:handoff --register     # Register current session in cwf-state.yaml only
+    17	cwf:handoff --phase        # Generate phase-handoff.md (HOW context for next phase)
+    18	```
+    19	
+    20	---
+
+thinking
+**Assessing canonical sections mismatch**
+exec
+/usr/bin/zsh -lc "nl -ba plugins/cwf/skills/update/SKILL.md | sed -n '1,260p'" in /home/hwidong/codes/claude-pluginsexec
+/usr/bin/zsh -lc "nl -ba plugins/cwf/skills/setup/SKILL.md | sed -n '200,290p'" in /home/hwidong/codes/claude-plugins succeeded in 51ms:
+     1	---
+     2	name: update
+     3	description: "Check and update CWF plugin to keep installed behavior aligned with latest contracts and fixes. Triggers: \"cwf:update\", \"update cwf\", \"check for updates\""
+     4	---
+     5	
+     6	# Update
+     7	
+     8	Keep installed CWF behavior aligned with the latest marketplace version and fixes.
+     9	
+    10	**Language**: Write artifacts in English. Communicate with the user in their prompt language.
+    11	
+    12	## Quick Start
+    13	
+    14	```text
+    15	cwf:update               # Check + update if newer version exists
+    16	cwf:update --check       # Version check only, no install
+    17	```
+    18	
+    19	---
+    20	
+ succeeded in 51ms:
+   200	
+   201	Options:
+   202	- `Install missing now (recommended)`:
+   203	  - run installer script for missing tools
+   204	  - re-check and report unresolved items with exact commands
+   205	- `Show commands only`:
+   206	  - do not install
+   207	  - print exact install commands per missing tool
+   208	- `Skip for now`:
+   209	  - continue setup without installation
+   210	
+   211	If user selects `Install missing now (recommended)`, run:
+   212	
+   213	```bash
+   214	bash {SKILL_DIR}/scripts/install-tooling-deps.sh --install missing
+   215	```
+   216	
+   217	If user selects `Show commands only`, run:
+   218	
+   219	```bash
+
+thinking
+**Planning skill and checklist review**
+codex
+`update` 스킬은 old/new 경로 캡처 방식이 실제 동작에서 안전한지 추가 검토가 필요해 보입니다. `retro`와 `impl/plan/refactor`의 규칙 충돌 가능성을 이어서 확인하겠습니다.
+exec
+/usr/bin/zsh -lc "nl -ba plugins/cwf/skills/retro/SKILL.md | sed -n '110,260p'" in /home/hwidong/codes/claude-pluginsexec
+/usr/bin/zsh -lc "nl -ba plugins/cwf/skills/retro/references/retro-gates-checklist.md | sed -n '1,220p'" in /home/hwidong/codes/claude-plugins succeeded in 51ms:
+   110	Stage-tier policy for deep mode outputs:
+   111	- **Critical (hard gate)**: `{session_dir}/retro-cdm-analysis.md`
+   112	- **Non-critical (soft gate)**: `{session_dir}/retro-learning-resources.md`,
+   113	  `{session_dir}/retro-expert-alpha.md`, `{session_dir}/retro-expert-beta.md`
+   114	
+   115	For all outputs: bounded retry = 1 for missing/invalid files.
+   116	- Shared output persistence contract: [agent-patterns.md § Sub-agent Output Persistence Contract](../../references/agent-patterns.md#sub-agent-output-persistence-contract).
+   117	
+   118	**Batch 1** — launch in a single message with 2 parallel Task calls (only for agents whose result files are missing or invalid):
+   119	
+   120	- **Agent A — CDM Analysis**: `subagent_type: general-purpose`, `max_turns: 16`. Prompt: "Read `{SKILL_DIR}/references/cdm-guide.md`. Analyze the following session summary using CDM methodology. Session summary: {Sections 1-3 summary}. cwf-state context: {relevant cwf-state.yaml content}. Output Section 4 content. **Output Persistence**: Write your complete analysis to: `{session_dir}/retro-cdm-analysis.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`"
+   121	- **Agent B — Learning Resources**: `subagent_type: general-purpose`, `max_turns: 20`. Prompt: "Based on the following session summary, search the web for 2-3 learning resources calibrated to the user's knowledge level. Follow the Web Research Protocol in {CWF_PLUGIN_DIR}/references/agent-patterns.md (discover URLs via WebSearch, fetch with WebFetch then agent-browser fallback for JS-rendered pages). You have Bash access for agent-browser CLI commands. Session summary: {Sections 1-3 summary}. For each resource: title + URL, 2-3 sentence summary of key takeaways, and why it matters for the user's work. Output Section 6 content. **Output Persistence**: Write your complete findings to: `{session_dir}/retro-learning-resources.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`"
+   122	
+   123	Wait for Batch 1 to complete. Read output files from session directory:
+   124	- `{session_dir}/retro-cdm-analysis.md` — CDM analysis (needed by Batch 2 experts)
+   125	- `{session_dir}/retro-learning-resources.md` — Learning resources
+   126	
+   127	Gate behavior after Batch 1:
+   128	- If `retro-cdm-analysis.md` remains invalid after retry: **hard fail** deep retro.
+   129	- If `retro-learning-resources.md` remains invalid after retry: continue with
+exec
+/usr/bin/zsh -lc "nl -ba plugins/cwf/skills/impl/SKILL.md | sed -n '50,130p'" in /home/hwidong/codes/claude-pluginsexec
+/usr/bin/zsh -lc "nl -ba plugins/cwf/skills/plan/SKILL.md | sed -n '190,320p'" in /home/hwidong/codes/claude-plugins succeeded in 51ms:
+     1	# Retro Gates Checklist
+     2	
+     3	Deterministic checks for `cwf:retro` execution. Use this checklist before finalizing `retro.md`.
+     4	
+     5	## Core Quality Gates
+     6	
+     7	1. Never duplicate content already captured in `lessons.md`.
+     8	2. Cite concrete session moments; avoid generic advice.
+     9	3. Keep each section scoped; if there is no meaningful signal, state that briefly.
+    10	4. If early context is unavailable due to truncation/window limits, state the limitation explicitly.
+    11	5. Always include language specifiers for fenced code blocks (`bash`, `yaml`, `markdown`, `text`, etc.).
+    12	6. Read `cwf-state.yaml` (when present) during artifact intake for lifecycle/stage context.
+    13	7. Use `retro-collect-evidence.sh` as the default evidence path and include `retro-evidence.md` when present.
+    14	
+    15	## Section Scope Gates
+    16	
+    17	1. Section 4 (CDM) is unconditional for retro-worthy sessions.
+    18	2. Section 5 (Expert Lens) is deep-mode only. In light mode, include a one-line pointer to `/retro --deep`.
+    19	3. Section 6 (Learning Resources) is deep-mode only. In light mode, include a one-line pointer to `/retro --deep`.
+    20	4. Section 7 must inventory installed capabilities first (skills + deterministic repo tools) before proposing new external tools.
+ succeeded in 50ms:
+    50	Format each entry as a timestamped string:
+    51	
+    52	```yaml
+    53	decision_journal:
+    54	  - "Phase 2: chose per-pattern commits — changes are cross-cutting"
+    55	  - "Phase 3b: agent-2 deviated from plan — added error handling for edge case"
+    56	```
+    57	
+    58	The compact recovery hook reads this field to restore decision context after auto-compaction. Keep entries concise (one line each, max ~80 chars).
+    59	
+    60	## Phase 0.5: Branch Gate
+    61	
+    62	Apply the [Branch Gate](references/impl-gates.md#branch-gate). Never proceed on a base branch.
+    63	
+    64	---
+    65	
+    66	## Phase 1: Load Plan
+    67	
+    68	Find and parse the plan that drives implementation.
+    69	
+ succeeded in 51ms:
+   190	### Cross-Cutting Pattern Gate
+   191	
+   192	Before finalizing Steps, scan for cross-cutting patterns:
+   193	
+   194	1. Identify steps that apply **identical logic to 3+ targets** (files, skills, modules)
+   195	2. If found: add a **Step 0** that creates a shared reference file for the common pattern. Subsequent steps reference the shared file — never duplicate the pattern inline.
+   196	3. If not found: proceed normally
+   197	
+   198	**Prohibited instructions** in step descriptions:
+   199	- "동일 적용" / "apply the same pattern" / "same as Step N"
+   200	- Any instruction that delegates architecture to parallel implementors
+   201	
+   202	Each step must either reference a shared file or contain self-contained instructions. Parallel agents cannot see each other's work, so sharing must be decided at plan level.
+   203	
+   204	### Preparatory Refactoring Check
+   205	
+   206	Before finalizing Steps, assess whether preparatory refactoring is needed:
+   207	
+   208	1. For each target file in "Files to Create/Modify", check its line count
+   209	2. If a file is **300+ lines** AND **3+ changes are planned** for it:
+
+thinking
+**Assessing skill line refactor**
+exec
+/usr/bin/zsh -lc "nl -ba plugins/cwf/skills/refactor/SKILL.md | sed -n '1,260p'" in /home/hwidong/codes/claude-plugins succeeded in 51ms:
+     1	---
+     2	name: refactor
+     3	description: "Multi-mode code and skill review for controlling drift as capability surface grows. Quick scan all plugins, deep-review a single skill, holistic cross-plugin analysis, commit-based tidying, or docs consistency check. Triggers: \"cwf:refactor\", \"/refactor\", \"tidy\", \"review skill\", \"cleanup code\", \"check docs consistency\""
+     4	---
+     5	
+     6	# Refactor (cwf:refactor)
+     7	
+     8	Control drift across code, skills, and docs as teams install and author more capabilities.
+     9	
+    10	**Language**: Write review reports in English. Communicate with the user in their prompt language.
+    11	
+    12	## Quick Reference
+    13	
+    14	```text
+    15	cwf:refactor                        Quick scan all marketplace skills
+    16	cwf:refactor --code [branch]        Commit-based tidying (parallel sub-agents)
+    17	cwf:refactor --skill <name>         Deep review of a single skill (parallel sub-agents)
+    18	cwf:refactor --skill --holistic     Cross-plugin analysis (parallel sub-agents)
+    19	cwf:refactor --docs                 Documentation consistency review
+    20	```
+
+thinking
+**Noting potential doc section expansion**
+exec
+/usr/bin/zsh -lc "nl -ba plugins/cwf/skills/refactor/SKILL.md | sed -n '260,560p'" in /home/hwidong/codes/claude-plugins succeeded in 51ms:
+   260	2. Each with effort estimate (small/medium/large)
+   261	```
+   262	
+   263	### 7. Offer to apply
+   264	
+   265	Ask the user if they want to apply any suggestions. If yes, implement the refactorings.
+   266	
+   267	---
+   268	
+   269	## Holistic Mode (`--skill --holistic` or `--holistic`)
+   270	
+   271	Cross-plugin analysis for global optimization. Read ALL skills and hooks, then analyze inter-plugin relationships.
+   272	
+   273	### 1. Inventory
+   274	
+   275	Read every SKILL.md and hooks.json across:
+   276	- `plugins/*/skills/*/SKILL.md` (marketplace plugins)
+   277	- `plugins/*/hooks/hooks.json` (hook plugins)
+   278	- `.claude/skills/*/SKILL.md` (local skills)
+   279	
+
+thinking
+**Inspecting state model versus scripts**
+exec
+/usr/bin/zsh -lc "rg -n \"in_progress|closed_by_user|intent_resync_required|queue.json|status:\" plugins/cwf/skills/hitl -g '"'!references/hitl-state-model.md'"'" in /home/hwidong/codes/claude-plugins succeeded in 51ms:
+plugins/cwf/skills/hitl/SKILL.md:40:  queue.json
+plugins/cwf/skills/hitl/SKILL.md:81:3. Before presenting any next chunk, check `intent_resync_required`.
+plugins/cwf/skills/hitl/SKILL.md:97:5. Save queue to `queue.json`.
+plugins/cwf/skills/hitl/SKILL.md:104:Before every chunk presentation, enforce Phase 0.75 gate (`intent_resync_required` must be `false`).
+plugins/cwf/skills/hitl/SKILL.md:159:1. Mark session state `completed` (or `closed_by_user`).
+plugins/cwf/skills/hitl/SKILL.md:179:13. If user manual edits are detected/reported, set `intent_resync_required=true` immediately and record the trigger in `events.log`.
+plugins/cwf/skills/hitl/SKILL.md:180:14. Never present a next chunk while `intent_resync_required=true`.
+plugins/cwf/skills/hitl/SKILL.md:181:15. Clearing `intent_resync_required` requires both: (a) scratchpad intent update and (b) `last_intent_resync_at` timestamp update.
+plugins/cwf/skills/hitl/SKILL.md:186:- [hitl-state-model.md](references/hitl-state-model.md) — canonical schema and lifecycle for `state.yaml`, `queue.json`, `fix-queue.yaml`, and HITL pointer metadata
+plugins/cwf/skills/hitl/references/hitl-state-model.md:16:  queue.json
+plugins/cwf/skills/hitl/references/hitl-state-model.md:33:## 2. queue.json Contract
+plugins/cwf/skills/hitl/references/hitl-state-model.md:35:`queue.json` tracks resumable review progress at file and chunk granularity.
+plugins/cwf/skills/hitl/references/hitl-state-model.md:49:status: "in_progress"
+plugins/cwf/skills/hitl/references/hitl-state-model.md:50:intent_resync_required: false
+plugins/cwf/skills/hitl/references/hitl-state-model.md:59:- `status`: run state (`in_progress`, `completed`, or `closed_by_user`)
+plugins/cwf/skills/hitl/references/hitl-state-model.md:60:- `intent_resync_required`: hard gate before presenting the next chunk
+plugins/cwf/skills/hitl/references/hitl-state-model.md:72:2. **Gate on**: set `intent_resync_required: true`, write
+plugins/cwf/skills/hitl/references/hitl-state-model.md:78:4. **Gate clear**: set `intent_resync_required: false` and write
+
+thinking
+**Inspecting placeholder usage and session handling**
+exec
+/usr/bin/zsh -lc "nl -ba plugins/cwf/skills/clarify/SKILL.md | sed -n '1,220p'" in /home/hwidong/codes/claude-plugins succeeded in 51ms:
+     1	---
+     2	name: clarify
+     3	description: "Unified requirement clarification to prevent downstream implementation churn by resolving ambiguity early. Default: research-first with autonomous decision-making and persistent questioning. --light: direct iterative Q&A. Triggers: \"cwf:clarify\", \"clarify this\", \"refine requirements\""
+     4	---
+     5	
+     6	# Clarify
+     7	
+     8	Resolve ambiguity before planning so implementation starts from explicit decisions, not assumptions.
+     9	
+    10	**Language**: Write clarification artifacts in English. Communicate with the user in their prompt language.
+    11	
+    12	## Quick Start
+    13	
+    14	```text
+    15	cwf:clarify <requirement>          # Research-first (default)
+    16	cwf:clarify <requirement> --light  # Direct Q&A, no sub-agents
+    17	```
+    18	
+    19	---
+    20	
+
+thinking
+**Reviewing conflict and instruction clarity**
+exec
+/usr/bin/zsh -lc "nl -ba plugins/cwf/skills/clarify/references/research-guide.md | sed -n '1,240p'" in /home/hwidong/codes/claude-plugins succeeded in 51ms:
+     1	# Research Guide
+     2	
+     3	This guide is for the **fallback research path** — used when `cwf:gather` is not available. When `cwf:gather` is available, the main SKILL.md routes research through it first.
+     4	
+     5	## Table of Contents
+     6	
+     7	- [Section 1: Codebase Research](#section-1-codebase-research)
+     8	- [Section 2: Web / Best Practice Research](#section-2-web--best-practice-research)
+     9	
+    10	---
+    11	
+    12	## Section 1: Codebase Research
+    13	
+    14	You are a codebase researcher. Explore the project and report evidence relevant to each decision point. You do NOT make final decisions — you report what you find.
+    15	
+    16	### Methodology
+    17	
+    18	1. **Orientation**: Read project root files (README, package.json, Cargo.toml,
+    19	   etc.) to understand tech stack and project structure.
+    20	
+
+thinking
+**Inspecting potential fail-path regressions**
+codex
+지금까지의 변경 중 실제 회귀로 볼 수 있는지 판단하려고, 의심 지점(`run`의 fail/halt 후 completion 처리, `update`의 old/new diff 기준)은 이전 커밋과 비교해 “이번 범위에서 새로 생긴 문제인지”를 확인하겠습니다.
+exec
+/usr/bin/zsh -lc "git show 524d016:plugins/cwf/skills/run/SKILL.md | nl -ba | sed -n '240,470p'" in /home/hwidong/codes/claude-pluginsexec
+/usr/bin/zsh -lc "git show 524d016:plugins/cwf/skills/update/SKILL.md | nl -ba | sed -n '1,220p'" in /home/hwidong/codes/claude-plugins succeeded in 51ms:
+   240	#### Auto Gates (auto: true)
+   241	
+   242	For review stages, check the verdict:
+   243	- **Pass** or **Conditional Pass** — proceed automatically
+   244	- **Revise** — attempt auto-fix (see Review Failure Handling)
+   245	
+   246	For non-review auto stages (impl, refactor, retro) — proceed automatically.
+   247	
+   248	### Review Failure Handling
+   249	
+   250	When a review returns **Revise**:
+   251	
+   252	1. Extract the concerns from the review output
+   253	1. If the failed review was `review-plan`:
+   254	   - Re-invoke `cwf:plan` with concerns as additional context
+   255	   - Re-invoke `cwf:review --mode plan`
+   256	   - If still Revise: halt and ask user
+   257	1. If the failed review was `review-code`:
+   258	   - Create a fix plan from the concerns
+   259	   - Re-invoke `cwf:impl` with the fix plan
+ succeeded in 51ms:
+     1	---
+     2	name: update
+     3	description: "Check and update CWF plugin to keep installed behavior aligned with latest contracts and fixes. Triggers: \"cwf:update\", \"update cwf\", \"check for updates\""
+     4	---
+     5	
+     6	# Update
+     7	
+     8	Keep installed CWF behavior aligned with the latest marketplace version and fixes.
+     9	
+    10	**Language**: Write artifacts in English. Communicate with the user in their prompt language.
+    11	
+    12	## Quick Start
+    13	
+    14	```text
+    15	cwf:update               # Check + update if newer version exists
+    16	cwf:update --check       # Version check only, no install
+    17	```
+    18	
+    19	---
+    20	
+
+thinking
+**Checking session update inconsistencies**
+exec
+/usr/bin/zsh -lc "git show 524d016:plugins/cwf/skills/handoff/SKILL.md | nl -ba | sed -n '200,380p'" in /home/hwidong/codes/claude-plugins succeeded in 51ms:
+   200	  - After the first completed unit, run `git status --short`, confirm the next
+   201	    commit boundary, and commit before starting the next major unit.
+   202	- Staging policy:
+   203	  - Stage only intended files for each commit unit.
+   204	  - Do not use broad staging that may include unrelated changes.
+   205	```
+   206	
+   207	This section is mandatory for `next-session.md`.
+   208	
+   209	#### 9. Start Command
+   210	
+   211	````markdown
+   212	## Start Command
+   213	
+   214	```text
+   215	{Natural language instruction to start the next session}
+   216	```
+   217	````
+   218	
+   219	---
+
+thinking
+**Verifying sidecar references**
+exec
+/usr/bin/zsh -lc 'for f in plugins/cwf/skills/refactor/references/review-criteria.provenance.yaml plugins/cwf/skills/refactor/references/holistic-criteria.provenance.yaml plugins/cwf/skills/refactor/references/docs-criteria.provenance.yaml; do [ -f "$f" ] && echo OK:$f || echo MISSING:$f; done' in /home/hwidong/codes/claude-plugins succeeded in 51ms:
+OK:plugins/cwf/skills/refactor/references/review-criteria.provenance.yaml
+OK:plugins/cwf/skills/refactor/references/holistic-criteria.provenance.yaml
+OK:plugins/cwf/skills/refactor/references/docs-criteria.provenance.yaml
+
+thinking
+**Verifying status enums usage**
+exec
+/usr/bin/zsh -lc "rg -n \"closed_by_user|status:\\s*\\\"in_progress\\\"|intent_resync_note|fix-queue.yaml\" plugins/cwf -g '*.md'" in /home/hwidong/codes/claude-plugins succeeded in 51ms:
+plugins/cwf/skills/hitl/SKILL.md:41:  fix-queue.yaml
+plugins/cwf/skills/hitl/SKILL.md:98:6. Initialize `state.yaml`, `fix-queue.yaml`, and `events.log`.
+plugins/cwf/skills/hitl/SKILL.md:124:3. If a fix targets an already reviewed file/chunk, default action is to append to `fix-queue.yaml` first (do not silently rewrite previously closed sections).
+plugins/cwf/skills/hitl/SKILL.md:139:When a new rule affects already reviewed regions, add those targets to `fix-queue.yaml` and mark overlapping chunks `stale` only when an edit is actually applied.
+plugins/cwf/skills/hitl/SKILL.md:159:1. Mark session state `completed` (or `closed_by_user`).
+plugins/cwf/skills/hitl/SKILL.md:174:9. Keep artifacts separated by role: `fix-queue.yaml` for actionable edits, `hitl-scratchpad.md` for agreements/rationale.
+plugins/cwf/skills/hitl/SKILL.md:186:- [hitl-state-model.md](references/hitl-state-model.md) — canonical schema and lifecycle for `state.yaml`, `queue.json`, `fix-queue.yaml`, and HITL pointer metadata
+plugins/cwf/skills/hitl/references/hitl-state-model.md:17:  fix-queue.yaml
+plugins/cwf/skills/hitl/references/hitl-state-model.md:49:status: "in_progress"
+plugins/cwf/skills/hitl/references/hitl-state-model.md:53:intent_resync_note: ""
+plugins/cwf/skills/hitl/references/hitl-state-model.md:59:- `status`: run state (`in_progress`, `completed`, or `closed_by_user`)
+plugins/cwf/skills/hitl/references/hitl-state-model.md:63:- `intent_resync_note`: short note describing what changed
+plugins/cwf/skills/hitl/references/hitl-state-model.md:73:   `last_user_manual_edit_at`, and record `intent_resync_note`
+plugins/cwf/skills/hitl/references/hitl-state-model.md:85:- `fix-queue.yaml`: actionable edit queue, especially for edits requested on
+
+
+thinking
+**Identifying multiple moderate blocking concerns**
+thinking
+**Finalizing moderate-to-critical concerns**
+codex
+## Correctness Review
+### Concerns (blocking)
+- **[C1]** `run` stage provenance has a fail/skip branch contradiction that can violate its own mandatory gate.
+  Severity: moderate  
+  Evidence: `plugins/cwf/skills/run/SKILL.md:267` says gate failure must stop immediately, but provenance append is defined later at `plugins/cwf/skills/run/SKILL.md:302`, while rules require every stage row at `plugins/cwf/skills/run/SKILL.md:443`. The spec does not define a guaranteed provenance write on early-stop/skip paths.
+
+- **[C2]** `handoff` missing-session flow introduces an unhandled user option.
+  Severity: moderate  
+  Evidence: `plugins/cwf/skills/handoff/SKILL.md:232` offers `"Edit fields first"`, but only Confirm/Cancel outcomes are defined at `plugins/cwf/skills/handoff/SKILL.md:234` and `plugins/cwf/skills/handoff/SKILL.md:235`. This leaves an undefined execution path in a deterministic gate section.
+
+- **[C3]** `update` current-vs-latest baseline can alias to the same cache tree, producing false comparison/changelog results and unsafe “up-to-date” outcomes.
+  Severity: critical  
+  Evidence: current is resolved from newest cache entry (`plugins/cwf/skills/update/SKILL.md:28`), latest is resolved the same way after marketplace update (`plugins/cwf/skills/update/SKILL.md:52`), and changelog diff compares those roots (`plugins/cwf/skills/update/SKILL.md:105`). If cache reuse or pre-population occurs, `current_plugin_root == latest_plugin_root`, collapsing diff evidence.
+
+### Suggestions (non-blocking)
+- **[S1]** In `run`, add an explicit “always append provenance row” branch for `Skipped`, `Fail`, and `User Stop` before any early return.
+- **[S2]** In `handoff`, define the `"Edit fields first"` loop (editable fields, re-confirm step, and cancellation semantics).
+- **[S3]** In `update`, snapshot pre-update state (or resolve active installed manifest path) before marketplace refresh, then diff against a guaranteed distinct post-update tree.
+
+### Behavioral Criteria Assessment
+- [ ] No behavioral regression / contradiction risk in changed contracts
+- [ ] Deterministic gates have complete failure/decision branches
+- [ ] Script/skill contracts avoid unsafe defaults and ambiguous baselines
+
+### Provenance
+source: REAL_EXECUTION  
+tool: codex  
+reviewer: Correctness  
+duration_ms: —  
+command: codex exec --sandbox read-only -c model_reasoning_effort='high' -
+tokens used
+148,526
