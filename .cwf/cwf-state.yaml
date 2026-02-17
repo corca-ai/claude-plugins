@@ -380,7 +380,8 @@ sessions:
     title: "refactor-review-prevention-impl"
     dir: ".cwf/projects/260217-03-refactor-review-prevention-impl"
     branch: "marketplace-v3"
-    artifacts: [plan.md, lessons.md]
+    artifacts: [plan.md, lessons.md, next-session.md, ship-summary-origin-marketplace-v3.md]
+    stage_checkpoints: [handoff]
 
 tools:
   codex: available
