@@ -87,14 +87,14 @@ By `plugin_type`:
 
 ### 7. Summary
 
-Report: plugin name, type, version change, files modified, and commit status (committed now vs deferred).
+Report: plugin name, type, version change, files modified, commit status, and created commit hash(es) when committed.
 
 ## Rules
 
 1. **All code fences must have language specifier**: Never use bare fences.
 2. **Consistency check is the source of truth**: Always run `check-consistency.sh` before and after changes.
 3. **Missing dependency interaction**: When prerequisites are missing, ask to install/configure now; do not only report unavailability.
-4. **Commit policy (autonomy-first)**: Default is no auto-commit, but when the user explicitly requests commit or an active workflow contract requires commit boundaries, commit by meaningful unit with selective staging only.
+4. **Commit policy (autonomy-first)**: Commit by default after successful re-verification, using meaningful units and selective staging only. Ask the user only when commit boundaries are ambiguous or unrelated worktree changes make safe selective staging unclear.
 
 ## References
 

@@ -75,6 +75,7 @@ When a plugin is deprecated:
 
 ## Commit Policy
 
-- Default: do not auto-commit.
-- If user explicitly asks to commit, or a workflow contract requires commit boundaries, commit by meaningful unit.
+- Default: auto-commit after verification.
+- Commit by meaningful unit; split unrelated changes into separate commits.
+- Ask before commit only when boundary selection is ambiguous or unrelated dirty files cannot be safely excluded.
 - Always use selective staging (`git add <intended files>`), never broad-stage unrelated worktree changes.
