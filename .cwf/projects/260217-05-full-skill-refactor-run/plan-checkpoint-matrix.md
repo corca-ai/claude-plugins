@@ -1,20 +1,163 @@
 # Plan Checkpoint Matrix
 
-이 행렬은 `.cwf/projects/260217-05-full-skill-refactor-run/clarify-result.md`의 gate-safe refactor 계약을 따르며 `cwf:run`의 determinist run gate(*) 요구를 각 단계별로 확인합니다.
+This matrix follows `.cwf/projects/260217-05-full-skill-refactor-run/clarify-result.md` and enforces fail-fast verification per stage.
 
-| Stage | Required Artifacts | Verification Command | Pass Condition |
-| review-plan | `review-security-plan.md`, `review-ux-dx-plan.md`, `review-correctness-plan.md`, `review-architecture-plan.md`, `review-expert-alpha-plan.md`, `review-expert-beta-plan.md` (each non-empty and ending with `<!-- AGENT_COMPLETE -->`), plus the synthesized `review-synthesis-plan.md` containing `## Review Synthesis`, `### Verdict:`, `### Behavioral Criteria Verification` (when plan criteria exist), `### Concerns`, `### Suggestions`, `### Commit Boundary Guidance`, `### Confidence Note` (includes base strategy/CLI fallbacks when applicable), `### Reviewer Provenance` table | `session_dir=$(bash plugins/cwf/scripts/cwf-live-state.sh get . dir);
-for f in review-security-plan.md review-ux-dx-plan.md review-correctness-plan.md review-architecture-plan.md review-expert-alpha-plan.md review-expert-beta-plan.md; do test -s "$session_dir/$f" && grep -q '<!-- AGENT_COMPLETE -->' "$session_dir/$f"; done;
-grep -Eq '^## Review Synthesis' "$session_dir/review-synthesis-plan.md"` | All six reviewer files exist, non-empty, and include `<!-- AGENT_COMPLETE -->`; `review-synthesis-plan.md` exists and exposes the mandated sections (Verdict, Behavioral Criteria checklists, Concerns, Suggestions, Commit Boundary Guidance, Confidence Note, Reviewer Provenance). |
-| review-code | Same six reviewer files with `-code` suffix and sentinel plus `review-synthesis-code.md` that lists the same sections and the deterministic `session_log_*` fields (`session_log_present`, `session_log_lines`, `session_log_turns`, `session_log_last_turn`, `session_log_cross_check`). | `session_dir=$(bash plugins/cwf/scripts/cwf-live-state.sh get . dir);
-bash plugins/cwf/scripts/check-run-gate-artifacts.sh --session-dir "$session_dir" --stage review-code --strict --record-lessons` | Gate exits zero: every reviewer file and synthesis file present, sentinel markers found, required synthesis patterns (`^## Review Synthesis`, `^### Verdict:`, `session_log_*` keys) detected. |
-| refactor | At least one of `refactor-summary.md` (with `## Refactor Summary` heading), `refactor-quick-scan.json` (containing `.total_skills` and `.results`), `refactor-deep-structural.md`, `refactor-deep-quality.md`, and any `refactor-tidy-commit-*.md`; deep/deep-quality files must include `<!-- AGENT_COMPLETE -->` when present. | `session_dir=$(bash plugins/cwf/scripts/cwf-live-state.sh get . dir);
-bash plugins/cwf/scripts/check-run-gate-artifacts.sh --session-dir "$session_dir" --stage refactor --strict --record-lessons` | Gate exits zero: at least one refactor artifact exists, summary heading present, quick-scan JSON passes `.total_skills`/`.results` schema (when `jq` available), and every present deep/tidy file ends with the sentinel. |
-| retro | `retro.md` (non-empty, includes a `- Mode:` line) and, when `Mode` mentions `deep`, the supplemental artifacts `retro-cdm-analysis.md`, `retro-learning-resources.md`, `retro-expert-alpha.md`, `retro-expert-beta.md` — each with `<!-- AGENT_COMPLETE -->`. | `session_dir=$(bash plugins/cwf/scripts/cwf-live-state.sh get . dir);
-bash plugins/cwf/scripts/check-run-gate-artifacts.sh --session-dir "$session_dir" --stage retro --strict --record-lessons` | Gate exits zero: `retro.md` exists with a `- Mode:` declaration, and any deep-mode attachments are present and close with the sentinel. |
-| ship | `ship.md` containing `## Execution Status`, `## Ambiguity Resolution`, `## Next Step`, `mode: (strict|defer-blocking|defer-reversible|explore-worktrees)`, numeric `blocking_open_count:`, `blocking_issue_refs:`, `merge_allowed: (yes|no)`; if `mode: defer-blocking` and `blocking_open_count > 0`, `merge_allowed` must be `no`. | `session_dir=$(bash plugins/cwf/scripts/cwf-live-state.sh get . dir);
-bash plugins/cwf/scripts/check-run-gate-artifacts.sh --session-dir "$session_dir" --stage ship --strict --record-lessons` | Gate exits zero: `ship.md` exists and matches every required pattern, `blocking_open_count` is numeric, and `defer-blocking` debt enforces `merge_allowed: no`. |
-| final completion | Session-level artifacts from `check-session.sh --impl` (plan.md, lessons.md, next-session metadata per `session_defaults`, plus any milestone files) and the deterministic gates for `review-code`, `refactor`, `retro`, `ship`. | `session_dir=$(bash plugins/cwf/scripts/cwf-live-state.sh get . dir);
-bash plugins/cwf/scripts/check-session.sh --impl "$session_dir";
-bash plugins/cwf/scripts/check-run-gate-artifacts.sh --session-dir "$session_dir" --stage review-code --stage refactor --stage retro --stage ship --strict --record-lessons` | Both commands exit zero: session artifacts remain present/complete (per `check-session.sh --impl`), and re-running the run gate checker on the four post-impl stages succeeds, ensuring no regression before clearing `remaining_gates` and marking the pipeline done. |
+## review-plan
 
+Required artifacts:
+- `review-security-plan.md`
+- `review-ux-dx-plan.md`
+- `review-correctness-plan.md`
+- `review-architecture-plan.md`
+- `review-expert-alpha-plan.md`
+- `review-expert-beta-plan.md`
+- `review-synthesis-plan.md`
+
+Verification command:
+```bash
+set -euo pipefail
+session_dir="$(bash plugins/cwf/scripts/cwf-live-state.sh get . dir)"
+for f in \
+  review-security-plan.md \
+  review-ux-dx-plan.md \
+  review-correctness-plan.md \
+  review-architecture-plan.md \
+  review-expert-alpha-plan.md \
+  review-expert-beta-plan.md
+ do
+  test -s "$session_dir/$f"
+  grep -q '<!-- AGENT_COMPLETE -->' "$session_dir/$f"
+done
+
+grep -Eq '^## Review Synthesis' "$session_dir/review-synthesis-plan.md"
+grep -Eq '^### Verdict: ' "$session_dir/review-synthesis-plan.md"
+grep -Eq '^### Concerns \(must address\)' "$session_dir/review-synthesis-plan.md"
+grep -Eq '^### Reviewer Provenance' "$session_dir/review-synthesis-plan.md"
+```
+
+Pass condition:
+- All six reviewer files exist, are non-empty, include sentinel.
+- Synthesis contains mandatory sections.
+- External-provider policy is enforced by `check-run-gate-artifacts.sh` using active contract (`provider_gemini_mode`).
+
+## review-code
+
+Required artifacts:
+- Six `review-*-code.md` reviewer files with sentinel.
+- `review-synthesis-code.md` with `session_log_*` fields.
+
+Verification command:
+```bash
+set -euo pipefail
+session_dir="$(bash plugins/cwf/scripts/cwf-live-state.sh get . dir)"
+bash plugins/cwf/scripts/check-run-gate-artifacts.sh \
+  --session-dir "$session_dir" \
+  --stage review-code \
+  --strict \
+  --record-lessons
+```
+
+Pass condition:
+- Gate exits zero.
+
+## refactor
+
+Required artifacts:
+- Gate artifacts accepted by `check-run-gate-artifacts.sh --stage refactor`.
+- Per-skill completion snapshots:
+  - `refactor-skill-clarify.md`
+  - `refactor-skill-gather.md`
+  - `refactor-skill-handoff.md`
+  - `refactor-skill-hitl.md`
+  - `refactor-skill-impl.md`
+  - `refactor-skill-plan.md`
+  - `refactor-skill-refactor.md`
+  - `refactor-skill-retro.md`
+  - `refactor-skill-review.md`
+  - `refactor-skill-run.md`
+  - `refactor-skill-setup.md`
+  - `refactor-skill-ship.md`
+  - `refactor-skill-update.md`
+
+Verification command:
+```bash
+set -euo pipefail
+session_dir="$(bash plugins/cwf/scripts/cwf-live-state.sh get . dir)"
+bash plugins/cwf/scripts/check-run-gate-artifacts.sh \
+  --session-dir "$session_dir" \
+  --stage refactor \
+  --strict \
+  --record-lessons
+
+for skill in \
+  clarify gather handoff hitl impl plan refactor retro review run setup ship update
+ do
+  test -s "$session_dir/refactor-skill-$skill.md"
+done
+```
+
+Pass condition:
+- Refactor gate exits zero.
+- All 13 per-skill snapshot files exist and are non-empty.
+
+## retro
+
+Required artifacts:
+- `retro.md` and deep attachments when deep mode is used.
+
+Verification command:
+```bash
+set -euo pipefail
+session_dir="$(bash plugins/cwf/scripts/cwf-live-state.sh get . dir)"
+bash plugins/cwf/scripts/check-run-gate-artifacts.sh \
+  --session-dir "$session_dir" \
+  --stage retro \
+  --strict \
+  --record-lessons
+```
+
+Pass condition:
+- Retro gate exits zero.
+
+## ship
+
+Required artifacts:
+- `ship.md` with all required metadata fields/patterns.
+
+Verification command:
+```bash
+set -euo pipefail
+session_dir="$(bash plugins/cwf/scripts/cwf-live-state.sh get . dir)"
+bash plugins/cwf/scripts/check-run-gate-artifacts.sh \
+  --session-dir "$session_dir" \
+  --stage ship \
+  --strict \
+  --record-lessons
+```
+
+Pass condition:
+- Ship gate exits zero.
+
+## final completion
+
+Required artifacts:
+- Session-level implementation closure artifacts.
+- Successful rerun of all post-impl stage gates.
+
+Verification command:
+```bash
+set -euo pipefail
+session_dir="$(bash plugins/cwf/scripts/cwf-live-state.sh get . dir)"
+bash plugins/cwf/scripts/check-session.sh --impl "$session_dir"
+bash plugins/cwf/scripts/check-run-gate-artifacts.sh \
+  --session-dir "$session_dir" \
+  --stage review-code \
+  --stage refactor \
+  --stage retro \
+  --stage ship \
+  --strict \
+  --record-lessons
+```
+
+Pass condition:
+- Both commands exit zero.
