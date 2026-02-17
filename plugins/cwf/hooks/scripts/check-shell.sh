@@ -49,10 +49,71 @@ is_external_tmp_path() {
     return 1
 }
 
+normalize_abs_path() {
+    local value="$1"
+    value="${value%/}"
+    printf '%s' "$value"
+}
+
+append_runtime_skip_dir() {
+    local candidate="${1:-}"
+    local normalized=""
+    local existing=""
+
+    [[ -n "$candidate" ]] || return 0
+    normalized="$(normalize_abs_path "$candidate")"
+    [[ -n "$normalized" ]] || return 0
+
+    for existing in "${RUNTIME_SKIP_DIRS[@]}"; do
+        if [[ "$existing" == "$normalized" ]]; then
+            return 0
+        fi
+    done
+    RUNTIME_SKIP_DIRS+=("$normalized")
+}
+
+init_runtime_skip_dirs() {
+    local base_dir="$1"
+    local projects_dir=""
+    local sessions_dir=""
+    local prompt_logs_dir=""
+    base_dir="$(cd "$base_dir" 2>/dev/null && pwd -P || printf '%s' "$base_dir")"
+
+    RUNTIME_SKIP_DIRS=()
+    if [[ -f "$ARTIFACT_PATHS_SCRIPT" ]]; then
+        # shellcheck source=plugins/cwf/scripts/cwf-artifact-paths.sh
+        source "$ARTIFACT_PATHS_SCRIPT"
+        projects_dir="$(resolve_cwf_projects_dir "$base_dir" 2>/dev/null || true)"
+        sessions_dir="$(resolve_cwf_session_logs_dir "$base_dir" 2>/dev/null || true)"
+        prompt_logs_dir="$(resolve_cwf_prompt_logs_dir "$base_dir" 2>/dev/null || true)"
+        append_runtime_skip_dir "$projects_dir"
+        append_runtime_skip_dir "$sessions_dir"
+        append_runtime_skip_dir "$prompt_logs_dir"
+    fi
+
+    append_runtime_skip_dir "$base_dir/.cwf/projects"
+    append_runtime_skip_dir "$base_dir/.cwf/sessions"
+    append_runtime_skip_dir "$base_dir/.cwf/prompt-logs"
+}
+
+is_runtime_artifact_path() {
+    local abs_path="$1"
+    local skip_dir=""
+    for skip_dir in "${RUNTIME_SKIP_DIRS[@]}"; do
+        if [[ "$abs_path" == "$skip_dir" || "$abs_path" == "$skip_dir/"* ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
 # --- Parse stdin ---
 INPUT=$(cat)
 FILE_PATH=$(printf '%s' "$INPUT" | jq -r '.tool_input.file_path // empty')
 CWD=$(printf '%s' "$INPUT" | jq -r '.cwd // empty')
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd)}"
+ARTIFACT_PATHS_SCRIPT="$PLUGIN_ROOT/scripts/cwf-artifact-paths.sh"
+RUNTIME_SKIP_DIRS=()
 
 # --- Early exits ---
 
@@ -65,11 +126,6 @@ fi
 case "$FILE_PATH" in
     *.sh) ;;
     *) exit 0 ;;
-esac
-
-# Skip project artifact paths (these are session artifacts, not production code)
-case "$FILE_PATH" in
-    */.cwf/projects/*|.cwf/projects/*) exit 0 ;;
 esac
 
 # File doesn't exist (may have been deleted or path is virtual)
@@ -85,6 +141,13 @@ if [[ -n "$ABS_FILE_PATH" ]]; then
         exit 0
     fi
     if [[ -n "$REPO_ROOT" && "$ABS_FILE_PATH" != "$REPO_ROOT" && "$ABS_FILE_PATH" != "$REPO_ROOT/"* ]]; then
+        exit 0
+    fi
+fi
+
+if [[ -n "$ABS_FILE_PATH" ]]; then
+    init_runtime_skip_dirs "${REPO_ROOT:-$LINT_DIR}"
+    if is_runtime_artifact_path "$ABS_FILE_PATH"; then
         exit 0
     fi
 fi

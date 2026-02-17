@@ -199,6 +199,8 @@ function getRuntimePaths(repoRoot) {
   const configuredProjectsDir = resolveConfigValue(repoRoot, "CWF_PROJECTS_DIR");
   const configuredStateFile = resolveConfigValue(repoRoot, "CWF_STATE_FILE");
   const configuredLogsDir = resolveConfigValue(repoRoot, "CWF_SESSION_LOG_DIR");
+  const configuredPromptLogsDir = resolveConfigValue(repoRoot, "CWF_PROMPT_LOGS_DIR");
+  const configuredIndexesDir = resolveConfigValue(repoRoot, "CWF_INDEXES_DIR");
 
   const artifactRoots = new Set([
     resolveAbsPath(repoRoot, ".cwf"),
@@ -212,6 +214,8 @@ function getRuntimePaths(repoRoot) {
     addRuntimeDir(dirs, artifactRoot);
     addRuntimeDir(dirs, path.join(artifactRoot, "projects"));
     addRuntimeDir(dirs, path.join(artifactRoot, "sessions"));
+    addRuntimeDir(dirs, path.join(artifactRoot, "prompt-logs"));
+    addRuntimeDir(dirs, path.join(artifactRoot, "indexes"));
     addRuntimeDir(dirs, path.join(artifactRoot, "projects", "sessions"));
     addRuntimeFile(files, path.join(artifactRoot, "cwf-state.yaml"));
   }
@@ -219,6 +223,8 @@ function getRuntimePaths(repoRoot) {
   addRuntimeDir(dirs, resolveAbsPath(repoRoot, configuredProjectsDir));
   addRuntimeFile(files, resolveAbsPath(repoRoot, configuredStateFile));
   addRuntimeDir(dirs, resolveAbsPath(repoRoot, configuredLogsDir));
+  addRuntimeDir(dirs, resolveAbsPath(repoRoot, configuredPromptLogsDir));
+  addRuntimeDir(dirs, resolveAbsPath(repoRoot, configuredIndexesDir));
 
   addRuntimeFile(files, path.join(repoRoot, ".cwf", "config.yaml"));
   addRuntimeFile(files, path.join(repoRoot, ".cwf", "config.local.yaml"));

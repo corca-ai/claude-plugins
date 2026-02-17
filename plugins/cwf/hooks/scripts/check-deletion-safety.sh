@@ -14,6 +14,8 @@ set -euo pipefail
 
 HOOK_GROUP="deletion_safety"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PLUGIN_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+ARTIFACT_PATHS_SCRIPT="$PLUGIN_ROOT/scripts/cwf-artifact-paths.sh"
 # shellcheck source=plugins/cwf/hooks/scripts/cwf-hook-gate.sh
 source "$SCRIPT_DIR/cwf-hook-gate.sh"
 
@@ -81,6 +83,82 @@ to_repo_rel() {
   fi
 
   printf '%s' "$rel"
+}
+
+normalize_rel_path() {
+  local value="$1"
+  value="${value#./}"
+  value="${value%/}"
+  printf '%s' "$value"
+}
+
+append_runtime_artifact_prefix() {
+  local candidate_rel="${1:-}"
+  local normalized=""
+  local existing=""
+
+  [[ -n "$candidate_rel" ]] || return 0
+  normalized="$(normalize_rel_path "$candidate_rel")"
+  [[ -n "$normalized" && "$normalized" != "." ]] || return 0
+
+  for existing in "${RUNTIME_ARTIFACT_PREFIXES[@]}"; do
+    if [[ "$existing" == "$normalized" ]]; then
+      return 0
+    fi
+  done
+  RUNTIME_ARTIFACT_PREFIXES+=("$normalized")
+}
+
+append_runtime_artifact_abs() {
+  local abs_path="${1:-}"
+  local rel=""
+
+  [[ -n "$abs_path" ]] || return 0
+  abs_path="${abs_path%/}"
+
+  if [[ "$abs_path" == "$REPO_ROOT" || "$abs_path" != "$REPO_ROOT/"* ]]; then
+    return 0
+  fi
+  rel="${abs_path#"$REPO_ROOT"/}"
+  append_runtime_artifact_prefix "$rel"
+}
+
+init_runtime_artifact_prefixes() {
+  local projects_dir=""
+  local sessions_dir=""
+  local prompt_logs_dir=""
+
+  RUNTIME_ARTIFACT_PREFIXES=()
+  if [[ -f "$ARTIFACT_PATHS_SCRIPT" ]]; then
+    # shellcheck source=plugins/cwf/scripts/cwf-artifact-paths.sh
+    source "$ARTIFACT_PATHS_SCRIPT"
+    projects_dir="$(resolve_cwf_projects_dir "$REPO_ROOT" 2>/dev/null || true)"
+    sessions_dir="$(resolve_cwf_session_logs_dir "$REPO_ROOT" 2>/dev/null || true)"
+    prompt_logs_dir="$(resolve_cwf_prompt_logs_dir "$REPO_ROOT" 2>/dev/null || true)"
+    append_runtime_artifact_abs "$projects_dir"
+    append_runtime_artifact_abs "$sessions_dir"
+    append_runtime_artifact_abs "$prompt_logs_dir"
+  fi
+
+  append_runtime_artifact_prefix ".cwf/projects"
+  append_runtime_artifact_prefix ".cwf/sessions"
+  append_runtime_artifact_prefix ".cwf/prompt-logs"
+}
+
+is_runtime_artifact_rel() {
+  local rel_path="$1"
+  local normalized=""
+  local prefix=""
+
+  normalized="$(normalize_rel_path "$rel_path")"
+  [[ -n "$normalized" ]] || return 1
+
+  for prefix in "${RUNTIME_ARTIFACT_PREFIXES[@]}"; do
+    if [[ "$normalized" == "$prefix" || "$normalized" == "$prefix/"* ]]; then
+      return 0
+    fi
+  done
+  return 1
 }
 
 is_external_tmp_artifact() {
@@ -208,6 +286,9 @@ DELETED_RAW=()
 WILDCARD_DELETE=0
 SEARCH_FAILED=0
 SEARCH_ERROR=""
+RUNTIME_ARTIFACT_PREFIXES=()
+
+init_runtime_artifact_prefixes
 
 if [[ "$TOOL_NAME" == "Bash" && -n "$TOOL_COMMAND" ]]; then
   extract_deleted_from_bash "$TOOL_COMMAND"
@@ -232,8 +313,11 @@ for candidate in "${DELETED_RAW[@]}"; do
 
   # Skip generated/session artifacts (not production runtime callers)
   case "$rel_path" in
-    node_modules/*|.cwf/projects/*|.cwf/sessions/*|.cwf/prompt-logs/*) continue ;;
+    node_modules/*) continue ;;
   esac
+  if is_runtime_artifact_rel "$rel_path"; then
+    continue
+  fi
 
   is_dup=0
   for existing in "${DELETED_REL[@]}"; do
@@ -273,8 +357,22 @@ for rel_path in "${DELETED_REL[@]}"; do
   fi
 
   combined_hits="$(printf '%s\n' "$combined_hits" | sed '/^$/d' | sed 's#^\./##' | sort -u)"
-  # Exclude the deleted file itself from caller results (grep -rl returns bare paths)
-  combined_hits="$(printf '%s\n' "$combined_hits" | grep -vxF "$rel_path" || true)"
+  filtered_hits=()
+  while IFS= read -r caller_path; do
+    [[ -n "$caller_path" ]] || continue
+    if [[ "$caller_path" == "$rel_path" ]]; then
+      continue
+    fi
+    if is_runtime_artifact_rel "$caller_path"; then
+      continue
+    fi
+    filtered_hits+=("$caller_path")
+  done <<< "$combined_hits"
+  if [[ ${#filtered_hits[@]} -gt 0 ]]; then
+    combined_hits="$(printf '%s\n' "${filtered_hits[@]}" | sort -u)"
+  else
+    combined_hits=""
+  fi
   if [[ -z "$combined_hits" ]]; then
     continue
   fi

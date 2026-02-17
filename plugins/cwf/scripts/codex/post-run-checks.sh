@@ -13,6 +13,7 @@ PLUGIN_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 REFACTOR_CHECK_LINKS="$PLUGIN_ROOT/skills/refactor/scripts/check-links.sh"
 LIVE_STATE_SCRIPT="$PLUGIN_ROOT/scripts/cwf-live-state.sh"
 CHECK_SESSION_SCRIPT="$PLUGIN_ROOT/scripts/check-session.sh"
+ARTIFACT_PATHS_SCRIPT="$PLUGIN_ROOT/scripts/cwf-artifact-paths.sh"
 
 CWD="$(pwd)"
 SINCE_EPOCH=""
@@ -112,6 +113,105 @@ resolve_repo_path() {
   else
     printf '%s/%s' "$REPO_ROOT" "$value"
   fi
+}
+
+normalize_rel_path() {
+  local value="$1"
+  value="${value#./}"
+  value="${value%/}"
+  printf '%s' "$value"
+}
+
+add_runtime_skip_prefix() {
+  local rel_path="${1:-}"
+  local normalized=""
+  local existing=""
+
+  [[ -n "$rel_path" ]] || return 0
+  normalized="$(normalize_rel_path "$rel_path")"
+  [[ -n "$normalized" && "$normalized" != "." ]] || return 0
+
+  for existing in "${RUNTIME_MD_SKIP_PREFIXES[@]}"; do
+    if [[ "$existing" == "$normalized" ]]; then
+      return 0
+    fi
+  done
+  RUNTIME_MD_SKIP_PREFIXES+=("$normalized")
+}
+
+add_runtime_skip_abs_dir() {
+  local abs_path="${1:-}"
+  local rel_path=""
+
+  [[ -n "$abs_path" ]] || return 0
+  abs_path="${abs_path%/}"
+
+  if [[ "$abs_path" == "$REPO_ROOT" || "$abs_path" != "$REPO_ROOT/"* ]]; then
+    return 0
+  fi
+  rel_path="${abs_path#"$REPO_ROOT"/}"
+  add_runtime_skip_prefix "$rel_path"
+}
+
+init_runtime_skip_paths() {
+  local projects_dir=""
+  local sessions_dir=""
+  local prompt_logs_dir=""
+  local state_file=""
+
+  RUNTIME_MD_SKIP_PREFIXES=()
+  HITL_SCRATCHPAD_GLOB_PREFIX=".cwf/projects"
+  LIVE_STATE_FILE_PROBE="$REPO_ROOT/.cwf/cwf-state.yaml"
+
+  if [[ -f "$ARTIFACT_PATHS_SCRIPT" ]]; then
+    # shellcheck source=plugins/cwf/scripts/cwf-artifact-paths.sh
+    source "$ARTIFACT_PATHS_SCRIPT"
+    projects_dir="$(resolve_cwf_projects_dir "$REPO_ROOT" 2>/dev/null || true)"
+    sessions_dir="$(resolve_cwf_session_logs_dir "$REPO_ROOT" 2>/dev/null || true)"
+    prompt_logs_dir="$(resolve_cwf_prompt_logs_dir "$REPO_ROOT" 2>/dev/null || true)"
+    state_file="$(resolve_cwf_state_file "$REPO_ROOT" 2>/dev/null || true)"
+
+    add_runtime_skip_abs_dir "$projects_dir"
+    add_runtime_skip_abs_dir "$sessions_dir"
+    add_runtime_skip_abs_dir "$prompt_logs_dir"
+
+    if [[ -n "$projects_dir" && "$projects_dir" == "$REPO_ROOT/"* ]]; then
+      HITL_SCRATCHPAD_GLOB_PREFIX="${projects_dir#"$REPO_ROOT"/}"
+      HITL_SCRATCHPAD_GLOB_PREFIX="$(normalize_rel_path "$HITL_SCRATCHPAD_GLOB_PREFIX")"
+    fi
+
+    if [[ -n "$state_file" ]]; then
+      LIVE_STATE_FILE_PROBE="$state_file"
+    fi
+  fi
+
+  add_runtime_skip_prefix ".cwf/projects"
+  add_runtime_skip_prefix ".cwf/sessions"
+  add_runtime_skip_prefix ".cwf/prompt-logs"
+}
+
+is_runtime_md_artifact_path() {
+  local rel_path="$1"
+  local normalized=""
+  local prefix=""
+
+  normalized="$(normalize_rel_path "$rel_path")"
+  [[ -n "$normalized" ]] || return 1
+
+  for prefix in "${RUNTIME_MD_SKIP_PREFIXES[@]}"; do
+    if [[ "$normalized" == "$prefix" || "$normalized" == "$prefix/"* ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+is_hitl_scratchpad_path() {
+  local rel_path="$1"
+  if [[ -n "$HITL_SCRATCHPAD_GLOB_PREFIX" && "$rel_path" == "$HITL_SCRATCHPAD_GLOB_PREFIX"/*/hitl/hitl-scratchpad.md ]]; then
+    return 0
+  fi
+  return 1
 }
 
 command_invokes_apply_patch() {
@@ -262,7 +362,7 @@ check_hitl_scratchpad_sync() {
   fi
 
   for file in "${md_files[@]}"; do
-    if [[ "$file" == "$scratchpad_rel" || "$file" == .cwf/projects/*/hitl/hitl-scratchpad.md ]]; then
+    if [[ "$file" == "$scratchpad_rel" ]] || is_hitl_scratchpad_path "$file"; then
       continue
     fi
     doc_sync_target_count=$((doc_sync_target_count + 1))
@@ -273,7 +373,7 @@ check_hitl_scratchpad_sync() {
   fi
 
   for file in "${changed_files[@]}"; do
-    if [[ "$file" == "$scratchpad_rel" || "$file" == .cwf/projects/*/hitl/hitl-scratchpad.md ]]; then
+    if [[ "$file" == "$scratchpad_rel" ]] || is_hitl_scratchpad_path "$file"; then
       scratchpad_touched=1
       break
     fi
@@ -347,6 +447,10 @@ if [[ -z "$REPO_ROOT" ]]; then
   exit 0
 fi
 cd "$REPO_ROOT"
+RUNTIME_MD_SKIP_PREFIXES=()
+HITL_SCRATCHPAD_GLOB_PREFIX=".cwf/projects"
+LIVE_STATE_FILE_PROBE="$REPO_ROOT/.cwf/cwf-state.yaml"
+init_runtime_skip_paths
 
 readarray -t changed_candidates < <(
   {
@@ -383,13 +487,13 @@ sh_files=()
 for file in "${changed_files[@]}"; do
   case "$file" in
     *.md|*.mdx)
-      case "$file" in
-        .cwf/projects/*|.cwf/sessions/*|.cwf/prompt-logs/*|references/anthropic-skills-guide/*)
-          ;;
-        *)
-          md_files+=("$file")
-          ;;
-      esac
+      if [[ "$file" == references/anthropic-skills-guide/* ]]; then
+        continue
+      fi
+      if is_runtime_md_artifact_path "$file"; then
+        continue
+      fi
+      md_files+=("$file")
       ;;
     *.sh)
       sh_files+=("$file")
@@ -455,7 +559,7 @@ if ! check_hitl_scratchpad_sync "$SINCE_EPOCH"; then
 fi
 
 check_count=$((check_count + 1))
-if [[ -x "$CHECK_SESSION_SCRIPT" && -f .cwf/cwf-state.yaml ]]; then
+if [[ -x "$CHECK_SESSION_SCRIPT" && -f "$LIVE_STATE_FILE_PROBE" ]]; then
   log "live session-state check"
   if ! bash "$CHECK_SESSION_SCRIPT" --live >/dev/null; then
     warn "live session-state check failed ($CHECK_SESSION_SCRIPT --live)"

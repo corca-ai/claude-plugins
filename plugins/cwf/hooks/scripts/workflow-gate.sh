@@ -11,6 +11,7 @@ source "$SCRIPT_DIR/cwf-hook-gate.sh"
 INPUT="$(cat)"
 PLUGIN_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 LIVE_STATE_SCRIPT="$PLUGIN_ROOT/scripts/cwf-live-state.sh"
+ARTIFACT_PATHS_SCRIPT="$PLUGIN_ROOT/scripts/cwf-artifact-paths.sh"
 BLOCKED_ACTION_REGEX='(^|[[:space:]])(cwf:ship|/ship|git[[:space:]]+push|git[[:space:]]+merge|gh[[:space:]]+pr[[:space:]]+create|gh[[:space:]]+pr[[:space:]]+merge|커밋해|푸시해|배포해)([[:space:]]|$)'
 
 json_block() {
@@ -194,7 +195,16 @@ BASE_DIR="$(resolve_base_dir "$INPUT")"
 
 LIVE_STATE_FILE="$(bash "$LIVE_STATE_SCRIPT" resolve "$BASE_DIR" 2>/dev/null || true)"
 if [[ -z "$LIVE_STATE_FILE" || ! -f "$LIVE_STATE_FILE" ]]; then
-  if [[ "$BLOCKED_REQUEST" == "true" && -f "$BASE_DIR/.cwf/cwf-state.yaml" ]]; then
+  STATE_FILE_PROBE=""
+  if [[ -f "$ARTIFACT_PATHS_SCRIPT" ]]; then
+    # shellcheck source=plugins/cwf/scripts/cwf-artifact-paths.sh
+    source "$ARTIFACT_PATHS_SCRIPT"
+    STATE_FILE_PROBE="$(resolve_cwf_state_file "$BASE_DIR" 2>/dev/null || true)"
+  fi
+  if [[ -z "$STATE_FILE_PROBE" ]]; then
+    STATE_FILE_PROBE="$BASE_DIR/.cwf/cwf-state.yaml"
+  fi
+  if [[ "$BLOCKED_REQUEST" == "true" && -f "$STATE_FILE_PROBE" ]]; then
     json_block "BLOCKED: live state file is unavailable while protected action was requested. Resolve live-state before ship/push."
   fi
   json_allow "[WARNING] live state file unavailable; workflow gate skipped."

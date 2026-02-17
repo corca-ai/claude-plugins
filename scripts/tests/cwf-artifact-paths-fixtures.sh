@@ -65,6 +65,14 @@ run_suite() {
     "$base_dir/.cwf/cwf-state.yaml" \
     "$(resolve_with_env "$resolver" "$base_dir" resolve_cwf_state_file)"
   assert_eq \
+    "$label default prompt logs dir" \
+    "$base_dir/.cwf/prompt-logs" \
+    "$(resolve_with_env "$resolver" "$base_dir" resolve_cwf_prompt_logs_dir)"
+  assert_eq \
+    "$label default indexes dir" \
+    "$base_dir/.cwf/indexes" \
+    "$(resolve_with_env "$resolver" "$base_dir" resolve_cwf_indexes_dir)"
+  assert_eq \
     "$label default projects relpath" \
     ".cwf/projects" \
     "$(resolve_with_env "$resolver" "$base_dir" resolve_cwf_projects_relpath)"
@@ -82,12 +90,22 @@ run_suite() {
     "$label env absolute projects relpath passthrough" \
     "$external_projects" \
     "$(resolve_with_env "$resolver" "$base_dir" resolve_cwf_projects_relpath CWF_PROJECTS_DIR="$external_projects")"
+  assert_eq \
+    "$label env prompt logs override" \
+    "$base_dir/.cwf-env/prompt-logs" \
+    "$(resolve_with_env "$resolver" "$base_dir" resolve_cwf_prompt_logs_dir CWF_PROMPT_LOGS_DIR=.cwf-env/prompt-logs)"
+  assert_eq \
+    "$label env indexes override" \
+    "$base_dir/.cwf-env/indexes" \
+    "$(resolve_with_env "$resolver" "$base_dir" resolve_cwf_indexes_dir CWF_INDEXES_DIR=.cwf-env/indexes)"
 
   # 3) shared config overrides env
   cat > "$base_dir/.cwf/config.yaml" <<'EOF'
 CWF_ARTIFACT_ROOT: ".cwf-shared"
 CWF_PROJECTS_DIR: ".cwf-shared/projects-shared"
 CWF_STATE_FILE: ".cwf-shared/state-shared.yaml"
+CWF_PROMPT_LOGS_DIR: ".cwf-shared/prompt-logs-shared"
+CWF_INDEXES_DIR: ".cwf-shared/indexes-shared"
 EOF
 
   assert_eq \
@@ -102,12 +120,22 @@ EOF
     "$label shared config state file" \
     "$base_dir/.cwf-shared/state-shared.yaml" \
     "$(resolve_with_env "$resolver" "$base_dir" resolve_cwf_state_file CWF_STATE_FILE=.cwf-env/state-env.yaml)"
+  assert_eq \
+    "$label shared config prompt logs dir" \
+    "$base_dir/.cwf-shared/prompt-logs-shared" \
+    "$(resolve_with_env "$resolver" "$base_dir" resolve_cwf_prompt_logs_dir CWF_PROMPT_LOGS_DIR=.cwf-env/prompt-logs)"
+  assert_eq \
+    "$label shared config indexes dir" \
+    "$base_dir/.cwf-shared/indexes-shared" \
+    "$(resolve_with_env "$resolver" "$base_dir" resolve_cwf_indexes_dir CWF_INDEXES_DIR=.cwf-env/indexes)"
 
   # 4) local config overrides shared and supports inline comments
   cat > "$base_dir/.cwf/config.local.yaml" <<'EOF'
 CWF_ARTIFACT_ROOT: ".cwf-local"
 CWF_PROJECTS_DIR: ".cwf-local/projects-local" # local override
 CWF_STATE_FILE: ".cwf-local/state-local.yaml"
+CWF_PROMPT_LOGS_DIR: ".cwf-local/prompt-logs-local"
+CWF_INDEXES_DIR: ".cwf-local/indexes-local"
 EOF
 
   assert_eq \
@@ -122,6 +150,14 @@ EOF
     "$label local config wins over shared state file" \
     "$base_dir/.cwf-local/state-local.yaml" \
     "$(resolve_with_env "$resolver" "$base_dir" resolve_cwf_state_file)"
+  assert_eq \
+    "$label local config prompt logs dir" \
+    "$base_dir/.cwf-local/prompt-logs-local" \
+    "$(resolve_with_env "$resolver" "$base_dir" resolve_cwf_prompt_logs_dir)"
+  assert_eq \
+    "$label local config indexes dir" \
+    "$base_dir/.cwf-local/indexes-local" \
+    "$(resolve_with_env "$resolver" "$base_dir" resolve_cwf_indexes_dir)"
   assert_eq \
     "$label local config projects relpath" \
     ".cwf-local/projects-local" \

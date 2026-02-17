@@ -14,10 +14,20 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PLUGIN_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+ARTIFACT_PATHS_SCRIPT="$PLUGIN_ROOT/scripts/cwf-artifact-paths.sh"
+BASE_DIR="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+
+DEFAULT_OUTPUT_DIR="$BASE_DIR/.cwf/projects"
+if [[ -f "$ARTIFACT_PATHS_SCRIPT" ]]; then
+    # shellcheck source=plugins/cwf/scripts/cwf-artifact-paths.sh
+    source "$ARTIFACT_PATHS_SCRIPT"
+    DEFAULT_OUTPUT_DIR="$(resolve_cwf_projects_dir "$BASE_DIR" 2>/dev/null || printf '%s' "$DEFAULT_OUTPUT_DIR")"
+fi
 
 URL="$1"
 FORMAT="$2"
-OUTPUT_DIR="${3:-${CWF_GATHER_GOOGLE_OUTPUT_DIR:-${CWF_GATHER_OUTPUT_DIR:-.cwf/projects}}}"
+OUTPUT_DIR="${3:-${CWF_GATHER_GOOGLE_OUTPUT_DIR:-${CWF_GATHER_OUTPUT_DIR:-$DEFAULT_OUTPUT_DIR}}}"
 
 # Extract document type and ID from URL
 if [[ "$URL" =~ docs\.google\.com/(presentation|document|spreadsheets)/d/([^/]+) ]]; then
