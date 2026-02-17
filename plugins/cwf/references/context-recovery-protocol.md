@@ -10,6 +10,29 @@ This protocol exists to enforce context-deficit resilience across skills:
 - Never require implicit conversational memory to continue execution.
 - If required recovery inputs are missing, fail with explicit file-level remediation.
 
+## Decision Journal Contract
+
+When recovery relies on `live.decision_journal`, each entry must be a single-line JSON object with these required fields:
+
+- `decision_id`
+- `ts`
+- `session_id`
+- `question`
+- `answer`
+- `source_hook`
+- `state_version`
+
+Optional fields:
+
+- `supersedes`
+- `expires_at`
+
+Behavioral constraints:
+
+- `decision_id` is idempotent: append/update by id, never duplicate.
+- Secret-like text must be redacted before persistence.
+- Retention must be bounded (keep only the latest N entries).
+
 ## Session Directory Resolution
 
 Resolve the effective live-state file first, then read `live.dir`.

@@ -7,11 +7,11 @@ set -euo pipefail
 
 HOOK_GROUP="log"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=cwf-hook-gate.sh
+# shellcheck source=plugins/cwf/hooks/scripts/cwf-hook-gate.sh
 source "$SCRIPT_DIR/cwf-hook-gate.sh"
-# shellcheck source=text-format.sh
+# shellcheck source=plugins/cwf/hooks/scripts/text-format.sh
 source "$SCRIPT_DIR/text-format.sh"
-# shellcheck source=env-loader.sh
+# shellcheck source=plugins/cwf/hooks/scripts/env-loader.sh
 source "$SCRIPT_DIR/env-loader.sh"
 
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd)}"
@@ -24,7 +24,7 @@ if command -v perl >/dev/null 2>&1 && [ -f "$REDACTOR_SCRIPT" ]; then
 fi
 
 if [ -f "$RESOLVER_SCRIPT" ]; then
-    # shellcheck source=../../scripts/cwf-artifact-paths.sh
+    # shellcheck source=plugins/cwf/scripts/cwf-artifact-paths.sh
     source "$RESOLVER_SCRIPT"
 fi
 
@@ -80,6 +80,115 @@ resolve_live_session_dir() {
     else
         printf '%s\n' "$project_root/$live_dir"
     fi
+}
+
+normalize_single_line_text() {
+    local raw_text="${1-}"
+    local single_line=""
+    single_line=$(printf '%s' "$raw_text" | tr '\n' ' ' | sed -E 's/[[:space:]]+/ /g; s/^[[:space:]]+//; s/[[:space:]]+$//')
+    printf '%s' "$single_line"
+}
+
+extract_ask_question_from_turn() {
+    local turn_json="$1"
+    echo "$turn_json" | jq -r '
+      [
+        .assistants[].message.content[]? |
+        select(.type == "tool_use" and .name == "AskUserQuestion") |
+        (.input.questions[0].question // .input.questions[0].header // "")
+      ] | last // empty
+    ' 2>/dev/null || true
+}
+
+extract_ask_answer_from_turn() {
+    local turn_json="$1"
+    echo "$turn_json" | jq -r '
+      [
+        (
+          .user.message.content |
+          if type == "array" then . else [] end
+        )[] |
+        select(.type == "tool_result") |
+        .content |
+        if type == "string" then .
+        elif type == "array" then
+          ([.[] | select(type == "object" and .type == "text") | .text] | join(""))
+        else "" end |
+        select(test("User has answered|user.*answered"))
+      ] | join("\n")
+    ' 2>/dev/null || true
+}
+
+extract_answer_payload() {
+    local raw_answer="$1"
+    local parsed=""
+    parsed="$(printf '%s' "$raw_answer" | sed -nE 's/.*[Ww]ith:[[:space:]]*(.+)$/\1/p' | head -n 1)"
+    if [ -n "$parsed" ]; then
+        printf '%s' "$parsed"
+        return 0
+    fi
+    printf '%s' "$raw_answer"
+}
+
+persist_decision_journal_entry() {
+    local turn_num="$1"
+    local turn_json="$2"
+    local turn_ts="$3"
+    local raw_question=""
+    local raw_answer=""
+    local question=""
+    local answer=""
+    local decision_ts=""
+    local state_version=""
+    local decision_id=""
+    local entry_json=""
+
+    if [ ! -f "$LIVE_RESOLVER_SCRIPT" ]; then
+        return 0
+    fi
+    if ! command -v jq >/dev/null 2>&1; then
+        return 0
+    fi
+
+    raw_question="$(extract_ask_question_from_turn "$turn_json")"
+    raw_answer="$(extract_ask_answer_from_turn "$turn_json")"
+    if [ -z "$raw_answer" ]; then
+        return 0
+    fi
+
+    raw_answer="$(extract_answer_payload "$raw_answer")"
+    question="$(normalize_single_line_text "$(redact_sensitive_text "$raw_question")")"
+    answer="$(normalize_single_line_text "$(redact_sensitive_text "$raw_answer")")"
+
+    if [ -z "$question" ]; then
+        question="AskUserQuestion response (question unavailable)"
+    fi
+    if [ -z "$answer" ]; then
+        return 0
+    fi
+
+    decision_ts="$turn_ts"
+    if [ -z "$decision_ts" ]; then
+        decision_ts="$(date -u "+%Y-%m-%dT%H:%M:%SZ")"
+    fi
+
+    state_version="$(bash "$LIVE_RESOLVER_SCRIPT" get "$CWD" state_version 2>/dev/null || true)"
+    if [ -z "$state_version" ]; then
+        state_version="0"
+    fi
+
+    decision_id="askq-$(printf '%s' "${SESSION_ID}|${turn_num}|${question}|${answer}" | shasum -a 256 | cut -c1-16)"
+    entry_json="$(jq -cn \
+        --arg decision_id "$decision_id" \
+        --arg ts "$decision_ts" \
+        --arg session_id "$SESSION_ID" \
+        --arg question "$question" \
+        --arg answer "$answer" \
+        --arg source_hook "log-turn" \
+        --arg state_version "$state_version" \
+        '{decision_id:$decision_id,ts:$ts,session_id:$session_id,question:$question,answer:$answer,source_hook:$source_hook,state_version:$state_version}')"
+
+    bash "$LIVE_RESOLVER_SCRIPT" journal-append "$CWD" "$entry_json" >/dev/null 2>&1 || true
 }
 
 link_log_into_live_session() {
@@ -605,6 +714,7 @@ while [ "$TURN_IDX" -lt "$TURN_COUNT" ]; do
             echo "### User Answers"
             echo "$ASK_ANSWERS"
         } >> "$OUT_FILE"
+        persist_decision_journal_entry "$CURRENT_TURN_NUM" "$TURN" "$LAST_ASSISTANT_TS"
     fi
 
     TURN_IDX=$((TURN_IDX + 1))

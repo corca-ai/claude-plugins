@@ -12,10 +12,10 @@ set -euo pipefail
 #   3. SKIP   — state file not found → exit 0
 
 HOOK_GROUP="compact_recovery"
-# shellcheck source=cwf-hook-gate.sh
-source "$(dirname "${BASH_SOURCE[0]}")/cwf-hook-gate.sh"
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=plugins/cwf/hooks/scripts/cwf-hook-gate.sh
+source "$SCRIPT_DIR/cwf-hook-gate.sh"
+
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd)}"
 RESOLVER_SCRIPT="${PLUGIN_ROOT}/scripts/cwf-artifact-paths.sh"
 LIVE_RESOLVER_SCRIPT="${PLUGIN_ROOT}/scripts/cwf-live-state.sh"
@@ -24,10 +24,10 @@ if [[ ! -f "$RESOLVER_SCRIPT" ]]; then
     exit 0
 fi
 
-# shellcheck source=../../scripts/cwf-artifact-paths.sh
+# shellcheck source=plugins/cwf/scripts/cwf-artifact-paths.sh
 source "$RESOLVER_SCRIPT"
 if [[ -f "$LIVE_RESOLVER_SCRIPT" ]]; then
-    # shellcheck source=../../scripts/cwf-live-state.sh
+    # shellcheck source=plugins/cwf/scripts/cwf-live-state.sh
     source "$LIVE_RESOLVER_SCRIPT"
 fi
 
@@ -328,6 +328,19 @@ if [[ ${#decision_journal[@]} -gt 0 ]]; then
 
 Decision journal (impl-phase decisions made before compact):"
     for entry in "${decision_journal[@]}"; do
+        decoded_entry="$(printf '%s' "$entry" | sed 's/\\"/"/g')"
+        entry_summary="$(printf '%s' "$decoded_entry" | jq -r '
+            if type == "object" and (.decision_id // "") != "" then
+                "[" + .decision_id + "] " + (.question // "?") + " => " + (.answer // "?")
+            else
+                empty
+            end
+        ' 2>/dev/null || true)"
+        if [[ -n "$entry_summary" ]]; then
+            context="${context}
+  - ${entry_summary}"
+            continue
+        fi
         context="${context}
   - ${entry}"
     done
