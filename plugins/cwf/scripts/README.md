@@ -5,9 +5,11 @@ This file maps scripts under [plugins/cwf/scripts](.).
 - [check-session.sh](check-session.sh): Validates session artifacts and semantic closure checks.
 - [check-growth-drift.sh](check-growth-drift.sh): Reports cross-surface drift across skills/docs/scripts/state/provenance, with optional strict hook regression execution via `--strict-hooks`.
 - [test-hook-exit-codes.sh](test-hook-exit-codes.sh): Deterministic hook allow/block regression suite (`--suite`, `--strict`) with hooks-manifest driven target discovery.
+- [check-script-deps.sh](check-script-deps.sh): Validates runtime script dependency edges from hooks manifest and script references.
+- [check-readme-structure.sh](check-readme-structure.sh): Verifies heading-level structure parity between the root English and Korean README documents.
 - [next-prompt-dir.sh](next-prompt-dir.sh): Computes next session directory name, with optional `--bootstrap` to initialize artifacts and register `cwf-state.yaml` session metadata.
 - [cwf-artifact-paths.sh](cwf-artifact-paths.sh): Resolves artifact/state/projects paths with project-config precedence (.cwf/config.local.yaml → .cwf/config.yaml → env).
-- [cwf-live-state.sh](cwf-live-state.sh): Resolves/syncs hybrid live-state files, reads live scalars/lists (`get`, `list-get`), and updates top-level live fields with session-first writes plus root-summary sync (`set`, `list-set`, `list-remove`).
+- [cwf-live-state.sh](cwf-live-state.sh): Resolves/syncs hybrid live-state files, reads live scalars/lists (`get`, `list-get`), updates top-level live fields (`set`, `list-set`, `list-remove`), and appends replay-safe decision entries (`journal-append`).
 - [retro-collect-evidence.sh](retro-collect-evidence.sh): Collects retro evidence snapshot (token-limit signals, HITL decisions/events, warning lines, changed-files context).
 - [provenance-check.sh](provenance-check.sh): Verifies provenance sidecar freshness against current CWF skill/hook counts.
 - [codex/codex-with-log.sh](codex/codex-with-log.sh): Wrapper entrypoint that runs Codex and syncs logs.

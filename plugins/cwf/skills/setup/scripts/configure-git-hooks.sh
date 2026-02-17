@@ -17,7 +17,7 @@ Options:
 Profiles:
   fast      pre-commit: staged markdownlint; pre-push: repo markdownlint
   balanced  fast + local link checks + staged shellcheck (if available) + index coverage checks on push
-  strict    balanced + provenance freshness + growth-drift reports on push (inform level)
+  strict    balanced + script dependency/readme structure hard gates + provenance/growth-drift reports
 USAGE
 }
 
@@ -158,6 +158,8 @@ CWF_LINK_CHECKER="plugins/cwf/skills/refactor/scripts/check-links.sh"
 CWF_INDEX_COVERAGE="plugins/cwf/skills/setup/scripts/check-index-coverage.sh"
 CWF_PROVENANCE="plugins/cwf/scripts/provenance-check.sh"
 CWF_GROWTH_DRIFT="plugins/cwf/scripts/check-growth-drift.sh"
+CWF_SCRIPT_DEPS="plugins/cwf/scripts/check-script-deps.sh"
+CWF_README_STRUCTURE="plugins/cwf/scripts/check-readme-structure.sh"
 
 mapfile -t md_files < <(
   git ls-files '*.md' '*.mdx' \
@@ -190,6 +192,22 @@ if [[ "$PROFILE" != "fast" ]]; then
 fi
 
 if [[ "$PROFILE" == "strict" ]]; then
+  if [[ -x "$CWF_SCRIPT_DEPS" ]]; then
+    echo "[pre-push] runtime script dependency checks..."
+    bash "$CWF_SCRIPT_DEPS" --strict
+  else
+    echo "[pre-push] $CWF_SCRIPT_DEPS missing or not executable" >&2
+    exit 1
+  fi
+
+  if [[ -x "$CWF_README_STRUCTURE" ]]; then
+    echo "[pre-push] README structure checks..."
+    bash "$CWF_README_STRUCTURE" --strict
+  else
+    echo "[pre-push] $CWF_README_STRUCTURE missing or not executable" >&2
+    exit 1
+  fi
+
   if [[ -x "$CWF_PROVENANCE" ]]; then
     echo "[pre-push] provenance freshness report (inform)..."
     bash "$CWF_PROVENANCE" --level inform
