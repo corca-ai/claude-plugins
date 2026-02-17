@@ -12,11 +12,10 @@ set -euo pipefail
 # file content but do not remove files from the filesystem, so they are out of scope
 # for deletion safety.
 
-# shellcheck disable=SC2034
 HOOK_GROUP="deletion_safety"
-# shellcheck source=cwf-hook-gate.sh
-# shellcheck disable=SC1091
-source "$(dirname "${BASH_SOURCE[0]}")/cwf-hook-gate.sh"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=plugins/cwf/hooks/scripts/cwf-hook-gate.sh
+source "$SCRIPT_DIR/cwf-hook-gate.sh"
 
 INPUT="$(cat)"
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || true)"
@@ -82,6 +81,31 @@ to_repo_rel() {
   fi
 
   printf '%s' "$rel"
+}
+
+is_external_tmp_artifact() {
+  local raw_path="$1"
+  local tmp_root=""
+
+  raw_path="$(trim_ws "$raw_path")"
+  raw_path="$(strip_quotes "$raw_path")"
+  [[ "$raw_path" == /* ]] || return 1
+
+  if [[ "$raw_path" == "$REPO_ROOT/"* ]]; then
+    return 1
+  fi
+
+  case "$raw_path" in
+    /tmp/*|/private/tmp/*) return 0 ;;
+  esac
+
+  tmp_root="${TMPDIR:-}"
+  tmp_root="${tmp_root%/}"
+  if [[ -n "$tmp_root" && "$raw_path" == "$tmp_root"/* ]]; then
+    return 0
+  fi
+
+  return 1
 }
 
 extract_deleted_from_bash() {
@@ -171,8 +195,8 @@ TOOL_NAME=""
 TOOL_COMMAND=""
 
 if command -v jq >/dev/null 2>&1; then
-  TOOL_NAME="$(echo "$INPUT" | jq -r '.tool_name // .tool // empty')"
-  TOOL_COMMAND="$(echo "$INPUT" | jq -r '.tool_input.command // empty')"
+  TOOL_NAME="$(printf '%s' "$INPUT" | jq -r '.tool_name // .tool // empty')"
+  TOOL_COMMAND="$(printf '%s' "$INPUT" | jq -r '.tool_input.command // empty')"
 else
   if printf '%s' "$INPUT" | grep -Eiq 'git[[:space:]]+rm|(^|[^[:alnum:]_])rm[[:space:]]|unlink[[:space:]]'; then
     json_block "Deletion safety gate requires jq for safe parsing."
@@ -199,16 +223,16 @@ fi
 
 DELETED_REL=()
 for candidate in "${DELETED_RAW[@]}"; do
+  if is_external_tmp_artifact "$candidate"; then
+    continue
+  fi
+
   rel_path="$(to_repo_rel "$candidate" || true)"
   [[ -n "$rel_path" ]] || continue
 
-  # Skip non-project paths (not worth caller-searching)
+  # Skip generated/session artifacts (not production runtime callers)
   case "$rel_path" in
-    node_modules/*|.cwf/projects/*|tmp/*) continue ;;
-  esac
-  # Skip absolute /tmp/ paths that survived to_repo_rel
-  case "$candidate" in
-    /tmp/*) continue ;;
+    node_modules/*|.cwf/projects/*|.cwf/sessions/*|.cwf/prompt-logs/*) continue ;;
   esac
 
   is_dup=0

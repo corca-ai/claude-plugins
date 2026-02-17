@@ -15,6 +15,10 @@ set -euo pipefail
 #     Print effective live-state file path.
 #   sync [base_dir]
 #     Copy root live section to session live-state file and upsert live.state_file pointer.
+#   get [base_dir] key
+#     Read a scalar field from resolved live state and print normalized value.
+#   list-get [base_dir] key
+#     Read a list field from resolved live state and print one item per line.
 #   set [base_dir] key=value [key=value ...]
 #     Update top-level scalar fields in live state (session-first write target)
 #     and synchronize root live summary fields for compatibility.
@@ -333,6 +337,53 @@ cwf_live_extract_list_from_file() {
       }
     }
   ' "$file_path"
+}
+
+cwf_live_validate_query_key() {
+  local key="$1"
+  [[ "$key" =~ ^[A-Za-z0-9_-]+$ ]]
+}
+
+cwf_live_get_scalar() {
+  local base_dir="${1:-.}"
+  local key="${2:-}"
+  local effective_state=""
+  local raw_value=""
+
+  if [[ -z "$key" ]]; then
+    echo "get requires a key" >&2
+    return 2
+  fi
+  if ! cwf_live_validate_query_key "$key"; then
+    echo "Invalid key for get: $key" >&2
+    return 2
+  fi
+
+  effective_state="$(cwf_live_resolve_file "$base_dir")"
+  [[ -f "$effective_state" ]] || return 1
+
+  raw_value="$(cwf_live_extract_scalar_from_file "$effective_state" "$key" || true)"
+  printf '%s\n' "$(cwf_live_normalize_scalar "$raw_value")"
+}
+
+cwf_live_get_list() {
+  local base_dir="${1:-.}"
+  local key="${2:-}"
+  local effective_state=""
+
+  if [[ -z "$key" ]]; then
+    echo "list-get requires a key" >&2
+    return 2
+  fi
+  if ! cwf_live_validate_query_key "$key"; then
+    echo "Invalid key for list-get: $key" >&2
+    return 2
+  fi
+
+  effective_state="$(cwf_live_resolve_file "$base_dir")"
+  [[ -f "$effective_state" ]] || return 1
+
+  cwf_live_extract_list_from_file "$effective_state" "$key"
 }
 
 cwf_live_upsert_live_list() {
@@ -709,6 +760,40 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
       base_dir="${1:-.}"
       cwf_live_sync_from_root "$base_dir"
       ;;
+    get)
+      case "$#" in
+        1)
+          base_dir="."
+          get_key="$1"
+          ;;
+        2)
+          base_dir="$1"
+          get_key="$2"
+          ;;
+        *)
+          echo "get requires: [base_dir] key" >&2
+          exit 2
+          ;;
+      esac
+      cwf_live_get_scalar "$base_dir" "$get_key"
+      ;;
+    list-get)
+      case "$#" in
+        1)
+          base_dir="."
+          get_list_key="$1"
+          ;;
+        2)
+          base_dir="$1"
+          get_list_key="$2"
+          ;;
+        *)
+          echo "list-get requires: [base_dir] key" >&2
+          exit 2
+          ;;
+      esac
+      cwf_live_get_list "$base_dir" "$get_list_key"
+      ;;
     set)
       base_dir="."
       if [[ "${1:-}" == *=* || -z "${1:-}" ]]; then
@@ -776,6 +861,8 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
       ;;
     *)
       echo "Usage: $0 {resolve|sync} [base_dir]" >&2
+      echo "       $0 get [base_dir] key" >&2
+      echo "       $0 list-get [base_dir] key" >&2
       echo "       $0 set [base_dir] key=value [key=value ...]" >&2
       echo "       $0 list-set [base_dir] key=item1,item2,..." >&2
       echo "       $0 list-remove [base_dir] key item" >&2
