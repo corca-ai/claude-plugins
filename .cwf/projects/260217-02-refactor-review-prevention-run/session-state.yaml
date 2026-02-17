@@ -1,0 +1,25 @@
+# session-state.yaml — volatile session live state
+# Synced from .cwf/cwf-state.yaml live section.
+
+live:
+  session_id: "260217-02"
+  dir: ".cwf/projects/260217-02-refactor-review-prevention-run"
+  branch: "feat/260217-run-review-prevention"
+  phase: "done"
+  task: "cwf:run completed (ship skipped)"
+  key_files:
+    - README.ko.md
+    - .cwf/projects/260216-03-hitl-readme-restart/next-session.md
+    - .cwf/projects/260216-03-hitl-readme-restart/hitl/hitl-scratchpad.md
+  decisions: []
+  decision_journal: []
+  hitl:
+    session_id: "260216-03-hitl"
+    state_file: ".cwf/projects/260216-03-hitl-readme-restart/hitl/state.yaml"
+    rules_file: ".cwf/projects/260216-03-hitl-readme-restart/hitl/rules.yaml"
+    updated_at: "2026-02-16T02:42:35Z"
+  active_pipeline: ""
+  user_directive: ""
+  pipeline_override_reason: ""
+  remaining_gates: []
+  state_version: "7"
