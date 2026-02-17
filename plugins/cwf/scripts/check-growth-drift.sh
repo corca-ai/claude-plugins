@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # check-growth-drift.sh — Detect cross-surface mismatches as CWF evolves.
-# Usage: check-growth-drift.sh [--level inform|warn|stop] [-h|--help]
+# Usage: check-growth-drift.sh [--level inform|warn|stop] [--strict-hooks] [-h|--help]
 #
 # Surfaces checked (v2):
 #   1) Skill inventory vs README.ko workflow table
@@ -22,6 +22,7 @@ usage() {
 }
 
 LEVEL="warn"
+STRICT_HOOKS="false"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --level)
@@ -31,6 +32,10 @@ while [[ $# -gt 0 ]]; do
       fi
       LEVEL="$2"
       shift 2
+      ;;
+    --strict-hooks)
+      STRICT_HOOKS="true"
+      shift
       ;;
     -h|--help)
       usage
@@ -269,6 +274,7 @@ check_plugin_runtime_scripts() {
     fi
   done <<'EOF'
 plugins/cwf/scripts/check-session.sh
+plugins/cwf/scripts/test-hook-exit-codes.sh
 plugins/cwf/scripts/next-prompt-dir.sh
 plugins/cwf/scripts/cwf-artifact-paths.sh
 plugins/cwf/scripts/cwf-live-state.sh
@@ -320,9 +326,9 @@ check_live_state_pointers() {
     return
   fi
 
-  # shellcheck source=./cwf-artifact-paths.sh
+  # shellcheck source=plugins/cwf/scripts/cwf-artifact-paths.sh
   source "$resolver"
-  # shellcheck source=./cwf-live-state.sh
+  # shellcheck source=plugins/cwf/scripts/cwf-live-state.sh
   source "$live_resolver"
   state_file="$(resolve_cwf_state_file "$REPO_ROOT")"
 
@@ -489,12 +495,55 @@ check_runtime_placeholder_style() {
   record_pass "$category" "No legacy {SKILL_DIR}/../../scripts placeholders in skills/references"
 }
 
+check_hook_exit_code_regression() {
+  local category="hook_exit_code_regression"
+  local tester="plugins/cwf/scripts/test-hook-exit-codes.sh"
+  local output=""
+  local summary_line=""
+  local rc=0
+
+  if [[ "$STRICT_HOOKS" != "true" ]]; then
+    record_pass "$category" "Skipped (enable with --strict-hooks)"
+    return
+  fi
+
+  if [[ ! -x "$tester" ]]; then
+    record_fail "$category" "Missing strict hook tester: $tester"
+    return
+  fi
+
+  set +e
+  output="$(bash "$tester" --strict 2>&1)"
+  rc=$?
+  set -e
+
+  summary_line="$(printf '%s\n' "$output" | grep -E '^Summary:' | tail -1 || true)"
+  if [[ -z "$summary_line" ]]; then
+    summary_line="(no summary line)"
+  fi
+
+  if [[ "$rc" -ne 0 ]]; then
+    record_fail "$category" "Strict hook suite failed: $summary_line"
+    while IFS= read -r line; do
+      [[ -n "$line" ]] || continue
+      record_fail "$category" "  $line"
+      if [[ "$line" == "$summary_line" ]]; then
+        break
+      fi
+    done <<< "$(printf '%s\n' "$output" | head -n 10)"
+    return
+  fi
+
+  record_pass "$category" "Strict hook suite passed: $summary_line"
+}
+
 check_skill_inventory_vs_readme_ko
 check_run_chain_sync
 check_plugin_runtime_scripts
 check_live_state_pointers
 check_provenance_freshness_summary
 check_runtime_placeholder_style
+check_hook_exit_code_regression
 
 echo "CWF Growth Drift Check (v2)"
 echo "Level: $LEVEL"

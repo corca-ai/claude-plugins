@@ -28,7 +28,12 @@ resolve_abs_path() {
 
 is_external_tmp_path() {
     local abs_path="$1"
+    local repo_root="${2:-}"
     local tmp_root=""
+
+    if [[ -n "$repo_root" && ("$abs_path" == "$repo_root" || "$abs_path" == "$repo_root/"*) ]]; then
+        return 1
+    fi
 
     case "$abs_path" in
         /tmp/*|/private/tmp/*) return 0 ;;
@@ -76,7 +81,7 @@ LINT_DIR="${CWD:-.}"
 REPO_ROOT="$(git -C "$LINT_DIR" rev-parse --show-toplevel 2>/dev/null || true)"
 ABS_FILE_PATH="$(resolve_abs_path "$FILE_PATH" "$LINT_DIR" || true)"
 if [[ -n "$ABS_FILE_PATH" ]]; then
-    if is_external_tmp_path "$ABS_FILE_PATH"; then
+    if is_external_tmp_path "$ABS_FILE_PATH" "$REPO_ROOT"; then
         exit 0
     fi
     if [[ -n "$REPO_ROOT" && "$ABS_FILE_PATH" != "$REPO_ROOT" && "$ABS_FILE_PATH" != "$REPO_ROOT/"* ]]; then
