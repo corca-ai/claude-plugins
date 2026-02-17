@@ -423,13 +423,14 @@ If user answers `No`, skip Phase 4.
 
 ### 4.0.2 Output Target Selection
 
-In this repository, repository index output is managed in AGENTS.md only.
-
 Target resolution:
 
-1. If command includes `--target agents`, use it.
-2. If command includes `--target file` or `--target both`, normalize to `agents` and report that this repository uses AGENTS-managed output only.
-3. Otherwise default to `agents`.
+1. If command includes `--target <agents|file|both>`, use it.
+2. Otherwise auto-detect:
+   - if an AGENTS guide file exists (or already contains managed block markers), default to `agents`
+   - if no AGENTS guide file exists, default to `file`
+3. Standalone file target: repository-index file (`repo-index.md`) under the artifact index directory.
+4. `both` means writing both outputs with equivalent index content.
 
 Managed AGENTS block markers:
 
@@ -439,7 +440,7 @@ Managed AGENTS block markers:
 <!-- CWF:INDEX:END -->
 ```
 
-If AGENTS.md does not exist, create it with a minimal scaffold and the managed block.
+If target includes `agents` and AGENTS.md does not exist, create it with a minimal scaffold and the managed block.
 
 ### 4.1 Scan Project Structure
 
@@ -482,22 +483,30 @@ For each area, generate:
   - For non-CWF skill collections, use deterministic alphabetical order.
   - Other sections: deterministic order (alphabetical unless there is a clear canonical sequence).
 
-### 4.3 Update AGENTS.md Managed Block
+### 4.3 Write Selected Output Targets
 
-Write the generated repository index body into the managed block in AGENTS.md:
+When target includes `agents`, write the generated repository index body into the managed block in AGENTS.md:
 
 - If markers exist, replace only the marker-delimited section.
 - If markers are absent, append a new managed block at the end of AGENTS.md.
 
+When target includes `file`, write the same repository index body to the standalone `repo-index.md` file under the artifact index directory (create parent directories as needed).
+
 ### 4.4 Repository Coverage Validation (Required)
 
-Run:
+Run validation for each selected target:
 
-```bash
-bash {SKILL_DIR}/scripts/check-index-coverage.sh AGENTS.md --profile repo
-```
+- `agents` target:
+  ```bash
+  bash {SKILL_DIR}/scripts/check-index-coverage.sh AGENTS.md --profile repo
+  ```
+- `file` target:
+  ```bash
+  bash {SKILL_DIR}/scripts/check-index-coverage.sh .cwf/indexes/repo-index.md --profile repo
+  ```
+- `both` target: run both commands.
 
-This check applies optional exclusions from repository-root .cwf-index-ignore.
+Checks apply optional exclusions from repository-root `.cwf-index-ignore`.
 
 If validation fails, regenerate and fix missing links before finishing.
 

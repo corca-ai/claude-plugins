@@ -15,7 +15,7 @@ Apply consistent multi-perspective quality gates before implementation (plan) an
 /review                 Code review (default)
 /review --mode plan     Plan/spec review
 /review --mode clarify  Requirement review
-/review --mode code --base marketplace-v3 --scenarios .cwf/projects/holdout.md
+/review --mode code --base <base-branch> --scenarios .cwf/projects/holdout.md
 /review --mode code --correctness-provider gemini --architecture-provider claude
 ```
 

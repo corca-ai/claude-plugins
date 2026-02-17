@@ -95,7 +95,7 @@ Do not replicate or improvise template structure from recent examples.
 
 Prepare source material for each canonical section:
 
-- Context Files to Read: from Phase 1/2 signals; always include the repository AGENTS guide, plugin development cheatsheet, and the cwf-state session state file. Include runtime logs when available. Include the Claude runtime adapter only when runtime behavior is relevant.
+- Context Files to Read: from Phase 1/2 signals; include the repository AGENTS guide, plugin development cheatsheet, and the cwf-state session state file when present. If any is missing, note it explicitly and continue with available context. Include runtime logs when available. Include the Claude runtime adapter only when runtime behavior is relevant.
 - Task Scope / Dependencies / Don't Touch: from the master plan artifact when present; otherwise from Phase 2 user answers and stage context.
 - Lessons from Prior Sessions: selective aggregation from cwf-state summaries and relevant lesson artifacts only.
 - Success Criteria: concrete BDD Given/When/Then tied to actual files or behaviors.
@@ -153,7 +153,7 @@ Example: "clarify + design → implementation"
 
 The agent executing this skill holds the clarify/gather context in its active conversation. Extract the following from conversation history and session artifacts:
 
-1. **Context Files**: Which files must the next phase agent read? Always include AGENTS.md and `cwf-state.yaml`. Add files that emerged as critical during the clarify/gather phase. Include CLAUDE.md only if runtime-specific behavior matters.
+1. **Context Files**: Which files must the next phase agent read? Include the AGENTS guide and CWF state file when present. If one is missing, record the omission and continue with available context files. Add files that emerged as critical during the clarify/gather phase. Include CLAUDE.md only if runtime-specific behavior matters.
    - When available, include runtime logs:
      `.cwf/sessions/*.claude.md`, `.cwf/sessions/*.codex.md`, `.cwf/sessions/*.md`
      (fallback: `.cwf/projects/sessions/*.claude.md`, `.cwf/projects/sessions/*.codex.md`, `.cwf/projects/sessions/*.md`)
@@ -176,8 +176,8 @@ Write to `.cwf/projects/{session-dir}/phase-handoff.md`:
 
 ## Context Files to Read
 
-1. `AGENTS.md` — shared project rules and protocols (cross-agent)
-2. `cwf-state.yaml` — current project state
+1. `AGENTS.md` — shared project rules and protocols (cross-agent, when present)
+2. `cwf-state.yaml` — current project state (when present)
 3. {additional files from 3b.2}
 
 ## Design Decision Summary

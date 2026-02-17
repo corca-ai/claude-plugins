@@ -131,3 +131,22 @@ Reviewing `gather`:
 - Map shows: Agent Orchestration only
 - Verify: adaptive sizing (Single/Adaptive) ✓, parallel batch for broad queries ✓, output synthesis ✓
 - Check unclaimed: does gather route decisions by evidence? No → no missing sync
+
+## 9. Repository Independence and Portability (Default)
+
+Check whether the target skill remains operable outside this repository's exact layout while still honoring CWF capability contracts.
+
+| Check | Flag condition |
+|-------|---------------|
+| Hardcoded host-repo paths | Skill assumes fixed root files/directories that may not exist in another repo without detection/fallback |
+| Non-defensive cross-plugin dependencies | Skill requires another plugin/skill path without existence guard or graceful fallback |
+| Environment/layout coupling | Script/path logic assumes one installation layout and lacks runtime resolution |
+| Hardcoded policy defaults | Hardcoded branch/language/runtime values where runtime/context-driven defaults are expected |
+| Missing degradation path | When prerequisite files/tools are absent, skill fails abruptly instead of reporting and continuing in best-effort mode (or asking user when required) |
+| Contractless repository-specific checks | Repository-specific checks are unconditional instead of being gated by detectable context or local contract |
+
+For each portability finding, report:
+
+- **Assumption**: what is hardcoded or non-defensive
+- **Impact**: where it breaks outside this repository
+- **Hardening**: detection/fallback or contract-gating fix

@@ -25,7 +25,9 @@ cwf:setup --git-hooks pre-commit --gate-profile fast # Lightweight local-only gi
 cwf:setup --git-hooks none # Remove repo-managed git hooks
 cwf:setup --cap-index    # Generate/refresh CWF capability index only
 cwf:setup --repo-index   # Generate/refresh repository index (explicit)
-cwf:setup --repo-index --target agents # AGENTS.md managed block (recommended)
+cwf:setup --repo-index --target agents # AGENTS.md managed block target
+cwf:setup --repo-index --target file   # Standalone index file target
+cwf:setup --repo-index --target both   # AGENTS block + standalone index file
 ```
 
 Operational note:
@@ -48,7 +50,7 @@ Parse input flags and run only the relevant phases:
 | `cwf:setup --codex-wrapper` | 2.6 → 5 |
 | `cwf:setup --git-hooks <none\|pre-commit\|pre-push\|both> [--gate-profile <fast\|balanced\|strict>]` | 2.7 → 5 |
 | `cwf:setup --cap-index` | 3 → 5 |
-| `cwf:setup --repo-index [--target agents]` | 4 → 5 |
+| `cwf:setup --repo-index [--target <agents\|file\|both>]` | 4 → 5 |
 
 When mode is full setup and Codex CLI is available, do not silently skip Codex integration; always run Phase 2.4 and ask the user which integration level to apply.
 
@@ -405,9 +407,9 @@ Generate repository index when explicitly requested or approved in full setup.
 
 Mandatory behavior:
 - ask include/skip decision in full setup
-- use AGENTS-managed output target rules
+- resolve output target via `--target` or repository-context detection (`agents`, `file`, `both`)
 - build deterministic inventories and ordering
-- update AGENTS managed block markers
+- update selected output target(s) deterministically
 - validate coverage with `check-index-coverage.sh --profile repo`
 
 Detailed generation and validation checklist: [runtime-and-index-phases.md](references/runtime-and-index-phases.md).
@@ -432,7 +434,7 @@ Detailed lessons/checkpoint format: [runtime-and-index-phases.md](references/run
 
 1. **State SSOT + idempotency**: Read and edit `cwf-state.yaml` (do not overwrite wholesale), and keep reruns safe/idempotent across all phases.
 2. **Single-entry setup UX**: Full setup (`cwf:setup`) must execute the integrated optional decision flow for Codex, hooks, env/bootstrap, agent-teams, and run-mode phases in one run.
-3. **Index generation is explicit and deterministic**: Capability index runs only via `--cap-index`; repository index runs via `--repo-index` with AGENTS managed-block output.
+3. **Index generation is explicit and deterministic**: Capability index runs only via `--cap-index`; repository index runs via `--repo-index` with target resolution (`agents`, `file`, `both`) from CLI or repository context.
 4. **Index coverage/link policy is mandatory**: Generated indexes must use Markdown relative links and pass deterministic coverage checks (cap/repo profiles).
 5. **File safety**: Codex sync must use symlink + backup move (no direct user file deletion).
 6. **Scope-aware Codex integration**: Resolve active plugin scope first; non-user context must not mutate user-global Codex paths without explicit user confirmation.

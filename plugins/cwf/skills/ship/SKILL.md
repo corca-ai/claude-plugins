@@ -23,7 +23,7 @@ No args or `help` → print the usage block above and stop.
 
 ## Defaults
 
-- **Base branch**: `main` (override with `--base`)
+- **Base branch**: auto-detect remote default branch → `main` → `master` (override with `--base`)
 - **Merge strategy**: `--squash` (override with `--merge` or `--rebase`)
 
 ## Prerequisites
@@ -83,6 +83,10 @@ Create a GitHub issue for the current session and optionally a feature branch.
    - Find the current session directory in `.cwf/projects/` (most recent `YYMMDD-NN-*`)
    - Read `plan.md` if it exists for purpose, scope, success criteria
    - Read master-plan (search for `master-plan.md` or similar) for session number
+   - Resolve `{base}`:
+     - if `--base` is provided, use it
+     - otherwise detect with `git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||'`
+     - if unresolved, fallback to `main`, then `master`; if none exists, ask the user for base branch explicitly
 
 2. **Compose issue body**:
    - Read `{SKILL_DIR}/references/issue-template.md`
@@ -129,7 +133,8 @@ Create a pull request from the current feature branch.
 ### Workflow
 
 1. **Pre-flight checks** (stop with message if any fail):
-   - Not on `main` or the base branch
+   - Resolve `{base}` using the same rule as `/ship issue`
+   - Not on the resolved base branch
    - Has commits ahead of base: `git log {base}..HEAD --oneline` is non-empty
    - No uncommitted changes: `git status --porcelain` is empty
      - If dirty, ask user whether to commit first or abort
@@ -315,7 +320,7 @@ Usage:
   /ship merge [--squash|--merge|--rebase]    Merge approved PR
   /ship status                           Show issues, PRs, checks
 
-Defaults: base=main, merge=squash
+Defaults: base=auto-detected (origin/HEAD -> main -> master), merge=squash
 ```
 
 ## Rules

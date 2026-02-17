@@ -22,9 +22,10 @@ cwf:clarify <requirement> --light  # Direct Q&A, no sub-agents
 
 Before entering Default or --light mode, assess **clarify depth** based on input specificity:
 
-1. Read `next-session.md` or the user's task description
-2. Check if the input provides: **target file paths**, **expected changes per file**, and **BDD-style success criteria**
-3. Apply this heuristic:
+1. If `next-session.md` exists in the active session directory or current workspace, read it as optional prior-session context.
+2. Always parse the user's task description (required input).
+3. Check if the combined input provides: **target file paths**, **expected changes per file**, and **BDD-style success criteria**.
+4. Apply this heuristic:
 
 | Input specificity | Clarify depth | Rationale |
 |-------------------|---------------|-----------|

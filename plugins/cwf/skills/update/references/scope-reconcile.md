@@ -90,6 +90,28 @@ Active scope is {active_scope}, but update target is user-global. Continue with 
 
 If declined, return to scope selection.
 
+## Phase 1 Cache Resolution Details
+
+After marketplace metadata refresh, resolve latest cached `plugin.json` using context-aware cache roots:
+
+```bash
+cache_roots=(
+  "${CLAUDE_HOME:-$HOME/.claude}/plugins/cache"
+  "$HOME/.claude/plugins/cache"
+)
+latest_plugin_json=""
+for cache_root in "${cache_roots[@]}"; do
+  [ -d "$cache_root" ] || continue
+  candidate="$(ls -1dt "$cache_root"/*/cwf/*/.claude-plugin/plugin.json 2>/dev/null | head -n1)"
+  if [ -n "$candidate" ]; then
+    latest_plugin_json="$candidate"
+    break
+  fi
+done
+```
+
+If unresolved, stop with explicit guidance (`CLAUDE_HOME` or cache-root path).
+
 ## Phase 3 Details
 
 ### Detect Existing Integration Signals

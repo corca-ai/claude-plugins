@@ -32,8 +32,23 @@ Why this exists:
 1. **Parse** args → mode (URL | `--search` | `--local` | help)
 2. **No args or "help"** → print [usage message](#usage-message) and stop
 3. **Execute** the appropriate handler (see sections below)
-4. **Save** results to `OUTPUT_DIR` (URL and `--local` modes)
+4. **Resolve + prepare** `OUTPUT_DIR` before writes (URL and `--local` modes)
 5. **Suggest** follow-up: after URL gathering, suggest `--search` for supplementary research if helpful
+
+Before any file write, resolve output path in this order:
+1. Explicit CLI output-dir argument
+2. Service-specific output env var
+3. `CWF_GATHER_OUTPUT_DIR`
+4. `.cwf/projects` (when writable)
+5. workspace-local `gather-output` fallback directory
+
+Then run:
+
+```bash
+mkdir -p "$OUTPUT_DIR"
+```
+
+If directory creation fails, stop that target with an explicit error and ask whether to provide a different output directory.
 
 ---
 
@@ -268,7 +283,7 @@ Provenance metadata guidance:
 | `TAVILY_API_KEY` | — | Required for `--search` and generic URL extract |
 | `EXA_API_KEY` | — | Required for `--search code` |
 
-**Output dir priority**: CLI argument > service-specific env var > `CWF_GATHER_OUTPUT_DIR` > hardcoded default (.cwf/projects)
+**Output dir priority**: CLI argument > service-specific env var > `CWF_GATHER_OUTPUT_DIR` > `.cwf/projects` (if writable) > `gather-output` fallback directory
 
 When a service-specific env var is not set, pass the unified output dir as a CLI argument to the handler script.
 
@@ -318,7 +333,7 @@ Environment variables:
 
 1. **URL auto-detect priority**: Match most specific pattern first (Google > Slack > Notion > GitHub > Generic)
 2. **Graceful degradation**: Missing API keys print setup instructions, don't crash
-3. **Output dir hierarchy**: CLI argument > service-specific env var > unified env var > .cwf/projects
+3. **Output dir hierarchy**: CLI argument > service-specific env var > unified env var > `.cwf/projects` (if writable) > `gather-output` fallback directory
 4. **Data privacy**: Do not include confidential code or sensitive information in search queries
 5. **Sub-agent for --local**: Always use Task tool, never inline exploration
 6. **All code fences must have language specifier**: Never use bare fences

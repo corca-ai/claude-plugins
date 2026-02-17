@@ -83,9 +83,23 @@ claude plugin marketplace update corca-plugins
 Resolve latest marketplace payload snapshot:
 
 ```bash
-latest_plugin_json="$(ls -1dt ~/.claude/plugins/cache/*/cwf/*/.claude-plugin/plugin.json 2>/dev/null | head -n1)"
+cache_roots=(
+  "${CLAUDE_HOME:-$HOME/.claude}/plugins/cache"
+  "$HOME/.claude/plugins/cache"
+)
+latest_plugin_json=""
+for cache_root in "${cache_roots[@]}"; do
+  [ -d "$cache_root" ] || continue
+  candidate="$(ls -1dt "$cache_root"/*/cwf/*/.claude-plugin/plugin.json 2>/dev/null | head -n1)"
+  if [ -n "$candidate" ]; then
+    latest_plugin_json="$candidate"
+    break
+  fi
+done
 [ -n "$latest_plugin_json" ] || {
   echo "Latest CWF metadata not found after marketplace update."
+  echo "Checked cache roots: ${cache_roots[*]}"
+  echo "Set CLAUDE_HOME or provide a valid cache root."
   exit 1
 }
 

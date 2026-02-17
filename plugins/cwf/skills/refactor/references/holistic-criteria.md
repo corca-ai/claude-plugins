@@ -4,6 +4,17 @@
 
 Three axes for cross-plugin analysis, based on semiotic decomposition (Form / Meaning / Function). Apply each to the full plugin inventory.
 
+## 0. Portability Baseline (Apply Across All Axes)
+
+Portability is a default requirement, not an opt-in check. Evaluate each axis with this baseline:
+
+- Skills should remain repository-agnostic and avoid hard requirements on one host repository layout.
+- Cross-plugin dependencies should be defensive (existence checks + graceful fallback), not fail-open or hardcoded.
+- Runtime defaults (branch/language/path) should be context-aware rather than fixed values.
+- Repository-specific checks should be driven by detectable context or local contracts, not unconditional assumptions.
+
+Report portability findings with file:line evidence and propose concrete hardening actions.
+
 ## 1. Convention Compliance (Form)
 
 Does each skill follow shared structural templates? Focus on individual skill structural consistency.
@@ -45,6 +56,14 @@ When 3+ skills repeat the same structural pattern, prose block, or rule text:
 
 Cite the repeated text, list all skills that contain it, and propose the shared reference location.
 
+### 1d. Portability shape checks (Form)
+
+Check structural portability hygiene:
+
+- Hardcoded absolute/host-specific paths in SKILL instructions
+- Missing path-resolution helpers where shared resolvers already exist
+- Script layouts assumed without fallback
+
 ## 2. Concept Integrity (Meaning)
 
 Does each skill implement its claimed concepts correctly? Are skills sharing a concept consistent in implementation? Focus on semantic correctness of concept composition.
@@ -85,6 +104,13 @@ Scan for skills that overload a concept beyond its stated purpose:
 
 **How to report**: For each finding, cite the specific skill, the concept involved, the expected behavior (from concept-map.md), and the actual behavior (from SKILL.md). Propose whether to fix the implementation or update the concept definition.
 
+### 2d. Portability semantics (Meaning)
+
+Check whether skill meaning implies repository lock-in:
+
+- Claimed generic behavior but implementation semantics require one repository's policies/files to exist
+- Missing explicit distinction between CWF capability contract vs host-repo local policy
+
 ## 3. Workflow Coherence (Function)
 
 Do skills connect properly in the workflow? Are triggers unambiguous? Are data flows complete? Focus on inter-skill operational behavior.
@@ -118,6 +144,13 @@ Identify manual steps that could be automated:
 - Hook infrastructure that could bridge two skills but doesn't
 
 **How to report**: For each finding, describe the flow (A → B), what's currently broken or manual, and propose a concrete fix. Include defensive check requirements — connections must work when either skill is not installed.
+
+### 3d. Workflow portability (Function)
+
+Check runtime behavior under repository variance:
+
+- Stage flow should degrade gracefully when optional docs/inventory files are missing
+- Automation should surface deterministic warnings instead of silent skips or brittle hard failures
 
 **Important constraints on connections**:
 

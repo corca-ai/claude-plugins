@@ -22,6 +22,7 @@ cwf:refactor --docs                 Documentation consistency review
 Philosophy:
 - `cwf:refactor` (no args) is a maintenance heartbeat for ecosystem-level drift detection.
 - `cwf:refactor --skill <name>` is for focused diagnosis when one authored/installed skill needs targeted correction without paying the cost of full holistic analysis.
+- Portability is a default review axis across deep, holistic, and docs modes (no extra flag).
 
 ## Mode Routing
 
@@ -223,14 +224,14 @@ Prompt includes:
 - Instructions: Evaluate Size, Progressive Disclosure, Duplication, Resource Health. Return structured findings per criterion.
 - **Output Persistence**: Write your complete findings to: `{session_dir}/refactor-deep-structural-{skill_suffix}.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`
 
-**Agent B — Quality + Concept Review** (Criteria 5–8):
+**Agent B — Quality + Concept Review** (Criteria 5–9):
 
 Prompt includes:
 - Target skill name and SKILL.md content
 - All reference file contents and resource file listing
-- `{SKILL_DIR}/references/review-criteria.md` criteria sections 5–8
+- `{SKILL_DIR}/references/review-criteria.md` criteria sections 5–9
 - `{PLUGIN_ROOT}/references/concept-map.md` (for Criterion 8: Concept Integrity)
-- Instructions: Evaluate Writing Style, Degrees of Freedom, Anthropic Compliance, Concept Integrity. Return structured findings per criterion.
+- Instructions: Evaluate Writing Style, Degrees of Freedom, Anthropic Compliance, Concept Integrity, and Repository Independence/Portability. Return structured findings per criterion.
 - **Output Persistence**: Write your complete findings to: `{session_dir}/refactor-deep-quality-{skill_suffix}.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`
 
 Both agents analyze and report; neither modifies files.
@@ -247,6 +248,7 @@ Read result files from the session directory (`{session_dir}/refactor-deep-struc
 - Line count: X (severity)
 - Resources: X total, Y unreferenced
 - Duplication: detected/none
+- Portability risks: detected/none
 
 ### Findings
 
@@ -291,7 +293,7 @@ Confirm the output includes [holistic-criteria.provenance.yaml](references/holis
 
 ### 3. Load analysis framework
 
-Read `{SKILL_DIR}/references/holistic-criteria.md` for the three analysis axes.
+Read `{SKILL_DIR}/references/holistic-criteria.md` for the three analysis axes and Section 0 portability baseline.
 
 ### 4. Parallel Analysis with Sub-agents
 
@@ -320,8 +322,9 @@ Launch **3 parallel sub-agents** in a single message using Task tool (`subagent_
 Prompt includes:
 - Condensed inventory map (name, type, word count, capabilities)
 - `{SKILL_DIR}/references/holistic-criteria.md` Section 1 content
+- `{SKILL_DIR}/references/holistic-criteria.md` Section 0 portability baseline
 - `{PLUGIN_ROOT}/references/skill-conventions.md` content (shared conventions checklist)
-- Instructions: Verify each skill against skill-conventions.md checklists. Identify good patterns one skill has that others should adopt. Detect repeated patterns across 3+ skills that should be extracted to shared references. Read individual SKILL.md files for deeper investigation as needed. Return structured findings.
+- Instructions: Verify each skill against skill-conventions.md checklists. Identify good patterns one skill has that others should adopt. Detect repeated patterns across 3+ skills that should be extracted to shared references. Include structural portability findings (hardcoded paths/layout assumptions). Read individual SKILL.md files for deeper investigation as needed. Return structured findings.
 - **Output Persistence**: Write your complete findings to: `{session_dir}/refactor-holistic-convention.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`
 
 **Agent B — Concept Integrity (Meaning)**:
@@ -329,8 +332,9 @@ Prompt includes:
 Prompt includes:
 - Condensed inventory map (name, type, word count, capabilities)
 - `{SKILL_DIR}/references/holistic-criteria.md` Section 2 content
+- `{SKILL_DIR}/references/holistic-criteria.md` Section 0 portability baseline
 - `{PLUGIN_ROOT}/references/concept-map.md` content (generic concepts + synchronization map)
-- Instructions: For each concept column in the synchronization map, compare how composing skills implement the same concept. Detect inconsistencies, under-synchronization, and over-synchronization. Read individual SKILL.md files for deeper investigation as needed. Return structured findings.
+- Instructions: For each concept column in the synchronization map, compare how composing skills implement the same concept. Detect inconsistencies, under-synchronization, and over-synchronization. Include semantic portability findings (generic claims vs repo-locked behavior). Read individual SKILL.md files for deeper investigation as needed. Return structured findings.
 - **Output Persistence**: Write your complete findings to: `{session_dir}/refactor-holistic-concept.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`
 
 **Agent C — Workflow Coherence (Function)**:
@@ -338,7 +342,8 @@ Prompt includes:
 Prompt includes:
 - Condensed inventory map (name, type, word count, capabilities)
 - `{SKILL_DIR}/references/holistic-criteria.md` Section 3 content
-- Instructions: Check data flow completeness between skills, trigger clarity, and workflow automation opportunities. Read individual SKILL.md files for deeper investigation as needed. Return structured findings.
+- `{SKILL_DIR}/references/holistic-criteria.md` Section 0 portability baseline
+- Instructions: Check data flow completeness between skills, trigger clarity, workflow automation opportunities, and runtime portability behavior under missing/variant repository structures. Read individual SKILL.md files for deeper investigation as needed. Return structured findings.
 - **Output Persistence**: Write your complete findings to: `{session_dir}/refactor-holistic-workflow.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`
 
 All 3 agents analyze and report; none modify files.
@@ -380,14 +385,15 @@ Present the report summary. The user may want to discuss findings, adjust priori
 ## Docs Review Mode (`--docs`)
 
 Review documentation consistency with this fixed flow:
-1. Deterministic tool pass (`markdownlint`, local link check, doc-graph)
-2. Docs criteria provenance verification
-3. Entry docs, project context, README, and cross-document consistency review
-4. Semantic quality and structural optimization synthesis
+1. Resolve/bootstrap docs contract (`bootstrap-docs-contract.sh`)
+2. Deterministic tool pass (`markdownlint`, local link check, doc-graph)
+3. Docs criteria provenance verification
+4. Contract-aware entry docs, project context, README, and cross-document consistency review
+5. Semantic quality and structural optimization synthesis (portability baseline always on)
 
-Deterministic tool pass uses [scripts/check-links.sh](scripts/check-links.sh) and [scripts/doc-graph.mjs](scripts/doc-graph.mjs) with markdownlint.
+Deterministic tool pass uses [scripts/check-links.sh](scripts/check-links.sh) and [scripts/doc-graph.mjs](scripts/doc-graph.mjs) with markdownlint; for docs-contract runtime regression checks, run [scripts/check-docs-contract-runtime.sh](scripts/check-docs-contract-runtime.sh).
 
-Use `{SKILL_DIR}/references/docs-criteria.md` for evaluation criteria and [references/docs-review-flow.md](references/docs-review-flow.md) for the full `--docs` procedure (commands, sequence, and reporting scope).
+Use `{SKILL_DIR}/references/docs-criteria.md` for evaluation criteria, [references/docs-contract.md](references/docs-contract.md) for contract schema, and [references/docs-review-flow.md](references/docs-review-flow.md) for full `--docs` procedure (commands, sequence, and reporting scope).
 
 ---
 
@@ -395,7 +401,7 @@ Use `{SKILL_DIR}/references/docs-criteria.md` for evaluation criteria and [refer
 
 1. Write review reports in English, communicate with user in their prompt language
 2. Deep Review and Holistic use perspective-based parallel sub-agents (not module-based)
-3. Deep Review: 2 agents (structural 1-4 + quality/concept 5-8), single batch
+3. Deep Review: 2 agents (structural 1-4 + quality/concept/portability 5-9), single batch
 4. Holistic: 3 agents (Convention Compliance, Concept Integrity, Workflow Coherence), single batch after inline inventory
 5. Code Tidying: 1 agent per commit, all in one message
 6. Docs Review: inline, no sub-agents (single-context synthesis over whole-repo graph and deterministic outputs)
@@ -411,6 +417,7 @@ Use `{SKILL_DIR}/references/docs-criteria.md` for evaluation criteria and [refer
 - Concept synchronization map: [concept-map.md](../../references/concept-map.md)
 - Tidying techniques for --code mode: [references/tidying-guide.md](references/tidying-guide.md)
 - Docs review criteria: [references/docs-criteria.md](references/docs-criteria.md)
+- Docs review contract schema: [references/docs-contract.md](references/docs-contract.md)
 - Docs review procedure flow: [references/docs-review-flow.md](references/docs-review-flow.md)
 - Provenance sidecar (deep criteria): [references/review-criteria.provenance.yaml](references/review-criteria.provenance.yaml)
 - Provenance sidecar (holistic criteria): [references/holistic-criteria.provenance.yaml](references/holistic-criteria.provenance.yaml)
