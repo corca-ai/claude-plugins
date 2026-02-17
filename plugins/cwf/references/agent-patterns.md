@@ -156,6 +156,23 @@ When `--mode plan` or `--mode code` is used, `cwf:review` receives the plan's su
 - **Behavioral criteria** (BDD-style Given/When/Then): checked as a pass/fail list
 - **Qualitative criteria** (narrative): addressed in the verdict prose
 
+## Sub-agent Output Persistence Contract
+
+Use this shared block whenever a skill instructs sub-agents to persist outputs:
+
+```text
+## Output Persistence
+Write your complete findings to: {session_dir}/{output_file}.md
+At the very end of the file, append this sentinel marker on its own line:
+<!-- AGENT_COMPLETE -->
+```
+
+Conformance rules:
+
+- Reuse this contract by reference instead of duplicating prose variants.
+- Keep `{session_dir}` and deterministic filenames explicit per slot.
+- The sentinel line must match exactly.
+
 ## Broken Link Triage Protocol
 
 When a broken link is detected (e.g., by `check-links-local.sh`), the agent should **NOT** default to "remove the reference." Instead, follow this triage:

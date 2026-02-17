@@ -113,6 +113,7 @@ Stage-tier policy for deep mode outputs:
   `{session_dir}/retro-expert-alpha.md`, `{session_dir}/retro-expert-beta.md`
 
 For all outputs: bounded retry = 1 for missing/invalid files.
+- Shared output persistence contract: [agent-patterns.md § Sub-agent Output Persistence Contract](../../references/agent-patterns.md#sub-agent-output-persistence-contract).
 
 **Batch 1** — launch in a single message with 2 parallel Task calls (only for agents whose result files are missing or invalid):
 

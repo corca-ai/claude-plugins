@@ -188,6 +188,7 @@ Store the resolved `cli_timeout` value for use in Phase 2.
 ## Phase 2: Launch All Reviewers
 
 Launch **six** reviewers in parallel: 2 internal (Task agents) + 2 external (CLI or Task fallback) + 2 domain experts (Task agents). All launched in a **single message** for maximum parallelism.
+- Shared output persistence contract: [agent-patterns.md § Sub-agent Output Persistence Contract](../../references/agent-patterns.md#sub-agent-output-persistence-contract).
 
 ### 2.0 Resolve session directory and context recovery
 
@@ -546,6 +547,27 @@ Task(subagent_type="general-purpose", name="{tool}-fallback", max_turns={max_tur
 
 Collect all 6 outputs from session directory files (mix of `REAL_EXECUTION` and `FALLBACK` sources). Internal reviewers and expert reviewers follow the standard reviewer output format from `prompts.md`. Expert reviewers follow the review mode format from `expert-advisor-guide.md`.
 
+### 3.4 Session-log cross-check (code mode)
+
+When `--mode code`, perform a deterministic session-log cross-check before synthesis.
+
+Inputs:
+
+- `{session_dir}/session-log.md` (symlink or file), or newest `session-logs/*.md`
+
+Required output fields (for Confidence Note):
+
+- `session_log_present`: `true|false`
+- `session_log_lines`: integer (`0` when missing)
+- `session_log_turns`: integer count of `^## Turn`
+- `session_log_last_turn`: last `## Turn` header or `none`
+- `session_log_cross_check`: `PASS|WARN`
+
+Policy:
+
+- If no session log exists, set `session_log_cross_check=WARN` and continue.
+- Do not omit these fields in code mode.
+
 ---
 
 ## Phase 4: Synthesize
@@ -618,6 +640,12 @@ Output to the conversation **and** persist to `{session_dir}/review-synthesis-{m
   Include setup hint based on failed provider:
   "Codex -> `codex auth login`; Gemini -> `npx @google/gemini-cli`."
 - Perspective differences between real CLI output and fallback interpretation
+- Session-log cross-check fields (code mode):
+  - `session_log_present: {true|false}`
+  - `session_log_lines: {int}`
+  - `session_log_turns: {int}`
+  - `session_log_last_turn: {header|none}`
+  - `session_log_cross_check: {PASS|WARN}`
 
 ### Reviewer Provenance
 | Reviewer | Source | Tool | Duration |
@@ -665,6 +693,7 @@ This prevents sensitive review content (diffs, plans) from persisting in `/tmp/`
 | External CLI timeout (120s) | Mark `FAILED`. Spawn Task agent fallback. Note in Confidence Note. |
 | External CLI auth error | Mark `FAILED`. Spawn Task agent fallback. Note in Confidence Note. |
 | External output malformed | Extract by pattern matching. Note in Confidence Note. |
+| Code mode and session log missing | Continue with `session_log_cross_check=WARN` and include deterministic session-log fields in Confidence Note. |
 
 ---
 
@@ -693,6 +722,7 @@ This prevents sensitive review content (diffs, plans) from persisting in `/tmp/`
 12. **Commit-boundary split for mixed follow-up work** — when review findings
     imply both `tidy` and `behavior-policy` changes, recommend separate commit
     units and `tidy` first.
+13. **Code-mode session-log fields are mandatory** — always include deterministic `session_log_*` keys in Confidence Note for `--mode code`.
 
 ---
 

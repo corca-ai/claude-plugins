@@ -87,6 +87,7 @@ session_dir: "{live.dir value from resolved live-state file}"
 Apply the [context recovery protocol](../../references/context-recovery-protocol.md) — for each commit N (1-indexed), check `{session_dir}/refactor-tidy-commit-{N}.md`.
 
 For each commit hash that needs analysis, launch a **parallel sub-agent** using Task tool:
+- Shared output persistence contract: [agent-patterns.md § Sub-agent Output Persistence Contract](../../references/agent-patterns.md#sub-agent-output-persistence-contract).
 
 ```yaml
 Task tool:

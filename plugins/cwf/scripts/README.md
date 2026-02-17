@@ -7,6 +7,8 @@ This file maps scripts under [plugins/cwf/scripts](.).
 - [test-hook-exit-codes.sh](test-hook-exit-codes.sh): Deterministic hook allow/block regression suite (`--suite`, `--strict`) with hooks-manifest driven target discovery.
 - [check-script-deps.sh](check-script-deps.sh): Validates runtime script dependency edges from hooks manifest and script references.
 - [check-readme-structure.sh](check-readme-structure.sh): Verifies heading-level structure parity between the root English and Korean README documents.
+- [check-review-routing.sh](check-review-routing.sh): Validates review routing cutoff contract (`prompt_lines > 1200`) and deterministic fallback expectations.
+- [check-shared-reference-conformance.sh](check-shared-reference-conformance.sh): Verifies shared output-persistence reference adoption across composing skills and duplication threshold.
 - [next-prompt-dir.sh](next-prompt-dir.sh): Computes next session directory name, with optional `--bootstrap` to initialize artifacts and register `cwf-state.yaml` session metadata.
 - [cwf-artifact-paths.sh](cwf-artifact-paths.sh): Resolves artifact/state/projects paths with project-config precedence (.cwf/config.local.yaml → .cwf/config.yaml → env).
 - [cwf-live-state.sh](cwf-live-state.sh): Resolves/syncs hybrid live-state files, reads live scalars/lists (`get`, `list-get`), updates top-level live fields (`set`, `list-set`, `list-remove`), and appends replay-safe decision entries (`journal-append`).

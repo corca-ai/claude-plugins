@@ -79,6 +79,7 @@ Apply the [context recovery protocol](../../references/context-recovery-protocol
 - `{session_dir}/clarify-web-research.md`
 
 Launch sub-agents **simultaneously** using the Task tool (only for missing or invalid results).
+- Shared output persistence contract: [agent-patterns.md § Sub-agent Output Persistence Contract](../../references/agent-patterns.md#sub-agent-output-persistence-contract).
 
 #### Sub-agent A: Codebase Researcher
 
