@@ -293,169 +293,17 @@ Provider semantics:
 
 ### 2.3 Launch all 6 in ONE message
 
-All 6 reviewers launch in a single message for parallel execution:
+Launch all 6 slots in one message with mode-suffixed output persistence:
+- Slot 1/2: internal Task reviewers (Security, UX/DX)
+- Slot 3/4: provider-routed external reviewers (Correctness, Architecture)
+- Slot 5/6: expert Task reviewers with contrasting frameworks
 
-**Slot 1 — Security (always Task):**
+Required invariants:
+- Every slot writes `{session_dir}/review-*-{mode}.md` and appends `<!-- AGENT_COMPLETE -->`.
+- External CLI success copies output into session file before synthesis.
+- Use stdin prompt redirection for external CLI execution to avoid prompt-shell injection.
 
-```text
-Task(subagent_type="general-purpose", name="security-reviewer", max_turns={max_turns}, prompt="
-  {security_prompt}
-
-  ## Output Persistence
-  Write your complete review verdict to: {session_dir}/review-security-{mode}.md
-  At the very end of the file, append this sentinel marker on its own line:
-  <!-- AGENT_COMPLETE -->
-")
-```
-
-**Slot 2 — UX/DX (always Task):**
-
-```text
-Task(subagent_type="general-purpose", name="uxdx-reviewer", max_turns={max_turns}, prompt="
-  {uxdx_prompt}
-
-  ## Output Persistence
-  Write your complete review verdict to: {session_dir}/review-ux-dx-{mode}.md
-  At the very end of the file, append this sentinel marker on its own line:
-  <!-- AGENT_COMPLETE -->
-")
-```
-
-**Slot 3 — Correctness (provider-routed):**
-
-If Slot 3 provider resolves to `codex`:
-
-```text
-Bash(timeout=300000, command="START_MS=$(date +%s%3N); CODEX_RUNNER='{CWF_PLUGIN_DIR}/scripts/codex/codex-with-log.sh'; [ -x \"$CODEX_RUNNER\" ] || CODEX_RUNNER='codex'; timeout {cli_timeout} \"$CODEX_RUNNER\" exec --sandbox read-only -c model_reasoning_effort='high' - < '{tmp_dir}/correctness-prompt.md' > '{tmp_dir}/slot3-output.md' 2>'{tmp_dir}/slot3-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"TOOL=codex EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/slot3-meta.txt'")
-```
-
-For `--mode code`, use `model_reasoning_effort='xhigh'` instead. Single quotes around config values avoid double-quote conflicts in the Bash wrapper.
-
-If Slot 3 provider resolves to `gemini`:
-
-```text
-Bash(timeout=300000, command="START_MS=$(date +%s%3N); timeout {cli_timeout} npx @google/gemini-cli -o text < '{tmp_dir}/correctness-prompt.md' > '{tmp_dir}/slot3-output.md' 2>'{tmp_dir}/slot3-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"TOOL=gemini EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/slot3-meta.txt'")
-```
-
-If Slot 3 provider resolves to `claude`:
-
-```text
-Task(subagent_type="general-purpose", name="correctness-fallback", max_turns={max_turns}, prompt="
-  {correctness_fallback_prompt}
-
-  ## Output Persistence
-  Write your complete review verdict to: {session_dir}/review-correctness-{mode}.md
-  At the very end of the file, append this sentinel marker on its own line:
-  <!-- AGENT_COMPLETE -->
-")
-```
-
-When Slot 3 uses external CLI and succeeds (exit 0 + non-empty output), copy output to session dir:
-
-```bash
-cp '{tmp_dir}/slot3-output.md' '{session_dir}/review-correctness-{mode}.md'
-echo '' >> '{session_dir}/review-correctness-{mode}.md'
-echo '<!-- AGENT_COMPLETE -->' >> '{session_dir}/review-correctness-{mode}.md'
-```
-
-**Slot 4 — Architecture (provider-routed):**
-
-If Slot 4 provider resolves to `gemini`:
-
-```text
-Bash(timeout=300000, command="START_MS=$(date +%s%3N); timeout {cli_timeout} npx @google/gemini-cli -o text < '{tmp_dir}/architecture-prompt.md' > '{tmp_dir}/slot4-output.md' 2>'{tmp_dir}/slot4-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"TOOL=gemini EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/slot4-meta.txt'")
-```
-
-Uses stdin redirection (`< prompt.md`) instead of `-p "$(cat ...)"` to prevent shell injection from review target content containing `$()` or backticks.
-
-If Slot 4 provider resolves to `codex`:
-
-```text
-Bash(timeout=300000, command="START_MS=$(date +%s%3N); CODEX_RUNNER='{CWF_PLUGIN_DIR}/scripts/codex/codex-with-log.sh'; [ -x \"$CODEX_RUNNER\" ] || CODEX_RUNNER='codex'; timeout {cli_timeout} \"$CODEX_RUNNER\" exec --sandbox read-only -c model_reasoning_effort='high' - < '{tmp_dir}/architecture-prompt.md' > '{tmp_dir}/slot4-output.md' 2>'{tmp_dir}/slot4-stderr.log'; EXIT=$?; END_MS=$(date +%s%3N); echo \"TOOL=codex EXIT_CODE=$EXIT DURATION_MS=$((END_MS - START_MS))\" > '{tmp_dir}/slot4-meta.txt'")
-```
-
-For `--mode code`, use `model_reasoning_effort='xhigh'` instead.
-
-If Slot 4 provider resolves to `claude`:
-
-```text
-Task(subagent_type="general-purpose", name="architecture-fallback", max_turns={max_turns}, prompt="
-  {architecture_fallback_prompt}
-
-  ## Output Persistence
-  Write your complete review verdict to: {session_dir}/review-architecture-{mode}.md
-  At the very end of the file, append this sentinel marker on its own line:
-  <!-- AGENT_COMPLETE -->
-")
-```
-
-When Slot 4 uses external CLI and succeeds (exit 0 + non-empty output), copy output to session dir:
-
-```bash
-cp '{tmp_dir}/slot4-output.md' '{session_dir}/review-architecture-{mode}.md'
-echo '' >> '{session_dir}/review-architecture-{mode}.md'
-echo '<!-- AGENT_COMPLETE -->' >> '{session_dir}/review-architecture-{mode}.md'
-```
-
-**Slot 5 — Expert α (always Task):**
-
-Expert selection: Read `expert_roster` from `cwf-state.yaml`. Analyze the review target for domain keywords; match against each roster entry's `domain` field. Select 2 experts with contrasting frameworks. If roster has < 2 matches, fill via independent selection.
-
-```text
-Task(subagent_type="general-purpose", name="expert-alpha", max_turns={max_turns}, prompt="
-  Read {CWF_PLUGIN_DIR}/references/expert-advisor-guide.md.
-  You are Expert α, operating in **review mode**.
-
-  Your identity: {selected expert name}
-  Your framework: {expert's domain}
-
-  ## Review Target
-  {the diff, plan content, or clarify artifact}
-
-  ## Success Criteria to Verify
-  {behavioral criteria + holdout checks as checklist, qualitative criteria as narrative items}
-
-  Review through your published framework. Use web search to verify your expert identity
-  and cite published work (follow Web Research Protocol in
-  {CWF_PLUGIN_DIR}/references/agent-patterns.md; you have Bash access for
-  agent-browser fallback on JS-rendered pages). Output in the review mode format
-  from the guide.
-
-  ## Output Persistence
-  Write your complete review verdict to: {session_dir}/review-expert-alpha-{mode}.md
-  At the very end of the file, append this sentinel marker on its own line:
-  <!-- AGENT_COMPLETE -->
-")
-```
-
-**Slot 6 — Expert β (always Task):**
-
-```text
-Task(subagent_type="general-purpose", name="expert-beta", max_turns={max_turns}, prompt="
-  Read {CWF_PLUGIN_DIR}/references/expert-advisor-guide.md.
-  You are Expert β, operating in **review mode**.
-
-  Your identity: {selected expert name — contrasting framework from Expert α}
-  Your framework: {expert's domain}
-
-  ## Review Target
-  {the diff, plan content, or clarify artifact}
-
-  ## Success Criteria to Verify
-  {behavioral criteria + holdout checks as checklist, qualitative criteria as narrative items}
-
-  Review through your published framework. Use web search to verify your expert identity
-  and cite published work (follow Web Research Protocol in
-  {CWF_PLUGIN_DIR}/references/agent-patterns.md; you have Bash access for
-  agent-browser fallback on JS-rendered pages). Output in the review mode format
-  from the guide.
-
-  ## Output Persistence
-  Write your complete review verdict to: {session_dir}/review-expert-beta-{mode}.md
-  At the very end of the file, append this sentinel marker on its own line:
-  <!-- AGENT_COMPLETE -->
-")
-```
+Full slot command templates and persistence snippets are in [references/orchestration-and-fallbacks.md](references/orchestration-and-fallbacks.md).
 
 ---
 
@@ -484,64 +332,13 @@ For successful external reviews, **override** the provenance `duration_ms` with 
 
 ### 3.2 Handle external failures
 
-#### Error-type classification (check FIRST, before exit code)
+Apply the deterministic failure flow:
+1. classify stderr error type first (capacity/internal/auth/tool-error)
+2. then apply exit-code fallback policy when no classifier matched
+3. extract actionable cause text for Confidence Note
+4. launch all required fallback Task agents in one message
 
-When an external CLI exits non-zero, parse stderr **immediately** for error type keywords. This prevents wasting time on retries that cannot succeed.
-
-1. Read `{tmp_dir}/slot{N}-stderr.log`
-1. Classify by the **first matching** pattern:
-   - `MODEL_CAPACITY_EXHAUSTED`, `429`, `ResourceExhausted`, `quota` → **CAPACITY**: fail-fast, immediate fallback, no retry
-   - `INTERNAL_ERROR`, `500`, `InternalError`, `server error` → **INTERNAL**: 1 retry then fallback
-   - `AUTHENTICATION`, `401`, `UNAUTHENTICATED`, `API key` → **AUTH**: abort immediately with setup hint
-   - `Tool.*not found`, `Did you mean one of` → **TOOL_ERROR**: fail-fast, immediate fallback, no retry
-1. Apply the action:
-   - **CAPACITY**: Skip exit code check. Launch fallback immediately.
-   - **INTERNAL**: Re-run the CLI command once. If still fails, launch fallback.
-   - **AUTH**: Do NOT stop with report only. Ask whether to configure now (`codex auth login` or `npx @google/gemini-cli`) and retry that slot once. If user declines, continue with Task fallback and record in Confidence Note.
-   - **TOOL_ERROR**: Skip exit code check. Ask whether to install now (recommended via `cwf:setup --tools`), then retry once if approved; otherwise launch fallback immediately. Record outcome in Confidence Note.
-1. If **no pattern matches**, fall through to exit code classification below.
-
-#### Exit code classification
-
-| Exit code | Meaning | Action |
-|-----------|---------|--------|
-| 0 + non-empty output | Success | `source: REAL_EXECUTION` |
-| 0 + empty output | Silent failure | `source: FAILED` → launch Task fallback |
-| 124 | Timeout (120s exceeded) | `source: FAILED` → launch Task fallback |
-| 126-127 | Permission denied / not found | `source: FAILED` → launch Task fallback |
-| Other non-zero | Unclassified error | `source: FAILED` → launch Task fallback |
-
-#### Error cause extraction (L9)
-
-When an external CLI fails (exit code != 0), extract the actionable error cause from stderr for the Confidence Note:
-
-1. Read the stderr log file: `{tmp_dir}/slot{N}-stderr.log`
-2. Extract the first actionable error message using this priority:
-   - **JSON stderr**: parse `.error.message` or `.error.details`
-   - **Plain text stderr**: find the last line containing "Error" or "error"
-   - **Fallback**: first 3 non-empty lines of stderr
-3. Store the extracted error cause per slot:
-
-```text
-error_causes[slot_N] = "{error_type}: {extracted_error}"
-```
-
-#### Launch fallbacks
-
-If fallbacks are needed, launch all needed fallback Task agents in **one message**, then read their results. Each fallback uses the fallback prompt template from `external-review.md` with the appropriate perspective (Correctness or Architecture).
-
-Each fallback Task agent prompt must include output persistence:
-
-```text
-Task(subagent_type="general-purpose", name="{tool}-fallback", max_turns={max_turns}, prompt="
-  {fallback_prompt}
-
-  ## Output Persistence
-  Write your complete review verdict to: {session_dir}/review-{slot_name}-{mode}.md
-  At the very end of the file, append this sentinel marker on its own line:
-  <!-- AGENT_COMPLETE -->
-")
-```
+Detailed classifier matrix, exit-code table, and fallback templates are in [references/orchestration-and-fallbacks.md](references/orchestration-and-fallbacks.md).
 
 ### 3.3 Assemble 6 review outputs
 
@@ -587,76 +384,17 @@ Conservative default: when reviewers disagree, the stricter assessment wins.
 
 ### 2. Render Review Synthesis
 
-Output to the conversation **and** persist to `{session_dir}/review-synthesis-{mode}.md`:
+Output synthesis to the conversation **and** persist `{session_dir}/review-synthesis-{mode}.md`.
 
-```markdown
-## Review Synthesis
+Synthesis must include:
+- verdict summary
+- behavioral criteria/holdout assessment (when provided)
+- concerns and suggestions
+- commit boundary guidance for tidy vs behavior-policy splits
+- confidence note (including base strategy, fallback causes, and session-log fields in code mode)
+- reviewer provenance table
 
-### Verdict: {Pass | Conditional Pass | Revise}
-{1-2 sentence summary of overall assessment}
-
-### Behavioral Criteria Verification
-(Only if criteria were extracted from plan and/or holdout scenarios)
-- [x] {criterion} — {reviewer}: {evidence}
-- [ ] {criterion} — {reviewer}: {reason for failure}
-
-### Holdout Scenario Assessment
-(Only when `--scenarios <path>` is provided)
-- [x] {holdout scenario/check} — {reviewer}: {evidence}
-- [ ] {holdout scenario/check} — {reviewer}: {reason for failure}
-
-### Concerns (must address)
-- **{reviewer}** [{severity}]: {concern description}
-  {specific reference: file, line, section}
-
-(If none: "No blocking concerns.")
-
-### Suggestions (optional improvements)
-- **{reviewer}**: {suggestion description}
-
-(If none: "No suggestions.")
-
-### Commit Boundary Guidance
-(Only when follow-up implementation is requested after this review)
-- `tidy`: structural/readability-only changes with no behavior or policy effect
-- `behavior-policy`: runtime behavior changes, validation logic, workflow/policy enforcement updates
-- If both categories exist, split work into separate commit units:
-  1. `tidy` commit(s) first
-  2. `behavior-policy` commit(s) second
-- After completing the first unit, run `git status --short`, confirm the next boundary, then commit before starting the next major unit.
-
-### Confidence Note
-{Note any of the following:}
-- Disagreements between reviewers and which side was chosen
-- Areas where reviewer confidence was low
-- Malformed reviewer outputs that required interpretation
-- Missing success criteria (if no plan was found)
-- Base strategy used for code review target:
-  "Base: {resolved_base} ({base_strategy})"
-- Holdout scenario source:
-  "`--scenarios {holdout_path}` ({holdout_count} checks)"
-- External CLI fallbacks used, with extracted error cause from stderr:
-  "Slot N ({tool}) FAILED → fallback. Cause: {extracted_error}"
-  Include setup hint based on failed provider:
-  "Codex -> `codex auth login`; Gemini -> `npx @google/gemini-cli`."
-- Perspective differences between real CLI output and fallback interpretation
-- Session-log cross-check fields (code mode):
-  - `session_log_present: {true|false}`
-  - `session_log_lines: {int}`
-  - `session_log_turns: {int}`
-  - `session_log_last_turn: {header|none}`
-  - `session_log_cross_check: {PASS|WARN}`
-
-### Reviewer Provenance
-| Reviewer | Source | Tool | Duration |
-|----------|--------|------|----------|
-| Security | REAL_EXECUTION | claude-task | — |
-| UX/DX | REAL_EXECUTION | claude-task | — |
-| Correctness | {REAL_EXECUTION / FALLBACK} | {slot3_tool / claude-task-fallback} | {duration_ms} |
-| Architecture | {REAL_EXECUTION / FALLBACK} | {slot4_tool / claude-task-fallback} | {duration_ms} |
-| Expert Alpha | REAL_EXECUTION | claude-task | — |
-| Expert Beta | REAL_EXECUTION | claude-task | — |
-```
+Use the full markdown template from [references/synthesis-and-gates.md](references/synthesis-and-gates.md).
 
 The Provenance table adapts to actual results: if an external CLI succeeded, show `REAL_EXECUTION` with the CLI tool name and measured duration. If it fell back, show `FALLBACK` with `claude-task-fallback`.
 
@@ -692,23 +430,7 @@ This prevents sensitive review content (diffs, plans) from persisting in `/tmp/`
 
 ## Error Handling
 
-| Situation | Action |
-|-----------|--------|
-| No review target found | AskUserQuestion: "What should I review?" |
-| Reviewer output malformed | Extract by pattern matching, note in Confidence Note |
-| External prompt lines > 1200 | Skip external CLIs for Slot 3/4, use Task fallbacks directly, and record cutoff evidence in Confidence Note. |
-| `--scenarios <path>` file missing/unreadable | Stop with explicit error. Ask for a valid scenarios path. |
-| `--scenarios <path>` has zero parseable checks | Stop with explicit error. Ask for GWT/checklist-formatted scenarios. |
-| `--base <branch>` not found in local/origin refs | Stop with explicit error. Ask for a valid base branch. |
-| No git changes found (code mode) | AskUserQuestion: ask user to specify target |
-| No plan.md found | AskUserQuestion: ask user to specify target |
-| All 6 reviewers report no issues | Verdict = Pass. Note "clean review" in synthesis |
-| Configured external provider unavailable | Ask whether to install/configure now (recommended), retry once if approved, otherwise route per fallback policy (`auto` chain or explicit `claude`). |
-| External CLI timeout (120s) | Mark `FAILED`. Spawn Task agent fallback. Note in Confidence Note. |
-| External CLI auth error | Mark `FAILED`. Spawn Task agent fallback. Note in Confidence Note. |
-| External output malformed | Extract by pattern matching. Note in Confidence Note. |
-| Code mode and session log missing | Continue with `session_log_cross_check=WARN` and include deterministic session-log fields in Confidence Note. |
-| Code mode artifact gate fails | Stop with explicit file-level errors from `check-run-gate-artifacts.sh` and request revision. |
+Use the deterministic error-handling matrix in [references/synthesis-and-gates.md](references/synthesis-and-gates.md), including scenario/base validation failures, external prompt cutoff behavior, fallback routing, and code-mode artifact/session-log gate outcomes.
 
 ---
 
@@ -744,34 +466,7 @@ This prevents sensitive review content (diffs, plans) from persisting in `/tmp/`
 
 ## BDD Acceptance Checks
 
-Use these checks when validating updates to this skill:
-
-```gherkin
-Given a review invocation with --scenarios and a valid GWT/checklist file
-When /review runs
-Then holdout checks are included in reviewer prompts and synthesis with path/count provenance
-
-Given a review invocation with --scenarios pointing to a missing file
-When /review runs
-Then the review stops with an explicit validation error instead of silently continuing
-
-Given a review invocation with --mode code and no --base
-When the current branch has an upstream
-Then /review uses the upstream branch as base and records base_strategy=upstream
-
-Given a review invocation with --mode code --base <branch>
-When <branch> exists
-Then /review deterministically uses that base and records base_strategy=explicit (--base)
-
-Given review findings include both structural tidy changes and behavior-policy changes
-When /review renders synthesis
-Then the synthesis includes commit-boundary guidance to split tidy and behavior-policy commits
-
-Given a review target whose external prompt length is 1201 lines
-When /review resolves external reviewer routing
-Then Slot 3 and Slot 4 skip CLI execution and run Task fallback directly
-And synthesis confidence note includes the deterministic cutoff evidence
-```
+Use the canonical BDD acceptance checks from [references/synthesis-and-gates.md](references/synthesis-and-gates.md) when validating review-skill changes.
 
 ---
 
@@ -779,5 +474,7 @@ And synthesis confidence note includes the deterministic cutoff evidence
 
 - Internal reviewer perspectives: [references/prompts.md](references/prompts.md)
 - External reviewer perspectives & CLI templates: [references/external-review.md](references/external-review.md)
+- Orchestration and fallback templates: [references/orchestration-and-fallbacks.md](references/orchestration-and-fallbacks.md)
+- Synthesis template, error matrix, and BDD checks: [references/synthesis-and-gates.md](references/synthesis-and-gates.md)
 - Agent patterns (provenance, synthesis, execution): [agent-patterns.md](../../references/agent-patterns.md)
 - Expert advisor guide (expert sub-agent identity, grounding, review format): [expert-advisor-guide.md](../../references/expert-advisor-guide.md)

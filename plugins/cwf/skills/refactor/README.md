@@ -5,6 +5,7 @@ File-level map for [refactor](SKILL.md).
 - [README.md](README.md): File map for this skill directory.
 - [SKILL.md](SKILL.md): Primary instructions and execution workflow for this skill.
 - [references/docs-criteria.md](references/docs-criteria.md): Reference file used by this skill (docs-criteria).
+- [references/docs-review-flow.md](references/docs-review-flow.md): Detailed docs-mode procedure flow extracted from SKILL.md.
 - [references/docs-criteria.provenance.yaml](references/docs-criteria.provenance.yaml): Provenance sidecar for docs-criteria.md.
 - [references/holistic-criteria.md](references/holistic-criteria.md): Reference file used by this skill (holistic-criteria).
 - [references/holistic-criteria.provenance.yaml](references/holistic-criteria.provenance.yaml): Provenance sidecar for holistic-criteria.md.
