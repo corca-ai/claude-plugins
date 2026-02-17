@@ -56,8 +56,8 @@ _cwf_read_config_value() {
 _cwf_resolve_config_value() {
   local base_dir="$1"
   local key="$2"
-  local local_cfg="${base_dir}/.cwf/config.local.yaml"
-  local shared_cfg="${base_dir}/.cwf/config.yaml"
+  local local_cfg="${base_dir}/.cwf-config.local.yaml"
+  local shared_cfg="${base_dir}/.cwf-config.yaml"
   local resolved=""
 
   # Project-local override > project-shared config > process environment.

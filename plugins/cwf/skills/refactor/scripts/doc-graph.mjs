@@ -53,8 +53,8 @@ function readYamlScalar(filePath, key) {
 }
 
 function resolveConfigValue(rootDir, key) {
-  const localCfg = resolve(rootDir, '.cwf', 'config.local.yaml');
-  const sharedCfg = resolve(rootDir, '.cwf', 'config.yaml');
+  const localCfg = resolve(rootDir, '.cwf-config.local.yaml');
+  const sharedCfg = resolve(rootDir, '.cwf-config.yaml');
   const localValue = readYamlScalar(localCfg, key);
   if (localValue) {
     return localValue;

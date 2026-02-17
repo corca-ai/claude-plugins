@@ -49,7 +49,7 @@ run_suite() {
 
   local base_dir="$tmp_dir/repo"
   local external_projects="$tmp_dir/external-projects"
-  mkdir -p "$base_dir/.cwf" "$external_projects"
+  mkdir -p "$base_dir" "$external_projects"
 
   # 1) defaults
   assert_eq \
@@ -100,7 +100,7 @@ run_suite() {
     "$(resolve_with_env "$resolver" "$base_dir" resolve_cwf_indexes_dir CWF_INDEXES_DIR=.cwf-env/indexes)"
 
   # 3) shared config overrides env
-  cat > "$base_dir/.cwf/config.yaml" <<'EOF'
+  cat > "$base_dir/.cwf-config.yaml" <<'EOF'
 CWF_ARTIFACT_ROOT: ".cwf-shared"
 CWF_PROJECTS_DIR: ".cwf-shared/projects-shared"
 CWF_STATE_FILE: ".cwf-shared/state-shared.yaml"
@@ -130,7 +130,7 @@ EOF
     "$(resolve_with_env "$resolver" "$base_dir" resolve_cwf_indexes_dir CWF_INDEXES_DIR=.cwf-env/indexes)"
 
   # 4) local config overrides shared and supports inline comments
-  cat > "$base_dir/.cwf/config.local.yaml" <<'EOF'
+  cat > "$base_dir/.cwf-config.local.yaml" <<'EOF'
 CWF_ARTIFACT_ROOT: ".cwf-local"
 CWF_PROJECTS_DIR: ".cwf-local/projects-local" # local override
 CWF_STATE_FILE: ".cwf-local/state-local.yaml"

@@ -147,8 +147,8 @@ function readYamlScalar(filePath, key) {
 }
 
 function resolveConfigValue(repoRoot, key) {
-  const localCfg = path.join(repoRoot, ".cwf", "config.local.yaml");
-  const sharedCfg = path.join(repoRoot, ".cwf", "config.yaml");
+  const localCfg = path.join(repoRoot, ".cwf-config.local.yaml");
+  const sharedCfg = path.join(repoRoot, ".cwf-config.yaml");
   const localValue = readYamlScalar(localCfg, key);
   if (localValue) {
     return localValue;
@@ -226,8 +226,8 @@ function getRuntimePaths(repoRoot) {
   addRuntimeDir(dirs, resolveAbsPath(repoRoot, configuredPromptLogsDir));
   addRuntimeDir(dirs, resolveAbsPath(repoRoot, configuredIndexesDir));
 
-  addRuntimeFile(files, path.join(repoRoot, ".cwf", "config.yaml"));
-  addRuntimeFile(files, path.join(repoRoot, ".cwf", "config.local.yaml"));
+  addRuntimeFile(files, path.join(repoRoot, ".cwf-config.yaml"));
+  addRuntimeFile(files, path.join(repoRoot, ".cwf-config.local.yaml"));
 
   const runtimePaths = { dirs, files };
   RUNTIME_PATH_CACHE.set(repoRoot, runtimePaths);

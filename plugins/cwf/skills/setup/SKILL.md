@@ -538,20 +538,20 @@ Open a new shell (or source ~/.zshrc / ~/.bashrc) so updated exports are loaded.
 
 ### 2.8.5 Bootstrap Project Config Files
 
-Ask whether to create project-level config files (.cwf/config.yaml, .cwf/config.local.yaml) now:
+Ask whether to create project-level config files (.cwf-config.yaml, .cwf-config.local.yaml) now:
 
 ```text
-Create project config templates now? (.cwf/config.yaml + .cwf/config.local.yaml)
+Create project config templates now? (.cwf-config.yaml + .cwf-config.local.yaml)
 ```
 
 Options:
 - `Yes (recommended)`:
   - create missing config templates
   - keep existing files unchanged
-  - ensure .cwf/config.local.yaml is listed in `.gitignore`
+  - ensure .cwf-config.local.yaml is listed in `.gitignore`
 - `Overwrite templates`:
   - re-write both templates (`--force`)
-  - ensure .cwf/config.local.yaml is listed in `.gitignore`
+  - ensure .cwf-config.local.yaml is listed in `.gitignore`
 - `Skip for now`:
   - no file changes in this sub-phase
 
@@ -571,16 +571,16 @@ bash {SKILL_DIR}/scripts/bootstrap-project-config.sh --force
 
 After migration/bootstrap decisions, always report the effective CWF config source priority:
 
-1. .cwf/config.local.yaml
-2. .cwf/config.yaml
+1. .cwf-config.local.yaml
+2. .cwf-config.yaml
 3. Process environment
 4. Shell profile exports (`~/.zshenv`, `~/.zprofile`, `~/.zshrc`, `~/.bash_profile`, `~/.bashrc`, `~/.profile`)
 
 Include this operational guidance:
 
 ```text
-Use .cwf/config.yaml for team-shared, non-secret defaults.
-Use .cwf/config.local.yaml for local/secret values.
+Use .cwf-config.yaml for team-shared, non-secret defaults.
+Use .cwf-config.local.yaml for local/secret values.
 Keep shell exports as global fallback.
 ```
 
@@ -696,10 +696,10 @@ Where should this default mode be saved?
 
 Options:
 - `Shared config (recommended)`:
-  - write to `.cwf/config.yaml`
+  - write to `.cwf-config.yaml`
   - team-wide default for this repository
 - `Local config`:
-  - write to `.cwf/config.local.yaml`
+  - write to `.cwf-config.local.yaml`
   - local override only (highest priority)
 
 ### 2.10.4 Persist Selection
@@ -728,13 +728,13 @@ Report:
 Provide verification command:
 
 ```bash
-rg -n "^CWF_RUN_AMBIGUITY_MODE:" .cwf/config.yaml .cwf/config.local.yaml 2>/dev/null
+rg -n "^CWF_RUN_AMBIGUITY_MODE:" .cwf-config.yaml .cwf-config.local.yaml 2>/dev/null
 ```
 
 Also report precedence reminder:
 - `--ambiguity-mode` flag
-- `.cwf/config.local.yaml`
-- `.cwf/config.yaml`
+- `.cwf-config.local.yaml`
+- `.cwf-config.yaml`
 - env/shell
 - built-in default (`defer-blocking`)
 
@@ -933,7 +933,7 @@ Add `setup` to `cwf-state.yaml` current session's `stage_checkpoints` list.
 14. **All code fences must have language specifier**: Never use bare fences.
 15. **Codex sync uses symlink + backup move**: Do not delete user files directly.
 16. **Single-entry setup UX**: `cwf:setup` must ask and apply optional integrations (Codex mode, git hook mode/profile) instead of requiring users to remember flags.
-17. **Env/project-config UX**: `cwf:setup` must detect and offer migration of legacy env keys to canonical `CWF_*` names, then offer project config bootstrap (.cwf/config.yaml, .cwf/config.local.yaml) with explicit user choice.
+17. **Env/project-config UX**: `cwf:setup` must detect and offer migration of legacy env keys to canonical `CWF_*` names, then offer project config bootstrap (.cwf-config.yaml, .cwf-config.local.yaml) with explicit user choice.
 18. **Agent Team UX**: `cwf:setup` must include explicit Agent Team mode setup so multi-agent skills do not silently depend on an unset runtime flag.
 19. **Dependency install UX**: When local runtime dependencies are missing, `cwf:setup` must ask whether to install now and run [scripts/install-tooling-deps.sh](scripts/install-tooling-deps.sh) on approval.
 20. **No passive missing-only report**: Missing prerequisites must end with either an install attempt or explicit manual install commands plus continue/stop choice.

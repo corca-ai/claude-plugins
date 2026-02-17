@@ -150,9 +150,9 @@ if [[ ! -d "$PROJECT_ROOT" ]]; then
   exit 1
 fi
 
-CONFIG_PATH="$PROJECT_ROOT/.cwf/config.yaml"
+CONFIG_PATH="$PROJECT_ROOT/.cwf-config.yaml"
 if [[ "$SCOPE" == "local" ]]; then
-  CONFIG_PATH="$PROJECT_ROOT/.cwf/config.local.yaml"
+  CONFIG_PATH="$PROJECT_ROOT/.cwf-config.local.yaml"
 fi
 
 mkdir -p "$(dirname "$CONFIG_PATH")"
