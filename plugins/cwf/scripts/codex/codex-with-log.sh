@@ -27,6 +27,12 @@ SYNC_SCRIPT="$SCRIPT_DIR/sync-session-logs.sh"
 POST_RUN_SCRIPT="$SCRIPT_DIR/post-run-checks.sh"
 SELF_PATH="$SCRIPT_PATH"
 
+# Keep trap path safe under nounset even if exit happens unexpectedly early.
+RUN_START_EPOCH=""
+SYNC_DONE="false"
+EXIT_CODE=0
+RUN_COMPLETED="false"
+
 is_same_file() {
   local a="$1"
   local b="$2"
@@ -59,22 +65,19 @@ if [ -z "$REAL_CODEX" ]; then
 fi
 
 RUN_START_EPOCH="$(date +%s 2>/dev/null || true)"
-SYNC_DONE="false"
-EXIT_CODE=0
-RUN_COMPLETED="false"
 
 run_sync_once() {
-  if [ "$SYNC_DONE" = "true" ]; then
+  if [ "${SYNC_DONE:-false}" = "true" ]; then
     return 0
   fi
   SYNC_DONE="true"
 
-  if [ ! -x "$SYNC_SCRIPT" ]; then
+  if [ ! -x "${SYNC_SCRIPT:-}" ]; then
     return 0
   fi
 
   # First pass: bounded to this wrapper invocation window.
-  if [ -n "$RUN_START_EPOCH" ]; then
+  if [ -n "${RUN_START_EPOCH:-}" ]; then
     "$SYNC_SCRIPT" --cwd "$PWD" --since-epoch "$RUN_START_EPOCH" --quiet || true
   fi
   # Second pass: unbounded fallback for session flush timing edge-cases.
