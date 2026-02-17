@@ -22,50 +22,20 @@ cwf:update --check       # Version/scope/reconcile check only (no install, no mu
 
 ### 0.1 Detect Active Plugin Scope
 
-Resolve active CWF plugin scope for current cwd:
+Resolve active scope using the safe parsing flow in [scope-reconcile.md](references/scope-reconcile.md) (no `eval`).
 
-```bash
-scope_info="$(bash {CWF_PLUGIN_DIR}/scripts/detect-plugin-scope.sh --plugin cwf --cwd "$PWD" 2>/dev/null || true)"
-```
-
-Parse when available:
-
-```bash
-eval "$scope_info"
-selected_scope="${active_scope:-user}"
-selected_project_root="${active_project_path:-}"
-if [ "$selected_scope" = "none" ]; then
-  selected_scope="user"
-fi
-```
-
-If `selected_scope` is `project` or `local` and project root is empty, resolve fallback root:
-
-```bash
-selected_project_root="$(git -C "$PWD" rev-parse --show-toplevel 2>/dev/null || printf '%s' "$PWD")"
-```
-
-Always print:
-- active scope
-- installed scopes
-- active install path
-- active project path (if any)
+Mandatory behavior:
+- Always print active scope, installed scopes, active install path, and active project path before prompting.
+- If detection fails or returns `none`, do not default to `user`; ask for explicit target scope.
+- If selected scope is `project`/`local` and project root is missing, resolve fallback root via git top-level (or current cwd).
 
 ### 0.2 Confirm Target Scope (Multi-Scope Safety)
 
-If multiple CWF scopes are installed, ask which scope to update:
+Use scope selection prompt/options from [scope-reconcile.md](references/scope-reconcile.md).
 
-```text
-Multiple CWF scopes are installed. Which scope should cwf:update target?
-```
-
-Options:
-- `Active scope (recommended)`
-- `User scope`
-- `Project scope`
-- `Local scope`
-
-If the chosen scope is not installed, stop and report valid installed scopes.
+Safety guard:
+- If active scope is non-user and selected target is `user`, require a second explicit confirmation before update/reconcile mutation.
+- If the chosen scope is not installed, stop and report valid installed scopes.
 
 ---
 
@@ -204,57 +174,30 @@ Goal: repair stale Codex symlink/wrapper targets when plugin install paths chang
 
 ### 3.1 Detect Existing Codex Integration for Selected Scope
 
-Resolve destination paths:
+Detect integration signals using the detailed flow in [scope-reconcile.md](references/scope-reconcile.md).
 
-- `user` scope:
-  - skills: `~/.agents/skills`
-  - wrapper: `~/.local/bin/codex`
-- project/local scope:
-  - skills: `{projectRoot}/.codex/skills`
-  - wrapper: `{projectRoot}/.codex/bin/codex`
-
-Detect prior integration signals:
-
-```bash
-skills_link_present="false"
-wrapper_active="false"
-
-if [ "$selected_scope" = "user" ]; then
-  [ -L "${AGENTS_HOME:-$HOME/.agents}/skills/setup" ] && skills_link_present="true"
-  wrapper_status="$(bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --scope user --status)"
-else
-  [ -L "$selected_project_root/.codex/skills/setup" ] && skills_link_present="true"
-  wrapper_status="$(bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --scope "$selected_scope" --project-root "$selected_project_root" --status)"
-fi
-printf '%s\n' "$wrapper_status"
-printf '%s' "$wrapper_status" | grep -q 'Active        : true' && wrapper_active="true"
-```
+Detection output must track:
+- `skills_link_present`
+- `wrapper_active`
+- `wrapper_link_present` (wrapper link exists even when `Active` is false)
 
 ### 3.2 Reconcile (Mutation Rules)
 
 - If `--check`: never mutate; report detection only and print recommended reconcile commands.
 - If update was applied in Phase 2:
   - when `skills_link_present=true`, run `sync-skills.sh` for selected scope.
-  - when `wrapper_active=true`, run `install-wrapper.sh --enable` for selected scope (without `--add-path`) to repoint symlink to current version path.
+  - when `wrapper_link_present=true` or `wrapper_active=true`, run `install-wrapper.sh --enable` for selected scope (without `--add-path`) to repoint stale wrapper links.
   - when neither is present, report "no existing Codex integration to reconcile" and skip mutation.
 
-Commands:
-
-```bash
-# skills reconcile
-bash {CWF_PLUGIN_DIR}/scripts/codex/sync-skills.sh --scope "$selected_scope" ${selected_project_root:+--project-root "$selected_project_root"} --cleanup-legacy
-
-# wrapper reconcile
-bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --scope "$selected_scope" ${selected_project_root:+--project-root "$selected_project_root"} --enable
-bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --scope "$selected_scope" ${selected_project_root:+--project-root "$selected_project_root"} --status
-```
+Command templates are maintained in [scope-reconcile.md](references/scope-reconcile.md).
 
 ### 3.3 Report Reconcile Summary (Before vs After)
 
 Always report:
 - selected scope and project root (if any)
 - whether skills links were detected and reconciled
-- whether wrapper was active and reconciled
+- whether wrapper link/active state was detected and reconciled
+- `type -a codex` for command-resolution visibility
 - rollback commands:
 
 ```bash
@@ -264,6 +207,10 @@ bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --scope "$selected_scope"
 For skill-link rollback, direct user to scope backup roots:
 - user: `~/.agents/.skill-sync-backup/*`
 - project/local: `{projectRoot}/.codex/.skill-sync-backup/*`
+
+Include alias boundary note:
+- aliases that call `codex` by command name inherit wrapper behavior
+- aliases/functions that call absolute paths bypass wrapper behavior and need manual adjustment
 
 ---
 
@@ -314,14 +261,16 @@ Add `update` to `cwf-state.yaml` current session's `stage_checkpoints` list if l
 3. **Scope-aware apply**: Update/install must target explicit scope via `--scope`.
 4. **Require user confirmation**: Never auto-update without asking.
 5. **Reconcile Codex links after update**: For existing Codex integrations in selected scope, run reconcile in the same update flow.
-6. **No mutation in check mode**: `cwf:update --check` must not install/update/reconcile; it reports status and suggested commands only.
-7. **Changes take effect after restart**: Always remind user to restart Claude Code.
-8. **All code fences must have language specifier**: Never use bare fences.
+6. **No fail-open scope fallback**: If scope detection fails or returns `none`, require explicit scope selection before mutation.
+7. **No mutation in check mode**: `cwf:update --check` must not install/update/reconcile; it reports status and suggested commands only.
+8. **Changes take effect after restart**: Always remind user to restart Claude Code.
+9. **All code fences must have language specifier**: Never use bare fences.
 
 ## References
 
 - [README.md](README.md) — File-map entry for this skill directory (not release notes)
 - [agent-patterns.md](../../references/agent-patterns.md) — Single pattern
+- [references/scope-reconcile.md](references/scope-reconcile.md) — detailed scope resolution and Codex reconcile matrix
 - [detect-plugin-scope.sh](../../scripts/detect-plugin-scope.sh) — active Claude plugin scope detection for cwd
 - [sync-skills.sh](../../scripts/codex/sync-skills.sh) — Codex scope-aware skill sync
 - [install-wrapper.sh](../../scripts/codex/install-wrapper.sh) — Codex scope-aware wrapper management
