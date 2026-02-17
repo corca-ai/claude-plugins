@@ -87,14 +87,14 @@ By `plugin_type`:
 
 ### 7. Summary
 
-Report: plugin name, type, version change, files modified, remaining manual steps (commit).
+Report: plugin name, type, version change, files modified, and commit status (committed now vs deferred).
 
 ## Rules
 
 1. **All code fences must have language specifier**: Never use bare fences.
 2. **Consistency check is the source of truth**: Always run `check-consistency.sh` before and after changes.
 3. **Missing dependency interaction**: When prerequisites are missing, ask to install/configure now; do not only report unavailability.
-4. **Never auto-commit**: Report modified files but leave committing to the user.
+4. **Commit policy (autonomy-first)**: Default is no auto-commit, but when the user explicitly requests commit or an active workflow contract requires commit boundaries, commit by meaningful unit with selective staging only.
 
 ## References
 

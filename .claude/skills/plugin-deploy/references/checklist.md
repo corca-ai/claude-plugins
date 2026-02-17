@@ -72,3 +72,9 @@ When a plugin is deprecated:
 - **Plugin renamed**: treat as new plugin + deprecate old
 - **marketplace.json has no version field for plugin**: OK, version lives in plugin.json
 - **README section order**: Skills come before Hooks, within each group maintain existing order
+
+## Commit Policy
+
+- Default: do not auto-commit.
+- If user explicitly asks to commit, or a workflow contract requires commit boundaries, commit by meaningful unit.
+- Always use selective staging (`git add <intended files>`), never broad-stage unrelated worktree changes.
