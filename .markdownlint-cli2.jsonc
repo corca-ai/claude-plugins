@@ -1,4 +1,6 @@
 {
+  "noBanner": true,
+  "noProgress": true,
   "ignores": [
     ".cwf/projects/",
     ".cwf/sessions/",
