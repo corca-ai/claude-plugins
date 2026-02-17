@@ -4,7 +4,9 @@ File-level map for [setup](SKILL.md).
 
 - [README.md](README.md): File map for this skill directory.
 - [SKILL.md](SKILL.md): Primary instructions and execution workflow for this skill.
+- [references/tool-detection-and-deps.md](references/tool-detection-and-deps.md): Detailed checks/prompts for setup phase `2` (external tool detection and dependency handling).
 - [references/codex-scope-integration.md](references/codex-scope-integration.md): Detailed prompts/commands for scope-aware Codex integration phases (`2.4`/`2.5`/`2.6`).
+- [references/runtime-and-index-phases.md](references/runtime-and-index-phases.md): Detailed prompts/commands for setup phases `2.7`~`2.10` and index/lessons phases (`3`/`4`/`5`).
 - [scripts/check-index-coverage.sh](scripts/check-index-coverage.sh): Validates generated index coverage for cap/repo profiles.
 - [scripts/configure-git-hooks.sh](scripts/configure-git-hooks.sh): Installs/removes repo git hooks and applies gate profiles (`fast`, `balanced`, `strict`).
 - [scripts/migrate-env-vars.sh](scripts/migrate-env-vars.sh): Migrates legacy env keys to canonical `CWF_*` keys in shell profiles.
