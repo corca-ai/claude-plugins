@@ -20,9 +20,9 @@ cwf:update --check       # Version check only, no install
 
 ## Phase 1: Version Check
 
-### 1.1 Find Current Version
+### 1.1 Find Current Version + Baseline Snapshot
 
-Locate the installed plugin.json using Glob and resolve deterministic baseline variables:
+Locate the installed plugin.json and snapshot the pre-update tree for deterministic diffing:
 
 ```bash
 current_plugin_json="$(ls -1dt ~/.claude/plugins/cache/*/cwf/*/.claude-plugin/plugin.json 2>/dev/null | head -n1)"
@@ -30,8 +30,12 @@ current_plugin_json="$(ls -1dt ~/.claude/plugins/cache/*/cwf/*/.claude-plugin/pl
   echo "CWF is not installed."
   exit 1
 }
+
 current_plugin_root="$(dirname "$(dirname "$current_plugin_json")")"
 current_version="$(jq -r '.version' "$current_plugin_json")"
+baseline_root="$(mktemp -d "${TMPDIR:-/tmp}/cwf-before.XXXXXX")"
+cp -a "$current_plugin_root"/. "$baseline_root"/
+old_diff_root="$baseline_root"
 ```
 
 If not found, report that CWF is not installed and suggest installing via marketplace.
@@ -46,12 +50,20 @@ claude plugin marketplace update corca-plugins
 
 ### 1.3 Compare Versions
 
-After marketplace update, resolve latest metadata and compare:
+After marketplace update, resolve latest metadata, snapshot it, and compare:
 
 ```bash
 latest_plugin_json="$(ls -1dt ~/.claude/plugins/cache/*/cwf/*/.claude-plugin/plugin.json 2>/dev/null | head -n1)"
+[ -n "$latest_plugin_json" ] || {
+  echo "Latest CWF metadata not found after marketplace update."
+  exit 1
+}
+
 latest_plugin_root="$(dirname "$(dirname "$latest_plugin_json")")"
 latest_version="$(jq -r '.version' "$latest_plugin_json")"
+marketplace_root="$(mktemp -d "${TMPDIR:-/tmp}/cwf-after-marketplace.XXXXXX")"
+cp -a "$latest_plugin_root"/. "$marketplace_root"/
+new_diff_root="$marketplace_root"
 ```
 
 Report the comparison:
@@ -63,7 +75,7 @@ Latest version:  0.7.0
 
 If versions match, report "CWF is up to date" and skip Phase 2.
 
-Persist these variables for Phase 3 diffing: `current_plugin_root`, `latest_plugin_root`, `current_version`, `latest_version`.
+Persist these variables for Phase 3 diffing: `old_diff_root`, `new_diff_root`, `current_version`, `latest_version`.
 
 ---
 
@@ -87,38 +99,57 @@ Options: "Yes, update" / "No, skip"
 claude plugin install cwf@corca-plugins
 ```
 
-### 2.3 Report Success
+### 2.3 Refresh Installed Snapshot
+
+Refresh the post-install root and overwrite `new_diff_root` so Phase 3 compares stable old-vs-installed trees:
+
+```bash
+installed_plugin_json="$(ls -1dt ~/.claude/plugins/cache/*/cwf/*/.claude-plugin/plugin.json 2>/dev/null | head -n1)"
+[ -n "$installed_plugin_json" ] || {
+  echo "Installed CWF metadata not found after install."
+  exit 1
+}
+
+installed_plugin_root="$(dirname "$(dirname "$installed_plugin_json")")"
+installed_version="$(jq -r '.version' "$installed_plugin_json")"
+post_install_root="$(mktemp -d "${TMPDIR:-/tmp}/cwf-after-install.XXXXXX")"
+cp -a "$installed_plugin_root"/. "$post_install_root"/
+new_diff_root="$post_install_root"
+latest_version="$installed_version"
+```
+
+### 2.4 Report Success
 
 ```text
-CWF updated to {version}. Restart Claude Code for changes to take effect.
+CWF updated to {installed_version}. Restart Claude Code for changes to take effect.
 ```
 
 ---
 
 ## Phase 3: Changelog Summary
 
-After a successful update (or when showing version diff), generate summary deterministically with explicit commands:
+After a successful update (or when showing version diff), generate summary with stable diff roots:
 
 1. Build file-change inventory between old/new plugin trees:
 
 ```bash
-git --no-pager diff --no-index --name-status "$current_plugin_root" "$latest_plugin_root" || true
+git --no-pager diff --no-index --name-status "$old_diff_root" "$new_diff_root" || true
 ```
 
 1. Diff the changelog file first (preferred release-note source):
 
 ```bash
 git --no-pager diff --no-index \
-  "$current_plugin_root/CHANGELOG.md" \
-  "$latest_plugin_root/CHANGELOG.md" || true
+  "$old_diff_root/CHANGELOG.md" \
+  "$new_diff_root/CHANGELOG.md" || true
 ```
 
 1. Diff README for user-facing usage/entrypoint changes, then summarize purpose explicitly:
 
 ```bash
 git --no-pager diff --no-index \
-  "$current_plugin_root/README.md" \
-  "$latest_plugin_root/README.md" || true
+  "$old_diff_root/README.md" \
+  "$new_diff_root/README.md" || true
 ```
 
 1. Summary procedure:

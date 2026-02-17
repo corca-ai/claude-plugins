@@ -92,11 +92,16 @@ Operational note:
 1. Initialize stage provenance log file:
 
    ```bash
-   cat > "{session directory}/run-stage-provenance.md" <<'EOF'
+   stage_provenance_file="{session directory}/run-stage-provenance.md"
+   if [[ ! -f "$stage_provenance_file" ]]; then
+     cat > "$stage_provenance_file" <<'EOF'
    # Run Stage Provenance
    | Stage | Skill | Args | Started At (UTC) | Finished At (UTC) | Duration (s) | Artifacts | Gate Outcome |
    |---|---|---|---|---|---|---|---|
    EOF
+   elif ! grep -Fqx '| Stage | Skill | Args | Started At (UTC) | Finished At (UTC) | Duration (s) | Artifacts | Gate Outcome |' "$stage_provenance_file"; then
+     printf '\n| Stage | Skill | Args | Started At (UTC) | Finished At (UTC) | Duration (s) | Artifacts | Gate Outcome |\n|---|---|---|---|---|---|---|---|\n' >> "$stage_provenance_file"
+   fi
    ```
 
 1. Report initialization:
@@ -179,9 +184,18 @@ When `mode=explore-worktrees` and unresolved T3 alternatives exist, use this con
    - Remove non-baseline worktrees and branches after confirming no needed uncommitted work remains:
 
      ```bash
-     git -C "{worktree_path}" status --porcelain
-     git worktree remove --force "{worktree_path}"
-     git branch -D "run/t3-{decision_id}-{option_slug}"
+     dirty_status=$(git -C "{worktree_path}" status --porcelain)
+     if [[ -n "$dirty_status" ]]; then
+       echo "WORKTREE_DIRTY: {worktree_path}"
+       echo "$dirty_status"
+       # Ask user whether to keep, commit/stash, or explicitly allow discard before cleanup.
+     else
+       git worktree remove "{worktree_path}"
+       if ! git branch -d "run/t3-{decision_id}-{option_slug}"; then
+         echo "BRANCH_NOT_MERGED: run/t3-{decision_id}-{option_slug}"
+         # Ask user whether to keep branch for follow-up or explicitly allow force-delete.
+       fi
+     fi
      ```
 
    - Keep a non-baseline branch only if explicitly recorded as deferred follow-up.
@@ -299,7 +313,7 @@ For non-review auto stages (impl, refactor, retro) — proceed automatically.
 
 #### Stage Provenance Checklist (Required)
 
-After gate resolution for each stage, append one row to `{session_dir}/run-stage-provenance.md` with:
+Append exactly one row to `{session_dir}/run-stage-provenance.md` for every stage outcome (`Proceed`, `Revise`, `Fail`, `Skipped`, `User Stop`), including early-stop paths before halting.
 
 - `Stage`: current stage name
 - `Skill` and `Args`: invoked skill + resolved args
@@ -316,6 +330,8 @@ printf '| %s | %s | %s | %s | %s | %s | %s | %s |\n' \
   "{artifact_paths_or_dash}" "{gate_outcome}" \
   >> "{session_dir}/run-stage-provenance.md"
 ```
+
+For skip or pre-invocation stop paths (for example `WORKTREE_MISMATCH`, review hard-stop, or user-selected `Stop`), set unavailable timing/skill fields to `—` and still append before exit.
 
 ### Review Failure Handling
 
@@ -440,7 +456,7 @@ After all stages complete (or the pipeline is halted):
 1. **Ambiguity mode precedence**: `--ambiguity-mode` flag overrides config. Config (`CWF_RUN_AMBIGUITY_MODE`) overrides built-in default (`defer-blocking`).
 1. **Defer modes require persistence**: Any non-`strict` T3 carry-over must be recorded in `{session_dir}/run-ambiguity-decisions.md` and reflected in `live.blocking_decisions_pending`.
 1. **defer-blocking merge discipline**: If unresolved blocking debt exists, ship must treat it as merge-blocking until linked issue/PR follow-up is recorded and blocking count reaches zero.
-1. **Per-stage provenance is mandatory**: Every stage must append a provenance row with skill args, timestamps/duration, artifacts, and gate outcome.
+1. **Per-stage provenance is mandatory**: Every stage outcome (`Proceed`/`Revise`/`Fail`/`Skipped`/`User Stop`) must append a provenance row, including early-stop paths before halt/return.
 1. **Review `Fail` is not `Revise`**: `Fail` halts automation immediately and requires explicit user direction before any downstream stage.
 
 ## References

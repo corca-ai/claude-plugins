@@ -1,6 +1,6 @@
 # Concept Synchronization Map
 
-<!-- Provenance: reviewed at 13 skills, 15 hooks (S24). Source: concept-distillation.md -->
+<!-- Provenance: reviewed at 13 skills, 18 hooks (S24). Source: concept-distillation.md -->
 
 Reference for refactor agents: 6 generic concepts with verification criteria, and a 13×6 synchronization map showing which concepts each skill composes.
 

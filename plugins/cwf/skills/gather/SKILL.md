@@ -122,15 +122,30 @@ For URLs that don't match any known service, run this deterministic routine:
    - `output_md`: `{OUTPUT_DIR}/{slug}.md`
    - `output_meta`: `{OUTPUT_DIR}/{slug}.meta.yaml`
 
-2. **Try Tavily extract first**:
+2. **Mandatory URL safety precheck (before any fetch/extract)**:
+   - Parse URL and derive: `scheme`, `host`, `resolved_ips` (A/AAAA when available).
+   - Evaluate block rules in this fixed order and store the first match as `blocked_reason_code`:
+     1. `non_http_scheme` — scheme is not `http` or `https`
+     2. `localhost_target` — host is `localhost` or ends with `.localhost`
+     3. `loopback_target` — host/IP in `127.0.0.0/8` or `::1/128`
+     4. `link_local_target` — host/IP in `169.254.0.0/16` or `fe80::/10`
+     5. `private_ipv4_target` — host/IP in RFC1918 ranges (`10/8`, `172.16/12`, `192.168/16`)
+     6. `private_ipv6_target` — host/IP in `fc00::/7`
+   - Default behavior for blocked URLs: do not run extraction.
+   - Required interactive override path:
+     1. `Override once for this URL and continue` (explicit user confirmation required)
+     2. `Skip this URL` (default)
+   - If override is not explicitly confirmed, stop processing this URL and write failed metadata.
+
+3. **Try Tavily extract first**:
    ```bash
    {SKILL_DIR}/scripts/extract.sh "<url>" > "{output_md}.tmp"
    ```
    - Success contract: exit code `0` and temp file has non-whitespace content.
    - On success: move temp file to `{output_md}` and set metadata `method: tavily-extract`.
-   - If `TAVILY_API_KEY` is missing or extraction fails, continue to Step 3.
+   - If `TAVILY_API_KEY` is missing or extraction fails, continue to Step 4.
 
-3. **WebFetch fallback (single fixed procedure)**:
+4. **WebFetch fallback (single fixed procedure)**:
    - Run one Task call with this exact prompt contract:
      ```text
      Fetch this URL with WebFetch: <url>
@@ -139,19 +154,29 @@ For URLs that don't match any known service, run this deterministic routine:
      ```
    - If the result is not `WEBFETCH_EMPTY`, save it to `{output_md}` and set metadata `method: webfetch-fallback`.
 
-4. **Empty-output handling**:
+5. **Empty-output handling**:
    - Treat as failure when `{output_md}` is missing, whitespace-only, or the fallback response equals `WEBFETCH_EMPTY`.
    - On failure, do not keep partial markdown output.
 
-5. **Metadata capture (always required)**:
+6. **Metadata capture (always required)**:
    - Write `{output_meta}` with at least:
      - `source_url`
      - `retrieved_at_utc` (ISO 8601 UTC)
      - `handler: generic`
-     - `method` (`tavily-extract` or `webfetch-fallback`)
+     - `safety_precheck`:
+       - `status` (`passed`, `blocked`, or `overridden`)
+       - `blocked_reason_code` (empty when passed)
+       - `host`
+       - `resolved_ips`
+     - `method` (`tavily-extract`, `webfetch-fallback`, or `none`)
      - `status` (`success` or `failed`)
      - `output_file` (empty when failed)
      - `failure_reason` (when failed)
+   - For safety-blocked URLs without explicit override, set:
+     - `status: failed`
+     - `method: none`
+     - `output_file: ""`
+     - `failure_reason: url_safety_blocked`
 
 ---
 

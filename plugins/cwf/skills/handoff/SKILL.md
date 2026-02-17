@@ -226,13 +226,29 @@ Resolve the current session entry in `cwf-state.yaml` before updating `artifacts
 1. Find a matching session by `dir` (primary), then by `id` (fallback).
 2. If found, continue to 4.2/4.2b.
 3. If no match exists, run this explicit missing-entry branch:
-   - Draft a minimal session entry from known context:
-     `id`, `title`, `dir`, `branch`, `artifacts: []`
-     (and `stage_checkpoints: []` when used in the project).
-   - Ask user confirmation before insertion:
-     `"Create missing session entry now" | "Edit fields first" | "Cancel registration"`.
-   - If confirmed, append the entry to `sessions` and continue.
-   - If canceled, stop registration and report that artifacts were not updated.
+   1. Draft a minimal session entry from known context:
+      `id`, `title`, `dir`, `branch`, `artifacts: []`
+      (and `stage_checkpoints: []` when used in the project).
+   2. Ask user decision before insertion:
+      `"Create missing session entry now" | "Edit fields first" | "Cancel registration"`.
+   3. If `"Create missing session entry now"`:
+      append the draft entry to `sessions`, then continue to 4.2/4.2b.
+   4. If `"Edit fields first"`, run this loop:
+      - Editable fields: `id`, `title`, `dir`, `branch`.
+      - Non-editable at creation: `artifacts: []`
+        (and `stage_checkpoints: []` when used in the project).
+      - Validate before re-confirm:
+        `id` must not duplicate an existing session `id`,
+        `dir` must not duplicate an existing session `dir`.
+      - Re-confirm with AskUserQuestion:
+        `"Insert this session entry with edited values?"`
+        with options:
+        `"Confirm insert" | "Edit again" | "Cancel registration"`.
+      - If `"Edit again"`, repeat this step.
+      - If `"Confirm insert"`, append the edited entry and continue to 4.2/4.2b.
+      - If `"Cancel registration"`, stop registration and report that artifacts were not updated.
+   5. If `"Cancel registration"` from the initial decision:
+      stop registration and report that artifacts were not updated.
 
 ### 4.2 Update Current Session (next-session mode)
 
