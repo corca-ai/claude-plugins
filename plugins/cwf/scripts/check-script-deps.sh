@@ -59,10 +59,29 @@ BROKEN_FILE="$TMP_DIR/broken.tsv"
 : > "$BROKEN_FILE"
 
 normalize_ref() {
-  local ref="$1"
+  local source_file="$1"
+  local ref="$2"
+  local source_dir=""
+
   ref="${ref//\$\{CWF_PLUGIN_DIR\}/plugins/cwf}"
+  ref="${ref//\$CWF_PLUGIN_DIR/plugins/cwf}"
   ref="${ref//\$\{CLAUDE_PLUGIN_ROOT\}/plugins/cwf}"
+  ref="${ref//\$CLAUDE_PLUGIN_ROOT/plugins/cwf}"
+  ref="${ref//\$\{PLUGIN_ROOT\}/plugins/cwf}"
   ref="${ref//\$PLUGIN_ROOT/plugins/cwf}"
+
+  if [[ -n "$source_file" ]]; then
+    source_dir="$(dirname "$source_file")"
+    ref="${ref//\$\{SCRIPT_DIR\}/$source_dir}"
+    ref="${ref//\$SCRIPT_DIR/$source_dir}"
+    if [[ "$ref" == ./* || "$ref" == ../* ]]; then
+      ref="$source_dir/$ref"
+    fi
+  fi
+
+  if [[ "$ref" == "$REPO_ROOT/"* ]]; then
+    ref="${ref#"$REPO_ROOT"/}"
+  fi
   printf '%s\n' "$ref"
 }
 
@@ -73,7 +92,7 @@ record_edge() {
   local normalized=""
   local reason=""
 
-  normalized="$(normalize_ref "$raw_ref")"
+  normalized="$(normalize_ref "$source_file" "$raw_ref")"
   if [[ "$normalized" != plugins/cwf/* ]]; then
     return 0
   fi
@@ -109,14 +128,14 @@ extract_edges_from_script_text() {
   local source_file=""
   local match=""
   # shellcheck disable=SC2016
-  local ref_pattern='(plugins/cwf|\$\{CWF_PLUGIN_DIR\}|\$\{CLAUDE_PLUGIN_ROOT\}|\$PLUGIN_ROOT)/[A-Za-z0-9._/-]+\.sh'
+  local ref_pattern='(plugins/cwf|\$\{CWF_PLUGIN_DIR\}|\$CWF_PLUGIN_DIR|\$\{CLAUDE_PLUGIN_ROOT\}|\$CLAUDE_PLUGIN_ROOT|\$\{PLUGIN_ROOT\}|\$PLUGIN_ROOT|\$\{SCRIPT_DIR\}|\$SCRIPT_DIR)/[A-Za-z0-9._/-]+\.(sh|pl)'
 
   while IFS= read -r source_file; do
     [[ -f "$source_file" ]] || continue
     while IFS= read -r match; do
       [[ -n "$match" ]] || continue
       record_edge "$source_file" "$match"
-    done < <(grep -oE "$ref_pattern" "$source_file" || true)
+    done < <(grep -vE '^[[:space:]]*#' "$source_file" | grep -oE "$ref_pattern" || true)
   done < <(
     {
       find plugins/cwf/hooks/scripts -type f -name '*.sh' 2>/dev/null

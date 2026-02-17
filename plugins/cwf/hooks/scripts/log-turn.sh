@@ -188,7 +188,9 @@ persist_decision_journal_entry() {
         --arg state_version "$state_version" \
         '{decision_id:$decision_id,ts:$ts,session_id:$session_id,question:$question,answer:$answer,source_hook:$source_hook,state_version:$state_version}')"
 
-    bash "$LIVE_RESOLVER_SCRIPT" journal-append "$CWD" "$entry_json" >/dev/null 2>&1 || true
+    if ! bash "$LIVE_RESOLVER_SCRIPT" journal-append "$CWD" "$entry_json" >/dev/null 2>&1; then
+        echo "[log-turn] warning: failed to append decision_journal entry (${decision_id})" >&2
+    fi
 }
 
 link_log_into_live_session() {

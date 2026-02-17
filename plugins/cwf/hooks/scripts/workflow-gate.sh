@@ -9,22 +9,21 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/cwf-hook-gate.sh"
 
 INPUT="$(cat)"
-
-if ! command -v jq >/dev/null 2>&1; then
-  exit 0
-fi
-
 PLUGIN_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 LIVE_STATE_SCRIPT="$PLUGIN_ROOT/scripts/cwf-live-state.sh"
-
-if [[ ! -f "$LIVE_STATE_SCRIPT" ]]; then
-  exit 0
-fi
+BLOCKED_ACTION_REGEX='(^|[[:space:]])(cwf:ship|/ship|git[[:space:]]+push|git[[:space:]]+merge|gh[[:space:]]+pr[[:space:]]+create|gh[[:space:]]+pr[[:space:]]+merge|커밋해|푸시해|배포해)([[:space:]]|$)'
 
 json_block() {
   local reason="$1"
-  local reason_json
-  reason_json="$(printf '%s' "$reason" | jq -Rs .)"
+  local reason_json="$reason"
+  if command -v jq >/dev/null 2>&1; then
+    reason_json="$(printf '%s' "$reason" | jq -Rs .)"
+  else
+    reason_json="${reason_json//\\/\\\\}"
+    reason_json="${reason_json//\"/\\\"}"
+    reason_json="${reason_json//$'\n'/ }"
+    reason_json="\"$reason_json\""
+  fi
   cat <<JSON
 {"decision":"block","reason":${reason_json}}
 JSON
@@ -33,12 +32,34 @@ JSON
 
 json_allow() {
   local reason="$1"
-  local reason_json
-  reason_json="$(printf '%s' "$reason" | jq -Rs .)"
+  local reason_json="$reason"
+  if command -v jq >/dev/null 2>&1; then
+    reason_json="$(printf '%s' "$reason" | jq -Rs .)"
+  else
+    reason_json="${reason_json//\\/\\\\}"
+    reason_json="${reason_json//\"/\\\"}"
+    reason_json="${reason_json//$'\n'/ }"
+    reason_json="\"$reason_json\""
+  fi
   cat <<JSON
 {"decision":"allow","reason":${reason_json}}
 JSON
   exit 0
+}
+
+extract_json_field() {
+  local input_json="$1"
+  local field="$2"
+
+  if command -v jq >/dev/null 2>&1; then
+    printf '%s' "$input_json" | jq -r --arg key "$field" '.[$key] // empty'
+    return
+  fi
+
+  # Best-effort fallback for dependency-degraded mode.
+  printf '%s' "$input_json" \
+    | sed -n "s/.*\"${field}\"[[:space:]]*:[[:space:]]*\"\\([^\"]*\\)\".*/\\1/p" \
+    | head -n 1
 }
 
 read_live_scalar() {
@@ -53,10 +74,47 @@ read_live_list() {
   bash "$LIVE_STATE_SCRIPT" list-get "$base_dir" "$key"
 }
 
+live_scalar_key_declared() {
+  local key="$1"
+  grep -Eq "^[[:space:]]{2}${key}:[[:space:]]*" "$LIVE_STATE_FILE"
+}
+
+live_list_is_inline_empty() {
+  local key="$1"
+  grep -Eq "^[[:space:]]{2}${key}:[[:space:]]*\\[[[:space:]]*\\][[:space:]]*$" "$LIVE_STATE_FILE"
+}
+
+live_list_block_has_lines() {
+  local key="$1"
+  awk -v key="$key" '
+    /^live:/ { in_live=1; next }
+    in_live && /^[^[:space:]]/ { exit }
+    in_live {
+      if ($0 ~ "^[[:space:]]{2}" key ":[[:space:]]*$") {
+        in_target=1
+        next
+      }
+      if (!in_target) {
+        next
+      }
+      if ($0 ~ /^[[:space:]]{2}[A-Za-z0-9_-]+:[[:space:]]*/) {
+        exit
+      }
+      if ($0 !~ /^[[:space:]]*$/) {
+        print "1"
+        exit
+      }
+    }
+  ' "$LIVE_STATE_FILE" | grep -q '^1$'
+}
+
 read_live_scalar_or_block() {
   local base_dir="$1"
   local key="$2"
   local value=""
+  if ! live_scalar_key_declared "$key"; then
+    json_block "BLOCKED: workflow gate expected live.${key} in ${LIVE_STATE_FILE}, but key is missing or malformed."
+  fi
   if ! value="$(read_live_scalar "$base_dir" "$key" 2>/dev/null)"; then
     json_block "BLOCKED: workflow gate could not parse live.${key} from ${LIVE_STATE_FILE}. Fix live-state parser/state before continuing."
   fi
@@ -67,8 +125,16 @@ read_live_list_or_block() {
   local base_dir="$1"
   local key="$2"
   local value=""
+  if ! live_scalar_key_declared "$key"; then
+    json_block "BLOCKED: workflow gate expected live.${key} in ${LIVE_STATE_FILE}, but key is missing or malformed."
+  fi
   if ! value="$(read_live_list "$base_dir" "$key" 2>/dev/null)"; then
     json_block "BLOCKED: workflow gate could not parse live.${key} from ${LIVE_STATE_FILE}. Fix live-state parser/state before continuing."
+  fi
+  if [[ -z "$value" ]] && ! live_list_is_inline_empty "$key"; then
+    if live_list_block_has_lines "$key"; then
+      json_block "BLOCKED: workflow gate detected malformed live.${key} entries in ${LIVE_STATE_FILE}."
+    fi
   fi
   printf '%s' "$value"
 }
@@ -100,21 +166,43 @@ list_contains() {
 
 prompt_requests_blocked_action() {
   local prompt="$1"
-  printf '%s' "$prompt" | grep -Eiq '(^|[[:space:]])(cwf:ship|/ship|git[[:space:]]+push|git[[:space:]]+merge|gh[[:space:]]+pr[[:space:]]+create|gh[[:space:]]+pr[[:space:]]+merge|커밋해|푸시해|배포해)([[:space:]]|$)'
+  printf '%s' "$prompt" | grep -Eiq "$BLOCKED_ACTION_REGEX"
 }
 
-PROMPT="$(printf '%s' "$INPUT" | jq -r '.prompt // empty')"
-SESSION_ID="$(printf '%s' "$INPUT" | jq -r '.session_id // empty')"
+PROMPT="$(extract_json_field "$INPUT" "prompt")"
+SESSION_ID="$(extract_json_field "$INPUT" "session_id")"
+BLOCKED_REQUEST="false"
+if prompt_requests_blocked_action "$PROMPT" || prompt_requests_blocked_action "$INPUT"; then
+  BLOCKED_REQUEST="true"
+fi
+
+if ! command -v jq >/dev/null 2>&1; then
+  if [[ "$BLOCKED_REQUEST" == "true" ]]; then
+    json_block "BLOCKED: workflow gate dependency missing (jq). Protected actions are denied until jq is available."
+  fi
+  json_allow "[WARNING] workflow gate dependency missing (jq). Non-protected prompts are allowed."
+fi
+
+if [[ ! -f "$LIVE_STATE_SCRIPT" ]]; then
+  if [[ "$BLOCKED_REQUEST" == "true" ]]; then
+    json_block "BLOCKED: workflow gate dependency missing (${LIVE_STATE_SCRIPT}). Protected actions are denied."
+  fi
+  json_allow "[WARNING] workflow gate dependency missing (${LIVE_STATE_SCRIPT}). Non-protected prompts are allowed."
+fi
+
 BASE_DIR="$(resolve_base_dir "$INPUT")"
 
 LIVE_STATE_FILE="$(bash "$LIVE_STATE_SCRIPT" resolve "$BASE_DIR" 2>/dev/null || true)"
 if [[ -z "$LIVE_STATE_FILE" || ! -f "$LIVE_STATE_FILE" ]]; then
-  exit 0
+  if [[ "$BLOCKED_REQUEST" == "true" && -f "$BASE_DIR/.cwf/cwf-state.yaml" ]]; then
+    json_block "BLOCKED: live state file is unavailable while protected action was requested. Resolve live-state before ship/push."
+  fi
+  json_allow "[WARNING] live state file unavailable; workflow gate skipped."
 fi
 
 ACTIVE_PIPELINE="$(read_live_scalar_or_block "$BASE_DIR" "active_pipeline")"
 if [[ -z "$ACTIVE_PIPELINE" ]]; then
-  exit 0
+  json_allow "[WARNING] live.active_pipeline is empty; workflow gate treated this as no active pipeline."
 fi
 
 # Stale pipeline detection: if stored session_id differs from current, the
@@ -144,7 +232,7 @@ fi
 gate_chain="$(IFS=' -> '; echo "${REMAINING_GATES[*]}")"
 status_msg="[PIPELINE] Active: ${ACTIVE_PIPELINE} (phase: ${PHASE:-unknown}, state_version: ${STATE_VERSION:-unset}). Remaining gates: ${gate_chain}. Do NOT skip gates. Use Skill tool to invoke next stage."
 
-if list_contains "review-code" "${REMAINING_GATES[@]}" && prompt_requests_blocked_action "$PROMPT"; then
+if list_contains "review-code" "${REMAINING_GATES[@]}" && [[ "$BLOCKED_REQUEST" == "true" ]]; then
   if [[ -n "$OVERRIDE_REASON" && "$OVERRIDE_REASON" != "null" ]]; then
     json_allow "${status_msg} Override active: ${OVERRIDE_REASON}."
   fi
