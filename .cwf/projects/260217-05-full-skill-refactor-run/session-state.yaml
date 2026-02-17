@@ -3,10 +3,10 @@
 
 live:
   session_id: "S260217-05"
-  dir: ".cwf/projects/260217-05-full-skill-refactor-run"
+  dir: ".cwf/projects/260217-10-refactor-portability-default"
   branch: "marketplace-v3"
-  phase: "impl"
-  task: "Run full cwf:run refactor across all skills before deploy"
+  phase: "plan"
+  task: "Refactor skill portability-default + docs contract bootstrap"
   key_files:
     - ".cwf/projects/260217-05-full-skill-refactor-run/plan.md"
     - ".cwf/projects/260217-05-full-skill-refactor-run/plan-checkpoint-matrix.md"
