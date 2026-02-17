@@ -75,7 +75,7 @@ if [ "$LINE_COUNT" -gt 15 ]; then
     SUFFIX=" ... (${LINE_COUNT} total lines, showing first 15)"
 fi
 
-REASON=$(printf 'Broken links detected in %s:\n%s%s' "$FILE_PATH" "$TRUNCATED" "$SUFFIX" | jq -Rs .)
+REASON=$(printf 'Broken links detected in %s:\n%s%s\nFor triage guidance, see references/agent-patterns.md § Broken Link Triage Protocol' "$FILE_PATH" "$TRUNCATED" "$SUFFIX" | jq -Rs .)
 
 cat <<EOF
 {"decision":"block","reason":${REASON}}

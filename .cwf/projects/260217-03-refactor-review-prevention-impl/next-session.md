@@ -29,9 +29,11 @@
 - [ ] Add `deletion_safety` and `workflow_gate` to cwf:setup hook group selection UI
 - [ ] Proposal C structural fix: modify triage output format to carry original recommendation inline
 - [ ] Consolidate duplicated YAML parsing in workflow-gate.sh (source cwf-live-state.sh instead — 6/6 reviewers flagged)
+- [ ] Hook matcher에 path-based filtering 추가 검토 (/tmp prompt 파일 대상 오발동 완화)
 
 ## Expert Insights to Carry Forward
 
 - **Leveson**: STAMP 기반 훅 설계 템플릿 — controlled process, safety constraint, control action, actuator, feedback channel, fail mode, detection boundary
 - **Dekker**: grep -rl 탐지 경계를 수동적 "잔여 위험"에서 능동적 운영 가이드로 재프레이밍. 삭제 허용 시 advisory 메시지로 normalization of deviance 방지.
 - **Dekker**: 훅 exit-code integration test로 convention을 structure로 전환 — practical drift 방지
+- **Perrow**: AWK/YAML 파서 중복은 common-mode failure 경로가 될 수 있으므로 공유 파서 계층으로 수렴 필요.

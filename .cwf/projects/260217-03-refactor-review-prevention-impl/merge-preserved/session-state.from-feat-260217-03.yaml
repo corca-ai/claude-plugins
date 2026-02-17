@@ -1,0 +1,24 @@
+# session-state.yaml — volatile session live state
+# Synced from .cwf/cwf-state.yaml live section.
+
+live:
+  session_id: "260216-04"
+  dir: ".cwf/projects/260216-04-full-repo-refactor"
+  branch: "marketplace-v3"
+  phase: "refactor"
+  task: "Full repository refactoring retro"
+  key_files:
+    - README.ko.md
+    - .cwf/projects/260216-03-hitl-readme-restart/next-session.md
+    - .cwf/projects/260216-03-hitl-readme-restart/hitl/hitl-scratchpad.md
+  decisions: []
+  decision_journal: []
+  hitl:
+    session_id: "260216-03-hitl"
+    state_file: ".cwf/projects/260216-03-hitl-readme-restart/hitl/state.yaml"
+    rules_file: ".cwf/projects/260216-03-hitl-readme-restart/hitl/rules.yaml"
+    updated_at: "2026-02-16T02:42:35Z"
+  remaining_gates:
+    - "retro"
+    - "ship"
+  state_version: "4"
