@@ -12,8 +12,23 @@
     {
       "name": "cwf",
       "source": "./plugins/cwf",
-      "description": "Corca Workflow Framework — 13 skills (setup, update, gather, clarify, plan, impl, retro, refactor, handoff, ship, review, run, hitl) and 7 infrastructure hook groups for AI-native development workflows",
-      "keywords": ["workflow", "cwf", "skills", "hooks", "clarify", "plan", "impl", "retro", "refactor", "gather", "review", "ship", "handoff", "hitl"]
+      "description": "Corca Workflow Framework — consolidated hooks and skill orchestration for structured development sessions",
+      "keywords": [
+        "workflow",
+        "cwf",
+        "skills",
+        "hooks",
+        "clarify",
+        "plan",
+        "impl",
+        "retro",
+        "refactor",
+        "gather",
+        "review",
+        "ship",
+        "handoff",
+        "hitl"
+      ]
     }
   ]
 }

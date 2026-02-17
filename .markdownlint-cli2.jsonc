@@ -9,6 +9,8 @@
     "node_modules/**",
     "**/node_modules/",
     "**/node_modules/**",
+    "references/",
+    "references/**",
     "references/anthropic-skills-guide/"
   ],
   "customRules": [
