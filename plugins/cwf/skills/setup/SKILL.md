@@ -232,6 +232,16 @@ bash {SKILL_DIR}/scripts/install-tooling-deps.sh --check
 
 If still missing, explicitly list unresolved tools and ask whether to continue setup or stop for manual installation.
 
+### 2.3.3 Post-Install Re-Detection + `cwf-state.yaml` Rewrite (Required)
+
+When `Install missing now` was selected, run a full re-detection pass so `cwf-state.yaml` remains the SSOT for tool status:
+
+1. Re-run **all checks in Phase 2.1** (AI/search tools + local runtime dependencies + API key presence).
+2. Re-run **Phase 2.2** and rewrite `cwf-state.yaml` `tools:` from the re-detected results.
+3. Re-run **Phase 2.3** output reporting and label the second report as post-install results.
+
+This step is mandatory even when some dependencies remain unresolved.
+
 ---
 
 ## Phase 2.4: Codex Integration on Full Setup
@@ -917,27 +927,14 @@ Add `setup` to `cwf-state.yaml` current session's `stage_checkpoints` list.
 
 ## Rules
 
-1. **Default-enabled**: Hooks work without cwf:setup. This skill creates config for customizing (disabling specific groups).
-2. **cwf-state.yaml is SSOT**: Read before modifying. Edit, do not overwrite.
-3. **Capability index policy**: CWF capability index generation is explicit-only. `cwf:setup` does not generate it by default; use `cwf:setup --cap-index` when needed.
-4. **Repository index policy**: Repository-wide index is AGENTS-managed in this repository. `cwf:setup --repo-index` updates the AGENTS managed block.
-5. **AGENTS block policy**: Update only the managed marker block (`CWF:INDEX:START/END`) and preserve all other content.
-6. **Index content**: Pointers, not summaries. Use section heading intent + link bullets with file-level descriptions. Avoid separate `When to read`/`Role`/`Key files` labels.
-7. **Link policy**: Internal files/directories in generated index content must use Markdown links with relative targets, not inline literals.
-8. **Coverage policy**: For capability index, cover CWF inventories (skills + plugin references + hooks/scripts READMEs when present). For repository index, cover discovered repository inventories (root/docs/references + skill entry docs + hooks/scripts READMEs when present), except intentional exclusions.
-9. **Coverage validation**: Run `{SKILL_DIR}/scripts/check-index-coverage.sh` with explicit profile (`--profile cap` or `--profile repo`) and fix all missing findings.
-10. **Ignore policy**: Use .cwf-cap-index-ignore and .cwf-index-ignore only for intentional exclusions.
-11. **Bash 3.2 compatible output**: `cwf-hooks-enabled.sh` uses only `export` lines with quoted string values.
-12. **AskUserQuestion for all choices**: No batch defaults. Always ask.
-13. **Idempotent**: Re-running updates existing config, does not duplicate.
-14. **All code fences must have language specifier**: Never use bare fences.
-15. **Codex sync uses symlink + backup move**: Do not delete user files directly.
-16. **Single-entry setup UX**: `cwf:setup` must ask and apply optional integrations (Codex mode, git hook mode/profile) instead of requiring users to remember flags.
-17. **Env/project-config UX**: `cwf:setup` must detect and offer migration of legacy env keys to canonical `CWF_*` names, then offer project config bootstrap (.cwf-config.yaml, .cwf-config.local.yaml) with explicit user choice.
-18. **Agent Team UX**: `cwf:setup` must include explicit Agent Team mode setup so multi-agent skills do not silently depend on an unset runtime flag.
-19. **Dependency install UX**: When local runtime dependencies are missing, `cwf:setup` must ask whether to install now and run [scripts/install-tooling-deps.sh](scripts/install-tooling-deps.sh) on approval.
-20. **No passive missing-only report**: Missing prerequisites must end with either an install attempt or explicit manual install commands plus continue/stop choice.
-21. **Run ambiguity default must be explicit**: `cwf:setup` must expose and persist `CWF_RUN_AMBIGUITY_MODE` via Phase 2.10.
+1. **State SSOT + idempotency**: Read and edit `cwf-state.yaml` (do not overwrite wholesale), and keep reruns safe/idempotent across all phases.
+2. **Always explicit user choices**: Use AskUserQuestion for each decision point in [Phase 1](#phase-1-hook-group-selection), [Phase 2.3.1](#231-missing-dependency-install-prompt-required), [Phase 2.4](#phase-24-codex-integration-on-full-setup), [Phase 2.7](#phase-27-git-hook-gate-installation), [Phase 2.8](#phase-28-environment-migration-and-project-config-bootstrap), [Phase 2.9](#phase-29-agent-team-mode-setup), and Phase 2.10 (cwf:run ambiguity mode setup).
+3. **Post-install re-detection is mandatory**: After an install attempt, re-run [Phase 2.1](#21-check-tools) → [Phase 2.2](#22-update-cwf-stateyaml) → [Phase 2.3](#23-report-results) per [Phase 2.3.3](#233-post-install-re-detection--cwf-stateyaml-rewrite-required).
+4. **Single-entry setup UX**: Full setup (`cwf:setup`) must run optional integration prompts/actions for [Phase 2.4](#phase-24-codex-integration-on-full-setup), [Phase 2.7](#phase-27-git-hook-gate-installation), [Phase 2.8](#phase-28-environment-migration-and-project-config-bootstrap), [Phase 2.9](#phase-29-agent-team-mode-setup), and Phase 2.10 (cwf:run ambiguity mode setup).
+5. **Index generation is explicit and deterministic**: Capability index runs only via `--cap-index` ([Phase 3](#phase-3-generate-cwf-capability-index-explicit)); repository index is AGENTS-managed via `--repo-index` ([Phase 4](#phase-4-generate-repository-index-optional)).
+6. **Coverage/link policy for generated indexes**: Use Markdown relative links and pass coverage validation via [Phase 3.4](#34-capability-coverage-validation-required) and [Phase 4.4](#44-repository-coverage-validation-required), with ignore files only for intentional exclusions.
+7. **File safety**: Codex sync must use symlink + backup move (no direct user file deletion) as defined in [Phase 2.5](#phase-25-codex-user-scope-skill-sync-optional).
+8. **Formatting invariant**: All code fences in this skill must include language specifiers.
 
 ## References
 

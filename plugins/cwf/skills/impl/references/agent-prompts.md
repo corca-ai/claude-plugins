@@ -2,6 +2,13 @@
 
 Prompt template, domain detection, and dependency heuristics for cwf:impl.
 
+## Navigation
+
+- [Implementation Agent Prompt Template](#implementation-agent-prompt-template)
+- [Domain Signal Table](#domain-signal-table)
+- [Dependency Detection Heuristics](#dependency-detection-heuristics)
+- [Simple Plan Detection](#simple-plan-detection)
+
 ---
 
 ## Implementation Agent Prompt Template

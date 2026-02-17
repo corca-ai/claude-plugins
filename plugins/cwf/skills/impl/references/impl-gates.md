@@ -2,6 +2,12 @@
 
 Shared gate definitions for cwf:impl. Referenced by SKILL.md phases.
 
+## Navigation
+
+- [Branch Gate](#branch-gate)
+- [Clarify Completion Gate](#clarify-completion-gate)
+- [Commit Gate](#commit-gate)
+
 ---
 
 ## Branch Gate

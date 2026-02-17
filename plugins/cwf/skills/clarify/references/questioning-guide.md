@@ -2,6 +2,16 @@
 
 Methodology for persistent, structured questioning of humans during requirement clarification. Used in Phase 4 (default mode, T3 items) and Phase 2 (--light mode, all ambiguities).
 
+## Table of Contents
+
+- [Core Principles](#core-principles)
+- [Why-Digging](#why-digging)
+- [Tension Detection](#tension-detection)
+- [Ambiguity Categories](#ambiguity-categories)
+- [Question Design for AskUserQuestion](#question-design-for-askuserquestion)
+- [New Ambiguity Detection](#new-ambiguity-detection)
+- [Loop Termination](#loop-termination)
+
 ---
 
 ## Core Principles

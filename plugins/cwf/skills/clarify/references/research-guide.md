@@ -2,6 +2,11 @@
 
 This guide is for the **fallback research path** — used when `cwf:gather` is not available. When `cwf:gather` is available, the main SKILL.md routes research through it first.
 
+## Table of Contents
+
+- [Section 1: Codebase Research](#section-1-codebase-research)
+- [Section 2: Web / Best Practice Research](#section-2-web--best-practice-research)
+
 ---
 
 ## Section 1: Codebase Research

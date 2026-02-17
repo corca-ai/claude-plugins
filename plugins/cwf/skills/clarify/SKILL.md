@@ -51,6 +51,19 @@ live_state_file=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh resolve)
 
 Set `live.key_files` in `{live_state_file}` to files relevant to the requirement.
 
+### Phase 0.5: Resolve Session Directory
+
+Resolve the effective live-state file, then read `live.dir` before any `{session_dir}` placeholder use:
+
+```bash
+live_state_file=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh resolve)
+session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . dir)
+```
+
+```yaml
+session_dir: "{live.dir value from resolved live-state file}"
+```
+
 ### Phase 1: Capture & Decompose
 
 1. Record the original requirement verbatim
@@ -88,9 +101,8 @@ Task tool:
   subagent_type: Explore
   max_turns: 20
   prompt: |
-    Explore the codebase and report evidence relevant to these decision points.
-    For each point, search with Glob/Grep, read relevant files, and assess
-    confidence (High/Medium/Low). Cite file paths and line numbers.
+    Read `{SKILL_DIR}/references/research-guide.md` and follow
+    **Section 1: Codebase Research** exactly.
     Report evidence only — do not make decisions.
 
     Decision points:
@@ -108,18 +120,12 @@ Task tool:
   subagent_type: general-purpose
   max_turns: 20
   prompt: |
-    Research best practices for these decision points.
-
-    ## Web Research Protocol
-    Read the "Web Research Protocol" section of
-    {CWF_PLUGIN_DIR}/references/agent-patterns.md and follow it exactly.
-    Key points: discover URLs via WebSearch first (never guess URLs),
-    use WebFetch then fall back to agent-browser for JS-rendered pages,
-    skip failed domains, budget turns for writing output.
-    You have Bash access for agent-browser CLI commands.
-
-    For each point, find authoritative sources and expert perspectives.
-    Cite real published work. Report findings — do not make decisions.
+    Read `{SKILL_DIR}/references/research-guide.md` and follow
+    **Section 2: Web / Best Practice Research** exactly.
+    Also follow the "Web Research Protocol" section in
+    `{CWF_PLUGIN_DIR}/references/agent-patterns.md` for tool order
+    and fallback behavior.
+    Report findings only — do not make decisions.
 
     Decision points:
     {list from Phase 1}

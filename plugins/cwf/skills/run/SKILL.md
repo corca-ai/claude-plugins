@@ -67,6 +67,7 @@ Operational note:
      ambiguity_mode="{resolved_mode}" \
      blocking_decisions_pending="false" \
      ambiguity_decisions_file="{session directory}/run-ambiguity-decisions.md" \
+     stage_provenance_file="{session directory}/run-stage-provenance.md" \
      pipeline_override_reason="" \
      state_version="1"
    bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh list-set . \
@@ -85,6 +86,16 @@ Operational note:
 
    | Decision ID | Stage | Question | Chosen Option | Blocking | Reversible | Follow-up |
    |---|---|---|---|---|---|---|
+   EOF
+   ```
+
+1. Initialize stage provenance log file:
+
+   ```bash
+   cat > "{session directory}/run-stage-provenance.md" <<'EOF'
+   # Run Stage Provenance
+   | Stage | Skill | Args | Started At (UTC) | Finished At (UTC) | Duration (s) | Artifacts | Gate Outcome |
+   |---|---|---|---|---|---|---|---|
    EOF
    ```
 
@@ -141,6 +152,40 @@ updated_at: {ISO-8601 UTC}
 | ... | clarify | ... | ... | yes/no | yes/no | issue/pr ref or TODO |
 ```
 
+#### `explore-worktrees` operational flow
+
+When `mode=explore-worktrees` and unresolved T3 alternatives exist, use this concrete workflow:
+
+1. Create a deterministic worktree workspace under the session directory:
+
+   ```bash
+   session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . dir)
+   wt_root="$session_dir/worktrees"
+   mkdir -p "$wt_root"
+   ```
+
+1. For each alternative `{option_slug}`, create a dedicated branch + worktree:
+
+   ```bash
+   branch_name="run/t3-{decision_id}-{option_slug}"
+   worktree_path="$wt_root/{decision_id}-{option_slug}"
+   git worktree add -b "$branch_name" "$worktree_path" HEAD
+   ```
+
+1. Execute the minimal downstream validation path in each worktree (usually `plan` + `review-plan`, or targeted `impl` delta) and capture artifacts per option.
+1. Select a baseline option and record the choice in `run-ambiguity-decisions.md` (decision ID, selected branch/worktree, rationale, follow-up).
+1. Reconcile and clean up:
+   - Keep baseline changes on the main pipeline branch via merge/cherry-pick.
+   - Remove non-baseline worktrees and branches after confirming no needed uncommitted work remains:
+
+     ```bash
+     git -C "{worktree_path}" status --porcelain
+     git worktree remove --force "{worktree_path}"
+     git branch -D "run/t3-{decision_id}-{option_slug}"
+     ```
+
+   - Keep a non-baseline branch only if explicitly recorded as deferred follow-up.
+
 ### Stage Execution Loop
 
 For each stage (respecting `--from` and `--skip` flags):
@@ -175,8 +220,14 @@ For each stage (respecting `--from` and `--skip` flags):
    ```
 1. Invoke the skill using the Skill tool:
 
-   ```text
+   ```bash
+   stage_started_at=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+   stage_started_epoch=$(date -u +%s)
+   # invoke stage skill
    Skill(skill="{skill-name}", args="{args if any}")
+   stage_finished_at=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+   stage_finished_epoch=$(date -u +%s)
+   stage_duration_s=$((stage_finished_epoch - stage_started_epoch))
    ```
 
 1. If current stage is `clarify`, apply ambiguity-mode handling:
@@ -242,8 +293,29 @@ Clarify-stage exception:
 For review stages, check the verdict:
 - **Pass** or **Conditional Pass** — proceed automatically
 - **Revise** — attempt auto-fix (see Review Failure Handling)
+- **Fail** — hard-stop the pipeline; summarize blocking findings and ask the user how to proceed
 
 For non-review auto stages (impl, refactor, retro) — proceed automatically.
+
+#### Stage Provenance Checklist (Required)
+
+After gate resolution for each stage, append one row to `{session_dir}/run-stage-provenance.md` with:
+
+- `Stage`: current stage name
+- `Skill` and `Args`: invoked skill + resolved args
+- `Started At (UTC)` / `Finished At (UTC)` / `Duration (s)`
+- `Artifacts`: key output paths produced by this stage (or `—`)
+- `Gate Outcome`: `Proceed`, `Revise`, `Fail`, `Skipped`, or `User Stop`
+
+Append format:
+
+```bash
+printf '| %s | %s | %s | %s | %s | %s | %s | %s |\n' \
+  "{stage}" "{skill}" "{args}" \
+  "$stage_started_at" "$stage_finished_at" "$stage_duration_s" \
+  "{artifact_paths_or_dash}" "{gate_outcome}" \
+  >> "{session_dir}/run-stage-provenance.md"
+```
 
 ### Review Failure Handling
 
@@ -261,6 +333,14 @@ When a review returns **Revise**:
    - If still Revise: halt and ask user
 
 Maximum 1 auto-fix attempt per review stage. After that, escalate to user.
+
+When a review returns **Fail**:
+
+1. Do not auto-fix or auto-retry.
+1. Halt pipeline progression immediately.
+1. Report fail reasons with file-level references and the stage name.
+1. Ask user for an explicit decision: `Revise plan/code`, `Skip downstream stages`, or `Stop`.
+1. Keep `remaining_gates` unchanged until the user explicitly resolves the fail path.
 
 ### --from Flag
 
@@ -337,6 +417,7 @@ After all stages complete (or the pipeline is halted):
 - Plan: {path to plan.md}
 - Lessons: {path to lessons.md}
 - Retro: {path to retro.md}
+- Stage provenance: {session_dir}/run-stage-provenance.md
 - Session dir: {session_dir}
 ```
 
@@ -359,6 +440,8 @@ After all stages complete (or the pipeline is halted):
 1. **Ambiguity mode precedence**: `--ambiguity-mode` flag overrides config. Config (`CWF_RUN_AMBIGUITY_MODE`) overrides built-in default (`defer-blocking`).
 1. **Defer modes require persistence**: Any non-`strict` T3 carry-over must be recorded in `{session_dir}/run-ambiguity-decisions.md` and reflected in `live.blocking_decisions_pending`.
 1. **defer-blocking merge discipline**: If unresolved blocking debt exists, ship must treat it as merge-blocking until linked issue/PR follow-up is recorded and blocking count reaches zero.
+1. **Per-stage provenance is mandatory**: Every stage must append a provenance row with skill args, timestamps/duration, artifacts, and gate outcome.
+1. **Review `Fail` is not `Revise`**: `Fail` halts automation immediately and requires explicit user direction before any downstream stage.
 
 ## References
 

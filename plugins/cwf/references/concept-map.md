@@ -1,8 +1,8 @@
 # Concept Synchronization Map
 
-<!-- Provenance: reviewed at 12 skills, 15 hooks (S24). Source: concept-distillation.md -->
+<!-- Provenance: reviewed at 13 skills, 15 hooks (S24). Source: concept-distillation.md -->
 
-Reference for refactor agents: 6 generic concepts with verification criteria, and a 12×6 synchronization map showing which concepts each skill composes.
+Reference for refactor agents: 6 generic concepts with verification criteria, and a 13×6 synchronization map showing which concepts each skill composes.
 
 ## 1. Generic Concepts
 
@@ -166,6 +166,7 @@ Which generic concepts each skill composes:
 | review | x | | x | | | |
 | run | | | x | | | |
 | handoff | | | | | x | |
+| hitl | | | | x | x | |
 | ship | | | | | | |
 | setup | | | | | | |
 | update | | | | | | |
@@ -177,6 +178,7 @@ Which generic concepts each skill composes:
 - **Sparse row** (setup, ship, update) = infrastructure/operational skill, no generic concept synchronization
 - **Dense row** (clarify) = complex skill composing many concepts
 - **Dense column** (Agent Orchestration) = pervasive concept reused across most skills
+- `hitl` composes Decision Point (agreement round, chunk-level discussion prompts, intent-resync confirmation) and Handoff (resumable state transfer via `state.yaml`, `queue.json`, and `hitl-scratchpad.md` across pauses/resume).
 
 ## 3. Usage Guide
 

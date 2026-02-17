@@ -24,7 +24,13 @@ cwf:review --human [--base <branch>]
 
 ## State Model
 
-Persist HITL runtime state under:
+Persist HITL runtime state under `.cwf/projects/{session-dir}/hitl/` and keep `cwf-state.yaml` as pointer metadata only.
+
+Canonical schema details (field contracts, status enums, and intent-resync state transitions) live in:
+
+- [hitl-state-model.md](references/hitl-state-model.md)
+
+At minimum, keep these runtime artifacts:
 
 ```text
 .cwf/projects/{session-dir}/hitl/
@@ -34,37 +40,6 @@ Persist HITL runtime state under:
   queue.json
   fix-queue.yaml
   events.log
-```
-
-`cwf-state.yaml` stores pointer metadata only:
-
-```yaml
-live:
-  phase: hitl
-  hitl:
-    session_id: "Sxx-hitl"
-    state_file: ".cwf/projects/{session-dir}/hitl/state.yaml"
-    rules_file: ".cwf/projects/{session-dir}/hitl/rules.yaml"
-    updated_at: "YYYY-MM-DDTHH:MM:SSZ"
-```
-
-`queue.json` tracks per-file/per-chunk status for resumable delta-review:
-
-- file status: `pending | in_review | reviewed | stale`
-- chunk status: `pending | reviewed | stale`
-- each file entry stores `blob_sha` captured when the queue was built.
-- `fix-queue.yaml` is an execution queue for concrete edits.
-- `hitl-scratchpad.md` is the agreement/rationale log (decisions, open questions, and intent).
-
-`state.yaml` must include intent resync gate fields:
-
-```yaml
-session_id: "Sxx-hitl"
-status: "in_progress"
-intent_resync_required: false
-last_user_manual_edit_at: ""
-last_intent_resync_at: ""
-intent_resync_note: ""
 ```
 
 ## Phase 0: Resolve Target
@@ -101,17 +76,15 @@ When `--resume` is used, refresh the same scratchpad first (new agreements or ch
 
 This gate prevents stale intent from leaking into the next chunk.
 
-1. If the user reports manual edits/overwrites (or HITL detects out-of-band file changes), set in `state.yaml`:
-   - `intent_resync_required: true`
-   - `last_user_manual_edit_at: {UTC timestamp}`
-   - `intent_resync_note: {what changed}`
-2. Before presenting any next chunk, check `intent_resync_required`.
-3. If `true`, run resync first:
+1. Trigger condition: the user reports manual edits/overwrites, or HITL detects out-of-band file changes.
+2. On trigger, update the intent-resync fields in `state.yaml` using the contract in [hitl-state-model.md](references/hitl-state-model.md), and append the trigger to `events.log`.
+3. Before presenting any next chunk, check `intent_resync_required`.
+4. If `true`, run resync first:
    - re-read the changed target files
    - summarize what changed and confirm updated intent with the user
    - update `hitl-scratchpad.md` with the confirmed intent delta
-   - set `intent_resync_required: false` and `last_intent_resync_at: {UTC timestamp}`
-4. Only continue chunk review after the flag is cleared.
+   - clear the resync gate and set `last_intent_resync_at` per state model contract
+5. Only continue chunk review after the flag is cleared.
 
 ## Phase 1: Build Deterministic Queue
 
@@ -207,3 +180,7 @@ On `--close` (or EOF completion):
 14. Never present a next chunk while `intent_resync_required=true`.
 15. Clearing `intent_resync_required` requires both: (a) scratchpad intent update and (b) `last_intent_resync_at` timestamp update.
 16. During active HITL doc review, document edits and scratchpad state must stay synchronized; post-run checks should flag missing scratchpad updates.
+
+## References
+
+- [hitl-state-model.md](references/hitl-state-model.md) — canonical schema and lifecycle for `state.yaml`, `queue.json`, `fix-queue.yaml`, and HITL pointer metadata

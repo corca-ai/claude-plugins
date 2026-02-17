@@ -82,139 +82,50 @@ Fall back to `cwf-state.yaml` stages and user input:
 
 ## Phase 3: Generate next-session.md
 
-Write `next-session.md` in the current session artifact directory. Follow the format defined in `plan-protocol.md` (Handoff Document section).
+Write `next-session.md` in the current session artifact directory.
 
-### 9 Required Sections
+Use [plan-protocol.md](../../references/plan-protocol.md) as the canonical source:
 
-#### 1. Context Files to Read
+- `Handoff Document (milestone sessions)` for required section structure
+- `Execution Contract (Mention-Only Safe)` for mandatory contract clauses
 
-List files the next session agent must read before starting:
+Do not replicate or improvise template structure from recent examples.
 
-```markdown
-## Context Files to Read
+### 3.1 Gather Inputs (by canonical section)
 
-1. `AGENTS.md` — shared project rules and protocols (cross-agent)
-2. `docs/plugin-dev-cheatsheet.md` — plugin development patterns
-3. `cwf-state.yaml` — session history and project state
-4. `.cwf/sessions/*.claude.md` / `*.codex.md` / `*.md` (fallback: `.cwf/projects/sessions/*`) — runtime conversation evidence when available
-5. {task-specific files from master-plan or plan.md}
-```
+Prepare source material for each canonical section:
 
-Always include AGENTS.md, docs/plugin-dev-cheatsheet.md, and `cwf-state.yaml` as standard entries. Add task-specific files based on the next session's scope. Include CLAUDE.md only when Claude runtime-specific behavior is relevant.
+- Context Files to Read: from Phase 1/2 signals; always include the repository AGENTS guide, plugin development cheatsheet, and the cwf-state session state file. Include runtime logs when available. Include the Claude runtime adapter only when runtime behavior is relevant.
+- Task Scope / Dependencies / Don't Touch: from the master plan artifact when present; otherwise from Phase 2 user answers and stage context.
+- Lessons from Prior Sessions: selective aggregation from cwf-state summaries and relevant lesson artifacts only.
+- Success Criteria: concrete BDD Given/When/Then tied to actual files or behaviors.
+- Dogfooding: reference skill discovery mechanism (`skills/` directory and trigger list), not a hardcoded skill catalog.
+- Execution Contract: include all minimum clauses from [plan-protocol.md](../../references/plan-protocol.md) (mention-only execution, branch gate, commit gate, selective staging).
+- Start Command: natural-language kickoff for next session execution.
 
-#### 2. Task Scope
+### 3.2 Render next-session.md
 
-```markdown
-## Task Scope
+Render the canonical 9 sections in protocol order (no section omission):
 
-{Description of what the next session should accomplish}
+1. Context Files to Read
+2. Task Scope
+3. Don't Touch
+4. Lessons from Prior Sessions
+5. Success Criteria
+6. Dependencies
+7. Dogfooding
+8. Execution Contract (Mention-Only Safe)
+9. Start Command
 
-### What to Build
-{Specific deliverables with design points}
+If `next-session.md` already exists, edit in place instead of overwriting.
 
-### Key Design Points
-{Architectural decisions and constraints}
-```
+### 3.3 Pre-Registration Validation
 
-Source from master-plan session definition or user input (Phase 2).
+Before updating `cwf-state.yaml`, verify:
 
-#### 3. Don't Touch
-
-```markdown
-## Don't Touch
-
-- {files/directories that must not be modified}
-```
-
-Infer conservatively from:
-
-- Completed sessions' outputs (don't re-modify finished work)
-- Master-plan session boundaries
-- Explicit user constraints
-
-#### 4. Lessons from Prior Sessions
-
-```markdown
-## Lessons from Prior Sessions
-
-1. **{title}** ({session}): {takeaway}
-2. **{title}** ({session}): {takeaway}
-```
-
-Aggregate selectively from:
-
-- `cwf-state.yaml` session summaries
-- Recent sessions' `lessons.md` files
-- Only include lessons relevant to the next session's task
-
-#### 5. Success Criteria
-
-````markdown
-## Success Criteria
-
-```gherkin
-Given {context} When {action} Then {expected outcome}
-```
-````
-
-Use BDD Given/When/Then format. Criteria must be concrete — reference actual files, features, or behaviors. Avoid vague criteria like "code is clean."
-
-#### 6. Dependencies
-
-```markdown
-## Dependencies
-
-- Requires: {completed sessions or artifacts}
-- Blocks: {future sessions that depend on this work}
-```
-
-Source from master-plan dependency graph or session history.
-
-#### 7. Dogfooding Reminder
-
-```markdown
-## Dogfooding
-
-Discover available CWF skills via the plugin's `skills/` directory or
-the trigger list in skill descriptions. Use CWF skills for workflow stages
-instead of manual execution.
-```
-
-Reference the discovery mechanism from AGENTS.md Dogfooding section. Do not hardcode a list of specific skills.
-
-#### 8. Execution Contract (Mention-Only Safe)
-
-```markdown
-## Execution Contract (Mention-Only Safe)
-
-If the user mentions only this file, treat it as an instruction to execute
-the task scope directly.
-
-- Branch gate:
-  - Before implementation edits, check current branch.
-  - If on a base branch (`main`, `master`, or repo primary branch), create/switch
-    to a feature branch and continue.
-- Commit gate:
-  - Commit during execution in meaningful units (per work item or change pattern).
-  - Avoid one monolithic end-of-session commit when multiple logical units exist.
-  - After the first completed unit, run `git status --short`, confirm the next
-    commit boundary, and commit before starting the next major unit.
-- Staging policy:
-  - Stage only intended files for each commit unit.
-  - Do not use broad staging that may include unrelated changes.
-```
-
-This section is mandatory for `next-session.md`.
-
-#### 9. Start Command
-
-````markdown
-## Start Command
-
-```text
-{Natural language instruction to start the next session}
-```
-````
+- all 9 canonical sections exist
+- execution contract includes all required gates from `plan-protocol`
+- phrasing remains behavior-executable (not advisory prose only)
 
 ---
 
@@ -308,16 +219,29 @@ If "Edit and regenerate": apply user feedback, regenerate, and re-confirm.
 
 ## Phase 4: Register in cwf-state.yaml
 
-### 4.1 Update Current Session
+### 4.1 Ensure Current Session Entry Exists (Before Artifact Updates)
 
-If the current session entry exists in `cwf-state.yaml`:
+Resolve the current session entry in `cwf-state.yaml` before updating `artifacts`, `summary`, or `completed_at`:
+
+1. Find a matching session by `dir` (primary), then by `id` (fallback).
+2. If found, continue to 4.2/4.2b.
+3. If no match exists, run this explicit missing-entry branch:
+   - Draft a minimal session entry from known context:
+     `id`, `title`, `dir`, `branch`, `artifacts: []`
+     (and `stage_checkpoints: []` when used in the project).
+   - Ask user confirmation before insertion:
+     `"Create missing session entry now" | "Edit fields first" | "Cancel registration"`.
+   - If confirmed, append the entry to `sessions` and continue.
+   - If canceled, stop registration and report that artifacts were not updated.
+
+### 4.2 Update Current Session (next-session mode)
 
 - Add `next-session.md` to the `artifacts` list
 - Update `summary` if not already set
 - Set `completed_at` to today's date (via `date +%Y-%m-%d`)
 - Clear `live` section: set all scalar fields to `""` and lists to `[]`
 
-### 4.1b Register Phase Handoff (--phase mode)
+### 4.2b Register Phase Handoff (--phase mode)
 
 When `--phase` flag is used:
 
@@ -325,9 +249,10 @@ When `--phase` flag is used:
 - Do NOT set `completed_at` — the session continues into the next phase
 - Do NOT update `summary` — the session is not finished
 - Skip Phase 4b (Unresolved Items) — phase handoff is intra-session, not inter-session
-- Skip Phase 5 (Checkpoint + Verify) — `check-session.sh` checks session-end artifacts, not mid-session artifacts
+- Skip Phase 5 (Checkpoint + Verify) — `check-session.sh` checks
+  session-end artifacts, not mid-session artifacts
 
-### 4.2 Register-Only Mode
+### 4.3 Register-Only Mode
 
 When `--register` flag is used, skip Phase 3 (generation) and only update the session entry in `cwf-state.yaml`.
 
@@ -408,8 +333,9 @@ Report results. If any artifacts are missing, list them and suggest fixes.
 14. **Draft-then-review**: Always present the generated `phase-handoff.md` to the user for review before finalizing.
 15. **Execution contract is required**: `next-session.md` must include "Execution Contract (Mention-Only Safe)".
 16. **Contract must include branch+commit gates**: Mention-only execution must define base-branch escape and meaningful commit unit rules.
+17. **Missing session entry must be resolved first**: Never update `artifacts`, `summary`, or `completed_at` until a matching `sessions` entry exists (find-or-create with user confirmation).
 
 ## References
 
-- [plan-protocol.md](../../references/plan-protocol.md) — Handoff Document format (lines 105-114)
+- [plan-protocol.md](../../references/plan-protocol.md) — canonical next-session structure and execution contract
 - [agent-patterns.md](../../references/agent-patterns.md) — Single pattern

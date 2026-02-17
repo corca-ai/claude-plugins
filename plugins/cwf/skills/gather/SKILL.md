@@ -55,7 +55,7 @@ Scan input for all URLs. Classify each by pattern table (most specific first):
 {SKILL_DIR}/scripts/g-export.sh <url> [format] [output-dir]
 ```
 
-**Prerequisites**: Public documents only (Share > Publish to web). Sheets default to TOON format — `g-export.sh` converts CSV via [scripts/csv-to-toon.sh](scripts/csv-to-toon.sh). See [references/TOON.md](references/TOON.md). Details: [references/google-export.md](references/google-export.md)
+Prerequisites and format caveats live in [references/google-export.md](references/google-export.md). TOON behavior for Sheets is defined in [references/TOON.md](references/TOON.md).
 
 ### Slack Export
 
@@ -70,7 +70,7 @@ node {SKILL_DIR}/scripts/slack-api.mjs <channel_id> <thread_ts> --attachments-di
 
 After conversion, rename to a meaningful name from the first message (lowercase, hyphens, max 50 chars). **Existing .md file**: Extract Slack URL from `> Source:` line to re-fetch.
 
-**Prerequisites**: Node.js 18+, Slack Bot (`channels:history`, `channels:join`, `users:read`, `files:read`), `SLACK_BOT_TOKEN` in shell profile (`~/.zshrc`/`~/.bashrc`). Details: [references/slack-export.md](references/slack-export.md)
+Prerequisites, token setup, and error recovery are defined in [references/slack-export.md](references/slack-export.md).
 
 ### Notion Export
 
@@ -78,7 +78,7 @@ After conversion, rename to a meaningful name from the first message (lowercase,
 python3 {SKILL_DIR}/scripts/notion-to-md.py "$URL" "$OUTPUT_PATH"
 ```
 
-**Prerequisites**: Page must be **published to the web**. Python 3.7+. **Limitations**: Sub-pages → `<!-- missing block -->`, images URL-only (S3 expires), no database views. Details: [references/notion-export.md](references/notion-export.md)
+Publication requirements and known limitations are defined in [references/notion-export.md](references/notion-export.md).
 
 ### GitHub
 
@@ -115,19 +115,43 @@ State: {{.state}} | Author: {{.author.login}}
 
 ### Generic URL
 
-For URLs that don't match any known service:
+For URLs that don't match any known service, run this deterministic routine:
 
-1. **Try `extract.sh`** (Tavily extract) if `TAVILY_API_KEY` is likely set:
+1. **Resolve paths**:
+   - `slug`: sanitized title/url token (lowercase, spaces to hyphens, remove special characters, max 50 chars)
+   - `output_md`: `{OUTPUT_DIR}/{slug}.md`
+   - `output_meta`: `{OUTPUT_DIR}/{slug}.meta.yaml`
+
+2. **Try Tavily extract first**:
    ```bash
-   {SKILL_DIR}/scripts/extract.sh "<url>"
+   {SKILL_DIR}/scripts/extract.sh "<url>" > "{output_md}.tmp"
    ```
-   If extraction succeeds, save to `{OUTPUT_DIR}/{sanitized-title}.md`.
+   - Success contract: exit code `0` and temp file has non-whitespace content.
+   - On success: move temp file to `{output_md}` and set metadata `method: tavily-extract`.
+   - If `TAVILY_API_KEY` is missing or extraction fails, continue to Step 3.
 
-2. **Fallback to WebFetch** if no `TAVILY_API_KEY` or extraction fails:
-   - Use WebFetch tool to download the page content.
-   - Save the result as markdown to `{OUTPUT_DIR}/{sanitized-title}.md`.
+3. **WebFetch fallback (single fixed procedure)**:
+   - Run one Task call with this exact prompt contract:
+     ```text
+     Fetch this URL with WebFetch: <url>
+     Return markdown only (preserve headings, lists, and links).
+     If content cannot be retrieved, return exactly: WEBFETCH_EMPTY
+     ```
+   - If the result is not `WEBFETCH_EMPTY`, save it to `{output_md}` and set metadata `method: webfetch-fallback`.
 
-Sanitize title: lowercase, spaces to hyphens, remove special characters, max 50 chars.
+4. **Empty-output handling**:
+   - Treat as failure when `{output_md}` is missing, whitespace-only, or the fallback response equals `WEBFETCH_EMPTY`.
+   - On failure, do not keep partial markdown output.
+
+5. **Metadata capture (always required)**:
+   - Write `{output_meta}` with at least:
+     - `source_url`
+     - `retrieved_at_utc` (ISO 8601 UTC)
+     - `handler: generic`
+     - `method` (`tavily-extract` or `webfetch-fallback`)
+     - `status` (`success` or `failed`)
+     - `output_file` (empty when failed)
+     - `failure_reason` (when failed)
 
 ---
 
@@ -174,16 +198,38 @@ Queries are sent to external search services. Do not include confidential code o
 
 Explore the local codebase for a topic and save structured results.
 
-### Execution
+### Task Output Contract
 
-1. Launch a sub-agent:
-   ```text
-   Task(subagent_type="general-purpose", prompt="Explore this codebase for: <query>. Use Glob, Grep, and Read to find relevant code, patterns, and architecture. Return a structured markdown summary with: ## Overview, ## Key Files, ## Code Patterns, ## Notable Details. Be thorough but concise.")
-   ```
-2. Save sub-agent output to `{OUTPUT_DIR}/local-{sanitized-query}.md`
-3. Report file location to user
+Input mapping:
+- `query_raw`: original `--local` argument
+- `query_slug`: sanitized query token (lowercase, spaces to hyphens, remove special characters, max 50 chars)
+- `output_md`: `{OUTPUT_DIR}/local-{query_slug}.md`
+- `output_meta`: `{OUTPUT_DIR}/local-{query_slug}.meta.yaml`
 
-Sanitize query for filename: lowercase, spaces to hyphens, remove special characters, max 50 chars.
+Task prompt contract:
+
+```text
+Explore this codebase for: <query_raw>.
+Use Glob, Grep, and Read to find relevant code, patterns, and architecture.
+Return a structured markdown summary with:
+## Overview
+## Key Files
+## Code Patterns
+## Notable Details
+Include file paths and line references where possible.
+Write your complete output to: <output_md>
+The file MUST exist when you finish and must end with: <!-- AGENT_COMPLETE -->
+```
+
+Execution and failure handling:
+1. Run Task once using the prompt contract above.
+2. Validate output contract (`output_md` exists, has non-whitespace content, and ends with `<!-- AGENT_COMPLETE -->`).
+3. If invalid or Task fails, retry once with the same input and explicit correction.
+4. If retry still fails, stop local gather for this query and report failure clearly.
+
+Provenance metadata guidance:
+- Always write `output_meta` with: `mode: local`, `query_raw`, `query_slug`, `subagent_type`, `attempts`, `status`, `output_md` (if any), `generated_at_utc`.
+- When failed, include `failure_reason` and preserve diagnostics from the last Task run.
 
 ---
 

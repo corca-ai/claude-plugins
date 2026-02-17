@@ -2,6 +2,12 @@
 
 Reference for `/review` skill. Each reviewer receives their role section plus the mode-specific checklist below.
 
+## Table of Contents
+
+- [Reviewer Output Format (required)](#reviewer-output-format-required)
+- [Security Reviewer](#security-reviewer)
+- [UX/DX Reviewer](#uxdx-reviewer)
+
 ## Reviewer Output Format (required)
 
 Every reviewer MUST structure output as follows:

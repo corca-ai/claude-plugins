@@ -75,9 +75,18 @@ Apply the [Clarify Completion Gate](references/impl-gates.md#clarify-completion-
 
 If an explicit path was provided, use it. Otherwise:
 
-1. Scan `.cwf/projects/*/plan.md` using Glob
-2. Sort by directory name (most recent date-sequence first)
-3. Select the most recent `plan.md`
+1. Scan `.cwf/projects/*/plan.md` using Glob.
+1. Rank candidates with this priority (highest first):
+   - **Session pin from live state**: if `plan.md` exists inside `live.dir` from the resolved live-state file, prefer it.
+   - **Plan metadata timestamp**: newest parseable ISO-8601 from plan metadata/frontmatter (`updated_at`, `created_at`, `generated_at`, `date`).
+   - **Filesystem timestamp**: newest `plan.md` modification time.
+   - **Directory name order**: use only as a final deterministic tiebreaker after timestamp signals.
+1. Select the top-ranked candidate only when it is unambiguous.
+
+Ambiguity behavior (fail-closed):
+- If two or more candidates tie on all available ranking signals, stop and ask the user for an explicit path.
+- If metadata timestamps are missing/invalid for all tied candidates and file mtimes are identical, stop and ask the user for an explicit path.
+- Never silently pick a plan based only on lexicographic directory naming when chronology is ambiguous.
 
 If no plan is found, report to the user and stop:
 

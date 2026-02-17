@@ -35,6 +35,27 @@ Parse the user's input:
 | `--skill --holistic` or `--holistic` | Holistic Analysis |
 | `--docs` | Docs Review |
 
+## Provenance Sidecars (Required)
+
+Before using any criteria document, verify its provenance sidecar against the current live repository state (current skill/hook counts).
+
+| Criteria | Provenance sidecar |
+|----------|--------------------|
+| [review-criteria.md](references/review-criteria.md) | [review-criteria.provenance.yaml](references/review-criteria.provenance.yaml) |
+| [holistic-criteria.md](references/holistic-criteria.md) | [holistic-criteria.provenance.yaml](references/holistic-criteria.provenance.yaml) |
+| [docs-criteria.md](references/docs-criteria.md) | [docs-criteria.provenance.yaml](references/docs-criteria.provenance.yaml) |
+
+Verification command:
+
+```bash
+bash {CWF_PLUGIN_DIR}/scripts/provenance-check.sh --level inform --json
+```
+
+Provenance verification rules:
+- Confirm the mode-relevant sidecar entry exists in the checker output.
+- Compare sidecar `skill_count`/`hook_count` with checker `current.skills`/`current.hooks`.
+- If the sidecar is missing or stale, continue review but prepend a **Provenance Warning** and include the delta in the report.
+
 ---
 
 ## Quick Scan Mode (no args)
@@ -152,11 +173,21 @@ If not found, report error and stop.
 
 Read the SKILL.md and all files in `references/`, `scripts/`, and `assets/` directories.
 
-### 3. Load review criteria
+### 3. Verify criteria provenance
+
+Run provenance verification before loading deep-review criteria:
+
+```bash
+bash {CWF_PLUGIN_DIR}/scripts/provenance-check.sh --level inform --json
+```
+
+Confirm the output includes [review-criteria.provenance.yaml](references/review-criteria.provenance.yaml). If its status is stale, continue but mark the final report with a provenance warning (include the skill/hook deltas).
+
+### 4. Load review criteria
 
 Read `{SKILL_DIR}/references/review-criteria.md` for the evaluation checklist.
 
-### 4. Parallel Evaluation with Sub-agents
+### 5. Parallel Evaluation with Sub-agents
 
 **Resolve session directory**: Resolve the effective live-state file, then read `live.dir`.
 
@@ -204,7 +235,7 @@ Prompt includes:
 
 Both agents analyze and report; neither modifies files.
 
-### 5. Produce report
+### 6. Produce report
 
 Read result files from the session directory (`{session_dir}/refactor-deep-structural-{skill_suffix}.md`, `{session_dir}/refactor-deep-quality-{skill_suffix}.md`). Merge both agents' findings into a unified report:
 
@@ -229,7 +260,7 @@ Read result files from the session directory (`{session_dir}/refactor-deep-struc
 2. Each with effort estimate (small/medium/large)
 ```
 
-### 6. Offer to apply
+### 7. Offer to apply
 
 Ask the user if they want to apply any suggestions. If yes, implement the refactorings.
 
@@ -248,11 +279,21 @@ Read every SKILL.md and hooks.json across:
 
 Build a condensed inventory map: plugin name, type (skill/hook/hybrid), word count, capabilities, dependencies.
 
-### 2. Load analysis framework
+### 2. Verify criteria provenance
+
+Run provenance verification before loading holistic criteria:
+
+```bash
+bash {CWF_PLUGIN_DIR}/scripts/provenance-check.sh --level inform --json
+```
+
+Confirm the output includes [holistic-criteria.provenance.yaml](references/holistic-criteria.provenance.yaml). If stale, continue analysis but include a provenance warning and delta summary in the report.
+
+### 3. Load analysis framework
 
 Read `{SKILL_DIR}/references/holistic-criteria.md` for the three analysis axes.
 
-### 3. Parallel Analysis with Sub-agents
+### 4. Parallel Analysis with Sub-agents
 
 **Resolve session directory**: Resolve the effective live-state file, then read `live.dir`.
 
@@ -302,7 +343,7 @@ Prompt includes:
 
 All 3 agents analyze and report; none modify files.
 
-### 4. Produce report
+### 5. Produce report
 
 Read result files from the session directory (`{session_dir}/refactor-holistic-convention.md`, `{session_dir}/refactor-holistic-concept.md`, `{session_dir}/refactor-holistic-workflow.md`). Merge 3 agents' outputs into a unified report. Save to `{REPO_ROOT}/.cwf/projects/{YYMMDD}-refactor-holistic/analysis.md`. Create the directory if it doesn't exist (use next sequence number if date prefix already exists).
 
@@ -330,7 +371,7 @@ Report structure:
 (table: priority, action, effort, impact, affected plugins)
 ```
 
-### 5. Discuss
+### 6. Discuss
 
 Present the report summary. The user may want to discuss findings, adjust priorities, or plan implementation sessions. Update the report with discussion outcomes.
 
@@ -362,6 +403,16 @@ Use tool output as the source of truth for lint-level issues.
 
 - If a tool is unavailable, report a tooling gap and continue with best-effort semantic review.
 - Do not restate lint-level findings manually unless you add repository-level interpretation or restructuring impact.
+
+### 1.5 Verify docs criteria provenance
+
+Before semantic checks that rely on docs criteria, run:
+
+```bash
+bash {CWF_PLUGIN_DIR}/scripts/provenance-check.sh --level inform --json
+```
+
+Confirm [docs-criteria.provenance.yaml](references/docs-criteria.provenance.yaml) is present and fresh against current skill/hook counts. If stale, continue review but include a provenance warning in the final docs report.
 
 ### 2. Agent Entry Docs Review
 
@@ -453,5 +504,8 @@ Present as a concrete restructuring proposal with rationale.
 - Concept synchronization map: [concept-map.md](../../references/concept-map.md)
 - Tidying techniques for --code mode: [references/tidying-guide.md](references/tidying-guide.md)
 - Docs review criteria: [references/docs-criteria.md](references/docs-criteria.md)
+- Provenance sidecar (deep criteria): [references/review-criteria.provenance.yaml](references/review-criteria.provenance.yaml)
+- Provenance sidecar (holistic criteria): [references/holistic-criteria.provenance.yaml](references/holistic-criteria.provenance.yaml)
+- Provenance sidecar (docs criteria): [references/docs-criteria.provenance.yaml](references/docs-criteria.provenance.yaml)
 - Shared agent patterns: [agent-patterns.md](../../references/agent-patterns.md)
 - Skill conventions checklist: [skill-conventions.md](../../references/skill-conventions.md)

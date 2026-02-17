@@ -133,10 +133,10 @@ Gate behavior after Batch 1:
 
 **Batch 2** — launch in a single message with 2 parallel Task calls (after Batch 1, only for agents whose result files are missing or invalid):
 
-- **Agent C — Expert alpha**: `subagent_type: general-purpose`, `max_turns: 20`. Prompt: "Read `{CWF_PLUGIN_DIR}/references/expert-advisor-guide.md`. You are Expert α, operating in **retro mode**. Session summary: {Sections 1-4 summary, including CDM results from Agent A}. Deep-clarify experts: {names or 'not available'}. Analyze through your framework. Use web search to verify expert identity and cite published work (follow Web Research Protocol in {CWF_PLUGIN_DIR}/references/agent-patterns.md; you have Bash access for agent-browser fallback). Output your Expert α section. **Output Persistence**: Write your complete analysis to: `{session_dir}/retro-expert-alpha.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`"
-- **Agent D — Expert beta**: `subagent_type: general-purpose`, `max_turns: 20`. Prompt: "Read `{CWF_PLUGIN_DIR}/references/expert-advisor-guide.md`. You are Expert β, operating in **retro mode**. Session summary: {Sections 1-4 summary, including CDM results from Agent A}. Deep-clarify experts: {names or 'not available'}. Analyze through your framework. Use web search to verify expert identity and cite published work (follow Web Research Protocol in {CWF_PLUGIN_DIR}/references/agent-patterns.md; you have Bash access for agent-browser fallback). Output your Expert β section. **Output Persistence**: Write your complete analysis to: `{session_dir}/retro-expert-beta.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`"
+- **Agent C — Expert alpha**: `subagent_type: general-purpose`, `max_turns: 20`. Prompt: "Read `{CWF_PLUGIN_DIR}/references/expert-advisor-guide.md` and `{SKILL_DIR}/references/expert-lens-guide.md`. You are Expert α, operating in **retro mode**. Session summary: {Sections 1-4 summary, including CDM results from Agent A}. Deep-clarify experts: {names or 'not available'}. Analyze through your framework. Use web search to verify expert identity and cite published work (follow Web Research Protocol in {CWF_PLUGIN_DIR}/references/agent-patterns.md; you have Bash access for agent-browser fallback). Output your Expert α section. **Output Persistence**: Write your complete analysis to: `{session_dir}/retro-expert-alpha.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`"
+- **Agent D — Expert beta**: `subagent_type: general-purpose`, `max_turns: 20`. Prompt: "Read `{CWF_PLUGIN_DIR}/references/expert-advisor-guide.md` and `{SKILL_DIR}/references/expert-lens-guide.md`. You are Expert β, operating in **retro mode**. Session summary: {Sections 1-4 summary, including CDM results from Agent A}. Deep-clarify experts: {names or 'not available'}. Analyze through your framework. Use web search to verify expert identity and cite published work (follow Web Research Protocol in {CWF_PLUGIN_DIR}/references/agent-patterns.md; you have Bash access for agent-browser fallback). Output your Expert β section. **Output Persistence**: Write your complete analysis to: `{session_dir}/retro-expert-beta.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`"
 
-After Batch 2: read output files from session directory (`{session_dir}/retro-expert-alpha.md`, `{session_dir}/retro-expert-beta.md`). Draft Section 7 inline (capability/tool scan), then integrate all results into retro.md.
+After Batch 2: read output files from session directory (`{session_dir}/retro-expert-alpha.md`, `{session_dir}/retro-expert-beta.md`). Draft Section 5 with the required agreement/disagreement synthesis subsection, then draft Section 7 inline (capability/tool scan), then integrate all results into retro.md.
 
 Gate behavior after Batch 2:
 - If either expert file remains invalid after retry: continue with warning and
@@ -186,9 +186,14 @@ Identify 2-4 critical decision moments from the session. Apply CDM probes to eac
 
 Condition: Does the session contain decisions that domain experts would analyze differently? If the session is too lightweight (simple config changes, routine tasks), skip this section with a brief note.
 
-**Expert selection**: Follow the Expert Selection rules in `{CWF_PLUGIN_DIR}/references/expert-advisor-guide.md` (read `expert_roster` from `cwf-state.yaml`, match domain, select 2 with contrast, fill gaps independently). If the conversation includes `/deep-clarify` or `cwf:clarify` expert names, use them as preferred starting points per the retro mode override.
+**Expert selection**: Follow the Expert Selection rules in `{CWF_PLUGIN_DIR}/references/expert-advisor-guide.md` and the retro-specific constraints in `{SKILL_DIR}/references/expert-lens-guide.md` (read `expert_roster` from `cwf-state.yaml`, match domain, select 2 with contrast, fill gaps independently). If the conversation includes `/deep-clarify` or `cwf:clarify` expert names, use them as preferred starting points per the retro mode override.
 
 **Execution** (deep mode): Produced by Agent C (Expert alpha) and Agent D (Expert beta) from Batch 2. Integrate both results into Section 5.
+
+**Agreement/Disagreement synthesis (required)**: Add `### Agreement and Disagreement Synthesis` under Section 5 with:
+- 2-4 shared conclusions across Expert α/β
+- 1-3 explicit disagreements with underlying assumption differences
+- a synthesis decision: what to adopt now, what to defer, and what evidence would resolve the disagreement
 
 #### Section 6: Learning Resources
 
@@ -387,28 +392,17 @@ Do not prompt the user to start this discussion.
 
 ## Rules
 
-1. Never duplicate content already in lessons.md
-2. Be specific — cite session moments, not generic advice
-3. Keep each section focused — if nothing to say, state that briefly
-4. AGENTS.md/runtime adapter changes require explicit user approval
-5. If early session context is unavailable due to conversation length, focus on what is visible and note the limitation
-6. CDM analysis (Section 4) is unconditional — every session has decisions to analyze
-7. Expert Lens (Section 5) is deep-mode only — in light mode, output a one-line pointer to `--deep`
-8. Learning Resources (Section 6) is deep-mode only — in light mode, output a one-line pointer to `--deep`
-9. Section 7 always inventories installed capabilities first (skills + deterministic repo tools), before suggesting new external tools
-10. When writing code fences in retro.md or any markdown output, always include a language specifier (`bash`, `json`, `yaml`, `text`, `markdown`, etc.). Never use bare code fences.
-11. In deep mode, analysis sections (CDM, Expert Lens, Learning Resources) run as parallel sub-agents in two batches. Do not run them inline.
-12. Persist findings follow the eval > state > doc hierarchy. Never suggest adding a doc rule when a deterministic check is possible.
-13. Read cwf-state.yaml (if it exists) during artifact reading to understand project lifecycle context.
-14. Apply stage-tier persistence gates in deep mode: CDM output hard-fails when invalid after bounded retry; Expert/Learning outputs use warning + explicit omission notes.
-15. Deep mode contract must be mode-accurate: if retro.md is labeled `Mode: deep`, ensure all four deep artifact files exist and each ends with `<!-- AGENT_COMPLETE -->`; otherwise downgrade to light mode with explicit reason.
-16. In deep mode, Section 6 must include external web resources (URLs) discovered during this run; internal repository docs can only be supplemental.
-17. If Section 7 includes a skill-gap branch, run `/find-skills` first and record command/result (or explicit tool-unavailable evidence).
-18. `retro-collect-evidence.sh` is the default evidence path; include its output (`retro-evidence.md`) in the evidence set when available.
-19. If retro is directly invoked by the user (not run-chain), the assistant response must include both `Retro Brief` and `Persist Proposals`; do not end with file-write confirmation only.
+1. Never duplicate content already in lessons.md.
+2. Be specific — cite session moments, not generic advice.
+3. Keep each section focused; if there is no meaningful signal, state that briefly.
+4. AGENTS.md/runtime adapter changes require explicit user approval.
+5. Use the deterministic gate checklist in [retro-gates-checklist.md](references/retro-gates-checklist.md) for deep-mode artifacts, persistence tiering, and direct-invocation reporting requirements.
+6. For Section 5 in deep mode, use `{SKILL_DIR}/references/expert-lens-guide.md` and include the mandatory agreement/disagreement synthesis subsection.
 
 ## References
 
 - `{SKILL_DIR}/references/cdm-guide.md` — CDM probe methodology and output format
+- `{SKILL_DIR}/references/expert-lens-guide.md` — Retro-specific expert lens constraints and output format
+- [retro-gates-checklist.md](references/retro-gates-checklist.md) — Deterministic retro artifact gates and reporting checklist
 - [expert-advisor-guide.md](../../references/expert-advisor-guide.md) — Expert identity, grounding, selection, and retro mode format
 - [agent-patterns.md](../../references/agent-patterns.md) — Shared agent orchestration patterns

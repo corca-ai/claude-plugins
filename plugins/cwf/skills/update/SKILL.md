@@ -22,13 +22,19 @@ cwf:update --check       # Version check only, no install
 
 ### 1.1 Find Current Version
 
-Locate the installed plugin.json using Glob:
+Locate the installed plugin.json using Glob and resolve deterministic baseline variables:
 
-```text
-~/.claude/plugins/cache/*/cwf/*/.claude-plugin/plugin.json
+```bash
+current_plugin_json="$(ls -1dt ~/.claude/plugins/cache/*/cwf/*/.claude-plugin/plugin.json 2>/dev/null | head -n1)"
+[ -n "$current_plugin_json" ] || {
+  echo "CWF is not installed."
+  exit 1
+}
+current_plugin_root="$(dirname "$(dirname "$current_plugin_json")")"
+current_version="$(jq -r '.version' "$current_plugin_json")"
 ```
 
-Read the `version` field. If not found, report that CWF is not installed and suggest installing via marketplace.
+If not found, report that CWF is not installed and suggest installing via marketplace.
 
 ### 1.2 Update Marketplace
 
@@ -40,7 +46,13 @@ claude plugin marketplace update corca-plugins
 
 ### 1.3 Compare Versions
 
-After marketplace update, check if the latest available version differs from the installed version. Read the source plugin.json from the marketplace cache or re-check after update.
+After marketplace update, resolve latest metadata and compare:
+
+```bash
+latest_plugin_json="$(ls -1dt ~/.claude/plugins/cache/*/cwf/*/.claude-plugin/plugin.json 2>/dev/null | head -n1)"
+latest_plugin_root="$(dirname "$(dirname "$latest_plugin_json")")"
+latest_version="$(jq -r '.version' "$latest_plugin_json")"
+```
 
 Report the comparison:
 
@@ -50,6 +62,8 @@ Latest version:  0.7.0
 ```
 
 If versions match, report "CWF is up to date" and skip Phase 2.
+
+Persist these variables for Phase 3 diffing: `current_plugin_root`, `latest_plugin_root`, `current_version`, `latest_version`.
 
 ---
 
@@ -83,12 +97,35 @@ CWF updated to {version}. Restart Claude Code for changes to take effect.
 
 ## Phase 3: Changelog Summary
 
-After a successful update (or when showing version diff):
+After a successful update (or when showing version diff), generate summary deterministically with explicit commands:
 
-1. Read CHANGELOG.md in the plugin source if it exists
-2. Summarize changes between old and new version
-3. If no changelog exists, list new/modified skills by comparing directory
-   structure
+1. Build file-change inventory between old/new plugin trees:
+
+```bash
+git --no-pager diff --no-index --name-status "$current_plugin_root" "$latest_plugin_root" || true
+```
+
+1. Diff the changelog file first (preferred release-note source):
+
+```bash
+git --no-pager diff --no-index \
+  "$current_plugin_root/CHANGELOG.md" \
+  "$latest_plugin_root/CHANGELOG.md" || true
+```
+
+1. Diff README for user-facing usage/entrypoint changes, then summarize purpose explicitly:
+
+```bash
+git --no-pager diff --no-index \
+  "$current_plugin_root/README.md" \
+  "$latest_plugin_root/README.md" || true
+```
+
+1. Summary procedure:
+   - If changelog diff exists, summarize changes between `{current_version}` and `{latest_version}` from that diff first.
+   - Add notable `SKILL.md`/script/manifest changes from the name-status diff.
+   - Add README delta summary as "user-facing setup/usage guidance changes".
+   - If changelog is absent on both sides, state that explicitly and rely on deterministic file diff evidence.
 
 ---
 
@@ -109,4 +146,5 @@ Add `update` to `cwf-state.yaml` current session's `stage_checkpoints` list if l
 
 ## References
 
+- [README.md](README.md) — File-map entry for this skill directory (not release notes)
 - [agent-patterns.md](../../references/agent-patterns.md) — Single pattern

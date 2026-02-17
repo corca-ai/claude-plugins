@@ -2,6 +2,14 @@
 
 Reference for `/review` skill — provider-routed external CLI slots (Codex/Gemini, with Claude Task fallback handled in SKILL.md). These complement the internal reviewers in `prompts.md`.
 
+## Table of Contents
+
+- [Correctness Perspective (default provider: Codex)](#correctness-perspective-default-provider-codex)
+- [Architecture Perspective (default provider: Gemini)](#architecture-perspective-default-provider-gemini)
+- [CLI Invocation Templates](#cli-invocation-templates)
+- [Fallback Prompt Template](#fallback-prompt-template)
+- [External Provenance Variants](#external-provenance-variants)
+
 ---
 
 ## Correctness Perspective (default provider: Codex)

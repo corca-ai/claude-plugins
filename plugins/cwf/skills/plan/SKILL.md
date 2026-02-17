@@ -211,75 +211,32 @@ Before finalizing Steps, assess whether preparatory refactoring is needed:
    - This reduces edit surface for subsequent steps and improves commit independence
 3. If no files meet the threshold: proceed normally
 
-### Required Plan Sections
+### Plan Structure Contract
 
-````markdown
-# {Plan Title}
+Use [`plan-protocol.md`](../../references/plan-protocol.md) as the single source of truth for:
 
-## Context
-{Why this plan exists, background information}
+- Required plan/lesson sections
+- Success criteria baseline structure
+- Artifact location and creation timing
+- `lessons.md` format and language policy
 
-## Goal
-{Precise description of the desired outcome}
+Keep only these skill-specific additions in the generated plan:
 
-## Scope
-{What is included and excluded}
+1. Add a required `## Commit Strategy` section:
+   - **Per step** (default for modular changes)
+   - **Per change pattern** (for cross-cutting changes)
+   - **Custom** (explicit commit boundaries + rationale)
+1. Keep Success Criteria in the two-layer format:
+   - **Behavioral (BDD)** scenarios
+   - **Qualitative** non-functional criteria
+1. Expand `## Decision Log` to include evidence/source and resolution metadata:
 
-## Commit Strategy
-{How changes should be committed — one of:}
-- **Per step**: Each step gets its own commit (default for modular changes)
-- **Per change pattern**: Group commits by concept when cross-cutting
-- **Custom**: Explicit commit boundaries with rationale
+   | # | Decision Point | Evidence / Source (artifact or URL + confidence) | Alternatives Considered | Resolution | Status | Resolved By | Resolved At (UTC) |
+   |---|----------------|---------------------------------------------------|-------------------------|------------|--------|-------------|-------------------|
+   | 1 | ... | ... | ... | ... | open/resolved | ... | ... |
 
-If not specified, default to **one commit per Step**.
-
-## Steps
-1. {Step with clear deliverable}
-2. {Step with clear deliverable}
-...
-
-## Success Criteria
-
-Two-layer format:
-
-### Behavioral (BDD)
-
-```gherkin
-Given [context] When [action] Then [expected outcome]
-```
-
-### Qualitative
-
-- {Quality attribute or non-functional requirement}
-- {Maintainability, readability, or other quality concern}
-
-## Files to Create/Modify
-
-| File | Action | Purpose |
-|------|--------|---------|
-| ... | Create/Edit | ... |
-
-## Decision Log
-
-| # | Decision | Rationale | Alternatives Considered |
-|---|----------|-----------|------------------------|
-| 1 | ... | ... | ... |
-
-## Don't Touch
-
-- {Files or areas explicitly out of scope}
-
-## Deferred Actions
-
-- [ ] {Items to handle later}
-````
-
-### Success Criteria Format
-
-Always use the **two-layer format**:
-
-1. **Behavioral (BDD)** — concrete, testable scenarios in Given/When/Then
-2. **Qualitative** — non-functional qualities that are important but harder to test mechanically (e.g., "Plan is understandable without prior context", "Solution follows existing codebase patterns")
+   - `Status=open`: leave `Resolution`, `Resolved By`, and `Resolved At` as `TBD`.
+   - `Status=resolved`: cite concrete evidence (e.g., `plan-codebase-analysis.md`, `plan-prior-art-research.md`, URL).
 
 ### Research Integration
 
@@ -299,25 +256,11 @@ Write two files:
 
 ### plan.md
 
-The complete plan from Phase 3, following all plan-protocol.md requirements.
+Write the complete plan from Phase 3, following `plan-protocol.md` and the skill-specific additions above (`Commit Strategy`, expanded `Decision Log`).
 
 ### lessons.md
 
-Initialize with any learnings from the planning process:
-
-Write `lessons.md` in the user's language, following the shared structure:
-
-```markdown
-# Lessons — {title}
-
-### {learning title}
-
-- **Expected**: {what was anticipated}
-- **Actual**: {what was discovered}
-- **Takeaway**: {key insight}
-```
-
-If no learnings yet, create with a header and note that learnings will be accumulated during implementation.
+Initialize `lessons.md` using the shared format in `plan-protocol.md` (user language). If no learnings exist yet, create the file with a header and a short placeholder note.
 
 ## Phase 5: Review Offer
 
