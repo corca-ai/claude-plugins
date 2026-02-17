@@ -390,6 +390,13 @@ sessions:
     branch: "marketplace-v3"
     artifacts: [plan.md, lessons.md]
 
+
+  - id: "S260217-05"
+    title: "full-skill-refactor-run"
+    dir: ".cwf/projects/260217-05-full-skill-refactor-run"
+    branch: "marketplace-v3"
+    artifacts: [plan.md, lessons.md]
+
 tools:
   codex: available
   gemini: available
@@ -414,15 +421,12 @@ hooks:
 # read by SessionStart(compact) hook for context recovery after auto-compact.
 # check-session.sh --live validates required fields are populated.
 live:
-  session_id: "S260217-04"
-  dir: ".cwf/projects/260217-04-refactor-review-prevention-hardening"
-  branch: "feat/260217-04-hardening-deferred-all"
-  phase: "ship"
-  task: "Complete review-code+refactor+retro and prepare ship docs (no issue/pr execution)"
-  key_files:
-    - README.ko.md
-    - .cwf/projects/260216-03-hitl-readme-restart/next-session.md
-    - .cwf/projects/260216-03-hitl-readme-restart/hitl/hitl-scratchpad.md
+  session_id: "S260217-05"
+  dir: ".cwf/projects/260217-05-full-skill-refactor-run"
+  branch: "marketplace-v3"
+  phase: "gather"
+  task: "Run full cwf:run refactor across all skills before deploy"
+  key_files: []
   decisions: []
   decision_journal: []
   hitl:
@@ -431,14 +435,21 @@ live:
     rules_file: ".cwf/projects/260216-03-hitl-readme-restart/hitl/rules.yaml"
     updated_at: "2026-02-16T02:42:35Z"
 
-  state_file: ".cwf/projects/260217-04-refactor-review-prevention-hardening/session-state.yaml"
-  remaining_gates: []
-  state_version: "3"
+  state_file: ".cwf/projects/260217-05-full-skill-refactor-run/session-state.yaml"
+  remaining_gates:
+    - "review-code"
+    - "refactor"
+    - "retro"
+    - "ship"
+  state_version: "4"
   worktree_root: "/home/hwidong/codes/claude-plugins"
-  worktree_branch: "feat/260217-04-hardening-deferred-all"
+  worktree_branch: "marketplace-v3"
   active_pipeline: "cwf:run"
-  user_directive: "cwf:run .cwf/projects/260217-03-refactor-review-prevention-impl/next-session.md"
+  user_directive: "토큰이 많이 들어도 상관없으니 서브에이전트와 외부 에이전트 최대한 활용하여 이 리포의 모든 skill에 대해 refactor 돌리고 싶습니다. gemini 제외하면 외부 에이전트는 여러 개 써도 됩니다. 리팩토링을 위한 계획부터 탐색까지 모두 cwf:run으로 하고, 발견한 것도 cwf:run 으로 고치기. 중간 결과 하나하나 모두 파일로 저장하고 적절히 커밋하면서 진행."
   pipeline_override_reason: ""
+  ambiguity_mode: "defer-blocking"
+  blocking_decisions_pending: "false"
+  ambiguity_decisions_file: ".cwf/projects/260217-05-full-skill-refactor-run/run-ambiguity-decisions.md"
 # Expert roster for domain expert sub-agents (used by clarify, review, retro)
 # Semi-automatic evolution: usage_count auto-incremented, new experts user-approved
 # verified: true = skip web identity verification, cite source field directly
