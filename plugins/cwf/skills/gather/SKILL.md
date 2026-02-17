@@ -55,7 +55,7 @@ Scan input for all URLs. Classify each by pattern table (most specific first):
 {SKILL_DIR}/scripts/g-export.sh <url> [format] [output-dir]
 ```
 
-Prerequisites and format caveats live in [references/google-export.md](references/google-export.md). TOON behavior for Sheets is defined in [references/TOON.md](references/TOON.md).
+Prerequisites and format caveats live in [references/google-export.md](references/google-export.md). TOON behavior for Sheets is defined in [references/TOON.md](references/TOON.md), implemented via [scripts/csv-to-toon.sh](scripts/csv-to-toon.sh) through `g-export.sh`.
 
 ### Slack Export
 
