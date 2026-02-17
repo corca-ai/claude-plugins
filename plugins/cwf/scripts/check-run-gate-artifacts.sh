@@ -144,8 +144,7 @@ check_refactor_stage() {
   local stage="refactor"
   local summary_file="$SESSION_DIR/refactor-summary.md"
   local quick_scan_json="$SESSION_DIR/refactor-quick-scan.json"
-  local deep_structural="$SESSION_DIR/refactor-deep-structural.md"
-  local deep_quality="$SESSION_DIR/refactor-deep-quality.md"
+  local deep_file=""
   local has_any=false
 
   if [[ -s "$summary_file" ]]; then
@@ -172,18 +171,19 @@ check_refactor_stage() {
     fi
   fi
 
-  if [[ -s "$deep_structural" ]]; then
-    has_any=true
-    append_pass "$stage" "artifact present: refactor-deep-structural.md"
-    require_agent_complete_sentinel "$stage" "$deep_structural" || true
-  fi
-  if [[ -s "$deep_quality" ]]; then
-    has_any=true
-    append_pass "$stage" "artifact present: refactor-deep-quality.md"
-    require_agent_complete_sentinel "$stage" "$deep_quality" || true
-  fi
-
   shopt -s nullglob
+  for deep_file in "$SESSION_DIR"/refactor-deep-structural*.md; do
+    [[ -s "$deep_file" ]] || continue
+    has_any=true
+    append_pass "$stage" "artifact present: ${deep_file#"$SESSION_DIR"/}"
+    require_agent_complete_sentinel "$stage" "$deep_file" || true
+  done
+  for deep_file in "$SESSION_DIR"/refactor-deep-quality*.md; do
+    [[ -s "$deep_file" ]] || continue
+    has_any=true
+    append_pass "$stage" "artifact present: ${deep_file#"$SESSION_DIR"/}"
+    require_agent_complete_sentinel "$stage" "$deep_file" || true
+  done
   local tidy_file=""
   for tidy_file in "$SESSION_DIR"/refactor-tidy-commit-*.md; do
     has_any=true

@@ -168,12 +168,18 @@ live_state_file=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh resolve)
 session_dir: "{live.dir value from resolved live-state file}"
 ```
 
+Derive a stable skill suffix from `--skill <name>` (lowercase, non-alphanumeric replaced with `-`):
+
+```bash
+skill_suffix="$(printf '%s' "{skill name}" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//')"
+```
+
 Apply the [context recovery protocol](../../references/context-recovery-protocol.md) to these files:
 
 | Agent | Output file |
 |-------|-------------|
-| Structural Review | `{session_dir}/refactor-deep-structural.md` |
-| Quality + Concept Review | `{session_dir}/refactor-deep-quality.md` |
+| Structural Review | `{session_dir}/refactor-deep-structural-{skill_suffix}.md` |
+| Quality + Concept Review | `{session_dir}/refactor-deep-quality-{skill_suffix}.md` |
 
 Launch **2 parallel sub-agents** in a single message using Task tool (`subagent_type: general-purpose`, `max_turns: 12`) — only for agents whose result files are missing or invalid:
 
@@ -184,7 +190,7 @@ Prompt includes:
 - All reference file contents and resource file listing
 - `{SKILL_DIR}/references/review-criteria.md` criteria sections 1–4
 - Instructions: Evaluate Size, Progressive Disclosure, Duplication, Resource Health. Return structured findings per criterion.
-- **Output Persistence**: Write your complete findings to: `{session_dir}/refactor-deep-structural.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`
+- **Output Persistence**: Write your complete findings to: `{session_dir}/refactor-deep-structural-{skill_suffix}.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`
 
 **Agent B — Quality + Concept Review** (Criteria 5–8):
 
@@ -194,13 +200,13 @@ Prompt includes:
 - `{SKILL_DIR}/references/review-criteria.md` criteria sections 5–8
 - `{PLUGIN_ROOT}/references/concept-map.md` (for Criterion 8: Concept Integrity)
 - Instructions: Evaluate Writing Style, Degrees of Freedom, Anthropic Compliance, Concept Integrity. Return structured findings per criterion.
-- **Output Persistence**: Write your complete findings to: `{session_dir}/refactor-deep-quality.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`
+- **Output Persistence**: Write your complete findings to: `{session_dir}/refactor-deep-quality-{skill_suffix}.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`
 
 Both agents analyze and report; neither modifies files.
 
 ### 5. Produce report
 
-Read result files from the session directory (`{session_dir}/refactor-deep-structural.md`, `{session_dir}/refactor-deep-quality.md`). Merge both agents' findings into a unified report:
+Read result files from the session directory (`{session_dir}/refactor-deep-structural-{skill_suffix}.md`, `{session_dir}/refactor-deep-quality-{skill_suffix}.md`). Merge both agents' findings into a unified report:
 
 ```markdown
 ## Refactor Review: <name>

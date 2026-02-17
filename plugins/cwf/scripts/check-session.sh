@@ -3,7 +3,7 @@ set -euo pipefail
 
 # check-session.sh — Verify session completion artifacts
 # Usage: check-session.sh [--impl|--live|--semantic-gap] [session-id|session-dir]
-#   --impl    Check impl_complete artifacts only (plan.md, lessons.md, next-session.md)
+#   --impl    Check impl_complete artifacts only (next-session.md is optional)
 #             Use after implementation, before retro. Prevents dismissing FAIL
 #             because "retro.md is expected to be missing at this stage."
 #   --live    Check that the CWF state file live section has required fields populated
@@ -28,10 +28,10 @@ if [[ ! -f "$RESOLVER_SCRIPT" ]]; then
   exit 1
 fi
 
-# shellcheck source=./cwf-artifact-paths.sh
+# shellcheck source=plugins/cwf/scripts/cwf-artifact-paths.sh
 source "$RESOLVER_SCRIPT"
 if [[ -f "$LIVE_RESOLVER_SCRIPT" ]]; then
-  # shellcheck source=./cwf-live-state.sh
+  # shellcheck source=plugins/cwf/scripts/cwf-live-state.sh
   source "$LIVE_RESOLVER_SCRIPT"
 fi
 
@@ -209,6 +209,19 @@ parse_yaml_list() {
   raw="${raw#\[}"
   raw="${raw%\]}"
   echo "$raw" | tr ',' '\n' | xargs
+}
+
+# In impl phase, next-session.md is optional for run closure checks.
+exclude_optional_impl_artifacts() {
+  local raw_item_list="$1"
+  if [[ -z "$raw_item_list" ]]; then
+    printf '%s\n' ""
+    return 0
+  fi
+  printf '%s\n' "$raw_item_list" \
+    | tr ' ' '\n' \
+    | sed '/^next-session\.md$/d' \
+    | xargs
 }
 
 trim_ws() {
@@ -549,7 +562,8 @@ if [[ "$PHASE" == "impl" ]]; then
     exit 1
   fi
   all_items=$(parse_yaml_list "$DEFAULTS_IMPL_COMPLETE")
-  echo -e "${YELLOW}Phase: impl — checking impl_complete artifacts${NC}"
+  all_items=$(exclude_optional_impl_artifacts "$all_items")
+  echo -e "${YELLOW}Phase: impl — checking impl_complete artifacts (next-session.md optional)${NC}"
 elif [[ -z "$ARTIFACTS_LINE" ]]; then
   if [[ -z "$DEFAULTS_ALWAYS" ]] && [[ -z "$DEFAULTS_MILESTONE" ]]; then
     echo -e "${RED}Error: No artifacts defined for session '$SESSION_ID' and no session_defaults found${NC}" >&2
