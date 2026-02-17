@@ -373,7 +373,7 @@ sessions:
     title: "refactor-review-prevention-run"
     dir: ".cwf/projects/260217-02-refactor-review-prevention-run"
     branch: "marketplace-v3"
-    artifacts: [plan.md, lessons.md]
+    artifacts: [plan.md, lessons.md, next-session.md]
 
 
   - id: "S260217-03"
