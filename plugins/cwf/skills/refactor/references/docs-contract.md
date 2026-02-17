@@ -40,6 +40,8 @@ Path resolution follows CWF artifact rules:
 | `inventory.plugin_inventory_path` | string | Path to plugin inventory source, if used. |
 | `inventory.plugin_manifest_glob` | string | Glob for plugin manifests used in consistency checks. |
 | `locale_mirrors[]` | list | Locale mirror pairs to compare (for example README.md ↔ README.ko.md). |
+| `scope.semantic_exclude_globs` | list | Repository-relative globs excluded from semantic docs review layers (Sections 5-6). |
+| `scope.root_relative_link_exclude_globs` | list | Repository-relative globs excluded only from root-relative-link portability findings. |
 | `checks.portability_baseline` | bool | Always-on portability baseline toggle (should remain true in normal operation). |
 | `checks.entry_docs_review` | bool | Enable/disable entry-doc review step. |
 | `checks.project_context_review` | bool | Enable/disable project-context review step. |
@@ -53,6 +55,7 @@ Path resolution follows CWF artifact rules:
 When no contract can be loaded, `--docs` should still run with best-effort defaults:
 
 - Always-on: portability baseline + deterministic gate + semantic structure checks
+- Scope exclusions: none (empty), unless contract defines `scope.*_exclude_globs`
 - Conditional by file existence:
   - Entry docs: AGENTS.md, README.md, CLAUDE.md, README.ko.md
   - Project context: docs/project-context.md

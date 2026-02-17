@@ -348,6 +348,12 @@ Collect all 6 outputs from session directory files (mix of `REAL_EXECUTION` and 
 
 When `--mode code`, perform a deterministic session-log cross-check before synthesis.
 
+Before reading session-log artifacts, run a best-effort Codex sync:
+
+```bash
+bash {CWF_PLUGIN_DIR}/scripts/codex/sync-session-logs.sh --cwd "$PWD" --quiet || true
+```
+
 Inputs:
 
 - `{session_dir}/session-log.md` (symlink or file), or newest `session-logs/*.md`

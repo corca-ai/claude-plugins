@@ -5,6 +5,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LIVE_RESOLVER_SCRIPT="$SCRIPT_DIR/cwf-live-state.sh"
+CODEX_SYNC_SCRIPT="$SCRIPT_DIR/codex/sync-session-logs.sh"
 
 SESSION_DIR=""
 OUT_FILE=""
@@ -35,6 +36,22 @@ log() {
 
 warn() {
   echo "[cwf:retro evidence] WARN: $*" >&2
+}
+
+run_best_effort_codex_sync() {
+  local args=()
+  if [[ ! -x "$CODEX_SYNC_SCRIPT" ]]; then
+    return 0
+  fi
+
+  args=(--cwd "$REPO_ROOT" --quiet)
+  if [[ -n "$SINCE_EPOCH" ]]; then
+    args+=(--since-epoch "$SINCE_EPOCH")
+  fi
+
+  if ! bash "$CODEX_SYNC_SCRIPT" "${args[@]}"; then
+    warn "best-effort Codex session log sync failed; continuing evidence collection"
+  fi
 }
 
 file_mtime_epoch() {
@@ -100,6 +117,7 @@ done
 
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 cd "$REPO_ROOT"
+run_best_effort_codex_sync
 
 if [[ -z "$SESSION_DIR" ]]; then
   if [[ -x "$LIVE_RESOLVER_SCRIPT" ]]; then

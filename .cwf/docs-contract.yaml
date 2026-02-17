@@ -5,10 +5,8 @@ mode: "advisory"
 entry_docs:
   required: 
     - "AGENTS.md"
-    - "README.md"
   optional: 
     - "CLAUDE.md"
-    - "README.ko.md"
 
 inventory:
   project_context_path: "docs/project-context.md"
@@ -19,6 +17,12 @@ locale_mirrors:
   - primary: "README.md"
     mirror: "README.ko.md"
     enabled: true
+
+scope:
+  semantic_exclude_globs:
+    - "references/**"
+  root_relative_link_exclude_globs:
+    - "references/**"
 
 checks:
   portability_baseline: true

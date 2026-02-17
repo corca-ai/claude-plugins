@@ -232,6 +232,13 @@ For each stage (respecting `--from` and `--skip` flags):
    bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh list-set . \
      remaining_gates="{remaining gate stages in order}"
    ```
+1. For stages that consume session logs (`review-code`, `retro`, `ship`), run a best-effort Codex sync immediately before invocation:
+
+   ```bash
+   if [[ "{current stage name}" == "review-code" || "{current stage name}" == "retro" || "{current stage name}" == "ship" ]]; then
+     bash {CWF_PLUGIN_DIR}/scripts/codex/sync-session-logs.sh --cwd "$PWD" --quiet || true
+   fi
+   ```
 1. Invoke the skill using the Skill tool:
 
    ```bash

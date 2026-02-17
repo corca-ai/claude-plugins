@@ -47,6 +47,11 @@ Read the current session's artifacts (if they exist):
   - Identify entries with unimplemented proposals (keywords: "구현은 별도 세션", "스코프 밖", "future", "deferred", "separate session", "out of scope")
 - `retro.md` — retrospective (if available)
   - Identify action items not yet addressed
+- Before consuming runtime session logs, run a best-effort Codex sync:
+
+  ```bash
+  bash {CWF_PLUGIN_DIR}/scripts/codex/sync-session-logs.sh --cwd "$PWD" --quiet || true
+  ```
 - Runtime session logs (optional but recommended when available)
   - Preferred path: `.cwf/sessions/*.claude.md`, `.cwf/sessions/*.codex.md`, `.cwf/sessions/*.md`
   - Legacy fallback: `.cwf/projects/sessions/*.claude.md`, `.cwf/projects/sessions/*.codex.md`, `.cwf/projects/sessions/*.md`

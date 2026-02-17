@@ -37,6 +37,8 @@ Contract reference: [docs-contract.md](docs-contract.md)
 - Project context alignment
 - Plugin inventory and manifest alignment
 - Locale mirror alignment (for example README language pairs)
+- Semantic/path exclusions declared by contract `scope.semantic_exclude_globs`
+- Root-relative-link exclusion declared by contract `scope.root_relative_link_exclude_globs`
 
 If a contract-driven source is missing, report in `SKIPPED_CHECKS` with reason.
 

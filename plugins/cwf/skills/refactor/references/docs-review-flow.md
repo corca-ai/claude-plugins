@@ -30,6 +30,7 @@ Capture metadata for final report:
 - `CONTRACT_PATH`
 - `SKIPPED_CHECKS` (disabled-by-contract or source-missing checks)
 - `CONTRACT_WARNING` (optional bootstrap degradation warning)
+- `SCOPE_EXCLUDES` (optional; semantic/root-relative-link exclusions from contract `scope.*_exclude_globs`)
 
 Contract spec: [docs-contract.md](docs-contract.md)
 
@@ -116,6 +117,7 @@ Always check:
 
 - Entry-doc references -> actual filesystem paths
 - Root-relative internal links (leading-slash paths like /path/to/doc.md) -> portability risk (prefer file-relative links)
+  - Exception: files matched by contract `scope.root_relative_link_exclude_globs`
 
 Inventory consistency checks are conditional and require all conditions:
 
@@ -145,6 +147,8 @@ Read `{SKILL_DIR}/references/docs-criteria.md` Section 5 and evaluate semantic/s
 - Scope overlap and ownership ambiguity
 - Portability baseline risks (host-repo hardcoding, non-defensive assumptions)
 
+When contract `scope.semantic_exclude_globs` is set, skip files matching those globs for this semantic layer and record `semantic_scope_exclusion` in `SKIPPED_CHECKS`.
+
 ### 7. Structural Optimization
 
 Read `{SKILL_DIR}/references/docs-criteria.md` Section 6 and synthesize:
@@ -155,5 +159,7 @@ Read `{SKILL_DIR}/references/docs-criteria.md` Section 6 and synthesize:
 - Target structure: before/after doc set comparison
 - Principle compliance: rate each doc against the 7 documentation principles
 - Automation promotion candidates (manual findings that should move to lint/hooks/scripts)
+
+When contract `scope.semantic_exclude_globs` is set, do not generate merge/deletion/trim proposals for excluded files.
 
 Present as a concrete restructuring proposal with rationale, including contract metadata (`CONTRACT_STATUS`, `CONTRACT_PATH`, `SKIPPED_CHECKS`).

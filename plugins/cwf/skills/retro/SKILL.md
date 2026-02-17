@@ -45,7 +45,13 @@ Resolution order:
 
 ### 2. Read Existing Artifacts
 
-Before reading artifacts, run the evidence collector:
+Before reading artifacts, run a best-effort Codex sync:
+
+```bash
+bash {CWF_PLUGIN_DIR}/scripts/codex/sync-session-logs.sh --cwd "$PWD" --quiet || true
+```
+
+Then run the evidence collector:
 
 ```bash
 bash {CWF_PLUGIN_DIR}/scripts/retro-collect-evidence.sh --session-dir "{output-dir}"
