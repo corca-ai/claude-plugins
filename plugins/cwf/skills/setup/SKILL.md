@@ -17,6 +17,7 @@ cwf:setup --hooks        # Hook group selection only
 cwf:setup --tools        # External tool detection only
 cwf:setup --env          # Environment variable migration/bootstrap only
 cwf:setup --agent-teams  # Agent Team mode setup only
+cwf:setup --run-mode     # Configure default cwf:run ambiguity mode only
 cwf:setup --codex        # Codex integration-only rerun (skills/references sync)
 cwf:setup --codex-wrapper # Codex wrapper-only rerun (session log sync + post-run checks)
 cwf:setup --git-hooks both --gate-profile balanced  # Install repo git hooks and set gate depth
@@ -37,11 +38,12 @@ Parse input flags and run only the relevant phases:
 
 | Input | Phases |
 |-------|--------|
-| `cwf:setup` | 1 → 2 → 2.8 → 2.9 → 2.4 (if codex available) → 2.7 (always ask) → 4 (opt-in) → 5 |
+| `cwf:setup` | 1 → 2 → 2.8 → 2.9 → 2.10 → 2.4 (if codex available) → 2.7 (always ask) → 4 (opt-in) → 5 |
 | `cwf:setup --hooks` | 1 → 5 |
-| `cwf:setup --tools` | 2 → 2.8 → 2.9 → 5 |
-| `cwf:setup --env` | 2.8 → 5 |
+| `cwf:setup --tools` | 2 → 2.8 → 2.9 → 2.10 → 5 |
+| `cwf:setup --env` | 2.8 → 2.10 → 5 |
 | `cwf:setup --agent-teams` | 2.9 → 5 |
+| `cwf:setup --run-mode` | 2.10 → 5 |
 | `cwf:setup --codex` | 2.5 → 5 |
 | `cwf:setup --codex-wrapper` | 2.6 → 5 |
 | `cwf:setup --git-hooks <none\|pre-commit\|pre-push\|both> [--gate-profile <fast\|balanced\|strict>]` | 2.7 → 5 |
@@ -56,6 +58,8 @@ When mode is full setup or tools-only setup, always run Phase 2.8 so legacy env 
 
 When mode is full setup or tools-only setup, always run Phase 2.9 so Agent Team mode is explicitly aligned with CWF's multi-agent workflow assumptions.
 
+When mode is full setup, tools-only setup, env-only setup, or run-mode-only setup, always run Phase 2.10 so `cwf:run` default ambiguity policy is explicit and reproducible.
+
 ---
 
 ## Phase 1: Hook Group Selection
@@ -68,7 +72,7 @@ Read `cwf-state.yaml` `hooks:` section for current toggle state.
 
 ### 1.2 Present Selection
 
-Use AskUserQuestion with `multiSelect: true`. Present 7 hook groups with descriptions:
+Use AskUserQuestion with `multiSelect: true`. Present 9 hook groups with descriptions:
 
 | Group | Description |
 |-------|-------------|
@@ -77,6 +81,8 @@ Use AskUserQuestion with `multiSelect: true`. Present 7 hook groups with descrip
 | `read` | File-size aware reading guard |
 | `lint_markdown` | Markdown validation after Write/Edit |
 | `lint_shell` | ShellCheck validation after Write/Edit |
+| `deletion_safety` | Blocks risky file deletions and requires policy-compliant justification |
+| `workflow_gate` | Enforces workflow stage/branch safety rules before edits and commands |
 | `websearch_redirect` | Redirect WebSearch to cwf:gather |
 | `compact_recovery` | Inject live session state after auto-compact and guard session↔worktree binding on prompts |
 
@@ -93,6 +99,8 @@ export HOOK_LOG_ENABLED="true"
 export HOOK_READ_ENABLED="true"
 export HOOK_LINT_MARKDOWN_ENABLED="false"
 export HOOK_LINT_SHELL_ENABLED="true"
+export HOOK_DELETION_SAFETY_ENABLED="true"
+export HOOK_WORKFLOW_GATE_ENABLED="true"
 export HOOK_WEBSEARCH_REDIRECT_ENABLED="true"
 export HOOK_COMPACT_RECOVERY_ENABLED="true"
 ```
@@ -112,6 +120,8 @@ hooks:
   read: true
   lint_markdown: false
   lint_shell: true
+  deletion_safety: true
+  workflow_gate: true
   websearch_redirect: true
   compact_recovery: true
 ```
@@ -528,20 +538,20 @@ Open a new shell (or source ~/.zshrc / ~/.bashrc) so updated exports are loaded.
 
 ### 2.8.5 Bootstrap Project Config Files
 
-Ask whether to create project-level config files (.cwf/config.yaml, .cwf/config.local.yaml) now:
+Ask whether to create project-level config files (.cwf-config.yaml, .cwf-config.local.yaml) now:
 
 ```text
-Create project config templates now? (.cwf/config.yaml + .cwf/config.local.yaml)
+Create project config templates now? (.cwf-config.yaml + .cwf-config.local.yaml)
 ```
 
 Options:
 - `Yes (recommended)`:
   - create missing config templates
   - keep existing files unchanged
-  - ensure .cwf/config.local.yaml is listed in `.gitignore`
+  - ensure .cwf-config.local.yaml is listed in `.gitignore`
 - `Overwrite templates`:
   - re-write both templates (`--force`)
-  - ensure .cwf/config.local.yaml is listed in `.gitignore`
+  - ensure .cwf-config.local.yaml is listed in `.gitignore`
 - `Skip for now`:
   - no file changes in this sub-phase
 
@@ -561,16 +571,16 @@ bash {SKILL_DIR}/scripts/bootstrap-project-config.sh --force
 
 After migration/bootstrap decisions, always report the effective CWF config source priority:
 
-1. .cwf/config.local.yaml
-2. .cwf/config.yaml
+1. .cwf-config.local.yaml
+2. .cwf-config.yaml
 3. Process environment
 4. Shell profile exports (`~/.zshenv`, `~/.zprofile`, `~/.zshrc`, `~/.bash_profile`, `~/.bashrc`, `~/.profile`)
 
 Include this operational guidance:
 
 ```text
-Use .cwf/config.yaml for team-shared, non-secret defaults.
-Use .cwf/config.local.yaml for local/secret values.
+Use .cwf-config.yaml for team-shared, non-secret defaults.
+Use .cwf-config.local.yaml for local/secret values.
 Keep shell exports as global fallback.
 ```
 
@@ -632,6 +642,101 @@ And include this note in plain language:
 ```text
 Restart Claude Code (or open a new session) so Agent Team mode changes are applied consistently.
 ```
+
+---
+
+## Phase 2.10: cwf:run Ambiguity Mode Setup
+
+Use this phase when:
+- Mode is full setup (`cwf:setup`)
+- User runs `cwf:setup --tools`
+- User runs `cwf:setup --env`
+- User runs `cwf:setup --run-mode`
+
+### 2.10.1 Detect Current Effective Mode
+
+Run:
+
+```bash
+source {CWF_PLUGIN_DIR}/hooks/scripts/env-loader.sh
+cwf_env_load_vars CWF_RUN_AMBIGUITY_MODE
+printf '%s\n' "${CWF_RUN_AMBIGUITY_MODE:-defer-blocking}"
+```
+
+If the key is unset anywhere, treat `defer-blocking` as the effective default.
+
+### 2.10.2 Ask Desired Default Mode
+
+Use AskUserQuestion (single choice):
+
+```text
+Select default ambiguity handling mode for cwf:run (T3 decisions in clarify).
+```
+
+Options:
+- `defer-blocking (recommended)`:
+  - continue autonomously
+  - must record autonomous T3 decisions
+  - must carry unresolved decisions to ship as merge-blocking items
+- `strict`:
+  - stop and ask the user at T3
+- `defer-reversible`:
+  - continue autonomously with reversible implementation structure
+  - still record decisions, but not merge-blocking by default
+- `explore-worktrees`:
+  - implement alternatives in separate worktrees and compare before finalization
+
+### 2.10.3 Ask Config Scope
+
+Use AskUserQuestion (single choice):
+
+```text
+Where should this default mode be saved?
+```
+
+Options:
+- `Shared config (recommended)`:
+  - write to `.cwf-config.yaml`
+  - team-wide default for this repository
+- `Local config`:
+  - write to `.cwf-config.local.yaml`
+  - local override only (highest priority)
+
+### 2.10.4 Persist Selection
+
+Run:
+
+```bash
+bash {SKILL_DIR}/scripts/configure-run-mode.sh --mode <selected-mode> --scope <shared|local>
+```
+
+If config templates are missing, bootstrap first:
+
+```bash
+bash {SKILL_DIR}/scripts/bootstrap-project-config.sh
+```
+
+Then retry `configure-run-mode.sh`.
+
+### 2.10.5 Report Effective State
+
+Report:
+- selected mode
+- selected scope
+- written config path
+
+Provide verification command:
+
+```bash
+rg -n "^CWF_RUN_AMBIGUITY_MODE:" .cwf-config.yaml .cwf-config.local.yaml 2>/dev/null
+```
+
+Also report precedence reminder:
+- `--ambiguity-mode` flag
+- `.cwf-config.local.yaml`
+- `.cwf-config.yaml`
+- env/shell
+- built-in default (`defer-blocking`)
 
 ---
 
@@ -828,10 +933,11 @@ Add `setup` to `cwf-state.yaml` current session's `stage_checkpoints` list.
 14. **All code fences must have language specifier**: Never use bare fences.
 15. **Codex sync uses symlink + backup move**: Do not delete user files directly.
 16. **Single-entry setup UX**: `cwf:setup` must ask and apply optional integrations (Codex mode, git hook mode/profile) instead of requiring users to remember flags.
-17. **Env/project-config UX**: `cwf:setup` must detect and offer migration of legacy env keys to canonical `CWF_*` names, then offer project config bootstrap (.cwf/config.yaml, .cwf/config.local.yaml) with explicit user choice.
+17. **Env/project-config UX**: `cwf:setup` must detect and offer migration of legacy env keys to canonical `CWF_*` names, then offer project config bootstrap (.cwf-config.yaml, .cwf-config.local.yaml) with explicit user choice.
 18. **Agent Team UX**: `cwf:setup` must include explicit Agent Team mode setup so multi-agent skills do not silently depend on an unset runtime flag.
 19. **Dependency install UX**: When local runtime dependencies are missing, `cwf:setup` must ask whether to install now and run [scripts/install-tooling-deps.sh](scripts/install-tooling-deps.sh) on approval.
 20. **No passive missing-only report**: Missing prerequisites must end with either an install attempt or explicit manual install commands plus continue/stop choice.
+21. **Run ambiguity default must be explicit**: `cwf:setup` must expose and persist `CWF_RUN_AMBIGUITY_MODE` via Phase 2.10.
 
 ## References
 
@@ -844,6 +950,7 @@ Add `setup` to `cwf-state.yaml` current session's `stage_checkpoints` list.
 - [scripts/migrate-env-vars.sh](scripts/migrate-env-vars.sh) — legacy env detection and canonical CWF env migration
 - [scripts/bootstrap-project-config.sh](scripts/bootstrap-project-config.sh) — project config template/bootstrap and `.gitignore` sync
 - [scripts/configure-agent-teams.sh](scripts/configure-agent-teams.sh) — toggles Claude Agent Team runtime mode in `~/.claude/settings.json`
+- [scripts/configure-run-mode.sh](scripts/configure-run-mode.sh) — persists default `cwf:run` ambiguity mode into project config
 - [scripts/install-tooling-deps.sh](scripts/install-tooling-deps.sh) — checks/installs missing local runtime dependencies for CWF workflows
 - [scripts/check-index-coverage.sh](scripts/check-index-coverage.sh) — deterministic index coverage validation
 - .cwf-cap-index-ignore — optional intentional exclusion list for capability index coverage

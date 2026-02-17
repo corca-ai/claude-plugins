@@ -100,6 +100,7 @@ Default to launching both agents when uncertain.
 ### 2.3 Launch sub-agents
 
 Launch sub-agents **simultaneously** using the Task tool — only for agents whose result files are missing or invalid.
+- Shared output persistence contract: [agent-patterns.md § Sub-agent Output Persistence Contract](../../references/agent-patterns.md#sub-agent-output-persistence-contract).
 
 #### Sub-agent A: Prior Art Researcher
 

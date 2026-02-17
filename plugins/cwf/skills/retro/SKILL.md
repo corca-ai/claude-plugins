@@ -113,6 +113,7 @@ Stage-tier policy for deep mode outputs:
   `{session_dir}/retro-expert-alpha.md`, `{session_dir}/retro-expert-beta.md`
 
 For all outputs: bounded retry = 1 for missing/invalid files.
+- Shared output persistence contract: [agent-patterns.md § Sub-agent Output Persistence Contract](../../references/agent-patterns.md#sub-agent-output-persistence-contract).
 
 **Batch 1** — launch in a single message with 2 parallel Task calls (only for agents whose result files are missing or invalid):
 
@@ -240,6 +241,18 @@ For each proposal, include:
 ### 5. Write retro.md
 
 Write to `{output-dir}/retro.md` using the format below.
+
+Immediately enforce deterministic retro artifact gate:
+
+```bash
+bash {CWF_PLUGIN_DIR}/scripts/check-run-gate-artifacts.sh \
+  --session-dir "{output-dir}" \
+  --stage retro \
+  --strict \
+  --record-lessons
+```
+
+If this gate fails, do not mark retro complete. Fix artifacts/mode labeling first, then re-run the gate.
 
 ### 6. Link Session Log
 

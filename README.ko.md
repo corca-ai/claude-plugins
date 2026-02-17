@@ -22,7 +22,7 @@ claude plugin install cwf@corca-plugins
 이제 Claude Code에서 `cwf:setup`을 실행해주세요. setup은 다음과 같이 작동합니다.
 
 - v3 이전 레거시 환경 변수를 표준 `CWF_*` 키로 마이그레이션
-- 프로젝트 설정 파일(`.cwf/config.yaml`, `.cwf/config.local.yaml`) 부트스트랩
+- 프로젝트 설정 파일(`.cwf-config.yaml`, `.cwf-config.local.yaml`) 부트스트랩
 - 외부 도구 감지(Codex/Gemini/Tavily/Exa) 및 선택적 Codex 연동
 - 로컬 실행 의존성(`shellcheck`, `jq`, `gh`, `node`, `python3`) 점검 및 설치 선택
 - 에이전트가 CWF 사용법 및 저장소 탐색을 돕는 인덱스 문서 생성(별도 파일로, 또는 AGENTS.md에 통합)
@@ -411,7 +411,7 @@ cwf:setup --repo-index --target agents # AGENTS 기반 저장소용 AGENTS.md �
 
 **무엇을 하는가**
 
-`cwf:setup`은 훅 그룹 토글, 외부 도구 감지(Codex/Gemini/Tavily/Exa), 환경 변수 마이그레이션(레거시 키 → `CWF_*`), 프로젝트 설정 파일 부트스트랩(`.cwf/config.yaml`, `.cwf/config.local.yaml`), 선택적 Codex 연동, 선택적 인덱스 생성/갱신을 대화형으로 수행합니다. 여기서 인덱스 생성은 에이전트가 필요한 문서를 짧은 경로로 찾아가도록 라우팅 품질을 높이기 위한 단계입니다. Codex 연동만 다시 적용할 때는 `--codex`/`--codex-wrapper`를 사용합니다.
+`cwf:setup`은 훅 그룹 토글, 외부 도구 감지(Codex/Gemini/Tavily/Exa), 환경 변수 마이그레이션(레거시 키 → `CWF_*`), 프로젝트 설정 파일 부트스트랩(`.cwf-config.yaml`, `.cwf-config.local.yaml`), 선택적 Codex 연동, 선택적 인덱스 생성/갱신을 대화형으로 수행합니다. 여기서 인덱스 생성은 에이전트가 필요한 문서를 짧은 경로로 찾아가도록 라우팅 품질을 높이기 위한 단계입니다. Codex 연동만 다시 적용할 때는 `--codex`/`--codex-wrapper`를 사용합니다.
 
 ### [update](plugins/cwf/skills/update/SKILL.md)
 
@@ -464,17 +464,17 @@ CWF는 자동으로 실행되는 7개 훅 그룹을 포함합니다. 모두 기�
 
 CWF 런타임은 아래 우선순위로 설정을 읽습니다.
 
-1. `.cwf/config.local.yaml` (로컬/비밀값, 최고 우선순위)
-2. `.cwf/config.yaml` (팀 공유 기본값)
+1. `.cwf-config.local.yaml` (로컬/비밀값, 최고 우선순위)
+2. `.cwf-config.yaml` (팀 공유 기본값)
 3. 프로세스 환경 변수
 4. 셸 프로파일(`~/.zshenv`, `~/.zprofile`, `~/.zshrc`, `~/.bash_profile`, `~/.bashrc`, `~/.profile`)
 
-`cwf:setup`을 수행하면 레거시 키를 `CWF_*`로 마이그레이션하고, 프로젝트 설정 템플릿을 부트스트랩하며, `.cwf/config.local.yaml`을 `.gitignore`에 등록합니다.
+`cwf:setup`을 수행하면 레거시 키를 `CWF_*`로 마이그레이션하고, 프로젝트 설정 템플릿을 부트스트랩하며, `.cwf-config.local.yaml`을 `.gitignore`에 등록합니다.
 
-팀 공유 기본값은 `.cwf/config.yaml`에 두세요.
+팀 공유 기본값은 `.cwf-config.yaml`에 두세요.
 
 ```yaml
-# .cwf/config.yaml
+# .cwf-config.yaml
 # Optional artifact path overrides
 # CWF_ARTIFACT_ROOT: ".cwf"
 # CWF_PROJECTS_DIR: ".cwf/projects"
@@ -490,10 +490,10 @@ CWF 런타임은 아래 우선순위로 설정을 읽습니다.
 # CWF_SESSION_LOG_AUTO_COMMIT: false
 ```
 
-개인/비밀값은 `.cwf/config.local.yaml`에 두세요.
+개인/비밀값은 `.cwf-config.local.yaml`에 두세요.
 
 ```yaml
-# .cwf/config.local.yaml
+# .cwf-config.local.yaml
 SLACK_BOT_TOKEN: "xoxb-your-bot-token"
 SLACK_CHANNEL_ID: "D0123456789"
 TAVILY_API_KEY: "tvly-your-key"

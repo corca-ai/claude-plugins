@@ -2,8 +2,8 @@
 # Shared environment variable loader for CWF scripts.
 #
 # Source priority (high -> low):
-#   1) Project-local config (.cwf/config.local.yaml)
-#   2) Project-shared config (.cwf/config.yaml)
+#   1) Project-local config (.cwf-config.local.yaml)
+#   2) Project-shared config (.cwf-config.yaml)
 #   3) Current process environment
 #   4) Shell profiles (~/.zshenv, ~/.zprofile, ~/.zshrc, ~/.bash_profile, ~/.bashrc, ~/.profile)
 #
@@ -63,7 +63,12 @@ cwf_env_resolve_project_root() {
     if [[ "${CLAUDE_PROJECT_DIR}" == /* ]]; then
       CWF_ENV_PROJECT_ROOT="${CLAUDE_PROJECT_DIR}"
     else
-      CWF_ENV_PROJECT_ROOT="$(cd "${CLAUDE_PROJECT_DIR}" 2>/dev/null && pwd || pwd)"
+      local resolved_root=""
+      if resolved_root="$(cd "${CLAUDE_PROJECT_DIR}" 2>/dev/null && pwd)"; then
+        CWF_ENV_PROJECT_ROOT="$resolved_root"
+      else
+        CWF_ENV_PROJECT_ROOT="$(pwd)"
+      fi
     fi
     printf '%s' "$CWF_ENV_PROJECT_ROOT"
     return 0
@@ -80,8 +85,8 @@ cwf_env_init_project_config_paths() {
 
   local root
   root="$(cwf_env_resolve_project_root)"
-  CWF_ENV_PROJECT_CONFIG_LOCAL="${root}/.cwf/config.local.yaml"
-  CWF_ENV_PROJECT_CONFIG_SHARED="${root}/.cwf/config.yaml"
+  CWF_ENV_PROJECT_CONFIG_LOCAL="${root}/.cwf-config.local.yaml"
+  CWF_ENV_PROJECT_CONFIG_SHARED="${root}/.cwf-config.yaml"
 }
 
 cwf_env_load_from_yaml_file() {
@@ -113,7 +118,7 @@ cwf_env_load_from_yaml_file() {
   [[ -n "$value" ]] || return 1
 
   printf -v "$var_name" '%s' "$value"
-  export "$var_name"
+  export "${var_name?}"
   return 0
 }
 
@@ -147,7 +152,7 @@ cwf_env_load_from_profiles() {
   value="${value%"${value##*[![:space:]]}"}"
   value=$(cwf_env_strip_quotes "$value")
   printf -v "$var_name" '%s' "$value"
-  export "$var_name"
+  export "${var_name?}"
 }
 
 cwf_env_load_var() {

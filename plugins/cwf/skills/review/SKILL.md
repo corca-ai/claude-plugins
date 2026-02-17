@@ -172,11 +172,23 @@ For `--mode plan` and `--mode clarify`, use the document line count instead of d
 
 Store the resolved `cli_timeout` value for use in Phase 2.
 
+**External CLI cutoff (deterministic):**
+
+- Compute `prompt_lines` from the final external prompt content (same basis used for timeout scaling).
+- If `prompt_lines > 1200`, set:
+  - `external_cli_allowed=false`
+  - `external_cli_cutoff_reason=prompt_lines_gt_1200`
+  - `external_cli_cutoff_value=1200`
+- When `external_cli_allowed=false`, skip external CLI detection/attempts and route Slot 3/4 directly to `claude` Task fallbacks.
+- Persist the cutoff evidence in synthesis Confidence Note:
+  - `External CLI skipped: prompt_lines={prompt_lines} cutoff=1200 reason=prompt_lines_gt_1200`
+
 ---
 
 ## Phase 2: Launch All Reviewers
 
 Launch **six** reviewers in parallel: 2 internal (Task agents) + 2 external (CLI or Task fallback) + 2 domain experts (Task agents). All launched in a **single message** for maximum parallelism.
+- Shared output persistence contract: [agent-patterns.md § Sub-agent Output Persistence Contract](../../references/agent-patterns.md#sub-agent-output-persistence-contract).
 
 ### 2.0 Resolve session directory and context recovery
 
@@ -264,7 +276,9 @@ Parse the output:
 
 Note: `NPX_FOUND` only confirms npx is installed, not that Gemini CLI is authenticated or cached. Runtime failures are handled in Phase 3.2.
 
-Resolve providers for external slots:
+If `external_cli_allowed=false` (from the 1200-line cutoff), skip detection and set both slots to `claude`.
+
+Otherwise, resolve providers for external slots:
 
 - Slot 3 (Correctness):
   - `--correctness-provider auto` → prefer `codex`, then `gemini`, then `claude`
@@ -533,6 +547,27 @@ Task(subagent_type="general-purpose", name="{tool}-fallback", max_turns={max_tur
 
 Collect all 6 outputs from session directory files (mix of `REAL_EXECUTION` and `FALLBACK` sources). Internal reviewers and expert reviewers follow the standard reviewer output format from `prompts.md`. Expert reviewers follow the review mode format from `expert-advisor-guide.md`.
 
+### 3.4 Session-log cross-check (code mode)
+
+When `--mode code`, perform a deterministic session-log cross-check before synthesis.
+
+Inputs:
+
+- `{session_dir}/session-log.md` (symlink or file), or newest `session-logs/*.md`
+
+Required output fields (for Confidence Note):
+
+- `session_log_present`: `true|false`
+- `session_log_lines`: integer (`0` when missing)
+- `session_log_turns`: integer count of `^## Turn`
+- `session_log_last_turn`: last `## Turn` header or `none`
+- `session_log_cross_check`: `PASS|WARN`
+
+Policy:
+
+- If no session log exists, set `session_log_cross_check=WARN` and continue.
+- Do not omit these fields in code mode.
+
 ---
 
 ## Phase 4: Synthesize
@@ -605,6 +640,12 @@ Output to the conversation **and** persist to `{session_dir}/review-synthesis-{m
   Include setup hint based on failed provider:
   "Codex -> `codex auth login`; Gemini -> `npx @google/gemini-cli`."
 - Perspective differences between real CLI output and fallback interpretation
+- Session-log cross-check fields (code mode):
+  - `session_log_present: {true|false}`
+  - `session_log_lines: {int}`
+  - `session_log_turns: {int}`
+  - `session_log_last_turn: {header|none}`
+  - `session_log_cross_check: {PASS|WARN}`
 
 ### Reviewer Provenance
 | Reviewer | Source | Tool | Duration |
@@ -623,7 +664,21 @@ The Provenance table adapts to actual results: if an external CLI succeeded, sho
 
 When expert reviewers (Slot 5-6) were used: Follow the Roster Maintenance procedure in `{CWF_PLUGIN_DIR}/references/expert-advisor-guide.md`.
 
-### 4. Cleanup
+### 4. Run-Stage Artifact Gate (code mode)
+
+When `--mode code`, validate deterministic stage artifacts immediately after synthesis persistence:
+
+```bash
+bash {CWF_PLUGIN_DIR}/scripts/check-run-gate-artifacts.sh \
+  --session-dir "{session_dir}" \
+  --stage review-code \
+  --strict \
+  --record-lessons
+```
+
+If this gate fails, stop with file-level errors and require revision before marking review-code complete.
+
+### 5. Cleanup
 
 After rendering the synthesis, remove the temp directory:
 
@@ -641,6 +696,7 @@ This prevents sensitive review content (diffs, plans) from persisting in `/tmp/`
 |-----------|--------|
 | No review target found | AskUserQuestion: "What should I review?" |
 | Reviewer output malformed | Extract by pattern matching, note in Confidence Note |
+| External prompt lines > 1200 | Skip external CLIs for Slot 3/4, use Task fallbacks directly, and record cutoff evidence in Confidence Note. |
 | `--scenarios <path>` file missing/unreadable | Stop with explicit error. Ask for a valid scenarios path. |
 | `--scenarios <path>` has zero parseable checks | Stop with explicit error. Ask for GWT/checklist-formatted scenarios. |
 | `--base <branch>` not found in local/origin refs | Stop with explicit error. Ask for a valid base branch. |
@@ -651,6 +707,8 @@ This prevents sensitive review content (diffs, plans) from persisting in `/tmp/`
 | External CLI timeout (120s) | Mark `FAILED`. Spawn Task agent fallback. Note in Confidence Note. |
 | External CLI auth error | Mark `FAILED`. Spawn Task agent fallback. Note in Confidence Note. |
 | External output malformed | Extract by pattern matching. Note in Confidence Note. |
+| Code mode and session log missing | Continue with `session_log_cross_check=WARN` and include deterministic session-log fields in Confidence Note. |
+| Code mode artifact gate fails | Stop with explicit file-level errors from `check-run-gate-artifacts.sh` and request revision. |
 
 ---
 
@@ -679,6 +737,8 @@ This prevents sensitive review content (diffs, plans) from persisting in `/tmp/`
 12. **Commit-boundary split for mixed follow-up work** — when review findings
     imply both `tidy` and `behavior-policy` changes, recommend separate commit
     units and `tidy` first.
+13. **Code-mode session-log fields are mandatory** — always include deterministic `session_log_*` keys in Confidence Note for `--mode code`.
+14. **Code-mode artifact gate is mandatory** — `review-code` is not complete unless `check-run-gate-artifacts.sh --stage review-code --strict` passes.
 
 ---
 
@@ -706,6 +766,11 @@ Then /review deterministically uses that base and records base_strategy=explicit
 Given review findings include both structural tidy changes and behavior-policy changes
 When /review renders synthesis
 Then the synthesis includes commit-boundary guidance to split tidy and behavior-policy commits
+
+Given a review target whose external prompt length is 1201 lines
+When /review resolves external reviewer routing
+Then Slot 3 and Slot 4 skip CLI execution and run Task fallback directly
+And synthesis confidence note includes the deterministic cutoff evidence
 ```
 
 ---

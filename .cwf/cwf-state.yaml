@@ -383,6 +383,13 @@ sessions:
     artifacts: [plan.md, lessons.md, next-session.md, ship-summary-origin-marketplace-v3.md]
     stage_checkpoints: [handoff]
 
+
+  - id: "S260217-04"
+    title: "refactor-review-prevention-hardening"
+    dir: ".cwf/projects/260217-04-refactor-review-prevention-hardening"
+    branch: "marketplace-v3"
+    artifacts: [plan.md, lessons.md]
+
 tools:
   codex: available
   gemini: available
@@ -398,6 +405,8 @@ hooks:
   read: true
   lint_markdown: true
   lint_shell: true
+  deletion_safety: true
+  workflow_gate: true
   websearch_redirect: true
   compact_recovery: true
 
@@ -405,11 +414,11 @@ hooks:
 # read by SessionStart(compact) hook for context recovery after auto-compact.
 # check-session.sh --live validates required fields are populated.
 live:
-  session_id: "260217-03"
-  dir: ".cwf/projects/260217-03-refactor-review-prevention-impl"
-  branch: "feat/260217-03-review-prevention-impl"
-  phase: "done"
-  task: "Implement Prevention Proposals A, B, C, E+G + Adaptive Review Timeout"
+  session_id: "S260217-04"
+  dir: ".cwf/projects/260217-04-refactor-review-prevention-hardening"
+  branch: "feat/260217-04-hardening-deferred-all"
+  phase: "ship"
+  task: "Complete review-code+refactor+retro and prepare ship docs (no issue/pr execution)"
   key_files:
     - README.ko.md
     - .cwf/projects/260216-03-hitl-readme-restart/next-session.md
@@ -422,9 +431,14 @@ live:
     rules_file: ".cwf/projects/260216-03-hitl-readme-restart/hitl/rules.yaml"
     updated_at: "2026-02-16T02:42:35Z"
 
-  state_file: ".cwf/projects/260216-03-hitl-readme-restart/session-state.yaml"
+  state_file: ".cwf/projects/260217-04-refactor-review-prevention-hardening/session-state.yaml"
   remaining_gates: []
-  state_version: "2"
+  state_version: "3"
+  worktree_root: "/home/hwidong/codes/claude-plugins"
+  worktree_branch: "feat/260217-04-hardening-deferred-all"
+  active_pipeline: "cwf:run"
+  user_directive: "cwf:run .cwf/projects/260217-03-refactor-review-prevention-impl/next-session.md"
+  pipeline_override_reason: ""
 # Expert roster for domain expert sub-agents (used by clarify, review, retro)
 # Semi-automatic evolution: usage_count auto-incremented, new experts user-approved
 # verified: true = skip web identity verification, cite source field directly

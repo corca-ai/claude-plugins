@@ -16,6 +16,7 @@ Requirements: Python 3.7+, no external dependencies.
 import json
 import os
 import re
+import subprocess
 import sys
 import time
 import urllib.error
@@ -470,6 +471,54 @@ def sanitize_filename(title: str) -> str:
     return name if name else "notion-export"
 
 
+def resolve_default_output_dir() -> str:
+    """Resolve default export directory using CWF runtime config when available."""
+    explicit = os.environ.get("CWF_GATHER_NOTION_OUTPUT_DIR") or os.environ.get("CWF_GATHER_OUTPUT_DIR")
+    if explicit:
+        return explicit
+
+    base_dir = resolve_workspace_root()
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    plugin_root = os.path.abspath(os.path.join(script_dir, "..", "..", ".."))
+    resolver = os.path.join(plugin_root, "scripts", "cwf-artifact-paths.sh")
+
+    if os.path.isfile(resolver):
+        try:
+            resolved = subprocess.check_output(
+                [
+                    "bash",
+                    "-c",
+                    'source "$1"; resolve_cwf_projects_dir "$2"',
+                    "bash",
+                    resolver,
+                    base_dir,
+                ],
+                stderr=subprocess.DEVNULL,
+                text=True,
+            ).strip()
+            if resolved:
+                return resolved
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            pass
+
+    return os.path.join(base_dir, ".cwf", "projects")
+
+
+def resolve_workspace_root() -> str:
+    """Resolve writable workspace root (git root when available)."""
+    try:
+        git_root = subprocess.check_output(
+            ["git", "rev-parse", "--show-toplevel"],
+            stderr=subprocess.DEVNULL,
+            text=True,
+        ).strip()
+        if git_root:
+            return git_root
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return os.path.realpath(".")
+    return os.path.realpath(".")
+
+
 # ---------------------------------------------------------------------------
 # 6. Main
 # ---------------------------------------------------------------------------
@@ -490,19 +539,15 @@ def main():
 
         if not output_path:
             filename = sanitize_filename(page_title) + ".md"
-            output_dir = (
-                os.environ.get("CWF_GATHER_NOTION_OUTPUT_DIR")
-                or os.environ.get("CWF_GATHER_OUTPUT_DIR")
-                or ".cwf/projects"
-            )
+            output_dir = resolve_default_output_dir()
             os.makedirs(output_dir, exist_ok=True)
             output_path = os.path.join(output_dir, filename)
 
-        # Path validation: reject paths outside current directory
+        # Path validation: reject paths outside workspace root
         real_path = os.path.realpath(output_path)
-        cwd = os.path.realpath(".")
-        if not (real_path == cwd or real_path.startswith(cwd + os.sep)):
-            raise ValueError(f"Output path must be within current directory: {output_path}")
+        workspace_root = resolve_workspace_root()
+        if not (real_path == workspace_root or real_path.startswith(workspace_root + os.sep)):
+            raise ValueError(f"Output path must be within workspace root: {output_path}")
 
         markdown = blocks_to_markdown(page_id, block_map)
 

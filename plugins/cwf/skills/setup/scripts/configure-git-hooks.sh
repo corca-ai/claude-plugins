@@ -17,7 +17,7 @@ Options:
 Profiles:
   fast      pre-commit: staged markdownlint; pre-push: repo markdownlint
   balanced  fast + local link checks + staged shellcheck (if available) + index coverage checks on push
-  strict    balanced + provenance freshness + growth-drift reports on push (inform level)
+  strict    balanced + script dependency/readme structure hard gates + provenance/growth-drift reports
 USAGE
 }
 
@@ -103,11 +103,90 @@ PROFILE="__PROFILE__"
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 CWF_LINK_CHECKER="plugins/cwf/skills/refactor/scripts/check-links.sh"
+CWF_ARTIFACT_PATHS="plugins/cwf/scripts/cwf-artifact-paths.sh"
 
-  mapfile -t md_files < <(
-  git diff --cached --name-only --diff-filter=ACMR -- '*.md' '*.mdx' \
-    | grep -Ev '^(\.cwf/projects/|\.cwf/sessions/|\.cwf/prompt-logs/|references/anthropic-skills-guide/)' || true
-)
+normalize_rel_path() {
+  local value="$1"
+  value="${value#./}"
+  value="${value%/}"
+  printf '%s' "$value"
+}
+
+add_skip_prefix() {
+  local rel_path="${1:-}"
+  local normalized=""
+  local existing=""
+  [[ -n "$rel_path" ]] || return 0
+  normalized="$(normalize_rel_path "$rel_path")"
+  [[ -n "$normalized" && "$normalized" != "." ]] || return 0
+  for existing in "${RUNTIME_SKIP_PREFIXES[@]}"; do
+    if [[ "$existing" == "$normalized" ]]; then
+      return 0
+    fi
+  done
+  RUNTIME_SKIP_PREFIXES+=("$normalized")
+}
+
+add_skip_abs_dir() {
+  local abs_path="${1:-}"
+  local rel_path=""
+  [[ -n "$abs_path" ]] || return 0
+  abs_path="${abs_path%/}"
+  if [[ "$abs_path" == "$REPO_ROOT" || "$abs_path" != "$REPO_ROOT/"* ]]; then
+    return 0
+  fi
+  rel_path="${abs_path#"$REPO_ROOT"/}"
+  add_skip_prefix "$rel_path"
+}
+
+init_runtime_skip_prefixes() {
+  local projects_dir=""
+  local sessions_dir=""
+  local prompt_logs_dir=""
+  RUNTIME_SKIP_PREFIXES=()
+  if [[ -f "$CWF_ARTIFACT_PATHS" ]]; then
+    # shellcheck source=plugins/cwf/scripts/cwf-artifact-paths.sh
+    source "$CWF_ARTIFACT_PATHS"
+    projects_dir="$(resolve_cwf_projects_dir "$REPO_ROOT" 2>/dev/null || true)"
+    sessions_dir="$(resolve_cwf_session_logs_dir "$REPO_ROOT" 2>/dev/null || true)"
+    prompt_logs_dir="$(resolve_cwf_prompt_logs_dir "$REPO_ROOT" 2>/dev/null || true)"
+    add_skip_abs_dir "$projects_dir"
+    add_skip_abs_dir "$sessions_dir"
+    add_skip_abs_dir "$prompt_logs_dir"
+  fi
+  add_skip_prefix ".cwf/projects"
+  add_skip_prefix ".cwf/sessions"
+  add_skip_prefix ".cwf/prompt-logs"
+}
+
+is_runtime_skip_path() {
+  local rel_path="$1"
+  local normalized=""
+  local prefix=""
+  normalized="$(normalize_rel_path "$rel_path")"
+  [[ -n "$normalized" ]] || return 1
+  for prefix in "${RUNTIME_SKIP_PREFIXES[@]}"; do
+    if [[ "$normalized" == "$prefix" || "$normalized" == "$prefix/"* ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+RUNTIME_SKIP_PREFIXES=()
+init_runtime_skip_prefixes
+
+mapfile -t md_candidates < <(git diff --cached --name-only --diff-filter=ACMR -- '*.md' '*.mdx' || true)
+md_files=()
+for file in "${md_candidates[@]}"; do
+  if [[ "$file" == references/anthropic-skills-guide/* ]]; then
+    continue
+  fi
+  if is_runtime_skip_path "$file"; then
+    continue
+  fi
+  md_files+=("$file")
+done
 
 if [ "${#md_files[@]}" -gt 0 ]; then
   echo "[pre-commit] markdownlint on staged markdown files..."
@@ -155,14 +234,95 @@ PROFILE="__PROFILE__"
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 CWF_LINK_CHECKER="plugins/cwf/skills/refactor/scripts/check-links.sh"
+CWF_ARTIFACT_PATHS="plugins/cwf/scripts/cwf-artifact-paths.sh"
 CWF_INDEX_COVERAGE="plugins/cwf/skills/setup/scripts/check-index-coverage.sh"
 CWF_PROVENANCE="plugins/cwf/scripts/provenance-check.sh"
 CWF_GROWTH_DRIFT="plugins/cwf/scripts/check-growth-drift.sh"
+CWF_SCRIPT_DEPS="plugins/cwf/scripts/check-script-deps.sh"
+CWF_README_STRUCTURE="plugins/cwf/scripts/check-readme-structure.sh"
 
-mapfile -t md_files < <(
-  git ls-files '*.md' '*.mdx' \
-    | grep -Ev '^(\.cwf/projects/|\.cwf/sessions/|\.cwf/prompt-logs/|references/anthropic-skills-guide/)' || true
-)
+normalize_rel_path() {
+  local value="$1"
+  value="${value#./}"
+  value="${value%/}"
+  printf '%s' "$value"
+}
+
+add_skip_prefix() {
+  local rel_path="${1:-}"
+  local normalized=""
+  local existing=""
+  [[ -n "$rel_path" ]] || return 0
+  normalized="$(normalize_rel_path "$rel_path")"
+  [[ -n "$normalized" && "$normalized" != "." ]] || return 0
+  for existing in "${RUNTIME_SKIP_PREFIXES[@]}"; do
+    if [[ "$existing" == "$normalized" ]]; then
+      return 0
+    fi
+  done
+  RUNTIME_SKIP_PREFIXES+=("$normalized")
+}
+
+add_skip_abs_dir() {
+  local abs_path="${1:-}"
+  local rel_path=""
+  [[ -n "$abs_path" ]] || return 0
+  abs_path="${abs_path%/}"
+  if [[ "$abs_path" == "$REPO_ROOT" || "$abs_path" != "$REPO_ROOT/"* ]]; then
+    return 0
+  fi
+  rel_path="${abs_path#"$REPO_ROOT"/}"
+  add_skip_prefix "$rel_path"
+}
+
+init_runtime_skip_prefixes() {
+  local projects_dir=""
+  local sessions_dir=""
+  local prompt_logs_dir=""
+  RUNTIME_SKIP_PREFIXES=()
+  if [[ -f "$CWF_ARTIFACT_PATHS" ]]; then
+    # shellcheck source=plugins/cwf/scripts/cwf-artifact-paths.sh
+    source "$CWF_ARTIFACT_PATHS"
+    projects_dir="$(resolve_cwf_projects_dir "$REPO_ROOT" 2>/dev/null || true)"
+    sessions_dir="$(resolve_cwf_session_logs_dir "$REPO_ROOT" 2>/dev/null || true)"
+    prompt_logs_dir="$(resolve_cwf_prompt_logs_dir "$REPO_ROOT" 2>/dev/null || true)"
+    add_skip_abs_dir "$projects_dir"
+    add_skip_abs_dir "$sessions_dir"
+    add_skip_abs_dir "$prompt_logs_dir"
+  fi
+  add_skip_prefix ".cwf/projects"
+  add_skip_prefix ".cwf/sessions"
+  add_skip_prefix ".cwf/prompt-logs"
+}
+
+is_runtime_skip_path() {
+  local rel_path="$1"
+  local normalized=""
+  local prefix=""
+  normalized="$(normalize_rel_path "$rel_path")"
+  [[ -n "$normalized" ]] || return 1
+  for prefix in "${RUNTIME_SKIP_PREFIXES[@]}"; do
+    if [[ "$normalized" == "$prefix" || "$normalized" == "$prefix/"* ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+RUNTIME_SKIP_PREFIXES=()
+init_runtime_skip_prefixes
+
+mapfile -t md_candidates < <(git ls-files '*.md' '*.mdx' || true)
+md_files=()
+for file in "${md_candidates[@]}"; do
+  if [[ "$file" == references/anthropic-skills-guide/* ]]; then
+    continue
+  fi
+  if is_runtime_skip_path "$file"; then
+    continue
+  fi
+  md_files+=("$file")
+done
 
 if [ "${#md_files[@]}" -gt 0 ]; then
   echo "[pre-push] markdownlint on tracked markdown files..."
@@ -177,11 +337,20 @@ if [[ "$PROFILE" != "fast" ]]; then
 
   if [[ -x "$CWF_INDEX_COVERAGE" ]]; then
     echo "[pre-push] index coverage checks..."
+    CAP_INDEX_FILE=".cwf/indexes/cwf-index.md"
+    if [[ -f "$CWF_ARTIFACT_PATHS" ]]; then
+      # shellcheck source=plugins/cwf/scripts/cwf-artifact-paths.sh
+      source "$CWF_ARTIFACT_PATHS"
+      CAP_INDEX_DIR="$(resolve_cwf_indexes_dir "$REPO_ROOT" 2>/dev/null || true)"
+      if [[ -n "$CAP_INDEX_DIR" ]]; then
+        CAP_INDEX_FILE="${CAP_INDEX_DIR}/cwf-index.md"
+      fi
+    fi
     if [[ -f AGENTS.md ]]; then
       bash "$CWF_INDEX_COVERAGE" AGENTS.md --profile repo
     fi
-    if [[ -f .cwf/indexes/cwf-index.md ]]; then
-      bash "$CWF_INDEX_COVERAGE" .cwf/indexes/cwf-index.md --profile cap
+    if [[ -f "$CAP_INDEX_FILE" ]]; then
+      bash "$CWF_INDEX_COVERAGE" "$CAP_INDEX_FILE" --profile cap
     fi
   else
     echo "[pre-push] $CWF_INDEX_COVERAGE missing or not executable" >&2
@@ -190,6 +359,22 @@ if [[ "$PROFILE" != "fast" ]]; then
 fi
 
 if [[ "$PROFILE" == "strict" ]]; then
+  if [[ -x "$CWF_SCRIPT_DEPS" ]]; then
+    echo "[pre-push] runtime script dependency checks..."
+    bash "$CWF_SCRIPT_DEPS" --strict
+  else
+    echo "[pre-push] $CWF_SCRIPT_DEPS missing or not executable" >&2
+    exit 1
+  fi
+
+  if [[ -x "$CWF_README_STRUCTURE" ]]; then
+    echo "[pre-push] README structure checks..."
+    bash "$CWF_README_STRUCTURE" --strict
+  else
+    echo "[pre-push] $CWF_README_STRUCTURE missing or not executable" >&2
+    exit 1
+  fi
+
   if [[ -x "$CWF_PROVENANCE" ]]; then
     echo "[pre-push] provenance freshness report (inform)..."
     bash "$CWF_PROVENANCE" --level inform

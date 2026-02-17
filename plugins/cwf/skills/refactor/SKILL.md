@@ -39,21 +39,38 @@ Parse the user's input:
 
 ## Quick Scan Mode (no args)
 
-Run the structural scan script:
+Resolve session directory (for deterministic artifact persistence):
 
 ```bash
-bash {SKILL_DIR}/scripts/quick-scan.sh {REPO_ROOT}
+session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . dir)
+```
+
+Run the structural scan script and persist raw output:
+
+```bash
+bash {SKILL_DIR}/scripts/quick-scan.sh {REPO_ROOT} > {session_dir}/refactor-quick-scan.json
 ```
 
 `{REPO_ROOT}` is the git repository root (5 levels up from SKILL.md in marketplace path, or use `git rev-parse --show-toplevel`).
 
-Parse the JSON output and present a summary table:
+Parse the JSON output and present a summary table. Also persist a concise summary to `{session_dir}/refactor-summary.md`:
 
 | Plugin | Skill | Words | Lines | Flags |
 |--------|-------|-------|-------|-------|
 
 - For each flagged skill (flag_count > 0), list the specific flags.
 - Suggest: "Run `cwf:refactor --skill <name>` for a deep review."
+- Include `Mode: cwf:refactor (Quick Scan)` and the scan command in the summary file.
+
+After writing summary artifacts, run deterministic gate:
+
+```bash
+bash {CWF_PLUGIN_DIR}/scripts/check-run-gate-artifacts.sh \
+  --session-dir "{session_dir}" \
+  --stage refactor \
+  --strict \
+  --record-lessons
+```
 
 ---
 
@@ -87,6 +104,7 @@ session_dir: "{live.dir value from resolved live-state file}"
 Apply the [context recovery protocol](../../references/context-recovery-protocol.md) — for each commit N (1-indexed), check `{session_dir}/refactor-tidy-commit-{N}.md`.
 
 For each commit hash that needs analysis, launch a **parallel sub-agent** using Task tool:
+- Shared output persistence contract: [agent-patterns.md § Sub-agent Output Persistence Contract](../../references/agent-patterns.md#sub-agent-output-persistence-contract).
 
 ```yaml
 Task tool:

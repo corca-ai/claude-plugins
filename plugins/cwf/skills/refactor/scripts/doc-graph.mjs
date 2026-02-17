@@ -18,6 +18,77 @@ function normalizeRelPath(pathValue) {
   return pathValue.replaceAll('\\\\', '/').replace(/^\.\//, '');
 }
 
+function normalizeAbsPath(pathValue) {
+  return resolve(pathValue).replaceAll('\\\\', '/').replace(/\/+$/, '');
+}
+
+function readYamlScalar(filePath, key) {
+  if (!existsSync(filePath)) {
+    return '';
+  }
+  const escapedKey = String(key).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp(`^\\s*${escapedKey}\\s*:\\s*(.+)$`);
+  const lines = readFileSync(filePath, 'utf8').split(/\r?\n/);
+  for (const line of lines) {
+    const match = line.match(re);
+    if (!match) {
+      continue;
+    }
+    let value = match[1].trim();
+    const isQuoted =
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"));
+    if (!isQuoted) {
+      value = value.replace(/\s+#.*$/, '').trim();
+    }
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1);
+    }
+    return value;
+  }
+  return '';
+}
+
+function resolveConfigValue(rootDir, key) {
+  const localCfg = resolve(rootDir, '.cwf-config.local.yaml');
+  const sharedCfg = resolve(rootDir, '.cwf-config.yaml');
+  const localValue = readYamlScalar(localCfg, key);
+  if (localValue) {
+    return localValue;
+  }
+  const sharedValue = readYamlScalar(sharedCfg, key);
+  if (sharedValue) {
+    return sharedValue;
+  }
+  if (process.env[key]) {
+    return process.env[key];
+  }
+  return '';
+}
+
+function resolveAbsPath(rootDir, rawPath) {
+  if (!rawPath) {
+    return '';
+  }
+  if (rawPath.startsWith('/')) {
+    return normalizeAbsPath(rawPath);
+  }
+  return normalizeAbsPath(resolve(rootDir, rawPath));
+}
+
+function isPathWithinDir(candidateAbsPath, dirAbsPath) {
+  if (!candidateAbsPath || !dirAbsPath) {
+    return false;
+  }
+  return (
+    candidateAbsPath === dirAbsPath ||
+    candidateAbsPath.startsWith(`${dirAbsPath}/`)
+  );
+}
+
 function loadIgnoreRules(rootDir) {
   const ignoreFilePath = resolve(rootDir, DOC_GRAPH_IGNORE_FILE);
   if (!existsSync(ignoreFilePath)) {
@@ -98,20 +169,80 @@ try {
   repoRoot = process.cwd();
 }
 
+function resolveRuntimeArtifactPaths(rootDir) {
+  const absDirs = new Set();
+  const relPrefixes = new Set();
+
+  const addAbsDir = (candidate) => {
+    if (!candidate) {
+      return;
+    }
+    const normalized = normalizeAbsPath(candidate);
+    absDirs.add(normalized);
+    if (normalized.startsWith(`${normalizeAbsPath(rootDir)}/`)) {
+      relPrefixes.add(normalizeRelPath(relative(rootDir, normalized)));
+    }
+  };
+
+  const configuredArtifactRoot = resolveConfigValue(rootDir, 'CWF_ARTIFACT_ROOT');
+  const configuredProjectsDir = resolveConfigValue(rootDir, 'CWF_PROJECTS_DIR');
+  const configuredPromptLogsDir = resolveConfigValue(rootDir, 'CWF_PROMPT_LOGS_DIR');
+  const configuredSessionLogDir = resolveConfigValue(rootDir, 'CWF_SESSION_LOG_DIR');
+
+  const artifactRoot = resolveAbsPath(rootDir, configuredArtifactRoot || '.cwf');
+  const projectsDir = resolveAbsPath(
+    rootDir,
+    configuredProjectsDir || `${artifactRoot}/projects`
+  );
+  const promptLogsDir = resolveAbsPath(
+    rootDir,
+    configuredPromptLogsDir || `${artifactRoot}/prompt-logs`
+  );
+
+  addAbsDir(artifactRoot);
+  addAbsDir(projectsDir);
+  addAbsDir(`${projectsDir}/sessions`);
+  addAbsDir(promptLogsDir);
+
+  if (configuredSessionLogDir) {
+    addAbsDir(resolveAbsPath(rootDir, configuredSessionLogDir));
+  } else {
+    addAbsDir(`${artifactRoot}/sessions`);
+    addAbsDir(`${projectsDir}/sessions`);
+  }
+
+  // Keep defaults as compatibility fallback regardless of config values.
+  addAbsDir(resolveAbsPath(rootDir, '.cwf'));
+  addAbsDir(resolveAbsPath(rootDir, '.cwf/projects'));
+  addAbsDir(resolveAbsPath(rootDir, '.cwf/sessions'));
+  addAbsDir(resolveAbsPath(rootDir, '.cwf/prompt-logs'));
+
+  return {
+    absDirs: Array.from(absDirs),
+    relPrefixes: Array.from(relPrefixes)
+  };
+}
+
+const runtimeArtifacts = resolveRuntimeArtifactPaths(repoRoot);
+
+function isRuntimeArtifactRelPath(relPath) {
+  const normalized = normalizeRelPath(relPath).replace(/\/+$/, '');
+  return runtimeArtifacts.relPrefixes.some(
+    (prefix) => normalized === prefix || normalized.startsWith(`${prefix}/`)
+  );
+}
+
 function readdirRecursive(dir) {
   const results = [];
   const entries = readdirSync(dir, { withFileTypes: true });
   for (const entry of entries) {
     const fullPath = resolve(dir, entry.name);
     if (entry.isDirectory()) {
-      if (
-        entry.name === '.git' ||
-        entry.name === 'node_modules' ||
-        entry.name === 'projects'
-      ) {
+      if (entry.name === '.git' || entry.name === 'node_modules') {
         continue;
       }
-      if (entry.name === '.cwf') {
+      const fullPathAbs = normalizeAbsPath(fullPath);
+      if (runtimeArtifacts.absDirs.some((artifactDir) => isPathWithinDir(fullPathAbs, artifactDir))) {
         continue;
       }
       results.push(...readdirRecursive(fullPath));
@@ -132,8 +263,7 @@ function collectMdFiles(rootDir) {
       relPath.startsWith('.git/') ||
       relPath.startsWith('node_modules/') ||
       relPath.includes('/node_modules/') ||
-      relPath.startsWith('projects/') ||
-      relPath.startsWith('.cwf/projects/') ||
+      isRuntimeArtifactRelPath(relPath) ||
       relPath === 'CHANGELOG.md' ||
       relPath.startsWith('references/')
     ) {
@@ -310,7 +440,7 @@ const orphans = allMdRel.filter((f) => {
   if (orphanExclude.has(f)) {
     return false;
   }
-  if (f.startsWith('projects/') || f.startsWith('.cwf/projects/')) {
+  if (isRuntimeArtifactRelPath(f)) {
     return false;
   }
   return !inbound[f] || inbound[f].length === 0;

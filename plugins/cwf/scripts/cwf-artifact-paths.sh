@@ -56,8 +56,8 @@ _cwf_read_config_value() {
 _cwf_resolve_config_value() {
   local base_dir="$1"
   local key="$2"
-  local local_cfg="${base_dir}/.cwf/config.local.yaml"
-  local shared_cfg="${base_dir}/.cwf/config.yaml"
+  local local_cfg="${base_dir}/.cwf-config.local.yaml"
+  local shared_cfg="${base_dir}/.cwf-config.yaml"
   local resolved=""
 
   # Project-local override > project-shared config > process environment.
@@ -162,6 +162,36 @@ resolve_cwf_state_file() {
 
   artifact_root="$(resolve_cwf_artifact_root "$base_dir")"
   printf '%s\n' "$artifact_root/cwf-state.yaml"
+}
+
+resolve_cwf_prompt_logs_dir() {
+  local base_dir="$1"
+  local artifact_root
+  local raw_prompt_logs_dir=""
+
+  raw_prompt_logs_dir="$(_cwf_resolve_config_value "$base_dir" "CWF_PROMPT_LOGS_DIR" 2>/dev/null || true)"
+  if [[ -n "$raw_prompt_logs_dir" ]]; then
+    resolve_cwf_abs_path "$base_dir" "$raw_prompt_logs_dir"
+    return 0
+  fi
+
+  artifact_root="$(resolve_cwf_artifact_root "$base_dir")"
+  printf '%s\n' "$artifact_root/prompt-logs"
+}
+
+resolve_cwf_indexes_dir() {
+  local base_dir="$1"
+  local artifact_root
+  local raw_indexes_dir=""
+
+  raw_indexes_dir="$(_cwf_resolve_config_value "$base_dir" "CWF_INDEXES_DIR" 2>/dev/null || true)"
+  if [[ -n "$raw_indexes_dir" ]]; then
+    resolve_cwf_abs_path "$base_dir" "$raw_indexes_dir"
+    return 0
+  fi
+
+  artifact_root="$(resolve_cwf_artifact_root "$base_dir")"
+  printf '%s\n' "$artifact_root/indexes"
 }
 
 # Return a stable projects-path prefix for script output.

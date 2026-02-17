@@ -156,6 +156,23 @@ When `--mode plan` or `--mode code` is used, `cwf:review` receives the plan's su
 - **Behavioral criteria** (BDD-style Given/When/Then): checked as a pass/fail list
 - **Qualitative criteria** (narrative): addressed in the verdict prose
 
+## Sub-agent Output Persistence Contract
+
+Use this shared block whenever a skill instructs sub-agents to persist outputs:
+
+```text
+## Output Persistence
+Write your complete findings to: {session_dir}/{output_file}.md
+At the very end of the file, append this sentinel marker on its own line:
+<!-- AGENT_COMPLETE -->
+```
+
+Conformance rules:
+
+- Reuse this contract by reference instead of duplicating prose variants.
+- Keep `{session_dir}` and deterministic filenames explicit per slot.
+- The sentinel line must match exactly.
+
 ## Broken Link Triage Protocol
 
 When a broken link is detected (e.g., by `check-links-local.sh`), the agent should **NOT** default to "remove the reference." Instead, follow this triage:
@@ -192,7 +209,26 @@ For each file that references the missing target, classify the reference:
 
 Rule: never treat "broken link" as "remove reference" by default. Determine why the file is missing before editing references.
 
-### 4. Record the triage decision
+### 4. Triage record contract (structural)
+
+Each triage item must carry the original recommendation and runtime impact evidence, not a summary-only action:
+
+```yaml
+triage_item:
+  source_ref: "<analysis file>:<line>"
+  source_recommendation: "<original recommendation>"
+  triage_action: "<restore|update-docs|remove-stale-ref|defer>"
+  runtime_caller_check: "<command + result>"
+  deletion_premortem: "<what breaks if deleted>"
+  decision_id: "<stable id>"
+```
+
+Contract rules:
+- If `source_recommendation` is missing, the triage item is invalid.
+- If `triage_action` differs from `source_recommendation`, ask the user before applying the change.
+- For deletion actions, `runtime_caller_check` and `deletion_premortem` are mandatory.
+
+### 5. Record the triage decision
 
 Persist the triage decision in the current session's artifacts — either `lessons.md` or `live.decision_journal` in the resolved live-state file.
 
@@ -205,7 +241,8 @@ This means agents encountering a hook block should:
 1. Read the broken link details from the hook output
 2. Follow the triage protocol above (git log → classify callers → decision matrix)
 3. Take the appropriate action from the decision matrix — **not** simply remove the reference to make the hook pass
-4. Record the triage decision before re-attempting the edit
+4. Ensure the triage item satisfies the structural contract
+5. Record the triage decision before re-attempting the edit
 
 ## Web Research Protocol
 

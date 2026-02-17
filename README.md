@@ -30,7 +30,7 @@ cwf:setup
 `cwf:setup` standardizes first-run behavior by handling:
 
 - legacy env migration to canonical `CWF_*` keys
-- project config bootstrap (`.cwf/config.yaml`, `.cwf/config.local.yaml`)
+- project config bootstrap (`.cwf-config.yaml`, `.cwf-config.local.yaml`)
 - tool detection (Codex/Gemini/Tavily/Exa) and optional Codex integration
 - local runtime dependency checks with install prompts (`shellcheck`, `jq`, `gh`, `node`, `python3`)
 - optional index generation (improves agent routing and progressive-disclosure navigation)
@@ -396,7 +396,7 @@ Standardizes hooks, tool detection, and environment contracts in one initial pas
 
 **What It Does**
 
-Interactive hook-group toggles, external AI CLI/API detection (Codex, Gemini, Tavily, Exa), env migration (legacy keys to canonical `CWF_*`), project config bootstrap (`.cwf/config.yaml`, `.cwf/config.local.yaml`), optional Codex integration (skills + wrapper), and optional index generation/refresh. Use `cwf:setup --cap-index` for capability index and `cwf:setup --repo-index --target agents` for repository index.
+Interactive hook-group toggles, external AI CLI/API detection (Codex, Gemini, Tavily, Exa), env migration (legacy keys to canonical `CWF_*`), project config bootstrap (`.cwf-config.yaml`, `.cwf-config.local.yaml`), optional Codex integration (skills + wrapper), and optional index generation/refresh. Use `cwf:setup --cap-index` for capability index and `cwf:setup --repo-index --target agents` for repository index.
 
 ### [update](plugins/cwf/skills/update/SKILL.md)
 
@@ -471,17 +471,17 @@ CWF includes 7 hook groups that run automatically. All are enabled by default; u
 
 CWF runtime loads configuration in this priority order:
 
-1. `.cwf/config.local.yaml` (local/secret, highest priority)
-2. `.cwf/config.yaml` (team-shared defaults)
+1. `.cwf-config.local.yaml` (local/secret, highest priority)
+2. `.cwf-config.yaml` (team-shared defaults)
 3. Process environment
 4. Shell profiles (`~/.zshenv`, `~/.zprofile`, `~/.zshrc`, `~/.bash_profile`, `~/.bashrc`, `~/.profile`)
 
-`cwf:setup` environment flow migrates legacy keys to canonical `CWF_*`, bootstraps project config templates, and ensures `.cwf/config.local.yaml` is gitignored.
+`cwf:setup` environment flow migrates legacy keys to canonical `CWF_*`, bootstraps project config templates, and ensures `.cwf-config.local.yaml` is gitignored.
 
-Use `.cwf/config.yaml` for shared non-secret defaults:
+Use `.cwf-config.yaml` for shared non-secret defaults:
 
 ```yaml
-# .cwf/config.yaml
+# .cwf-config.yaml
 # Optional artifact path overrides
 # CWF_ARTIFACT_ROOT: ".cwf"
 # CWF_PROJECTS_DIR: ".cwf/projects"
@@ -497,10 +497,10 @@ Use `.cwf/config.yaml` for shared non-secret defaults:
 # CWF_SESSION_LOG_AUTO_COMMIT: false
 ```
 
-Use `.cwf/config.local.yaml` for local/secret values:
+Use `.cwf-config.local.yaml` for local/secret values:
 
 ```yaml
-# .cwf/config.local.yaml
+# .cwf-config.local.yaml
 SLACK_BOT_TOKEN: "xoxb-your-bot-token"
 SLACK_CHANNEL_ID: "D0123456789"
 TAVILY_API_KEY: "tvly-your-key"

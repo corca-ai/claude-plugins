@@ -3,10 +3,16 @@
 This file maps scripts under [plugins/cwf/scripts](.).
 
 - [check-session.sh](check-session.sh): Validates session artifacts and semantic closure checks.
-- [check-growth-drift.sh](check-growth-drift.sh): Reports cross-surface drift across skills/docs/scripts/state/provenance.
+- [check-growth-drift.sh](check-growth-drift.sh): Reports cross-surface drift across skills/docs/scripts/state/provenance, with optional strict hook regression execution via `--strict-hooks`.
+- [test-hook-exit-codes.sh](test-hook-exit-codes.sh): Deterministic hook allow/block regression suite (`--suite`, `--strict`) with hooks-manifest driven target discovery.
+- [check-script-deps.sh](check-script-deps.sh): Validates runtime script dependency edges from hooks manifest and script references.
+- [check-readme-structure.sh](check-readme-structure.sh): Verifies heading-level structure parity between the root English and Korean README documents.
+- [check-review-routing.sh](check-review-routing.sh): Validates review routing cutoff contract (`prompt_lines > 1200`) and deterministic fallback expectations.
+- [check-shared-reference-conformance.sh](check-shared-reference-conformance.sh): Verifies shared output-persistence reference adoption across composing skills and duplication threshold.
+- [check-run-gate-artifacts.sh](check-run-gate-artifacts.sh): Validates stage artifacts for `cwf:run` gate closure (`review-code`, `refactor`, `retro`, `ship`) and can append gate failures to `lessons.md`.
 - [next-prompt-dir.sh](next-prompt-dir.sh): Computes next session directory name, with optional `--bootstrap` to initialize artifacts and register `cwf-state.yaml` session metadata.
-- [cwf-artifact-paths.sh](cwf-artifact-paths.sh): Resolves artifact/state/projects paths with project-config precedence (.cwf/config.local.yaml → .cwf/config.yaml → env).
-- [cwf-live-state.sh](cwf-live-state.sh): Resolves/syncs hybrid live-state files and updates top-level live scalars with session-first writes plus root-summary sync (`resolve`, `sync`, `set key=value`).
+- [cwf-artifact-paths.sh](cwf-artifact-paths.sh): Resolves artifact/state/projects paths with project-config precedence (.cwf-config.local.yaml → .cwf-config.yaml → env).
+- [cwf-live-state.sh](cwf-live-state.sh): Resolves/syncs hybrid live-state files, reads live scalars/lists (`get`, `list-get`), updates top-level live fields (`set`, `list-set`, `list-remove`), and appends replay-safe decision entries (`journal-append`).
 - [retro-collect-evidence.sh](retro-collect-evidence.sh): Collects retro evidence snapshot (token-limit signals, HITL decisions/events, warning lines, changed-files context).
 - [provenance-check.sh](provenance-check.sh): Verifies provenance sidecar freshness against current CWF skill/hook counts.
 - [codex/codex-with-log.sh](codex/codex-with-log.sh): Wrapper entrypoint that runs Codex and syncs logs.

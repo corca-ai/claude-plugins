@@ -12,11 +12,12 @@ set -euo pipefail
 # file content but do not remove files from the filesystem, so they are out of scope
 # for deletion safety.
 
-# shellcheck disable=SC2034
 HOOK_GROUP="deletion_safety"
-# shellcheck source=cwf-hook-gate.sh
-# shellcheck disable=SC1091
-source "$(dirname "${BASH_SOURCE[0]}")/cwf-hook-gate.sh"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PLUGIN_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+ARTIFACT_PATHS_SCRIPT="$PLUGIN_ROOT/scripts/cwf-artifact-paths.sh"
+# shellcheck source=plugins/cwf/hooks/scripts/cwf-hook-gate.sh
+source "$SCRIPT_DIR/cwf-hook-gate.sh"
 
 INPUT="$(cat)"
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || true)"
@@ -82,6 +83,107 @@ to_repo_rel() {
   fi
 
   printf '%s' "$rel"
+}
+
+normalize_rel_path() {
+  local value="$1"
+  value="${value#./}"
+  value="${value%/}"
+  printf '%s' "$value"
+}
+
+append_runtime_artifact_prefix() {
+  local candidate_rel="${1:-}"
+  local normalized=""
+  local existing=""
+
+  [[ -n "$candidate_rel" ]] || return 0
+  normalized="$(normalize_rel_path "$candidate_rel")"
+  [[ -n "$normalized" && "$normalized" != "." ]] || return 0
+
+  for existing in "${RUNTIME_ARTIFACT_PREFIXES[@]}"; do
+    if [[ "$existing" == "$normalized" ]]; then
+      return 0
+    fi
+  done
+  RUNTIME_ARTIFACT_PREFIXES+=("$normalized")
+}
+
+append_runtime_artifact_abs() {
+  local abs_path="${1:-}"
+  local rel=""
+
+  [[ -n "$abs_path" ]] || return 0
+  abs_path="${abs_path%/}"
+
+  if [[ "$abs_path" == "$REPO_ROOT" || "$abs_path" != "$REPO_ROOT/"* ]]; then
+    return 0
+  fi
+  rel="${abs_path#"$REPO_ROOT"/}"
+  append_runtime_artifact_prefix "$rel"
+}
+
+init_runtime_artifact_prefixes() {
+  local projects_dir=""
+  local sessions_dir=""
+  local prompt_logs_dir=""
+
+  RUNTIME_ARTIFACT_PREFIXES=()
+  if [[ -f "$ARTIFACT_PATHS_SCRIPT" ]]; then
+    # shellcheck source=plugins/cwf/scripts/cwf-artifact-paths.sh
+    source "$ARTIFACT_PATHS_SCRIPT"
+    projects_dir="$(resolve_cwf_projects_dir "$REPO_ROOT" 2>/dev/null || true)"
+    sessions_dir="$(resolve_cwf_session_logs_dir "$REPO_ROOT" 2>/dev/null || true)"
+    prompt_logs_dir="$(resolve_cwf_prompt_logs_dir "$REPO_ROOT" 2>/dev/null || true)"
+    append_runtime_artifact_abs "$projects_dir"
+    append_runtime_artifact_abs "$sessions_dir"
+    append_runtime_artifact_abs "$prompt_logs_dir"
+  fi
+
+  append_runtime_artifact_prefix ".cwf/projects"
+  append_runtime_artifact_prefix ".cwf/sessions"
+  append_runtime_artifact_prefix ".cwf/prompt-logs"
+}
+
+is_runtime_artifact_rel() {
+  local rel_path="$1"
+  local normalized=""
+  local prefix=""
+
+  normalized="$(normalize_rel_path "$rel_path")"
+  [[ -n "$normalized" ]] || return 1
+
+  for prefix in "${RUNTIME_ARTIFACT_PREFIXES[@]}"; do
+    if [[ "$normalized" == "$prefix" || "$normalized" == "$prefix/"* ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+is_external_tmp_artifact() {
+  local raw_path="$1"
+  local tmp_root=""
+
+  raw_path="$(trim_ws "$raw_path")"
+  raw_path="$(strip_quotes "$raw_path")"
+  [[ "$raw_path" == /* ]] || return 1
+
+  if [[ "$raw_path" == "$REPO_ROOT/"* ]]; then
+    return 1
+  fi
+
+  case "$raw_path" in
+    /tmp/*|/private/tmp/*) return 0 ;;
+  esac
+
+  tmp_root="${TMPDIR:-}"
+  tmp_root="${tmp_root%/}"
+  if [[ -n "$tmp_root" && "$raw_path" == "$tmp_root"/* ]]; then
+    return 0
+  fi
+
+  return 1
 }
 
 extract_deleted_from_bash() {
@@ -171,8 +273,8 @@ TOOL_NAME=""
 TOOL_COMMAND=""
 
 if command -v jq >/dev/null 2>&1; then
-  TOOL_NAME="$(echo "$INPUT" | jq -r '.tool_name // .tool // empty')"
-  TOOL_COMMAND="$(echo "$INPUT" | jq -r '.tool_input.command // empty')"
+  TOOL_NAME="$(printf '%s' "$INPUT" | jq -r '.tool_name // .tool // empty')"
+  TOOL_COMMAND="$(printf '%s' "$INPUT" | jq -r '.tool_input.command // empty')"
 else
   if printf '%s' "$INPUT" | grep -Eiq 'git[[:space:]]+rm|(^|[^[:alnum:]_])rm[[:space:]]|unlink[[:space:]]'; then
     json_block "Deletion safety gate requires jq for safe parsing."
@@ -184,6 +286,9 @@ DELETED_RAW=()
 WILDCARD_DELETE=0
 SEARCH_FAILED=0
 SEARCH_ERROR=""
+RUNTIME_ARTIFACT_PREFIXES=()
+
+init_runtime_artifact_prefixes
 
 if [[ "$TOOL_NAME" == "Bash" && -n "$TOOL_COMMAND" ]]; then
   extract_deleted_from_bash "$TOOL_COMMAND"
@@ -199,17 +304,20 @@ fi
 
 DELETED_REL=()
 for candidate in "${DELETED_RAW[@]}"; do
+  if is_external_tmp_artifact "$candidate"; then
+    continue
+  fi
+
   rel_path="$(to_repo_rel "$candidate" || true)"
   [[ -n "$rel_path" ]] || continue
 
-  # Skip non-project paths (not worth caller-searching)
+  # Skip generated/session artifacts (not production runtime callers)
   case "$rel_path" in
-    node_modules/*|.cwf/projects/*|tmp/*) continue ;;
+    node_modules/*) continue ;;
   esac
-  # Skip absolute /tmp/ paths that survived to_repo_rel
-  case "$candidate" in
-    /tmp/*) continue ;;
-  esac
+  if is_runtime_artifact_rel "$rel_path"; then
+    continue
+  fi
 
   is_dup=0
   for existing in "${DELETED_REL[@]}"; do
@@ -249,8 +357,22 @@ for rel_path in "${DELETED_REL[@]}"; do
   fi
 
   combined_hits="$(printf '%s\n' "$combined_hits" | sed '/^$/d' | sed 's#^\./##' | sort -u)"
-  # Exclude the deleted file itself from caller results (grep -rl returns bare paths)
-  combined_hits="$(printf '%s\n' "$combined_hits" | grep -vxF "$rel_path" || true)"
+  filtered_hits=()
+  while IFS= read -r caller_path; do
+    [[ -n "$caller_path" ]] || continue
+    if [[ "$caller_path" == "$rel_path" ]]; then
+      continue
+    fi
+    if is_runtime_artifact_rel "$caller_path"; then
+      continue
+    fi
+    filtered_hits+=("$caller_path")
+  done <<< "$combined_hits"
+  if [[ ${#filtered_hits[@]} -gt 0 ]]; then
+    combined_hits="$(printf '%s\n' "${filtered_hits[@]}" | sort -u)"
+  else
+    combined_hits=""
+  fi
   if [[ -z "$combined_hits" ]]; then
     continue
   fi

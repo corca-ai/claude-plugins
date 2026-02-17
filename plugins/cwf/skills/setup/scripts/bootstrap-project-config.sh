@@ -3,8 +3,8 @@ set -euo pipefail
 
 # bootstrap-project-config.sh
 # Initialize project-scoped CWF config files:
-#   - .cwf/config.yaml (shared, non-secret)
-#   - .cwf/config.local.yaml (local/secret, gitignored)
+#   - .cwf-config.yaml (shared, non-secret)
+#   - .cwf-config.local.yaml (local/secret, gitignored)
 #
 # Usage:
 #   bootstrap-project-config.sh [--project-root <path>] [--force]
@@ -88,7 +88,7 @@ write_if_missing_or_forced() {
 
 ensure_gitignore_entry() {
   local gitignore_path="$1"
-  local entry=".cwf/config.local.yaml"
+  local entry=".cwf-config.local.yaml"
 
   if [[ -f "$gitignore_path" ]] && grep -qxF "$entry" "$gitignore_path"; then
     printf '%s\n' "present"
@@ -114,13 +114,13 @@ if [[ ! -d "$PROJECT_ROOT" ]]; then
   exit 1
 fi
 
-SHARED_CONFIG_PATH="$PROJECT_ROOT/.cwf/config.yaml"
-LOCAL_CONFIG_PATH="$PROJECT_ROOT/.cwf/config.local.yaml"
+SHARED_CONFIG_PATH="$PROJECT_ROOT/.cwf-config.yaml"
+LOCAL_CONFIG_PATH="$PROJECT_ROOT/.cwf-config.local.yaml"
 GITIGNORE_PATH="$PROJECT_ROOT/.gitignore"
 
 read -r -d '' SHARED_TEMPLATE <<'EOF' || true
 # CWF project-shared config (non-secret).
-# Priority: .cwf/config.local.yaml > .cwf/config.yaml > process env > shell profile
+# Priority: .cwf-config.local.yaml > .cwf-config.yaml > process env > shell profile
 #
 # Put repository-wide defaults here (safe to commit).
 
@@ -131,6 +131,7 @@ read -r -d '' SHARED_TEMPLATE <<'EOF' || true
 
 # Optional runtime overrides (non-secret)
 # CWF_GATHER_OUTPUT_DIR: ".cwf/projects"
+# CWF_RUN_AMBIGUITY_MODE: "defer-blocking"
 # CWF_READ_WARN_LINES: 500
 # CWF_READ_DENY_LINES: 2000
 # CWF_SESSION_LOG_DIR: ".cwf/sessions"

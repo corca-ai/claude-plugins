@@ -1,0 +1,4 @@
+# CWF shared project config
+
+# cwf:run ambiguity handling mode
+CWF_RUN_AMBIGUITY_MODE: "defer-blocking"

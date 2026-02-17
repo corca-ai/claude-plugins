@@ -15,6 +15,10 @@ set -euo pipefail
 #     Print effective live-state file path.
 #   sync [base_dir]
 #     Copy root live section to session live-state file and upsert live.state_file pointer.
+#   get [base_dir] key
+#     Read a scalar field from resolved live state and print normalized value.
+#   list-get [base_dir] key
+#     Read a list field from resolved live state and print one item per line.
 #   set [base_dir] key=value [key=value ...]
 #     Update top-level scalar fields in live state (session-first write target)
 #     and synchronize root live summary fields for compatibility.
@@ -22,6 +26,8 @@ set -euo pipefail
 #     Replace a top-level list field in live state and synchronize root/session state.
 #   list-remove [base_dir] key item
 #     Remove a single item from a list field (idempotent).
+#   journal-append [base_dir] '<entry-json>'
+#     Append/replace a decision_journal entry by decision_id with bounded retention.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RESOLVER_SCRIPT="$SCRIPT_DIR/cwf-artifact-paths.sh"
@@ -335,6 +341,53 @@ cwf_live_extract_list_from_file() {
   ' "$file_path"
 }
 
+cwf_live_validate_query_key() {
+  local key="$1"
+  [[ "$key" =~ ^[A-Za-z0-9_-]+$ ]]
+}
+
+cwf_live_get_scalar() {
+  local base_dir="${1:-.}"
+  local key="${2:-}"
+  local effective_state=""
+  local raw_value=""
+
+  if [[ -z "$key" ]]; then
+    echo "get requires a key" >&2
+    return 2
+  fi
+  if ! cwf_live_validate_query_key "$key"; then
+    echo "Invalid key for get: $key" >&2
+    return 2
+  fi
+
+  effective_state="$(cwf_live_resolve_file "$base_dir")"
+  [[ -f "$effective_state" ]] || return 1
+
+  raw_value="$(cwf_live_extract_scalar_from_file "$effective_state" "$key" || true)"
+  printf '%s\n' "$(cwf_live_normalize_scalar "$raw_value")"
+}
+
+cwf_live_get_list() {
+  local base_dir="${1:-.}"
+  local key="${2:-}"
+  local effective_state=""
+
+  if [[ -z "$key" ]]; then
+    echo "list-get requires a key" >&2
+    return 2
+  fi
+  if ! cwf_live_validate_query_key "$key"; then
+    echo "Invalid key for list-get: $key" >&2
+    return 2
+  fi
+
+  effective_state="$(cwf_live_resolve_file "$base_dir")"
+  [[ -f "$effective_state" ]] || return 1
+
+  cwf_live_extract_list_from_file "$effective_state" "$key"
+}
+
 cwf_live_upsert_live_list() {
   local state_file="$1"
   local key="$2"
@@ -439,6 +492,135 @@ cwf_live_remove_list_item() {
   rm -f "$list_file"
 }
 
+cwf_live_trim_list_file_to_max() {
+  local list_file="$1"
+  local max_entries="$2"
+  local current_count=0
+  local tmp_file=""
+
+  current_count="$(wc -l < "$list_file" | tr -d ' ')"
+  if [[ -z "$current_count" || "$current_count" -le "$max_entries" ]]; then
+    return 0
+  fi
+
+  tmp_file="$(mktemp)"
+  tail -n "$max_entries" "$list_file" > "$tmp_file"
+  mv "$tmp_file" "$list_file"
+}
+
+cwf_live_journal_append() {
+  local base_dir="${1:-.}"
+  local raw_entry_json="${2:-}"
+  local root_state=""
+  local effective_state=""
+  local rel_path=""
+  local entry_json=""
+  local decision_id=""
+  local supersedes=""
+  local synced_state=""
+  local max_entries="${CWF_DECISION_JOURNAL_MAX_ENTRIES:-50}"
+  local list_file=""
+  local existing=""
+  local existing_id=""
+  local normalized_existing=""
+  local new_entry_added=0
+  local state_version=""
+  local idx_key=""
+  local required_keys=(decision_id ts session_id question answer source_hook state_version)
+
+  if [[ -z "$raw_entry_json" ]]; then
+    echo "journal-append requires an entry JSON argument" >&2
+    return 2
+  fi
+  if ! command -v jq >/dev/null 2>&1; then
+    echo "journal-append requires jq" >&2
+    return 2
+  fi
+  if [[ ! "$max_entries" =~ ^[0-9]+$ ]] || [[ "$max_entries" -le 0 ]]; then
+    max_entries=50
+  fi
+
+  entry_json="$(printf '%s' "$raw_entry_json" | jq -c . 2>/dev/null || true)"
+  if [[ -z "$entry_json" ]]; then
+    echo "journal-append requires valid JSON" >&2
+    return 2
+  fi
+
+  for idx_key in "${required_keys[@]}"; do
+    if [[ "$(printf '%s' "$entry_json" | jq -r --arg k "$idx_key" '.[$k] // empty')" == "" ]]; then
+      echo "journal-append missing required field: $idx_key" >&2
+      return 2
+    fi
+  done
+
+  decision_id="$(printf '%s' "$entry_json" | jq -r '.decision_id // empty')"
+  supersedes="$(printf '%s' "$entry_json" | jq -r '.supersedes // empty')"
+
+  root_state="$(cwf_live_resolve_root_state_file "$base_dir")"
+  [[ -f "$root_state" ]] || return 1
+  effective_state="$(cwf_live_resolve_file "$base_dir")"
+  [[ -n "$effective_state" ]] || return 1
+
+  list_file="$(mktemp)"
+  while IFS= read -r existing; do
+    [[ -n "$existing" ]] || continue
+    normalized_existing="$(printf '%s' "$existing" | jq -c . 2>/dev/null || true)"
+    if [[ -z "$normalized_existing" ]]; then
+      normalized_existing="$(printf '%s' "$existing" | sed 's/\\"/"/g' | jq -c . 2>/dev/null || true)"
+    fi
+    if [[ -z "$normalized_existing" ]]; then
+      normalized_existing="$existing"
+    fi
+
+    existing_id="$(printf '%s' "$normalized_existing" | jq -r '.decision_id // empty' 2>/dev/null || true)"
+    if [[ "$existing_id" == "$decision_id" ]]; then
+      if [[ "$new_entry_added" -eq 0 ]]; then
+        printf '%s\n' "$entry_json" >> "$list_file"
+        new_entry_added=1
+      fi
+      continue
+    fi
+    if [[ -n "$supersedes" && "$existing_id" == "$supersedes" ]]; then
+      continue
+    fi
+    printf '%s\n' "$normalized_existing" >> "$list_file"
+  done < <(cwf_live_extract_list_from_file "$effective_state" "decision_journal" || true)
+
+  if [[ "$new_entry_added" -eq 0 ]]; then
+    printf '%s\n' "$entry_json" >> "$list_file"
+  fi
+
+  cwf_live_trim_list_file_to_max "$list_file" "$max_entries"
+
+  if [[ "$effective_state" == "$root_state" ]]; then
+    cwf_live_upsert_live_list "$root_state" "decision_journal" "$list_file"
+    state_version="$(cwf_live_bump_state_version "$root_state")"
+    synced_state="$(cwf_live_sync_from_root "$base_dir" 2>/dev/null || true)"
+    if [[ -n "$synced_state" && -f "$synced_state" ]]; then
+      cwf_live_upsert_live_list "$synced_state" "decision_journal" "$list_file"
+      cwf_live_upsert_live_scalar "$synced_state" "state_version" "$state_version"
+      rm -f "$list_file"
+      printf '%s\n' "$synced_state"
+      return 0
+    fi
+    rm -f "$list_file"
+    printf '%s\n' "$root_state"
+    return 0
+  fi
+
+  cwf_live_upsert_live_list "$effective_state" "decision_journal" "$list_file"
+  state_version="$(cwf_live_bump_state_version "$effective_state")"
+
+  cwf_live_upsert_live_list "$root_state" "decision_journal" "$list_file"
+  cwf_live_upsert_live_scalar "$root_state" "state_version" "$state_version"
+
+  rel_path="$(cwf_live_to_repo_rel_path "$base_dir" "$effective_state")"
+  cwf_live_upsert_state_file_pointer "$root_state" "$rel_path" >/dev/null || true
+
+  rm -f "$list_file"
+  printf '%s\n' "$effective_state"
+}
+
 cwf_live_extract_state_version() {
   local state_file="$1"
   local current=""
@@ -503,6 +685,76 @@ cwf_live_sync_from_root() {
   printf '%s\n' "$target_state"
 }
 
+cwf_live_validate_run_done_transition() {
+  local base_dir="$1"
+  shift || true
+  local assignment=""
+  local key=""
+  local value=""
+  local phase_target=""
+  local current_pipeline=""
+  local remaining_raw=""
+  local gate_checker=""
+  local session_dir_raw=""
+  local session_dir_abs=""
+
+  for assignment in "$@"; do
+    [[ "$assignment" == *=* ]] || continue
+    key="${assignment%%=*}"
+    value="${assignment#*=}"
+    if [[ "$key" == "phase" ]]; then
+      phase_target="$value"
+      break
+    fi
+  done
+
+  if [[ "$phase_target" != "done" ]]; then
+    return 0
+  fi
+
+  current_pipeline="$(cwf_live_get_scalar "$base_dir" "active_pipeline" 2>/dev/null || true)"
+  if [[ "$current_pipeline" != "cwf:run" ]]; then
+    return 0
+  fi
+
+  remaining_raw="$(cwf_live_get_list "$base_dir" "remaining_gates" 2>/dev/null || true)"
+  if printf '%s\n' "$remaining_raw" | sed '/^$/d' | grep -q .; then
+    echo "Cannot set phase=done while live.active_pipeline=cwf:run and remaining_gates is non-empty" >&2
+    return 1
+  fi
+
+  gate_checker="$SCRIPT_DIR/check-run-gate-artifacts.sh"
+  if [[ ! -x "$gate_checker" ]]; then
+    echo "Cannot set phase=done for cwf:run: missing gate checker ($gate_checker)" >&2
+    return 1
+  fi
+
+  session_dir_raw="$(cwf_live_get_scalar "$base_dir" "dir" 2>/dev/null || true)"
+  if [[ -z "$session_dir_raw" ]]; then
+    echo "Cannot set phase=done for cwf:run: live.dir is empty" >&2
+    return 1
+  fi
+
+  if [[ "$session_dir_raw" == /* ]]; then
+    session_dir_abs="$session_dir_raw"
+  else
+    session_dir_abs="$(cwf_live_to_abs_path "$base_dir" "$session_dir_raw")"
+  fi
+
+  if ! bash "$gate_checker" \
+    --session-dir "$session_dir_abs" \
+    --stage review-code \
+    --stage refactor \
+    --stage retro \
+    --stage ship \
+    --strict; then
+    echo "Cannot set phase=done for cwf:run: run gate artifact check failed" >&2
+    return 1
+  fi
+
+  return 0
+}
+
 cwf_live_set_scalars() {
   local base_dir="${1:-.}"
   shift || true
@@ -511,6 +763,7 @@ cwf_live_set_scalars() {
   local synced_state=""
   local rel_path=""
   local assignment=""
+  local assignments=()
   local key=""
   local value=""
   local keys=()
@@ -535,9 +788,14 @@ cwf_live_set_scalars() {
       echo "Unsupported scalar key for set: $key" >&2
       return 2
     fi
+    assignments+=("$assignment")
     keys+=("$key")
     values+=("$value")
   done
+
+  if ! cwf_live_validate_run_done_transition "$base_dir" "${assignments[@]}"; then
+    return 1
+  fi
 
   root_state="$(cwf_live_resolve_root_state_file "$base_dir")"
   [[ -f "$root_state" ]] || return 1
@@ -709,6 +967,40 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
       base_dir="${1:-.}"
       cwf_live_sync_from_root "$base_dir"
       ;;
+    get)
+      case "$#" in
+        1)
+          base_dir="."
+          get_key="$1"
+          ;;
+        2)
+          base_dir="$1"
+          get_key="$2"
+          ;;
+        *)
+          echo "get requires: [base_dir] key" >&2
+          exit 2
+          ;;
+      esac
+      cwf_live_get_scalar "$base_dir" "$get_key"
+      ;;
+    list-get)
+      case "$#" in
+        1)
+          base_dir="."
+          get_list_key="$1"
+          ;;
+        2)
+          base_dir="$1"
+          get_list_key="$2"
+          ;;
+        *)
+          echo "list-get requires: [base_dir] key" >&2
+          exit 2
+          ;;
+      esac
+      cwf_live_get_list "$base_dir" "$get_list_key"
+      ;;
     set)
       base_dir="."
       if [[ "${1:-}" == *=* || -z "${1:-}" ]]; then
@@ -771,14 +1063,32 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
       fi
       printf '%s\n' "$effective_state"
       ;;
+    journal-append)
+      base_dir="."
+      if [[ "$#" -lt 1 ]]; then
+        echo "journal-append requires: [base_dir] <entry-json>" >&2
+        exit 2
+      fi
+      if [[ "$#" -eq 1 ]]; then
+        ja_entry="$1"
+      else
+        base_dir="$1"
+        shift
+        ja_entry="$1"
+      fi
+      cwf_live_journal_append "$base_dir" "$ja_entry"
+      ;;
     -h|--help)
       sed -n '3,22p' "$0" | sed 's/^# \?//'
       ;;
     *)
       echo "Usage: $0 {resolve|sync} [base_dir]" >&2
+      echo "       $0 get [base_dir] key" >&2
+      echo "       $0 list-get [base_dir] key" >&2
       echo "       $0 set [base_dir] key=value [key=value ...]" >&2
       echo "       $0 list-set [base_dir] key=item1,item2,..." >&2
       echo "       $0 list-remove [base_dir] key item" >&2
+      echo "       $0 journal-append [base_dir] '<entry-json>'" >&2
       exit 2
       ;;
   esac
