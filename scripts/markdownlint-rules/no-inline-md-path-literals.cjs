@@ -10,6 +10,7 @@
 // - skips already-linked labels: [`path`](path)
 
 const path = require("path");
+const fs = require("fs");
 
 const RULE_NAME = "CORCA001";
 const RULE_ALIASES = [
@@ -36,6 +37,7 @@ const README_INLINE_PATH_EXEMPT = new Set(["README.md", "README.ko.md"]);
 const README_INLINE_PATH_EXEMPT_ABS = new Set(
   ["README.md", "README.ko.md"].map((p) => path.resolve(process.cwd(), p))
 );
+const RUNTIME_PATH_CACHE = new Map();
 
 function isReadmeInlinePathExempt(fileName) {
   if (!fileName) {
@@ -77,6 +79,202 @@ function isLinkableRepoPath(content) {
   return ROOT_DOCS.has(base);
 }
 
+function escapeRegex(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function normalizeAbsPath(value) {
+  return path
+    .normalize(value)
+    .replace(/\\/g, "/")
+    .replace(/\/+$/, "");
+}
+
+function findRepoRoot(fileName) {
+  let current = path.resolve(fileName || process.cwd());
+
+  if (path.extname(current)) {
+    current = path.dirname(current);
+  }
+
+  while (true) {
+    if (
+      fs.existsSync(path.join(current, ".git")) ||
+      fs.existsSync(path.join(current, ".cwf"))
+    ) {
+      return current;
+    }
+    const parent = path.dirname(current);
+    if (parent === current) {
+      break;
+    }
+    current = parent;
+  }
+
+  return process.cwd();
+}
+
+function readYamlScalar(filePath, key) {
+  if (!fs.existsSync(filePath)) {
+    return "";
+  }
+  const escaped = escapeRegex(key);
+  const re = new RegExp(`^\\s*${escaped}\\s*:\\s*(.+)$`);
+  const lines = fs.readFileSync(filePath, "utf8").split(/\r?\n/);
+
+  for (const line of lines) {
+    const match = line.match(re);
+    if (!match) {
+      continue;
+    }
+    let value = match[1].trim();
+    const isQuoted =
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"));
+    if (!isQuoted) {
+      value = value.replace(/\s+#.*$/, "").trim();
+    }
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1);
+    }
+    return value;
+  }
+
+  return "";
+}
+
+function resolveConfigValue(repoRoot, key) {
+  const localCfg = path.join(repoRoot, ".cwf", "config.local.yaml");
+  const sharedCfg = path.join(repoRoot, ".cwf", "config.yaml");
+  const localValue = readYamlScalar(localCfg, key);
+  if (localValue) {
+    return localValue;
+  }
+  const sharedValue = readYamlScalar(sharedCfg, key);
+  if (sharedValue) {
+    return sharedValue;
+  }
+  if (process.env[key]) {
+    return process.env[key];
+  }
+  return "";
+}
+
+function resolveAbsPath(repoRoot, rawPath) {
+  if (!rawPath) {
+    return "";
+  }
+  if (path.isAbsolute(rawPath)) {
+    return normalizeAbsPath(rawPath);
+  }
+  return normalizeAbsPath(path.resolve(repoRoot, rawPath));
+}
+
+function addRuntimeDir(set, absPath) {
+  if (!absPath) {
+    return;
+  }
+  set.add(normalizeAbsPath(absPath));
+}
+
+function addRuntimeFile(set, absPath) {
+  if (!absPath) {
+    return;
+  }
+  set.add(normalizeAbsPath(absPath));
+}
+
+function getRuntimePaths(repoRoot) {
+  if (RUNTIME_PATH_CACHE.has(repoRoot)) {
+    return RUNTIME_PATH_CACHE.get(repoRoot);
+  }
+
+  const dirs = new Set();
+  const files = new Set();
+
+  const configuredArtifactRoot = resolveConfigValue(repoRoot, "CWF_ARTIFACT_ROOT");
+  const configuredProjectsDir = resolveConfigValue(repoRoot, "CWF_PROJECTS_DIR");
+  const configuredStateFile = resolveConfigValue(repoRoot, "CWF_STATE_FILE");
+  const configuredLogsDir = resolveConfigValue(repoRoot, "CWF_SESSION_LOG_DIR");
+
+  const artifactRoots = new Set([
+    resolveAbsPath(repoRoot, ".cwf"),
+    resolveAbsPath(repoRoot, configuredArtifactRoot)
+  ]);
+
+  for (const artifactRoot of artifactRoots) {
+    if (!artifactRoot) {
+      continue;
+    }
+    addRuntimeDir(dirs, artifactRoot);
+    addRuntimeDir(dirs, path.join(artifactRoot, "projects"));
+    addRuntimeDir(dirs, path.join(artifactRoot, "sessions"));
+    addRuntimeDir(dirs, path.join(artifactRoot, "projects", "sessions"));
+    addRuntimeFile(files, path.join(artifactRoot, "cwf-state.yaml"));
+  }
+
+  addRuntimeDir(dirs, resolveAbsPath(repoRoot, configuredProjectsDir));
+  addRuntimeFile(files, resolveAbsPath(repoRoot, configuredStateFile));
+  addRuntimeDir(dirs, resolveAbsPath(repoRoot, configuredLogsDir));
+
+  addRuntimeFile(files, path.join(repoRoot, ".cwf", "config.yaml"));
+  addRuntimeFile(files, path.join(repoRoot, ".cwf", "config.local.yaml"));
+
+  const runtimePaths = { dirs, files };
+  RUNTIME_PATH_CACHE.set(repoRoot, runtimePaths);
+  return runtimePaths;
+}
+
+function matchesRuntimePath(candidateAbs, runtimePaths) {
+  if (runtimePaths.files.has(candidateAbs)) {
+    return true;
+  }
+  for (const runtimeDir of runtimePaths.dirs) {
+    if (candidateAbs === runtimeDir || candidateAbs.startsWith(`${runtimeDir}/`)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function isSkillRuntimePathLiteral(content, fileName) {
+  if (!fileName || !/(^|\/)SKILL\.md$/i.test(fileName)) {
+    return false;
+  }
+  const base = content.split("#")[0].trim();
+  if (
+    !base ||
+    base.includes(" ") ||
+    base.includes("{") ||
+    base.includes("}") ||
+    base.startsWith("~/")
+  ) {
+    return false;
+  }
+
+  const repoRoot = findRepoRoot(fileName);
+  const runtimePaths = getRuntimePaths(repoRoot);
+  const fileDir = path.dirname(path.resolve(fileName));
+
+  const candidates = [];
+  if (path.isAbsolute(base)) {
+    candidates.push(normalizeAbsPath(base));
+  } else {
+    candidates.push(normalizeAbsPath(path.resolve(fileDir, base)));
+    candidates.push(normalizeAbsPath(path.resolve(repoRoot, base.replace(/^\.\//, ""))));
+  }
+
+  for (const candidate of candidates) {
+    if (matchesRuntimePath(candidate, runtimePaths)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 module.exports = [
   {
     names: [RULE_NAME, ...RULE_ALIASES],
@@ -108,6 +306,9 @@ module.exports = [
           const full = match[0];
           const content = match[1].trim();
           if (!isLinkableRepoPath(content)) {
+            continue;
+          }
+          if (isSkillRuntimePathLiteral(content, fileName)) {
             continue;
           }
 

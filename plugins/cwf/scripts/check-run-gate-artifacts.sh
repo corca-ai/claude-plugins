@@ -228,12 +228,48 @@ check_retro_stage() {
 check_ship_stage() {
   local stage="ship"
   local ship_file="$SESSION_DIR/ship.md"
+  local required_pattern=""
+  local required_patterns=(
+    '^## Execution Status'
+    '^## Ambiguity Resolution'
+    '^## Next Step'
+    '^mode: (strict|defer-blocking|defer-reversible|explore-worktrees)$'
+    '^blocking_open_count: [0-9]+$'
+    '^blocking_issue_refs: '
+    '^merge_allowed: (yes|no)$'
+  )
+  local mode=""
+  local blocking_open_count_raw=""
+  local blocking_open_count=0
+  local merge_allowed=""
 
   ensure_nonempty_file "$stage" "$ship_file" || return 0
-  if grep -Eq '^## Execution Status' "$ship_file"; then
-    append_pass "$stage" "ship execution status block present"
+
+  for required_pattern in "${required_patterns[@]}"; do
+    if grep -Eq "$required_pattern" "$ship_file"; then
+      append_pass "$stage" "ship pattern present: $required_pattern"
+    else
+      append_fail "$stage" "ship.md missing required pattern: $required_pattern"
+    fi
+  done
+
+  mode="$(grep -E '^mode: ' "$ship_file" | head -n 1 | sed 's/^mode:[[:space:]]*//')"
+  blocking_open_count_raw="$(grep -E '^blocking_open_count: ' "$ship_file" | head -n 1 | sed 's/^blocking_open_count:[[:space:]]*//')"
+  merge_allowed="$(grep -E '^merge_allowed: ' "$ship_file" | head -n 1 | sed 's/^merge_allowed:[[:space:]]*//')"
+
+  if [[ "$blocking_open_count_raw" =~ ^[0-9]+$ ]]; then
+    blocking_open_count="$blocking_open_count_raw"
   else
-    append_fail "$stage" "ship.md missing section: ## Execution Status"
+    append_fail "$stage" "invalid blocking_open_count value: ${blocking_open_count_raw:-<empty>}"
+    return 0
+  fi
+
+  if [[ "$mode" == "defer-blocking" && "$blocking_open_count" -gt 0 ]]; then
+    if [[ "$merge_allowed" == "no" ]]; then
+      append_pass "$stage" "defer-blocking debt correctly marks merge_allowed: no"
+    else
+      append_fail "$stage" "defer-blocking with open debt must set merge_allowed: no"
+    fi
   fi
 }
 

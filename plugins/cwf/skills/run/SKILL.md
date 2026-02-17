@@ -16,6 +16,7 @@ cwf:run <task description>           # Full pipeline from scratch
 cwf:run --from impl                  # Resume from impl stage
 cwf:run --skip ship                  # Full pipeline, skip ship
 cwf:run --skip review-plan,retro     # Skip specific stages
+cwf:run --ambiguity-mode strict      # Override T3 handling policy for this run
 ```
 
 Operational note:
@@ -27,7 +28,27 @@ Operational note:
 
 ## Phase 1: Initialize
 
-1. Parse task description and flags (`--from`, `--skip`)
+1. Parse task description and flags (`--from`, `--skip`, `--ambiguity-mode`)
+1. Resolve ambiguity mode (`--ambiguity-mode` or config default):
+
+   ```bash
+   source {CWF_PLUGIN_DIR}/hooks/scripts/env-loader.sh
+   cwf_env_load_vars CWF_RUN_AMBIGUITY_MODE
+
+   # precedence: CLI flag > config/env > built-in default
+   resolved_mode="{--ambiguity-mode flag value if provided}"
+   if [[ -z "$resolved_mode" ]]; then
+     resolved_mode="${CWF_RUN_AMBIGUITY_MODE:-defer-blocking}"
+   fi
+
+   case "$resolved_mode" in
+     strict|defer-blocking|defer-reversible|explore-worktrees) ;;
+     *)
+       echo "Invalid ambiguity mode: $resolved_mode (fallback: defer-blocking)"
+       resolved_mode="defer-blocking"
+       ;;
+   esac
+   ```
 1. Bootstrap session directory via `{CWF_PLUGIN_DIR}/scripts/next-prompt-dir.sh --bootstrap <sanitized-title>`
    - This creates the directory, initializes `plan.md`/`lessons.md` if missing, and pre-registers the session in `cwf-state.yaml` `sessions` when state exists.
 1. Initialize live state (session-first write path):
@@ -43,16 +64,35 @@ Operational note:
      task="{task description}" \
      active_pipeline="cwf:run" \
      user_directive="{original user directive}" \
+     ambiguity_mode="{resolved_mode}" \
+     blocking_decisions_pending="false" \
+     ambiguity_decisions_file="{session directory}/run-ambiguity-decisions.md" \
      pipeline_override_reason="" \
      state_version="1"
    bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh list-set . \
      remaining_gates="review-code,refactor,retro,ship"
    ```
 
+1. Initialize ambiguity ledger file (all modes):
+
+   ```bash
+   cat > "{session directory}/run-ambiguity-decisions.md" <<'EOF'
+   # Run Ambiguity Decisions
+   mode: {resolved_mode}
+   open_blocking_count: 0
+   open_non_blocking_count: 0
+   updated_at: {ISO-8601 UTC}
+
+   | Decision ID | Stage | Question | Chosen Option | Blocking | Reversible | Follow-up |
+   |---|---|---|---|---|---|---|
+   EOF
+   ```
+
 1. Report initialization:
 
 ```text
 Pipeline initialized: {session_dir}
+Ambiguity mode: {resolved_mode}
 Stages: {list of stages to execute, with skipped ones marked}
 ```
 
@@ -67,7 +107,7 @@ Execute stages in order. Each stage invokes the corresponding CWF skill via the 
 | # | Stage | Skill Invocation | Gate | Auto |
 |---|-------|-----------------|------|------|
 | 1 | gather | `cwf:gather` | — | false |
-| 2 | clarify | `cwf:clarify` | User confirms requirements | false |
+| 2 | clarify | `cwf:clarify` | T3 policy depends on ambiguity mode | false |
 | 3 | plan | `cwf:plan` | User approves plan | false |
 | 4 | review-plan | `cwf:review --mode plan` | Verdict-based | true |
 | 5 | impl | `cwf:impl --skip-clarify` | — | true |
@@ -75,6 +115,31 @@ Execute stages in order. Each stage invokes the corresponding CWF skill via the 
 | 7 | refactor | `cwf:refactor` | — | true |
 | 8 | retro | `cwf:retro --from-run` | — | true |
 | 9 | ship | `cwf:ship` | User confirms PR | false |
+
+### Ambiguity Modes (Clarify T3 Policy)
+
+Use `live.ambiguity_mode` (resolved in Phase 1).
+
+| Mode | Clarify T3 handling | Merge policy |
+|---|---|---|
+| `strict` | Stop and ask user for every T3 decision | no extra blocking by mode |
+| `defer-blocking` | Decide autonomously, but persist unresolved decision debt | unresolved decision debt is merge-blocking at ship |
+| `defer-reversible` | Decide autonomously with reversible structure (flags/adapters/switch points) | track debt, non-blocking by default |
+| `explore-worktrees` | Implement alternatives in separate worktrees, then pick baseline | blocking depends on final unresolved debt |
+
+When mode is not `strict`, create/update `{session_dir}/run-ambiguity-decisions.md` whenever T3 debt exists using this minimum file contract:
+
+```markdown
+# Run Ambiguity Decisions
+mode: {mode}
+open_blocking_count: {integer}
+open_non_blocking_count: {integer}
+updated_at: {ISO-8601 UTC}
+
+| Decision ID | Stage | Question | Chosen Option | Blocking | Reversible | Follow-up |
+|---|---|---|---|---|---|---|
+| ... | clarify | ... | ... | yes/no | yes/no | issue/pr ref or TODO |
+```
 
 ### Stage Execution Loop
 
@@ -114,6 +179,29 @@ For each stage (respecting `--from` and `--skip` flags):
    Skill(skill="{skill-name}", args="{args if any}")
    ```
 
+1. If current stage is `clarify`, apply ambiguity-mode handling:
+
+   1. Resolve session dir and ambiguity file path:
+
+      ```bash
+      session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . dir)
+      mode=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . ambiguity_mode)
+      ambiguity_file=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . ambiguity_decisions_file)
+      ```
+
+   1. Determine whether clarify left unresolved T3 debt (use clarify summary/artifacts and explicit T3 table).
+   1. Apply mode behavior:
+      - `strict`: halt and ask user for each unresolved T3 item before proceeding.
+      - `defer-blocking`: record autonomous decision + follow-up in `run-ambiguity-decisions.md`; set `blocking_decisions_pending="true"` if any blocking items remain open.
+      - `defer-reversible`: record autonomous decision + reversible structure note; keep `blocking_decisions_pending="false"` unless user explicitly marks an item as blocking.
+      - `explore-worktrees`: evaluate alternatives in separate worktrees; record comparison + final choice; set blocking flag based on remaining open debt.
+   1. Synchronize live state:
+
+      ```bash
+      bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh set . \
+        blocking_decisions_pending="{true|false}"
+      ```
+
 1. Enforce deterministic stage-artifact gate for run-closing stages (`review-code`, `refactor`, `retro`, `ship`):
 
    ```bash
@@ -144,6 +232,10 @@ Options:
 - **Revise** — re-run the current stage (with user's feedback as additional context)
 - **Skip next** — skip the next stage and continue
 - **Stop** — halt the pipeline
+
+Clarify-stage exception:
+- If stage is `clarify` and `ambiguity_mode` is `strict`, unresolved T3 items must be resolved with the user before `Proceed`.
+- If stage is `clarify` and mode is not `strict`, T3 debt may continue only after `run-ambiguity-decisions.md` is updated and `blocking_decisions_pending` is synchronized.
 
 #### Auto Gates (auto: true)
 
@@ -221,7 +313,7 @@ After all stages complete (or the pipeline is halted):
    - Clear pending gates first:
      `bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh list-set . remaining_gates=""`
    - Set final phase and clear active pipeline:
-     `bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh set . phase="done" active_pipeline="" user_directive="" pipeline_override_reason=""`
+     `bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh set . phase="done" active_pipeline="" user_directive="" pipeline_override_reason="" blocking_decisions_pending="false"`
    - Ensure the current session entry in `cwf-state.yaml` stays consistent with final artifacts/summary (registration is initialized during Phase 1 bootstrap)
 1. Report pipeline summary:
 
@@ -252,7 +344,7 @@ After all stages complete (or the pipeline is halted):
 
 ## Rules
 
-1. **Decision #19**: Pre-impl stages require human gates. Post-impl stages chain automatically. This is the core design principle.
+1. **Decision #19 baseline**: Pre-impl stages require human gates and post-impl stages chain automatically. Ambiguity defer modes are explicit, scoped overrides for clarify-stage T3 debt only.
 1. **One auto-fix attempt**: Never loop more than once on a review failure. Escalate to user after 1 retry.
 1. **Skill invocation only**: Use the Skill tool to invoke CWF skills. Do not inline skill logic.
 1. **State tracking**: Use `cwf-live-state.sh set` and `list-set` at every stage transition so session-local live state stays current while root summary remains synchronized.
@@ -264,6 +356,9 @@ After all stages complete (or the pipeline is halted):
 1. **Worktree consistency gate**: During an active pipeline, if current worktree root diverges from `live.worktree_root`, stop immediately and request explicit user decision before any write/edit/ship action.
 1. **Fail-closed run gates**: While `active_pipeline="cwf:run"` and `remaining_gates` includes `review-code`, ship/push/commit intents must be blocked unless `pipeline_override_reason` is explicitly set.
 1. **Artifact gate is mandatory for stage closure**: `review-code`, `refactor`, `retro`, and `ship` are not complete unless `check-run-gate-artifacts.sh --strict` passes for that stage.
+1. **Ambiguity mode precedence**: `--ambiguity-mode` flag overrides config. Config (`CWF_RUN_AMBIGUITY_MODE`) overrides built-in default (`defer-blocking`).
+1. **Defer modes require persistence**: Any non-`strict` T3 carry-over must be recorded in `{session_dir}/run-ambiguity-decisions.md` and reflected in `live.blocking_decisions_pending`.
+1. **defer-blocking merge discipline**: If unresolved blocking debt exists, ship must treat it as merge-blocking until linked issue/PR follow-up is recorded and blocking count reaches zero.
 
 ## References
 

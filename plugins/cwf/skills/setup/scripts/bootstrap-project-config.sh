@@ -131,6 +131,7 @@ read -r -d '' SHARED_TEMPLATE <<'EOF' || true
 
 # Optional runtime overrides (non-secret)
 # CWF_GATHER_OUTPUT_DIR: ".cwf/projects"
+# CWF_RUN_AMBIGUITY_MODE: "defer-blocking"
 # CWF_READ_WARN_LINES: 500
 # CWF_READ_DENY_LINES: 2000
 # CWF_SESSION_LOG_DIR: ".cwf/sessions"

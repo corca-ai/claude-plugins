@@ -50,8 +50,18 @@ If either fails, do not stop with a passive failure only. Ask the user:
 For every `/ship` invocation (`issue`, `pr`, `merge`, `status`, and `help` or no-args):
 
 1. Resolve session directory from live state (`live.dir`).
-2. Persist a structured execution summary to `{session_dir}/ship.md` (action, inputs, result, blockers, next step).
-3. When running under `cwf:run`, enforce the stage gate:
+2. Persist a structured execution summary to `{session_dir}/ship.md` with these required sections:
+   - `## Execution Status`
+   - `## Ambiguity Resolution`
+   - `## Next Step`
+3. In `## Ambiguity Resolution`, always write these scalar lines:
+   - `mode: strict|defer-blocking|defer-reversible|explore-worktrees`
+   - `blocking_open_count: <integer>`
+   - `blocking_issue_refs: <comma-separated refs or none>`
+   - `merge_allowed: yes|no`
+   - Resolve `mode` from live state (`live.ambiguity_mode`) and derive counts from `{session_dir}/run-ambiguity-decisions.md` if it exists.
+   - For `defer-blocking`, `merge_allowed` must be `no` when `blocking_open_count > 0`.
+4. When running under `cwf:run`, enforce the stage gate:
 
 ```bash
 bash {CWF_PLUGIN_DIR}/scripts/check-run-gate-artifacts.sh \
@@ -146,6 +156,8 @@ Create a pull request from the current feature branch.
      - Cover both happy path and edge cases if relevant
    - `{HUMAN_JUDGMENT}` — agent self-assessment of items needing human review:
      - Architecture changes, UX decisions, security implications, breaking changes
+     - Read `live.ambiguity_mode` and `{session_dir}/run-ambiguity-decisions.md` when present
+     - If mode is `defer-blocking` and `blocking_open_count > 0`, list all open blocking decision debts here (never write `None`)
      - If none, write `None` (this enables autonomous merge — see `/ship merge`)
    - `{SYSTEM_IMPACT}` — behavioral changes visible to end users or dependent systems
    - `{FUTURE_IMPACT}` — impact on future development (new patterns, constraints, tech debt)
@@ -208,11 +220,14 @@ Check PR status and merge if ready.
    **Review requirement** (conditional):
    - Parse the PR body for `## Human Judgment Required` section
    - Check branch protection: `gh api repos/{owner}/{repo}/branches/{base}/protection 2>&1`
+   - Parse `{session_dir}/run-ambiguity-decisions.md` and/or `ship.md` ambiguity block:
+     - if `mode: defer-blocking` and `blocking_open_count > 0`, merge is blocked
 
    Decision matrix:
 
    | Human judgment | Branch protected | Review required |
    |---|---|---|
+   | `defer-blocking` with open blocking debt | Any | **Stop** — do not merge |
    | `None` or empty | No | **Skip** — autonomous merge |
    | `None` or empty | Yes | `reviewDecision` = `APPROVED` required |
    | Items listed | Any | Report items, **stop** — do not merge |
@@ -313,6 +328,7 @@ Defaults: base=main, merge=squash
 6. All code fences must have language specifiers.
 7. Missing prerequisites must trigger an install/configure choice prompt, not a passive "missing tool" report only.
 8. `/ship` must always persist `{session_dir}/ship.md` before returning.
+9. In `defer-blocking` mode, unresolved ambiguity debt is merge-blocking until tracked follow-up references are recorded and `blocking_open_count` is zero.
 
 ## References
 
