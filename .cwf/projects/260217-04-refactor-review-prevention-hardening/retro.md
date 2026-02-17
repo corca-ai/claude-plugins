@@ -1,7 +1,7 @@
 # Retro — 260217-04 Refactor Review Prevention Hardening
 
 - Date: 2026-02-17
-- Mode: deep (direct invocation)
+- Mode: light (manual retro after run-stage remediation)
 - Session dir: `.cwf/projects/260217-04-refactor-review-prevention-hardening`
 
 ## 1. Context Worth Remembering
@@ -129,4 +129,3 @@
 
 - Add a deterministic degraded-path suite for `workflow-gate` dependency failures.
 - Add a conformance check to verify code-mode synthesis includes mandatory `session_log_*` fields from actual generated artifacts.
-

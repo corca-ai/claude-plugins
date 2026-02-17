@@ -685,6 +685,76 @@ cwf_live_sync_from_root() {
   printf '%s\n' "$target_state"
 }
 
+cwf_live_validate_run_done_transition() {
+  local base_dir="$1"
+  shift || true
+  local assignment=""
+  local key=""
+  local value=""
+  local phase_target=""
+  local current_pipeline=""
+  local remaining_raw=""
+  local gate_checker=""
+  local session_dir_raw=""
+  local session_dir_abs=""
+
+  for assignment in "$@"; do
+    [[ "$assignment" == *=* ]] || continue
+    key="${assignment%%=*}"
+    value="${assignment#*=}"
+    if [[ "$key" == "phase" ]]; then
+      phase_target="$value"
+      break
+    fi
+  done
+
+  if [[ "$phase_target" != "done" ]]; then
+    return 0
+  fi
+
+  current_pipeline="$(cwf_live_get_scalar "$base_dir" "active_pipeline" 2>/dev/null || true)"
+  if [[ "$current_pipeline" != "cwf:run" ]]; then
+    return 0
+  fi
+
+  remaining_raw="$(cwf_live_get_list "$base_dir" "remaining_gates" 2>/dev/null || true)"
+  if printf '%s\n' "$remaining_raw" | sed '/^$/d' | grep -q .; then
+    echo "Cannot set phase=done while live.active_pipeline=cwf:run and remaining_gates is non-empty" >&2
+    return 1
+  fi
+
+  gate_checker="$SCRIPT_DIR/check-run-gate-artifacts.sh"
+  if [[ ! -x "$gate_checker" ]]; then
+    echo "Cannot set phase=done for cwf:run: missing gate checker ($gate_checker)" >&2
+    return 1
+  fi
+
+  session_dir_raw="$(cwf_live_get_scalar "$base_dir" "dir" 2>/dev/null || true)"
+  if [[ -z "$session_dir_raw" ]]; then
+    echo "Cannot set phase=done for cwf:run: live.dir is empty" >&2
+    return 1
+  fi
+
+  if [[ "$session_dir_raw" == /* ]]; then
+    session_dir_abs="$session_dir_raw"
+  else
+    session_dir_abs="$(cwf_live_to_abs_path "$base_dir" "$session_dir_raw")"
+  fi
+
+  if ! bash "$gate_checker" \
+    --session-dir "$session_dir_abs" \
+    --stage review-code \
+    --stage refactor \
+    --stage retro \
+    --stage ship \
+    --strict; then
+    echo "Cannot set phase=done for cwf:run: run gate artifact check failed" >&2
+    return 1
+  fi
+
+  return 0
+}
+
 cwf_live_set_scalars() {
   local base_dir="${1:-.}"
   shift || true
@@ -693,6 +763,7 @@ cwf_live_set_scalars() {
   local synced_state=""
   local rel_path=""
   local assignment=""
+  local assignments=()
   local key=""
   local value=""
   local keys=()
@@ -717,9 +788,14 @@ cwf_live_set_scalars() {
       echo "Unsupported scalar key for set: $key" >&2
       return 2
     fi
+    assignments+=("$assignment")
     keys+=("$key")
     values+=("$value")
   done
+
+  if ! cwf_live_validate_run_done_transition "$base_dir" "${assignments[@]}"; then
+    return 1
+  fi
 
   root_state="$(cwf_live_resolve_root_state_file "$base_dir")"
   [[ -f "$root_state" ]] || return 1

@@ -16,3 +16,12 @@
   2. 6-slot launch plan confirmed (internal/external/experts)
   3. external-provider availability check logged
   4. one-pass parallel launch decision recorded
+
+## Protocol Discrepancy — Retro Deep Path Bypass
+
+- **Expected (Protocol)**: When retro is labeled deep, run deep-mode artifact flow (CDM + learning + expert alpha/beta outputs) and satisfy deep artifact contract.
+- **Actual**: Retro artifact was drafted manually after evidence collection without executing the full deep-mode batch artifact path.
+- **Impact**: The artifact existed, but protocol evidence for deep-mode execution was incomplete and depended on narrative trust rather than deterministic outputs.
+- **Root Cause**: Completion bias (closing gates quickly) over strict process fidelity.
+- **Immediate Correction**: Added deterministic run-stage artifact checker and wired it into `run/review/retro` stage closure paths.
+- **Hardening Follow-up**: Added phase-transition guard so `phase=done` is rejected when run-stage artifact gates fail.

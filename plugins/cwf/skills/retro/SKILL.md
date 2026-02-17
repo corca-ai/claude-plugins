@@ -242,6 +242,18 @@ For each proposal, include:
 
 Write to `{output-dir}/retro.md` using the format below.
 
+Immediately enforce deterministic retro artifact gate:
+
+```bash
+bash {CWF_PLUGIN_DIR}/scripts/check-run-gate-artifacts.sh \
+  --session-dir "{output-dir}" \
+  --stage retro \
+  --strict \
+  --record-lessons
+```
+
+If this gate fails, do not mark retro complete. Fix artifacts/mode labeling first, then re-run the gate.
+
 ### 6. Link Session Log
 
 Discover runtime logs under:

@@ -664,7 +664,21 @@ The Provenance table adapts to actual results: if an external CLI succeeded, sho
 
 When expert reviewers (Slot 5-6) were used: Follow the Roster Maintenance procedure in `{CWF_PLUGIN_DIR}/references/expert-advisor-guide.md`.
 
-### 4. Cleanup
+### 4. Run-Stage Artifact Gate (code mode)
+
+When `--mode code`, validate deterministic stage artifacts immediately after synthesis persistence:
+
+```bash
+bash {CWF_PLUGIN_DIR}/scripts/check-run-gate-artifacts.sh \
+  --session-dir "{session_dir}" \
+  --stage review-code \
+  --strict \
+  --record-lessons
+```
+
+If this gate fails, stop with file-level errors and require revision before marking review-code complete.
+
+### 5. Cleanup
 
 After rendering the synthesis, remove the temp directory:
 
@@ -694,6 +708,7 @@ This prevents sensitive review content (diffs, plans) from persisting in `/tmp/`
 | External CLI auth error | Mark `FAILED`. Spawn Task agent fallback. Note in Confidence Note. |
 | External output malformed | Extract by pattern matching. Note in Confidence Note. |
 | Code mode and session log missing | Continue with `session_log_cross_check=WARN` and include deterministic session-log fields in Confidence Note. |
+| Code mode artifact gate fails | Stop with explicit file-level errors from `check-run-gate-artifacts.sh` and request revision. |
 
 ---
 
@@ -723,6 +738,7 @@ This prevents sensitive review content (diffs, plans) from persisting in `/tmp/`
     imply both `tidy` and `behavior-policy` changes, recommend separate commit
     units and `tidy` first.
 13. **Code-mode session-log fields are mandatory** — always include deterministic `session_log_*` keys in Confidence Note for `--mode code`.
+14. **Code-mode artifact gate is mandatory** — `review-code` is not complete unless `check-run-gate-artifacts.sh --stage review-code --strict` passes.
 
 ---
 

@@ -114,6 +114,21 @@ For each stage (respecting `--from` and `--skip` flags):
    Skill(skill="{skill-name}", args="{args if any}")
    ```
 
+1. Enforce deterministic stage-artifact gate for run-closing stages (`review-code`, `refactor`, `retro`, `ship`):
+
+   ```bash
+   session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . dir)
+   bash {CWF_PLUGIN_DIR}/scripts/check-run-gate-artifacts.sh \
+     --session-dir "$session_dir" \
+     --stage "{current stage name}" \
+     --strict \
+     --record-lessons
+   ```
+
+   - If this gate fails, stop immediately.
+   - Report the failure to the user with file-level details.
+   - Ask the user whether to revise and re-run the stage.
+
 1. After skill completes, apply the gate:
 
 #### User Gates (auto: false)
@@ -189,15 +204,24 @@ After all stages complete (or the pipeline is halted):
 
    ```bash
    bash {CWF_PLUGIN_DIR}/scripts/check-session.sh --impl
+   session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . dir)
+   bash {CWF_PLUGIN_DIR}/scripts/check-run-gate-artifacts.sh \
+     --session-dir "$session_dir" \
+     --stage review-code \
+     --stage refactor \
+     --stage retro \
+     --stage ship \
+     --strict \
+     --record-lessons
    ```
 
    If any FAIL items are reported, fix them before proceeding. This is a forced function — the pipeline is not complete until all checks pass.
 
 1. Update state:
+   - Clear pending gates first:
+     `bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh list-set . remaining_gates=""`
    - Set final phase and clear active pipeline:
      `bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh set . phase="done" active_pipeline="" user_directive="" pipeline_override_reason=""`
-   - Clear pending gates:
-     `bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh list-set . remaining_gates=""`
    - Ensure the current session entry in `cwf-state.yaml` stays consistent with final artifacts/summary (registration is initialized during Phase 1 bootstrap)
 1. Report pipeline summary:
 
@@ -239,6 +263,7 @@ After all stages complete (or the pipeline is halted):
 1. **Context-deficit resilience**: On resume/restart, reconstruct stage context from `cwf-state.yaml`, session artifacts, and handoff docs before invoking downstream skills.
 1. **Worktree consistency gate**: During an active pipeline, if current worktree root diverges from `live.worktree_root`, stop immediately and request explicit user decision before any write/edit/ship action.
 1. **Fail-closed run gates**: While `active_pipeline="cwf:run"` and `remaining_gates` includes `review-code`, ship/push/commit intents must be blocked unless `pipeline_override_reason` is explicitly set.
+1. **Artifact gate is mandatory for stage closure**: `review-code`, `refactor`, `retro`, and `ship` are not complete unless `check-run-gate-artifacts.sh --strict` passes for that stage.
 
 ## References
 

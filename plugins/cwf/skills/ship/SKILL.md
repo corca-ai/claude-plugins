@@ -45,6 +45,22 @@ If either fails, do not stop with a passive failure only. Ask the user:
 - `Skip ship for now`:
   - stop without executing ship actions
 
+## Output Persistence (Mandatory)
+
+For every `/ship` invocation (`issue`, `pr`, `merge`, `status`, and `help` or no-args):
+
+1. Resolve session directory from live state (`live.dir`).
+2. Persist a structured execution summary to `{session_dir}/ship.md` (action, inputs, result, blockers, next step).
+3. When running under `cwf:run`, enforce the stage gate:
+
+```bash
+bash {CWF_PLUGIN_DIR}/scripts/check-run-gate-artifacts.sh \
+  --session-dir "{session_dir}" \
+  --stage ship \
+  --strict \
+  --record-lessons
+```
+
 ---
 
 ## /ship issue
@@ -296,6 +312,7 @@ Defaults: base=main, merge=squash
 5. Preserve user-created files and branches; do not perform destructive cleanup beyond explicit merge cleanup.
 6. All code fences must have language specifiers.
 7. Missing prerequisites must trigger an install/configure choice prompt, not a passive "missing tool" report only.
+8. `/ship` must always persist `{session_dir}/ship.md` before returning.
 
 ## References
 

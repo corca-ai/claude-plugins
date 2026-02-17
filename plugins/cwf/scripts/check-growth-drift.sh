@@ -275,6 +275,7 @@ check_plugin_runtime_scripts() {
   done <<'EOF'
 plugins/cwf/scripts/check-session.sh
 plugins/cwf/scripts/test-hook-exit-codes.sh
+plugins/cwf/scripts/check-run-gate-artifacts.sh
 plugins/cwf/scripts/next-prompt-dir.sh
 plugins/cwf/scripts/cwf-artifact-paths.sh
 plugins/cwf/scripts/cwf-live-state.sh
