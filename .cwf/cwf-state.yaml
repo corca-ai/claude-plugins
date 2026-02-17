@@ -395,7 +395,7 @@ live:
   session_id: "260216-04"
   dir: ".cwf/projects/260216-04-full-repo-refactor"
   branch: "marketplace-v3"
-  phase: "retro"
+  phase: "refactor"
   task: "Full repository refactoring retro"
   key_files:
     - README.ko.md
@@ -410,6 +410,10 @@ live:
     updated_at: "2026-02-16T02:42:35Z"
 
   state_file: ".cwf/projects/260216-03-hitl-readme-restart/session-state.yaml"
+  remaining_gates:
+    - "retro"
+    - "ship"
+  state_version: "4"
 # Expert roster for domain expert sub-agents (used by clarify, review, retro)
 # Semi-automatic evolution: usage_count auto-incremented, new experts user-approved
 # verified: true = skip web identity verification, cite source field directly
