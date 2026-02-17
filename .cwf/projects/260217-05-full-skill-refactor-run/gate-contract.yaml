@@ -1,0 +1,15 @@
+version: 1
+
+stages:
+  review-code: fail
+  refactor: fail
+  retro: fail
+  ship: fail
+
+policies:
+  # Keep provider policy flexible for environments where external CLIs may fail.
+  provider_gemini_mode: warn
+
+  # This session wants full per-skill refactor coverage tracked explicitly.
+  refactor_skill_coverage_mode: fail
+  refactor_expected_skills: [clarify, gather, handoff, hitl, impl, plan, refactor, retro, review, run, setup, ship, update]
