@@ -18,6 +18,7 @@ live:
     state_file: ".cwf/projects/260216-03-hitl-readme-restart/hitl/state.yaml"
     rules_file: ".cwf/projects/260216-03-hitl-readme-restart/hitl/rules.yaml"
     updated_at: "2026-02-16T02:42:35Z"
+
   remaining_gates:
     - "review-code"
     - "refactor"
