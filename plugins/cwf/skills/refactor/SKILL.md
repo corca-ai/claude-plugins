@@ -177,11 +177,11 @@ Behavior:
 - Default location: `{artifact_root}/codebase-contract.json`
 - If contract is missing: create a draft contract
 - If contract exists: do not overwrite unless explicit force is used
-- If bootstrap/contract load fails: continue with fallback defaults and prepend a contract warning
+- If bootstrap fails (`status=fallback` with non-zero exit): stop this mode and fix bootstrap/path issues before scanning
 
 Capture metadata for final summary:
 
-- `CONTRACT_STATUS`: `created`, `existing`, `updated`, or `fallback`
+- `CONTRACT_STATUS`: `created`, `existing`, `updated`, or `fallback` (`fallback` is fail-safe and must halt the stage)
 - `CONTRACT_PATH`
 - `CONTRACT_WARNING` (optional)
 

@@ -35,6 +35,14 @@
         {
           "file": "plugins/cwf/skills/setup/references/setup-contract.md",
           "selector": "Hook Policy Field"
+        },
+        {
+          "file": "plugins/cwf/skills/setup/SKILL.md",
+          "selector": "check-configure-git-hooks-runtime.sh"
+        },
+        {
+          "file": "plugins/cwf/skills/update/SKILL.md",
+          "selector": "CWF_UPDATE_CACHE_ROOTS"
         }
       ],
       "tests": [

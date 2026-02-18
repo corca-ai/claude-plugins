@@ -111,7 +111,7 @@ Options:
 If `Skills + wrapper (recommended)`:
 
 ```bash
-bash {CWF_PLUGIN_DIR}/scripts/codex/sync-skills.sh --scope "$selected_scope" ${selected_project_root:+--project-root "$selected_project_root"} --cleanup-legacy
+bash {CWF_PLUGIN_DIR}/scripts/codex/sync-skills.sh --scope "$selected_scope" ${selected_project_root:+--project-root "$selected_project_root"}
 if [ "$selected_scope" = "user" ]; then
   bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --scope "$selected_scope" --enable --add-path
 else
@@ -123,7 +123,7 @@ bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --scope "$selected_scope"
 If `Skills only`:
 
 ```bash
-bash {CWF_PLUGIN_DIR}/scripts/codex/sync-skills.sh --scope "$selected_scope" ${selected_project_root:+--project-root "$selected_project_root"} --cleanup-legacy
+bash {CWF_PLUGIN_DIR}/scripts/codex/sync-skills.sh --scope "$selected_scope" ${selected_project_root:+--project-root "$selected_project_root"}
 ```
 
 If `Skip for now`: do not mutate Codex integration.
@@ -169,13 +169,12 @@ From non-user context, user-global override requires explicit confirmation.
 ### 2.5.2 Run Sync
 
 ```bash
-bash {CWF_PLUGIN_DIR}/scripts/codex/sync-skills.sh --scope "$selected_scope" ${selected_project_root:+--project-root "$selected_project_root"} --cleanup-legacy
+bash {CWF_PLUGIN_DIR}/scripts/codex/sync-skills.sh --scope "$selected_scope" ${selected_project_root:+--project-root "$selected_project_root"}
 ```
 
 Expected behavior:
 - user: links into `~/.agents/skills` and `~/.agents/references`
 - project/local: links into `{projectRoot}/.codex/skills` and `{projectRoot}/.codex/references`
-- user scope may move legacy custom entries from `~/.codex/skills` to backup (keeping `.system`)
 - relative skill references are validated by `verify-skill-links.sh`
 
 ### 2.5.3 Report Results
@@ -183,7 +182,6 @@ Expected behavior:
 Report:
 - linked skill count
 - destination paths
-- whether legacy `~/.codex/skills` entries were moved (user scope)
 - before/after touched paths
 - rollback guidance from `.skill-sync-backup`
 

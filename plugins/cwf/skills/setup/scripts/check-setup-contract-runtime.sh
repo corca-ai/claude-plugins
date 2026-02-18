@@ -9,7 +9,7 @@ set -euo pipefail
 # - create path (status=created)
 # - idempotent re-run (status=existing)
 # - force update (status=updated)
-# - fallback degradation (status=fallback, exit 0)
+# - fallback degradation (status=fallback, non-zero exit)
 # - required contract keys exist for setup-flow parsing
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -66,7 +66,7 @@ set +e
 fallback_json="$(bash "$BOOTSTRAP_SCRIPT" --json --contract '/dev/null/setup-contract.yaml' 2>/dev/null)"
 fallback_rc=$?
 set -e
-[[ "$fallback_rc" -eq 0 ]] || fail "fallback execution returned non-zero: $fallback_rc"
+[[ "$fallback_rc" -ne 0 ]] || fail "fallback execution unexpectedly returned success"
 
 fallback_status="$(printf '%s' "$fallback_json" | jq -r '.status')"
 [[ "$fallback_status" == "fallback" ]] || fail "expected fallback, got: $fallback_status"

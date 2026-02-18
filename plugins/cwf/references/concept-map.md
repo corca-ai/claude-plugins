@@ -164,7 +164,7 @@ Which generic concepts each skill composes:
 | retro | x | | x | | | |
 | refactor | | | x | | | x |
 | review | x | | x | | | |
-| run | | | x | | | |
+| run | | | | | | |
 | handoff | | | | | x | |
 | hitl | | | | x | x | |
 | ship | | | | | | |
@@ -178,6 +178,7 @@ Which generic concepts each skill composes:
 - **Sparse row** (setup, ship, update) = infrastructure/operational skill, no generic concept synchronization
 - **Dense row** (clarify) = complex skill composing many concepts
 - **Dense column** (Agent Orchestration) = pervasive concept reused across most skills
+- `run` remains a pipeline router (stage sequencing) and is intentionally not counted as Agent Orchestration until it adds adaptive/parallel sub-agent decomposition.
 - `hitl` composes Decision Point (agreement round, chunk-level discussion prompts, intent-resync confirmation) and Handoff (resumable state transfer via `state.yaml`, `queue.json`, and `hitl-scratchpad.md` across pauses/resume).
 
 ## 3. Usage Guide

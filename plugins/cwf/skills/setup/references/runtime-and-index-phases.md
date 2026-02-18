@@ -7,7 +7,7 @@ Detailed procedure reference for setup phases 2.7, 2.8, 2.9, 2.10, 3, 4, and 5.
 ## Contents
 
 - [Phase 2.7: Git Hook Gate Installation](#phase-27-git-hook-gate-installation)
-- [Phase 2.8: Environment Migration and Project Config Bootstrap](#phase-28-environment-migration-and-project-config-bootstrap)
+- [Phase 2.8: Project Config Bootstrap](#phase-28-project-config-bootstrap)
 - [Phase 2.9: Agent Team Mode Setup](#phase-29-agent-team-mode-setup)
 - [Phase 2.10: CWF Run Ambiguity Mode Setup](#phase-210-cwf-run-ambiguity-mode-setup)
 - [Phase 3: Generate CWF Capability Index (Explicit)](#phase-3-generate-cwf-capability-index-explicit)
@@ -91,78 +91,14 @@ And summarize:
 
 ---
 
-## Phase 2.8: Environment Migration and Project Config Bootstrap
+## Phase 2.8: Project Config Bootstrap
 
 Use this phase when:
 - Mode is full setup (`cwf:setup`)
 - User runs `cwf:setup --tools`
 - User runs `cwf:setup --env`
 
-### 2.8.1 Scan Existing Environment Config
-
-Run:
-
-```bash
-bash {SKILL_DIR}/scripts/migrate-env-vars.sh --scan
-```
-
-This scan checks `~/.zshrc`, `~/.bashrc`, and `~/.claude/.env` (if present), and reports:
-- legacy-to-canonical migration candidates (`CLAUDE_CORCA_*`/`CLAUDE_ATTENTION_*` → `CWF_*`)
-- missing required keys (`SLACK_BOT_TOKEN`, `SLACK_CHANNEL_ID`, `TAVILY_API_KEY`, `EXA_API_KEY`)
-
-### 2.8.2 Ask Apply Strategy
-
-Use AskUserQuestion (single choice):
-
-```text
-Apply environment variable migration now?
-```
-
-Options:
-- `Auto migrate now (recommended)`:
-  - apply canonical exports into active shell profile
-  - comment legacy assignments in scanned files
-  - include commented placeholders for missing required keys
-- `Review first`:
-  - show scan output and the exact apply command
-  - ask one additional confirm question before applying
-- `Skip for now`:
-  - no file modifications in this phase
-
-### 2.8.3 Apply Migration
-
-When apply is approved, run:
-
-```bash
-bash {SKILL_DIR}/scripts/migrate-env-vars.sh --apply --cleanup-legacy --include-placeholders
-```
-
-If the user wants a specific target profile, pass:
-
-```bash
-bash {SKILL_DIR}/scripts/migrate-env-vars.sh --apply --cleanup-legacy --include-placeholders --target-profile ~/.zshrc
-```
-
-### 2.8.4 Report Effective State
-
-Always report:
-- applied profile path
-- migrated key list
-- missing required keys still needing real values
-
-Provide verification command:
-
-```bash
-rg -n "CWF_|TAVILY_API_KEY|EXA_API_KEY|SLACK_BOT_TOKEN|SLACK_CHANNEL_ID" ~/.zshrc ~/.bashrc ~/.claude/.env
-```
-
-Include activation note:
-
-```text
-Open a new shell (or source ~/.zshrc / ~/.bashrc) so updated exports are loaded.
-```
-
-### 2.8.5 Bootstrap Project Config Files
+### 2.8.1 Bootstrap Project Config Files
 
 Ask whether to create project-level config files (.cwf-config.yaml, .cwf-config.local.yaml) now:
 
@@ -193,9 +129,9 @@ When user selects `Overwrite templates`, run:
 bash {SKILL_DIR}/scripts/bootstrap-project-config.sh --force
 ```
 
-### 2.8.6 Explain Runtime Priority
+### 2.8.2 Explain Runtime Priority
 
-After migration/bootstrap decisions, always report the effective CWF config source priority:
+After bootstrap decisions, always report the effective CWF config source priority:
 
 1. .cwf-config.local.yaml
 2. .cwf-config.yaml

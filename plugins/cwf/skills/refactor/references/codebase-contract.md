@@ -27,7 +27,7 @@ Path resolution follows CWF artifact rules:
 
 - Existing contract is never overwritten unless `--force` is used.
 - First run is advisory defaults.
-- If bootstrap write fails, codebase scan should continue with fallback defaults and warning metadata.
+- If bootstrap write fails, emit `status=fallback` and halt with non-zero exit (fail-safe).
 
 ## Fields
 
@@ -58,7 +58,7 @@ Path resolution follows CWF artifact rules:
 
 ## Fallback Defaults (No Contract)
 
-When no contract can be loaded, `--codebase` should still run with best-effort defaults:
+When no contract can be loaded via direct scan invocation (outside the bootstrap gate), `codebase-quick-scan` may still run with best-effort defaults:
 
 - Source: tracked files when git is available; otherwise filesystem walk
 - Scope: include all files, exclude common generated/non-code paths and common lockfiles (`*.lock`, `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `bun.lock*`)

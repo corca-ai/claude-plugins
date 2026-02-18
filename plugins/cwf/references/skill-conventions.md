@@ -35,7 +35,7 @@ Skeleton policy (enforced):
 
 The top-level repository README (including locale mirrors) MUST keep each skill summary in this section order:
 
-1. Skill heading link (`### [skill](.../SKILL.md)`)
+1. Skill heading link (for example, ``### [gather](../skills/gather/SKILL.md)``)
 2. Primary trigger
 3. `Why`
 4. `What Happens`

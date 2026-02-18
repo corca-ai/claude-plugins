@@ -262,27 +262,32 @@ For **external** reviewer slots (Correctness, Architecture):
 
 ### 2.2 Detect provider availability and route external slots
 
-Single Bash call to check both:
+Single Bash call for provider preflight:
 
 ```bash
-command -v codex && echo CODEX_FOUND; command -v npx && echo NPX_FOUND
+command -v codex >/dev/null 2>&1 && echo CODEX_FOUND
+command -v npx >/dev/null 2>&1 && echo NPX_FOUND
+if command -v codex >/dev/null 2>&1; then
+  codex auth status >/dev/null 2>&1 && echo CODEX_AUTH_OK || true
+fi
 ```
 
 Parse the output:
-- Contains `CODEX_FOUND` → Codex CLI binary exists (auth assumed OK)
+- Contains `CODEX_FOUND` + `CODEX_AUTH_OK` → Codex CLI is preflight-ready
+- Contains `CODEX_FOUND` without `CODEX_AUTH_OK` → Codex exists but is not authenticated; treat as not ready for auto routing
 - Contains `NPX_FOUND` → npx exists, Gemini CLI *may* be available
 
-Note: `NPX_FOUND` only confirms npx is installed, not that Gemini CLI is authenticated or cached. Runtime failures are handled in Phase 3.2.
+Note: `NPX_FOUND` only confirms npx is installed, not that Gemini CLI is authenticated/cached. Runtime auth/tool failures are still handled in Phase 3.2 with immediate fallback or install/auth prompt.
 
 If `external_cli_allowed=false` (from the 1200-line cutoff), skip detection and set both slots to `claude`.
 
 Otherwise, resolve providers for external slots:
 
 - Slot 3 (Correctness):
-  - `--correctness-provider auto` → prefer `codex`, then `gemini`, then `claude`
+  - `--correctness-provider auto` → prefer `codex` only when `CODEX_AUTH_OK`; otherwise `gemini`, then `claude`
   - explicit `codex` / `gemini` / `claude` overrides auto
 - Slot 4 (Architecture):
-  - `--architecture-provider auto` → prefer `gemini`, then `codex`, then `claude`
+  - `--architecture-provider auto` → prefer `gemini`, then `codex` only when `CODEX_AUTH_OK`, then `claude`
   - explicit `gemini` / `codex` / `claude` overrides auto
 
 Provider semantics:

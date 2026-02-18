@@ -7,30 +7,23 @@
 #
 # Usage:
 #   plugins/cwf/scripts/codex/sync-skills.sh
-#   plugins/cwf/scripts/codex/sync-skills.sh --cleanup-legacy
 #   plugins/cwf/scripts/codex/sync-skills.sh --dry-run
 #
 # Notes:
 # - This script never uses rm. When replacing files/dirs, it moves them to backup.
-# - Legacy ~/.codex/skills cleanup is user-scope only and opt-in.
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+PLUGIN_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-PLUGIN_NAME="cwf"
 AGENTS_HOME="${AGENTS_HOME:-$HOME/.agents}"
 DEST_SKILLS_DIR="$AGENTS_HOME/skills"
 DEST_REFERENCES_PATH="$AGENTS_HOME/references"
 SCOPE="${CWF_CLAUDE_PLUGIN_SCOPE:-user}"
 PROJECT_ROOT=""
 
-CODEX_HOME_LEGACY="${CODEX_HOME:-$HOME/.codex}"
-LEGACY_SKILLS_DIR="$CODEX_HOME_LEGACY/skills"
-
 LINK_REFERENCES=true
-CLEANUP_LEGACY=false
 DRY_RUN=false
 VERIFY_LINKS=true
 
@@ -45,12 +38,10 @@ Options:
   --scope <user|project|local>
                         Integration scope (default: user)
   --project-root <path> Project root for project/local scope (default: git root or cwd)
-  --repo-root <path>      Repository root (default: auto-detect from script location)
+  --repo-root <path>      Plugin root override (default: auto-detect from script location)
   --agents-home <path>    Agents home (default: ~/.agents or $AGENTS_HOME)
   --skills-dir <path>     Destination skills dir (overrides --agents-home)
-  --plugin <name>         Plugin name under plugins/ (default: cwf)
   --no-references         Do not link ~/.agents/references
-  --cleanup-legacy        Move non-.system entries from legacy $CODEX_HOME/skills to backup
   --no-verify             Skip post-sync reference validation
   --dry-run               Print actions without modifying files
   -h, --help              Show this help
@@ -104,7 +95,7 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     --repo-root)
-      REPO_ROOT="${2:-}"
+      PLUGIN_ROOT="${2:-}"
       shift 2
       ;;
     --agents-home)
@@ -117,16 +108,8 @@ while [[ $# -gt 0 ]]; do
       DEST_SKILLS_DIR="${2:-}"
       shift 2
       ;;
-    --plugin)
-      PLUGIN_NAME="${2:-}"
-      shift 2
-      ;;
     --no-references)
       LINK_REFERENCES=false
-      shift
-      ;;
-    --cleanup-legacy)
-      CLEANUP_LEGACY=true
       shift
       ;;
     --no-verify)
@@ -173,20 +156,9 @@ else
   BACKUP_BASE="$AGENTS_HOME/.skill-sync-backup"
 fi
 
-# Support both layouts:
-# 1) Plugin-local layout (marketplace source = ./plugins/cwf)
-#    {REPO_ROOT}/skills, {REPO_ROOT}/references
-# 2) Repository-root layout (legacy/dev scripts path)
-#    {REPO_ROOT}/plugins/{name}/skills, {REPO_ROOT}/plugins/{name}/references
-if [[ -d "$REPO_ROOT/skills" ]]; then
-  SOURCE_SKILLS_DIR="$REPO_ROOT/skills"
-  SOURCE_REFERENCES_DIR="$REPO_ROOT/references"
-  SCRIPT_ROOT="$REPO_ROOT/scripts"
-else
-  SOURCE_SKILLS_DIR="$REPO_ROOT/plugins/$PLUGIN_NAME/skills"
-  SOURCE_REFERENCES_DIR="$REPO_ROOT/plugins/$PLUGIN_NAME/references"
-  SCRIPT_ROOT="$REPO_ROOT/plugins/$PLUGIN_NAME/scripts"
-fi
+SOURCE_SKILLS_DIR="$PLUGIN_ROOT/skills"
+SOURCE_REFERENCES_DIR="$PLUGIN_ROOT/references"
+SCRIPT_ROOT="$PLUGIN_ROOT/scripts"
 
 if [[ ! -d "$SOURCE_SKILLS_DIR" ]]; then
   echo "Source skills directory not found: $SOURCE_SKILLS_DIR" >&2
@@ -215,46 +187,6 @@ done
 if [[ "$LINK_REFERENCES" == "true" ]]; then
   safe_replace_with_symlink "$SOURCE_REFERENCES_DIR" "$DEST_REFERENCES_PATH" "$BACKUP_BASE"
   echo "Linked references: $DEST_REFERENCES_PATH -> $SOURCE_REFERENCES_DIR"
-fi
-
-if [[ "$CLEANUP_LEGACY" == "true" ]]; then
-  if [[ "$SCOPE" != "user" ]]; then
-    echo "Skipping legacy cleanup for scope '$SCOPE' (legacy path is user-scoped: $LEGACY_SKILLS_DIR)."
-  elif [[ "$LEGACY_SKILLS_DIR" == "$DEST_SKILLS_DIR" ]]; then
-    echo "Skipping legacy cleanup: destination and legacy path are identical."
-  elif [[ -d "$LEGACY_SKILLS_DIR" ]]; then
-    run_cmd mkdir -p "$CODEX_HOME_LEGACY/tmp"
-    legacy_backup="$(backup_path_for "$CODEX_HOME_LEGACY/tmp" "skills-custom-migrated")"
-    moved_any=false
-
-    shopt -s nullglob dotglob
-    for entry in "$LEGACY_SKILLS_DIR"/*; do
-      entry_name="$(basename "$entry")"
-      if [[ "$entry_name" == "." || "$entry_name" == ".." || "$entry_name" == ".system" ]]; then
-        continue
-      fi
-      if [[ "$moved_any" == "false" ]]; then
-        run_cmd mkdir -p "$legacy_backup"
-      fi
-      run_cmd mv "$entry" "$legacy_backup/"
-      moved_any=true
-      echo "Moved legacy entry: $entry_name"
-    done
-    shopt -u nullglob dotglob
-
-    if [[ "$moved_any" == "true" ]]; then
-      echo "Moved legacy custom entries to: $legacy_backup"
-    else
-      echo "No legacy custom entries found in: $LEGACY_SKILLS_DIR"
-    fi
-
-    if [[ -d "$LEGACY_SKILLS_DIR" ]] && [[ -z "$(find "$LEGACY_SKILLS_DIR" -mindepth 1 -maxdepth 1 -print -quit)" ]]; then
-      run_cmd rmdir "$LEGACY_SKILLS_DIR"
-      echo "Removed empty legacy directory: $LEGACY_SKILLS_DIR"
-    fi
-  else
-    echo "Legacy skills directory not found (or not a directory): $LEGACY_SKILLS_DIR"
-  fi
 fi
 
 if [[ "$VERIFY_LINKS" == "true" ]]; then

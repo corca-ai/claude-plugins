@@ -61,7 +61,7 @@ Status values:
 - `created`: first draft contract generated this run
 - `existing`: contract already present; no overwrite
 - `updated`: existing contract refreshed via `--force`
-- `fallback`: bootstrap degraded (for example, path/write failure); continue setup with core defaults
+- `fallback`: bootstrap failed (for example, path/write failure); stop and fix before continuing
 
 ## First-Run Flow (Required)
 
@@ -111,14 +111,14 @@ bash {SKILL_DIR}/scripts/install-tooling-deps.sh --check
 
 If bootstrap returns `fallback`:
 
-- continue setup using core dependency defaults,
+- stop setup flow immediately (fail-safe),
 - report `warning` text,
-- suggest manual rerun after environment/path issues are resolved.
+- request path/permission fix and rerun bootstrap.
 
 Example report line:
 
 ```text
-setup-contract: fallback (using core defaults); reason: <warning>
+setup-contract: fallback (bootstrap failed); reason: <warning>
 ```
 
 ## Runtime Validation

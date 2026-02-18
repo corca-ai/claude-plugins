@@ -139,7 +139,7 @@ Handle by `status`:
 - `existing`:
   - report contract path and continue with current contract
 - `fallback`:
-  - report warning and continue with core defaults
+  - report warning and stop this setup run (fail-safe)
 
 Prompt text:
 

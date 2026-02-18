@@ -21,7 +21,6 @@ claude plugin install cwf@corca-plugins
 
 이제 Claude Code에서 `cwf:setup`을 실행해주세요. setup은 다음과 같이 작동합니다.
 
-- v3 이전 레거시 환경 변수를 표준 `CWF_*` 키로 마이그레이션
 - 프로젝트 설정 파일(`.cwf-config.yaml`, `.cwf-config.local.yaml`) 부트스트랩
 - 외부 도구 감지(Codex/Gemini/Tavily/Exa) 및 선택적 Codex 연동
 - 로컬 실행 의존성(`shellcheck`, `jq`, `gh`, `node`, `python3`, `lychee`, `markdownlint-cli2`) 점검 및 설치 선택
@@ -162,7 +161,7 @@ gather → clarify → plan → review(plan) → impl → review(code) → refac
 | 9 | [review](#review) | `cwf:review` | 요구/계획/코드에 공통 품질 게이트를 적용하는 다각도 리뷰 |
 | 10 | [hitl](#hitl) | `cwf:hitl` | 합의 라운드와 청크 검토를 재개 가능한 상태로 운영 |
 | 11 | [run](#run) | `cwf:run` | gather부터 ship까지 전체 파이프라인을 단계 게이트로 조율 |
-| 12 | [setup](#setup) | `cwf:setup` | 훅/도구/setup·환경/인덱스 계약을 초기 표준값으로 부트스트랩하고 repo별 제안을 분리 제시 |
+| 12 | [setup](#setup) | `cwf:setup` | 훅/도구/setup·설정/인덱스 계약을 초기 표준값으로 부트스트랩하고 repo별 제안을 분리 제시 |
 | 13 | [update](#update) | `cwf:update` | CWF 동작을 최신 계약/수정사항과 동기화 |
 
 ## 스킬 레퍼런스
@@ -455,7 +454,7 @@ CWF 런타임은 아래 우선순위로 설정을 읽습니다.
 3. 프로세스 환경 변수
 4. 셸 프로파일(`~/.zshenv`, `~/.zprofile`, `~/.zshrc`, `~/.bash_profile`, `~/.bashrc`, `~/.profile`)
 
-`cwf:setup`을 수행하면 레거시 키를 `CWF_*`로 마이그레이션하고, 프로젝트 설정 템플릿을 부트스트랩하며, `.cwf-config.local.yaml`을 `.gitignore`에 등록합니다.
+`cwf:setup`을 수행하면 프로젝트 설정 템플릿을 부트스트랩하고, `.cwf-config.local.yaml`을 `.gitignore`에 등록합니다.
 
 팀 공유 기본값은 `.cwf-config.yaml`에 두세요.
 
@@ -520,6 +519,14 @@ CWF_SESSION_LOG_AUTO_COMMIT=true                    # 기본값: false
 # CWF_ARTIFACT_ROOT=".cwf-data"                     # 기본값: .cwf
 # CWF_PROJECTS_DIR=".cwf/projects"                  # 기본값: {CWF_ARTIFACT_ROOT}/projects
 # CWF_STATE_FILE=".cwf/custom-state.yaml"           # 기본값: {CWF_ARTIFACT_ROOT}/cwf-state.yaml
+```
+
+v3에서는 레거시 env 마이그레이션을 기본 `cwf:setup` 흐름에서 분리했습니다. v3 이전 키(`CLAUDE_CORCA_*`, `CLAUDE_ATTENTION_*`)를 쓰던 사용자라면 Claude Code / Codex에서 아래 프롬프트를 실행하세요.
+
+```text
+pre-v3 CWF 환경에서 업그레이드해서 CLAUDE_CORCA_* / CLAUDE_ATTENTION_* 레거시 env 키가 남아 있을 수 있습니다.
+설치된 CWF 플러그인 경로를 자동으로 찾고, migrate-env-vars.sh --scan 결과를 먼저 보여준 다음,
+--apply --cleanup-legacy --include-placeholders 실행 전에 확인을 요청해 주세요.
 ```
 
 ## 라이선스

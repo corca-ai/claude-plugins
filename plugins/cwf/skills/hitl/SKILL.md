@@ -46,7 +46,12 @@ At minimum, keep these runtime artifacts:
    - fallback `main`
 2. Resolve review scope (`docs|code|all`, default `all`).
 3. Build diff target: `git diff --name-only <base>...HEAD`.
-4. If `--resume`, load from `live.hitl.state_file` pointer in `cwf-state.yaml` (fallback: latest `.cwf/projects/*/hitl/`).
+4. If `--resume`, load from `live.hitl.state_file` pointer in `cwf-state.yaml`.
+   - If pointer is missing, fallback to latest `.cwf/projects/*/hitl/`.
+   - If both are missing, bootstrap HITL state interactively:
+     - ask whether to initialize under current `live.dir` (recommended) or a new session dir
+     - create `.cwf/projects/{session-dir}/hitl/` artifacts
+     - persist the resolved pointer back to `cwf-state.yaml` `live.hitl.state_file`
 
 ## Phase 0.5: Agreement Round (Default)
 
@@ -172,9 +177,9 @@ On `--close` (or EOF completion):
 11. For comment-driven doc HITL (for example README reflection), present each item in this order: `Before` (current text), `After` (proposed text), `After Intent` (why this reflects the user's concern and any trade-off/opinion).
     - `Before`/`After` must include enough surrounding context for user judgment (for example, the full paragraph or subsection, not a single isolated sentence).
 12. Do not ask a separate "proceed to next item?" question. When the current item is agreed, present the next pending item immediately; if not agreed, keep discussing the same item until agreement.
-13. If user manual edits are detected/reported, set `intent_resync_required=true` immediately and record the trigger in `events.log`.
-14. Never present a next chunk while `intent_resync_required=true`.
-15. Clearing `intent_resync_required` requires both: (a) scratchpad intent update and (b) `last_intent_resync_at` timestamp update.
+13. If user manual edits are detected/reported, trigger Phase 0.75 immediately (set `intent_resync_required=true` and append trigger to `events.log`).
+14. While `intent_resync_required=true`, apply the Phase 0.75 block rule (no next chunk presentation).
+15. Clear `intent_resync_required` only through the Phase 0.75 completion contract (`hitl-scratchpad.md` intent delta + `last_intent_resync_at` update).
 16. During active HITL doc review, document edits and scratchpad state must stay synchronized; post-run checks should flag missing scratchpad updates.
 17. **Language override**: review-facing HITL outputs follow the user's language by default unless the user explicitly requests another language.
 

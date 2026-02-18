@@ -10,7 +10,7 @@ set -euo pipefail
 # - Default contract location: {artifact_root}/codebase-contract.json
 # - Artifact root resolution: CWF config/env via cwf-artifact-paths.sh, fallback ./.cwf
 # - Idempotent by default: existing contract is never overwritten unless --force
-# - On bootstrap failure, emit fallback metadata and return success so scan can continue
+# - On bootstrap failure, emit fallback metadata and exit non-zero (fail-safe)
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
@@ -342,9 +342,9 @@ else
 fi
 
 if ! mkdir -p "$(dirname "$CONTRACT_PATH")" 2>/dev/null; then
-  append_warning "unable to create contract directory; continue with fallback defaults"
+  append_warning "unable to create contract directory; bootstrap failed"
   emit_result "fallback" "$CONTRACT_PATH" "$ARTIFACT_ROOT_ABS" "$WARNING"
-  exit 0
+  exit 2
 fi
 
 if [[ -f "$CONTRACT_PATH" && "$FORCE" != "true" ]]; then
@@ -357,21 +357,21 @@ tmp_file="$(mktemp "$CONTRACT_PATH.tmp.XXXXXX" 2>/dev/null || true)"
 if [[ -z "$tmp_file" ]]; then
   append_warning "unable to allocate temporary file for contract generation"
   emit_result "fallback" "$CONTRACT_PATH" "$ARTIFACT_ROOT_ABS" "$WARNING"
-  exit 0
+  exit 2
 fi
 
 if ! write_contract_file "$tmp_file" "$generated_at_utc"; then
   mv "$tmp_file" "$tmp_file.failed" >/dev/null 2>&1 || true
-  append_warning "failed to render contract draft; continue with fallback defaults"
+  append_warning "failed to render contract draft; bootstrap failed"
   emit_result "fallback" "$CONTRACT_PATH" "$ARTIFACT_ROOT_ABS" "$WARNING"
-  exit 0
+  exit 2
 fi
 
 if ! mv "$tmp_file" "$CONTRACT_PATH" 2>/dev/null; then
   mv "$tmp_file" "$tmp_file.failed" >/dev/null 2>&1 || true
-  append_warning "failed to write contract file; continue with fallback defaults"
+  append_warning "failed to write contract file; bootstrap failed"
   emit_result "fallback" "$CONTRACT_PATH" "$ARTIFACT_ROOT_ABS" "$WARNING"
-  exit 0
+  exit 2
 fi
 
 if [[ "$FORCE" == "true" ]]; then

@@ -29,7 +29,6 @@ cwf:setup
 
 `cwf:setup` standardizes first-run behavior by handling:
 
-- legacy env migration to canonical `CWF_*` keys
 - project config bootstrap (`.cwf-config.yaml`, `.cwf-config.local.yaml`)
 - tool detection (Codex/Gemini/Tavily/Exa) and optional Codex integration
 - local runtime dependency checks with install prompts (`shellcheck`, `jq`, `gh`, `node`, `python3`, `lychee`, `markdownlint-cli2`)
@@ -484,7 +483,7 @@ CWF runtime loads configuration in this priority order:
 3. Process environment
 4. Shell profiles (`~/.zshenv`, `~/.zprofile`, `~/.zshrc`, `~/.bash_profile`, `~/.bashrc`, `~/.profile`)
 
-`cwf:setup` environment flow migrates legacy keys to canonical `CWF_*`, bootstraps project config templates, and ensures `.cwf-config.local.yaml` is gitignored.
+`cwf:setup` bootstraps project config templates and ensures `.cwf-config.local.yaml` is gitignored.
 
 Use `.cwf-config.yaml` for shared non-secret defaults:
 
@@ -549,6 +548,13 @@ CWF_SESSION_LOG_AUTO_COMMIT=true                   # default: false
 # CWF_ARTIFACT_ROOT=".cwf-data"                    # default: .cwf
 # CWF_PROJECTS_DIR=".cwf/projects"                 # default: {CWF_ARTIFACT_ROOT}/projects
 # CWF_STATE_FILE=".cwf/custom-state.yaml"          # default: {CWF_ARTIFACT_ROOT}/cwf-state.yaml
+```
+
+Legacy env migration is intentionally out of the default `cwf:setup` flow in v3. If you are upgrading from pre-v3 keys (`CLAUDE_CORCA_*`, `CLAUDE_ATTENTION_*`), run this prompt in Claude Code / Codex:
+
+```text
+I upgraded from a pre-v3 CWF setup and may still have legacy CLAUDE_CORCA_* / CLAUDE_ATTENTION_* env vars.
+Please detect my installed CWF plugin path, run migrate-env-vars.sh --scan, show the migration candidates, and ask for confirmation before running --apply --cleanup-legacy --include-placeholders.
 ```
 
 ## License

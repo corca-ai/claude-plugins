@@ -207,7 +207,7 @@ When an external CLI exits non-zero, parse stderr **immediately** for error type
 1. Classify by the **first matching** pattern:
    - `MODEL_CAPACITY_EXHAUSTED`, `429`, `ResourceExhausted`, `quota` → **CAPACITY**: fail-fast, immediate fallback, no retry
    - `INTERNAL_ERROR`, `500`, `InternalError`, `server error` → **INTERNAL**: 1 retry then fallback
-   - `AUTHENTICATION`, `401`, `UNAUTHENTICATED`, `API key` → **AUTH**: abort immediately with setup hint
+   - `AUTHENTICATION`, `401`, `UNAUTHENTICATED`, `API key`, `auth login`, `not logged in`, `Please login` → **AUTH**: abort immediately with setup hint
    - `Tool.*not found`, `Did you mean one of` → **TOOL_ERROR**: fail-fast, immediate fallback, no retry
 1. Apply the action:
    - **CAPACITY**: Skip exit code check. Launch fallback immediately.
@@ -222,7 +222,7 @@ When an external CLI exits non-zero, parse stderr **immediately** for error type
 |-----------|---------|--------|
 | 0 + non-empty output | Success | `source: REAL_EXECUTION` |
 | 0 + empty output | Silent failure | `source: FAILED` → launch Task fallback |
-| 124 | Timeout (120s exceeded) | `source: FAILED` → launch Task fallback |
+| 124 | Timeout (120s exceeded) | If stderr indicates auth prompt, classify as `AUTH`; otherwise `source: FAILED` → launch Task fallback |
 | 126-127 | Permission denied / not found | `source: FAILED` → launch Task fallback |
 | Other non-zero | Unclassified error | `source: FAILED` → launch Task fallback |
 
