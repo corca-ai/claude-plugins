@@ -106,6 +106,38 @@ is_runtime_artifact_path() {
     return 1
 }
 
+resolve_check_links_script() {
+    local candidate=""
+    local root=""
+    local roots=()
+
+    if [[ -n "${CLAUDE_PLUGIN_ROOT:-}" ]]; then
+        roots+=("${CLAUDE_PLUGIN_ROOT}")
+    fi
+    roots+=("$PLUGIN_ROOT")
+    if [[ -n "$REPO_ROOT" ]]; then
+        roots+=("$REPO_ROOT")
+    fi
+
+    for root in "${roots[@]}"; do
+        [[ -n "$root" ]] || continue
+
+        candidate="$root/skills/refactor/scripts/check-links.sh"
+        if [[ -x "$candidate" ]]; then
+            printf '%s\n' "$candidate"
+            return 0
+        fi
+
+        candidate="$root/plugins/cwf/skills/refactor/scripts/check-links.sh"
+        if [[ -x "$candidate" ]]; then
+            printf '%s\n' "$candidate"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
 # --- Parse stdin ---
 INPUT=$(cat)
 FILE_PATH=$(printf '%s' "$INPUT" | jq -r '.tool_input.file_path // empty')
@@ -168,12 +200,12 @@ fi
 if [ -z "$REPO_ROOT" ]; then
     exit 0
 fi
-CHECK_LINKS="${REPO_ROOT}/plugins/cwf/skills/refactor/scripts/check-links.sh"
+CHECK_LINKS="$(resolve_check_links_script || true)"
 
-if [ ! -x "$CHECK_LINKS" ]; then
+if [[ -z "$CHECK_LINKS" ]]; then
     REASON=$(
-        printf 'Link checker unavailable for %s: plugins/cwf/skills/refactor/scripts/check-links.sh is missing or not executable.' \
-            "$FILE_PATH" | jq -Rs .
+        printf 'Link checker unavailable for %s: check-links.sh is missing or not executable under plugin root (%s) and repo fallback (%s/plugins/cwf).' \
+            "$FILE_PATH" "$PLUGIN_ROOT" "${REPO_ROOT:-<no-repo>}" | jq -Rs .
     )
     cat <<EOF
 {"decision":"block","reason":${REASON}}

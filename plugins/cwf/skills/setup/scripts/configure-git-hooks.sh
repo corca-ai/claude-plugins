@@ -24,6 +24,14 @@ USAGE
 INSTALL_MODE="both"
 PROFILE="balanced"
 APPLY_HOOKS_PATH="true"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CWF_PLUGIN_ROOT_DEFAULT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+
+escape_for_perl_replacement() {
+  printf '%s' "$1" | sed 's/[\\/&]/\\&/g'
+}
+
+CWF_PLUGIN_ROOT_ESCAPED="$(escape_for_perl_replacement "$CWF_PLUGIN_ROOT_DEFAULT")"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -102,9 +110,43 @@ set -euo pipefail
 PROFILE="__PROFILE__"
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
-CWF_LINK_CHECKER="plugins/cwf/skills/refactor/scripts/check-links.sh"
-CWF_ARTIFACT_PATHS="plugins/cwf/scripts/cwf-artifact-paths.sh"
-CWF_PLUGIN_DESC_SYNC="scripts/sync-marketplace-descriptions.sh"
+CWF_PLUGIN_ROOT="${CWF_PLUGIN_ROOT:-__CWF_PLUGIN_ROOT__}"
+
+resolve_cwf_path() {
+  local rel="$1"
+  local candidate=""
+  for candidate in \
+    "$CWF_PLUGIN_ROOT/$rel" \
+    "$CWF_PLUGIN_ROOT/plugins/cwf/$rel" \
+    "$REPO_ROOT/$rel" \
+    "$REPO_ROOT/plugins/cwf/$rel"; do
+    if [[ -f "$candidate" ]]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
+resolve_cwf_exec_path() {
+  local rel="$1"
+  local candidate=""
+  for candidate in \
+    "$CWF_PLUGIN_ROOT/$rel" \
+    "$CWF_PLUGIN_ROOT/plugins/cwf/$rel" \
+    "$REPO_ROOT/$rel" \
+    "$REPO_ROOT/plugins/cwf/$rel"; do
+    if [[ -x "$candidate" ]]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
+CWF_LINK_CHECKER="$(resolve_cwf_exec_path "skills/refactor/scripts/check-links.sh" || true)"
+CWF_ARTIFACT_PATHS="$(resolve_cwf_path "scripts/cwf-artifact-paths.sh" || true)"
+CWF_PLUGIN_DESC_SYNC="$(resolve_cwf_exec_path "scripts/sync-marketplace-descriptions.sh" || true)"
 
 normalize_rel_path() {
   local value="$1"
@@ -178,8 +220,7 @@ ensure_markdownlint_cli2() {
   if command -v markdownlint-cli2 >/dev/null 2>&1; then
     return 0
   fi
-  echo "[pre-commit] markdownlint-cli2 not found; run 'cwf:setup --tools' or" >&2
-  echo "  'bash plugins/cwf/skills/setup/scripts/install-tooling-deps.sh --install markdownlint-cli2'" >&2
+  echo "[pre-commit] markdownlint-cli2 not found; run 'cwf:setup --tools'." >&2
   exit 1
 }
 
@@ -193,50 +234,49 @@ mapfile -t plugin_meta_files < <(
     || true
 )
 if [ "${#plugin_meta_files[@]}" -gt 0 ]; then
-  if [[ ! -x "$CWF_PLUGIN_DESC_SYNC" ]]; then
-    echo "[pre-commit] $CWF_PLUGIN_DESC_SYNC missing or not executable" >&2
-    exit 1
-  fi
+  if [[ -z "$CWF_PLUGIN_DESC_SYNC" ]]; then
+    echo "[pre-commit] sync-marketplace-descriptions.sh not found; skipping marketplace sync." >&2
+  else
+    run_all_plugins=false
+    declare -a plugin_sync_args=()
+    declare -a plugin_names_seen=()
 
-  run_all_plugins=false
-  declare -a plugin_sync_args=()
-  declare -a plugin_names_seen=()
+    has_seen_plugin() {
+      local candidate="$1"
+      local existing=""
+      for existing in "${plugin_names_seen[@]}"; do
+        if [[ "$existing" == "$candidate" ]]; then
+          return 0
+        fi
+      done
+      return 1
+    }
 
-  has_seen_plugin() {
-    local candidate="$1"
-    local existing=""
-    for existing in "${plugin_names_seen[@]}"; do
-      if [[ "$existing" == "$candidate" ]]; then
-        return 0
+    for file in "${plugin_meta_files[@]}"; do
+      if [[ "$file" == ".claude-plugin/marketplace.json" ]]; then
+        run_all_plugins=true
+        continue
+      fi
+      if [[ "$file" =~ ^plugins/([^/]+)/\.claude-plugin/plugin\.json$ ]]; then
+        plugin_name="${BASH_REMATCH[1]}"
+        if ! has_seen_plugin "$plugin_name"; then
+          plugin_names_seen+=("$plugin_name")
+          plugin_sync_args+=(--plugin "$plugin_name")
+        fi
       fi
     done
-    return 1
-  }
 
-  for file in "${plugin_meta_files[@]}"; do
-    if [[ "$file" == ".claude-plugin/marketplace.json" ]]; then
-      run_all_plugins=true
-      continue
+    echo "[pre-commit] syncing marketplace descriptions from plugin manifests..."
+    if [[ "$run_all_plugins" == "true" || "${#plugin_sync_args[@]}" -eq 0 ]]; then
+      bash "$CWF_PLUGIN_DESC_SYNC"
+      bash "$CWF_PLUGIN_DESC_SYNC" --check
+    else
+      bash "$CWF_PLUGIN_DESC_SYNC" "${plugin_sync_args[@]}"
+      bash "$CWF_PLUGIN_DESC_SYNC" --check "${plugin_sync_args[@]}"
     fi
-    if [[ "$file" =~ ^plugins/([^/]+)/\.claude-plugin/plugin\.json$ ]]; then
-      plugin_name="${BASH_REMATCH[1]}"
-      if ! has_seen_plugin "$plugin_name"; then
-        plugin_names_seen+=("$plugin_name")
-        plugin_sync_args+=(--plugin "$plugin_name")
-      fi
-    fi
-  done
 
-  echo "[pre-commit] syncing marketplace descriptions from plugin manifests..."
-  if [[ "$run_all_plugins" == "true" || "${#plugin_sync_args[@]}" -eq 0 ]]; then
-    bash "$CWF_PLUGIN_DESC_SYNC"
-    bash "$CWF_PLUGIN_DESC_SYNC" --check
-  else
-    bash "$CWF_PLUGIN_DESC_SYNC" "${plugin_sync_args[@]}"
-    bash "$CWF_PLUGIN_DESC_SYNC" --check "${plugin_sync_args[@]}"
+    git add .claude-plugin/marketplace.json
   fi
-
-  git add .claude-plugin/marketplace.json
 fi
 
 mapfile -t md_candidates < <(git diff --cached --name-only --diff-filter=ACMR -- '*.md' '*.mdx' || true)
@@ -257,15 +297,19 @@ if [ "${#md_files[@]}" -gt 0 ]; then
   markdownlint-cli2 "${md_files[@]}"
 
   if [[ "$PROFILE" != "fast" ]]; then
-    echo "[pre-commit] local link validation on staged markdown files..."
-    for file in "${md_files[@]}"; do
-      case "$file" in
-        CHANGELOG.md|references/*)
-          continue
-          ;;
-      esac
-      bash "$CWF_LINK_CHECKER" --local --json --file "$file" >/dev/null
-    done
+    if [[ -n "$CWF_LINK_CHECKER" ]]; then
+      echo "[pre-commit] local link validation on staged markdown files..."
+      for file in "${md_files[@]}"; do
+        case "$file" in
+          CHANGELOG.md|references/*)
+            continue
+            ;;
+        esac
+        bash "$CWF_LINK_CHECKER" --local --json --file "$file" >/dev/null
+      done
+    else
+      echo "[pre-commit] CWF link checker unavailable; skipping local link validation." >&2
+    fi
   fi
 fi
 
@@ -282,7 +326,7 @@ if [[ "$PROFILE" != "fast" ]]; then
 fi
 SCRIPT
 
-  perl -0pi -e "s/__PROFILE__/$profile/g" "$path"
+  perl -0pi -e "s/__PROFILE__/$profile/g; s/__CWF_PLUGIN_ROOT__/$CWF_PLUGIN_ROOT_ESCAPED/g" "$path"
   chmod +x "$path"
 }
 
@@ -297,13 +341,47 @@ set -euo pipefail
 PROFILE="__PROFILE__"
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
-CWF_LINK_CHECKER="plugins/cwf/skills/refactor/scripts/check-links.sh"
-CWF_ARTIFACT_PATHS="plugins/cwf/scripts/cwf-artifact-paths.sh"
-CWF_INDEX_COVERAGE="plugins/cwf/skills/setup/scripts/check-index-coverage.sh"
-CWF_PROVENANCE="plugins/cwf/scripts/provenance-check.sh"
-CWF_GROWTH_DRIFT="plugins/cwf/scripts/check-growth-drift.sh"
-CWF_SCRIPT_DEPS="plugins/cwf/scripts/check-script-deps.sh"
-CWF_README_STRUCTURE="plugins/cwf/scripts/check-readme-structure.sh"
+CWF_PLUGIN_ROOT="${CWF_PLUGIN_ROOT:-__CWF_PLUGIN_ROOT__}"
+
+resolve_cwf_path() {
+  local rel="$1"
+  local candidate=""
+  for candidate in \
+    "$CWF_PLUGIN_ROOT/$rel" \
+    "$CWF_PLUGIN_ROOT/plugins/cwf/$rel" \
+    "$REPO_ROOT/$rel" \
+    "$REPO_ROOT/plugins/cwf/$rel"; do
+    if [[ -f "$candidate" ]]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
+resolve_cwf_exec_path() {
+  local rel="$1"
+  local candidate=""
+  for candidate in \
+    "$CWF_PLUGIN_ROOT/$rel" \
+    "$CWF_PLUGIN_ROOT/plugins/cwf/$rel" \
+    "$REPO_ROOT/$rel" \
+    "$REPO_ROOT/plugins/cwf/$rel"; do
+    if [[ -x "$candidate" ]]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
+CWF_LINK_CHECKER="$(resolve_cwf_exec_path "skills/refactor/scripts/check-links.sh" || true)"
+CWF_ARTIFACT_PATHS="$(resolve_cwf_path "scripts/cwf-artifact-paths.sh" || true)"
+CWF_INDEX_COVERAGE="$(resolve_cwf_exec_path "skills/setup/scripts/check-index-coverage.sh" || true)"
+CWF_PROVENANCE="$(resolve_cwf_exec_path "scripts/provenance-check.sh" || true)"
+CWF_GROWTH_DRIFT="$(resolve_cwf_exec_path "scripts/check-growth-drift.sh" || true)"
+CWF_SCRIPT_DEPS="$(resolve_cwf_exec_path "scripts/check-script-deps.sh" || true)"
+CWF_README_STRUCTURE="$(resolve_cwf_exec_path "scripts/check-readme-structure.sh" || true)"
 
 normalize_rel_path() {
   local value="$1"
@@ -373,12 +451,15 @@ is_runtime_skip_path() {
   return 1
 }
 
+is_cwf_authoring_repo() {
+  [[ -d "$REPO_ROOT/plugins/cwf" && -f "$REPO_ROOT/README.md" && -f "$REPO_ROOT/README.ko.md" ]]
+}
+
 ensure_markdownlint_cli2() {
   if command -v markdownlint-cli2 >/dev/null 2>&1; then
     return 0
   fi
-  echo "[pre-push] markdownlint-cli2 not found; run 'cwf:setup --tools' or" >&2
-  echo "  'bash plugins/cwf/skills/setup/scripts/install-tooling-deps.sh --install markdownlint-cli2'" >&2
+  echo "[pre-push] markdownlint-cli2 not found; run 'cwf:setup --tools'." >&2
   exit 1
 }
 
@@ -406,13 +487,17 @@ else
 fi
 
 if [[ "$PROFILE" != "fast" ]]; then
-  echo "[pre-push] local link validation..."
-  bash "$CWF_LINK_CHECKER" --local --json
+  if [[ -n "$CWF_LINK_CHECKER" ]]; then
+    echo "[pre-push] local link validation..."
+    bash "$CWF_LINK_CHECKER" --local --json
+  else
+    echo "[pre-push] CWF link checker unavailable; skipping local link validation." >&2
+  fi
 
-  if [[ -x "$CWF_INDEX_COVERAGE" ]]; then
+  if [[ -n "$CWF_INDEX_COVERAGE" ]]; then
     echo "[pre-push] index coverage checks..."
     CAP_INDEX_FILE=".cwf/indexes/cwf-index.md"
-    if [[ -f "$CWF_ARTIFACT_PATHS" ]]; then
+    if [[ -n "$CWF_ARTIFACT_PATHS" && -f "$CWF_ARTIFACT_PATHS" ]]; then
       # shellcheck source=plugins/cwf/scripts/cwf-artifact-paths.sh
       source "$CWF_ARTIFACT_PATHS"
       CAP_INDEX_DIR="$(resolve_cwf_indexes_dir "$REPO_ROOT" 2>/dev/null || true)"
@@ -427,45 +512,46 @@ if [[ "$PROFILE" != "fast" ]]; then
       bash "$CWF_INDEX_COVERAGE" "$CAP_INDEX_FILE" --profile cap
     fi
   else
-    echo "[pre-push] $CWF_INDEX_COVERAGE missing or not executable" >&2
-    exit 1
+    echo "[pre-push] check-index-coverage.sh unavailable; skipping index coverage checks." >&2
   fi
 fi
 
 if [[ "$PROFILE" == "strict" ]]; then
-  if [[ -x "$CWF_SCRIPT_DEPS" ]]; then
-    echo "[pre-push] runtime script dependency checks..."
-    bash "$CWF_SCRIPT_DEPS" --strict
+  if ! is_cwf_authoring_repo; then
+    echo "[pre-push] strict CWF authoring checks skipped (non-CWF repository)." >&2
   else
-    echo "[pre-push] $CWF_SCRIPT_DEPS missing or not executable" >&2
-    exit 1
-  fi
+    if [[ -n "$CWF_SCRIPT_DEPS" ]]; then
+      echo "[pre-push] runtime script dependency checks..."
+      bash "$CWF_SCRIPT_DEPS" --strict
+    else
+      echo "[pre-push] check-script-deps.sh unavailable; skipping strict dependency checks." >&2
+    fi
 
-  if [[ -x "$CWF_README_STRUCTURE" ]]; then
-    echo "[pre-push] README structure checks..."
-    bash "$CWF_README_STRUCTURE" --strict
-  else
-    echo "[pre-push] $CWF_README_STRUCTURE missing or not executable" >&2
-    exit 1
-  fi
+    if [[ -n "$CWF_README_STRUCTURE" ]]; then
+      echo "[pre-push] README structure checks..."
+      bash "$CWF_README_STRUCTURE" --strict
+    else
+      echo "[pre-push] check-readme-structure.sh unavailable; skipping README structure checks." >&2
+    fi
 
-  if [[ -x "$CWF_PROVENANCE" ]]; then
-    echo "[pre-push] provenance freshness report (inform)..."
-    bash "$CWF_PROVENANCE" --level inform
-  else
-    echo "[pre-push] $CWF_PROVENANCE missing; skipping provenance report" >&2
-  fi
+    if [[ -n "$CWF_PROVENANCE" ]]; then
+      echo "[pre-push] provenance freshness report (inform)..."
+      bash "$CWF_PROVENANCE" --level inform || true
+    else
+      echo "[pre-push] $CWF_PROVENANCE missing; skipping provenance report" >&2
+    fi
 
-  if [[ -x "$CWF_GROWTH_DRIFT" ]]; then
-    echo "[pre-push] growth-drift report (inform)..."
-    bash "$CWF_GROWTH_DRIFT" --level inform
-  else
-    echo "[pre-push] $CWF_GROWTH_DRIFT missing; skipping growth-drift report" >&2
+    if [[ -n "$CWF_GROWTH_DRIFT" ]]; then
+      echo "[pre-push] growth-drift report (inform)..."
+      bash "$CWF_GROWTH_DRIFT" --level inform || true
+    else
+      echo "[pre-push] $CWF_GROWTH_DRIFT missing; skipping growth-drift report" >&2
+    fi
   fi
 fi
 SCRIPT
 
-  perl -0pi -e "s/__PROFILE__/$profile/g" "$path"
+  perl -0pi -e "s/__PROFILE__/$profile/g; s/__CWF_PLUGIN_ROOT__/$CWF_PLUGIN_ROOT_ESCAPED/g" "$path"
   chmod +x "$path"
 }
 
