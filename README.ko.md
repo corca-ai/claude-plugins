@@ -281,7 +281,8 @@ cwf:retro --light    # 핵심 항목만 빠르게 점검 (서브에이전트 없
 
 ```text
 cwf:refactor                        # 모든 스킬 퀵 스캔
-cwf:refactor --code [branch]        # 커밋 기반 정리
+cwf:refactor --tidy [branch]        # 커밋 기반 정리
+cwf:refactor --codebase             # 계약 기반 전체 코드베이스 퀵 스캔
 cwf:refactor --skill <name>         # 단일 스킬 심층 리뷰
 cwf:refactor --skill --holistic     # 스킬/훅 전반의 교차 패턴·규약 정합성 분석
 cwf:refactor --docs                 # 문서 일관성 리뷰
@@ -293,7 +294,7 @@ cwf:refactor --docs                 # 문서 일관성 리뷰
 
 **무엇을 하는가**
 
-퀵 스캔은 모든 스킬의 구조 지표와 경고 플래그를 빠르게 점검해 이상 후보를 찾습니다. `--skill <name>`은 특정 스킬의 구조/품질/컨셉 정합성을 깊게 검토하는 집중 모드입니다. `--code`는 최근 커밋 기준 정리(tidy) 후보를 찾고, `--holistic`은 플러그인/훅 간 규약 준수와 워크플로우 연결성을 교차 분석하며, `--docs`는 문서 간 일관성·중복·연결 상태를 점검합니다.
+퀵 스캔은 모든 스킬의 구조 지표와 경고 플래그를 빠르게 점검해 이상 후보를 찾습니다. `--tidy`는 최근 커밋 기준 정리(tidy) 후보를 찾고, `--codebase`는 계약 기반으로 전체 코드베이스를 범용 규칙으로 빠르게 스캔합니다. `--skill <name>`은 특정 스킬의 구조/품질/컨셉 정합성을 깊게 검토하는 집중 모드입니다. `--holistic`은 플러그인/훅 간 규약 준수와 워크플로우 연결성을 교차 분석하며, `--docs`는 문서 간 일관성·중복·연결 상태를 점검합니다.
 
 ### [handoff](plugins/cwf/skills/handoff/SKILL.md)
 
@@ -448,6 +449,7 @@ cwf:setup --codex-wrapper
 - 프로젝트/로컬 스코프 실행 시 사용자 전역 경로(`~/.agents`, `~/.local/bin`)를 수정하려면 추가 명시적 확인이 필요합니다.
 - `cwf:setup --codex`: 선택된 스코프 경로에 CWF 스킬/레퍼런스를 연결해 Codex에서도 동일한 CWF 지식을 사용합니다.
 - `cwf:setup --codex-wrapper`: 선택된 스코프 경로에 codex wrapper를 설치해 Codex 실행 종료 후 세션 로그를 기본 `.cwf/sessions/`(레거시 폴백: `.cwf/projects/sessions/`)로 자동 동기화하고, 이번 실행에서 바뀐 파일 기준으로 post-run 품질 점검을 수행합니다.
+- 세션 로그 동기화는 체크포인트 기반 append 우선(증분) 방식으로 동작해 종료 시 지연과 전체 재생성 비용을 줄이고, 상태 불일치 시 전체 재생성으로 안전하게 폴백합니다.
 - 세션 아티팩트 디렉토리(`plan.md`, `retro.md`, `next-session.md`)는 기존처럼 `.cwf/projects/{YYMMDD}-{NN}-{title}/`에 유지됩니다.
 - post-run 점검 항목은 기본 품질 체크(markdownlint, 로컬 링크, shellcheck, live state) 외에 `apply_patch via exec_command` 위생 감지와 HITL 활성 상태에서 문서 변경 대비 scratchpad 동기화 감지도 포함합니다.
 - post-run 점검은 기본 `warn` 모드로 동작하며(실패를 경고로만 보고), 필요하면 `CWF_CODEX_POST_RUN_MODE=strict`로 실패를 종료코드에 반영할 수 있습니다. 끄려면 `CWF_CODEX_POST_RUN_CHECKS=false`, 로그를 줄이려면 `CWF_CODEX_POST_RUN_QUIET=true`를 사용하세요.

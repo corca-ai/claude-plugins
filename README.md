@@ -274,7 +274,8 @@ JTBD: keep a growing skill/tool ecosystem coherent as teams install or author mo
 
 ```text
 cwf:refactor                        # Quick scan all skills
-cwf:refactor --code [branch]        # Commit-based tidying
+cwf:refactor --tidy [branch]        # Commit-based tidying
+cwf:refactor --codebase             # Contract-driven whole-codebase quick scan
 cwf:refactor --skill <name>         # Deep review of a single skill
 cwf:refactor --skill --holistic     # Cross-plugin analysis
 cwf:refactor --docs                 # Documentation consistency review
@@ -286,7 +287,7 @@ In a growing codebase where features, skills, docs, and operational scripts evol
 
 **What It Does**
 
-Quick scan checks structural metrics and warning flags across all skills. `--skill <name>` provides focused structural/quality/concept diagnosis. `--code` finds safe tidy candidates from recent commits (Kent Beck's "Tidy First?"). `--holistic` analyzes cross-plugin convention compliance, concept integrity, and workflow coherence. `--docs` checks cross-document consistency.
+Quick scan checks structural metrics and warning flags across all skills. `--tidy` finds safe tidy candidates from recent commits (Kent Beck's "Tidy First?"). `--codebase` runs a contract-driven whole-codebase quick scan with portable defaults. `--skill <name>` provides focused structural/quality/concept diagnosis. `--holistic` analyzes cross-plugin convention compliance, concept integrity, and workflow coherence. `--docs` checks cross-document consistency.
 
 ### [handoff](plugins/cwf/skills/handoff/SKILL.md)
 
@@ -433,6 +434,7 @@ What this enables:
 - Project/local scope targets: `{projectRoot}/.codex/skills/*`, `{projectRoot}/.codex/references`, `{projectRoot}/.codex/bin/codex`
 - Non-user runs do not mutate user-global Codex paths unless explicitly confirmed
 - Every `codex` run auto-syncs session markdown logs into `.cwf/sessions/` by default (legacy fallback: `.cwf/projects/sessions/`) as `*.codex.md`
+- Session log sync is append-first with checkpointed incremental updates to reduce exit-time latency; if state is missing/inconsistent, it safely falls back to full rebuild
 - Session artifact directories (`plan.md`, `retro.md`, `next-session.md`) remain under `.cwf/projects/{YYMMDD}-{NN}-{title}/`
 - Sync is anchored to the session updated during the current run (reduces wrong-session exports on shared cwd)
 - Raw JSONL copy is opt-in (`--raw`); redaction still applies when raw export is enabled
