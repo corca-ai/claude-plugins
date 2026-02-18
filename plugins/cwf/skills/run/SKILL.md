@@ -7,8 +7,6 @@ description: "Full CWF pipeline auto-chaining for end-to-end delegation without 
 
 Delegate end-to-end workflow orchestration when users do not want to manually sequence each skill.
 
-**Language**: Communicate with the user in their prompt language. Artifacts in English.
-
 ## Quick Start
 
 ```text

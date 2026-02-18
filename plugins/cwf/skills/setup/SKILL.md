@@ -7,8 +7,6 @@ description: "Initial CWF configuration to standardize environment/tool contract
 
 Standardize hooks, tool contracts, and environment wiring once so later workflow runs stay reproducible. Includes interactive hook toggles, external tool detection, setup-contract bootstrap for repo-adaptive suggestions, env migration/bootstrap, optional Agent Team mode setup, optional Codex integration, optional git hook gate installation, optional CWF capability index generation, and optional repository index generation.
 
-**Language**: Write config files in English. Communicate with the user in their prompt language.
-
 ## Quick Start
 
 ```text

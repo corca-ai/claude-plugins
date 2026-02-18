@@ -7,8 +7,6 @@ description: "Unified requirement clarification to prevent downstream implementa
 
 Resolve ambiguity before planning so implementation starts from explicit decisions, not assumptions.
 
-**Language**: Write clarification artifacts in English. Communicate with the user in their prompt language.
-
 ## Quick Start
 
 ```text

@@ -7,8 +7,6 @@ description: "Agent-assisted plan drafting to define a reviewable execution cont
 
 Create a reviewable execution contract (scope, files, success criteria) before code changes begin.
 
-**Language**: Write `plan.md` in English. Write `lessons.md` in the user's language. Communicate with the user in their prompt language.
-
 ## Quick Start
 
 ```text
@@ -287,7 +285,7 @@ For a multi-perspective review before implementation, run:
 8. **Commit Strategy is required**: Every plan must include a Commit Strategy section. Default is one commit per Step.
 9. **Preparatory refactoring check**: When a target file is 300+ lines with 3+ planned changes, add Step 0 to extract separable blocks first
 10. **Critical persistence outputs hard-fail**: If `plan-prior-art-research.md` or `plan-codebase-analysis.md` remains invalid after bounded retry, stop with explicit error instead of drafting from partial data
-11. **Language split is mandatory**: `plan.md` is in English; `lessons.md` is in the user's language
+11. **Language override is mandatory**: `plan.md` is in English; `lessons.md` is in the user's language
 
 ## References
 

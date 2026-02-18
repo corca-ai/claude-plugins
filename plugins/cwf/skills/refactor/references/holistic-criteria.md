@@ -32,9 +32,10 @@ Does each skill follow shared structural templates? Focus on individual skill st
 
 Read `skill-conventions.md` and verify each skill against its checklists:
 
-- SKILL.md section order (frontmatter → title → Language → Quick Start → Phases → Rules → References)
+- SKILL.md skeleton order (frontmatter → title/description → Quick Start/Reference → flexible workflow/phases → Rules → References)
 - Frontmatter format (name, description with Triggers, allowed-tools)
-- Language declaration (standard pattern after title)
+- No top-level `**Language**:` declaration in SKILL.md
+- Language exceptions are declared in `## Rules` when needed
 - Rules section present with universal rules
 - References section with correct relative paths (`../../references/`)
 
@@ -44,14 +45,14 @@ Flag deviations with specific file:line references.
 
 Identify good patterns one skill has that others should adopt:
 
-- Language adaptation: does every user-facing skill specify how to match the user's language?
+- Language overrides: do user-facing exception skills explicitly declare output-language overrides in Rules?
 - Sub-agent usage: when skills use Task tool, do they follow the mature pattern (reference guide in `references/`, parallel execution, structured output)?
 - Usage message: do skills with subcommands show help when invoked with no args?
 - Configuration: are env vars named consistently (`CWF_{DOMAIN}_{SETTING}`)?
 - Output persistence: do skills that produce artifacts offer to save them?
 - Progressive Disclosure: do all skills follow the three-level hierarchy (metadata → body → references)?
 
-For each gap, name the source skill (where the pattern is done well) and the target skills (where it's missing). Be specific about what to add — not "add language adaptation" but "add `**Language**: Match the user's language.` after the title."
+For each gap, name the source skill (where the pattern is done well) and the target skills (where it's missing). Be specific about what to add — not "add language adaptation" but "add a Rules-level language override for synthesis output."
 
 ### 1c. Structural extraction opportunities
 

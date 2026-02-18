@@ -7,8 +7,6 @@ description: "Comprehensive session retrospective that turns one session's outco
 
 Adaptive end-of-session review that converts outcomes into durable process/context/tool improvements. Deep by default; light mode is used with `--light` or for tiny routine sessions. Produces `retro.md` alongside `plan.md` and `lessons.md` in the session artifact directory.
 
-**Language**: Write retro.md in the user's language. Communicate with the user in their prompt language.
-
 ## Quick Start
 
 ```text
@@ -402,6 +400,7 @@ Do not prompt the user to start this discussion.
 4. AGENTS.md/runtime adapter changes require explicit user approval.
 5. Use the deterministic gate checklist in [retro-gates-checklist.md](references/retro-gates-checklist.md) for deep-mode artifacts, persistence tiering, and direct-invocation reporting requirements.
 6. For Section 5 in deep mode, use `{SKILL_DIR}/references/expert-lens-guide.md` and include the mandatory agreement/disagreement synthesis subsection.
+7. **Language override**: `retro.md` and deep-mode companion outputs are written in the user's language.
 
 ## References
 

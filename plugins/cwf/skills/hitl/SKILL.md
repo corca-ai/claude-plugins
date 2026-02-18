@@ -7,8 +7,6 @@ description: "Human-in-the-loop diff/chunk review to inject deliberate human jud
 
 Insert deliberate human judgment into branch-diff review (`<base>...HEAD`) with resumable chunk state. Reviews file-by-file in meaningful chunks, pauses for user input each chunk, and persists state/rules so work can resume anytime.
 
-**Language**: Write review outputs in the user's prompt language by default. If the user explicitly requests another language, follow that request.
-
 ## Quick Reference
 
 ```text
@@ -178,6 +176,7 @@ On `--close` (or EOF completion):
 14. Never present a next chunk while `intent_resync_required=true`.
 15. Clearing `intent_resync_required` requires both: (a) scratchpad intent update and (b) `last_intent_resync_at` timestamp update.
 16. During active HITL doc review, document edits and scratchpad state must stay synchronized; post-run checks should flag missing scratchpad updates.
+17. **Language override**: review-facing HITL outputs follow the user's language by default unless the user explicitly requests another language.
 
 ## References
 

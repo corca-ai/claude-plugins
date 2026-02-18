@@ -7,8 +7,6 @@ description: "Check and update CWF plugin to keep installed behavior aligned wit
 
 Keep installed CWF behavior aligned with the latest marketplace version and fixes, with scope-aware reconciliation for Codex integration paths.
 
-**Language**: Write artifacts in English. Communicate with the user in their prompt language.
-
 ## Quick Start
 
 ```text

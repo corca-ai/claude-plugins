@@ -7,8 +7,6 @@ description: "Implementation orchestration from a plan to execute approved scope
 
 Execute an approved plan predictably while preserving constraints, dependencies, and BDD validation.
 
-**Language**: Write code/technical implementation artifacts in English. Keep `lessons.md` in the user's language. Communicate with the user in their prompt language.
-
 ## Quick Start
 
 ```text
@@ -446,7 +444,7 @@ the plan's success criteria, run:
 14. **Lesson-driven changes get separate commits**: If a lesson triggers a code change, commit it independently. See [Lesson-Driven Commits](references/impl-gates.md#lesson-driven-commits).
 15. **Incremental lessons are mandatory**: Update `lessons.md` as implementation progresses, not only at the end.
 16. **Structural Triage Contract**: For each triage item referencing analysis documents, enforce the triage record contract in [agent-patterns.md](../../references/agent-patterns.md#broken-link-triage-protocol): include `source_ref`, `source_recommendation`, `triage_action`, `runtime_caller_check`, `deletion_premortem`, and `decision_id`. If `source_recommendation` is missing, stop and complete triage context first. If `triage_action` diverges from `source_recommendation`, ask the user before proceeding. For deletion actions, do not continue until runtime-caller check and pre-mortem are both recorded.
-17. **Language split is mandatory**: implementation/code artifacts stay in English, while `lessons.md` stays in the user's language.
+17. **Language override is mandatory**: implementation/code artifacts stay in English, while `lessons.md` stays in the user's language.
 
 ## References
 

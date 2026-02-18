@@ -7,8 +7,6 @@ description: "Unified information acquisition that stabilizes context before rea
 
 Convert scattered sources into local, reusable artifacts so later phases reason over stable context instead of transient links.
 
-**Language**: Write gathered artifacts in English. Communicate with the user in their prompt language.
-
 ## Quick Reference
 
 ```text

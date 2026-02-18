@@ -7,8 +7,6 @@ description: "Automate GitHub workflow so validated session artifacts become shi
 
 Convert validated CWF session artifacts into issue → PR → merge execution with explicit human merge control.
 
-**Language**: Write issue/PR bodies in the user's language. Keep code blocks, file paths, commit hashes, and CLI output verbatim.
-
 ## Quick Start
 
 ```text
@@ -342,6 +340,7 @@ Defaults: base=auto-detected (origin/HEAD -> main -> master), merge=squash
 7. Missing prerequisites must trigger an install/configure choice prompt, not a passive "missing tool" report only.
 8. `/ship` must always persist `{session_dir}/ship.md` before returning.
 9. In `defer-blocking` mode, unresolved ambiguity debt is merge-blocking until tracked follow-up references are recorded and `blocking_open_count` is zero.
+10. **Language override**: issue/PR narrative sections are written in the user's language; code blocks, file paths, commit hashes, and CLI output remain verbatim.
 
 ## References
 

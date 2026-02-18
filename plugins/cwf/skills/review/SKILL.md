@@ -7,8 +7,6 @@ description: "Universal review with narrative verdicts for consistent quality ga
 
 Apply consistent multi-perspective quality gates before implementation (plan) and after implementation (code) via 6 parallel reviewers (2 internal + 2 external slots + 2 domain experts).
 
-**Language**: Match the user's language for synthesis. Reviewer prompts in English.
-
 ## Quick Reference
 
 ```text
@@ -467,6 +465,7 @@ Use the deterministic error-handling matrix in [references/synthesis-and-gates.m
     units and `tidy` first.
 13. **Code-mode session-log fields are mandatory** — always include deterministic `session_log_*` keys in Confidence Note for `--mode code`.
 14. **Code-mode artifact gate is mandatory** — `review-code` is not complete unless `check-run-gate-artifacts.sh --stage review-code --strict` passes.
+15. **Language override** — synthesis output follows the user's language; reviewer prompts remain in English.
 
 ---
 

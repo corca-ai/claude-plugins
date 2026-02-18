@@ -7,8 +7,6 @@ description: "Multi-mode code and skill review for controlling drift as capabili
 
 Control drift across code, skills, and docs as teams install and author more capabilities.
 
-**Language**: Write review reports in English. Communicate with the user in their prompt language.
-
 ## Quick Reference
 
 ```text
@@ -299,18 +297,17 @@ Use `{SKILL_DIR}/references/docs-criteria.md` for evaluation criteria, [referenc
 
 ## Rules
 
-1. Write review reports in English, communicate with user in their prompt language
-2. Deep Review and Holistic use perspective-based parallel sub-agents (not module-based)
-3. Deep Review: 2 agents (structural 1-4 + quality/concept/portability 5-9), single batch
-4. Holistic: 3 agents (Convention Compliance, Concept Integrity, Workflow Coherence), single batch after inline inventory
-5. Code Tidying: 1 agent per commit, all in one message
-6. Codebase Quick Scan: contract-driven deterministic scan, no sub-agents
-7. Codebase Deep Review: 4 expert sub-agents (fixed 2 + context 2) after codebase scan
-8. Docs Review: inline, no sub-agents (single-context synthesis over whole-repo graph and deterministic outputs)
-9. Docs Review must run the deterministic tool pass before semantic analysis
-10. In Docs Review, do not report lint/hook-detectable issues as standalone manual findings when tool output already covers them
-11. Sub-agents analyze and report; orchestrator merges. Sub-agents do not modify files
-12. All code fences must have a language specifier
+1. Deep Review and Holistic use perspective-based parallel sub-agents (not module-based)
+2. Deep Review: 2 agents (structural 1-4 + quality/concept/portability 5-9), single batch
+3. Holistic: 3 agents (Convention Compliance, Concept Integrity, Workflow Coherence), single batch after inline inventory
+4. Code Tidying: 1 agent per commit, all in one message
+5. Codebase Quick Scan: contract-driven deterministic scan, no sub-agents
+6. Codebase Deep Review: 4 expert sub-agents (fixed 2 + context 2) after codebase scan
+7. Docs Review: inline, no sub-agents (single-context synthesis over whole-repo graph and deterministic outputs)
+8. Docs Review must run the deterministic tool pass before semantic analysis
+9. In Docs Review, do not report lint/hook-detectable issues as standalone manual findings when tool output already covers them
+10. Sub-agents analyze and report; orchestrator merges. Sub-agents do not modify files
+11. All code fences must have a language specifier
 
 ## References
 

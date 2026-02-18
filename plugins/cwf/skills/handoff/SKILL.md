@@ -7,8 +7,6 @@ description: "Auto-generate session or phase handoff documents so the next agent
 
 Preserve execution continuity across boundaries by generating handoff documents (`next-session.md` or `phase-handoff.md`) from project state and artifacts. Reads `cwf-state.yaml` for session history and `master-plan.md` (when available) for next-session scope.
 
-**Language**: Write handoff documents in English. Communicate with the user in their prompt language.
-
 ## Quick Start
 
 ```text

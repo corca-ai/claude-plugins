@@ -15,8 +15,6 @@ Every skill MUST follow this section order:
 
 {1-2 line description}
 
-**Language**: Write {artifact type} in English. Communicate with the user in their prompt language.
-
 ## Quick Start / Quick Reference
 
 ## {Phases / Workflow}
@@ -25,6 +23,13 @@ Every skill MUST follow this section order:
 
 ## References
 ```
+
+Skeleton policy (enforced):
+
+- `## Quick Start` or `## Quick Reference` must exist.
+- `## Rules` and `## References` must both exist.
+- `## Rules` must appear before `## References`.
+- Sections between Quick and Rules are intentionally flexible by skill.
 
 ## README Skill Summary Format
 
@@ -56,21 +61,18 @@ description: "{One-line description.} Triggers: \"{cwf:name}\", \"{natural langu
 - `name`: lowercase, matches directory name
 - `description`: single-line with embedded `Triggers:` clause (CORCA003 lint rule enforces single-line for runtime portability; do not use block scalar `|` or `>`)
 
-## Language Declaration
+## Language Contract (Global)
 
-Place immediately after the 1-2 line description, before any sections.
+Default contract for all skills:
 
-**Standard pattern**:
+- Communicate with the user in the user's prompt language.
+- Keep implementation/technical artifacts in English unless a skill-specific override applies.
 
-```text
-**Language**: Write {artifact type} in English. Communicate with the user in their prompt language.
-```
+Policy:
 
-**Exception**: Skills producing user-facing artifacts in the user's language (e.g., retro) may use:
-
-```text
-**Language**: Write {artifact} in the user's language. Communicate with the user in their prompt language.
-```
+- Do not use a top-level `**Language**:` declaration in `SKILL.md`.
+- When a skill needs a language exception (for example, user-language synthesis/output), declare it in `## Rules` as an explicit language override.
+- Gate: CORCA005 (`skill-skeleton-language-contract.cjs`) enforces no top-level language declaration and the skeleton structure above.
 
 ## Context-Deficit Resilience (Global Contract)
 
@@ -209,19 +211,21 @@ This applies to analysis reports, quick scans, review summaries, and any skill o
 ## Checklist for New Skills
 
 - [ ] Frontmatter: name, description (with Triggers)
-- [ ] Language declaration after title (standard pattern)
-- [ ] Quick Start section with usage examples
-- [ ] Phase-based workflow (numbered phases)
+- [ ] Quick Start/Quick Reference section with usage examples
+- [ ] Workflow/Phases section(s) after Quick section
 - [ ] Rules section with universal + skill-specific rules
+- [ ] References section is present and comes after Rules
+- [ ] If language behavior differs from default, add explicit language override in Rules
 - [ ] References section with correct relative paths (`../../references/`)
 - [ ] All code fences have language specifiers
 - [ ] markdownlint passes (0 errors)
 
 ## Checklist for Holistic Review
 
-- [ ] All skills follow section order (frontmatter → title → Language → Quick Start → Phases → Rules → References)
-- [ ] Language declarations use standard pattern
+- [ ] All skills follow skeleton order (frontmatter → title/description → Quick Start/Reference → flexible workflow/phases → Rules → References)
 - [ ] All skills have Rules section
+- [ ] No skill has top-level `**Language**:` declaration
+- [ ] Language exceptions are documented in Rules when needed
 - [ ] Shared reference paths use `../../references/` (avoid deeper parent traversal forms)
 - [ ] Agent pattern matches declaration in agent-patterns.md
 - [ ] No repeated patterns that should be extracted to shared references
