@@ -24,7 +24,7 @@ function getFileName(params) {
 
 function isSkillFile(params) {
   const fileName = getFileName(params);
-  return /(^|\/)SKILL\.md$/i.test(fileName);
+  return /(^|\/)plugins\/cwf\/skills\/[^/]+\/SKILL\.md$/i.test(fileName);
 }
 
 module.exports = [
