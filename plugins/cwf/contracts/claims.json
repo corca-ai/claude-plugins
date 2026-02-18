@@ -53,7 +53,7 @@
     {
       "id": "portable_authoring_contract_split",
       "audience": "agent",
-      "assertion": "Portable and authoring gate policies are explicitly separated and selectable.",
+      "assertion": "Portable and authoring gate policies are explicitly separated; auto uses portable baseline and authoring remains explicitly selectable.",
       "source_refs": [
         {
           "file": "plugins/cwf/contracts/portable-contract.json",
@@ -74,6 +74,11 @@
           "id": "unified_gate_auto",
           "path": "plugins/cwf/scripts/check-portability-contract.sh",
           "command": "bash plugins/cwf/scripts/check-portability-contract.sh --contract auto --context manual"
+        },
+        {
+          "id": "unified_gate_authoring",
+          "path": "plugins/cwf/scripts/check-portability-contract.sh",
+          "command": "bash plugins/cwf/scripts/check-portability-contract.sh --contract authoring --context manual"
         }
       ]
     }

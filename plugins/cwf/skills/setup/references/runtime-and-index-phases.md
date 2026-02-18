@@ -39,8 +39,8 @@ Gate profile values:
 
 Contract gate behavior (all profiles):
 - hook scripts call `check-portability-contract.sh --contract auto --context hook`
-- `auto` resolves to `authoring` only for CWF authoring repos
-- non-authoring host repos always resolve to `portable`
+- `auto` always resolves to `portable`
+- authoring checks require explicit invocation (`--contract authoring`) from repo-maintainer workflows
 
 Resolution order:
 1. If command includes `--gate-profile <value>`, use it.
@@ -77,7 +77,7 @@ And summarize:
 - installed hooks (`pre-commit`, `pre-push`)
 - selected profile
 - what each hook enforces at that profile
-- resolved contract mode policy (`auto -> authoring|portable`) and why
+- resolved contract mode policy (`auto -> portable`) and when to run explicit `authoring`
 
 ---
 

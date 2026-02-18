@@ -31,12 +31,14 @@ Git hook and post-run gates use a contract split so CWF remains repository-agnos
 - [plugins/cwf/contracts/portable-contract.json](../../../contracts/portable-contract.json): safe baseline checks for arbitrary host repositories.
 - [plugins/cwf/contracts/authoring-contract.json](../../../contracts/authoring-contract.json): stricter checks that depend on CWF authoring-repo structure.
 
-`check-portability-contract.sh --contract auto` selects:
+`check-portability-contract.sh --contract auto` always selects `portable`.
 
-- `authoring` when the current repository matches CWF authoring markers.
-- `portable` for all other repositories.
+Authoring checks remain available via explicit selection:
 
-This keeps the dependency direction one-way (`repo -> cwf`, not `cwf -> this repo`).
+- `bash plugins/cwf/scripts/check-portability-contract.sh --contract authoring --context <manual|hook|post-run>`
+- `bash scripts/check-cwf-authoring-contract.sh` (this repository maintainer wrapper)
+
+This keeps runtime dependency direction one-way (`repo -> cwf`, not `cwf -> this repo`) and prevents layout-based auto-detection coupling.
 
 ### Audience boundary for policy IDs
 

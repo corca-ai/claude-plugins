@@ -29,9 +29,46 @@ CONTRACT_STAGE_REFACTOR="fail"
 CONTRACT_STAGE_RETRO="fail"
 CONTRACT_STAGE_SHIP="fail"
 CONTRACT_POLICY_PROVIDER_GEMINI_MODE="off"
+PERSISTENCE_GATE="PASS"
 
 # shellcheck source=plugins/cwf/scripts/check-run-gate-artifacts-lib.sh
 source "$SCRIPT_DIR/check-run-gate-artifacts-lib.sh"
+
+mark_soft_continue() {
+  if [[ "$PERSISTENCE_GATE" != "HARD_FAIL" ]]; then
+    PERSISTENCE_GATE="SOFT_CONTINUE"
+  fi
+}
+
+check_retro_critical_output() {
+  local stage="$1"
+  local file_path="$2"
+  ensure_nonempty_file "$stage" "$file_path" || return 1
+  require_agent_complete_sentinel "$stage" "$file_path" || return 1
+  return 0
+}
+
+check_retro_noncritical_output() {
+  local stage="$1"
+  local file_path="$2"
+  local rel="${file_path#"$SESSION_DIR"/}"
+
+  if [[ ! -s "$file_path" ]]; then
+    append_warn "$stage" "soft gate: non-critical artifact missing or empty: $rel (continue with omission note)"
+    mark_soft_continue
+    return 1
+  fi
+  append_pass "$stage" "artifact present: $rel"
+
+  if grep -q '<!-- AGENT_COMPLETE -->' "$file_path" 2>/dev/null; then
+    append_pass "$stage" "sentinel present: $rel"
+    return 0
+  fi
+
+  append_warn "$stage" "soft gate: missing sentinel <!-- AGENT_COMPLETE --> in $rel (continue with omission note)"
+  mark_soft_continue
+  return 1
+}
 
 check_review_code_stage() {
   local stage="review-code"
@@ -168,9 +205,9 @@ check_retro_stage() {
   local stage="retro"
   local retro_file="$SESSION_DIR/retro.md"
   local mode_line=""
-  local deep_file=""
-  local deep_files=(
-    "$SESSION_DIR/retro-cdm-analysis.md"
+  local noncritical_file=""
+  local critical_file="$SESSION_DIR/retro-cdm-analysis.md"
+  local noncritical_files=(
     "$SESSION_DIR/retro-learning-resources.md"
     "$SESSION_DIR/retro-expert-alpha.md"
     "$SESSION_DIR/retro-expert-beta.md"
@@ -185,9 +222,9 @@ check_retro_stage() {
 
   append_pass "$stage" "mode declaration: $mode_line"
   if printf '%s' "$mode_line" | grep -Eiq 'deep'; then
-    for deep_file in "${deep_files[@]}"; do
-      ensure_nonempty_file "$stage" "$deep_file" || true
-      require_agent_complete_sentinel "$stage" "$deep_file" || true
+    check_retro_critical_output "$stage" "$critical_file" || true
+    for noncritical_file in "${noncritical_files[@]}"; do
+      check_retro_noncritical_output "$stage" "$noncritical_file" || true
     done
   fi
 }
@@ -295,6 +332,7 @@ EOF_LESSONS
   {
     printf '\n## Run Gate Violation — %s\n' "$ts"
     printf -- "- Gate checker: \`%s\`\n" "plugins/cwf/scripts/check-run-gate-artifacts.sh"
+    printf -- "- Persistence gate: \`%s\`\n" "$PERSISTENCE_GATE"
     printf -- '- Recorded failures:\n'
     for item in "${FAILS[@]}"; do
       printf '  - %s\n' "$item"
@@ -396,6 +434,10 @@ done
 
 apply_provider_gemini_policy
 
+if [[ "${#FAILS[@]}" -gt 0 ]]; then
+  PERSISTENCE_GATE="HARD_FAIL"
+fi
+
 echo "Run gate artifact check"
 echo "  session_dir : ${SESSION_DIR#"$REPO_ROOT"/}"
 echo "  stages      : ${STAGES[*]}"
@@ -411,6 +453,7 @@ fi
 echo "  pass        : ${#PASSES[@]}"
 echo "  warn        : ${#WARNS[@]}"
 echo "  fail        : ${#FAILS[@]}"
+echo "  PERSISTENCE_GATE=$PERSISTENCE_GATE"
 
 for item in "${WARNS[@]}"; do
   echo "[WARN] $item"

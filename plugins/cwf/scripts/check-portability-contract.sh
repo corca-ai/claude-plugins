@@ -18,7 +18,7 @@ Usage:
 
 Options:
   --contract <auto|portable|authoring|path>
-                          Contract selector (default: auto)
+                          Contract selector (default: auto=portable baseline)
   --context <manual|hook|post-run>
                           Execution context filter (default: manual)
   -h, --help              Show this help
@@ -38,19 +38,11 @@ require_cmd() {
   command -v "$1" >/dev/null 2>&1 || fail "missing required command: $1"
 }
 
-is_cwf_authoring_repo() {
-  [[ -d "$REPO_ROOT/plugins/cwf" && -f "$REPO_ROOT/README.md" && -f "$REPO_ROOT/README.ko.md" ]]
-}
-
 resolve_contract_path() {
   local selector="$1"
   case "$selector" in
     auto)
-      if is_cwf_authoring_repo; then
-        echo "$PLUGIN_ROOT/contracts/authoring-contract.json"
-      else
-        echo "$PLUGIN_ROOT/contracts/portable-contract.json"
-      fi
+      echo "$PLUGIN_ROOT/contracts/portable-contract.json"
       ;;
     portable)
       echo "$PLUGIN_ROOT/contracts/portable-contract.json"
