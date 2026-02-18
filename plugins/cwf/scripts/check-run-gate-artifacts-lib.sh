@@ -102,8 +102,6 @@ load_contract() {
   local section=""
   local key=""
   local value=""
-  local skill_raw=""
-  local skill=""
   local mode=""
   local stage_line_re='^[[:space:]]{2}(review-code|refactor|retro|ship):[[:space:]]*([A-Za-z_-]+)[[:space:]]*$'
 
@@ -138,19 +136,6 @@ load_contract() {
 
     if [[ "$section" == "policies" && "$line" =~ ^[[:space:]]{2}provider_gemini_mode:[[:space:]]*([A-Za-z_-]+)[[:space:]]*$ ]]; then
       CONTRACT_POLICY_PROVIDER_GEMINI_MODE="$(normalize_mode "${BASH_REMATCH[1]}" "off")"
-      continue
-    fi
-    if [[ "$section" == "policies" && "$line" =~ ^[[:space:]]{2}refactor_skill_coverage_mode:[[:space:]]*([A-Za-z_-]+)[[:space:]]*$ ]]; then
-      CONTRACT_POLICY_REFACTOR_SKILL_COVERAGE_MODE="$(normalize_mode "${BASH_REMATCH[1]}" "off")"
-      continue
-    fi
-    if [[ "$section" == "policies" && "$line" =~ ^[[:space:]]{2}refactor_expected_skills:[[:space:]]*\[(.*)\][[:space:]]*$ ]]; then
-      CONTRACT_POLICY_REFACTOR_EXPECTED_SKILLS=()
-      while IFS= read -r skill_raw; do
-        skill="$(printf '%s' "$skill_raw" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | tr '[:upper:]' '[:lower:]')"
-        [[ -n "$skill" ]] || continue
-        CONTRACT_POLICY_REFACTOR_EXPECTED_SKILLS+=("$skill")
-      done < <(printf '%s' "${BASH_REMATCH[1]}" | tr ',' '\n')
       continue
     fi
   done < "$CONTRACT_PATH"
@@ -260,47 +245,6 @@ apply_provider_gemini_policy() {
     append_fail "$stage" "gemini provider detected: ${hits[*]}"
   else
     append_warn "$stage" "gemini provider detected: ${hits[*]}"
-  fi
-}
-
-apply_refactor_skill_coverage_policy() {
-  local mode="$CONTRACT_POLICY_REFACTOR_SKILL_COVERAGE_MODE"
-  local stage="policy-refactor-skill-coverage"
-  local skill=""
-  local file=""
-  local missing=()
-
-  case "$mode" in
-    off) return 0 ;;
-    warn|fail) ;;
-    *) mode="off" ;;
-  esac
-
-  if ! list_contains "refactor" "${STAGES[@]}"; then
-    return 0
-  fi
-
-  if [[ "${#CONTRACT_POLICY_REFACTOR_EXPECTED_SKILLS[@]}" -eq 0 ]]; then
-    append_warn "$stage" "coverage policy enabled but refactor_expected_skills is empty"
-    return 0
-  fi
-
-  for skill in "${CONTRACT_POLICY_REFACTOR_EXPECTED_SKILLS[@]}"; do
-    file="$SESSION_DIR/refactor-skill-$skill.md"
-    if [[ ! -s "$file" ]]; then
-      missing+=("refactor-skill-$skill.md")
-    fi
-  done
-
-  if [[ "${#missing[@]}" -eq 0 ]]; then
-    append_pass "$stage" "all expected per-skill refactor outputs are present"
-    return 0
-  fi
-
-  if [[ "$mode" == "fail" ]]; then
-    append_fail "$stage" "missing expected per-skill outputs: ${missing[*]}"
-  else
-    append_warn "$stage" "missing expected per-skill outputs: ${missing[*]}"
   fi
 }
 

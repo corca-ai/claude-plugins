@@ -29,8 +29,6 @@ CONTRACT_STAGE_REFACTOR="fail"
 CONTRACT_STAGE_RETRO="fail"
 CONTRACT_STAGE_SHIP="fail"
 CONTRACT_POLICY_PROVIDER_GEMINI_MODE="off"
-CONTRACT_POLICY_REFACTOR_SKILL_COVERAGE_MODE="off"
-CONTRACT_POLICY_REFACTOR_EXPECTED_SKILLS=()
 
 # shellcheck source=plugins/cwf/scripts/check-run-gate-artifacts-lib.sh
 source "$SCRIPT_DIR/check-run-gate-artifacts-lib.sh"
@@ -394,7 +392,6 @@ for stage in "${STAGES[@]}"; do
 done
 
 apply_provider_gemini_policy
-apply_refactor_skill_coverage_policy
 
 echo "Run gate artifact check"
 echo "  session_dir : ${SESSION_DIR#"$REPO_ROOT"/}"

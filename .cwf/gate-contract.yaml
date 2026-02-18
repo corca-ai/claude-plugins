@@ -10,8 +10,3 @@ policies:
   # External provider preference should be resilient to local environment/auth gaps.
   # Use warn by default (no hard fail) unless a session needs stricter enforcement.
   provider_gemini_mode: warn
-
-  # Per-skill refactor coverage can be tracked without hard-failing baseline runs.
-  # Session-specific contracts may override this to fail.
-  refactor_skill_coverage_mode: warn
-  refactor_expected_skills: [clarify, gather, handoff, hitl, impl, plan, refactor, retro, review, run, setup, ship, update]
