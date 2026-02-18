@@ -2,7 +2,7 @@ target: concept-map.md
 written_session: S24
 last_reviewed: S26
 skill_count: 13
-hook_count: 18
+hook_count: 19
 designed_for:
   - "6 generic concepts with verification criteria for refactor analysis"
   - "13x6 synchronization map for deep review and holistic modes"
