@@ -61,7 +61,15 @@ For every `/ship` invocation (`issue`, `pr`, `merge`, `status`, and `help` or no
    - `merge_allowed: yes|no`
    - Resolve `mode` from live state (`live.ambiguity_mode`) and derive counts from `{session_dir}/run-ambiguity-decisions.md` if it exists.
    - For `defer-blocking`, `merge_allowed` must be `no` when `blocking_open_count > 0`.
-4. When running under `cwf:run`, enforce the stage gate:
+4. Synchronize live ambiguity debt state before gate closure:
+
+```bash
+bash {CWF_PLUGIN_DIR}/scripts/sync-ambiguity-debt.sh \
+  --base-dir . \
+  --session-dir "{session_dir}"
+```
+
+1. When running under `cwf:run`, enforce the stage gate:
 
 ```bash
 bash {CWF_PLUGIN_DIR}/scripts/check-run-gate-artifacts.sh \

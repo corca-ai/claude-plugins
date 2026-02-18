@@ -233,6 +233,12 @@ check_ship_stage() {
   local stage="ship"
   local ship_file="$SESSION_DIR/ship.md"
   local stage_provenance_file="$SESSION_DIR/run-stage-provenance.md"
+  local ambiguity_sync_script="$SCRIPT_DIR/sync-ambiguity-debt.sh"
+  local ambiguity_sync_output=""
+  local ambiguity_sync_summary=""
+  local derived_blocking_count=""
+  local derived_mode=""
+  local sync_rc=0
   local stage_provenance_header='| Stage | Skill | Args | Started At (UTC) | Finished At (UTC) | Duration (s) | Artifacts | Gate Outcome |'
   local stage_provenance_schema='|---|---|---|---|---|---|---|---|'
   local stage_provenance_row_count=0
@@ -310,6 +316,37 @@ check_ship_stage() {
     else
       append_fail "$stage" "defer-blocking with open debt must set merge_allowed: no"
     fi
+  fi
+
+  if [[ -x "$ambiguity_sync_script" ]]; then
+    set +e
+    ambiguity_sync_output="$(bash "$ambiguity_sync_script" --base-dir "$BASE_DIR" --session-dir "$SESSION_DIR" --check-only 2>&1)"
+    sync_rc=$?
+    set -e
+
+    if [[ "$sync_rc" -ne 0 ]]; then
+      ambiguity_sync_summary="$(printf '%s' "$ambiguity_sync_output" | tr '\n' '; ' | sed 's/; $//')"
+      append_fail "$stage" "ambiguity debt sync check failed: ${ambiguity_sync_summary:-unknown}"
+      return 0
+    fi
+
+    append_pass "$stage" "ambiguity debt state synchronized with live state"
+    derived_blocking_count="$(printf '%s\n' "$ambiguity_sync_output" | sed -n -E 's/^blocking_open_count:[[:space:]]*([0-9]+)$/\1/p' | head -n 1)"
+    derived_mode="$(printf '%s\n' "$ambiguity_sync_output" | sed -n -E 's/^mode:[[:space:]]*(.*)$/\1/p' | head -n 1)"
+
+    if [[ -n "$derived_blocking_count" && "$derived_blocking_count" -ne "$blocking_open_count" ]]; then
+      append_fail "$stage" "ship.md blocking_open_count mismatch (ship=$blocking_open_count derived=$derived_blocking_count)"
+    else
+      append_pass "$stage" "ship.md blocking_open_count aligned with ambiguity ledger"
+    fi
+
+    if [[ -n "$derived_mode" && "$derived_mode" != "$mode" ]]; then
+      append_fail "$stage" "ship.md mode mismatch (ship=$mode derived=$derived_mode)"
+    else
+      append_pass "$stage" "ship.md mode aligned with ambiguity ledger/live mode"
+    fi
+  else
+    append_warn "$stage" "sync-ambiguity-debt.sh unavailable; skipped ambiguity synchronization check"
   fi
 }
 

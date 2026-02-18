@@ -270,8 +270,9 @@ For each stage (respecting `--from` and `--skip` flags):
    1. Synchronize live state:
 
       ```bash
-      bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh set . \
-        blocking_decisions_pending="{true|false}"
+      bash {CWF_PLUGIN_DIR}/scripts/sync-ambiguity-debt.sh \
+        --base-dir . \
+        --session-dir "$session_dir"
       ```
 
 1. Enforce deterministic stage-artifact gate for run-closing stages (`review-code`, `refactor`, `retro`, `ship`):
@@ -461,7 +462,7 @@ After all stages complete (or the pipeline is halted):
 1. **Fail-closed run gates**: While `active_pipeline="cwf:run"` and `remaining_gates` includes `review-code`, ship/push/commit intents must be blocked unless `pipeline_override_reason` is explicitly set.
 1. **Artifact gate is mandatory for stage closure**: `review-code`, `refactor`, `retro`, and `ship` are not complete unless `check-run-gate-artifacts.sh --strict` passes for that stage.
 1. **Ambiguity mode precedence**: `--ambiguity-mode` flag overrides config. Config (`CWF_RUN_AMBIGUITY_MODE`) overrides built-in default (`defer-blocking`).
-1. **Defer modes require persistence**: Any non-`strict` T3 carry-over must be recorded in `{session_dir}/run-ambiguity-decisions.md` and reflected in `live.blocking_decisions_pending`.
+1. **Defer modes require persistence**: Any non-`strict` T3 carry-over must be recorded in `{session_dir}/run-ambiguity-decisions.md` and synchronized to `live.blocking_decisions_pending` via `sync-ambiguity-debt.sh`.
 1. **defer-blocking merge discipline**: If unresolved blocking debt exists, ship must treat it as merge-blocking until linked issue/PR follow-up is recorded and blocking count reaches zero.
 1. **Per-stage provenance is mandatory**: Every stage outcome (`Proceed`/`Revise`/`Fail`/`Skipped`/`User Stop`) must append a provenance row, including early-stop paths before halt/return.
 1. **Review `Fail` is not `Revise`**: `Fail` halts automation immediately and requires explicit user direction before any downstream stage.
