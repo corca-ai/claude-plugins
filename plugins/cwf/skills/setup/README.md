@@ -17,3 +17,4 @@ File-level map for [setup](SKILL.md).
 - [scripts/configure-agent-teams.sh](scripts/configure-agent-teams.sh): Toggles Claude Agent Team runtime mode by editing `~/.claude/settings.json` env key.
 - [scripts/configure-run-mode.sh](scripts/configure-run-mode.sh): Persists `cwf:run` ambiguity mode (`strict|defer-blocking|defer-reversible|explore-worktrees`) into project config.
 - [scripts/install-tooling-deps.sh](scripts/install-tooling-deps.sh): Checks/installs setup dependencies (core: `shellcheck`, `jq`, `gh`, `node`, `python3`, `lychee`, `markdownlint-cli2`; optional repo suggestions: `yq`, `rg`, `realpath`, `perl`).
+- [scripts/sync-hook-state.sh](scripts/sync-hook-state.sh): Deterministically synchronizes setup hook selections across `~/.claude/cwf-hooks-enabled.sh` and `cwf-state.yaml` `hooks:`.
