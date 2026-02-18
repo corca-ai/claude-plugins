@@ -1,6 +1,6 @@
 ---
 name: refactor
-description: "Multi-mode code and skill review for controlling drift as capability surface grows. Quick scan all plugins, deep-review a single skill, holistic cross-plugin analysis, commit-based tidying, or docs consistency check. Triggers: \"cwf:refactor\", \"/refactor\", \"tidy\", \"review skill\", \"cleanup code\", \"check docs consistency\""
+description: "Multi-mode code and skill review for controlling drift as capability surface grows. Quick scan all plugins, commit-based tidying, contract-driven codebase quick scan, deep-review a single skill, holistic cross-plugin analysis, or docs consistency check. Triggers: \"cwf:refactor\", \"/refactor\", \"tidy\", \"review skill\", \"cleanup code\", \"check docs consistency\""
 ---
 
 # Refactor (cwf:refactor)
@@ -13,7 +13,8 @@ Control drift across code, skills, and docs as teams install and author more cap
 
 ```text
 cwf:refactor                        Quick scan all marketplace skills
-cwf:refactor --code [branch]        Commit-based tidying (parallel sub-agents)
+cwf:refactor --tidy [branch]        Commit-based tidying (parallel sub-agents)
+cwf:refactor --codebase             Contract-driven whole-codebase quick scan
 cwf:refactor --skill <name>         Deep review of a single skill (parallel sub-agents)
 cwf:refactor --skill --holistic     Cross-plugin analysis (parallel sub-agents)
 cwf:refactor --docs                 Documentation consistency review
@@ -31,7 +32,8 @@ Parse the user's input:
 | Input | Mode |
 |-------|------|
 | No args | Quick Scan |
-| `--code` or `--code <branch>` | Code Tidying |
+| `--tidy` or `--tidy <branch>` | Code Tidying |
+| `--codebase` | Codebase Quick Scan |
 | `--skill <name>` | Deep Review |
 | `--skill --holistic` or `--holistic` | Holistic Analysis |
 | `--docs` | Docs Review |
@@ -96,7 +98,7 @@ bash {CWF_PLUGIN_DIR}/scripts/check-run-gate-artifacts.sh \
 
 ---
 
-## Code Tidying Mode (`--code [branch]`)
+## Code Tidying Mode (`--tidy [branch]`)
 
 Analyze recent commits for safe tidying opportunities — guard clauses, dead code removal, explaining variables. Based on Kent Beck's "Tidy First?" philosophy.
 
@@ -108,7 +110,7 @@ Run the script to get recent non-tidying commits:
 bash {SKILL_DIR}/scripts/tidy-target-commits.sh 5 [branch]
 ```
 
-- If branch argument provided (e.g., `cwf:refactor --code develop`), pass it to the script.
+- If branch argument provided (e.g., `cwf:refactor --tidy develop`), pass it to the script.
 - If no branch specified, defaults to HEAD.
 
 ### 2. Parallel Analysis with Sub-agents
@@ -155,6 +157,77 @@ Read all result files from the session directory (`{session_dir}/refactor-tidy-c
 
 ## Commit: {hash} - {message}
 - No tidying opportunities
+```
+
+---
+
+## Codebase Quick Scan Mode (`--codebase`)
+
+Run a contract-driven quick scan across the repository codebase.
+
+### 0. Resolve or Bootstrap Codebase Contract
+
+Before scanning, resolve the repository-local codebase contract:
+
+```bash
+bash {SKILL_DIR}/scripts/bootstrap-codebase-contract.sh --json
+```
+
+Behavior:
+
+- Default location: `{artifact_root}/codebase-contract.json`
+- If contract is missing: create a draft contract
+- If contract exists: do not overwrite unless explicit force is used
+- If bootstrap/contract load fails: continue with fallback defaults and prepend a contract warning
+
+Capture metadata for final summary:
+
+- `CONTRACT_STATUS`: `created`, `existing`, `updated`, or `fallback`
+- `CONTRACT_PATH`
+- `CONTRACT_WARNING` (optional)
+
+Contract spec: [references/codebase-contract.md](references/codebase-contract.md)
+
+For implementation/regression checks of codebase-contract behavior, run:
+
+```bash
+bash {SKILL_DIR}/scripts/check-codebase-contract-runtime.sh
+```
+
+### 1. Resolve Session Directory
+
+```bash
+session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . dir)
+```
+
+### 2. Run Contract-Driven Scan and Persist Raw Output
+
+```bash
+bash {SKILL_DIR}/scripts/codebase-quick-scan.sh \
+  {REPO_ROOT} \
+  --contract "{CONTRACT_PATH}" > {session_dir}/refactor-codebase-scan.json
+```
+
+`{REPO_ROOT}` is the git repository root (`git rev-parse --show-toplevel`).
+
+### 3. Summarize Findings
+
+Read `{session_dir}/refactor-codebase-scan.json` and write `{session_dir}/refactor-summary.md` with:
+
+- `Mode: cwf:refactor --codebase`
+- Contract metadata (`CONTRACT_STATUS`, `CONTRACT_PATH`, optional `CONTRACT_WARNING`)
+- Scope summary (candidate/scanned/excluded files)
+- Top findings table: severity, check, file, detail
+- If no findings: explicit "No significant codebase tidy risks detected"
+
+After writing summary artifacts, run deterministic gate:
+
+```bash
+bash {CWF_PLUGIN_DIR}/scripts/check-run-gate-artifacts.sh \
+  --session-dir "{session_dir}" \
+  --stage refactor \
+  --strict \
+  --record-lessons
 ```
 
 ---
@@ -404,18 +477,20 @@ Use `{SKILL_DIR}/references/docs-criteria.md` for evaluation criteria, [referenc
 3. Deep Review: 2 agents (structural 1-4 + quality/concept/portability 5-9), single batch
 4. Holistic: 3 agents (Convention Compliance, Concept Integrity, Workflow Coherence), single batch after inline inventory
 5. Code Tidying: 1 agent per commit, all in one message
-6. Docs Review: inline, no sub-agents (single-context synthesis over whole-repo graph and deterministic outputs)
-7. Docs Review must run the deterministic tool pass before semantic analysis
-8. In Docs Review, do not report lint/hook-detectable issues as standalone manual findings when tool output already covers them
-9. Sub-agents analyze and report; orchestrator merges. Sub-agents do not modify files
-10. All code fences must have a language specifier
+6. Codebase Quick Scan: contract-driven deterministic scan, no sub-agents
+7. Docs Review: inline, no sub-agents (single-context synthesis over whole-repo graph and deterministic outputs)
+8. Docs Review must run the deterministic tool pass before semantic analysis
+9. In Docs Review, do not report lint/hook-detectable issues as standalone manual findings when tool output already covers them
+10. Sub-agents analyze and report; orchestrator merges. Sub-agents do not modify files
+11. All code fences must have a language specifier
 
 ## References
 
 - Review criteria for deep review: [references/review-criteria.md](references/review-criteria.md)
 - Holistic analysis framework: [references/holistic-criteria.md](references/holistic-criteria.md)
 - Concept synchronization map: [concept-map.md](../../references/concept-map.md)
-- Tidying techniques for --code mode: [references/tidying-guide.md](references/tidying-guide.md)
+- Tidying techniques for --tidy mode: [references/tidying-guide.md](references/tidying-guide.md)
+- Codebase scan contract schema: [references/codebase-contract.md](references/codebase-contract.md)
 - Docs review criteria: [references/docs-criteria.md](references/docs-criteria.md)
 - Docs review contract schema: [references/docs-contract.md](references/docs-contract.md)
 - Docs review procedure flow: [references/docs-review-flow.md](references/docs-review-flow.md)
