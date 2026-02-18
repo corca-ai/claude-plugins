@@ -7,11 +7,12 @@ MODE="check"
 INSTALL_TARGETS="missing"
 QUIET="false"
 
-DEFAULT_TOOLS=(shellcheck jq gh node python3)
+DEFAULT_TOOLS=(shellcheck jq gh node python3 lychee markdownlint-cli2)
 TARGET_TOOLS=("${DEFAULT_TOOLS[@]}")
 
 SHELLCHECK_VERSION="${SHELLCHECK_VERSION:-v0.10.0}"
 JQ_VERSION="${JQ_VERSION:-jq-1.7.1}"
+LYCHEE_VERSION="${LYCHEE_VERSION:-v0.15.1}"
 APT_UPDATED="false"
 
 usage() {
@@ -28,7 +29,8 @@ Options:
   -h, --help                   Show this help
 
 Managed tools:
-  shellcheck, jq, gh, node, python3
+  core: shellcheck, jq, gh, node, python3, lychee, markdownlint-cli2
+  optional: yq, rg, realpath, perl
 USAGE
 }
 
@@ -49,6 +51,12 @@ tool_cmd() {
     gh) echo "gh" ;;
     node) echo "node" ;;
     python3) echo "python3" ;;
+    lychee) echo "lychee" ;;
+    markdownlint-cli2) echo "markdownlint-cli2" ;;
+    yq) echo "yq" ;;
+    rg) echo "rg" ;;
+    realpath) echo "realpath" ;;
+    perl) echo "perl" ;;
     *) return 1 ;;
   esac
 }
@@ -69,7 +77,7 @@ resolve_tools_from_arg() {
     token="$(echo "$token" | tr -d '[:space:]')"
     [[ -n "$token" ]] || continue
     case "$token" in
-      shellcheck|jq|gh|node|python3)
+      shellcheck|jq|gh|node|python3|lychee|markdownlint-cli2|yq|rg|realpath|perl)
         TARGET_TOOLS+=("$token")
         ;;
       *)
@@ -166,6 +174,49 @@ install_jq_local() {
   chmod 0755 "$HOME/.local/bin/jq"
 }
 
+install_lychee_local() {
+  local platform asset url tmpdir binary_path
+  platform="$(detect_platform)"
+  case "$platform" in
+    linux-amd64) asset="lychee-x86_64-unknown-linux-gnu.tar.gz" ;;
+    linux-arm64) asset="lychee-aarch64-unknown-linux-gnu.tar.gz" ;;
+    darwin-amd64) asset="lychee-x86_64-apple-darwin.tar.gz" ;;
+    darwin-arm64) asset="lychee-aarch64-apple-darwin.tar.gz" ;;
+    *)
+      return 1
+      ;;
+  esac
+
+  url="https://github.com/lycheeverse/lychee/releases/download/${LYCHEE_VERSION}/${asset}"
+  tmpdir="$(mktemp -d)"
+  trap 'rm -rf "$tmpdir"' RETURN
+
+  curl -fsSL "$url" -o "$tmpdir/lychee.tar.gz" || return 1
+  tar -xzf "$tmpdir/lychee.tar.gz" -C "$tmpdir" || return 1
+  binary_path="$(find "$tmpdir" -type f -name lychee | head -n 1)"
+  [[ -n "$binary_path" ]] || return 1
+
+  mkdir -p "$HOME/.local/bin"
+  install -m 0755 "$binary_path" "$HOME/.local/bin/lychee"
+}
+
+install_markdownlint_local() {
+  local user_bin="$HOME/.local/bin"
+  local user_npm_bin="$HOME/.local/node_modules/.bin/markdownlint-cli2"
+
+  command -v npm >/dev/null 2>&1 || return 1
+
+  if npm install -g markdownlint-cli2 >/dev/null 2>&1; then
+    return 0
+  fi
+
+  npm install --prefix "$HOME/.local" markdownlint-cli2 >/dev/null 2>&1 || return 1
+  if [[ -x "$user_npm_bin" ]]; then
+    mkdir -p "$user_bin"
+    ln -sf "$user_npm_bin" "$user_bin/markdownlint-cli2"
+  fi
+}
+
 manual_hint() {
   case "$1" in
     shellcheck)
@@ -182,6 +233,24 @@ manual_hint() {
       ;;
     python3)
       echo "brew install python  OR  sudo apt-get install -y python3"
+      ;;
+    lychee)
+      echo "brew install lychee  OR  sudo apt-get install -y lychee"
+      ;;
+    markdownlint-cli2)
+      echo "npm install -g markdownlint-cli2  OR  npm install --prefix ~/.local markdownlint-cli2 && ln -sf ~/.local/node_modules/.bin/markdownlint-cli2 ~/.local/bin/markdownlint-cli2"
+      ;;
+    yq)
+      echo "brew install yq  OR  sudo apt-get install -y yq"
+      ;;
+    rg)
+      echo "brew install ripgrep  OR  sudo apt-get install -y ripgrep"
+      ;;
+    realpath)
+      echo "brew install coreutils  OR  sudo apt-get install -y coreutils"
+      ;;
+    perl)
+      echo "brew install perl  OR  sudo apt-get install -y perl"
       ;;
   esac
 }
@@ -231,6 +300,54 @@ install_tool() {
       if brew_install python || apt_install python3; then
         if is_available python3; then
           echo "python3|installed|$(tool_cmd python3)"
+          return 0
+        fi
+      fi
+      ;;
+    lychee)
+      if brew_install lychee || apt_install lychee || install_lychee_local; then
+        if is_available lychee; then
+          echo "lychee|installed|$(tool_cmd lychee)"
+          return 0
+        fi
+      fi
+      ;;
+    markdownlint-cli2)
+      if install_markdownlint_local; then
+        if is_available markdownlint-cli2; then
+          echo "markdownlint-cli2|installed|$(tool_cmd markdownlint-cli2)"
+          return 0
+        fi
+      fi
+      ;;
+    yq)
+      if brew_install yq || apt_install yq; then
+        if is_available yq; then
+          echo "yq|installed|$(tool_cmd yq)"
+          return 0
+        fi
+      fi
+      ;;
+    rg)
+      if brew_install ripgrep || apt_install ripgrep; then
+        if is_available rg; then
+          echo "rg|installed|$(tool_cmd rg)"
+          return 0
+        fi
+      fi
+      ;;
+    realpath)
+      if brew_install coreutils || apt_install coreutils; then
+        if is_available realpath; then
+          echo "realpath|installed|$(tool_cmd realpath)"
+          return 0
+        fi
+      fi
+      ;;
+    perl)
+      if brew_install perl || apt_install perl; then
+        if is_available perl; then
+          echo "perl|installed|$(tool_cmd perl)"
           return 0
         fi
       fi

@@ -104,6 +104,7 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 CWF_LINK_CHECKER="plugins/cwf/skills/refactor/scripts/check-links.sh"
 CWF_ARTIFACT_PATHS="plugins/cwf/scripts/cwf-artifact-paths.sh"
+CWF_PLUGIN_DESC_SYNC="scripts/sync-marketplace-descriptions.sh"
 
 normalize_rel_path() {
   local value="$1"
@@ -173,8 +174,64 @@ is_runtime_skip_path() {
   return 1
 }
 
+ensure_markdownlint_cli2() {
+  if command -v markdownlint-cli2 >/dev/null 2>&1; then
+    return 0
+  fi
+  echo "[pre-commit] markdownlint-cli2 not found; run 'cwf:setup --tools' or 'bash plugins/cwf/skills/setup/scripts/install-tooling-deps.sh --install markdownlint-cli2'" >&2
+  exit 1
+}
+
 RUNTIME_SKIP_PREFIXES=()
 init_runtime_skip_prefixes
+
+mapfile -t plugin_meta_files < <(git diff --cached --name-only --diff-filter=ACMR -- '.claude-plugin/marketplace.json' 'plugins/*/.claude-plugin/plugin.json' || true)
+if [ "${#plugin_meta_files[@]}" -gt 0 ]; then
+  if [[ ! -x "$CWF_PLUGIN_DESC_SYNC" ]]; then
+    echo "[pre-commit] $CWF_PLUGIN_DESC_SYNC missing or not executable" >&2
+    exit 1
+  fi
+
+  run_all_plugins=false
+  declare -a plugin_sync_args=()
+  declare -a plugin_names_seen=()
+
+  has_seen_plugin() {
+    local candidate="$1"
+    local existing=""
+    for existing in "${plugin_names_seen[@]}"; do
+      if [[ "$existing" == "$candidate" ]]; then
+        return 0
+      fi
+    done
+    return 1
+  }
+
+  for file in "${plugin_meta_files[@]}"; do
+    if [[ "$file" == ".claude-plugin/marketplace.json" ]]; then
+      run_all_plugins=true
+      continue
+    fi
+    if [[ "$file" =~ ^plugins/([^/]+)/\.claude-plugin/plugin\.json$ ]]; then
+      plugin_name="${BASH_REMATCH[1]}"
+      if ! has_seen_plugin "$plugin_name"; then
+        plugin_names_seen+=("$plugin_name")
+        plugin_sync_args+=(--plugin "$plugin_name")
+      fi
+    fi
+  done
+
+  echo "[pre-commit] syncing marketplace descriptions from plugin manifests..."
+  if [[ "$run_all_plugins" == "true" || "${#plugin_sync_args[@]}" -eq 0 ]]; then
+    bash "$CWF_PLUGIN_DESC_SYNC"
+    bash "$CWF_PLUGIN_DESC_SYNC" --check
+  else
+    bash "$CWF_PLUGIN_DESC_SYNC" "${plugin_sync_args[@]}"
+    bash "$CWF_PLUGIN_DESC_SYNC" --check "${plugin_sync_args[@]}"
+  fi
+
+  git add .claude-plugin/marketplace.json
+fi
 
 mapfile -t md_candidates < <(git diff --cached --name-only --diff-filter=ACMR -- '*.md' '*.mdx' || true)
 md_files=()
@@ -189,8 +246,9 @@ for file in "${md_candidates[@]}"; do
 done
 
 if [ "${#md_files[@]}" -gt 0 ]; then
+  ensure_markdownlint_cli2
   echo "[pre-commit] markdownlint on staged markdown files..."
-  npx --yes markdownlint-cli2 "${md_files[@]}"
+  markdownlint-cli2 "${md_files[@]}"
 
   if [[ "$PROFILE" != "fast" ]]; then
     echo "[pre-commit] local link validation on staged markdown files..."
@@ -309,6 +367,14 @@ is_runtime_skip_path() {
   return 1
 }
 
+ensure_markdownlint_cli2() {
+  if command -v markdownlint-cli2 >/dev/null 2>&1; then
+    return 0
+  fi
+  echo "[pre-push] markdownlint-cli2 not found; run 'cwf:setup --tools' or 'bash plugins/cwf/skills/setup/scripts/install-tooling-deps.sh --install markdownlint-cli2'" >&2
+  exit 1
+}
+
 RUNTIME_SKIP_PREFIXES=()
 init_runtime_skip_prefixes
 
@@ -325,8 +391,9 @@ for file in "${md_candidates[@]}"; do
 done
 
 if [ "${#md_files[@]}" -gt 0 ]; then
+  ensure_markdownlint_cli2
   echo "[pre-push] markdownlint on tracked markdown files..."
-  npx --yes markdownlint-cli2 "${md_files[@]}"
+  markdownlint-cli2 "${md_files[@]}"
 else
   echo "[pre-push] no markdown files found; skipping markdownlint"
 fi

@@ -20,6 +20,8 @@ command -v jq >/dev/null 2>&1         # JSON parsing for scripts
 command -v gh >/dev/null 2>&1         # GitHub CLI for ship
 command -v node >/dev/null 2>&1       # Node runtime for gather/review helpers
 command -v python3 >/dev/null 2>&1    # Python runtime for gather helpers
+command -v lychee >/dev/null 2>&1     # Deterministic link checks for docs/refactor
+command -v markdownlint-cli2 >/dev/null 2>&1 # Deterministic markdown lint checks
 ```
 
 Check environment variables:
@@ -64,6 +66,8 @@ Local Dependency Results:
   gh         : available|unavailable
   node       : available|unavailable
   python3    : available|unavailable
+  lychee     : available|unavailable
+  markdownlint-cli2: available|unavailable
 ```
 
 ### 2.3.1 Missing Dependency Install Prompt (Required)
@@ -117,3 +121,36 @@ When `Install missing now` was selected, run a full re-detection pass so `cwf-st
 3. Re-run **Phase 2.3** output reporting and label the second report as post-install results.
 
 This step is mandatory even when some dependencies remain unresolved.
+
+### 2.3.4 Setup Contract Bootstrap and Repo-Tool Proposal (Required for full/tools setup)
+
+After baseline dependency detection, bootstrap setup contract:
+
+```bash
+bash {SKILL_DIR}/scripts/bootstrap-setup-contract.sh --json
+```
+
+Handle by `status`:
+
+- `created` or `updated`:
+  - report generated contract path
+  - summarize `repo_tools` proposals from contract
+  - ask whether to apply repo-specific suggestions now
+- `existing`:
+  - report contract path and continue with current contract
+- `fallback`:
+  - report warning and continue with core defaults
+
+Prompt text:
+
+```text
+Setup contract draft is ready. Apply repository-specific tool suggestions now?
+```
+
+If approved, install selected suggestions via:
+
+```bash
+bash {SKILL_DIR}/scripts/install-tooling-deps.sh --install <tool1,tool2,...>
+```
+
+Contract details and status semantics: [setup-contract.md](setup-contract.md)

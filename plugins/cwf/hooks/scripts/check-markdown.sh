@@ -155,7 +155,7 @@ if [[ -n "$ABS_FILE_PATH" ]]; then
 fi
 
 # markdownlint-cli2 not available
-if ! command -v npx >/dev/null 2>&1; then
+if ! command -v markdownlint-cli2 >/dev/null 2>&1; then
     exit 0
 fi
 
@@ -174,9 +174,9 @@ fi
 
 set +e
 if [ -n "$LINT_CONFIG" ]; then
-    LINT_OUTPUT=$(cd "$LINT_DIR" && npx --yes markdownlint-cli2 --config "$LINT_CONFIG" "$FILE_PATH" 2>&1)
+    LINT_OUTPUT=$(cd "$LINT_DIR" && markdownlint-cli2 --config "$LINT_CONFIG" "$FILE_PATH" 2>&1)
 else
-    LINT_OUTPUT=$(cd "$LINT_DIR" && npx --yes markdownlint-cli2 "$FILE_PATH" 2>&1)
+    LINT_OUTPUT=$(cd "$LINT_DIR" && markdownlint-cli2 "$FILE_PATH" 2>&1)
 fi
 LINT_EXIT=$?
 set -e

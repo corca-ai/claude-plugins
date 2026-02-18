@@ -1,11 +1,11 @@
 ---
 name: setup
-description: "Initial CWF configuration to standardize environment/tool contracts before workflow execution: hook group selection, external tool detection, env migration + project config bootstrap, optional Agent Team mode setup, optional Codex integration, optional git hook gate installation, optional CWF capability index generation, and optional repository index generation. Triggers: \"cwf:setup\", \"setup hooks\", \"configure cwf\""
+description: "Initial CWF configuration to standardize environment/tool contracts before workflow execution: hook group selection, external tool detection, setup-contract bootstrap, env migration + project config bootstrap, optional Agent Team mode setup, optional Codex integration, optional git hook gate installation, optional CWF capability index generation, and optional repository index generation. Triggers: \"cwf:setup\", \"setup hooks\", \"configure cwf\""
 ---
 
 # Setup
 
-Standardize hooks, tool contracts, and environment wiring once so later workflow runs stay reproducible. Includes interactive hook toggles, external tool detection, env migration/bootstrap, optional Agent Team mode setup, optional Codex integration, optional git hook gate installation, optional CWF capability index generation, and optional repository index generation.
+Standardize hooks, tool contracts, and environment wiring once so later workflow runs stay reproducible. Includes interactive hook toggles, external tool detection, setup-contract bootstrap for repo-adaptive suggestions, env migration/bootstrap, optional Agent Team mode setup, optional Codex integration, optional git hook gate installation, optional CWF capability index generation, and optional repository index generation.
 
 **Language**: Write config files in English. Communicate with the user in their prompt language.
 
@@ -136,7 +136,7 @@ Detect availability of external AI/search tools and local runtime dependencies u
 
 ### 2.1 Check Tools
 
-Run external tool checks (`codex`, `gemini`, API keys) and local dependency checks (`shellcheck`, `jq`, `gh`, `node`, `python3`) as defined in [tool-detection-and-deps.md](references/tool-detection-and-deps.md).
+Run external tool checks (`codex`, `gemini`, API keys) and local dependency checks (`shellcheck`, `jq`, `gh`, `node`, `python3`, `lychee`, `markdownlint-cli2`) as defined in [tool-detection-and-deps.md](references/tool-detection-and-deps.md).
 
 ### 2.2 Update cwf-state.yaml
 
@@ -159,6 +159,10 @@ After install attempts, re-run dependency check and explicitly report unresolved
 ### 2.3.3 Post-Install Re-Detection + `cwf-state.yaml` Rewrite (Required)
 
 When `Install missing now` was selected, re-run 2.1 -> 2.2 -> 2.3 in full so `cwf-state.yaml` stays SSOT. This is mandatory even when unresolved dependencies remain.
+
+### 2.3.4 Setup Contract Bootstrap + Repo-Tool Proposal (Required for full/tools setup)
+
+Bootstrap setup contract draft (`.cwf/setup-contract.yaml` by default), report contract status (`created|existing|updated|fallback`), and ask whether to apply repo-specific tool suggestions now.
 
 Detailed checks, prompts, and commands: [tool-detection-and-deps.md](references/tool-detection-and-deps.md).
 
@@ -433,13 +437,14 @@ Detailed lessons/checkpoint format: [runtime-and-index-phases.md](references/run
 ## Rules
 
 1. **State SSOT + idempotency**: Read and edit `cwf-state.yaml` (do not overwrite wholesale), and keep reruns safe/idempotent across all phases.
-2. **Single-entry setup UX**: Full setup (`cwf:setup`) must execute the integrated optional decision flow for Codex, hooks, env/bootstrap, agent-teams, and run-mode phases in one run.
+2. **Single-entry setup UX**: Full setup (`cwf:setup`) must execute the integrated optional decision flow for Codex, hooks, setup-contract proposal, env/bootstrap, agent-teams, and run-mode phases in one run.
 3. **Index generation is explicit and deterministic**: Capability index runs only via `--cap-index`; repository index runs via `--repo-index` with target resolution (`agents`, `file`, `both`) from CLI or repository context.
 4. **Index coverage/link policy is mandatory**: Generated indexes must use Markdown relative links and pass deterministic coverage checks (cap/repo profiles).
 5. **File safety**: Codex sync must use symlink + backup move (no direct user file deletion).
 6. **Scope-aware Codex integration**: Resolve active plugin scope first; non-user context must not mutate user-global Codex paths without explicit user confirmation.
 7. **No fail-open scope fallback**: If scope detection fails or returns `none`, require explicit user scope selection before any Codex mutation.
-8. **Formatting invariant**: All code fences in this skill must include language specifiers.
+8. **Setup-contract first-run invariant**: Full/tools setup must bootstrap setup-contract and explicitly report `created|existing|updated|fallback` status before continuing.
+9. **Formatting invariant**: All code fences in this skill must include language specifiers.
 
 ## References
 
@@ -447,6 +452,7 @@ Detailed lessons/checkpoint format: [runtime-and-index-phases.md](references/run
 - [hooks.json](../../hooks/hooks.json) — hook definitions
 - [agent-patterns.md](../../references/agent-patterns.md) — Single pattern
 - [references/tool-detection-and-deps.md](references/tool-detection-and-deps.md) — detailed checks/prompts for setup Phase 2 tool detection and dependency handling
+- [references/setup-contract.md](references/setup-contract.md) — setup-contract bootstrap and repo-specific tool suggestion flow
 - [references/codex-scope-integration.md](references/codex-scope-integration.md) — detailed prompt/command matrix for setup Phase 2.4/2.5/2.6
 - [references/runtime-and-index-phases.md](references/runtime-and-index-phases.md) — detailed prompt/command matrix for setup Phase 2.7/2.8/2.9/2.10 and Phase 3/4/5
 - [detect-plugin-scope.sh](../../scripts/detect-plugin-scope.sh) — active Claude plugin scope detection for cwd
@@ -458,6 +464,8 @@ Detailed lessons/checkpoint format: [runtime-and-index-phases.md](references/run
 - [scripts/bootstrap-project-config.sh](scripts/bootstrap-project-config.sh) — project config template/bootstrap and `.gitignore` sync
 - [scripts/configure-agent-teams.sh](scripts/configure-agent-teams.sh) — toggles Claude Agent Team runtime mode in `~/.claude/settings.json`
 - [scripts/configure-run-mode.sh](scripts/configure-run-mode.sh) — persists default `cwf:run` ambiguity mode into project config
+- [scripts/bootstrap-setup-contract.sh](scripts/bootstrap-setup-contract.sh) — bootstraps repository-local setup contract (`.cwf/setup-contract.yaml`) from core baseline + repo scan
+- [scripts/check-setup-contract-runtime.sh](scripts/check-setup-contract-runtime.sh) — validates setup-contract bootstrap status semantics (`created|existing|updated|fallback`)
 - [scripts/install-tooling-deps.sh](scripts/install-tooling-deps.sh) — checks/installs missing local runtime dependencies for CWF workflows
 - [scripts/check-index-coverage.sh](scripts/check-index-coverage.sh) — deterministic index coverage validation
 - .cwf-cap-index-ignore — optional intentional exclusion list for capability index coverage

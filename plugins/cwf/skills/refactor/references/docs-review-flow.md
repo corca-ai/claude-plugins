@@ -53,7 +53,7 @@ Only `NON_AUTOMATABLE` items should become or remain documentation rules.
 Run deterministic checks before semantic review:
 
 ```bash
-npx --yes markdownlint-cli2 "**/*.md"
+markdownlint-cli2 "**/*.md"
 bash {SKILL_DIR}/scripts/check-links.sh --local --json
 node {SKILL_DIR}/scripts/doc-graph.mjs --json
 ```

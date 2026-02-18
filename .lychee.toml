@@ -11,6 +11,7 @@ extensions = ["md"]
 exclude_path = [
   "^\\.cwf/prompt-logs/",
   "^\\.cwf/projects/",
+  "^\\.cwf/sessions/",
   "^node_modules/",
   "(^|/)node_modules/",
   "^scripts/node_modules/",

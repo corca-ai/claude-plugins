@@ -506,14 +506,14 @@ check_count=0
 
 if [[ "${#md_files[@]}" -gt 0 ]]; then
   check_count=$((check_count + 1))
-  if command -v npx >/dev/null 2>&1; then
+  if command -v markdownlint-cli2 >/dev/null 2>&1; then
     log "markdownlint on changed markdown files (${#md_files[@]})"
-    if ! npx --yes markdownlint-cli2 "${md_files[@]}"; then
+    if ! markdownlint-cli2 "${md_files[@]}"; then
       warn "markdownlint failed on changed markdown files"
       fail_count=$((fail_count + 1))
     fi
   else
-    warn "npx not found; skipping markdownlint"
+    warn "markdownlint-cli2 not found; skipping markdownlint (run 'cwf:setup --tools' or 'bash plugins/cwf/skills/setup/scripts/install-tooling-deps.sh --install markdownlint-cli2')"
   fi
 
   check_count=$((check_count + 1))

@@ -6,7 +6,7 @@ Checklist for the `--docs` mode. Evaluate documentation consistency across the r
 
 Run deterministic checks before semantic review:
 
-- Markdown lint (`npx --yes markdownlint-cli2`)
+- Markdown lint (`markdownlint-cli2 "**/*.md"`)
 - Link validation (`bash {SKILL_DIR}/scripts/check-links.sh --local --json`)
 - Graph/orphan analysis (`node {SKILL_DIR}/scripts/doc-graph.mjs --json`)
 - Repository-local deterministic rules configured in current lint/hooks/scripts

@@ -80,6 +80,14 @@ is_runtime_skip_path() {
   return 1
 }
 
+ensure_markdownlint_cli2() {
+  if command -v markdownlint-cli2 >/dev/null 2>&1; then
+    return 0
+  fi
+  echo "[pre-push] markdownlint-cli2 not found; run 'cwf:setup --tools' or 'bash plugins/cwf/skills/setup/scripts/install-tooling-deps.sh --install markdownlint-cli2'" >&2
+  exit 1
+}
+
 RUNTIME_SKIP_PREFIXES=()
 init_runtime_skip_prefixes
 
@@ -96,8 +104,9 @@ for file in "${md_candidates[@]}"; do
 done
 
 if [ "${#md_files[@]}" -gt 0 ]; then
+  ensure_markdownlint_cli2
   echo "[pre-push] markdownlint on tracked markdown files..."
-  npx --yes markdownlint-cli2 "${md_files[@]}"
+  markdownlint-cli2 "${md_files[@]}"
 else
   echo "[pre-push] no markdown files found; skipping markdownlint"
 fi

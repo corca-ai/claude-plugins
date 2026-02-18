@@ -82,7 +82,7 @@ As of v3.0.0, legacy standalone plugins have been removed from the marketplace. 
 
 - A single workflow plugin (`cwf`) that integrates context gathering, requirement clarification, planning, implementation, review, retrospective, handoff, and shipping.
 - A stateful workflow system where .cwf/cwf-state.yaml, session-log artifacts, and hooks preserve context across phase/session boundaries.
-- A composable skill framework built on shared concepts (Expert Advisor, Tier Classification, Agent Orchestration, Decision Point, Handoff, Provenance Tracking).
+- A composable skill framework built on shared concepts (Expert Advisor, Tier Classification, Agent Orchestration, Decision Point, Handoff, Provenance Tracking, Adaptive Setup Contract).
 - A cross-skill context-deficit resilience contract: after auto-compact/session restart, skills recover from persisted state/artifacts/handoff files instead of implicit chat memory.
 - A roadmap toward lower user bottlenecks by chaining smaller approval units (for example, dark-factory-style operating patterns).
 
@@ -111,7 +111,7 @@ As long-running work is parallelized, the final bottleneck shifts to human cogni
 
 ### Approach
 
-CWF addresses this with six building-block concepts that compose across thirteen skills.
+CWF addresses this with seven building-block concepts that compose across thirteen skills.
 
 Design choices behind this approach:
 
@@ -132,7 +132,7 @@ The result: one plugin (`cwf`), thirteen skills, seven hook groups. Context surv
 
 ## Core Concepts
 
-Six reusable behavioral patterns that CWF skills compose. Each concept below describes a job CWF must do to keep long-running AI sessions reliable.
+Seven reusable behavioral patterns that CWF skills compose. Each concept below describes a job CWF must do to keep long-running AI sessions reliable.
 
 **Expert Advisor** — JTBD: re-check the same decision points through different expert frames so hidden assumptions and risks surface early. Decision Point structures what to decide; Expert Advisor strengthens how that decision is validated.
 
@@ -145,6 +145,8 @@ Six reusable behavioral patterns that CWF skills compose. Each concept below des
 **Handoff** — JTBD: prevent restart-from-zero at phase/session boundaries. Session handoffs preserve task context and lessons, while phase handoffs preserve protocols and constraints.
 
 **Provenance Tracking** — JTBD: prevent stale standards from silently driving current work. Reference docs carry system-state metadata and are checked before reuse.
+
+**Adaptive Setup Contract** — JTBD: keep setup portable while still adapting to each repository's real toolchain. First-run setup bootstraps a contract with core deterministic dependencies plus repo-specific tool suggestions for explicit approval.
 
 ## The Workflow
 
@@ -167,7 +169,7 @@ gather → clarify → plan → review(plan) → impl → review(code) → refac
 | 9 | [review](#review) | `cwf:review` | Multi-perspective review with 6 parallel reviewers |
 | 10 | [hitl](#hitl) | `cwf:hitl` | Human-in-the-loop diff/chunk review with resumable state and rule propagation |
 | 11 | [run](#run) | `cwf:run` | Orchestrate full pipeline chaining from gather to ship with stage gates |
-| 12 | [setup](#setup) | `cwf:setup` | Configure hook groups, detect tools, bootstrap env/index contracts |
+| 12 | [setup](#setup) | `cwf:setup` | Configure hooks/tools, bootstrap setup/env/index contracts, and propose repo-specific setup dependencies |
 | 13 | [update](#update) | `cwf:update` | Check and apply CWF plugin updates |
 
 ## Skills Reference
