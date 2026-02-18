@@ -47,8 +47,9 @@ Path resolution follows CWF artifact rules:
 | `checks.shell_strict_mode.exclude_globs[]` | list | Optional path globs excluded from shell strict-mode warnings. |
 | `deep_review.enabled` | bool | Enable/disable codebase deep review with expert sub-agents. |
 | `deep_review.fixed_experts[]` | list | Mandatory experts (always included first). |
-| `deep_review.context_expert_count` | number | Number of additional context-matched experts from roster. |
-| `deep_review.roster_state_file` | string | Path to state file containing `expert_roster`. |
+| `deep_review.context_experts[]` | list | Context expert roster in contract JSON. |
+| `deep_review.context_expert_count` | number | Number of additional context-matched experts from contract roster. |
+| `deep_review.selection_keywords.*[]` | list | Optional keyword overrides for context expert scoring per check. |
 | `reporting.top_findings_limit` | number | Maximum findings per severity in final output. |
 
 ## Fallback Defaults (No Contract)

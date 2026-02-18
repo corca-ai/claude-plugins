@@ -68,7 +68,10 @@ Provenance verification rules:
 Resolve session directory (for deterministic artifact persistence):
 
 ```bash
-session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . dir)
+session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . dir 2>/dev/null || true)
+if [[ -z "$session_dir" ]]; then
+  session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/next-prompt-dir.sh --bootstrap refactor-quick-scan)
+fi
 ```
 
 Run the structural scan script and persist raw output:
@@ -117,14 +120,13 @@ bash {SKILL_DIR}/scripts/tidy-target-commits.sh 5 [branch]
 
 ### 2. Parallel Analysis with Sub-agents
 
-**Resolve session directory**: Resolve the effective live-state file, then read `live.dir`.
+**Resolve session directory**: use live session first, then bootstrap a project session fallback.
 
 ```bash
-live_state_file=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh resolve)
-```
-
-```yaml
-session_dir: "{live.dir value from resolved live-state file}"
+session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . dir 2>/dev/null || true)
+if [[ -z "$session_dir" ]]; then
+  session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/next-prompt-dir.sh --bootstrap refactor-tidy)
+fi
 ```
 
 Apply the [context recovery protocol](../../references/context-recovery-protocol.md) — for each commit N (1-indexed), check `{session_dir}/refactor-tidy-commit-{N}.md`.
@@ -199,7 +201,10 @@ bash {SKILL_DIR}/scripts/check-codebase-contract-runtime.sh
 ### 1. Resolve Session Directory
 
 ```bash
-session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . dir)
+session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . dir 2>/dev/null || true)
+if [[ -z "$session_dir" ]]; then
+  session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/next-prompt-dir.sh --bootstrap refactor-codebase)
+fi
 ```
 
 ### 2. Run Contract-Driven Scan and Persist Raw Output
@@ -249,16 +254,17 @@ bash {SKILL_DIR}/scripts/bootstrap-codebase-contract.sh --json
 Contract deep-review policy fields are defined in [references/codebase-contract.md](references/codebase-contract.md):
 
 - `deep_review.fixed_experts[]` (mandatory experts)
+- `deep_review.context_experts[]` (context expert roster in contract JSON)
 - `deep_review.context_expert_count` (additional context experts)
-- `deep_review.roster_state_file` (state file path for `expert_roster`)
 
 ### 1. Resolve Session Directory and Run Codebase Scan
 
 ```bash
-session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . dir)
+session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . dir 2>/dev/null || true)
+if [[ -z "$session_dir" ]]; then
+  session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/next-prompt-dir.sh --bootstrap refactor-codebase-deep)
+fi
 ```
-
-If `session_dir` is empty, fallback to `{REPO_ROOT}/.cwf`.
 
 ```bash
 bash {SKILL_DIR}/scripts/codebase-quick-scan.sh \
@@ -281,8 +287,8 @@ Selection policy:
 - Always include fixed experts from contract defaults:
   - Martin Fowler
   - Kent Beck
-- Add `deep_review.context_expert_count` context-matched experts from `expert_roster`
-- If context matches are insufficient, fill from roster fallback order
+- Add `deep_review.context_expert_count` context-matched experts from `deep_review.context_experts[]`
+- If context matches are insufficient, fill from contract roster order
 
 ### 3. Parallel Expert Deep Review (4 Sub-agents)
 
@@ -363,14 +369,13 @@ Read `{SKILL_DIR}/references/review-criteria.md` for the evaluation checklist.
 
 ### 5. Parallel Evaluation with Sub-agents
 
-**Resolve session directory**: Resolve the effective live-state file, then read `live.dir`.
+**Resolve session directory**: use live session first, then bootstrap a project session fallback.
 
 ```bash
-live_state_file=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh resolve)
-```
-
-```yaml
-session_dir: "{live.dir value from resolved live-state file}"
+session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . dir 2>/dev/null || true)
+if [[ -z "$session_dir" ]]; then
+  session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/next-prompt-dir.sh --bootstrap refactor-skill)
+fi
 ```
 
 Derive a stable skill suffix from `--skill <name>` (lowercase, non-alphanumeric replaced with `-`):
@@ -470,14 +475,13 @@ Read `{SKILL_DIR}/references/holistic-criteria.md` for the three analysis axes a
 
 ### 4. Parallel Analysis with Sub-agents
 
-**Resolve session directory**: Resolve the effective live-state file, then read `live.dir`.
+**Resolve session directory**: use live session first, then bootstrap a project session fallback.
 
 ```bash
-live_state_file=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh resolve)
-```
-
-```yaml
-session_dir: "{live.dir value from resolved live-state file}"
+session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . dir 2>/dev/null || true)
+if [[ -z "$session_dir" ]]; then
+  session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/next-prompt-dir.sh --bootstrap refactor-holistic)
+fi
 ```
 
 Apply the [context recovery protocol](../../references/context-recovery-protocol.md) to these files:

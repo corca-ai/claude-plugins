@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -uo pipefail
+set -euo pipefail
 
 # bootstrap-codebase-contract.sh — Create/refresh repository-local codebase scan contract.
 #
@@ -218,8 +218,35 @@ write_contract_file() {
         "source": "Tidy First? (2023), Test-Driven Development: By Example (2002), Extreme Programming Explained (2004)"
       }
     ],
+    "context_experts": [
+      {
+        "name": "Nancy Leveson",
+        "domain": "systems safety engineering, STAMP/STPA, control-structure analysis",
+        "source": "Engineering a Safer World (MIT Press, 2011)"
+      },
+      {
+        "name": "Donella Meadows",
+        "domain": "systems thinking, feedback loops, leverage points",
+        "source": "Thinking in Systems (2008)"
+      },
+      {
+        "name": "David Parnas",
+        "domain": "information hiding, modular decomposition criteria",
+        "source": "On the Criteria To Be Used in Decomposing Systems into Modules (CACM, 1972)"
+      },
+      {
+        "name": "John Ousterhout",
+        "domain": "deep modules, interface simplicity, strategic design",
+        "source": "A Philosophy of Software Design (2018/2021)"
+      }
+    ],
     "context_expert_count": 2,
-    "roster_state_file": ".cwf/cwf-state.yaml"
+    "selection_keywords": {
+      "large_file_lines": ["modular", "decomposition", "architecture", "design"],
+      "long_line_length": ["readability", "clarity", "maintainability"],
+      "todo_markers": ["technical debt", "process", "improvement"],
+      "shell_strict_mode": ["safety", "risk", "reliability", "resilience"]
+    }
   },
   "reporting": {
     "top_findings_limit": 30,
