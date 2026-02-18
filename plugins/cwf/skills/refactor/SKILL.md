@@ -222,6 +222,8 @@ bash {SKILL_DIR}/scripts/codebase-quick-scan.sh \
 
 `{REPO_ROOT}` is the git repository root (`git rev-parse --show-toplevel`).
 
+[scripts/codebase-quick-scan.sh](scripts/codebase-quick-scan.sh) delegates contract evaluation and findings aggregation to [scripts/codebase-quick-scan.py](scripts/codebase-quick-scan.py) as the backend implementation.
+
 ### 3. Summarize Findings
 
 Read `{session_dir}/refactor-codebase-scan.json` and write `{session_dir}/refactor-summary.md` with:
@@ -276,6 +278,8 @@ bash {SKILL_DIR}/scripts/codebase-quick-scan.sh \
   {REPO_ROOT} \
   --contract "{CONTRACT_PATH}" > {session_dir}/refactor-codebase-scan.json
 ```
+
+The wrapper delegates to [scripts/codebase-quick-scan.py](scripts/codebase-quick-scan.py); keep both files aligned when changing scan behavior.
 
 ### 2. Select Experts (Contract-Driven)
 
