@@ -25,7 +25,7 @@ if [ ! -f "$RESOLVER_SCRIPT" ]; then
   exit 1
 fi
 
-# shellcheck source=../cwf-artifact-paths.sh
+# shellcheck source=plugins/cwf/scripts/cwf-artifact-paths.sh
 source "$RESOLVER_SCRIPT"
 
 DEFAULT_CWD="$(pwd)"
@@ -40,6 +40,23 @@ OUT_DIR="$DEFAULT_OUT_DIR"
 COPY_RAW=false
 SINCE_EPOCH=""
 QUIET=false
+APPEND_MODE="${CODEX_SESSION_LOG_APPEND:-true}"
+
+STATE_FILE=""
+STATE_ENABLED=false
+STATE_OFFSET=0
+STATE_JSONL_PATH=""
+STATE_OUT_FILE=""
+STATE_LAST_MTIME=0
+
+EMITTED_TURNS=0
+HAS_TURN=false
+TURN_USER_TEXT=""
+TURN_USER_TS=""
+TURN_ASSISTANT_TEXT=""
+TURN_ASSISTANT_LAST_TS=""
+TURN_TOOLS=""
+LAST_TURN_FINGERPRINT=""
 
 usage() {
   cat <<'USAGE'
@@ -57,6 +74,8 @@ Options:
   --raw                Copy raw JSONL into out-dir/raw
   --no-raw             Backward-compatible alias for default behavior (no raw copy)
   --quiet              Suppress informational output
+  --append             Incremental append sync when possible (default)
+  --no-append          Disable incremental append and always rebuild
   -h, --help           Show help
 USAGE
 }
@@ -197,6 +216,91 @@ file_mtime_epoch() {
   stat -c %Y "$path" 2>/dev/null || stat -f %m "$path" 2>/dev/null || echo "0"
 }
 
+normalize_bool() {
+  local v="${1:-}"
+  case "$v" in
+    1|true|TRUE|yes|YES|on|ON) echo "true" ;;
+    0|false|FALSE|no|NO|off|OFF) echo "false" ;;
+    *) echo "false" ;;
+  esac
+}
+
+reset_turn_state() {
+  HAS_TURN=false
+  TURN_USER_TEXT=""
+  TURN_USER_TS=""
+  TURN_ASSISTANT_TEXT=""
+  TURN_ASSISTANT_LAST_TS=""
+  TURN_TOOLS=""
+}
+
+load_sync_state() {
+  local f="$1"
+  [ -f "$f" ] || return 1
+  command -v jq >/dev/null 2>&1 || return 1
+
+  local version
+  version="$(jq -r '.version // 0' "$f" 2>/dev/null || echo "0")"
+  [ "$version" = "1" ] || return 1
+
+  STATE_OFFSET="$(jq -r '.offset // 0' "$f" 2>/dev/null || echo "0")"
+  STATE_JSONL_PATH="$(jq -r '.jsonl_path // ""' "$f" 2>/dev/null || echo "")"
+  STATE_OUT_FILE="$(jq -r '.out_file // ""' "$f" 2>/dev/null || echo "")"
+  STATE_LAST_MTIME="$(jq -r '.last_mtime // 0' "$f" 2>/dev/null || echo "0")"
+
+  EMITTED_TURNS="$(jq -r '.emitted_turns // 0' "$f" 2>/dev/null || echo "0")"
+  HAS_TURN="$(normalize_bool "$(jq -r '.has_turn // false' "$f" 2>/dev/null || echo "false")")"
+  TURN_USER_TEXT="$(jq -r '.turn_user_text // ""' "$f" 2>/dev/null || echo "")"
+  TURN_USER_TS="$(jq -r '.turn_user_ts // ""' "$f" 2>/dev/null || echo "")"
+  TURN_ASSISTANT_TEXT="$(jq -r '.turn_assistant_text // ""' "$f" 2>/dev/null || echo "")"
+  TURN_ASSISTANT_LAST_TS="$(jq -r '.turn_assistant_last_ts // ""' "$f" 2>/dev/null || echo "")"
+  TURN_TOOLS="$(jq -r '.turn_tools // ""' "$f" 2>/dev/null || echo "")"
+  LAST_TURN_FINGERPRINT="$(jq -r '.last_turn_fingerprint // ""' "$f" 2>/dev/null || echo "")"
+
+  [ -n "$STATE_OFFSET" ] || STATE_OFFSET=0
+  [ -n "$STATE_LAST_MTIME" ] || STATE_LAST_MTIME=0
+  [ -n "$EMITTED_TURNS" ] || EMITTED_TURNS=0
+  return 0
+}
+
+save_sync_state() {
+  local f="$1"
+  local offset="$2"
+  local jsonl_path="$3"
+  local out_file="$4"
+  local last_mtime="$5"
+  mkdir -p "$(dirname "$f")"
+  jq -n \
+    --argjson version 1 \
+    --argjson offset "$offset" \
+    --arg jsonl_path "$jsonl_path" \
+    --arg out_file "$out_file" \
+    --argjson last_mtime "$last_mtime" \
+    --argjson emitted_turns "$EMITTED_TURNS" \
+    --arg has_turn "$HAS_TURN" \
+    --arg turn_user_text "$TURN_USER_TEXT" \
+    --arg turn_user_ts "$TURN_USER_TS" \
+    --arg turn_assistant_text "$TURN_ASSISTANT_TEXT" \
+    --arg turn_assistant_last_ts "$TURN_ASSISTANT_LAST_TS" \
+    --arg turn_tools "$TURN_TOOLS" \
+    --arg last_turn_fingerprint "$LAST_TURN_FINGERPRINT" \
+    '{
+      version: $version,
+      offset: $offset,
+      jsonl_path: $jsonl_path,
+      out_file: $out_file,
+      last_mtime: $last_mtime,
+      emitted_turns: $emitted_turns,
+      has_turn: ($has_turn == "true"),
+      turn_user_text: $turn_user_text,
+      turn_user_ts: $turn_user_ts,
+      turn_assistant_text: $turn_assistant_text,
+      turn_assistant_last_ts: $turn_assistant_last_ts,
+      turn_tools: $turn_tools,
+      last_turn_fingerprint: $last_turn_fingerprint
+    }' > "$f"
+}
+
 find_latest_session_for_cwd() {
   local target_cwd="$1"
   local min_epoch="${2:-}"
@@ -264,6 +368,88 @@ summarize_tool() {
   echo "$summary"
 }
 
+build_events_from_source() {
+  local source_jsonl="$1"
+  local has_event_messages=""
+
+  has_event_messages=$(
+    jq -r 'select(.type == "event_msg" and (.payload.type == "user_message" or .payload.type == "agent_message")) | 1' \
+      "$source_jsonl" 2>/dev/null | head -n1 || true
+  )
+
+  if [ -n "$has_event_messages" ]; then
+    jq -c '
+      if .type == "event_msg" and (.payload.type == "user_message" or .payload.type == "agent_message") then
+        {
+          kind: "message",
+          role: (if .payload.type == "user_message" then "user" else "assistant" end),
+          ts: (.timestamp // ""),
+          text: (.payload.message // "")
+        }
+      elif .type == "response_item" and (.payload.type == "function_call" or .payload.type == "custom_tool_call") then
+        {
+          kind: "tool",
+          ts: (.timestamp // ""),
+          name: (.payload.name // "tool"),
+          arguments: (.payload.arguments // "")
+        }
+      else
+        empty
+      end
+    ' "$source_jsonl" > "$EVENTS_FILE"
+    return 0
+  fi
+
+  log "No event_msg user/assistant messages detected; falling back to response_item.message."
+  jq -c '
+    def message_text:
+      if (.payload.content | type) == "array" then
+        (.payload.content
+          | map(
+              if .type == "input_text" then (.text // "")
+              elif .type == "output_text" then (.text // "")
+              elif (.text? != null) then (.text // "")
+              elif (.input_text? != null) then (.input_text // "")
+              elif (.output_text? != null) then (.output_text // "")
+              else ""
+              end
+            )
+          | join("\n")
+        )
+      else
+        ""
+      end;
+    if .type == "response_item" and .payload.type == "message" and (.payload.role == "user" or .payload.role == "assistant") then
+      {
+        kind: "message",
+        role: .payload.role,
+        ts: (.timestamp // ""),
+        text: message_text
+      }
+    elif .type == "response_item" and (.payload.type == "function_call" or .payload.type == "custom_tool_call") then
+      {
+        kind: "tool",
+        ts: (.timestamp // ""),
+        name: (.payload.name // "tool"),
+        arguments: (.payload.arguments // "")
+      }
+    else
+      empty
+    end
+  ' "$source_jsonl" > "$EVENTS_FILE"
+}
+
+write_session_header() {
+  {
+    echo "# Session: ${HASH}"
+    echo "Engine: codex | Model: ${MODEL}"
+    echo "Recorded by: ${USER:-unknown}@$(hostname 2>/dev/null || echo unknown)"
+    echo "CWD: ${SESSION_CWD}"
+    echo "Started: ${STARTED_LOCAL} | Codex CLI v${CLI_VERSION}"
+    echo "Session ID: ${SESSION_ID}"
+  } > "$OUT_FILE"
+}
+
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --session-id)
@@ -296,6 +482,14 @@ while [ "$#" -gt 0 ]; do
       ;;
     --quiet)
       QUIET=true
+      shift
+      ;;
+    --append)
+      APPEND_MODE=true
+      shift
+      ;;
+    --no-append)
+      APPEND_MODE=false
       shift
       ;;
     -h|--help)
@@ -371,89 +565,79 @@ START_HHMM=$(utc_to_local "$SESSION_STARTED_UTC" "%H%M")
 mkdir -p "$OUT_DIR"
 OUT_FILE="$OUT_DIR/${DATE_STR}-${START_HHMM}-${HASH}.codex.md"
 
-EVENTS_FILE=$(mktemp)
-trap 'rm -f "$EVENTS_FILE"' EXIT
+CURRENT_SIZE="$(wc -c < "$JSONL_PATH" | tr -d ' ')"
+CURRENT_MTIME="$(file_mtime_epoch "$JSONL_PATH")"
+SOURCE_JSONL="$JSONL_PATH"
+CHUNK_FILE=""
+EVENTS_FILE="$(mktemp)"
+trap 'rm -f "$EVENTS_FILE" "$CHUNK_FILE"' EXIT
 
-HAS_EVENT_MESSAGES=$(jq -r 'select(.type == "event_msg" and (.payload.type == "user_message" or .payload.type == "agent_message")) | 1' "$JSONL_PATH" 2>/dev/null | head -n1 || true)
+APPEND_MODE="$(normalize_bool "$APPEND_MODE")"
+STATE_FILE="$OUT_DIR/.sync-state/${HASH}.json"
+STATE_ENABLED=false
+REBUILD_MODE=true
 
-if [ -n "$HAS_EVENT_MESSAGES" ]; then
-  jq -c '
-    if .type == "event_msg" and (.payload.type == "user_message" or .payload.type == "agent_message") then
-      {
-        kind: "message",
-        role: (if .payload.type == "user_message" then "user" else "assistant" end),
-        ts: (.timestamp // ""),
-        text: (.payload.message // "")
-      }
-    elif .type == "response_item" and (.payload.type == "function_call" or .payload.type == "custom_tool_call") then
-      {
-        kind: "tool",
-        ts: (.timestamp // ""),
-        name: (.payload.name // "tool"),
-        arguments: (.payload.arguments // "")
-      }
+reset_turn_state
+EMITTED_TURNS=0
+LAST_TURN_FINGERPRINT=""
+TURN_NUM=0
+STATE_OFFSET=0
+
+if [ "$APPEND_MODE" = "true" ] && command -v jq >/dev/null 2>&1; then
+  STATE_ENABLED=true
+  if load_sync_state "$STATE_FILE"; then
+    if [ "$STATE_JSONL_PATH" = "$JSONL_PATH" ] && [ "$STATE_OUT_FILE" = "$OUT_FILE" ] && \
+      [ "$STATE_OFFSET" -ge 0 ] && [ "$STATE_OFFSET" -le "$CURRENT_SIZE" ] && [ -f "$OUT_FILE" ]; then
+      REBUILD_MODE=false
     else
-      empty
-    end
-  ' "$JSONL_PATH" > "$EVENTS_FILE"
-else
-  log "No event_msg user/assistant messages detected; falling back to response_item.message."
-  jq -c '
-    def message_text:
-      if (.payload.content | type) == "array" then
-        (.payload.content
-          | map(
-              if .type == "input_text" then (.text // "")
-              elif .type == "output_text" then (.text // "")
-              elif (.text? != null) then (.text // "")
-              elif (.input_text? != null) then (.input_text // "")
-              elif (.output_text? != null) then (.output_text // "")
-              else ""
-              end
-            )
-          | join("\n")
-        )
-      else
-        ""
-      end;
-    if .type == "response_item" and .payload.type == "message" and (.payload.role == "user" or .payload.role == "assistant") then
-      {
-        kind: "message",
-        role: .payload.role,
-        ts: (.timestamp // ""),
-        text: message_text
-      }
-    elif .type == "response_item" and (.payload.type == "function_call" or .payload.type == "custom_tool_call") then
-      {
-        kind: "tool",
-        ts: (.timestamp // ""),
-        name: (.payload.name // "tool"),
-        arguments: (.payload.arguments // "")
-      }
-    else
-      empty
-    end
-  ' "$JSONL_PATH" > "$EVENTS_FILE"
+      reset_turn_state
+      EMITTED_TURNS=0
+      LAST_TURN_FINGERPRINT=""
+      STATE_OFFSET=0
+    fi
+  fi
 fi
 
-{
-  echo "# Session: ${HASH}"
-  echo "Engine: codex | Model: ${MODEL}"
-  echo "Recorded by: ${USER:-unknown}@$(hostname 2>/dev/null || echo unknown)"
-  echo "CWD: ${SESSION_CWD}"
-  echo "Started: ${STARTED_LOCAL} | Codex CLI v${CLI_VERSION}"
-  echo "Session ID: ${SESSION_ID}"
-} > "$OUT_FILE"
+if [ "$REBUILD_MODE" = "true" ]; then
+  write_session_header
+else
+  if [ "$STATE_OFFSET" -ge "$CURRENT_SIZE" ]; then
+    reset_turn_state
+    if [ "$STATE_ENABLED" = "true" ]; then
+      save_sync_state "$STATE_FILE" "$CURRENT_SIZE" "$JSONL_PATH" "$OUT_FILE" "$CURRENT_MTIME"
+    fi
+    if [ "$COPY_RAW" = "true" ]; then
+      RAW_DIR="$OUT_DIR/raw"
+      RAW_FILE="$RAW_DIR/$(basename "$JSONL_PATH")"
+      mkdir -p "$RAW_DIR"
+      cp "$JSONL_PATH" "$RAW_FILE"
+      redact_file_in_place "$RAW_FILE"
+    fi
+    link_log_into_live_session "$OUT_FILE" || true
+    log "Codex session exported: $OUT_FILE"
+    exit 0
+  fi
 
-TURN_NUM=0
-EMITTED_TURNS=0
-HAS_TURN=false
-TURN_USER_TEXT=""
-TURN_USER_TS=""
-TURN_ASSISTANT_TEXT=""
-TURN_ASSISTANT_LAST_TS=""
-TURN_TOOLS=""
-LAST_TURN_FINGERPRINT=""
+  CHUNK_FILE="$(mktemp)"
+  tail -c "+$((STATE_OFFSET + 1))" "$JSONL_PATH" > "$CHUNK_FILE"
+  SOURCE_JSONL="$CHUNK_FILE"
+fi
+
+if ! build_events_from_source "$SOURCE_JSONL"; then
+  if [ "$REBUILD_MODE" != "true" ]; then
+    log "Incremental parse failed; falling back to full rebuild."
+    REBUILD_MODE=true
+    STATE_OFFSET=0
+    SOURCE_JSONL="$JSONL_PATH"
+    reset_turn_state
+    EMITTED_TURNS=0
+    LAST_TURN_FINGERPRINT=""
+    write_session_header
+    build_events_from_source "$SOURCE_JSONL"
+  else
+    exit 1
+  fi
+fi
 
 flush_turn() {
   if [ "$HAS_TURN" != "true" ]; then
@@ -574,9 +758,14 @@ done < "$EVENTS_FILE"
 
 if [ "$HAS_TURN" = "true" ]; then
   flush_turn
+  reset_turn_state
 fi
 
 redact_file_in_place "$OUT_FILE"
+
+if [ "$STATE_ENABLED" = "true" ]; then
+  save_sync_state "$STATE_FILE" "$CURRENT_SIZE" "$JSONL_PATH" "$OUT_FILE" "$CURRENT_MTIME"
+fi
 
 if [ "$COPY_RAW" = "true" ]; then
   RAW_DIR="$OUT_DIR/raw"
