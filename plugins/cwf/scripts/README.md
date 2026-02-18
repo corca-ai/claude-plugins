@@ -10,6 +10,8 @@ This file maps scripts under [plugins/cwf/scripts](.).
 - [check-review-routing.sh](check-review-routing.sh): Validates review routing cutoff contract (`prompt_lines > 1200`) and deterministic fallback expectations.
 - [check-shared-reference-conformance.sh](check-shared-reference-conformance.sh): Verifies shared output-persistence reference adoption across composing skills and duplication threshold.
 - [check-run-gate-artifacts.sh](check-run-gate-artifacts.sh): Validates stage artifacts for `cwf:run` gate closure (`review-code`, `refactor`, `retro`, `ship`) with contract-driven stage/policy modes (session/project/explicit contract priority), and can append gate failures to `lessons.md`.
+- [check-run-gate-artifacts-lib.sh](check-run-gate-artifacts-lib.sh): Shared helper functions for `check-run-gate-artifacts.sh`.
+- [check-session-lib.sh](check-session-lib.sh): Shared helper functions for `check-session.sh`.
 - [next-prompt-dir.sh](next-prompt-dir.sh): Computes next session directory name, with optional `--bootstrap` to initialize artifacts and register `cwf-state.yaml` session metadata.
 - [cwf-artifact-paths.sh](cwf-artifact-paths.sh): Resolves artifact/state/projects paths with project-config precedence (.cwf-config.local.yaml → .cwf-config.yaml → env).
 - [cwf-live-state.sh](cwf-live-state.sh): Resolves/syncs hybrid live-state files, reads live scalars/lists (`get`, `list-get`), updates top-level live fields (`set`, `list-set`, `list-remove`), and appends replay-safe decision entries (`journal-append`).
@@ -25,6 +27,7 @@ This file maps scripts under [plugins/cwf/scripts](.).
 - [codex/sync-skills.sh](codex/sync-skills.sh): Symlinks CWF skills/references into Codex scope-specific destinations.
 - [codex/verify-skill-links.sh](codex/verify-skill-links.sh): Verifies linked skill references resolve correctly.
 - [codex/sync-session-logs.sh](codex/sync-session-logs.sh): Exports session logs into repository project artifacts.
+- [codex/sync-session-logs-lib.sh](codex/sync-session-logs-lib.sh): Shared helper functions for [codex/sync-session-logs.sh](codex/sync-session-logs.sh).
 - [codex/redact-session-logs.sh](codex/redact-session-logs.sh): Batch-redacts existing markdown session logs.
 - [codex/redact-jsonl.sh](codex/redact-jsonl.sh): Redacts JSONL logs.
 - [codex/redact-sensitive.pl](codex/redact-sensitive.pl): Core sensitive-token redaction engine.
