@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # cwf-live-state-core.sh — shared helpers for hybrid live-state parsing/upserts.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

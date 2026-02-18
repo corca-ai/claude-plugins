@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # cwf-live-state-journal.sh — list mutation and decision journal helpers.
 
 if ! declare -F cwf_live_resolve_root_state_file >/dev/null 2>&1; then
