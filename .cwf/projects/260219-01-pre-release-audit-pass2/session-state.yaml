@@ -1,0 +1,36 @@
+# session-state.yaml — volatile session live state
+# Synced from .cwf/cwf-state.yaml live section.
+
+live:
+  session_id: "260219-01"
+  dir: ".cwf/projects/260219-01-pre-release-audit-pass2"
+  branch: "marketplace-v3"
+  phase: "plan"
+  task: "pre-release pass2 plan finalized"
+  key_files:
+    - ".cwf/projects/260219-01-pre-release-audit-pass2/clarify-result.md"
+    - ".cwf/projects/260219-01-pre-release-audit-pass2/plan.md"
+    - ".cwf/projects/260219-01-pre-release-audit-pass2/lessons.md"
+    - ".cwf/projects/260219-01-pre-release-audit-pass2/plan-codebase-analysis.md"
+    - ".cwf/projects/260219-01-pre-release-audit-pass2/plan-claim-map.md"
+    - ".cwf/projects/260219-01-pre-release-audit-pass2/plan-prior-art-research.md"
+  decisions: []
+  decision_journal: []
+  hitl:
+    session_id: ""
+    state_file: ""
+    rules_file: ""
+    updated_at: ""
+  remaining_gates: []
+  state_version: "6"
+  worktree_root: "/home/hwidong/codes/claude-plugins"
+  worktree_branch: "marketplace-v3"
+  active_pipeline: ""
+  user_directive: "Run clarify→plan→implement fixes→review→retro for public release readiness"
+  pipeline_override_reason: "ship persisted as docs artifact (ship.md), GitHub mutation intentionally skipped"
+  ambiguity_mode: "defer-blocking"
+  blocking_decisions_pending: "false"
+  ambiguity_decisions_file: ".cwf/projects/260218-03-pre-release-refactor-audit/run-ambiguity-decisions.md"
+  clarify_result_file: ".cwf/projects/260218-03-pre-release-refactor-audit/clarify-result.md"
+  clarify_completed_at: "2026-02-18T06:48:00Z"
+  stage_provenance_file: ".cwf/projects/260218-03-pre-release-refactor-audit/run-stage-provenance.md"

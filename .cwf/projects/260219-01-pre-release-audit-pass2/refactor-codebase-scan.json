@@ -1,0 +1,141 @@
+{
+  "contract": {
+    "status": "loaded",
+    "path": "/home/hwidong/codes/claude-plugins/.cwf/codebase-contract.json",
+    "version": 1
+  },
+  "source": {
+    "mode": "git_ls_files",
+    "candidate_files": 1121
+  },
+  "scope": {
+    "include_globs": [
+      "**/*"
+    ],
+    "exclude_globs": [
+      ".git/**",
+      ".cwf/**",
+      "node_modules/**",
+      "dist/**",
+      "build/**",
+      "coverage/**",
+      ".venv/**",
+      "venv/**",
+      "**/*.md",
+      "**/*.mdx",
+      "**/*.png",
+      "**/*.jpg",
+      "**/*.jpeg",
+      "**/*.gif",
+      "**/*.svg",
+      "**/*.pdf",
+      "**/*.lock",
+      "**/package-lock.json",
+      "**/pnpm-lock.yaml",
+      "**/yarn.lock",
+      "**/bun.lock",
+      "**/bun.lockb",
+      "**/*.snap",
+      "**/*.min.js",
+      "**/*.min.css"
+    ],
+    "include_extensions": [
+      ".bash",
+      ".cfg",
+      ".cjs",
+      ".conf",
+      ".cs",
+      ".go",
+      ".ini",
+      ".java",
+      ".js",
+      ".json",
+      ".jsx",
+      ".kt",
+      ".lua",
+      ".mjs",
+      ".php",
+      ".py",
+      ".rb",
+      ".rs",
+      ".scala",
+      ".sh",
+      ".sql",
+      ".swift",
+      ".toml",
+      ".ts",
+      ".tsx",
+      ".xml",
+      ".yaml",
+      ".yml",
+      ".zsh"
+    ],
+    "scanned_files": 123,
+    "excluded_scope": 903,
+    "excluded_extension": 3,
+    "excluded_binary": 0
+  },
+  "summary": {
+    "errors": 0,
+    "warnings": 0,
+    "total_lines": 24802,
+    "checks": {
+      "large_file_lines": {
+        "warnings": 0,
+        "errors": 0
+      },
+      "long_line_length": {
+        "warnings": 0
+      },
+      "todo_markers": {
+        "warnings": 0
+      },
+      "shell_strict_mode": {
+        "warnings": 0
+      }
+    }
+  },
+  "relaxations": {
+    "shell_strict_mode": {
+      "applied": 4,
+      "items": [
+        {
+          "path": "plugins/cwf/hooks/scripts/cwf-hook-gate.sh",
+          "action": "relax",
+          "detail": "relaxed by contract+pragma",
+          "ticket": "CWF-STRICT-RELAX-001",
+          "expires": "2026-12-31"
+        },
+        {
+          "path": "plugins/cwf/hooks/scripts/env-loader.sh",
+          "action": "relax",
+          "detail": "relaxed by contract+pragma",
+          "ticket": "CWF-STRICT-RELAX-002",
+          "expires": "2026-12-31"
+        },
+        {
+          "path": "plugins/cwf/hooks/scripts/slack-send.sh",
+          "action": "relax",
+          "detail": "relaxed by contract+pragma",
+          "ticket": "CWF-STRICT-RELAX-003",
+          "expires": "2026-12-31"
+        },
+        {
+          "path": "plugins/cwf/hooks/scripts/text-format.sh",
+          "action": "relax",
+          "detail": "relaxed by contract+pragma",
+          "ticket": "CWF-STRICT-RELAX-004",
+          "expires": "2026-12-31"
+        }
+      ]
+    }
+  },
+  "findings": {
+    "errors": [],
+    "warnings": []
+  },
+  "omitted_findings": {
+    "errors": 0,
+    "warnings": 0
+  }
+}

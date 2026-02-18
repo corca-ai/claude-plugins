@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # test-hook-exit-codes-suite-decision-journal.sh
 # Provides suite_decision_journal_e2e() for test-hook-exit-codes.sh.
 
