@@ -1,16 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# bootstrap-setup-contract.sh — Create/refresh repository-local setup contract.
-#
-# Usage:
-#   bootstrap-setup-contract.sh [--contract <path>] [--force] [--json]
-#
-# Behavior:
-# - Default contract location: {artifact_root}/setup-contract.yaml
-# - Artifact root resolution: CWF config/env via cwf-artifact-paths.sh, fallback ./.cwf
-# - Idempotent by default: existing contract is never overwritten unless --force
-# - On bootstrap failure, emit fallback metadata and return success so setup flow can continue
+# bootstrap-setup-contract.sh — create/refresh repository-local setup contract.
+# Usage: bootstrap-setup-contract.sh [--contract <path>] [--force] [--json]
+# Defaults to {artifact_root}/setup-contract.yaml; artifact root resolves via
+# cwf-artifact-paths.sh (fallback: ./.cwf). Existing files are preserved unless
+# --force. On bootstrap failure, emit fallback metadata and keep setup flow moving.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"

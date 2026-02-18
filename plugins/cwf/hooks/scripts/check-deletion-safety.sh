@@ -3,14 +3,9 @@ set -euo pipefail
 # check-deletion-safety.sh — PreToolUse fail-closed guard for destructive deletions.
 # Blocks BEFORE execution when the command would delete files that have in-repo callers.
 #
-# Detection boundary: grep -rl detects literal string matches only. Variable-interpolated
-# references (e.g., "$SCRIPT_DIR/csv-to-toon.sh", source "$DIR/lib.sh") will NOT be
-# detected. This is an accepted residual risk — static analysis cannot resolve all
-# dynamic references.
-#
-# Scope: This hook targets Bash tool calls only. The Write and Edit tools overwrite
-# file content but do not remove files from the filesystem, so they are out of scope
-# for deletion safety.
+# Detection boundary: grep -rl only catches literal string matches; interpolated paths
+# are an accepted residual risk.
+# Scope: Bash tool calls only (Write/Edit do not delete filesystem entries).
 
 HOOK_GROUP="deletion_safety"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -21,7 +16,6 @@ source "$SCRIPT_DIR/cwf-hook-gate.sh"
 
 INPUT="$(cat)"
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || true)"
-
 if [[ -z "$REPO_ROOT" ]]; then
   exit 0
 fi
@@ -311,7 +305,6 @@ for candidate in "${DELETED_RAW[@]}"; do
   rel_path="$(to_repo_rel "$candidate" || true)"
   [[ -n "$rel_path" ]] || continue
 
-  # Skip generated/session artifacts (not production runtime callers)
   case "$rel_path" in
     node_modules/*) continue ;;
   esac
@@ -340,9 +333,6 @@ CALLER_LINES=()
 
 for rel_path in "${DELETED_REL[@]}"; do
   combined_hits="$(search_callers "$rel_path")"
-  if [[ -n "$combined_hits" ]]; then
-    :
-  fi
 
   base_name="$(basename "$rel_path")"
   if [[ -n "$base_name" && "$base_name" != "$rel_path" ]]; then
