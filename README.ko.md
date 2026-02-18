@@ -283,6 +283,7 @@ cwf:retro --light    # 핵심 항목만 빠르게 점검 (서브에이전트 없
 cwf:refactor                        # 모든 스킬 퀵 스캔
 cwf:refactor --tidy [branch]        # 커밋 기반 정리
 cwf:refactor --codebase             # 계약 기반 전체 코드베이스 퀵 스캔
+cwf:refactor --codebase --deep      # 코드베이스 딥 리뷰 (Fowler+Beck + 맥락 익스퍼트)
 cwf:refactor --skill <name>         # 단일 스킬 심층 리뷰
 cwf:refactor --skill --holistic     # 스킬/훅 전반의 교차 패턴·규약 정합성 분석
 cwf:refactor --docs                 # 문서 일관성 리뷰
@@ -294,7 +295,7 @@ cwf:refactor --docs                 # 문서 일관성 리뷰
 
 **무엇을 하는가**
 
-퀵 스캔은 모든 스킬의 구조 지표와 경고 플래그를 빠르게 점검해 이상 후보를 찾습니다. `--tidy`는 최근 커밋 기준 정리(tidy) 후보를 찾고, `--codebase`는 계약 기반으로 전체 코드베이스를 범용 규칙으로 빠르게 스캔합니다. `--skill <name>`은 특정 스킬의 구조/품질/컨셉 정합성을 깊게 검토하는 집중 모드입니다. `--holistic`은 플러그인/훅 간 규약 준수와 워크플로우 연결성을 교차 분석하며, `--docs`는 문서 간 일관성·중복·연결 상태를 점검합니다.
+퀵 스캔은 모든 스킬의 구조 지표와 경고 플래그를 빠르게 점검해 이상 후보를 찾습니다. `--tidy`는 최근 커밋 기준 정리(tidy) 후보를 찾고, `--codebase`는 계약 기반으로 전체 코드베이스를 범용 규칙으로 빠르게 스캔합니다. `--codebase --deep`은 고정 익스퍼트(Martin Fowler, Kent Beck)와 맥락 익스퍼트 2명을 결합한 4개 병렬 익스퍼트 렌즈를 추가합니다. `--skill <name>`은 특정 스킬의 구조/품질/컨셉 정합성을 깊게 검토하는 집중 모드입니다. `--holistic`은 플러그인/훅 간 규약 준수와 워크플로우 연결성을 교차 분석하며, `--docs`는 문서 간 일관성·중복·연결 상태를 점검합니다.
 
 ### [handoff](plugins/cwf/skills/handoff/SKILL.md)
 

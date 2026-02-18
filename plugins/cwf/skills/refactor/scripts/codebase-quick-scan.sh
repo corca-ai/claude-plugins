@@ -202,7 +202,7 @@ defaults = {
         "large_file_lines": {"enabled": True, "warn_at": 400, "error_at": 800},
         "long_line_length": {"enabled": True, "warn_at": 140},
         "todo_markers": {"enabled": True, "patterns": ["TODO", "FIXME", "HACK", "XXX"]},
-        "shell_strict_mode": {"enabled": True},
+        "shell_strict_mode": {"enabled": True, "exclude_globs": []},
     },
     "reporting": {"top_findings_limit": 30, "include_clean_summary": True},
 }
@@ -260,6 +260,7 @@ large_file_cfg = checks.get("large_file_lines", {})
 long_line_cfg = checks.get("long_line_length", {})
 todo_cfg = checks.get("todo_markers", {})
 shell_cfg = checks.get("shell_strict_mode", {})
+shell_exclude_globs = [as_posix(p) for p in shell_cfg.get("exclude_globs", []) if isinstance(p, str) and p]
 
 todo_patterns = [p for p in todo_cfg.get("patterns", []) if isinstance(p, str) and p]
 todo_regex = None
@@ -302,9 +303,63 @@ def is_shell_candidate(rel_path, first_line):
 
 
 def has_shell_strict_mode(text):
-    has_errexit = re.search(r"^\\s*set\\s+(-[^\\n#]*e\\b|.*-o\\s+errexit\\b)", text, flags=re.MULTILINE) is not None
-    has_nounset = re.search(r"^\\s*set\\s+(-[^\\n#]*u\\b|.*-o\\s+nounset\\b)", text, flags=re.MULTILINE) is not None
-    has_pipefail = re.search(r"^\\s*set\\s+(-[^\\n#]*o\\s+pipefail\\b|.*-o\\s+pipefail\\b)", text, flags=re.MULTILINE) is not None
+    has_errexit = False
+    has_nounset = False
+    has_pipefail = False
+
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+        if not line.startswith("set "):
+            continue
+        if line.startswith("set +"):
+            continue
+
+        if "#" in line:
+            line = line.split("#", 1)[0].rstrip()
+        if not line:
+            continue
+
+        tokens = line.split()
+        i = 1
+        while i < len(tokens):
+            token = tokens[i]
+
+            if token == "-o" and i + 1 < len(tokens):
+                opt = tokens[i + 1]
+                if opt == "errexit":
+                    has_errexit = True
+                elif opt == "nounset":
+                    has_nounset = True
+                elif opt == "pipefail":
+                    has_pipefail = True
+                i += 2
+                continue
+
+            if token.startswith("-") and len(token) > 1:
+                flags = token[1:]
+                j = 0
+                while j < len(flags):
+                    flag = flags[j]
+                    if flag == "e":
+                        has_errexit = True
+                    elif flag == "u":
+                        has_nounset = True
+                    elif flag == "o":
+                        if j == len(flags) - 1 and i + 1 < len(tokens):
+                            opt = tokens[i + 1]
+                            if opt == "errexit":
+                                has_errexit = True
+                            elif opt == "nounset":
+                                has_nounset = True
+                            elif opt == "pipefail":
+                                has_pipefail = True
+                            i += 1
+                    j += 1
+                i += 1
+                continue
+
+            i += 1
+
     return has_errexit and has_nounset and has_pipefail
 
 
@@ -426,7 +481,8 @@ for raw_item in raw_candidates:
             check_summary["todo_markers"]["warnings"] += 1
 
     if shell_cfg.get("enabled", True) and shell_candidate:
-        if not has_shell_strict_mode(text):
+        is_shell_excluded = any(fnmatch.fnmatch(rel_path, pattern) for pattern in shell_exclude_globs)
+        if not is_shell_excluded and not has_shell_strict_mode(text):
             warnings.append(
                 {
                     "severity": "warning",

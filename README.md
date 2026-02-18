@@ -276,6 +276,7 @@ JTBD: keep a growing skill/tool ecosystem coherent as teams install or author mo
 cwf:refactor                        # Quick scan all skills
 cwf:refactor --tidy [branch]        # Commit-based tidying
 cwf:refactor --codebase             # Contract-driven whole-codebase quick scan
+cwf:refactor --codebase --deep      # Codebase deep review (Fowler+Beck + context experts)
 cwf:refactor --skill <name>         # Deep review of a single skill
 cwf:refactor --skill --holistic     # Cross-plugin analysis
 cwf:refactor --docs                 # Documentation consistency review
@@ -287,7 +288,7 @@ In a growing codebase where features, skills, docs, and operational scripts evol
 
 **What It Does**
 
-Quick scan checks structural metrics and warning flags across all skills. `--tidy` finds safe tidy candidates from recent commits (Kent Beck's "Tidy First?"). `--codebase` runs a contract-driven whole-codebase quick scan with portable defaults. `--skill <name>` provides focused structural/quality/concept diagnosis. `--holistic` analyzes cross-plugin convention compliance, concept integrity, and workflow coherence. `--docs` checks cross-document consistency.
+Quick scan checks structural metrics and warning flags across all skills. `--tidy` finds safe tidy candidates from recent commits (Kent Beck's "Tidy First?"). `--codebase` runs a contract-driven whole-codebase quick scan with portable defaults. `--codebase --deep` adds 4 expert sub-agents (fixed Martin Fowler + Kent Beck, plus 2 context experts selected from roster by contract). `--skill <name>` provides focused structural/quality/concept diagnosis. `--holistic` analyzes cross-plugin convention compliance, concept integrity, and workflow coherence. `--docs` checks cross-document consistency.
 
 ### [handoff](plugins/cwf/skills/handoff/SKILL.md)
 

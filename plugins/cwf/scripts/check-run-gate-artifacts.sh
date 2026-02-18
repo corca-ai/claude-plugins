@@ -418,6 +418,7 @@ check_refactor_stage() {
   local summary_file="$SESSION_DIR/refactor-summary.md"
   local quick_scan_json="$SESSION_DIR/refactor-quick-scan.json"
   local codebase_scan_json="$SESSION_DIR/refactor-codebase-scan.json"
+  local codebase_experts_json="$SESSION_DIR/refactor-codebase-experts.json"
   local deep_file=""
   local has_any=false
 
@@ -459,6 +460,20 @@ check_refactor_stage() {
     fi
   fi
 
+  if [[ -s "$codebase_experts_json" ]]; then
+    has_any=true
+    append_pass "$stage" "artifact present: refactor-codebase-experts.json"
+    if command -v jq >/dev/null 2>&1; then
+      if jq -e '.selected and .fixed and .contextual' "$codebase_experts_json" >/dev/null; then
+        append_pass "$stage" "codebase-experts JSON schema check passed"
+      else
+        append_fail "$stage" "codebase-experts JSON missing required keys (.selected/.fixed/.contextual)"
+      fi
+    else
+      append_warn "$stage" "jq not available; skipped codebase-experts JSON schema check"
+    fi
+  fi
+
   shopt -s nullglob
   for deep_file in "$SESSION_DIR"/refactor-deep-structural*.md; do
     [[ -s "$deep_file" ]] || continue
@@ -478,10 +493,16 @@ check_refactor_stage() {
     append_pass "$stage" "artifact present: ${tidy_file#"$SESSION_DIR"/}"
     require_agent_complete_sentinel "$stage" "$tidy_file" || true
   done
+  for deep_file in "$SESSION_DIR"/refactor-codebase-deep-*.md; do
+    [[ -s "$deep_file" ]] || continue
+    has_any=true
+    append_pass "$stage" "artifact present: ${deep_file#"$SESSION_DIR"/}"
+    require_agent_complete_sentinel "$stage" "$deep_file" || true
+  done
   shopt -u nullglob
 
   if [[ "$has_any" == false ]]; then
-    append_fail "$stage" "no refactor artifact found (expected summary/quick-scan/codebase-scan/deep/tidy outputs)"
+    append_fail "$stage" "no refactor artifact found (expected summary/quick-scan/codebase-scan/codebase-experts/deep/tidy outputs)"
   fi
 }
 

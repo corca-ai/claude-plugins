@@ -15,6 +15,7 @@ Control drift across code, skills, and docs as teams install and author more cap
 cwf:refactor                        Quick scan all marketplace skills
 cwf:refactor --tidy [branch]        Commit-based tidying (parallel sub-agents)
 cwf:refactor --codebase             Contract-driven whole-codebase quick scan
+cwf:refactor --codebase --deep      Codebase deep review with 4 expert sub-agents
 cwf:refactor --skill <name>         Deep review of a single skill (parallel sub-agents)
 cwf:refactor --skill --holistic     Cross-plugin analysis (parallel sub-agents)
 cwf:refactor --docs                 Documentation consistency review
@@ -34,6 +35,7 @@ Parse the user's input:
 | No args | Quick Scan |
 | `--tidy` or `--tidy <branch>` | Code Tidying |
 | `--codebase` | Codebase Quick Scan |
+| `--codebase --deep` | Codebase Deep Review |
 | `--skill <name>` | Deep Review |
 | `--skill --holistic` or `--holistic` | Holistic Analysis |
 | `--docs` | Docs Review |
@@ -219,6 +221,104 @@ Read `{session_dir}/refactor-codebase-scan.json` and write `{session_dir}/refact
 - Scope summary (candidate/scanned/excluded files)
 - Top findings table: severity, check, file, detail
 - If no findings: explicit "No significant codebase tidy risks detected"
+
+After writing summary artifacts, run deterministic gate:
+
+```bash
+bash {CWF_PLUGIN_DIR}/scripts/check-run-gate-artifacts.sh \
+  --session-dir "{session_dir}" \
+  --stage refactor \
+  --strict \
+  --record-lessons
+```
+
+---
+
+## Codebase Deep Review Mode (`--codebase --deep`)
+
+Run codebase quick scan first, then add expert-lens deep review using 4 parallel expert sub-agents.
+
+### 0. Resolve or Bootstrap Codebase Contract
+
+Use the same contract bootstrap flow as `--codebase`.
+
+```bash
+bash {SKILL_DIR}/scripts/bootstrap-codebase-contract.sh --json
+```
+
+Contract deep-review policy fields are defined in [references/codebase-contract.md](references/codebase-contract.md):
+
+- `deep_review.fixed_experts[]` (mandatory experts)
+- `deep_review.context_expert_count` (additional context experts)
+- `deep_review.roster_state_file` (state file path for `expert_roster`)
+
+### 1. Resolve Session Directory and Run Codebase Scan
+
+```bash
+session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . dir)
+```
+
+If `session_dir` is empty, fallback to `{REPO_ROOT}/.cwf`.
+
+```bash
+bash {SKILL_DIR}/scripts/codebase-quick-scan.sh \
+  {REPO_ROOT} \
+  --contract "{CONTRACT_PATH}" > {session_dir}/refactor-codebase-scan.json
+```
+
+### 2. Select Experts (Contract-Driven)
+
+Select experts using deterministic script:
+
+```bash
+bash {SKILL_DIR}/scripts/select-codebase-experts.sh \
+  --scan "{session_dir}/refactor-codebase-scan.json" \
+  --contract "{CONTRACT_PATH}" > "{session_dir}/refactor-codebase-experts.json"
+```
+
+Selection policy:
+
+- Always include fixed experts from contract defaults:
+  - Martin Fowler
+  - Kent Beck
+- Add `deep_review.context_expert_count` context-matched experts from `expert_roster`
+- If context matches are insufficient, fill from roster fallback order
+
+### 3. Parallel Expert Deep Review (4 Sub-agents)
+
+Read `{session_dir}/refactor-codebase-experts.json` and launch one sub-agent per selected expert (single message, parallel).
+
+Output files:
+
+| Expert slot | Output file |
+|-------------|-------------|
+| Martin Fowler | `{session_dir}/refactor-codebase-deep-fowler.md` |
+| Kent Beck | `{session_dir}/refactor-codebase-deep-beck.md` |
+| Context Expert 1 | `{session_dir}/refactor-codebase-deep-context-1.md` |
+| Context Expert 2 | `{session_dir}/refactor-codebase-deep-context-2.md` |
+
+Each expert sub-agent prompt:
+
+1. Read `{CWF_PLUGIN_DIR}/references/expert-advisor-guide.md` (review mode format)
+2. Read `{session_dir}/refactor-codebase-scan.json`
+3. Read `{session_dir}/refactor-codebase-experts.json` and adopt assigned expert identity
+4. Produce:
+   - Top 3 concerns (blocking risks)
+   - Top 3 suggestions (high leverage)
+   - 1 prioritized first action
+5. **Output Persistence**: write to assigned file and append `<!-- AGENT_COMPLETE -->`
+
+### 4. Synthesize Deep Report
+
+Merge scan + four expert outputs into `{session_dir}/refactor-summary.md`:
+
+- `Mode: cwf:refactor --codebase --deep`
+- Contract metadata (`CONTRACT_STATUS`, `CONTRACT_PATH`, optional `CONTRACT_WARNING`)
+- Scan metrics summary (errors/warnings/check counts)
+- Expert roster used (fixed + contextual, with selection reasons)
+- Convergent findings (agreements across 2+ experts)
+- Divergent findings (framework tensions)
+- Prioritized action list (P0/P1/P2)
 
 After writing summary artifacts, run deterministic gate:
 
@@ -478,11 +578,12 @@ Use `{SKILL_DIR}/references/docs-criteria.md` for evaluation criteria, [referenc
 4. Holistic: 3 agents (Convention Compliance, Concept Integrity, Workflow Coherence), single batch after inline inventory
 5. Code Tidying: 1 agent per commit, all in one message
 6. Codebase Quick Scan: contract-driven deterministic scan, no sub-agents
-7. Docs Review: inline, no sub-agents (single-context synthesis over whole-repo graph and deterministic outputs)
-8. Docs Review must run the deterministic tool pass before semantic analysis
-9. In Docs Review, do not report lint/hook-detectable issues as standalone manual findings when tool output already covers them
-10. Sub-agents analyze and report; orchestrator merges. Sub-agents do not modify files
-11. All code fences must have a language specifier
+7. Codebase Deep Review: 4 expert sub-agents (fixed 2 + context 2) after codebase scan
+8. Docs Review: inline, no sub-agents (single-context synthesis over whole-repo graph and deterministic outputs)
+9. Docs Review must run the deterministic tool pass before semantic analysis
+10. In Docs Review, do not report lint/hook-detectable issues as standalone manual findings when tool output already covers them
+11. Sub-agents analyze and report; orchestrator merges. Sub-agents do not modify files
+12. All code fences must have a language specifier
 
 ## References
 
@@ -491,6 +592,7 @@ Use `{SKILL_DIR}/references/docs-criteria.md` for evaluation criteria, [referenc
 - Concept synchronization map: [concept-map.md](../../references/concept-map.md)
 - Tidying techniques for --tidy mode: [references/tidying-guide.md](references/tidying-guide.md)
 - Codebase scan contract schema: [references/codebase-contract.md](references/codebase-contract.md)
+- Codebase expert selector script: [scripts/select-codebase-experts.sh](scripts/select-codebase-experts.sh)
 - Docs review criteria: [references/docs-criteria.md](references/docs-criteria.md)
 - Docs review contract schema: [references/docs-contract.md](references/docs-contract.md)
 - Docs review procedure flow: [references/docs-review-flow.md](references/docs-review-flow.md)

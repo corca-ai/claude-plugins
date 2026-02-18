@@ -49,6 +49,10 @@ jq -e '
   (.checks.large_file_lines.warn_at | type == "number") and
   (.checks.large_file_lines.error_at | type == "number") and
   (.checks.todo_markers.patterns | type == "array") and
+  (.checks.shell_strict_mode.exclude_globs | type == "array") and
+  (.deep_review.enabled | type == "boolean") and
+  (.deep_review.fixed_experts | type == "array") and
+  (.deep_review.context_expert_count | type == "number") and
   (.reporting.top_findings_limit | type == "number")
 ' "$contract_path" >/dev/null || fail "contract schema keys missing or invalid"
 

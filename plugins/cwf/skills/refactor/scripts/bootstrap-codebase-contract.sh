@@ -200,8 +200,26 @@ write_contract_file() {
       ]
     },
     "shell_strict_mode": {
-      "enabled": true
+      "enabled": true,
+      "exclude_globs": []
     }
+  },
+  "deep_review": {
+    "enabled": true,
+    "fixed_experts": [
+      {
+        "name": "Martin Fowler",
+        "domain": "refactoring patterns, knowledge duplication (Rule of Three), shared abstractions, evolutionary design",
+        "source": "Refactoring: Improving the Design of Existing Code 2nd ed. (2018), Is Design Dead? (martinfowler.com), BeckDesignRules (martinfowler.com/bliki)"
+      },
+      {
+        "name": "Kent Beck",
+        "domain": "Tidy First, small safe refactorings, test-driven development, simple design",
+        "source": "Tidy First? (2023), Test-Driven Development: By Example (2002), Extreme Programming Explained (2004)"
+      }
+    ],
+    "context_expert_count": 2,
+    "roster_state_file": ".cwf/cwf-state.yaml"
   },
   "reporting": {
     "top_findings_limit": 30,

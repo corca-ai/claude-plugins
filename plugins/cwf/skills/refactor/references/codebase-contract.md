@@ -44,6 +44,11 @@ Path resolution follows CWF artifact rules:
 | `checks.long_line_length` | object | Long line check (`warn_at`). |
 | `checks.todo_markers` | object | TODO/FIXME marker detection patterns. |
 | `checks.shell_strict_mode.enabled` | bool | Shell strict-mode check toggle. |
+| `checks.shell_strict_mode.exclude_globs[]` | list | Optional path globs excluded from shell strict-mode warnings. |
+| `deep_review.enabled` | bool | Enable/disable codebase deep review with expert sub-agents. |
+| `deep_review.fixed_experts[]` | list | Mandatory experts (always included first). |
+| `deep_review.context_expert_count` | number | Number of additional context-matched experts from roster. |
+| `deep_review.roster_state_file` | string | Path to state file containing `expert_roster`. |
 | `reporting.top_findings_limit` | number | Maximum findings per severity in final output. |
 
 ## Fallback Defaults (No Contract)
