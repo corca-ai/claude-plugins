@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -uo pipefail
+set -euo pipefail
 
 # bootstrap-docs-contract.sh — Create/refresh repository-local docs review contract.
 #

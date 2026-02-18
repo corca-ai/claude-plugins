@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Shared environment variable loader for CWF scripts.
+# cwf: shell-strict-mode relax reason="sourced-env-loader" ticket="CWF-STRICT-RELAX-002" expires="2026-12-31"
 #
 # Source priority (high -> low):
 #   1) Project-local config (.cwf-config.local.yaml)

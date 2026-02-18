@@ -34,12 +34,10 @@ done
 if [[ -t 1 ]] && [[ "$JSON_OUTPUT" != "true" ]]; then
   RED='\033[0;31m'
   GREEN='\033[0;32m'
-  YELLOW='\033[1;33m'
   NC='\033[0m'
 else
   RED=''
   GREEN=''
-  YELLOW=''
   NC=''
 fi
 
@@ -74,6 +72,7 @@ fi
 
 TMPFILES=()
 
+# shellcheck disable=SC2317
 cleanup() {
   for f in "${TMPFILES[@]}"; do
     rm -f "$f" 2>/dev/null || true
@@ -122,7 +121,14 @@ validate_target() {
 
   # Validate with ajv-cli + local format registrations
   local output
-  if output=$(cd "$REPO_ROOT" && npx ajv-cli@5 validate -c "$AJV_FORMATS_MODULE" -s "$schema_path" -d "$validate_path" --spec=draft2020 --all-errors 2>&1); then
+  if output=$(
+    cd "$REPO_ROOT" && npx ajv-cli@5 validate \
+      -c "$AJV_FORMATS_MODULE" \
+      -s "$schema_path" \
+      -d "$validate_path" \
+      --spec=draft2020 \
+      --all-errors 2>&1
+  ); then
     return 0
   else
     if [[ "$JSON_OUTPUT" != "true" ]]; then

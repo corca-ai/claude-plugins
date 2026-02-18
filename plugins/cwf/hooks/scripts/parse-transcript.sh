@@ -50,7 +50,11 @@ parse_assistant_text() {
     jq -rs '. as $all |
         ([to_entries[] |
           select(.value.type == "user" and (.value.isMeta | not)) |
-          select(.value.message.content | (type == "string") or (type == "array" and any(type == "string" or .type == "text" or .type == "image"))) |
+          select(
+            .value.message.content |
+            (type == "string") or
+            (type == "array" and any(type == "string" or .type == "text" or .type == "image"))
+          ) |
           .key] | last // -1) as $last_user_idx |
         $all |
         [to_entries[] |
@@ -70,10 +74,15 @@ parse_ask_question() {
     local transcript="$1"
 
     # Find AskUserQuestion in the last assistant message of current turn
-    local ask_json=$(jq -rs '. as $all |
+    local ask_json=""
+    ask_json=$(jq -rs '. as $all |
         ([to_entries[] |
           select(.value.type == "user" and (.value.isMeta | not)) |
-          select(.value.message.content | (type == "string") or (type == "array" and any(type == "string" or .type == "text" or .type == "image"))) |
+          select(
+            .value.message.content |
+            (type == "string") or
+            (type == "array" and any(type == "string" or .type == "text" or .type == "image"))
+          ) |
           .key] | last // -1) as $last_user_idx |
         $all |
         [to_entries[] |
@@ -111,7 +120,8 @@ parse_ask_question() {
 parse_todos() {
     local transcript="$1"
 
-    local todo_json=$(jq -s '
+    local todo_json=""
+    todo_json=$(jq -s '
         [.[] | select(.type == "assistant") |
          .message.content[]? |
          select(.type == "tool_use" and .name == "TodoWrite") |

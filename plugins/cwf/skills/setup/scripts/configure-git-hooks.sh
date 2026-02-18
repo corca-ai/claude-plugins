@@ -178,14 +178,20 @@ ensure_markdownlint_cli2() {
   if command -v markdownlint-cli2 >/dev/null 2>&1; then
     return 0
   fi
-  echo "[pre-commit] markdownlint-cli2 not found; run 'cwf:setup --tools' or 'bash plugins/cwf/skills/setup/scripts/install-tooling-deps.sh --install markdownlint-cli2'" >&2
+  echo "[pre-commit] markdownlint-cli2 not found; run 'cwf:setup --tools' or" >&2
+  echo "  'bash plugins/cwf/skills/setup/scripts/install-tooling-deps.sh --install markdownlint-cli2'" >&2
   exit 1
 }
 
 RUNTIME_SKIP_PREFIXES=()
 init_runtime_skip_prefixes
 
-mapfile -t plugin_meta_files < <(git diff --cached --name-only --diff-filter=ACMR -- '.claude-plugin/marketplace.json' 'plugins/*/.claude-plugin/plugin.json' || true)
+mapfile -t plugin_meta_files < <(
+  git diff --cached --name-only --diff-filter=ACMR -- \
+    '.claude-plugin/marketplace.json' \
+    'plugins/*/.claude-plugin/plugin.json' \
+    || true
+)
 if [ "${#plugin_meta_files[@]}" -gt 0 ]; then
   if [[ ! -x "$CWF_PLUGIN_DESC_SYNC" ]]; then
     echo "[pre-commit] $CWF_PLUGIN_DESC_SYNC missing or not executable" >&2
@@ -371,7 +377,8 @@ ensure_markdownlint_cli2() {
   if command -v markdownlint-cli2 >/dev/null 2>&1; then
     return 0
   fi
-  echo "[pre-push] markdownlint-cli2 not found; run 'cwf:setup --tools' or 'bash plugins/cwf/skills/setup/scripts/install-tooling-deps.sh --install markdownlint-cli2'" >&2
+  echo "[pre-push] markdownlint-cli2 not found; run 'cwf:setup --tools' or" >&2
+  echo "  'bash plugins/cwf/skills/setup/scripts/install-tooling-deps.sh --install markdownlint-cli2'" >&2
   exit 1
 }
 

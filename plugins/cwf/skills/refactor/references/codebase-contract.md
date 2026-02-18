@@ -45,6 +45,10 @@ Path resolution follows CWF artifact rules:
 | `checks.todo_markers` | object | TODO/FIXME marker detection patterns. |
 | `checks.shell_strict_mode.enabled` | bool | Shell strict-mode check toggle. |
 | `checks.shell_strict_mode.exclude_globs[]` | list | Optional path globs excluded from shell strict-mode warnings. |
+| `checks.shell_strict_mode.require_contract_and_pragma` | bool | Require both contract override and file pragma for relax mode. |
+| `checks.shell_strict_mode.pragma_prefix` | string | File pragma prefix for shell strict relax (for example `cwf: shell-strict-mode relax`). |
+| `checks.shell_strict_mode.pragma_required_fields[]` | list | Required pragma key-value fields (default: `reason`, `ticket`, `expires`). |
+| `checks.shell_strict_mode.file_overrides` | object | File-level relax allowlist keyed by repository-relative path. |
 | `deep_review.enabled` | bool | Enable/disable codebase deep review with expert sub-agents. |
 | `deep_review.fixed_experts[]` | list | Mandatory experts (always included first). |
 | `deep_review.context_experts[]` | list | Context expert roster in contract JSON. |

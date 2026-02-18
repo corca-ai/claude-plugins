@@ -7,10 +7,11 @@ set -euo pipefail
 # - Large files (>DENY): denied with guidance to use offset/limit or Grep
 # Bypass: set offset or limit explicitly to signal intentional reading.
 
+# shellcheck disable=SC2034
 HOOK_GROUP="read"
-# shellcheck source=cwf-hook-gate.sh
+# shellcheck source=plugins/cwf/hooks/scripts/cwf-hook-gate.sh
 source "$(dirname "${BASH_SOURCE[0]}")/cwf-hook-gate.sh"
-# shellcheck source=env-loader.sh
+# shellcheck source=plugins/cwf/hooks/scripts/env-loader.sh
 source "$(dirname "${BASH_SOURCE[0]}")/env-loader.sh"
 
 # --- Load environment variables (env -> shell profiles) ---
@@ -84,12 +85,26 @@ if [ "$LINE_COUNT" -le "$WARN_LINES" ]; then
 elif [ "$LINE_COUNT" -le "$DENY_LINES" ]; then
     # Medium file — allow but inform Claude of the size
     cat <<EOF
-{"hookSpecificOutput":{"hookEventName":"PreToolUse","additionalContext":"File has ${LINE_COUNT} lines. Consider using offset/limit to read specific sections if you only need part of it."}}
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "additionalContext": "File has ${LINE_COUNT} lines. Consider using offset/limit to read specific sections if you only need part of it."
+  }
+}
 EOF
 
 else
     # Large file — deny and guide to selective reading
-    cat <<EOF
-{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"File has ${LINE_COUNT} lines (exceeds ${DENY_LINES}-line threshold). To read this file, either: (1) Use Read with offset/limit to target specific sections, (2) Use Grep to find relevant parts first, or (3) Use the Task tool with Explore agent for broad understanding."}}
-EOF
+    deny_reason="File has ${LINE_COUNT} lines (exceeds ${DENY_LINES}-line threshold). "
+    deny_reason+="To read this file, choose one: "
+    deny_reason+="(1) Read with offset/limit, (2) Grep first, or (3) Task with Explore agent."
+    jq -nc \
+      --arg reason "$deny_reason" \
+      '{
+        hookSpecificOutput: {
+          hookEventName: "PreToolUse",
+          permissionDecision: "deny",
+          permissionDecisionReason: $reason
+        }
+      }'
 fi

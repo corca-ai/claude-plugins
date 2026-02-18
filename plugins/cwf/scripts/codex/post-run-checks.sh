@@ -513,7 +513,9 @@ if [[ "${#md_files[@]}" -gt 0 ]]; then
       fail_count=$((fail_count + 1))
     fi
   else
-    warn "markdownlint-cli2 not found; skipping markdownlint (run 'cwf:setup --tools' or 'bash plugins/cwf/skills/setup/scripts/install-tooling-deps.sh --install markdownlint-cli2')"
+    warn "markdownlint-cli2 not found; skipping markdownlint " \
+      "(run 'cwf:setup --tools' or " \
+      "'bash plugins/cwf/skills/setup/scripts/install-tooling-deps.sh --install markdownlint-cli2')"
   fi
 
   check_count=$((check_count + 1))
@@ -544,7 +546,9 @@ if [[ "${#sh_files[@]}" -gt 0 ]]; then
       fail_count=$((fail_count + 1))
     fi
   else
-    warn "shellcheck not found; skipping shell lint (run 'cwf:setup --tools' or 'bash plugins/cwf/skills/setup/scripts/install-tooling-deps.sh --install shellcheck')"
+    warn "shellcheck not found; skipping shell lint " \
+      "(run 'cwf:setup --tools' or " \
+      "'bash plugins/cwf/skills/setup/scripts/install-tooling-deps.sh --install shellcheck')"
   fi
 fi
 

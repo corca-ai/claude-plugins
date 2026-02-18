@@ -192,6 +192,11 @@ Capture metadata for final summary:
 
 Contract spec: [references/codebase-contract.md](references/codebase-contract.md)
 
+For shell strict-mode exceptions, use contract + file pragma dual control:
+
+- contract allowlist: `checks.shell_strict_mode.file_overrides`
+- file pragma: `# cwf: shell-strict-mode relax reason="..." ticket="..." expires="YYYY-MM-DD"`
+
 For implementation/regression checks of codebase-contract behavior, run:
 
 ```bash

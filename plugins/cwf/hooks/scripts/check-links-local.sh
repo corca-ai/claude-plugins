@@ -154,7 +154,10 @@ fi
 
 # lychee not available — block (deterministic gate unavailable)
 if ! command -v lychee >/dev/null 2>&1; then
-    REASON=$(printf 'Link checker unavailable for %s: lychee is not installed.\nInstall lychee to continue markdown edits safely.' "$FILE_PATH" | jq -Rs .)
+    REASON=$(
+        printf 'Link checker unavailable for %s: lychee is not installed.\nInstall lychee to continue markdown edits safely.' \
+            "$FILE_PATH" | jq -Rs .
+    )
     cat <<EOF
 {"decision":"block","reason":${REASON}}
 EOF
@@ -168,7 +171,10 @@ fi
 CHECK_LINKS="${REPO_ROOT}/plugins/cwf/skills/refactor/scripts/check-links.sh"
 
 if [ ! -x "$CHECK_LINKS" ]; then
-    REASON=$(printf 'Link checker unavailable for %s: plugins/cwf/skills/refactor/scripts/check-links.sh is missing or not executable.' "$FILE_PATH" | jq -Rs .)
+    REASON=$(
+        printf 'Link checker unavailable for %s: plugins/cwf/skills/refactor/scripts/check-links.sh is missing or not executable.' \
+            "$FILE_PATH" | jq -Rs .
+    )
     cat <<EOF
 {"decision":"block","reason":${REASON}}
 EOF
@@ -193,7 +199,10 @@ if [ "$LINE_COUNT" -gt 15 ]; then
     SUFFIX=" ... (${LINE_COUNT} total lines, showing first 15)"
 fi
 
-REASON=$(printf 'Broken links detected in %s:\n%s%s\nFor triage guidance, see references/agent-patterns.md § Broken Link Triage Protocol' "$FILE_PATH" "$TRUNCATED" "$SUFFIX" | jq -Rs .)
+REASON=$(
+    printf 'Broken links detected in %s:\n%s%s\nFor triage guidance, see references/agent-patterns.md § Broken Link Triage Protocol' \
+        "$FILE_PATH" "$TRUNCATED" "$SUFFIX" | jq -Rs .
+)
 
 cat <<EOF
 {"decision":"block","reason":${REASON}}

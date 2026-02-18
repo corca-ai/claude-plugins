@@ -1,14 +1,14 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Slack thread to Markdown converter
 # Reads JSON from stdin (from slack-api.mjs)
 # Usage: ./slack-to-md.sh <channel_id> <thread_ts> <workspace> <output_file> [title]
 
-set -e
+set -euo pipefail
 
-CHANNEL_ID="$1"
-THREAD_TS="$2"
-WORKSPACE="$3"
-OUTPUT_FILE="$4"
+CHANNEL_ID="${1:-}"
+THREAD_TS="${2:-}"
+WORKSPACE="${3:-}"
+OUTPUT_FILE="${4:-}"
 TITLE="${5:-Slack Thread}"
 
 if [[ -z "$CHANNEL_ID" || -z "$THREAD_TS" || -z "$WORKSPACE" || -z "$OUTPUT_FILE" ]]; then
@@ -79,9 +79,6 @@ is_image() {
     done
     return 1
 }
-
-# Compute relative path from output file to attachments directory
-OUTPUT_DIR=$(dirname "$OUTPUT_FILE")
 
 # Get total message count
 MSG_COUNT=$(echo "$JSON" | jq '.messages | sort_by(.ts) | length')

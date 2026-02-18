@@ -102,7 +102,9 @@ module.exports = [
             detail:
               `Frontmatter line ${i + 2}: unsupported SKILL frontmatter key: ` +
               key +
-              ". Allowed: argument-hint, compatibility, description, disable-model-invocation, license, metadata, name, user-invokable, allowed-tools",
+              ". Allowed: argument-hint, compatibility, description, " +
+              "disable-model-invocation, license, metadata, name, " +
+              "user-invokable, allowed-tools",
             context: line
           });
           continue;

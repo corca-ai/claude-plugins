@@ -186,10 +186,27 @@ for pfile in "${PROVENANCE_FILES[@]}"; do
     json_target="${target//\\/\\\\}"; json_target="${json_target//\"/\\\"}"
     json_written="${written_session//\\/\\\\}"; json_written="${json_written//\"/\\\"}"
     json_reviewed="${last_reviewed//\\/\\\\}"; json_reviewed="${json_reviewed//\"/\\\"}"
-    entry=$(printf '{"file":"%s","target":"%s","written_session":"%s","last_reviewed":"%s","recorded_skills":%s,"recorded_hooks":%s,"status":"%s","skill_delta":%d,"hook_delta":%d}' \
-      "$json_file" "$json_target" "$json_written" "$json_reviewed" \
-      "${recorded_skills:-null}" "${recorded_hooks:-null}" \
-      "$status" "$skill_delta" "$hook_delta")
+    entry="$(jq -cn \
+      --arg file "$json_file" \
+      --arg target "$json_target" \
+      --arg written_session "$json_written" \
+      --arg last_reviewed "$json_reviewed" \
+      --arg status "$status" \
+      --argjson recorded_skills "${recorded_skills:-null}" \
+      --argjson recorded_hooks "${recorded_hooks:-null}" \
+      --argjson skill_delta "$skill_delta" \
+      --argjson hook_delta "$hook_delta" \
+      '{
+        file:$file,
+        target:$target,
+        written_session:$written_session,
+        last_reviewed:$last_reviewed,
+        recorded_skills:$recorded_skills,
+        recorded_hooks:$recorded_hooks,
+        status:$status,
+        skill_delta:$skill_delta,
+        hook_delta:$hook_delta
+      }')"
     if [[ -n "$json_files" ]]; then json_files="$json_files,"; fi
     json_files="$json_files$entry"
   else

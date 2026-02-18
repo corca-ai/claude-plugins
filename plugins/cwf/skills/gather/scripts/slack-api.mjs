@@ -147,8 +147,10 @@ async function joinChannel(channelId, token) {
     console.error('Successfully joined channel');
   } catch (error) {
     if (error.slackError === 'missing_scope') {
+      const requiredScope = error.needed || 'channels:join';
       throw new Error(
-        `Error: missing_scope\nRequired scope: ${error.needed || 'channels:join'}\nPlease add this scope to your Slack app at https://api.slack.com/apps`
+        `Error: missing_scope\nRequired scope: ${requiredScope}\n` +
+          'Please add this scope to your Slack app at https://api.slack.com/apps'
       );
     }
     throw error;
@@ -294,8 +296,10 @@ async function main() {
 
 main().catch((error) => {
   if (error.slackError === 'missing_scope') {
+    const requiredScope = error.needed || 'unknown';
     console.error(
-      `Error: missing_scope\nRequired scope: ${error.needed || 'unknown'}\nPlease add this scope to your Slack app at https://api.slack.com/apps`
+      `Error: missing_scope\nRequired scope: ${requiredScope}\n` +
+        'Please add this scope to your Slack app at https://api.slack.com/apps'
     );
   } else {
     console.error(error.message);

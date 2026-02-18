@@ -50,6 +50,10 @@ jq -e '
   (.checks.large_file_lines.error_at | type == "number") and
   (.checks.todo_markers.patterns | type == "array") and
   (.checks.shell_strict_mode.exclude_globs | type == "array") and
+  (.checks.shell_strict_mode.require_contract_and_pragma | type == "boolean") and
+  (.checks.shell_strict_mode.pragma_prefix | type == "string") and
+  (.checks.shell_strict_mode.pragma_required_fields | type == "array") and
+  (.checks.shell_strict_mode.file_overrides | type == "object") and
   (.deep_review.enabled | type == "boolean") and
   (.deep_review.fixed_experts | type == "array") and
   (.deep_review.context_experts | type == "array") and

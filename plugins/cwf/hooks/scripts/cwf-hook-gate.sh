@@ -1,5 +1,7 @@
+# shellcheck shell=bash
 # cwf-hook-gate.sh — shared gate for all cwf hook scripts
 # SOURCED (not executed) by hook scripts. Do NOT add set -euo pipefail.
+# cwf: shell-strict-mode relax reason="sourced-gate-library" ticket="CWF-STRICT-RELAX-001" expires="2026-12-31"
 #
 # Usage in hook scripts:
 #   HOOK_GROUP="attention"   # set before sourcing

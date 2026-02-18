@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Usage: csv-to-toon.sh <csv-file>
 # Converts CSV file to TOON (Token-Oriented Object Notation) format for LLM consumption.
 # TOON reduces token usage by ~40% compared to CSV for structured data.
@@ -6,9 +6,9 @@
 # Input: Standard CSV with headers in first row
 # Output: TOON format written to stdout
 
-set -e
+set -euo pipefail
 
-CSV_FILE="$1"
+CSV_FILE="${1:-}"
 
 if [[ -z "$CSV_FILE" ]]; then
     echo "Usage: csv-to-toon.sh <csv-file>" >&2

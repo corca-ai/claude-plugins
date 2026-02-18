@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Shared Slack API utility for attention-hook
 # Supports: Web API (chat.postMessage with threading) and Webhook (fallback, no threading)
+# cwf: shell-strict-mode relax reason="primarily-sourced-helper" ticket="CWF-STRICT-RELAX-003" expires="2026-12-31"
 #
 # Usage: source this file in other scripts
 #   source "$SCRIPT_DIR/slack-send.sh"
@@ -12,7 +13,7 @@
 # Diagnose: run directly to check Slack configuration
 #   ./slack-send.sh --diagnose
 
-# shellcheck source=env-loader.sh
+# shellcheck source=plugins/cwf/hooks/scripts/env-loader.sh
 source "$(dirname "${BASH_SOURCE[0]}")/env-loader.sh"
 
 # Load config from process env / shell profiles

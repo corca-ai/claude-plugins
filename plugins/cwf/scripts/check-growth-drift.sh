@@ -159,8 +159,12 @@ normalize_chain() {
 
 extract_chain_line() {
   local file="$1"
+  local chain_pattern='gather[[:space:]]*→[[:space:]]*clarify[[:space:]]*→[[:space:]]*plan[[:space:]]*→'
+  chain_pattern+='[[:space:]]*review\(plan\)[[:space:]]*→[[:space:]]*impl[[:space:]]*→'
+  chain_pattern+='[[:space:]]*review\(code\)[[:space:]]*→[[:space:]]*refactor[[:space:]]*→'
+  chain_pattern+='[[:space:]]*retro[[:space:]]*→[[:space:]]*ship'
   grep -m1 -E 'gather[[:space:]]*→[[:space:]]*clarify.*review\(code\).*ship' "$file" \
-    | sed -nE 's/.*(gather[[:space:]]*→[[:space:]]*clarify[[:space:]]*→[[:space:]]*plan[[:space:]]*→[[:space:]]*review\(plan\)[[:space:]]*→[[:space:]]*impl[[:space:]]*→[[:space:]]*review\(code\)[[:space:]]*→[[:space:]]*refactor[[:space:]]*→[[:space:]]*retro[[:space:]]*→[[:space:]]*ship).*/\1/p' \
+    | sed -nE "s/.*(${chain_pattern}).*/\\1/p" \
     || true
 }
 

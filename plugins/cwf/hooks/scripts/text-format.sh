@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Shared multiline text formatting helpers for hooks.
+# cwf: shell-strict-mode relax reason="sourced-format-helper" ticket="CWF-STRICT-RELAX-004" expires="2026-12-31"
 
 # Normalize multiline text by:
 # - trimming leading/trailing blank lines

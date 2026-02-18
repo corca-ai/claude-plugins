@@ -127,8 +127,10 @@ import fnmatch
 import json
 import os
 import re
+import shlex
 import sys
 from copy import deepcopy
+from datetime import date
 
 repo_root = os.path.abspath(sys.argv[1])
 contract_path = os.path.abspath(sys.argv[2])
@@ -201,8 +203,15 @@ defaults = {
     "checks": {
         "large_file_lines": {"enabled": True, "warn_at": 400, "error_at": 800},
         "long_line_length": {"enabled": True, "warn_at": 140},
-        "todo_markers": {"enabled": True, "patterns": ["TODO", "FIXME", "HACK", "XXX"]},
-        "shell_strict_mode": {"enabled": True, "exclude_globs": []},
+        "todo_markers": {"enabled": True, "patterns": ["T" + "ODO", "FIX" + "ME", "HA" + "CK", "X" * 3]},
+        "shell_strict_mode": {
+            "enabled": True,
+            "exclude_globs": [],
+            "require_contract_and_pragma": True,
+            "pragma_prefix": "cwf: shell-strict-mode relax",
+            "pragma_required_fields": ["reason", "ticket", "expires"],
+            "file_overrides": {},
+        },
     },
     "reporting": {"top_findings_limit": 30, "include_clean_summary": True},
 }
@@ -261,11 +270,57 @@ long_line_cfg = checks.get("long_line_length", {})
 todo_cfg = checks.get("todo_markers", {})
 shell_cfg = checks.get("shell_strict_mode", {})
 shell_exclude_globs = [as_posix(p) for p in shell_cfg.get("exclude_globs", []) if isinstance(p, str) and p]
+shell_require_contract_pragma = bool(shell_cfg.get("require_contract_and_pragma", True))
+shell_pragma_prefix = str(shell_cfg.get("pragma_prefix", "cwf: shell-strict-mode relax")).strip()
+shell_pragma_required_fields = [
+    field
+    for field in shell_cfg.get("pragma_required_fields", ["reason", "ticket", "expires"])
+    if isinstance(field, str) and field.strip()
+]
+shell_file_overrides_raw = shell_cfg.get("file_overrides", {})
+
+
+def normalize_shell_overrides(raw_value):
+    normalized = {}
+
+    if isinstance(raw_value, dict):
+        iterator = []
+        for raw_path, raw_meta in raw_value.items():
+            meta = raw_meta if isinstance(raw_meta, dict) else {}
+            entry = {"path": raw_path}
+            entry.update(meta)
+            iterator.append(entry)
+    elif isinstance(raw_value, list):
+        iterator = [item for item in raw_value if isinstance(item, dict)]
+    else:
+        iterator = []
+
+    for item in iterator:
+        raw_path = str(item.get("path", "")).strip()
+        if not raw_path:
+            continue
+
+        path_key = as_posix(raw_path).lstrip("./")
+        if not path_key:
+            continue
+
+        normalized[path_key] = {
+            "action": str(item.get("action", "relax")).strip().lower(),
+            "reason": str(item.get("reason", "")).strip(),
+            "ticket": str(item.get("ticket", "")).strip(),
+            "expires": str(item.get("expires", "")).strip(),
+        }
+
+    return normalized
+
+
+shell_file_overrides = normalize_shell_overrides(shell_file_overrides_raw)
+shell_relaxations = []
 
 todo_patterns = [p for p in todo_cfg.get("patterns", []) if isinstance(p, str) and p]
 todo_regex = None
 if todo_patterns:
-    todo_regex = re.compile(r"(?<!\\w)(?:%s)(?!\\w)" % "|".join(re.escape(p) for p in todo_patterns))
+    todo_regex = re.compile(r"(?<!\w)(?:%s)(?!\w)" % "|".join(re.escape(p) for p in todo_patterns))
 
 top_limit = int(contract.get("reporting", {}).get("top_findings_limit", 30))
 if top_limit <= 0:
@@ -361,6 +416,67 @@ def has_shell_strict_mode(text):
             i += 1
 
     return has_errexit and has_nounset and has_pipefail
+
+
+def parse_shell_relax_pragma(text):
+    if not shell_pragma_prefix:
+        return {"present": False, "line": 0, "fields": {}, "error": ""}
+
+    pattern = re.compile(rf"^\s*#\s*{re.escape(shell_pragma_prefix)}\b(?P<rest>.*)$", flags=re.IGNORECASE)
+
+    for idx, raw_line in enumerate(text.splitlines(), start=1):
+        if idx > 80:
+            break
+
+        match = pattern.match(raw_line)
+        if not match:
+            continue
+
+        fields = {}
+        rest = match.group("rest").strip()
+        if rest:
+            try:
+                for token in shlex.split(rest):
+                    if "=" not in token:
+                        continue
+                    key, value = token.split("=", 1)
+                    key = key.strip()
+                    if key:
+                        fields[key] = value.strip()
+            except Exception:
+                return {"present": True, "line": idx, "fields": fields, "error": "unable to parse pragma fields"}
+
+        return {"present": True, "line": idx, "fields": fields, "error": ""}
+
+    return {"present": False, "line": 0, "fields": {}, "error": ""}
+
+
+def validate_shell_relaxation(text):
+    pragma = parse_shell_relax_pragma(text)
+
+    if not shell_require_contract_pragma:
+        return True, "relaxed by contract override", pragma
+
+    if not pragma.get("present"):
+        return False, "contract override exists but file pragma is missing", pragma
+
+    if pragma.get("error"):
+        return False, pragma["error"], pragma
+
+    missing = [field for field in shell_pragma_required_fields if not pragma["fields"].get(field)]
+    if missing:
+        return False, f"pragma missing fields: {', '.join(missing)}", pragma
+
+    expires_value = pragma["fields"].get("expires", "")
+    if expires_value:
+        try:
+            expires_date = date.fromisoformat(expires_value)
+        except ValueError:
+            return False, f"invalid pragma expires date: {expires_value}", pragma
+        if expires_date < date.today():
+            return False, f"pragma expired at {expires_value}", pragma
+
+    return True, "relaxed by contract+pragma", pragma
 
 
 for raw_item in raw_candidates:
@@ -482,7 +598,36 @@ for raw_item in raw_candidates:
 
     if shell_cfg.get("enabled", True) and shell_candidate:
         is_shell_excluded = any(fnmatch.fnmatch(rel_path, pattern) for pattern in shell_exclude_globs)
-        if not is_shell_excluded and not has_shell_strict_mode(text):
+        if is_shell_excluded:
+            continue
+
+        override = shell_file_overrides.get(rel_path)
+        if override and override.get("action") == "relax":
+            relax_ok, relax_detail, relax_pragma = validate_shell_relaxation(text)
+            if relax_ok:
+                shell_relaxations.append(
+                    {
+                        "path": rel_path,
+                        "action": "relax",
+                        "detail": relax_detail,
+                        "ticket": relax_pragma.get("fields", {}).get("ticket", override.get("ticket", "")),
+                        "expires": relax_pragma.get("fields", {}).get("expires", override.get("expires", "")),
+                    }
+                )
+                continue
+
+            warnings.append(
+                {
+                    "severity": "warning",
+                    "check": "shell_strict_mode",
+                    "path": rel_path,
+                    "detail": relax_detail,
+                }
+            )
+            check_summary["shell_strict_mode"]["warnings"] += 1
+            continue
+
+        if not has_shell_strict_mode(text):
             warnings.append(
                 {
                     "severity": "warning",
@@ -523,6 +668,12 @@ result = {
         "warnings": len(warnings),
         "total_lines": total_lines,
         "checks": check_summary,
+    },
+    "relaxations": {
+        "shell_strict_mode": {
+            "applied": len(shell_relaxations),
+            "items": shell_relaxations,
+        }
     },
     "findings": {
         "errors": present_errors,

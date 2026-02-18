@@ -12,7 +12,9 @@ INPUT="$(cat)"
 PLUGIN_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 LIVE_STATE_SCRIPT="$PLUGIN_ROOT/scripts/cwf-live-state.sh"
 ARTIFACT_PATHS_SCRIPT="$PLUGIN_ROOT/scripts/cwf-artifact-paths.sh"
-BLOCKED_ACTION_REGEX='(^|[[:space:]])(cwf:ship|/ship|git[[:space:]]+push|git[[:space:]]+merge|gh[[:space:]]+pr[[:space:]]+create|gh[[:space:]]+pr[[:space:]]+merge|커밋해|푸시해|배포해)([[:space:]]|$)'
+BLOCKED_ACTION_REGEX='(^|[[:space:]])(cwf:ship|/ship|git[[:space:]]+push|git[[:space:]]+merge|'
+BLOCKED_ACTION_REGEX+='gh[[:space:]]+pr[[:space:]]+create|gh[[:space:]]+pr[[:space:]]+merge|'
+BLOCKED_ACTION_REGEX+='커밋해|푸시해|배포해)([[:space:]]|$)'
 
 json_block() {
   local reason="$1"
@@ -219,7 +221,10 @@ fi
 # pipeline belongs to a previous session and should be cleaned up.
 STORED_SESSION_ID="$(read_live_scalar_or_block "$BASE_DIR" "session_id")"
 if [[ -n "$SESSION_ID" && -n "$STORED_SESSION_ID" && "$SESSION_ID" != "$STORED_SESSION_ID" ]]; then
-  json_allow "[WARNING] Stale pipeline detected: active_pipeline='${ACTIVE_PIPELINE}' belongs to session '${STORED_SESSION_ID}' but current session is '${SESSION_ID}'. Run: bash ${LIVE_STATE_SCRIPT} set . active_pipeline=\"\" to clean up."
+  stale_reason="[WARNING] Stale pipeline detected: active_pipeline='${ACTIVE_PIPELINE}' "
+  stale_reason+="belongs to session '${STORED_SESSION_ID}' but current session is '${SESSION_ID}'. "
+  stale_reason+="Run: bash ${LIVE_STATE_SCRIPT} set . active_pipeline=\"\" to clean up."
+  json_allow "$stale_reason"
 fi
 
 PHASE="$(read_live_scalar_or_block "$BASE_DIR" "phase")"
@@ -236,11 +241,15 @@ if [[ -n "$REMAINING_GATES_RAW" ]]; then
 fi
 
 if [[ "${#REMAINING_GATES[@]}" -eq 0 ]]; then
-  json_allow "[WARNING] Active pipeline '${ACTIVE_PIPELINE}' has no remaining_gates in live state. Run cleanup or reinitialize run-state before continuing."
+  missing_gate_reason="[WARNING] Active pipeline '${ACTIVE_PIPELINE}' has no remaining_gates in live state. "
+  missing_gate_reason+="Run cleanup or reinitialize run-state before continuing."
+  json_allow "$missing_gate_reason"
 fi
 
 gate_chain="$(IFS=' -> '; echo "${REMAINING_GATES[*]}")"
-status_msg="[PIPELINE] Active: ${ACTIVE_PIPELINE} (phase: ${PHASE:-unknown}, state_version: ${STATE_VERSION:-unset}). Remaining gates: ${gate_chain}. Do NOT skip gates. Use Skill tool to invoke next stage."
+status_msg="[PIPELINE] Active: ${ACTIVE_PIPELINE} (phase: ${PHASE:-unknown}, "
+status_msg+="state_version: ${STATE_VERSION:-unset}). Remaining gates: ${gate_chain}. "
+status_msg+="Do NOT skip gates. Use Skill tool to invoke next stage."
 
 if list_contains "review-code" "${REMAINING_GATES[@]}" && [[ "$BLOCKED_REQUEST" == "true" ]]; then
   if [[ -n "$OVERRIDE_REASON" && "$OVERRIDE_REASON" != "null" ]]; then

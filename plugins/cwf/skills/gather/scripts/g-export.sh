@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Usage: g-export.sh <google-doc-url> [format] [output-dir]
 # Downloads public Google Slides/Docs/Sheets to local files.
 #
@@ -11,7 +11,7 @@
 # It provides clearer structure indication while handling multi-line content explicitly.
 # See: https://github.com/toon-format/toon
 
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
@@ -25,9 +25,14 @@ if [[ -f "$ARTIFACT_PATHS_SCRIPT" ]]; then
     DEFAULT_OUTPUT_DIR="$(resolve_cwf_projects_dir "$BASE_DIR" 2>/dev/null || printf '%s' "$DEFAULT_OUTPUT_DIR")"
 fi
 
-URL="$1"
-FORMAT="$2"
+URL="${1:-}"
+FORMAT="${2:-}"
 OUTPUT_DIR="${3:-${CWF_GATHER_GOOGLE_OUTPUT_DIR:-${CWF_GATHER_OUTPUT_DIR:-$DEFAULT_OUTPUT_DIR}}}"
+
+if [[ -z "$URL" ]]; then
+    echo "Usage: g-export.sh <google-doc-url> [format] [output-dir]" >&2
+    exit 1
+fi
 
 # Extract document type and ID from URL
 if [[ "$URL" =~ docs\.google\.com/(presentation|document|spreadsheets)/d/([^/]+) ]]; then

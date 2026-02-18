@@ -133,6 +133,7 @@ load_contract() {
   local skill_raw=""
   local skill=""
   local mode=""
+  local stage_line_re='^[[:space:]]{2}(review-code|refactor|retro|ship):[[:space:]]*([A-Za-z_-]+)[[:space:]]*$'
 
   [[ -n "$CONTRACT_PATH" ]] || return 0
 
@@ -150,7 +151,7 @@ load_contract() {
       continue
     fi
 
-    if [[ "$section" == "stages" && "$line" =~ ^[[:space:]]{2}(review-code|refactor|retro|ship):[[:space:]]*([A-Za-z_-]+)[[:space:]]*$ ]]; then
+    if [[ "$section" == "stages" && "$line" =~ $stage_line_re ]]; then
       key="${BASH_REMATCH[1]}"
       value="${BASH_REMATCH[2]}"
       mode="$(normalize_mode "$value" "fail")"
@@ -570,8 +571,10 @@ check_ship_stage() {
       append_fail "$stage" "run-stage-provenance.md missing required schema divider row"
     fi
 
-    stage_provenance_row_count="$(awk '
-      /^\| Stage \| Skill \| Args \| Started At \(UTC\) \| Finished At \(UTC\) \| Duration \(s\) \| Artifacts \| Gate Outcome \|$/ { header_seen=1; next }
+    local stage_header_re='^\| Stage \| Skill \| Args \| Started At \(UTC\) \| Finished At \(UTC\) \|'
+    stage_header_re+=' Duration \(s\) \| Artifacts \| Gate Outcome \|$'
+    stage_provenance_row_count="$(awk -v header_re="$stage_header_re" '
+      $0 ~ header_re { header_seen=1; next }
       header_seen && /^\|---\|---\|---\|---\|---\|---\|---\|---\|$/ { schema_seen=1; next }
       schema_seen && /^\|([^|]*\|){8}$/ { count += 1 }
       END { print count + 0 }

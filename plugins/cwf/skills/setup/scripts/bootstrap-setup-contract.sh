@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -uo pipefail
+set -euo pipefail
 
 # bootstrap-setup-contract.sh — Create/refresh repository-local setup contract.
 #

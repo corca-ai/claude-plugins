@@ -16,12 +16,13 @@ if [[ "${1:-}" == "--guard-only" ]]; then
     MODE="guard"
 fi
 
+# shellcheck disable=SC2034
 HOOK_GROUP="attention"
 if [[ "$MODE" == "guard" ]]; then
     # Worktree binding guard is part of compact-recovery resilience.
     HOOK_GROUP="compact_recovery"
 fi
-# shellcheck source=cwf-hook-gate.sh
+# shellcheck source=plugins/cwf/hooks/scripts/cwf-hook-gate.sh
 source "$(dirname "${BASH_SOURCE[0]}")/cwf-hook-gate.sh"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -138,8 +139,13 @@ enforce_worktree_binding() {
             fi
 
             if [ "$emit_block" = "true" ]; then
-                reason=$(printf 'BLOCKED: session %s is bound to worktree %s%s (recorded at epoch %s), but current worktree is %s. Switch to the bound worktree before continuing.' \
-                    "$sid" "$expected_root" "$branch_hint" "${expected_ts:-unknown}" "$current_root" | jq -Rs .)
+                reason=$(
+                    {
+                        printf 'BLOCKED: session %s is bound to worktree %s%s (recorded at epoch %s), but current worktree is %s. ' \
+                            "$sid" "$expected_root" "$branch_hint" "${expected_ts:-unknown}" "$current_root"
+                        printf 'Switch to the bound worktree before continuing.'
+                    } | jq -Rs .
+                )
                 cat <<EOF
 {"decision":"block","reason":${reason}}
 EOF
@@ -161,7 +167,7 @@ fi
 # Keep mapping fresh in normal mode as well, but never rebind on mismatch.
 enforce_worktree_binding "$SESSION_ID" "$CWD" "false" || true
 
-# shellcheck source=slack-send.sh
+# shellcheck source=plugins/cwf/hooks/scripts/slack-send.sh
 source "$SCRIPT_DIR/slack-send.sh"
 
 # Load config

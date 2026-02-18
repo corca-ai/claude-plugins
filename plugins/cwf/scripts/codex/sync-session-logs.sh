@@ -518,7 +518,11 @@ if [ -z "$JSONL_PATH" ]; then
       if [ -n "$SINCE_EPOCH" ]; then
         log "No cwd-matched Codex session updated since epoch: $SINCE_EPOCH"
       else
-        JSONL_PATH=$(find "$CODEX_SESSIONS_DIR" -type f -name '*.jsonl' -print0 2>/dev/null | xargs -0 ls -1t 2>/dev/null | head -n1 || true)
+        JSONL_PATH=$(
+            find "$CODEX_SESSIONS_DIR" -type f -name '*.jsonl' -print0 2>/dev/null \
+                | xargs -0 ls -1t 2>/dev/null \
+                | head -n1 || true
+        )
       fi
     fi
   fi

@@ -128,7 +128,12 @@ extract_edges_from_script_text() {
   local source_file=""
   local match=""
   # shellcheck disable=SC2016
-  local ref_pattern='(plugins/cwf|\$\{CWF_PLUGIN_DIR\}|\$CWF_PLUGIN_DIR|\$\{CLAUDE_PLUGIN_ROOT\}|\$CLAUDE_PLUGIN_ROOT|\$\{PLUGIN_ROOT\}|\$PLUGIN_ROOT|\$\{SCRIPT_DIR\}|\$SCRIPT_DIR)/[A-Za-z0-9._/-]+\.(sh|pl)'
+  local ref_pattern='(plugins/cwf|\$\{CWF_PLUGIN_DIR\}|\$CWF_PLUGIN_DIR|'
+  # shellcheck disable=SC2016
+  ref_pattern+='\$\{CLAUDE_PLUGIN_ROOT\}|\$CLAUDE_PLUGIN_ROOT|'
+  # shellcheck disable=SC2016
+  ref_pattern+='\$\{PLUGIN_ROOT\}|\$PLUGIN_ROOT|\$\{SCRIPT_DIR\}|\$SCRIPT_DIR)'
+  ref_pattern+='/[A-Za-z0-9._/-]+\.(sh|pl)'
 
   while IFS= read -r source_file; do
     [[ -f "$source_file" ]] || continue

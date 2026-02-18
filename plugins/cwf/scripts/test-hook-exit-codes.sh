@@ -185,12 +185,20 @@ live:
     - "ship"
 YAML
 
-  input_json="$(jq -nc --arg cwd "$sandbox" --arg session "S-TEST-1" --arg prompt "다음 단계 진행" '{cwd:$cwd,session_id:$session,prompt:$prompt}')"
+  input_json="$(jq -nc \
+    --arg cwd "$sandbox" \
+    --arg session "S-TEST-1" \
+    --arg prompt "다음 단계 진행" \
+    '{cwd:$cwd,session_id:$session,prompt:$prompt}')"
   run_hook "$hook" "$sandbox" "$input_json"
   assert_decision "allow" "workflow-gate allows non-blocked prompt"
   assert_exit_code 0 "workflow-gate allow exit code"
 
-  input_json="$(jq -nc --arg cwd "$sandbox" --arg session "S-TEST-1" --arg prompt "git push 해" '{cwd:$cwd,session_id:$session,prompt:$prompt}')"
+  input_json="$(jq -nc \
+    --arg cwd "$sandbox" \
+    --arg session "S-TEST-1" \
+    --arg prompt "git push 해" \
+    '{cwd:$cwd,session_id:$session,prompt:$prompt}')"
   run_hook "$hook" "$sandbox" "$input_json"
   assert_decision "block" "workflow-gate blocks ship/push request while review-code pending"
   assert_exit_code 1 "workflow-gate block exit code"
@@ -348,12 +356,47 @@ live:
 EOF_SESSION
 
   transcript="$sandbox/transcript.jsonl"
-  cat > "$transcript" <<'EOF_TRANSCRIPT'
-{"type":"user","timestamp":"2026-02-17T10:00:00.000Z","message":{"content":[{"type":"text","text":"I choose Proceed"},{"type":"tool_result","content":"User has answered your question with: Proceed"}]}}
-{"type":"assistant","timestamp":"2026-02-17T10:00:02.000Z","message":{"model":"claude-test","content":[{"type":"tool_use","name":"AskUserQuestion","input":{"questions":[{"question":"Proceed with strict mode?","header":"Strict mode","options":[{"label":"Proceed"},{"label":"Cancel"}]}]}}],"usage":{"input_tokens":10,"output_tokens":12}}}
-EOF_TRANSCRIPT
+  jq -nc '
+    {
+      type:"user",
+      timestamp:"2026-02-17T10:00:00.000Z",
+      message:{
+        content:[
+          {type:"text",text:"I choose Proceed"},
+          {type:"tool_result",content:"User has answered your question with: Proceed"}
+        ]
+      }
+    }' > "$transcript"
+  jq -nc '
+    {
+      type:"assistant",
+      timestamp:"2026-02-17T10:00:02.000Z",
+      message:{
+        model:"claude-test",
+        content:[
+          {
+            type:"tool_use",
+            name:"AskUserQuestion",
+            input:{
+              questions:[
+                {
+                  question:"Proceed with strict mode?",
+                  header:"Strict mode",
+                  options:[{label:"Proceed"},{label:"Cancel"}]
+                }
+              ]
+            }
+          }
+        ],
+        usage:{input_tokens:10,output_tokens:12}
+      }
+    }' >> "$transcript"
 
-  input_json="$(jq -nc --arg sid "$session_id" --arg transcript "$transcript" --arg cwd "$sandbox" '{session_id:$sid,transcript_path:$transcript,cwd:$cwd}')"
+  input_json="$(jq -nc \
+    --arg sid "$session_id" \
+    --arg transcript "$transcript" \
+    --arg cwd "$sandbox" \
+    '{session_id:$sid,transcript_path:$transcript,cwd:$cwd}')"
   run_hook "$hook_log_turn" "$sandbox" "$input_json"
   assert_exit_code 0 "log-turn runs for decision journal persistence"
 
@@ -379,7 +422,12 @@ EOF_TRANSCRIPT
   done
 
   bash "$REPO_ROOT/plugins/cwf/scripts/cwf-live-state.sh" journal-append "$sandbox" "$journal_json" >/dev/null
-  journal_count="$(bash "$REPO_ROOT/plugins/cwf/scripts/cwf-live-state.sh" list-get "$sandbox" decision_journal | sed '/^$/d' | wc -l | tr -d ' ')"
+  journal_count="$(
+    bash "$REPO_ROOT/plugins/cwf/scripts/cwf-live-state.sh" list-get "$sandbox" decision_journal \
+      | sed '/^$/d' \
+      | wc -l \
+      | tr -d ' '
+  )"
   if [[ "$journal_count" == "1" ]]; then
     pass "decision_journal append is idempotent by decision_id"
   else

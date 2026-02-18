@@ -4,7 +4,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=../../../hooks/scripts/env-loader.sh
+# shellcheck source=plugins/cwf/hooks/scripts/env-loader.sh
 source "$SCRIPT_DIR/../../../hooks/scripts/env-loader.sh"
 
 # --- Parse arguments ---
@@ -117,7 +117,11 @@ if [ "$JSON_TOOL" = "jq" ]; then
   echo "## Search Results: $QUERY"
   echo
   [ -n "$ANSWER" ] && echo "$ANSWER" && echo
-  jq -r '[.results[] | {t: (.title // "Untitled"), c: (.content // ""), u: (.url // "")}] | to_entries[] | "### \(.key + 1). \(.value.t)\n\(.value.c)\n- URL: \(.value.u)\n"' "$TMPFILE"
+  jq -r '
+    [.results[] | {t: (.title // "Untitled"), c: (.content // ""), u: (.url // "")}] |
+    to_entries[] |
+    "### \(.key + 1). \(.value.t)\n\(.value.c)\n- URL: \(.value.u)\n"
+  ' "$TMPFILE"
   echo "---"
   echo "Sources:"
   jq -r '.results[] | "- [\(.title // "Untitled")](\(.url // ""))"' "$TMPFILE"

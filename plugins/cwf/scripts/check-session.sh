@@ -268,9 +268,18 @@ run_semantic_gap_checks() {
   local missing_open=""
   local open_count=0
   local backlog_count=0
+  # shellcheck disable=SC2016
+  local open_gap_awk='
+    /^\| GAP-[0-9]+ /{
+      id=$2; cls=$7
+      gsub(/^[ \t]+|[ \t]+$/, "", id)
+      gsub(/^[ \t]+|[ \t]+$/, "", cls)
+      if (cls=="Unresolved" || cls=="Unknown") print id
+    }
+  '
 
   all_gaps=$(awk -F'|' '/^\| GAP-[0-9]+ /{id=$2; gsub(/^[ \t]+|[ \t]+$/,"",id); print id}' "$gap_file")
-  open_gaps=$(awk -F'|' '/^\| GAP-[0-9]+ /{id=$2; cls=$7; gsub(/^[ \t]+|[ \t]+$/,"",id); gsub(/^[ \t]+|[ \t]+$/,"",cls); if (cls=="Unresolved" || cls=="Unknown") print id}' "$gap_file")
+  open_gaps=$(awk -F'|' "$open_gap_awk" "$gap_file")
   backlog_gaps=$(grep -oE 'GAP-[0-9]+' "$backlog_file" | sort -u || true)
 
   if [[ -n "$open_gaps" ]]; then

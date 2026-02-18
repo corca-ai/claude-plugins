@@ -136,13 +136,14 @@ detect_platform() {
 }
 
 install_shellcheck_local() {
-  local platform url tmpdir
+  local platform url tmpdir base_url
   platform="$(detect_platform)"
+  base_url="https://github.com/koalaman/shellcheck/releases/download/${SHELLCHECK_VERSION}"
   case "$platform" in
-    linux-amd64) url="https://github.com/koalaman/shellcheck/releases/download/${SHELLCHECK_VERSION}/shellcheck-${SHELLCHECK_VERSION}.linux.x86_64.tar.xz" ;;
-    linux-arm64) url="https://github.com/koalaman/shellcheck/releases/download/${SHELLCHECK_VERSION}/shellcheck-${SHELLCHECK_VERSION}.linux.aarch64.tar.xz" ;;
-    darwin-amd64) url="https://github.com/koalaman/shellcheck/releases/download/${SHELLCHECK_VERSION}/shellcheck-${SHELLCHECK_VERSION}.darwin.x86_64.tar.xz" ;;
-    darwin-arm64) url="https://github.com/koalaman/shellcheck/releases/download/${SHELLCHECK_VERSION}/shellcheck-${SHELLCHECK_VERSION}.darwin.aarch64.tar.xz" ;;
+    linux-amd64) url="${base_url}/shellcheck-${SHELLCHECK_VERSION}.linux.x86_64.tar.xz" ;;
+    linux-arm64) url="${base_url}/shellcheck-${SHELLCHECK_VERSION}.linux.aarch64.tar.xz" ;;
+    darwin-amd64) url="${base_url}/shellcheck-${SHELLCHECK_VERSION}.darwin.x86_64.tar.xz" ;;
+    darwin-arm64) url="${base_url}/shellcheck-${SHELLCHECK_VERSION}.darwin.aarch64.tar.xz" ;;
     *)
       return 1
       ;;
@@ -238,7 +239,10 @@ manual_hint() {
       echo "brew install lychee  OR  sudo apt-get install -y lychee"
       ;;
     markdownlint-cli2)
-      echo "npm install -g markdownlint-cli2  OR  npm install --prefix ~/.local markdownlint-cli2 && ln -sf ~/.local/node_modules/.bin/markdownlint-cli2 ~/.local/bin/markdownlint-cli2"
+      echo "npm install -g markdownlint-cli2"
+      echo "  OR"
+      echo "npm install --prefix ~/.local markdownlint-cli2"
+      echo "  && ln -sf ~/.local/node_modules/.bin/markdownlint-cli2 ~/.local/bin/markdownlint-cli2"
       ;;
     yq)
       echo "brew install yq  OR  sudo apt-get install -y yq"

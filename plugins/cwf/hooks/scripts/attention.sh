@@ -13,8 +13,9 @@ set -euo pipefail
 # The transcript structure is not a public API and may change between versions.
 # If notifications stop working after a Claude Code update, the jq queries may need adjustment.
 
+# shellcheck disable=SC2034
 HOOK_GROUP="attention"
-# shellcheck source=cwf-hook-gate.sh
+# shellcheck source=plugins/cwf/hooks/scripts/cwf-hook-gate.sh
 source "$(dirname "${BASH_SOURCE[0]}")/cwf-hook-gate.sh"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -22,9 +23,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # === HELPER FUNCTIONS ===
 
 # Source shared Slack utility
-# shellcheck source=slack-send.sh
+# shellcheck source=plugins/cwf/hooks/scripts/slack-send.sh
 source "$SCRIPT_DIR/slack-send.sh"
-# shellcheck source=text-format.sh
+# shellcheck source=plugins/cwf/hooks/scripts/text-format.sh
 source "$SCRIPT_DIR/text-format.sh"
 
 # === CONFIGURATION ===
@@ -50,7 +51,12 @@ fi
 if [ -n "$HASH" ]; then
     DEBUG_LOG=$(slack_state_file "$HASH" "debug.log")
     THREAD_TS_FILE=$(slack_state_file "$HASH" "thread-ts")
-    echo "$(date): attention.sh called (tool_name=${TOOL_NAME:-none}, hash=$HASH, thread-ts-exists=$([ -f "$THREAD_TS_FILE" ] && echo "yes:$(cat "$THREAD_TS_FILE")" || echo "no"))" >> "$DEBUG_LOG"
+    thread_ts_state="no"
+    if [[ -f "$THREAD_TS_FILE" ]]; then
+        thread_ts_state="yes:$(cat "$THREAD_TS_FILE")"
+    fi
+    echo "$(date): attention.sh called (tool_name=${TOOL_NAME:-none}, hash=$HASH, thread-ts-exists=$thread_ts_state)" \
+        >> "$DEBUG_LOG"
 fi
 
 # === BUILD NOTIFICATION ===

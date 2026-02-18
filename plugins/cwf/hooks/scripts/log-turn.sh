@@ -186,7 +186,15 @@ persist_decision_journal_entry() {
         --arg answer "$answer" \
         --arg source_hook "log-turn" \
         --arg state_version "$state_version" \
-        '{decision_id:$decision_id,ts:$ts,session_id:$session_id,question:$question,answer:$answer,source_hook:$source_hook,state_version:$state_version}')"
+        '{
+          decision_id:$decision_id,
+          ts:$ts,
+          session_id:$session_id,
+          question:$question,
+          answer:$answer,
+          source_hook:$source_hook,
+          state_version:$state_version
+        }')"
 
     if ! bash "$LIVE_RESOLVER_SCRIPT" journal-append "$CWD" "$entry_json" >/dev/null 2>&1; then
         echo "[log-turn] warning: failed to append decision_journal entry (${decision_id})" >&2
@@ -666,7 +674,11 @@ while [ "$TURN_IDX" -lt "$TURN_COUNT" ]; do
               elif $name == "Skill" then
                 "Skill `\(.input.skill // "?")`"
               elif $name == "AskUserQuestion" then
-                "AskUserQuestion \"\(.input.questions[0].question // .input.questions[0].header // "?" | .[0:60])\" [\(.input.questions[0].options // [] | map(.label) | join(", ") | .[0:80])]"
+                "AskUserQuestion \"\(
+                  .input.questions[0].question // .input.questions[0].header // "?" | .[0:60]
+                )\" [\(
+                  .input.questions[0].options // [] | map(.label) | join(", ") | .[0:80]
+                )]"
               elif $name == "EnterPlanMode" then
                 "EnterPlanMode"
               elif $name == "ExitPlanMode" then

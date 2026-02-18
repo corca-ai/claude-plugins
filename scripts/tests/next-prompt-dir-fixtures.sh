@@ -78,7 +78,12 @@ live:
   task: ""
 EOF
 
-plugin_bootstrap_path="$(CWF_PROJECTS_DIR="$PROJECTS_DIR" CWF_STATE_FILE="$STATE_FILE" CWF_NEXT_PROMPT_DATE=260214 bash "$PLUGIN_SCRIPT" --bootstrap boot-plugin)"
+plugin_bootstrap_path="$(
+  CWF_PROJECTS_DIR="$PROJECTS_DIR" \
+  CWF_STATE_FILE="$STATE_FILE" \
+  CWF_NEXT_PROMPT_DATE=260214 \
+  bash "$PLUGIN_SCRIPT" --bootstrap boot-plugin
+)"
 expected_plugin_bootstrap="$PROJECTS_DIR/260214-03-boot-plugin"
 assert_eq "plugin bootstrap returns resolved path" "$expected_plugin_bootstrap" "$plugin_bootstrap_path"
 
