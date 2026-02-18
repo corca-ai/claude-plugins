@@ -11,6 +11,18 @@ Generate a repository-local setup contract on first setup so `cwf:setup` can:
 - keep a deterministic core dependency baseline for CWF runtime gates,
 - propose repository-specific tooling separately (opt-in),
 - avoid hidden coupling between portable plugin behavior and host-repo conventions.
+- make repository-specific git-hook checks policy-driven via contract fields.
+
+## Hook Policy Field
+
+`setup-contract.yaml` includes `policy.hook_index_coverage_mode` to control pre-push index coverage behavior:
+
+- `authoring-only` (default): run index coverage only for CWF authoring repos
+- `always`: run index coverage for all repositories
+- `warn`: run index coverage but do not fail push on violations
+- `off`: skip index coverage entirely
+
+When the field is missing, runtime defaults to `authoring-only`.
 
 ## Contract Location and Status
 

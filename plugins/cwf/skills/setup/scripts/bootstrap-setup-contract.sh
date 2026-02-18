@@ -222,20 +222,54 @@ tool_pattern() {
 
 collect_repo_tool_evidence() {
   local scan_file=""
+  local tracked_rel=""
+  local tracked_abs=""
+  local first_line=""
   local tool=""
   local pattern=""
   local rel_path=""
   local evidence_lines=""
+  local -a scan_files=()
 
-  mapfile -t SCAN_FILES < <(
-    {
-      find "$REPO_ROOT/.githooks" -maxdepth 1 -type f 2>/dev/null
-      find "$REPO_ROOT/plugins/cwf" -type f -name '*.sh' 2>/dev/null
-      find "$REPO_ROOT/scripts" -type f -name '*.sh' 2>/dev/null
-    } | sort -u
-  )
+  if git -C "$REPO_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    while IFS= read -r -d '' tracked_rel; do
+      [[ -n "$tracked_rel" ]] || continue
+      case "$tracked_rel" in
+        .git/*|.cwf/*|node_modules/*|.venv/*|venv/*)
+          continue
+          ;;
+      esac
 
-  if [[ "${#SCAN_FILES[@]}" -eq 0 ]]; then
+      tracked_abs="$REPO_ROOT/$tracked_rel"
+      [[ -f "$tracked_abs" ]] || continue
+
+      case "$tracked_rel" in
+        *.sh|*.bash|*.zsh|.githooks/*|*/.githooks/*)
+          scan_files+=("$tracked_abs")
+          continue
+          ;;
+      esac
+
+      case "$tracked_rel" in
+        scripts/*|*/scripts/*|ci/*|*/ci/*)
+          first_line="$(head -n 1 "$tracked_abs" 2>/dev/null || true)"
+          if [[ "$first_line" == "#!"* ]] && [[ "$first_line" =~ (bash|sh|zsh) ]]; then
+            scan_files+=("$tracked_abs")
+          fi
+          ;;
+      esac
+    done < <(git -C "$REPO_ROOT" ls-files -z 2>/dev/null || true)
+  fi
+
+  if [[ "${#scan_files[@]}" -eq 0 ]]; then
+    mapfile -t scan_files < <(
+      find "$REPO_ROOT" \
+        \( -path "$REPO_ROOT/.git" -o -path "$REPO_ROOT/.cwf" -o -path "$REPO_ROOT/node_modules" -o -path "$REPO_ROOT/.venv" -o -path "$REPO_ROOT/venv" \) -prune -o \
+        -type f \( -name '*.sh' -o -name '*.bash' -o -name '*.zsh' \) -print 2>/dev/null | sort -u
+    )
+  fi
+
+  if [[ "${#scan_files[@]}" -eq 0 ]]; then
     append_warning "repository scan found no candidate shell files"
     return 0
   fi
@@ -244,7 +278,7 @@ collect_repo_tool_evidence() {
     pattern="$(tool_pattern "$tool")" || continue
     evidence_lines=""
 
-    for scan_file in "${SCAN_FILES[@]}"; do
+    for scan_file in "${scan_files[@]}"; do
       [[ -f "$scan_file" ]] || continue
       if grep -Eq "$pattern" "$scan_file"; then
         rel_path="${scan_file#"$REPO_ROOT"/}"
@@ -274,6 +308,7 @@ write_contract_file() {
     echo 'policy:'
     echo '  core_tools_required: true'
     echo '  repo_tools_opt_in: true'
+    echo '  hook_index_coverage_mode: "authoring-only"'
     echo
     echo 'core_tools:'
     for tool in "${CORE_TOOLS[@]}"; do

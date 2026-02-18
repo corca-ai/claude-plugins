@@ -455,6 +455,77 @@ is_cwf_authoring_repo() {
   [[ -d "$REPO_ROOT/plugins/cwf" && -f "$REPO_ROOT/README.md" && -f "$REPO_ROOT/README.ko.md" ]]
 }
 
+read_contract_scalar() {
+  local file_path="$1"
+  local key="$2"
+  local line=""
+  local value=""
+
+  [[ -f "$file_path" ]] || return 1
+  line="$(grep -shm1 -E "^[[:space:]]*${key}:[[:space:]]*" "$file_path" 2>/dev/null || true)"
+  [[ -n "$line" ]] || return 1
+
+  value="${line#*:}"
+  value="$(printf '%s' "$value" | sed -E 's/[[:space:]]+#.*$//' | sed -E 's/^[[:space:]]+|[[:space:]]+$//g')"
+  if [[ "$value" =~ ^\".*\"$ ]] || [[ "$value" =~ ^\'.*\'$ ]]; then
+    value="${value:1:${#value}-2}"
+  fi
+  [[ -n "$value" ]] || return 1
+  printf '%s\n' "$value"
+}
+
+resolve_setup_contract_path() {
+  local artifact_root=""
+  if [[ -n "$CWF_ARTIFACT_PATHS" && -f "$CWF_ARTIFACT_PATHS" ]]; then
+    # shellcheck source=plugins/cwf/scripts/cwf-artifact-paths.sh
+    source "$CWF_ARTIFACT_PATHS"
+    artifact_root="$(resolve_cwf_artifact_root "$REPO_ROOT" 2>/dev/null || true)"
+    if [[ -n "$artifact_root" ]]; then
+      printf '%s\n' "$artifact_root/setup-contract.yaml"
+      return 0
+    fi
+  fi
+  printf '%s\n' "$REPO_ROOT/.cwf/setup-contract.yaml"
+}
+
+resolve_index_coverage_mode() {
+  local contract_path="$1"
+  local mode=""
+  mode="$(read_contract_scalar "$contract_path" "hook_index_coverage_mode" 2>/dev/null || true)"
+  if [[ -z "$mode" ]]; then
+    mode="authoring-only"
+  fi
+  printf '%s\n' "$mode"
+}
+
+run_index_coverage_checks() {
+  local coverage_rc=0
+  local cap_index_file=".cwf/indexes/cwf-index.md"
+  local cap_index_dir=""
+
+  if [[ -n "$CWF_ARTIFACT_PATHS" && -f "$CWF_ARTIFACT_PATHS" ]]; then
+    # shellcheck source=plugins/cwf/scripts/cwf-artifact-paths.sh
+    source "$CWF_ARTIFACT_PATHS"
+    cap_index_dir="$(resolve_cwf_indexes_dir "$REPO_ROOT" 2>/dev/null || true)"
+    if [[ -n "$cap_index_dir" ]]; then
+      cap_index_file="${cap_index_dir}/cwf-index.md"
+    fi
+  fi
+
+  if [[ -f AGENTS.md ]]; then
+    if ! bash "$CWF_INDEX_COVERAGE" AGENTS.md --profile repo; then
+      coverage_rc=1
+    fi
+  fi
+  if [[ -f "$cap_index_file" ]]; then
+    if ! bash "$CWF_INDEX_COVERAGE" "$cap_index_file" --profile cap; then
+      coverage_rc=1
+    fi
+  fi
+
+  return "$coverage_rc"
+}
+
 ensure_markdownlint_cli2() {
   if command -v markdownlint-cli2 >/dev/null 2>&1; then
     return 0
@@ -495,21 +566,47 @@ if [[ "$PROFILE" != "fast" ]]; then
   fi
 
   if [[ -n "$CWF_INDEX_COVERAGE" ]]; then
-    echo "[pre-push] index coverage checks..."
-    CAP_INDEX_FILE=".cwf/indexes/cwf-index.md"
-    if [[ -n "$CWF_ARTIFACT_PATHS" && -f "$CWF_ARTIFACT_PATHS" ]]; then
-      # shellcheck source=plugins/cwf/scripts/cwf-artifact-paths.sh
-      source "$CWF_ARTIFACT_PATHS"
-      CAP_INDEX_DIR="$(resolve_cwf_indexes_dir "$REPO_ROOT" 2>/dev/null || true)"
-      if [[ -n "$CAP_INDEX_DIR" ]]; then
-        CAP_INDEX_FILE="${CAP_INDEX_DIR}/cwf-index.md"
+    INDEX_COVERAGE_MODE="$(resolve_index_coverage_mode "$(resolve_setup_contract_path)")"
+    should_run_index_coverage="false"
+    index_coverage_blocking="true"
+
+    case "$INDEX_COVERAGE_MODE" in
+      always|enforce|required)
+        should_run_index_coverage="true"
+        index_coverage_blocking="true"
+        ;;
+      warn|advisory)
+        should_run_index_coverage="true"
+        index_coverage_blocking="false"
+        ;;
+      authoring-only|auto|default|"")
+        if is_cwf_authoring_repo; then
+          should_run_index_coverage="true"
+          index_coverage_blocking="true"
+        fi
+        ;;
+      off|disabled|none|skip|false)
+        should_run_index_coverage="false"
+        ;;
+      *)
+        echo "[pre-push] unknown hook_index_coverage_mode '$INDEX_COVERAGE_MODE'; defaulting to authoring-only." >&2
+        if is_cwf_authoring_repo; then
+          should_run_index_coverage="true"
+          index_coverage_blocking="true"
+        fi
+        ;;
+    esac
+
+    if [[ "$should_run_index_coverage" == "true" ]]; then
+      echo "[pre-push] index coverage checks (mode: $INDEX_COVERAGE_MODE, blocking: $index_coverage_blocking)..."
+      if ! run_index_coverage_checks; then
+        if [[ "$index_coverage_blocking" == "true" ]]; then
+          exit 1
+        fi
+        echo "[pre-push] index coverage checks failed (non-blocking mode)." >&2
       fi
-    fi
-    if [[ -f AGENTS.md ]]; then
-      bash "$CWF_INDEX_COVERAGE" AGENTS.md --profile repo
-    fi
-    if [[ -f "$CAP_INDEX_FILE" ]]; then
-      bash "$CWF_INDEX_COVERAGE" "$CAP_INDEX_FILE" --profile cap
+    else
+      echo "[pre-push] index coverage checks skipped by policy (mode: $INDEX_COVERAGE_MODE)."
     fi
   else
     echo "[pre-push] check-index-coverage.sh unavailable; skipping index coverage checks." >&2
