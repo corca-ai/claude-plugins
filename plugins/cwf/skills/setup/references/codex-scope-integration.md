@@ -240,7 +240,7 @@ bash {CWF_PLUGIN_DIR}/scripts/codex/sync-session-logs.sh --cwd "$PWD"
 bash {CWF_PLUGIN_DIR}/scripts/codex/post-run-checks.sh --cwd "$PWD" --mode warn
 ```
 
-Logs persist under `.cwf/sessions/` by default (legacy fallback: `.cwf/projects/sessions/`) as `*.codex.md`.
+Logs persist under `.cwf/sessions/` by default as `*.codex.md`.
 
 ### 2.6.4 Report and Reversal
 

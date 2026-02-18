@@ -27,6 +27,7 @@ Suites:
   workflow-gate       UserPromptSubmit pipeline block/allow behavior.
   deletion-safety     PreToolUse deletion caller block/allow behavior.
   path-filter         /tmp prompt artifact filtering (allow) and in-repo deny fixtures.
+  compact-context-no-jq  SessionStart compact recovery output without jq dependency.
 USAGE
 }
 
@@ -111,16 +112,57 @@ new_sandbox_repo() {
   printf '%s\n' "$dir"
 }
 
+build_path_without_jq() {
+  local dir=""
+  local cmd=""
+  local target=""
+  local required_cmds=(
+    bash
+    git
+    awk
+    cat
+    date
+    dirname
+    grep
+    head
+    mktemp
+    pwd
+    sed
+    tail
+    tr
+    wc
+  )
+
+  dir="$(mktemp -d "${TMPDIR:-/tmp}/cwf-hook-path-no-jq-XXXXXX")"
+  CLEANUP_DIRS+=("$dir")
+
+  for cmd in "${required_cmds[@]}"; do
+    target="$(command -v "$cmd" || true)"
+    [[ -n "$target" ]] || fail "required command not found for no-jq fixture: $cmd"
+    ln -s "$target" "$dir/$cmd"
+  done
+
+  printf '%s\n' "$dir"
+}
+
 run_hook() {
   local script_path="$1"
   local cwd="$2"
   local input_json="$3"
+  local path_override="${4:-}"
   local test_home="$cwd/.cwf-hook-test-home"
 
   mkdir -p "$test_home"
 
   set +e
-  LAST_OUTPUT="$(cd "$cwd" && HOME="$test_home" "$script_path" <<< "$input_json" 2>/dev/null)"
+  if [[ -n "$path_override" ]]; then
+    LAST_OUTPUT="$(
+      cd "$cwd" \
+        && HOME="$test_home" PATH="$path_override" "$script_path" <<< "$input_json" 2>/dev/null
+    )"
+  else
+    LAST_OUTPUT="$(cd "$cwd" && HOME="$test_home" "$script_path" <<< "$input_json" 2>/dev/null)"
+  fi
   LAST_EXIT=$?
   set -e
 }
@@ -169,21 +211,33 @@ suite_workflow_gate() {
   local hook=""
   local sandbox=""
   local input_json=""
+  local gate=""
+
+  write_state() {
+    local override_reason="$1"
+    shift
+    {
+      echo "live:"
+      echo "  session_id: \"S-TEST-1\""
+      echo "  phase: \"impl\""
+      echo "  state_version: \"7\""
+      echo "  active_pipeline: \"cwf:run\""
+      echo "  pipeline_override_reason: \"$override_reason\""
+      if [[ $# -eq 0 ]]; then
+        echo "  remaining_gates: []"
+      else
+        echo "  remaining_gates:"
+        for gate in "$@"; do
+          echo "    - \"$gate\""
+        done
+      fi
+    } > "$sandbox/.cwf/cwf-state.yaml"
+  }
 
   hook="$(require_hook_path "workflow-gate.sh")" || return
   sandbox="$(new_sandbox_repo)"
   mkdir -p "$sandbox/.cwf"
-  cat > "$sandbox/.cwf/cwf-state.yaml" <<'YAML'
-live:
-  session_id: "S-TEST-1"
-  phase: "impl"
-  state_version: "7"
-  active_pipeline: "cwf:run"
-  pipeline_override_reason: ""
-  remaining_gates:
-    - "review-code"
-    - "ship"
-YAML
+  write_state "" review-code ship
 
   input_json="$(jq -nc \
     --arg cwd "$sandbox" \
@@ -194,14 +248,57 @@ YAML
   assert_decision "allow" "workflow-gate allows non-blocked prompt"
   assert_exit_code 0 "workflow-gate allow exit code"
 
+  for gate in review-code refactor retro ship; do
+    write_state "" "$gate"
+    input_json="$(jq -nc \
+      --arg cwd "$sandbox" \
+      --arg session "S-TEST-1" \
+      --arg prompt "git push 해" \
+      '{cwd:$cwd,session_id:$session,prompt:$prompt}')"
+    run_hook "$hook" "$sandbox" "$input_json"
+    assert_decision "block" "workflow-gate blocks push while $gate pending"
+    assert_exit_code 1 "workflow-gate block exit code while $gate pending"
+  done
+
+  write_state "" plan
   input_json="$(jq -nc \
     --arg cwd "$sandbox" \
     --arg session "S-TEST-1" \
     --arg prompt "git push 해" \
     '{cwd:$cwd,session_id:$session,prompt:$prompt}')"
   run_hook "$hook" "$sandbox" "$input_json"
-  assert_decision "block" "workflow-gate blocks ship/push request while review-code pending"
-  assert_exit_code 1 "workflow-gate block exit code"
+  assert_decision "allow" "workflow-gate allows push when only non-closing gates remain"
+  assert_exit_code 0 "workflow-gate allow exit code for non-closing gate only"
+
+  write_state "manual override approved" review-code
+  input_json="$(jq -nc \
+    --arg cwd "$sandbox" \
+    --arg session "S-TEST-1" \
+    --arg prompt "git push 해" \
+    '{cwd:$cwd,session_id:$session,prompt:$prompt}')"
+  run_hook "$hook" "$sandbox" "$input_json"
+  assert_decision "allow" "workflow-gate allows blocked action when override reason exists"
+  assert_exit_code 0 "workflow-gate override allow exit code"
+
+  write_state "" review-code
+  input_json="$(jq -nc \
+    --arg cwd "$sandbox" \
+    --arg session "S-TEST-2" \
+    --arg prompt "git push 해" \
+    '{cwd:$cwd,session_id:$session,prompt:$prompt}')"
+  run_hook "$hook" "$sandbox" "$input_json"
+  assert_decision "allow" "workflow-gate allows stale pipeline session mismatch"
+  assert_exit_code 0 "workflow-gate stale pipeline allow exit code"
+
+  write_state "" review-code
+  input_json="$(jq -nc \
+    --arg cwd "$sandbox" \
+    --arg session "S-TEST-1" \
+    --arg prompt "커밋해" \
+    '{cwd:$cwd,session_id:$session,prompt:$prompt}')"
+  run_hook "$hook" "$sandbox" "$input_json"
+  assert_decision "block" "workflow-gate blocks Korean commit intent while closing gate pending"
+  assert_exit_code 1 "workflow-gate Korean commit block exit code"
 }
 
 suite_deletion_safety() {
@@ -303,148 +400,59 @@ EOF_CALLER
   assert_decision "block" "check-deletion-safety does not skip in-repo tmp/ path"
 }
 
-suite_decision_journal_e2e() {
-  local hook_log_turn=""
+suite_compact_context_no_jq() {
   local hook_compact=""
   local sandbox=""
-  local transcript=""
   local input_json=""
-  local journal_raw=""
-  local journal_json=""
-  local journal_count=""
-  local required_key=""
   local context=""
-  local session_id=""
-  local required_keys=(decision_id ts session_id question answer source_hook state_version)
+  local no_jq_path=""
 
-  hook_log_turn="$(require_hook_path "log-turn.sh")" || return
   hook_compact="$(require_hook_path "compact-context.sh")" || return
-
   sandbox="$(new_sandbox_repo)"
-  session_id="session-test-$(date +%s%N)"
   mkdir -p "$sandbox/.cwf/projects/s1"
 
-  cat > "$sandbox/.cwf/cwf-state.yaml" <<EOF_STATE
+  cat > "$sandbox/.cwf/cwf-state.yaml" <<'EOF_STATE'
 live:
-  session_id: "${session_id}"
+  session_id: "S-NO-JQ"
   dir: ".cwf/projects/s1"
   branch: "test-branch"
   phase: "impl"
-  task: "Decision journal test"
-  state_file: ".cwf/projects/s1/session-state.yaml"
-  key_files: []
+  task: "Compact no-jq fixture"
+  key_files:
+    - ".cwf/projects/s1/plan.md"
   dont_touch: []
   decisions: []
-  decision_journal: []
+  decision_journal:
+    - "{\"decision_id\":\"d-no-jq\",\"question\":\"Proceed without jq?\",\"answer\":\"Yes\"}"
   remaining_gates: []
   state_version: "1"
 EOF_STATE
 
-  cat > "$sandbox/.cwf/projects/s1/session-state.yaml" <<EOF_SESSION
-live:
-  session_id: "${session_id}"
-  dir: ".cwf/projects/s1"
-  branch: "test-branch"
-  phase: "impl"
-  task: "Decision journal test"
-  key_files: []
-  dont_touch: []
-  decisions: []
-  decision_journal: []
-  remaining_gates: []
-  state_version: "1"
-EOF_SESSION
+  cat > "$sandbox/.cwf/projects/s1/plan.md" <<'EOF_PLAN'
+# Plan
 
-  transcript="$sandbox/transcript.jsonl"
-  jq -nc '
-    {
-      type:"user",
-      timestamp:"2026-02-17T10:00:00.000Z",
-      message:{
-        content:[
-          {type:"text",text:"I choose Proceed"},
-          {type:"tool_result",content:"User has answered your question with: Proceed"}
-        ]
-      }
-    }' > "$transcript"
-  jq -nc '
-    {
-      type:"assistant",
-      timestamp:"2026-02-17T10:00:02.000Z",
-      message:{
-        model:"claude-test",
-        content:[
-          {
-            type:"tool_use",
-            name:"AskUserQuestion",
-            input:{
-              questions:[
-                {
-                  question:"Proceed with strict mode?",
-                  header:"Strict mode",
-                  options:[{label:"Proceed"},{label:"Cancel"}]
-                }
-              ]
-            }
-          }
-        ],
-        usage:{input_tokens:10,output_tokens:12}
-      }
-    }' >> "$transcript"
+No-jq compact context fixture.
+EOF_PLAN
 
-  input_json="$(jq -nc \
-    --arg sid "$session_id" \
-    --arg transcript "$transcript" \
-    --arg cwd "$sandbox" \
-    '{session_id:$sid,transcript_path:$transcript,cwd:$cwd}')"
-  run_hook "$hook_log_turn" "$sandbox" "$input_json"
-  assert_exit_code 0 "log-turn runs for decision journal persistence"
-
-  journal_raw="$(bash "$REPO_ROOT/plugins/cwf/scripts/cwf-live-state.sh" list-get "$sandbox" decision_journal | tail -n 1)"
-  if [[ -z "$journal_raw" ]]; then
-    fail "decision_journal entry is persisted"
-    return
-  fi
-
-  journal_json="$(printf '%s' "$journal_raw" | sed 's/\\"/"/g')"
-  if ! printf '%s' "$journal_json" | jq -e . >/dev/null 2>&1; then
-    fail "decision_journal entry is valid JSON"
-    return
-  fi
-  pass "decision_journal entry is valid JSON"
-
-  for required_key in "${required_keys[@]}"; do
-    if [[ "$(printf '%s' "$journal_json" | jq -r --arg k "$required_key" '.[$k] // empty')" == "" ]]; then
-      fail "decision_journal required key present: $required_key"
-    else
-      pass "decision_journal required key present: $required_key"
-    fi
-  done
-
-  bash "$REPO_ROOT/plugins/cwf/scripts/cwf-live-state.sh" journal-append "$sandbox" "$journal_json" >/dev/null
-  journal_count="$(
-    bash "$REPO_ROOT/plugins/cwf/scripts/cwf-live-state.sh" list-get "$sandbox" decision_journal \
-      | sed '/^$/d' \
-      | wc -l \
-      | tr -d ' '
-  )"
-  if [[ "$journal_count" == "1" ]]; then
-    pass "decision_journal append is idempotent by decision_id"
-  else
-    fail "decision_journal append is idempotent by decision_id (count=$journal_count)"
-  fi
-
-  input_json="$(jq -nc --arg sid "$session_id" --arg cwd "$sandbox" '{session_id:$sid,cwd:$cwd}')"
-  run_hook "$hook_compact" "$sandbox" "$input_json"
-  assert_exit_code 0 "compact-context hook runs for recovery output"
+  no_jq_path="$(build_path_without_jq)"
+  input_json="$(jq -nc --arg sid "S-NO-JQ" --arg cwd "$sandbox" '{session_id:$sid,cwd:$cwd}')"
+  run_hook "$hook_compact" "$sandbox" "$input_json" "$no_jq_path"
+  assert_exit_code 0 "compact-context runs without jq dependency"
 
   context="$(printf '%s' "$LAST_OUTPUT" | jq -r '.hookSpecificOutput.additionalContext // empty' 2>/dev/null || true)"
-  if [[ "$context" == *"Decision journal"* && "$context" == *"Proceed with strict mode?"* && "$context" == *"Proceed"* ]]; then
-    pass "compact recovery context includes decision_journal details"
+  if [[ "$context" == *"[Compact Recovery] Session: S-NO-JQ"* && "$context" == *"Decision journal"* ]]; then
+    pass "compact-context no-jq output includes recovery context"
   else
-    fail "compact recovery context includes decision_journal details"
+    fail "compact-context no-jq output includes recovery context"
   fi
 }
+
+SUITE_DECISION_JOURNAL_LIB="$REPO_ROOT/plugins/cwf/scripts/test-hook-exit-codes-suite-decision-journal.sh"
+if [[ ! -f "$SUITE_DECISION_JOURNAL_LIB" ]]; then
+  fail "missing suite library: $SUITE_DECISION_JOURNAL_LIB"
+fi
+# shellcheck source=plugins/cwf/scripts/test-hook-exit-codes-suite-decision-journal.sh
+source "$SUITE_DECISION_JOURNAL_LIB"
 
 run_suite() {
   local suite="$1"
@@ -459,6 +467,9 @@ run_suite() {
     path-filter)
       suite_path_filter
       ;;
+    compact-context-no-jq)
+      suite_compact_context_no_jq
+      ;;
     decision-journal-e2e)
       suite_decision_journal_e2e
       ;;
@@ -468,7 +479,7 @@ run_suite() {
   esac
 }
 
-STRICT_SUITES=(workflow-gate deletion-safety path-filter)
+STRICT_SUITES=(workflow-gate deletion-safety path-filter compact-context-no-jq)
 SELECTED_SUITES=()
 USE_STRICT=false
 
@@ -487,7 +498,7 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     --list-suites)
-      printf '%s\n' "workflow-gate" "deletion-safety" "path-filter" "decision-journal-e2e"
+      printf '%s\n' "workflow-gate" "deletion-safety" "path-filter" "compact-context-no-jq" "decision-journal-e2e"
       exit 0
       ;;
     -h|--help)

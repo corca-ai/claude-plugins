@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# cwf-hook-source-sha=c414b8d5acf30464d44e39e9f887451f676d1dfae961593b48d7bc523cdab585
+# cwf-hook-source-sha=e8d099ad2f5bd235335ca55e45b86d26e804f819ef43ac651d38ebd5282a6463
 set -euo pipefail
 
 PROFILE="balanced"

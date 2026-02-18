@@ -27,12 +27,24 @@ APPLY_HOOKS_PATH="true"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CWF_PLUGIN_ROOT_DEFAULT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
+is_truthy() {
+  case "${1:-}" in
+    1|true|TRUE|yes|YES|on|ON)
+      return 0
+      ;;
+  esac
+  return 1
+}
+
 escape_for_perl_replacement() {
   printf '%s' "$1" | sed 's/[\\/&]/\\&/g'
 }
 
 compute_sha256() {
   local file="$1"
+  if is_truthy "${CWF_HOOKS_DISABLE_SHA:-}"; then
+    return 1
+  fi
   if command -v sha256sum >/dev/null 2>&1; then
     sha256sum "$file" | awk '{print $1}'
     return 0
@@ -126,6 +138,7 @@ render_hook_template() {
   local template_path="$1"
   local output_path="$2"
   local profile="$3"
+  local force_sed_render="${CWF_HOOKS_RENDER_WITH_SED:-}"
   local profile_escaped=""
   local perl_expr=""
   local tmp_rendered=""
@@ -138,7 +151,7 @@ render_hook_template() {
   cp "$template_path" "$output_path"
   profile_escaped="$(escape_for_perl_replacement "$profile")"
 
-  if command -v perl >/dev/null 2>&1; then
+  if ! is_truthy "$force_sed_render" && command -v perl >/dev/null 2>&1; then
     perl_expr="s/__PROFILE__/$profile_escaped/g;"
     perl_expr+=" s/__CWF_PLUGIN_ROOT__/$CWF_PLUGIN_ROOT_ESCAPED/g;"
     perl_expr+=" s/__CONFIG_SHA__/$CONFIG_SHA_ESCAPED/g"

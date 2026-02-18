@@ -61,7 +61,6 @@ title="$1"
 resolve_project_root() {
   local git_root=""
   local candidate=""
-  local script_dir=""
   local root_override="${CWF_PROJECT_ROOT:-}"
 
   if [[ -n "$root_override" ]]; then
@@ -80,20 +79,6 @@ resolve_project_root() {
 
   # Fallback: walk ancestor directories from caller cwd.
   candidate="$(pwd)"
-  while [[ -n "$candidate" ]]; do
-    if [[ -e "$candidate/.git" || -f "$candidate/AGENTS.md" ]]; then
-      printf '%s\n' "$candidate"
-      return 0
-    fi
-    if [[ "$candidate" == "/" ]]; then
-      break
-    fi
-    candidate="$(dirname "$candidate")"
-  done
-
-  # Compatibility fallback: walk ancestors from the script location.
-  script_dir="$(cd "$(dirname "$0")" && pwd)"
-  candidate="$script_dir"
   while [[ -n "$candidate" ]]; do
     if [[ -e "$candidate/.git" || -f "$candidate/AGENTS.md" ]]; then
       printf '%s\n' "$candidate"

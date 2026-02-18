@@ -190,7 +190,7 @@ cwf_live_set_scalars() {
   fi
 
   # Session-local state exists: write there first, then sync summary fields
-  # in root live for backward-compatible readers.
+  # into root live so hooks can read a stable top-level summary.
   for idx in "${!keys[@]}"; do
     cwf_live_upsert_live_scalar "$effective_state" "${keys[$idx]}" "${values[$idx]}"
   done

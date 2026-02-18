@@ -449,7 +449,7 @@ cwf:setup --codex-wrapper
 - 프로젝트/로컬 스코프 대상: `{projectRoot}/.codex/skills/*`, `{projectRoot}/.codex/references`, `{projectRoot}/.codex/bin/codex`
 - 프로젝트/로컬 스코프 실행 시 사용자 전역 경로(`~/.agents`, `~/.local/bin`)를 수정하려면 추가 명시적 확인이 필요합니다.
 - `cwf:setup --codex`: 선택된 스코프 경로에 CWF 스킬/레퍼런스를 연결해 Codex에서도 동일한 CWF 지식을 사용합니다.
-- `cwf:setup --codex-wrapper`: 선택된 스코프 경로에 codex wrapper를 설치해 Codex 실행 종료 후 세션 로그를 기본 `.cwf/sessions/`(레거시 폴백: `.cwf/projects/sessions/`)로 자동 동기화하고, 이번 실행에서 바뀐 파일 기준으로 post-run 품질 점검을 수행합니다.
+- `cwf:setup --codex-wrapper`: 선택된 스코프 경로에 codex wrapper를 설치해 Codex 실행 종료 후 세션 로그를 기본 `.cwf/sessions/`로 자동 동기화하고, 이번 실행에서 바뀐 파일 기준으로 post-run 품질 점검을 수행합니다.
 - 세션 로그 동기화는 체크포인트 기반 append 우선(증분) 방식으로 동작해 종료 시 지연과 전체 재생성 비용을 줄이고, 상태 불일치 시 전체 재생성으로 안전하게 폴백합니다.
 - 세션 아티팩트 디렉토리(`plan.md`, `retro.md`, `next-session.md`)는 기존처럼 `.cwf/projects/{YYMMDD}-{NN}-{title}/`에 유지됩니다.
 - post-run 점검 항목은 기본 품질 체크(markdownlint, 로컬 링크, shellcheck, live state) 외에 `apply_patch via exec_command` 위생 감지와 HITL 활성 상태에서 문서 변경 대비 scratchpad 동기화 감지도 포함합니다.
@@ -537,7 +537,7 @@ CWF_ATTENTION_USER_ID="U0123456789"              # 기본값: 미설정
 CWF_GATHER_OUTPUT_DIR=".cwf/projects"               # 기본값: .cwf/projects
 CWF_READ_WARN_LINES=700                             # 기본값: 500
 CWF_READ_DENY_LINES=2500                            # 기본값: 2000
-CWF_SESSION_LOG_DIR=".cwf/sessions"                 # 기본값: .cwf/sessions (레거시 폴백: .cwf/projects/sessions)
+CWF_SESSION_LOG_DIR=".cwf/sessions"                 # 기본값: .cwf/sessions
 CWF_SESSION_LOG_ENABLED=false                       # 기본값: true
 CWF_SESSION_LOG_TRUNCATE=20                         # 기본값: 10
 CWF_SESSION_LOG_AUTO_COMMIT=true                    # 기본값: false

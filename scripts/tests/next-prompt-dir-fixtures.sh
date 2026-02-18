@@ -122,6 +122,25 @@ else
   fail "invalid override date is rejected"
 fi
 
+ROOT_FIXTURE="$TMP_DIR/root-resolution"
+mkdir -p "$ROOT_FIXTURE/sub/dir" "$ROOT_FIXTURE/.cwf/projects"
+git -C "$ROOT_FIXTURE" init -q
+
+expected_from_cwd=".cwf/projects/260216-01-root-cwd"
+actual_from_cwd="$(
+  cd "$ROOT_FIXTURE/sub/dir" \
+    && CWF_NEXT_PROMPT_DATE=260216 bash "$PLUGIN_SCRIPT" root-cwd
+)"
+assert_eq "plugin resolves project root from caller cwd git context" "$expected_from_cwd" "$actual_from_cwd"
+
+mkdir -p "$ROOT_FIXTURE/.cwf/projects/260216-01-existing"
+expected_from_override=".cwf/projects/260216-02-root-override"
+actual_from_override="$(
+  cd "$TMP_DIR" \
+    && CWF_PROJECT_ROOT="$ROOT_FIXTURE" CWF_NEXT_PROMPT_DATE=260216 bash "$PLUGIN_SCRIPT" root-override
+)"
+assert_eq "plugin honors CWF_PROJECT_ROOT override for root resolution" "$expected_from_override" "$actual_from_override"
+
 echo "---"
 echo "Fixtures: PASS=$PASS FAIL=$FAIL"
 

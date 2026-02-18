@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # redact-session-logs.sh: sanitize existing Codex session log artifacts in place.
 # Default target directory: resolve_cwf_session_logs_dir output
-# (prefers ./.cwf/sessions, falls back to legacy ./.cwf/projects/sessions).
+# (`./.cwf/sessions` by default).
 
 set -euo pipefail
 
@@ -15,7 +15,7 @@ if [ ! -f "$RESOLVER_SCRIPT" ]; then
   exit 1
 fi
 
-# shellcheck source=../cwf-artifact-paths.sh
+# shellcheck source=plugins/cwf/scripts/cwf-artifact-paths.sh
 source "$RESOLVER_SCRIPT"
 
 DEFAULT_CWD="$(pwd)"

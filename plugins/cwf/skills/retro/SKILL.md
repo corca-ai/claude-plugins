@@ -269,8 +269,7 @@ If this gate fails, do not mark retro complete. Fix artifacts/mode labeling firs
 
 Discover runtime logs under:
 
-1. Preferred: `.cwf/sessions/`
-2. Legacy fallback: `.cwf/projects/sessions/`
+1. `.cwf/sessions/`
 
 - Prefer suffix files: `{YYMMDD}-*.claude.md`, `{YYMMDD}-*.codex.md`
 - Also allow unsuffixed files: `{YYMMDD}-*.md`
@@ -283,8 +282,7 @@ Then:
    ```bash
    ln -s "{relative-log-path}/{filename}" "{output-dir}/session-logs/{filename}"
    ```
-5. Compatibility alias: if `{output-dir}/session-log.md` is missing (or already a symlink), point it to one representative file in `session-logs/` (prefer latest).
-6. If no candidates or directories do not exist, skip silently.
+5. If no candidates or directories do not exist, skip silently.
 
 ### 7. Persist Findings
 

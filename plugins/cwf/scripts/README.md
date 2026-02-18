@@ -5,6 +5,7 @@ This file maps scripts under [plugins/cwf/scripts](.).
 - [check-session.sh](check-session.sh): Validates session artifacts and semantic closure checks.
 - [check-growth-drift.sh](check-growth-drift.sh): Reports cross-surface drift across skills/docs/scripts/state/provenance, with optional strict hook regression execution via `--strict-hooks`.
 - [test-hook-exit-codes.sh](test-hook-exit-codes.sh): Deterministic hook allow/block regression suite (`--suite`, `--strict`) with hooks-manifest driven target discovery.
+- [test-hook-exit-codes-suite-decision-journal.sh](test-hook-exit-codes-suite-decision-journal.sh): Shared decision-journal E2E suite definition sourced by `test-hook-exit-codes.sh`.
 - [check-script-deps.sh](check-script-deps.sh): Validates runtime script dependency edges from hooks manifest and script references.
 - [check-readme-structure.sh](check-readme-structure.sh): Verifies heading-level structure parity between the root English and Korean README documents.
 - [check-portability-contract.sh](check-portability-contract.sh): Unified contract gate runner (`portable` vs `authoring`) with context-aware filtering (`manual|hook|post-run`).
@@ -16,6 +17,7 @@ This file maps scripts under [plugins/cwf/scripts](.).
 - [check-shared-reference-conformance.sh](check-shared-reference-conformance.sh): Verifies shared output-persistence reference adoption across composing skills and duplication threshold.
 - [check-run-gate-artifacts.sh](check-run-gate-artifacts.sh): Validates stage artifacts for `cwf:run` gate closure (`review-code`, `refactor`, `retro`, `ship`) with contract-driven stage/policy modes (session/project/explicit contract priority), and can append gate failures to `lessons.md`.
 - [check-run-gate-artifacts-lib.sh](check-run-gate-artifacts-lib.sh): Shared helper functions for `check-run-gate-artifacts.sh`.
+- [bootstrap-review-code-artifacts.sh](bootstrap-review-code-artifacts.sh): Scaffolds required `review-code` artifacts (`review-*.md`, synthesis skeleton) for deterministic gate closure preparation.
 - [sync-ambiguity-debt.sh](sync-ambiguity-debt.sh): Synchronizes and validates `live.blocking_decisions_pending` against `run-ambiguity-decisions.md` for deterministic defer-mode debt handling.
 - [check-session-lib.sh](check-session-lib.sh): Shared helper functions for `check-session.sh`.
 - [next-prompt-dir.sh](next-prompt-dir.sh): Computes next session directory name, with optional `--bootstrap` to initialize artifacts and register `cwf-state.yaml` session metadata.

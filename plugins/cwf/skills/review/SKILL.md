@@ -356,7 +356,7 @@ bash {CWF_PLUGIN_DIR}/scripts/codex/sync-session-logs.sh --cwd "$PWD" --quiet ||
 
 Inputs:
 
-- `{session_dir}/session-log.md` (symlink or file), or newest `session-logs/*.md`
+- Newest `session-logs/*.md`
 
 Required output fields (for Confidence Note):
 

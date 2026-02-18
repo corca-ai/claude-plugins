@@ -8,8 +8,7 @@
 #
 # By default this script:
 # - Finds the latest Codex session for the current cwd
-# - Writes markdown to resolve_cwf_session_logs_dir output (prefers ./.cwf/sessions,
-#   falls back to legacy ./.cwf/projects/sessions when needed) as *.codex.md
+# - Writes markdown to resolve_cwf_session_logs_dir output (`./.cwf/sessions` by default) as *.codex.md
 # - Does not copy raw JSONL (use --raw to enable)
 
 set -euo pipefail
@@ -70,9 +69,8 @@ Options:
   --jsonl <path>       Export a specific JSONL file directly
   --cwd <path>         Prefer sessions whose session_meta.cwd matches path (default: $PWD)
   --since-epoch <sec>  Prefer sessions modified at/after this epoch seconds value
-  --out-dir <path>     Output directory (default: CWF_SESSION_LOG_DIR/.cwf/sessions with legacy fallback)
+  --out-dir <path>     Output directory (default: CWF_SESSION_LOG_DIR/.cwf/sessions)
   --raw                Copy raw JSONL into out-dir/raw
-  --no-raw             Backward-compatible alias for default behavior (no raw copy)
   --quiet              Suppress informational output
   --append             Incremental append sync when possible (default)
   --no-append          Disable incremental append and always rebuild
@@ -107,10 +105,6 @@ while [ "$#" -gt 0 ]; do
       ;;
     --raw)
       COPY_RAW=true
-      shift
-      ;;
-    --no-raw)
-      COPY_RAW=false
       shift
       ;;
     --quiet)

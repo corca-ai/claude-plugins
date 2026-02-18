@@ -434,7 +434,7 @@ What this enables:
 - User scope targets: `~/.agents/skills/*`, `~/.agents/references`, `~/.local/bin/codex`
 - Project/local scope targets: `{projectRoot}/.codex/skills/*`, `{projectRoot}/.codex/references`, `{projectRoot}/.codex/bin/codex`
 - Non-user runs do not mutate user-global Codex paths unless explicitly confirmed
-- Every `codex` run auto-syncs session markdown logs into `.cwf/sessions/` by default (legacy fallback: `.cwf/projects/sessions/`) as `*.codex.md`
+- Every `codex` run auto-syncs session markdown logs into `.cwf/sessions/` as `*.codex.md`
 - Session log sync is append-first with checkpointed incremental updates to reduce exit-time latency; if state is missing/inconsistent, it safely falls back to full rebuild
 - Session artifact directories (`plan.md`, `retro.md`, `next-session.md`) remain under `.cwf/projects/{YYMMDD}-{NN}-{title}/`
 - Sync is anchored to the session updated during the current run (reduces wrong-session exports on shared cwd)
@@ -544,7 +544,7 @@ CWF_ATTENTION_USER_ID="U0123456789"             # default: unset
 CWF_GATHER_OUTPUT_DIR=".cwf/projects"               # default: .cwf/projects
 CWF_READ_WARN_LINES=700                            # default: 500
 CWF_READ_DENY_LINES=2500                           # default: 2000
-CWF_SESSION_LOG_DIR=".cwf/sessions"                # default: .cwf/sessions (legacy fallback: .cwf/projects/sessions)
+CWF_SESSION_LOG_DIR=".cwf/sessions"                # default: .cwf/sessions
 CWF_SESSION_LOG_ENABLED=false                      # default: true
 CWF_SESSION_LOG_TRUNCATE=20                        # default: 10
 CWF_SESSION_LOG_AUTO_COMMIT=true                   # default: false

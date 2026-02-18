@@ -47,6 +47,26 @@
           "id": "portability_fixtures",
           "path": "plugins/cwf/scripts/check-portability-fixtures.sh",
           "command": "bash plugins/cwf/scripts/check-portability-fixtures.sh"
+        },
+        {
+          "id": "configure_git_hooks_runtime",
+          "path": "plugins/cwf/skills/setup/scripts/check-configure-git-hooks-runtime.sh",
+          "command": "bash plugins/cwf/skills/setup/scripts/check-configure-git-hooks-runtime.sh"
+        },
+        {
+          "id": "next_prompt_dir_fixtures",
+          "path": "scripts/tests/next-prompt-dir-fixtures.sh",
+          "command": "bash scripts/tests/next-prompt-dir-fixtures.sh"
+        },
+        {
+          "id": "workflow_gate_matrix",
+          "path": "plugins/cwf/scripts/test-hook-exit-codes.sh",
+          "command": "bash plugins/cwf/scripts/test-hook-exit-codes.sh --suite workflow-gate"
+        },
+        {
+          "id": "compact_context_no_jq",
+          "path": "plugins/cwf/scripts/test-hook-exit-codes.sh",
+          "command": "bash plugins/cwf/scripts/test-hook-exit-codes.sh --suite compact-context-no-jq"
         }
       ]
     },

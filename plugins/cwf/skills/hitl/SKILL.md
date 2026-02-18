@@ -1,6 +1,6 @@
 ---
 name: hitl
-description: "Human-in-the-loop diff/chunk review to inject deliberate human judgment where automated review is insufficient, with resumable state, agreement-round kickoff, and rule propagation. Triggers: \"cwf:hitl\", \"hitl\", \"interactive review\", \"human review\", \"cwf:review --human\""
+description: "Human-in-the-loop diff/chunk review to inject deliberate human judgment where automated review is insufficient, with resumable state, agreement-round kickoff, and rule propagation. Triggers: \"cwf:hitl\", \"hitl\", \"interactive review\", \"human review\""
 ---
 
 # HITL Review (cwf:hitl)
@@ -18,8 +18,6 @@ cwf:hitl --rule "<rule text>"
 cwf:hitl --rules
 cwf:hitl --state
 cwf:hitl --close
-# compatibility alias:
-cwf:review --human [--base <branch>]
 ```
 
 ## State Model

@@ -80,7 +80,6 @@ link_log_into_live_session() {
   local session_dir=""
   local links_dir=""
   local log_link=""
-  local alias_link=""
 
   [ -f "$log_file" ] || return 0
 
@@ -97,12 +96,6 @@ link_log_into_live_session() {
     return 0
   fi
   ln -sfn "$log_file" "$log_link"
-
-  # Compatibility alias for readers that still expect one session-log.md file.
-  alias_link="${session_dir}/session-log.md"
-  if [ ! -e "$alias_link" ] || [ -L "$alias_link" ]; then
-    ln -sfn "session-logs/$(basename "$log_file")" "$alias_link"
-  fi
 }
 
 utc_to_epoch() {
