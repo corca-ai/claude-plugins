@@ -61,8 +61,9 @@ Path resolution follows CWF artifact rules:
 When no contract can be loaded, `--codebase` should still run with best-effort defaults:
 
 - Source: tracked files when git is available; otherwise filesystem walk
-- Scope: include all files, exclude common generated/non-code paths
+- Scope: include all files, exclude common generated/non-code paths and common lockfiles (`*.lock`, `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `bun.lock*`)
 - Checks: large files, long lines, TODO markers, shell strict mode
+- Threshold baseline: `large_file_lines.warn_at=600`, `large_file_lines.error_at=800`
 
 ## Reporting Contract Metadata
 

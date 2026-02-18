@@ -144,6 +144,11 @@ write_contract_file() {
       "**/*.svg",
       "**/*.pdf",
       "**/*.lock",
+      "**/package-lock.json",
+      "**/pnpm-lock.yaml",
+      "**/yarn.lock",
+      "**/bun.lock",
+      "**/bun.lockb",
       "**/*.snap",
       "**/*.min.js",
       "**/*.min.css"
@@ -183,7 +188,7 @@ write_contract_file() {
   "checks": {
     "large_file_lines": {
       "enabled": true,
-      "warn_at": 400,
+      "warn_at": 600,
       "error_at": 800
     },
     "long_line_length": {

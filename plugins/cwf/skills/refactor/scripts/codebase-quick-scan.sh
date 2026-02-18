@@ -164,6 +164,11 @@ defaults = {
             "**/*.svg",
             "**/*.pdf",
             "**/*.lock",
+            "**/package-lock.json",
+            "**/pnpm-lock.yaml",
+            "**/yarn.lock",
+            "**/bun.lock",
+            "**/bun.lockb",
             "**/*.snap",
             "**/*.min.js",
             "**/*.min.css",
@@ -201,7 +206,7 @@ defaults = {
         ],
     },
     "checks": {
-        "large_file_lines": {"enabled": True, "warn_at": 400, "error_at": 800},
+        "large_file_lines": {"enabled": True, "warn_at": 600, "error_at": 800},
         "long_line_length": {"enabled": True, "warn_at": 140},
         "todo_markers": {"enabled": True, "patterns": ["T" + "ODO", "FIX" + "ME", "HA" + "CK", "X" * 3]},
         "shell_strict_mode": {
