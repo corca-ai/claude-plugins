@@ -407,6 +407,13 @@ sessions:
     artifacts: [plan.md, lessons.md, review-synthesis-plan.md, review-synthesis-impl.md, retro.md, next-session.md]
     stage_checkpoints: [retro, handoff]
 
+
+  - id: "S260218-01"
+    title: "refactor-codebase-deep"
+    dir: ".cwf/projects/260218-01-refactor-codebase-deep"
+    branch: "marketplace-v3"
+    artifacts: [plan.md, lessons.md]
+
 tools:
   codex: available
   gemini: available
@@ -432,10 +439,10 @@ hooks:
 # check-session.sh --live validates required fields are populated.
 live:
   session_id: ""
-  dir: ""
+  dir: ".cwf/projects/260218-01-refactor-codebase-deep"
   branch: ""
-  phase: ""
-  task: ""
+  phase: "refactor"
+  task: "codebase deep review"
   key_files: []
   decisions: []
   decision_journal: []
@@ -444,7 +451,7 @@ live:
     state_file: ""
     rules_file: ""
     updated_at: ""
-  state_file: ""
+  state_file: ".cwf/projects/260218-01-refactor-codebase-deep/session-state.yaml"
   remaining_gates: []
   state_version: "4"
   worktree_root: ""

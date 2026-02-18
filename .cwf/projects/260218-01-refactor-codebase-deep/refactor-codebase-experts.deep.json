@@ -1,0 +1,85 @@
+{
+  "deep_review_enabled": true,
+  "inputs": {
+    "scan_path": "/tmp/codebase-scan-full2.BIAOwk.json",
+    "contract_path": "/home/hwidong/codes/claude-plugins/.cwf/codebase-contract.json",
+    "state_path": "/home/hwidong/codes/claude-plugins/.cwf/cwf-state.yaml"
+  },
+  "weights": {
+    "large_file_lines": 19,
+    "long_line_length": 26,
+    "todo_markers": 15,
+    "shell_strict_mode": 10
+  },
+  "fixed": [
+    {
+      "name": "Martin Fowler",
+      "domain": "refactoring patterns, knowledge duplication (Rule of Three), shared abstractions, evolutionary design",
+      "source": "Refactoring: Improving the Design of Existing Code 2nd ed. (2018), Is Design Dead? (martinfowler.com), BeckDesignRules (martinfowler.com/bliki)",
+      "selection_reason": "fixed (from roster or contract)",
+      "source_type": "roster"
+    },
+    {
+      "name": "Kent Beck",
+      "domain": "Tidy First, small safe refactorings, test-driven development, simple design",
+      "source": "Tidy First? (2023), Test-Driven Development: By Example (2002), Extreme Programming Explained (2004)",
+      "selection_reason": "fixed (contract default profile)",
+      "source_type": "default-profile"
+    }
+  ],
+  "contextual": [
+    {
+      "name": "Nancy Leveson",
+      "domain": "systems safety engineering, STAMP/STPA, system-level hazard analysis, control structure analysis",
+      "source": "Engineering a Safer World: Systems Thinking Applied to Safety (MIT Press, 2011)",
+      "score": 55,
+      "usage_count": 3,
+      "selection_reason": "context match: large_file_lines(w=19), long_line_length(w=26), shell_strict_mode(w=10)",
+      "source_type": "roster"
+    },
+    {
+      "name": "Donella Meadows",
+      "domain": "systems thinking, feedback loops, leverage points",
+      "source": "Thinking in Systems (2008)",
+      "score": 45,
+      "usage_count": 1,
+      "selection_reason": "context match: large_file_lines(w=19), long_line_length(w=26)",
+      "source_type": "roster"
+    }
+  ],
+  "selected": [
+    {
+      "name": "Martin Fowler",
+      "domain": "refactoring patterns, knowledge duplication (Rule of Three), shared abstractions, evolutionary design",
+      "source": "Refactoring: Improving the Design of Existing Code 2nd ed. (2018), Is Design Dead? (martinfowler.com), BeckDesignRules (martinfowler.com/bliki)",
+      "selection_reason": "fixed (from roster or contract)",
+      "source_type": "roster"
+    },
+    {
+      "name": "Kent Beck",
+      "domain": "Tidy First, small safe refactorings, test-driven development, simple design",
+      "source": "Tidy First? (2023), Test-Driven Development: By Example (2002), Extreme Programming Explained (2004)",
+      "selection_reason": "fixed (contract default profile)",
+      "source_type": "default-profile"
+    },
+    {
+      "name": "Nancy Leveson",
+      "domain": "systems safety engineering, STAMP/STPA, system-level hazard analysis, control structure analysis",
+      "source": "Engineering a Safer World: Systems Thinking Applied to Safety (MIT Press, 2011)",
+      "score": 55,
+      "usage_count": 3,
+      "selection_reason": "context match: large_file_lines(w=19), long_line_length(w=26), shell_strict_mode(w=10)",
+      "source_type": "roster"
+    },
+    {
+      "name": "Donella Meadows",
+      "domain": "systems thinking, feedback loops, leverage points",
+      "source": "Thinking in Systems (2008)",
+      "score": 45,
+      "usage_count": 1,
+      "selection_reason": "context match: large_file_lines(w=19), long_line_length(w=26)",
+      "source_type": "roster"
+    }
+  ],
+  "warnings": []
+}

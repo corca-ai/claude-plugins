@@ -1,0 +1,92 @@
+{
+  "deep_review_enabled": true,
+  "inputs": {
+    "scan_path": "/home/hwidong/codes/claude-plugins/.cwf/projects/260218-01-refactor-codebase-deep/refactor-codebase-scan.json",
+    "contract_path": "/home/hwidong/codes/claude-plugins/.cwf/codebase-contract.json"
+  },
+  "weights": {
+    "large_file_lines": 19,
+    "long_line_length": 26,
+    "todo_markers": 15,
+    "shell_strict_mode": 9
+  },
+  "fixed": [
+    {
+      "name": "Martin Fowler",
+      "domain": "refactoring patterns, knowledge duplication (Rule of Three), shared abstractions, evolutionary design",
+      "source": "Refactoring: Improving the Design of Existing Code 2nd ed. (2018), Is Design Dead? (martinfowler.com), BeckDesignRules (martinfowler.com/bliki)",
+      "rationale": "",
+      "usage_count": 0,
+      "selection_reason": "fixed (contract/default profile)",
+      "source_type": "fixed"
+    },
+    {
+      "name": "Kent Beck",
+      "domain": "Tidy First, small safe refactorings, test-driven development, simple design",
+      "source": "Tidy First? (2023), Test-Driven Development: By Example (2002), Extreme Programming Explained (2004)",
+      "rationale": "",
+      "usage_count": 0,
+      "selection_reason": "fixed (contract/default profile)",
+      "source_type": "fixed"
+    }
+  ],
+  "contextual": [
+    {
+      "name": "David Parnas",
+      "domain": "information hiding, modular decomposition criteria",
+      "source": "On the Criteria To Be Used in Decomposing Systems into Modules (CACM, 1972)",
+      "usage_count": 0,
+      "score": 19,
+      "selection_reason": "context match: large_file_lines(w=19)",
+      "source_type": "contract"
+    },
+    {
+      "name": "John Ousterhout",
+      "domain": "deep modules, interface simplicity, strategic design",
+      "source": "A Philosophy of Software Design (2018/2021)",
+      "usage_count": 0,
+      "score": 19,
+      "selection_reason": "context match: large_file_lines(w=19)",
+      "source_type": "contract"
+    }
+  ],
+  "selected": [
+    {
+      "name": "Martin Fowler",
+      "domain": "refactoring patterns, knowledge duplication (Rule of Three), shared abstractions, evolutionary design",
+      "source": "Refactoring: Improving the Design of Existing Code 2nd ed. (2018), Is Design Dead? (martinfowler.com), BeckDesignRules (martinfowler.com/bliki)",
+      "rationale": "",
+      "usage_count": 0,
+      "selection_reason": "fixed (contract/default profile)",
+      "source_type": "fixed"
+    },
+    {
+      "name": "Kent Beck",
+      "domain": "Tidy First, small safe refactorings, test-driven development, simple design",
+      "source": "Tidy First? (2023), Test-Driven Development: By Example (2002), Extreme Programming Explained (2004)",
+      "rationale": "",
+      "usage_count": 0,
+      "selection_reason": "fixed (contract/default profile)",
+      "source_type": "fixed"
+    },
+    {
+      "name": "David Parnas",
+      "domain": "information hiding, modular decomposition criteria",
+      "source": "On the Criteria To Be Used in Decomposing Systems into Modules (CACM, 1972)",
+      "usage_count": 0,
+      "score": 19,
+      "selection_reason": "context match: large_file_lines(w=19)",
+      "source_type": "contract"
+    },
+    {
+      "name": "John Ousterhout",
+      "domain": "deep modules, interface simplicity, strategic design",
+      "source": "A Philosophy of Software Design (2018/2021)",
+      "usage_count": 0,
+      "score": 19,
+      "selection_reason": "context match: large_file_lines(w=19)",
+      "source_type": "contract"
+    }
+  ],
+  "warnings": []
+}

@@ -1,0 +1,29 @@
+# session-state.yaml — volatile session live state
+# Synced from .cwf/cwf-state.yaml live section.
+
+live:
+  session_id: ""
+  dir: ".cwf/projects/260218-01-refactor-codebase-deep"
+  branch: ""
+  phase: "refactor"
+  task: "codebase deep review"
+  key_files: []
+  decisions: []
+  decision_journal: []
+  hitl:
+    session_id: ""
+    state_file: ""
+    rules_file: ""
+    updated_at: ""
+  remaining_gates: []
+  state_version: "4"
+  worktree_root: ""
+  worktree_branch: ""
+  active_pipeline: ""
+  user_directive: ""
+  pipeline_override_reason: ""
+  ambiguity_mode: ""
+  blocking_decisions_pending: ""
+  ambiguity_decisions_file: ""
+  clarify_result_file: ""
+  clarify_completed_at: ""
