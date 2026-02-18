@@ -26,12 +26,26 @@ SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
 SYNC_SCRIPT="$SCRIPT_DIR/sync-session-logs.sh"
 POST_RUN_SCRIPT="$SCRIPT_DIR/post-run-checks.sh"
 SELF_PATH="$SCRIPT_PATH"
+INTERACTIVE_TTY="false"
+if [ -t 0 ] && [ -t 1 ]; then
+  INTERACTIVE_TTY="true"
+fi
 
 # Keep trap path safe under nounset even if exit happens unexpectedly early.
 RUN_START_EPOCH=""
 SYNC_DONE="false"
 EXIT_CODE=0
 RUN_COMPLETED="false"
+SYNC_TIMEOUT_SEC="${CWF_CODEX_SYNC_TIMEOUT_SEC:-10}"
+POST_RUN_TIMEOUT_SEC="${CWF_CODEX_POST_RUN_TIMEOUT_SEC:-15}"
+SYNC_UNBOUNDED_FALLBACK="${CWF_CODEX_SYNC_UNBOUNDED_FALLBACK:-auto}"
+if [ "$SYNC_UNBOUNDED_FALLBACK" = "auto" ]; then
+  if [ "$INTERACTIVE_TTY" = "true" ]; then
+    SYNC_UNBOUNDED_FALLBACK="false"
+  else
+    SYNC_UNBOUNDED_FALLBACK="true"
+  fi
+fi
 
 is_same_file() {
   local a="$1"
@@ -66,6 +80,16 @@ fi
 
 RUN_START_EPOCH="$(date +%s 2>/dev/null || true)"
 
+run_with_optional_timeout() {
+  local timeout_sec="$1"
+  shift
+  if command -v timeout >/dev/null 2>&1; then
+    timeout "$timeout_sec" "$@" || true
+  else
+    "$@" || true
+  fi
+}
+
 run_sync_once() {
   if [ "${SYNC_DONE:-false}" = "true" ]; then
     return 0
@@ -78,10 +102,14 @@ run_sync_once() {
 
   # First pass: bounded to this wrapper invocation window.
   if [ -n "${RUN_START_EPOCH:-}" ]; then
-    "$SYNC_SCRIPT" --cwd "$PWD" --since-epoch "$RUN_START_EPOCH" --quiet || true
+    run_with_optional_timeout "$SYNC_TIMEOUT_SEC" \
+      "$SYNC_SCRIPT" --cwd "$PWD" --since-epoch "$RUN_START_EPOCH" --quiet
   fi
-  # Second pass: unbounded fallback for session flush timing edge-cases.
-  "$SYNC_SCRIPT" --cwd "$PWD" --quiet || true
+  # Optional second pass: unbounded fallback can pick unrelated sessions when many are active.
+  if [ "$SYNC_UNBOUNDED_FALLBACK" = "true" ]; then
+    run_with_optional_timeout "$SYNC_TIMEOUT_SEC" \
+      "$SYNC_SCRIPT" --cwd "$PWD" --quiet
+  fi
 }
 
 cleanup_on_exit() {
@@ -99,7 +127,11 @@ set -e
 
 run_sync_once
 
-POST_RUN_ENABLED="${CWF_CODEX_POST_RUN_CHECKS:-true}"
+if [ "$INTERACTIVE_TTY" = "true" ]; then
+  POST_RUN_ENABLED="${CWF_CODEX_POST_RUN_CHECKS:-false}"
+else
+  POST_RUN_ENABLED="${CWF_CODEX_POST_RUN_CHECKS:-true}"
+fi
 POST_RUN_MODE="${CWF_CODEX_POST_RUN_MODE:-warn}"
 POST_RUN_EXIT=0
 if [ "$RUN_COMPLETED" = "true" ] && [ "$POST_RUN_ENABLED" = "true" ] && [ -x "$POST_RUN_SCRIPT" ]; then
@@ -110,7 +142,7 @@ if [ "$RUN_COMPLETED" = "true" ] && [ "$POST_RUN_ENABLED" = "true" ] && [ -x "$P
   if [ "${CWF_CODEX_POST_RUN_QUIET:-false}" = "true" ]; then
     post_args+=(--quiet)
   fi
-  if "$POST_RUN_SCRIPT" "${post_args[@]}"; then
+  if run_with_optional_timeout "$POST_RUN_TIMEOUT_SEC" "$POST_RUN_SCRIPT" "${post_args[@]}"; then
     :
   else
     POST_RUN_EXIT=$?
