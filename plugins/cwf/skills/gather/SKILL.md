@@ -221,7 +221,7 @@ Web and code search via external APIs.
 5. Display results to user (scripts output formatted markdown)
 
 **Graceful degradation**: If API key is missing, scripts print setup instructions to stderr. Do not stop at an error message only. Ask whether to configure now:
-- `Configure now (recommended)` — run `cwf:setup --env` (and `cwf:setup --tools` if runtime dependencies are also missing), then retry the same search once.
+- `Configure now (recommended)` — set the missing API key (`TAVILY_API_KEY` or `EXA_API_KEY`) in shell profile/process env, run `cwf:setup --tools` if runtime dependencies are also missing, then retry the same search once. Do not rely on `cwf:setup --env` for API key provisioning.
 - `Skip search for now` — continue without search results.
 - `Show setup commands only` — print exact export/setup commands.
 See [references/search-api-reference.md](references/search-api-reference.md).

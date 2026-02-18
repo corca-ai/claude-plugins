@@ -3,8 +3,8 @@ set -euo pipefail
 # check-markdown.sh — PostToolUse hook for Write|Edit
 # Validates markdown files using markdownlint after write/edit operations.
 # If violations are found, blocks with a reason so Claude can self-correct.
-# Skips silently when: not a .md file, file doesn't exist, markdownlint not available,
-# or file is under project artifacts (excluded from lint).
+# Skips silently when: not a .md file, file doesn't exist, or file is under
+# project artifacts (excluded from lint). Missing markdownlint is a hard block.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 HOOK_GROUP="lint_markdown"
@@ -154,8 +154,15 @@ if [[ -n "$ABS_FILE_PATH" ]]; then
     fi
 fi
 
-# markdownlint-cli2 not available
+# markdownlint-cli2 not available — block (deterministic gate unavailable)
 if ! command -v markdownlint-cli2 >/dev/null 2>&1; then
+    REASON=$(
+        printf 'Markdown lint gate unavailable for %s: markdownlint-cli2 is not installed.\nInstall markdownlint-cli2 (for example, run cwf:setup --tools) and retry.' \
+            "$FILE_PATH" | jq -Rs .
+    )
+    cat <<EOF
+{"decision":"block","reason":${REASON}}
+EOF
     exit 0
 fi
 
