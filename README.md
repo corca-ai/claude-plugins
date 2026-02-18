@@ -160,7 +160,7 @@ gather → clarify → plan → review(plan) → impl → review(code) → refac
 |---|-------|---------|-------------|
 | 1 | [gather](#gather) | `cwf:gather` | Acquire information — URLs, web search, local code exploration |
 | 2 | [clarify](#clarify) | `cwf:clarify` | Turn vague requirements into precise specs via research + tier classification |
-| 3 | [plan](#plan) | `cwf:plan` | Draft a research-backed implementation plan with BDD success criteria |
+| 3 | [plan](#plan) | `cwf:plan` | Draft a research-backed implementation plan with explicit testable success criteria |
 | 4 | [impl](#impl) | `cwf:impl` | Orchestrate parallel implementation from a plan |
 | 5 | [retro](#retro) | `cwf:retro` | Extract durable learnings through CDM analysis and expert lens |
 | 6 | [refactor](#refactor) | `cwf:refactor` | Multi-mode code and skill review — scan, tidy, deep review, holistic |
@@ -174,250 +174,246 @@ gather → clarify → plan → review(plan) → impl → review(code) → refac
 
 ## Skills Reference
 
+This section is outcome-focused by design.
+
+- It defines each skill by intent (`why`) and expected behavior (`what happens`).
+- It omits detailed flag matrices, edge-case command flows, and rollback internals.
+- For full execution contracts, read each linked `SKILL.md` and its local references.
+- This summary format is standardized in [skill-conventions](plugins/cwf/references/skill-conventions.md#readme-skill-summary-format).
+
 ### [gather](plugins/cwf/skills/gather/SKILL.md)
 
-JTBD: turn scattered external context into local, reusable artifacts before reasoning and implementation start.
+Primary trigger: `cwf:gather`
 
-```text
-cwf:gather <url>                  # Auto-detect service (Google/Slack/Notion/GitHub/web)
-cwf:gather --search <query>       # Web search (Tavily)
-cwf:gather --search code <query>  # Code search (Exa)
-cwf:gather --local <topic>        # Explore local codebase
-```
+**Why**
 
-**Design Intent**
+Turn scattered external context into local, reusable evidence before reasoning and implementation start.
 
-Consolidate scattered information into agent-readable local artifacts. URL, web search, and local exploration results are unified as file-based outputs so downstream stages reason from evidence files, not links. Uses Tavily/Exa instead of Claude's built-in WebSearch for better search quality and consistent result formatting.
+**What Happens**
 
-**What It Does**
+Collects URL/web/local context, normalizes it into artifact files under `.cwf/projects/`, and preserves provenance so downstream stages reason from files rather than memory.
 
-Auto-detects Google Docs/Slides/Sheets, Slack threads, Notion pages, GitHub PRs/issues, and generic web URLs. Downloads content into `.cwf/projects/`, normalizes into agent-friendly markdown, and preserves provenance links. Google Docs and Notion exports require public/published sharing settings. The `websearch_redirect` hook routes Claude's WebSearch to `cwf:gather --search`; without `TAVILY_API_KEY`/`EXA_API_KEY`, it returns setup guidance for search while URL collection and `--local` continue to work. A future fallback mode will route back to Claude WebSearch when keys are missing.
+**Expected Outcomes**
+
+1. Scattered documents and links are converted into normalized local artifacts with source traceability.
+2. If external web-search keys are missing, setup guidance is reported while available collection paths continue.
+3. Downstream skills can reference explicit gathered evidence instead of implicit chat memory.
 
 ### [clarify](plugins/cwf/skills/clarify/SKILL.md)
 
-JTBD: prevent costly implementation churn by resolving ambiguity before planning.
+Primary trigger: `cwf:clarify`
 
-```text
-cwf:clarify <requirement>          # Research-first (default)
-cwf:clarify <requirement> --light  # Direct Q&A, no sub-agents
-```
+**Why**
 
-**Design Intent**
+Resolve ambiguity early so implementation does not absorb avoidable rework.
 
-Decompose requirements into decision points before planning to reduce "questions arriving too late" rework. Classifies decisions into 3 tiers (T1: codebase evidence, T2: standards/best practices, T3: subjective preference/policy), handling T1/T2 autonomously so agents don't ask users about discoverable facts.
+**What Happens**
 
-**What It Does**
+Decomposes requirements into decision points, classifies them by tier (evidence/standards/subjective), resolves what can be resolved autonomously, and escalates only true preference/policy choices.
 
-Default mode decomposes and classifies via parallel research (codebase + web) → expert analysis → tier classification → persistent why-questioning. Light mode provides a faster interactive Q&A loop without sub-agents.
+**Expected Outcomes**
+
+1. Vague requests are transformed into explicit decision points.
+2. Evidence-backed questions produce autonomous answers with rationale.
+3. Remaining preference or policy choices are returned to the user with concrete trade-offs.
 
 ### [plan](plugins/cwf/skills/plan/SKILL.md)
 
-JTBD: create an implementation contract that downstream implementation and review can enforce.
+Primary trigger: `cwf:plan`
 
-```text
-cwf:plan <task description>
-```
+**Why**
 
-**Design Intent**
+Create an execution contract that implementation and review can enforce consistently.
 
-Pre-v3, CWF augmented planning via Claude Code's Plan mode hooks. v3 restructured this into a runtime-independent `cwf:plan` skill because: (a) `gather`+`clarify` provide more consistent planning input quality; (b) context continuity is maintained through file-based artifacts (`plan.md`, `lessons.md`, optional `phase-handoff.md`) rather than shifting context management to the user; (c) planning conversations that reveal constraints/preferences are immediately recorded in `lessons.md` for reuse.
+**What Happens**
 
-**What It Does**
+Builds a structured `plan.md` with scope, file-level changes, and testable success criteria, then records carry-forward lessons for later phases.
 
-Parallel prior art + codebase research produce a structured plan with steps, files, and success criteria (BDD + qualitative), saved to `.cwf/projects/`. Recommended flow: run `cwf:review --mode plan` before implementation so plan-level concerns are resolved before `cwf:impl`.
+**Expected Outcomes**
+
+1. `plan.md` includes explicit scope, target files, and testable success criteria.
+2. Unresolved assumptions are surfaced as open items instead of being embedded silently.
+3. `cwf:review --mode plan` can validate contract quality before coding starts.
 
 ### [impl](plugins/cwf/skills/impl/SKILL.md)
 
-JTBD: convert an approved plan into predictable execution without losing constraints.
+Primary trigger: `cwf:impl`
 
-```text
-cwf:impl                    # Auto-detect most recent plan.md
-cwf:impl <path/to/plan.md>  # Explicit plan path
-```
+**Why**
 
-**Design Intent**
+Convert an approved plan into predictable execution without losing constraints.
 
-Treats the approved plan as an execution contract to prevent scope drift. Uses adaptive [Agent Team](https://code.claude.com/docs/agent-teams) sizing (1-4) based on task complexity and dependency, avoiding the coordination overhead of fixed-size teams. Records decision history (`decision_journal`) and lessons (`lessons.md`) for context recovery across boundaries.
+**What Happens**
 
-**What It Does**
+Decomposes approved work into dependency-aware execution units, runs safe parallel batches, and validates completion against the plan's success criteria.
 
-Loads `plan.md` (+ phase handoff if present), decomposes by domain/dependency, executes parallel batches, and verifies against BDD criteria. Typical sequence: `cwf:plan` → `cwf:review --mode plan` → `cwf:impl` → `cwf:review --mode code`.
+**Expected Outcomes**
+
+1. Produced changes map back to approved plan work units.
+2. Order-sensitive tasks remain sequenced while independent tasks are parallelized.
+3. Unresolved risks and follow-up actions are captured with supporting evidence.
 
 ### [retro](plugins/cwf/skills/retro/SKILL.md)
 
-JTBD: convert one session's outcomes into durable operating improvements and capability decisions.
+Primary trigger: `cwf:retro`
 
-```text
-cwf:retro            # Adaptive (deep by default)
-cwf:retro --deep     # Full analysis with expert lens
-cwf:retro --light    # Sections 1-4 + 7 only, no sub-agents
-```
+**Why**
 
-**Design Intent**
+Turn a single session into durable operating improvements instead of one-off notes.
 
-Converts single-session outcomes into durable environment improvements, not just records. Decomposes retrospective into sections separating "what happened" from "what to change next." Connects insights to document/check/backlog changes to prevent recurring friction.
+**What Happens**
 
-**What It Does**
+Analyzes session evidence, captures causes and decisions, and routes actionable improvements into reusable documentation/check/process changes.
 
-Outputs are saved to session `retro.md`; deep mode also writes companion files (`retro-cdm-analysis.md`, `retro-expert-alpha.md`, `retro-expert-beta.md`, `retro-learning-resources.md`). The 7 sections are:
-1. `Context Worth Remembering`: background/decision context for next sessions, then promoted to project docs only when durable.
-2. `Collaboration Preferences`: collaboration patterns and improvements, then promoted to agent-guide/skill rules when repeatedly useful.
-3. `Waste Reduction (5 Whys)`: structural causes behind rework/misalignment.
-4. `Critical Decision Moment Analysis`: decision moments that changed session trajectory, including signals/alternatives/risks.
-5. `Expert Lens` (deep): how domain experts would run the same session differently.
-6. `Learning Resources` (deep): resources calibrated to the user's current level and observed knowledge gaps.
-7. `Relevant Tools & Tool Gaps`: used tools, available-but-unused tools, and candidate tools worth creating (including skills/automation).
+**Expected Outcomes**
+
+1. `retro.md` records what happened, why it happened, and what should change next.
+2. Repeated friction patterns are categorized by enforcement tier.
+3. Deep mode persists expert-lens outputs and learning resources alongside core retro artifacts.
 
 ### [refactor](plugins/cwf/skills/refactor/SKILL.md)
 
-JTBD: keep a growing skill/tool ecosystem coherent as teams install or author more capabilities.
+Primary trigger: `cwf:refactor`
 
-```text
-cwf:refactor                        # Quick scan all skills
-cwf:refactor --tidy [branch]        # Commit-based tidying
-cwf:refactor --codebase             # Contract-driven whole-codebase quick scan
-cwf:refactor --codebase --deep      # Codebase deep review (Fowler+Beck + context experts)
-cwf:refactor --skill <name>         # Deep review of a single skill
-cwf:refactor --skill --holistic     # Cross-plugin analysis
-cwf:refactor --docs                 # Documentation consistency review
-```
+**Why**
 
-**Design Intent**
+Control drift across code, skills, docs, hooks, and scripts as capability surface grows.
 
-In a growing codebase where features, skills, docs, and operational scripts evolve together, cleaning code alone doesn't restore quality. Refactor inspects code/skills/docs against the same standard to catch global drift and standard deviations early. Included in every default `cwf:run` chain for this reason.
+**What Happens**
 
-**What It Does**
+Runs quick/deep/docs-oriented inspections and produces concrete findings and fix targets so maintainability can be recovered systematically.
 
-Quick scan checks structural metrics and warning flags across all skills. `--tidy` finds safe tidy candidates from recent commits (Kent Beck's "Tidy First?"). `--codebase` runs a contract-driven whole-codebase quick scan with portable defaults. `--codebase --deep` adds 4 expert sub-agents (fixed Martin Fowler + Kent Beck, plus 2 context experts selected from contract JSON roster). `--skill <name>` provides focused structural/quality/concept diagnosis. `--holistic` analyzes cross-plugin convention compliance, concept integrity, and workflow coherence. `--docs` checks cross-document consistency.
+**Expected Outcomes**
+
+1. Structural and quality drift is reported with explicit severity and impacted scope.
+2. Docs mode surfaces consistency, link, and provenance issues deterministically.
+3. Re-runs after fixes show warning/error convergence with traceable evidence.
 
 ### [handoff](plugins/cwf/skills/handoff/SKILL.md)
 
-Generate session or phase handoff documents from project state and artifacts.
+Primary trigger: `cwf:handoff`
 
-```text
-cwf:handoff                # Generate next-session.md + register
-cwf:handoff --register     # Register session in .cwf/cwf-state.yaml only
-cwf:handoff --phase        # Generate phase-handoff.md (HOW context)
-```
+**Why**
 
-Session handoffs carry task scope, lessons, and unresolved items for the next session. Phase handoffs carry protocols, rules, and constraints for the next workflow phase (HOW), complementing plan.md (WHAT). `next-session.md` now also includes an execution contract so entering only the handoff file path can start directly, including branch gate (auto escape from base branch) and meaningful commit-unit policy.
+Preserve continuity across session and phase boundaries without relying on conversational memory.
+
+**What Happens**
+
+Generates session or phase handoff artifacts from persisted state and outputs, capturing scope, constraints, unresolved items, and restart instructions.
+
+**Expected Outcomes**
+
+1. The next session gets an explicit file-based starting contract.
+2. Phase handoff adds HOW-level constraints that complement WHAT-level planning artifacts.
+3. After compact/restart events, execution can resume from artifacts without hidden memory assumptions.
 
 ### [ship](plugins/cwf/skills/ship/SKILL.md)
 
-Automate GitHub workflow — issue creation, PR with structured templates, and merge management.
+Primary trigger: `cwf:ship`
 
-```text
-cwf:ship                                   # Show usage
-cwf:ship issue [--base B] [--no-branch]    # Create issue + feature branch
-cwf:ship pr [--base B] [--issue N] [--draft]  # Create pull request
-cwf:ship merge [--squash|--merge|--rebase]    # Merge approved PR
-cwf:ship status                            # Show issues, PRs, and checks
-```
+**Why**
 
-**Design Intent**
+Standardize issue/PR/merge preparation while keeping final human judgment explicit.
 
-Automates GitHub issue/PR/merge from session artifacts while keeping final merge judgment human-gated. Maximizes automation up to the point of merge, where human control remains explicit.
+**What Happens**
 
-**What It Does**
+Transforms validated session artifacts into structured issue/PR/merge-ready outputs with clear guardrails for unresolved risk.
 
-Builds issue/PR bodies from session context (`plan.md`, `lessons.md`, `retro.md`) with decision summaries, verification checklists, and human-judgment guardrails. Default policy keeps merge human-gated; when there are no blocking issues and the user explicitly requests it, an exceptional merge path can be used. `cwf:hitl` can be added before merge for agreement on key decisions and chunked change review.
+**Expected Outcomes**
+
+1. Issue and PR materials include decision context and verification evidence.
+2. Unresolved blocking items hold progression and are surfaced explicitly.
+3. Merge remains actionable only with explicit user approval and a clean state.
 
 ### [review](plugins/cwf/skills/review/SKILL.md)
 
-JTBD: apply a consistent quality gate at two leverage points: before implementation and after implementation.
+Primary trigger: `cwf:review`
 
-```text
-cwf:review                       # Review current changes (defaults to code mode)
-cwf:review --mode code           # Review current changes (explicit code mode)
-cwf:review --mode clarify        # Review clarified requirements
-cwf:review --mode plan           # Review implementation plan
-```
+**Why**
 
-**Design Intent**
+Apply one consistent quality gate at high-leverage points before and after implementation.
 
-Applies the same multi-perspective parallel review frame before implementation (requirements/plan) and after (code) to catch risks early. Built with fallback paths so external provider unavailability doesn't block the review gate.
+**What Happens**
 
-**What It Does**
+Runs parallel multi-perspective review (internal, external, domain experts), synthesizes findings into a verdict, and records deterministic gate outcomes.
 
-Use `--mode plan` after `cwf:plan` to validate scope/assumptions before code is written, and `--mode code` after `cwf:impl` to catch regressions. Runs 6 parallel reviewers: 2 internal (Security, UX/DX), 2 external (Codex/Gemini slots), 2 domain experts. Provider routing is the same regardless of main runtime; unavailable external CLIs fall back to Task-based reviewers.
+**Expected Outcomes**
+
+1. Plan-mode review exposes specification risks before code is written.
+2. Code-mode review synthesizes regression, security, and architecture concerns into explicit findings.
+3. Fallback routing preserves gate semantics when external providers are unavailable.
 
 ### [hitl](plugins/cwf/skills/hitl/SKILL.md)
 
-JTBD: inject deliberate human judgment through one resumable loop that combines agreement-round consensus and change review when automated review is insufficient.
+Primary trigger: `cwf:hitl`
 
-```text
-cwf:hitl                             # Start from default base (upstream/main)
-cwf:hitl --base <branch>             # Review diff against explicit base
-cwf:hitl --resume                    # Resume from saved cursor
-cwf:hitl --rule "<rule text>"        # Add review rule for remaining queue
-```
+**Why**
 
-**Design Intent**
+Inject deliberate human judgment where automated review is insufficient.
 
-Structures subjective human judgment — tone, documentation quality, consensus fitness — that automated review can miss. Persists state and rules to files so long reviews can be interrupted and resumed without context loss.
+**What Happens**
 
-**What It Does**
+Starts with an agreement round, then runs resumable chunk-based review with persisted rules/state so long review sessions remain controllable.
 
-Starts with an agreement round: collect major decision points and user concerns, record consensus in `hitl-scratchpad.md`, apply high-impact edits, then proceed to chunk review. Runtime state is persisted under `.cwf/projects/<session-dir>/hitl/` (`hitl-scratchpad.md`, `state.yaml`, `rules.yaml`, `queue.json`, `fix-queue.yaml`, `events.log`). [`.cwf/cwf-state.yaml`](.cwf/cwf-state.yaml) stores only live pointer metadata to the active HITL session.
+**Expected Outcomes**
+
+1. Large diffs are reviewed as resumable chunks with persisted cursor/state.
+2. New review rules are propagated to the remaining queue behavior.
+3. Interrupted review sessions can restore progress and rationale from artifacts.
 
 ### [run](plugins/cwf/skills/run/SKILL.md)
 
-JTBD: let users delegate end-to-end workflow orchestration without memorizing individual skills.
+Primary trigger: `cwf:run`
 
-```text
-cwf:run <task description>           # Full pipeline from scratch
-cwf:run --from impl                  # Resume from impl stage
-cwf:run --skip review-plan,retro     # Skip specific stages
-```
+**Why**
 
-**Design Intent**
+Delegate end-to-end workflow orchestration without manually chaining individual skills.
 
-Enables reproducible end-to-end workflow without requiring users to specify individual skill commands. Separates human gates (pre-impl) from automatic chaining (post-impl) to balance control and speed.
+**What Happens**
 
-**What It Does**
+Orchestrates the default stage chain with human gates before implementation and autonomous chaining after implementation, while persisting stage state for safe continuation.
 
-Executes gather → clarify → plan → review(plan) → impl → review(code) → refactor → retro → ship, with human gates before implementation, automatic chaining after, and user confirmation at `ship`. Including `refactor` in the default chain adds a maintainability pass for skill/docs/code drift before retrospective and shipping.
+**Expected Outcomes**
+
+1. The pipeline progresses stage by stage with explicit gates.
+2. Unresolved pre-implementation ambiguity triggers user decisions before irreversible execution.
+3. Persisted run-state checkpoints support reliable resume after compact/restart events.
 
 ### [setup](plugins/cwf/skills/setup/SKILL.md)
 
-JTBD: standardize environment and tool contracts once so later stages stay reproducible.
+Primary trigger: `cwf:setup`
 
-```text
-cwf:setup                # Full setup (hooks + tools + optional repo-index prompt)
-cwf:setup --hooks        # Hook group selection only
-cwf:setup --tools        # External tool detection only
-cwf:setup --env          # Environment variable migration/bootstrap only
-cwf:setup --codex        # Scope-aware skill/reference sync (user or project/local)
-cwf:setup --codex-wrapper # Scope-aware codex wrapper install (user or project/local)
-cwf:setup --cap-index    # Generate/refresh CWF capability index only (.cwf/indexes/cwf-index.md)
-cwf:setup --repo-index   # Generate/refresh repository index output (explicit)
-cwf:setup --repo-index --target agents # AGENTS.md managed block (for AGENTS-based repositories)
-```
+**Why**
 
-**Design Intent**
+Standardize runtime/tool contracts once so later workflow runs stay reproducible.
 
-Standardizes hooks, tool detection, and environment contracts in one initial pass to reduce execution variance. `--cap-index` creates a CWF capability routing map; `--repo-index` keeps AGENTS managed blocks aligned for progressive disclosure (see [documentation guide](docs/documentation-guide.md)).
+**What Happens**
 
-**What It Does**
+Guides initial contract bootstrap for hooks, dependencies, environment, config, and optional integrations, then persists the chosen baseline for deterministic operation.
 
-Interactive hook-group toggles, external AI CLI/API detection (Codex, Gemini, Tavily, Exa), env migration (legacy keys to canonical `CWF_*`), project config bootstrap (`.cwf-config.yaml`, `.cwf-config.local.yaml`), optional scope-aware Codex integration (skills + wrapper), and optional index generation/refresh. For Codex integration, setup resolves active plugin scope with deterministic precedence (`local > project > user`) and defaults integration to that scope. Use `cwf:setup --cap-index` for capability index and `cwf:setup --repo-index --target agents` for repository index.
+**Expected Outcomes**
+
+1. Baseline setup artifacts and policy context are created for a fresh repository.
+2. Missing required dependencies trigger interactive install-now prompts and deterministic rechecks.
+3. Selected Codex integration reports reconciled scope-aware links and wrapper state.
 
 ### [update](plugins/cwf/skills/update/SKILL.md)
 
-JTBD: keep local workflow behavior aligned with the latest contracts, fixes, and guardrails.
+Primary trigger: `cwf:update`
 
-```text
-cwf:update               # Check + update if newer version exists
-cwf:update --check       # Version check only
-```
+**Why**
 
-**Design Intent**
+Keep installed CWF behavior aligned with the latest contracts, fixes, and guardrails.
 
-Created because the author frequently forgot to update the plugin manually. Standardizes the `check → user approval → apply` sequence so version alignment becomes routine.
+**What Happens**
 
-**What It Does**
+Checks scope-specific installed vs latest state, requires explicit confirmation before mutation, applies updates, and reconciles scope-aware Codex linkage when needed.
 
-Refreshes marketplace metadata, compares installed vs latest version for selected scope, applies scoped update after user confirmation, and reconciles existing Codex links/wrapper targets when install paths changed. `--check` is read-only.
+**Expected Outcomes**
+
+1. A newer version requires explicit user confirmation before mutation.
+2. Check mode reports status without installation or reconcile mutations.
+3. Reconcile reports before/after integration state when install-path drift exists.
 
 ### Codex Integration
 

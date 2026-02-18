@@ -26,6 +26,23 @@ Every skill MUST follow this section order:
 ## References
 ```
 
+## README Skill Summary Format
+
+The top-level repository README (including locale mirrors) MUST keep each skill summary in this section order:
+
+1. Skill heading link (`### [skill](.../SKILL.md)`)
+2. Primary trigger
+3. `Why`
+4. `What Happens`
+5. `Expected Outcomes` (3 concise outcome bullets)
+
+Rules:
+
+- Keep this section outcome-focused; do not include flag matrices or low-level rollback/edge-case command flows.
+- Write outcome bullets in natural language; rigid given-when-then keywords are optional, not required.
+- Keep implementation contracts in each `SKILL.md` and skill-local `references/`; README summaries should point there instead of duplicating details.
+- Locale mirrors should preserve the same structure, while allowing language-specific tone.
+
 ## Frontmatter
 <!-- Gate: CORCA003 (skill-frontmatter-schema.cjs) — enforces key allowlist, name format, single-line description -->
 
