@@ -242,196 +242,28 @@ bash {CWF_PLUGIN_DIR}/scripts/check-run-gate-artifacts.sh \
 
 Run codebase quick scan first, then add expert-lens deep review using 4 parallel expert sub-agents.
 
-### 0. Resolve or Bootstrap Codebase Contract
+Full procedure: [references/codebase-deep-review-flow.md](references/codebase-deep-review-flow.md)
 
-Use the same contract bootstrap flow as `--codebase`.
-
-```bash
-bash {SKILL_DIR}/scripts/bootstrap-codebase-contract.sh --json
-```
-
-Contract deep-review policy fields are defined in [references/codebase-contract.md](references/codebase-contract.md):
-
-- `deep_review.fixed_experts[]` (mandatory experts)
-- `deep_review.context_experts[]` (context expert roster in contract JSON)
-- `deep_review.context_expert_count` (additional context experts)
-
-### 1. Resolve Session Directory and Run Codebase Scan
-
-Use [references/session-bootstrap.md](references/session-bootstrap.md) with bootstrap key `refactor-codebase-deep`.
-
-```bash
-bash {SKILL_DIR}/scripts/codebase-quick-scan.sh \
-  {REPO_ROOT} \
-  --contract "{CONTRACT_PATH}" > {session_dir}/refactor-codebase-scan.json
-```
-
-The wrapper delegates to [scripts/codebase-quick-scan.py](scripts/codebase-quick-scan.py); keep both files aligned when changing scan behavior.
-
-### 2. Select Experts (Contract-Driven)
-
-Select experts using deterministic script:
-
-```bash
-bash {SKILL_DIR}/scripts/select-codebase-experts.sh \
-  --scan "{session_dir}/refactor-codebase-scan.json" \
-  --contract "{CONTRACT_PATH}" > "{session_dir}/refactor-codebase-experts.json"
-```
-
-Selection policy:
-
-- Always include fixed experts from contract defaults:
-  - Martin Fowler
-  - Kent Beck
-- Add `deep_review.context_expert_count` context-matched experts from `deep_review.context_experts[]`
-- If context matches are insufficient, fill from contract roster order
-
-### 3. Parallel Expert Deep Review (4 Sub-agents)
-
-Read `{session_dir}/refactor-codebase-experts.json` and launch one sub-agent per selected expert (single message, parallel).
-
-Output files:
-
-| Expert slot | Output file |
-|-------------|-------------|
-| Martin Fowler | `{session_dir}/refactor-codebase-deep-fowler.md` |
-| Kent Beck | `{session_dir}/refactor-codebase-deep-beck.md` |
-| Context Expert 1 | `{session_dir}/refactor-codebase-deep-context-1.md` |
-| Context Expert 2 | `{session_dir}/refactor-codebase-deep-context-2.md` |
-
-Each expert sub-agent prompt:
-
-1. Read `{CWF_PLUGIN_DIR}/references/expert-advisor-guide.md` (review mode format)
-2. Read `{session_dir}/refactor-codebase-scan.json`
-3. Read `{session_dir}/refactor-codebase-experts.json` and adopt assigned expert identity
-4. Produce:
-   - Top 3 concerns (blocking risks)
-   - Top 3 suggestions (high leverage)
-   - 1 prioritized first action
-5. **Output Persistence**: write to assigned file and append `<!-- AGENT_COMPLETE -->`
-
-### 4. Synthesize Deep Report
-
-Merge scan + four expert outputs into `{session_dir}/refactor-summary.md`:
-
-- `Mode: cwf:refactor --codebase --deep`
-- Contract metadata (`CONTRACT_STATUS`, `CONTRACT_PATH`, optional `CONTRACT_WARNING`)
-- Scan metrics summary (errors/warnings/check counts)
-- Expert roster used (fixed + contextual, with selection reasons)
-- Convergent findings (agreements across 2+ experts)
-- Divergent findings (framework tensions)
-- Prioritized action list (P0/P1/P2)
-
-After writing summary artifacts, run deterministic gate:
-
-```bash
-bash {CWF_PLUGIN_DIR}/scripts/check-run-gate-artifacts.sh \
-  --session-dir "{session_dir}" \
-  --stage refactor \
-  --strict \
-  --record-lessons
-```
+Execution contract:
+1. Resolve/bootstrap codebase contract (`bootstrap-codebase-contract.sh --json`)
+2. Resolve session directory with [references/session-bootstrap.md](references/session-bootstrap.md) (`refactor-codebase-deep`)
+3. Run codebase scan to `{session_dir}/refactor-codebase-scan.json`
+4. Select experts to `{session_dir}/refactor-codebase-experts.json`
+5. Launch 4 parallel experts (Fowler, Beck, Context 1, Context 2) and persist outputs with `<!-- AGENT_COMPLETE -->`
+6. Merge scan + expert outputs into `{session_dir}/refactor-summary.md`, then run gate
 
 ---
 
 ## Deep Review Mode (`--skill <name>`)
 
-### 1. Locate the skill
+Full procedure: [references/deep-review-flow.md](references/deep-review-flow.md)
 
-Search for the SKILL.md in this order:
-1. `plugins/<name>/skills/<name>/SKILL.md` (marketplace plugin)
-2. `plugins/<name>/skills/*/SKILL.md` (skill name differs from plugin name)
-3. `.claude/skills/<name>/SKILL.md` (local skill)
-
-If not found, report error and stop.
-
-### 2. Read the skill
-
-Read the SKILL.md and all files in `references/`, `scripts/`, and `assets/` directories.
-
-### 3. Verify criteria provenance
-
-Run provenance verification before loading deep-review criteria:
-
-```bash
-bash {CWF_PLUGIN_DIR}/scripts/provenance-check.sh --level inform --json
-```
-
-Confirm the output includes [review-criteria.provenance.yaml](references/review-criteria.provenance.yaml). If its status is stale, continue but mark the final report with a provenance warning (include the skill/hook deltas).
-
-### 4. Load review criteria
-
-Read `{SKILL_DIR}/references/review-criteria.md` for the evaluation checklist.
-
-### 5. Parallel Evaluation with Sub-agents
-
-**Resolve session directory** using [references/session-bootstrap.md](references/session-bootstrap.md) with bootstrap key `refactor-skill`.
-
-Derive a stable skill suffix from `--skill <name>` (lowercase, non-alphanumeric replaced with `-`):
-
-```bash
-skill_suffix="$(printf '%s' "{skill name}" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//')"
-```
-
-Apply the [context recovery protocol](../../references/context-recovery-protocol.md) to these files:
-
-| Agent | Output file |
-|-------|-------------|
-| Structural Review | `{session_dir}/refactor-deep-structural-{skill_suffix}.md` |
-| Quality + Concept Review | `{session_dir}/refactor-deep-quality-{skill_suffix}.md` |
-
-Launch **2 parallel sub-agents** in a single message using Task tool (`subagent_type: general-purpose`, `max_turns: 12`) — only for agents whose result files are missing or invalid:
-
-**Agent A — Structural Review** (Criteria 1–4):
-
-Prompt includes:
-- Target skill name and SKILL.md content
-- All reference file contents and resource file listing
-- `{SKILL_DIR}/references/review-criteria.md` criteria sections 1–4
-- Instructions: Evaluate Size, Progressive Disclosure, Duplication, Resource Health. Return structured findings per criterion.
-- **Output Persistence**: Write your complete findings to: `{session_dir}/refactor-deep-structural-{skill_suffix}.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`
-
-**Agent B — Quality + Concept Review** (Criteria 5–9):
-
-Prompt includes:
-- Target skill name and SKILL.md content
-- All reference file contents and resource file listing
-- `{SKILL_DIR}/references/review-criteria.md` criteria sections 5–9
-- `{PLUGIN_ROOT}/references/concept-map.md` (for Criterion 8: Concept Integrity)
-- Instructions: Evaluate Writing Style, Degrees of Freedom, Anthropic Compliance, Concept Integrity, and Repository Independence/Portability. Return structured findings per criterion.
-- **Output Persistence**: Write your complete findings to: `{session_dir}/refactor-deep-quality-{skill_suffix}.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`
-
-Both agents analyze and report; neither modifies files.
-
-### 6. Produce report
-
-Read result files from the session directory (`{session_dir}/refactor-deep-structural-{skill_suffix}.md`, `{session_dir}/refactor-deep-quality-{skill_suffix}.md`). Merge both agents' findings into a unified report:
-
-```markdown
-## Refactor Review: <name>
-
-### Summary
-- Word count: X (severity)
-- Line count: X (severity)
-- Resources: X total, Y unreferenced
-- Duplication: detected/none
-- Portability risks: detected/none
-
-### Findings
-
-#### [severity] Finding title
-**What**: Description of the issue
-**Where**: File and section
-**Suggestion**: Concrete refactoring action
-
-### Suggested Actions
-1. Prioritized list of refactorings
-2. Each with effort estimate (small/medium/large)
-```
-
-### 7. Offer to apply
-
-Ask the user if they want to apply any suggestions. If yes, implement the refactorings.
+Execution contract:
+1. Locate the target skill, read `SKILL.md` + `references/` + `scripts/` + `assets/`
+2. Verify deep-review provenance (`review-criteria.provenance.yaml`)
+3. Resolve session directory with [references/session-bootstrap.md](references/session-bootstrap.md) (`refactor-skill`)
+4. Launch 2 parallel sub-agents (Structural 1-4, Quality+Concept 5-9) with output persistence sentinel
+5. Merge outputs into unified deep report and offer to apply changes
 
 ---
 
@@ -439,105 +271,14 @@ Ask the user if they want to apply any suggestions. If yes, implement the refact
 
 Cross-plugin analysis for global optimization. Read ALL skills and hooks, then analyze inter-plugin relationships.
 
-### 1. Inventory
+Full procedure: [references/holistic-review-flow.md](references/holistic-review-flow.md)
 
-Read every SKILL.md and hooks.json across:
-- `plugins/*/skills/*/SKILL.md` (marketplace plugins)
-- `plugins/*/hooks/hooks.json` (hook plugins)
-- `.claude/skills/*/SKILL.md` (local skills)
-
-Build a condensed inventory map: plugin name, type (skill/hook/hybrid), word count, capabilities, dependencies.
-
-### 2. Verify criteria provenance
-
-Run provenance verification before loading holistic criteria:
-
-```bash
-bash {CWF_PLUGIN_DIR}/scripts/provenance-check.sh --level inform --json
-```
-
-Confirm the output includes [holistic-criteria.provenance.yaml](references/holistic-criteria.provenance.yaml). If stale, continue analysis but include a provenance warning and delta summary in the report.
-
-### 3. Load analysis framework
-
-Read `{SKILL_DIR}/references/holistic-criteria.md` for the three analysis axes and Section 0 portability baseline.
-
-### 4. Parallel Analysis with Sub-agents
-
-**Resolve session directory** using [references/session-bootstrap.md](references/session-bootstrap.md) with bootstrap key `refactor-holistic`.
-
-Apply the [context recovery protocol](../../references/context-recovery-protocol.md) to these files:
-
-| Agent | Output file |
-|-------|-------------|
-| Convention Compliance | `{session_dir}/refactor-holistic-convention.md` |
-| Concept Integrity | `{session_dir}/refactor-holistic-concept.md` |
-| Workflow Coherence | `{session_dir}/refactor-holistic-workflow.md` |
-
-Launch **3 parallel sub-agents** in a single message using Task tool (`subagent_type: general-purpose`, `max_turns: 12`) — only for agents whose result files are missing or invalid:
-
-**Agent A — Convention Compliance (Form)**:
-
-Prompt includes:
-- Condensed inventory map (name, type, word count, capabilities)
-- `{SKILL_DIR}/references/holistic-criteria.md` Section 1 content
-- `{SKILL_DIR}/references/holistic-criteria.md` Section 0 portability baseline
-- `{PLUGIN_ROOT}/references/skill-conventions.md` content (shared conventions checklist)
-- Instructions: Verify each skill against skill-conventions.md checklists. Identify good patterns one skill has that others should adopt. Detect repeated patterns across 3+ skills that should be extracted to shared references. Include structural portability findings (hardcoded paths/layout assumptions). Read individual SKILL.md files for deeper investigation as needed. Return structured findings.
-- **Output Persistence**: Write your complete findings to: `{session_dir}/refactor-holistic-convention.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`
-
-**Agent B — Concept Integrity (Meaning)**:
-
-Prompt includes:
-- Condensed inventory map (name, type, word count, capabilities)
-- `{SKILL_DIR}/references/holistic-criteria.md` Section 2 content
-- `{SKILL_DIR}/references/holistic-criteria.md` Section 0 portability baseline
-- `{PLUGIN_ROOT}/references/concept-map.md` content (generic concepts + synchronization map)
-- Instructions: For each concept column in the synchronization map, compare how composing skills implement the same concept. Detect inconsistencies, under-synchronization, and over-synchronization. Include semantic portability findings (generic claims vs repo-locked behavior). Read individual SKILL.md files for deeper investigation as needed. Return structured findings.
-- **Output Persistence**: Write your complete findings to: `{session_dir}/refactor-holistic-concept.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`
-
-**Agent C — Workflow Coherence (Function)**:
-
-Prompt includes:
-- Condensed inventory map (name, type, word count, capabilities)
-- `{SKILL_DIR}/references/holistic-criteria.md` Section 3 content
-- `{SKILL_DIR}/references/holistic-criteria.md` Section 0 portability baseline
-- Instructions: Check data flow completeness between skills, trigger clarity, workflow automation opportunities, and runtime portability behavior under missing/variant repository structures. Read individual SKILL.md files for deeper investigation as needed. Return structured findings.
-- **Output Persistence**: Write your complete findings to: `{session_dir}/refactor-holistic-workflow.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`
-
-All 3 agents analyze and report; none modify files.
-
-### 5. Produce report
-
-Read result files from the session directory (`{session_dir}/refactor-holistic-convention.md`, `{session_dir}/refactor-holistic-concept.md`, `{session_dir}/refactor-holistic-workflow.md`). Merge 3 agents' outputs into a unified report. Save to `{REPO_ROOT}/.cwf/projects/{YYMMDD}-refactor-holistic/analysis.md`. Create the directory if it doesn't exist (use next sequence number if date prefix already exists).
-
-Report structure:
-
-```markdown
-# Cross-Plugin Analysis
-
-> Date: {YYYY-MM-DD}
-> Plugins analyzed: N skills, M hooks, L local skills
-
-## Plugin Map
-(table: name, type, words, key capabilities)
-
-## 1. Convention Compliance (Form)
-(structural consistency, pattern gaps, extraction opportunities)
-
-## 2. Concept Integrity (Meaning)
-(concept consistency, under/over-synchronization)
-
-## 3. Workflow Coherence (Function)
-(data flow, trigger clarity, automation opportunities)
-
-## Prioritized Actions
-(table: priority, action, effort, impact, affected plugins)
-```
-
-### 6. Discuss
-
-Present the report summary. The user may want to discuss findings, adjust priorities, or plan implementation sessions. Update the report with discussion outcomes.
+Execution contract:
+1. Build inventory from marketplace skills, hooks, and local skills
+2. Verify holistic criteria provenance (`holistic-criteria.provenance.yaml`)
+3. Resolve session directory with [references/session-bootstrap.md](references/session-bootstrap.md) (`refactor-holistic`)
+4. Launch 3 parallel sub-agents (Convention, Concept, Workflow) with output persistence sentinel
+5. Merge to holistic report and discuss prioritization with the user
 
 ---
 
@@ -575,6 +316,9 @@ Use `{SKILL_DIR}/references/docs-criteria.md` for evaluation criteria, [referenc
 
 - Review criteria for deep review: [references/review-criteria.md](references/review-criteria.md)
 - Holistic analysis framework: [references/holistic-criteria.md](references/holistic-criteria.md)
+- Detailed codebase deep procedure: [references/codebase-deep-review-flow.md](references/codebase-deep-review-flow.md)
+- Detailed deep-review procedure: [references/deep-review-flow.md](references/deep-review-flow.md)
+- Detailed holistic procedure: [references/holistic-review-flow.md](references/holistic-review-flow.md)
 - Concept synchronization map: [concept-map.md](../../references/concept-map.md)
 - Tidying techniques for --tidy mode: [references/tidying-guide.md](references/tidying-guide.md)
 - Codebase scan contract schema: [references/codebase-contract.md](references/codebase-contract.md)

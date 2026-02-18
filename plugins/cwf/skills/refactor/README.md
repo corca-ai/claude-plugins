@@ -9,7 +9,10 @@ File-level map for [refactor](SKILL.md).
 - [references/docs-contract.md](references/docs-contract.md): Contract schema for repository-local docs review scoping.
 - [references/docs-review-flow.md](references/docs-review-flow.md): Detailed docs-mode procedure flow extracted from SKILL.md.
 - [references/docs-criteria.provenance.yaml](references/docs-criteria.provenance.yaml): Provenance sidecar for docs-criteria.md.
+- [references/codebase-deep-review-flow.md](references/codebase-deep-review-flow.md): Detailed codebase deep-review procedure.
+- [references/deep-review-flow.md](references/deep-review-flow.md): Detailed `--skill` deep-review procedure.
 - [references/holistic-criteria.md](references/holistic-criteria.md): Reference file used by this skill (holistic-criteria).
+- [references/holistic-review-flow.md](references/holistic-review-flow.md): Detailed holistic analysis procedure.
 - [references/holistic-criteria.provenance.yaml](references/holistic-criteria.provenance.yaml): Provenance sidecar for holistic-criteria.md.
 - [references/review-criteria.md](references/review-criteria.md): Reference file used by this skill (review-criteria).
 - [references/review-criteria.provenance.yaml](references/review-criteria.provenance.yaml): Provenance sidecar for review-criteria.md.
