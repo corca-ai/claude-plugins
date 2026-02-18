@@ -462,8 +462,8 @@ live:
   session_id: "260219-01"
   dir: ".cwf/projects/260219-01-pre-release-audit-pass2"
   branch: "marketplace-v3"
-  phase: "plan"
-  task: "pre-release pass2 plan finalized"
+  phase: "retro"
+  task: "pre-release pass2 retrospective"
   key_files:
     - ".cwf/projects/260219-01-pre-release-audit-pass2/clarify-result.md"
     - ".cwf/projects/260219-01-pre-release-audit-pass2/plan.md"
@@ -515,14 +515,14 @@ expert_roster:
     source: "On the Criteria To Be Used in Decomposing Systems into Modules (CACM, 1972)"
     rationale: "Applied to concept vs principle distinction and directory structure classification, S24 retro: script decomposition as Decomposition 2 (secrets = detection algorithms), check-schemas.sh target encoding as information leakage, review filename collision as namespace sharing violation"
     introduced: "S13.5-B2"
-    usage_count: 2
+    usage_count: 3
     verified: true
   - name: "Gary Klein"
     domain: "naturalistic decision-making, recognition-primed decision model"
     source: "Sources of Power: How People Make Decisions (MIT Press, 1998)"
     rationale: "Applied to agreement bias analysis and mental simulation protocols, S260217-01: RPD analysis of triage distortion and deletion decision-point intervention"
     introduced: "S13.5-B2"
-    usage_count: 2
+    usage_count: 3
     verified: true
   - name: "James Reason"
     domain: "organizational accidents, Swiss cheese model, defense-in-depth"
@@ -557,14 +557,14 @@ expert_roster:
     source: "Out of the Crisis (MIT Press, 1986), Point 3: cease dependence on inspection"
     rationale: "Applied to convention-vs-structure enforcement gap, commit strategy recurrence as common cause variation, check-session.sh as inspection-to-process conversion, TOOL_ERROR as common cause variation, Check vs Study distinction in review orchestration, S24 retro: 5 inspection tools as Point 3 tension, 4/6 agent failure as common cause variation, datasketch threshold as PDCA cycle, additionalProperties as statistical process control"
     introduced: "S33"
-    usage_count: 4
+    usage_count: 5
     verified: true
   - name: "Chris Argyris"
     domain: "espoused theory vs theory-in-use, single-loop vs double-loop learning, defensive routines"
     source: "Organizational Learning: A Theory of Action Perspective (Argyris & Schön, 1978), Teaching Smart People How to Learn (HBR, 1991)"
     rationale: "Applied to teaching-practicing gap analysis, SKILL.md recording vs current behavior gap as espoused/theory-in-use divergence, eval>state>doc as double-loop learning mechanism"
     introduced: "S33"
-    usage_count: 1
+    usage_count: 2
     verified: true
   - name: "Gojko Adzic"
     domain: "specification by example, living documentation, key examples, collaborative specification"

@@ -29,3 +29,9 @@ When 점검 범위가 코드+문서+운영계약까지 걸치면 -> 탐색 서�
 - Persistence gate: `HARD_FAIL`
 - Recorded failures:
   - [refactor] refactor-summary.md missing heading: ## Refactor Summary
+
+## Run Gate Violation — 2026-02-18T23:51:22Z
+- Gate checker: `plugins/cwf/scripts/check-run-gate-artifacts.sh`
+- Persistence gate: `HARD_FAIL`
+- Recorded failures:
+  - [retro] retro.md missing '- Mode:' declaration

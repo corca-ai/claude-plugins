@@ -5,8 +5,8 @@ live:
   session_id: "260219-01"
   dir: ".cwf/projects/260219-01-pre-release-audit-pass2"
   branch: "marketplace-v3"
-  phase: "plan"
-  task: "pre-release pass2 plan finalized"
+  phase: "retro"
+  task: "pre-release pass2 retrospective"
   key_files:
     - ".cwf/projects/260219-01-pre-release-audit-pass2/clarify-result.md"
     - ".cwf/projects/260219-01-pre-release-audit-pass2/plan.md"
