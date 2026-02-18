@@ -14,6 +14,7 @@ REFACTOR_CHECK_LINKS="$PLUGIN_ROOT/skills/refactor/scripts/check-links.sh"
 LIVE_STATE_SCRIPT="$PLUGIN_ROOT/scripts/cwf-live-state.sh"
 CHECK_SESSION_SCRIPT="$PLUGIN_ROOT/scripts/check-session.sh"
 ARTIFACT_PATHS_SCRIPT="$PLUGIN_ROOT/scripts/cwf-artifact-paths.sh"
+UNIFIED_GATE_SCRIPT="$PLUGIN_ROOT/scripts/check-portability-contract.sh"
 
 CWD="$(pwd)"
 SINCE_EPOCH=""
@@ -571,6 +572,17 @@ if [[ -x "$CHECK_SESSION_SCRIPT" && -f "$LIVE_STATE_FILE_PROBE" ]]; then
   fi
 else
   log "check-session live gate unavailable; skipping"
+fi
+
+check_count=$((check_count + 1))
+if [[ -x "$UNIFIED_GATE_SCRIPT" ]]; then
+  log "contract-driven unified gate (post-run context)"
+  if ! bash "$UNIFIED_GATE_SCRIPT" --contract auto --context post-run; then
+    warn "unified portability gate failed ($UNIFIED_GATE_SCRIPT)"
+    fail_count=$((fail_count + 1))
+  fi
+else
+  log "unified gate unavailable; skipping"
 fi
 
 if [[ "$fail_count" -eq 0 ]]; then

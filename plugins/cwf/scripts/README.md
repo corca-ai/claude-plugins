@@ -7,6 +7,11 @@ This file maps scripts under [plugins/cwf/scripts](.).
 - [test-hook-exit-codes.sh](test-hook-exit-codes.sh): Deterministic hook allow/block regression suite (`--suite`, `--strict`) with hooks-manifest driven target discovery.
 - [check-script-deps.sh](check-script-deps.sh): Validates runtime script dependency edges from hooks manifest and script references.
 - [check-readme-structure.sh](check-readme-structure.sh): Verifies heading-level structure parity between the root English and Korean README documents.
+- [check-portability-contract.sh](check-portability-contract.sh): Unified contract gate runner (`portable` vs `authoring`) with context-aware filtering (`manual|hook|post-run`).
+- [check-claim-test-mapping.sh](check-claim-test-mapping.sh): Validates policy-claim inventory shape and source/test reference integrity.
+- [check-change-impact.sh](check-change-impact.sh): Enforces trigger-to-companion file change-impact rules from contract definitions.
+- [check-hook-sync.sh](check-hook-sync.sh): Validates generated `.githooks` files are synchronized with `configure-git-hooks.sh` via embedded SHA marker.
+- [check-portability-fixtures.sh](check-portability-fixtures.sh): Runs host-minimal and authoring-like fixture regressions for repository-agnostic behavior.
 - [check-review-routing.sh](check-review-routing.sh): Validates review routing cutoff contract (`prompt_lines > 1200`) and deterministic fallback expectations.
 - [check-shared-reference-conformance.sh](check-shared-reference-conformance.sh): Verifies shared output-persistence reference adoption across composing skills and duplication threshold.
 - [check-run-gate-artifacts.sh](check-run-gate-artifacts.sh): Validates stage artifacts for `cwf:run` gate closure (`review-code`, `refactor`, `retro`, `ship`) with contract-driven stage/policy modes (session/project/explicit contract priority), and can append gate failures to `lessons.md`.
@@ -22,7 +27,7 @@ This file maps scripts under [plugins/cwf/scripts](.).
 - [retro-collect-evidence.sh](retro-collect-evidence.sh): Collects retro evidence snapshot (token-limit signals, HITL decisions/events, warning lines, changed-files context).
 - [provenance-check.sh](provenance-check.sh): Verifies provenance sidecar freshness against current CWF skill/hook counts.
 - [codex/codex-with-log.sh](codex/codex-with-log.sh): Wrapper entrypoint that runs Codex and syncs logs.
-- [codex/post-run-checks.sh](codex/post-run-checks.sh): Post-run quality checks (changed files only) for markdown/shell/link/live-state gates plus tool-hygiene and HITL scratchpad sync guards.
+- [codex/post-run-checks.sh](codex/post-run-checks.sh): Post-run quality checks (changed files only) for markdown/shell/link/live-state gates plus tool-hygiene, HITL scratchpad sync guards, and contract-driven portability gate (`--context post-run`).
 - [codex/install-wrapper.sh](codex/install-wrapper.sh): Installs, checks, or disables a Codex wrapper for `user`/`project`/`local` scopes.
 - [codex/sync-skills.sh](codex/sync-skills.sh): Symlinks CWF skills/references into Codex scope-specific destinations.
 - [codex/verify-skill-links.sh](codex/verify-skill-links.sh): Verifies linked skill references resolve correctly.

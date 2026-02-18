@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# cwf-hook-source-sha=c414b8d5acf30464d44e39e9f887451f676d1dfae961593b48d7bc523cdab585
 set -euo pipefail
 
 PROFILE="balanced"
@@ -45,6 +46,7 @@ CWF_PROVENANCE="$(resolve_cwf_exec_path "scripts/provenance-check.sh" || true)"
 CWF_GROWTH_DRIFT="$(resolve_cwf_exec_path "scripts/check-growth-drift.sh" || true)"
 CWF_SCRIPT_DEPS="$(resolve_cwf_exec_path "scripts/check-script-deps.sh" || true)"
 CWF_README_STRUCTURE="$(resolve_cwf_exec_path "scripts/check-readme-structure.sh" || true)"
+CWF_UNIFIED_GATE="$(resolve_cwf_exec_path "scripts/check-portability-contract.sh" || true)"
 
 normalize_rel_path() {
   local value="$1"
@@ -274,6 +276,11 @@ if [[ "$PROFILE" != "fast" ]]; then
   else
     echo "[pre-push] check-index-coverage.sh unavailable; skipping index coverage checks." >&2
   fi
+fi
+
+if [[ -n "$CWF_UNIFIED_GATE" ]]; then
+  echo "[pre-push] unified portability gate (hook context)..."
+  bash "$CWF_UNIFIED_GATE" --contract auto --context hook
 fi
 
 if [[ "$PROFILE" == "strict" ]]; then

@@ -228,12 +228,15 @@ check_ship_stage() {
       append_fail "$stage" "run-stage-provenance.md missing required schema divider row"
     fi
 
-    local stage_header_re='^\| Stage \| Skill \| Args \| Started At \(UTC\) \| Finished At \(UTC\) \|'
-    stage_header_re+=' Duration \(s\) \| Artifacts \| Gate Outcome \|$'
-    stage_provenance_row_count="$(awk -v header_re="$stage_header_re" '
-      $0 ~ header_re { header_seen=1; next }
+    stage_provenance_row_count="$(awk '
+      /^\| Stage \| Skill \| Args \| Started At \(UTC\) \| Finished At \(UTC\) \| Duration \(s\) \| Artifacts \| Gate Outcome \|$/ { header_seen=1; next }
       header_seen && /^\|---\|---\|---\|---\|---\|---\|---\|---\|$/ { schema_seen=1; next }
-      schema_seen && /^\|([^|]*\|){8}$/ { count += 1 }
+      schema_seen && /^\|.*\|$/ {
+        pipes = gsub(/\|/, "&")
+        if (pipes == 9) {
+          count += 1
+        }
+      }
       END { print count + 0 }
     ' "$stage_provenance_file")"
     if [[ "$stage_provenance_row_count" -gt 0 ]]; then

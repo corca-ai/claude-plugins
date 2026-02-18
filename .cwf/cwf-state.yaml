@@ -414,6 +414,13 @@ sessions:
     branch: "marketplace-v3"
     artifacts: [plan.md, lessons.md]
 
+
+  - id: "S260218-02"
+    title: "run-portability-contract-hardening"
+    dir: ".cwf/projects/260218-02-run-portability-contract-hardening"
+    branch: "marketplace-v3"
+    artifacts: [plan.md, lessons.md]
+
 tools:
   codex: available
   gemini: available
@@ -438,11 +445,11 @@ hooks:
 # read by SessionStart(compact) hook for context recovery after auto-compact.
 # check-session.sh --live validates required fields are populated.
 live:
-  session_id: ""
-  dir: ".cwf/projects/260218-01-refactor-codebase-deep"
-  branch: ""
-  phase: "refactor"
-  task: "codebase deep review"
+  session_id: "260218-02"
+  dir: ".cwf/projects/260218-02-run-portability-contract-hardening"
+  branch: "marketplace-v3"
+  phase: "ship"
+  task: "Implement six portability guardrail improvements (contracts, claims, fixtures, generated-artifact sync, change-impact rules, unified gate)"
   key_files: []
   decisions: []
   decision_journal: []
@@ -451,19 +458,20 @@ live:
     state_file: ""
     rules_file: ""
     updated_at: ""
-  state_file: ".cwf/projects/260218-01-refactor-codebase-deep/session-state.yaml"
+  state_file: ".cwf/projects/260218-02-run-portability-contract-hardening/session-state.yaml"
   remaining_gates: []
-  state_version: "4"
-  worktree_root: ""
-  worktree_branch: ""
-  active_pipeline: ""
-  user_directive: ""
-  pipeline_override_reason: ""
-  ambiguity_mode: ""
-  blocking_decisions_pending: ""
-  ambiguity_decisions_file: ""
+  state_version: "6"
+  worktree_root: "/home/hwidong/codes/claude-plugins"
+  worktree_branch: "marketplace-v3"
+  active_pipeline: "cwf:run"
+  user_directive: "Use cwf:run style end-to-end; ship output to docs instead of GitHub"
+  pipeline_override_reason: "ship persisted as docs artifact (ship.md), GitHub mutation intentionally skipped"
+  ambiguity_mode: "defer-blocking"
+  blocking_decisions_pending: "false"
+  ambiguity_decisions_file: ".cwf/projects/260218-02-run-portability-contract-hardening/run-ambiguity-decisions.md"
   clarify_result_file: ""
-  clarify_completed_at: ""
+  clarify_completed_at: "2026-02-18T06:48:00Z"
+  stage_provenance_file: ".cwf/projects/260218-02-run-portability-contract-hardening/run-stage-provenance.md"
 # Expert roster for domain expert sub-agents (used by clarify, review, retro)
 # Semi-automatic evolution: usage_count auto-incremented, new experts user-approved
 # verified: true = skip web identity verification, cite source field directly

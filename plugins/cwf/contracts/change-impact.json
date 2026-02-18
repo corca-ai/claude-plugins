@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "id": "setup_contract_logic_requires_runtime_check",
+      "when_changed": [
+        "plugins/cwf/skills/setup/scripts/bootstrap-setup-contract.sh",
+        "plugins/cwf/skills/setup/references/setup-contract.md"
+      ],
+      "require_any_changed": [
+        "plugins/cwf/skills/setup/scripts/check-setup-contract-runtime.sh",
+        "plugins/cwf/scripts/check-portability-fixtures.sh"
+      ],
+      "message": "Setup-contract behavior changes must update runtime/fixture verification."
+    },
+    {
+      "id": "git_hook_generator_requires_generated_hooks",
+      "when_changed": [
+        "plugins/cwf/skills/setup/scripts/configure-git-hooks.sh"
+      ],
+      "require_all_changed": [
+        ".githooks/pre-commit",
+        ".githooks/pre-push"
+      ],
+      "message": "Hook generator changes must regenerate tracked .githooks outputs."
+    },
+    {
+      "id": "sot_or_policy_doc_change_requires_claim_sync",
+      "when_changed": [
+        "README.md",
+        "README.ko.md",
+        "docs/project-context.md",
+        "plugins/cwf/skills/setup/SKILL.md",
+        "plugins/cwf/skills/setup/references/setup-contract.md"
+      ],
+      "require_any_changed": [
+        "plugins/cwf/contracts/claims.json",
+        "plugins/cwf/contracts/change-impact.json"
+      ],
+      "message": "Policy/SoT document changes must update claim/change-impact contracts."
+    },
+    {
+      "id": "unified_gate_or_contract_change_requires_mapping_validation",
+      "when_changed": [
+        "plugins/cwf/scripts/check-portability-contract.sh",
+        "plugins/cwf/contracts/portable-contract.json",
+        "plugins/cwf/contracts/authoring-contract.json"
+      ],
+      "require_any_changed": [
+        "plugins/cwf/scripts/check-claim-test-mapping.sh",
+        "plugins/cwf/contracts/claims.json"
+      ],
+      "message": "Unified gate/contract changes must keep claim-test mapping aligned."
+    }
+  ]
+}

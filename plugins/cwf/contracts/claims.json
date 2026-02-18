@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "claims": [
+    {
+      "id": "readme_ko_sot",
+      "audience": "user",
+      "assertion": "README.ko.md is the user-facing policy source of truth.",
+      "source_refs": [
+        {
+          "file": "README.md",
+          "selector": "Disclaimer (SoT)"
+        },
+        {
+          "file": "README.ko.md",
+          "selector": "Disclaimer: Single Source Of Truth"
+        }
+      ],
+      "tests": [
+        {
+          "id": "readme_structure_parity",
+          "path": "plugins/cwf/scripts/check-readme-structure.sh",
+          "command": "bash plugins/cwf/scripts/check-readme-structure.sh --strict"
+        }
+      ]
+    },
+    {
+      "id": "repo_agnostic_execution",
+      "audience": "agent",
+      "assertion": "CWF execution remains repository-agnostic and host-specific checks are contract-gated.",
+      "source_refs": [
+        {
+          "file": "docs/project-context.md",
+          "selector": "execution must remain repository-agnostic"
+        },
+        {
+          "file": "plugins/cwf/skills/setup/references/setup-contract.md",
+          "selector": "Hook Policy Field"
+        }
+      ],
+      "tests": [
+        {
+          "id": "setup_contract_runtime",
+          "path": "plugins/cwf/skills/setup/scripts/check-setup-contract-runtime.sh",
+          "command": "bash plugins/cwf/skills/setup/scripts/check-setup-contract-runtime.sh"
+        },
+        {
+          "id": "portability_fixtures",
+          "path": "plugins/cwf/scripts/check-portability-fixtures.sh",
+          "command": "bash plugins/cwf/scripts/check-portability-fixtures.sh"
+        }
+      ]
+    },
+    {
+      "id": "portable_authoring_contract_split",
+      "audience": "agent",
+      "assertion": "Portable and authoring gate policies are explicitly separated and selectable.",
+      "source_refs": [
+        {
+          "file": "plugins/cwf/contracts/portable-contract.json",
+          "selector": "name=portable"
+        },
+        {
+          "file": "plugins/cwf/contracts/authoring-contract.json",
+          "selector": "name=authoring"
+        }
+      ],
+      "tests": [
+        {
+          "id": "unified_gate_portable",
+          "path": "plugins/cwf/scripts/check-portability-contract.sh",
+          "command": "bash plugins/cwf/scripts/check-portability-contract.sh --contract portable --context manual"
+        },
+        {
+          "id": "unified_gate_auto",
+          "path": "plugins/cwf/scripts/check-portability-contract.sh",
+          "command": "bash plugins/cwf/scripts/check-portability-contract.sh --contract auto --context manual"
+        }
+      ]
+    }
+  ]
+}

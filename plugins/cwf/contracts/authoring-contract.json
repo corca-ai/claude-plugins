@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "name": "authoring",
+  "description": "Authoring-repo gate profile: portable baseline plus repo-specific quality gates.",
+  "checks": [
+    {
+      "id": "claim_test_mapping",
+      "mode": "fail",
+      "contexts": ["manual", "hook", "post-run"],
+      "command": "bash \"$CWF_PLUGIN_ROOT/scripts/check-claim-test-mapping.sh\" --contract \"$CWF_PLUGIN_ROOT/contracts/claims.json\""
+    },
+    {
+      "id": "change_impact",
+      "mode": "fail",
+      "contexts": ["manual", "hook", "post-run"],
+      "command": "bash \"$CWF_PLUGIN_ROOT/scripts/check-change-impact.sh\" --contract \"$CWF_PLUGIN_ROOT/contracts/change-impact.json\" --staged"
+    },
+    {
+      "id": "hook_sync",
+      "mode": "fail",
+      "contexts": ["manual", "hook", "post-run"],
+      "command": "bash \"$CWF_PLUGIN_ROOT/scripts/check-hook-sync.sh\" --repo-root \"$CWF_HOST_REPO_ROOT\""
+    },
+    {
+      "id": "setup_contract_runtime",
+      "mode": "fail",
+      "contexts": ["manual"],
+      "command": "bash \"$CWF_PLUGIN_ROOT/skills/setup/scripts/check-setup-contract-runtime.sh\""
+    },
+    {
+      "id": "portability_fixtures",
+      "mode": "warn",
+      "contexts": ["manual"],
+      "command": "bash \"$CWF_PLUGIN_ROOT/scripts/check-portability-fixtures.sh\""
+    },
+    {
+      "id": "script_deps",
+      "mode": "fail",
+      "contexts": ["manual", "hook", "post-run"],
+      "command": "bash \"$CWF_PLUGIN_ROOT/scripts/check-script-deps.sh\" --strict"
+    },
+    {
+      "id": "growth_drift",
+      "mode": "warn",
+      "contexts": ["manual", "post-run"],
+      "command": "bash \"$CWF_PLUGIN_ROOT/scripts/check-growth-drift.sh\" --level warn"
+    },
+    {
+      "id": "provenance",
+      "mode": "warn",
+      "contexts": ["manual", "post-run"],
+      "command": "bash \"$CWF_PLUGIN_ROOT/scripts/provenance-check.sh\" --level warn"
+    },
+    {
+      "id": "readme_structure",
+      "mode": "fail",
+      "contexts": ["manual", "post-run"],
+      "command": "bash \"$CWF_PLUGIN_ROOT/scripts/check-readme-structure.sh\" --strict"
+    }
+  ]
+}

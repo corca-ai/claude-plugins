@@ -37,6 +37,11 @@ Gate profile values:
 - `balanced`: markdownlint + local link checks + staged shellcheck + push-time index coverage checks
 - `strict`: balanced + provenance freshness and growth-drift reports on push
 
+Contract gate behavior (all profiles):
+- hook scripts call `check-portability-contract.sh --contract auto --context hook`
+- `auto` resolves to `authoring` only for CWF authoring repos
+- non-authoring host repos always resolve to `portable`
+
 Resolution order:
 1. If command includes `--gate-profile <value>`, use it.
 2. Otherwise ask AskUserQuestion (single choice):
@@ -72,6 +77,7 @@ And summarize:
 - installed hooks (`pre-commit`, `pre-push`)
 - selected profile
 - what each hook enforces at that profile
+- resolved contract mode policy (`auto -> authoring|portable`) and why
 
 ---
 

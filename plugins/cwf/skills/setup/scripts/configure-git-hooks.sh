@@ -31,7 +31,26 @@ escape_for_perl_replacement() {
   printf '%s' "$1" | sed 's/[\\/&]/\\&/g'
 }
 
+compute_sha256() {
+  local file="$1"
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$file" | awk '{print $1}'
+    return 0
+  fi
+  if command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 "$file" | awk '{print $1}'
+    return 0
+  fi
+  return 1
+}
+
 CWF_PLUGIN_ROOT_ESCAPED="$(escape_for_perl_replacement "$CWF_PLUGIN_ROOT_DEFAULT")"
+CONFIG_SHA="$(compute_sha256 "$0" 2>/dev/null || true)"
+if [[ -z "$CONFIG_SHA" ]]; then
+  echo "Unable to compute configure-git-hooks.sh SHA-256 (sha256sum/shasum required)" >&2
+  exit 2
+fi
+CONFIG_SHA_ESCAPED="$(escape_for_perl_replacement "$CONFIG_SHA")"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -105,6 +124,7 @@ write_pre_commit() {
 
   cat > "$path" <<'SCRIPT'
 #!/usr/bin/env bash
+# cwf-hook-source-sha=__CONFIG_SHA__
 set -euo pipefail
 
 PROFILE="__PROFILE__"
@@ -147,6 +167,7 @@ resolve_cwf_exec_path() {
 CWF_LINK_CHECKER="$(resolve_cwf_exec_path "skills/refactor/scripts/check-links.sh" || true)"
 CWF_ARTIFACT_PATHS="$(resolve_cwf_path "scripts/cwf-artifact-paths.sh" || true)"
 CWF_PLUGIN_DESC_SYNC="$(resolve_cwf_exec_path "scripts/sync-marketplace-descriptions.sh" || true)"
+CWF_UNIFIED_GATE="$(resolve_cwf_exec_path "scripts/check-portability-contract.sh" || true)"
 
 normalize_rel_path() {
   local value="$1"
@@ -214,6 +235,10 @@ is_runtime_skip_path() {
     fi
   done
   return 1
+}
+
+is_cwf_authoring_repo() {
+  [[ -d "$REPO_ROOT/plugins/cwf" && -f "$REPO_ROOT/README.md" && -f "$REPO_ROOT/README.ko.md" ]]
 }
 
 ensure_markdownlint_cli2() {
@@ -324,9 +349,14 @@ if [[ "$PROFILE" != "fast" ]]; then
     fi
   fi
 fi
+
+if [[ -n "$CWF_UNIFIED_GATE" ]]; then
+  echo "[pre-commit] unified portability gate (hook context)..."
+  bash "$CWF_UNIFIED_GATE" --contract auto --context hook
+fi
 SCRIPT
 
-  perl -0pi -e "s/__PROFILE__/$profile/g; s/__CWF_PLUGIN_ROOT__/$CWF_PLUGIN_ROOT_ESCAPED/g" "$path"
+  perl -0pi -e "s/__PROFILE__/$profile/g; s/__CWF_PLUGIN_ROOT__/$CWF_PLUGIN_ROOT_ESCAPED/g; s/__CONFIG_SHA__/$CONFIG_SHA_ESCAPED/g" "$path"
   chmod +x "$path"
 }
 
@@ -336,6 +366,7 @@ write_pre_push() {
 
   cat > "$path" <<'SCRIPT'
 #!/usr/bin/env bash
+# cwf-hook-source-sha=__CONFIG_SHA__
 set -euo pipefail
 
 PROFILE="__PROFILE__"
@@ -382,6 +413,7 @@ CWF_PROVENANCE="$(resolve_cwf_exec_path "scripts/provenance-check.sh" || true)"
 CWF_GROWTH_DRIFT="$(resolve_cwf_exec_path "scripts/check-growth-drift.sh" || true)"
 CWF_SCRIPT_DEPS="$(resolve_cwf_exec_path "scripts/check-script-deps.sh" || true)"
 CWF_README_STRUCTURE="$(resolve_cwf_exec_path "scripts/check-readme-structure.sh" || true)"
+CWF_UNIFIED_GATE="$(resolve_cwf_exec_path "scripts/check-portability-contract.sh" || true)"
 
 normalize_rel_path() {
   local value="$1"
@@ -613,6 +645,11 @@ if [[ "$PROFILE" != "fast" ]]; then
   fi
 fi
 
+if [[ -n "$CWF_UNIFIED_GATE" ]]; then
+  echo "[pre-push] unified portability gate (hook context)..."
+  bash "$CWF_UNIFIED_GATE" --contract auto --context hook
+fi
+
 if [[ "$PROFILE" == "strict" ]]; then
   if ! is_cwf_authoring_repo; then
     echo "[pre-push] strict CWF authoring checks skipped (non-CWF repository)." >&2
@@ -648,7 +685,7 @@ if [[ "$PROFILE" == "strict" ]]; then
 fi
 SCRIPT
 
-  perl -0pi -e "s/__PROFILE__/$profile/g; s/__CWF_PLUGIN_ROOT__/$CWF_PLUGIN_ROOT_ESCAPED/g" "$path"
+  perl -0pi -e "s/__PROFILE__/$profile/g; s/__CWF_PLUGIN_ROOT__/$CWF_PLUGIN_ROOT_ESCAPED/g; s/__CONFIG_SHA__/$CONFIG_SHA_ESCAPED/g" "$path"
   chmod +x "$path"
 }
 

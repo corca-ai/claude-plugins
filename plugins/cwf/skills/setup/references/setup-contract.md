@@ -24,6 +24,24 @@ Generate a repository-local setup contract on first setup so `cwf:setup` can:
 
 When the field is missing, runtime defaults to `authoring-only`.
 
+## Policy Decision: Portable vs Authoring Contracts
+
+Git hook and post-run gates use a contract split so CWF remains repository-agnostic:
+
+- [plugins/cwf/contracts/portable-contract.json](../../../contracts/portable-contract.json): safe baseline checks for arbitrary host repositories.
+- [plugins/cwf/contracts/authoring-contract.json](../../../contracts/authoring-contract.json): stricter checks that depend on CWF authoring-repo structure.
+
+`check-portability-contract.sh --contract auto` selects:
+
+- `authoring` when the current repository matches CWF authoring markers.
+- `portable` for all other repositories.
+
+This keeps the dependency direction one-way (`repo -> cwf`, not `cwf -> this repo`).
+
+### Audience boundary for policy IDs
+
+Claim IDs and test IDs belong in machine-readable contracts (`claims.json`, `change-impact.json`) instead of user-facing README text or SKILL flow prose. This preserves deterministic traceability without leaking low-signal identifiers into conversational guidance.
+
 ## Contract Location and Status
 
 Default command:

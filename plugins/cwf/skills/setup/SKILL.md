@@ -283,7 +283,7 @@ Apply via [scripts/configure-git-hooks.sh](scripts/configure-git-hooks.sh) with 
 
 ### 2.7.4 Report Effective State
 
-Always report effective hooks state (`core.hooksPath`, installed hooks, selected profile, enforced checks).
+Always report effective hooks state (`core.hooksPath`, installed hooks, selected profile, enforced checks) and contract-gate resolution policy (`auto` => `authoring` only for CWF authoring repos, otherwise `portable`).
 
 Detailed prompts, command templates, and reporting checklist: [runtime-and-index-phases.md](references/runtime-and-index-phases.md).
 
