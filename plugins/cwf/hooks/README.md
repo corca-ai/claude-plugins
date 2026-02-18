@@ -9,6 +9,7 @@ This file maps scripts under [plugins/cwf/hooks/scripts](scripts).
 - [scripts/heartbeat.sh](scripts/heartbeat.sh): Emits async heartbeat metadata during tool usage.
 - [scripts/track-user-input.sh](scripts/track-user-input.sh): Enforces session worktree binding on prompt submit (`--guard-only`) and records user prompt metadata.
 - [scripts/log-turn.sh](scripts/log-turn.sh): Persists turn/session logs with sensitive token redaction.
+- [scripts/log-turn-lib.sh](scripts/log-turn-lib.sh): Shared helper functions used by `log-turn.sh`.
 - [scripts/parse-transcript.sh](scripts/parse-transcript.sh): Parses transcript structure for logging and exports.
 - [scripts/read-guard.sh](scripts/read-guard.sh): Read guard for large files.
 - [scripts/redirect-websearch.sh](scripts/redirect-websearch.sh): Redirects native web search flow to CWF gather flow.
