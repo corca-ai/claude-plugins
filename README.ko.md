@@ -24,7 +24,7 @@ claude plugin install cwf@corca-plugins
 - v3 이전 레거시 환경 변수를 표준 `CWF_*` 키로 마이그레이션
 - 프로젝트 설정 파일(`.cwf-config.yaml`, `.cwf-config.local.yaml`) 부트스트랩
 - 외부 도구 감지(Codex/Gemini/Tavily/Exa) 및 선택적 Codex 연동
-- 로컬 실행 의존성(`shellcheck`, `jq`, `gh`, `node`, `python3`) 점검 및 설치 선택
+- 로컬 실행 의존성(`shellcheck`, `jq`, `gh`, `node`, `python3`, `lychee`, `markdownlint-cli2`) 점검 및 설치 선택
 - 에이전트가 CWF 사용법 및 저장소 탐색을 돕는 인덱스 문서 생성(별도 파일로, 또는 AGENTS.md에 통합)
 
 플래그별 세부 동작은 [setup](#setup) 섹션을 참고하세요.
@@ -121,7 +121,7 @@ AI 에이전트는 이미 충분히 똑똑하나, 아직까지는 긴 작업을 
 
 ### 결과
 
-하나의 플러그인(CWF), 13개 스킬, 7개 훅 그룹. 컨텍스트는 세션 경계를 넘어 유지되고, 의사결정은 증거 기반으로 이루어지며, 품질 기준은 시스템과 함께 진화합니다.
+하나의 플러그인(CWF), 13개 스킬, 9개 훅 그룹. 컨텍스트는 세션 경계를 넘어 유지되고, 의사결정은 증거 기반으로 이루어지며, 품질 기준은 시스템과 함께 진화합니다.
 
 ## 핵심 개념: CWF의 빌딩 블록 7개
 
@@ -458,7 +458,7 @@ cwf:setup --codex-wrapper
 
 ## 훅
 
-CWF는 자동으로 실행되는 7개 훅 그룹을 포함합니다. 모두 기본 활성화되어 있으며, `cwf:setup --hooks`로 개별 그룹을 토글할 수 있습니다. 이 훅은 Claude Code 런타임에서 동작하며, Codex CLI에서는 동일 훅이 자동 실행되지 않습니다.
+CWF는 자동으로 실행되는 9개 훅 그룹을 포함합니다. 모두 기본 활성화되어 있으며, `cwf:setup --hooks`로 개별 그룹을 토글할 수 있습니다. 이 훅은 Claude Code 런타임에서 동작하며, Codex CLI에서는 동일 훅이 자동 실행되지 않습니다.
 
 | 그룹 | 훅 유형 | 하는 일 |
 |------|---------|---------|
@@ -467,6 +467,8 @@ CWF는 자동으로 실행되는 7개 훅 그룹을 포함합니다. 모두 기�
 | `read` | PreToolUse → Read | 파일 크기 인식 읽기 가드 (500줄 이상 경고, 2000줄 이상 차단) |
 | `lint_markdown` | PostToolUse → Write\|Edit | 마크다운 린트 + 로컬 링크 검증 -- 린트 위반 시 자동 수정 유도, 깨진 링크 비동기 보고 |
 | `lint_shell` | PostToolUse → Write\|Edit | 셸 스크립트용 ShellCheck 검증 |
+| `deletion_safety` | PreToolUse → Bash | 위험한 삭제 명령을 차단하고 정책 준수 근거를 요구 |
+| `workflow_gate` | UserPromptSubmit | `cwf:run` 게이트가 남아 있으면 ship/push/merge 의도를 차단 |
 | `websearch_redirect` | PreToolUse → WebSearch | Claude의 WebSearch를 `cwf:gather --search`로 리다이렉트 |
 | `compact_recovery` | SessionStart → compact, UserPromptSubmit | auto-compact 후 라이브 상태를 주입하고, 프롬프트 제출 시 세션-워크트리 바인딩 불일치를 차단 |
 

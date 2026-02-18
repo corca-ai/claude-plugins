@@ -32,7 +32,7 @@ cwf:setup
 - legacy env migration to canonical `CWF_*` keys
 - project config bootstrap (`.cwf-config.yaml`, `.cwf-config.local.yaml`)
 - tool detection (Codex/Gemini/Tavily/Exa) and optional Codex integration
-- local runtime dependency checks with install prompts (`shellcheck`, `jq`, `gh`, `node`, `python3`)
+- local runtime dependency checks with install prompts (`shellcheck`, `jq`, `gh`, `node`, `python3`, `lychee`, `markdownlint-cli2`)
 - optional index generation (improves agent routing and progressive-disclosure navigation)
 
 For detailed flags, see [setup](#setup).
@@ -128,7 +128,7 @@ CWF prioritizes effectiveness over immediate token efficiency. It spends tokens 
 
 ### Result
 
-The result: one plugin (`cwf`), thirteen skills, seven hook groups. Context survives session boundaries. Decisions are evidence-backed. Quality criteria evolve with the system.
+The result: one plugin (`cwf`), thirteen skills, nine hook groups. Context survives session boundaries. Decisions are evidence-backed. Quality criteria evolve with the system.
 
 ## Core Concepts
 
@@ -465,7 +465,7 @@ After install, open a new shell (or `source ~/.zshrc`). Aliases that call `codex
 
 ## Hooks
 
-CWF includes 7 hook groups that run automatically. All are enabled by default; use `cwf:setup --hooks` to toggle individual groups.
+CWF includes 9 hook groups that run automatically. All are enabled by default; use `cwf:setup --hooks` to toggle individual groups.
 
 | Group | Hook Type | What It Does |
 |-------|-----------|-------------|
@@ -474,6 +474,8 @@ CWF includes 7 hook groups that run automatically. All are enabled by default; u
 | `read` | PreToolUse → Read | File-size aware reading guard (warn >500 lines, block >2000) |
 | `lint_markdown` | PostToolUse → Write\|Edit | Markdown lint + local link validation — lint violations trigger self-correction, broken links reported async |
 | `lint_shell` | PostToolUse → Write\|Edit | ShellCheck validation for shell scripts |
+| `deletion_safety` | PreToolUse → Bash | Block risky deletion commands and require policy-compliant justification |
+| `workflow_gate` | UserPromptSubmit | Block ship/push/merge intents when run-stage gates are unresolved |
 | `websearch_redirect` | PreToolUse → WebSearch | Redirect Claude's WebSearch to `cwf:gather --search` |
 | `compact_recovery` | SessionStart → compact, UserPromptSubmit | Inject live session state after auto-compact and guard session↔worktree binding on prompts |
 
