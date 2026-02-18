@@ -4,6 +4,13 @@
 
 Three axes for cross-plugin analysis, based on semiotic decomposition (Form / Meaning / Function). Apply each to the full plugin inventory.
 
+## Contents
+
+- [0. Portability Baseline (Apply Across All Axes)](#0-portability-baseline-apply-across-all-axes)
+- [1. Convention Compliance (Form)](#1-convention-compliance-form)
+- [2. Concept Integrity (Meaning)](#2-concept-integrity-meaning)
+- [3. Workflow Coherence (Function)](#3-workflow-coherence-function)
+
 ## 0. Portability Baseline (Apply Across All Axes)
 
 Portability is a default requirement, not an opt-in check. Evaluate each axis with this baseline:

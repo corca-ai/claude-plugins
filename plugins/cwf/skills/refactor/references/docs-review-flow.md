@@ -4,6 +4,18 @@ Detailed `--docs` mode procedure for `cwf:refactor`.
 
 This reference preserves the full deterministic tool pass and semantic review sequence. `SKILL.md` keeps only routing/invariant summaries and links here.
 
+## Contents
+
+- [0. Resolve or Bootstrap Docs Contract](#0-resolve-or-bootstrap-docs-contract)
+- [1. Deterministic Tool Pass (Required First)](#1-deterministic-tool-pass-required-first)
+- [1.5 Verify docs criteria provenance](#15-verify-docs-criteria-provenance)
+- [2. Agent Entry Docs Review (Contract-Driven)](#2-agent-entry-docs-review-contract-driven)
+- [3. Project Context Review (Conditional)](#3-project-context-review-conditional)
+- [4. README and Locale Mirror Review (Conditional)](#4-readme-and-locale-mirror-review-conditional)
+- [5. Cross-Document Consistency (Conditional + Always-On)](#5-cross-document-consistency-conditional--always-on)
+- [6. Document Design Quality (Semantic Layer)](#6-document-design-quality-semantic-layer)
+- [7. Structural Optimization](#7-structural-optimization)
+
 ## Docs Review Mode (`--docs`)
 
 Review documentation consistency across the repository with portability baseline always enabled.

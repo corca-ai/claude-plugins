@@ -2,6 +2,18 @@
 
 Checklist distilled from skill-creator's Progressive Disclosure philosophy. Use this to evaluate a skill's SKILL.md and bundled resources.
 
+## Contents
+
+- [1. SKILL.md Size](#1-skillmd-size)
+- [2. Progressive Disclosure Compliance](#2-progressive-disclosure-compliance)
+- [3. Duplication Check](#3-duplication-check)
+- [4. Resource Health](#4-resource-health)
+- [5. Writing Style](#5-writing-style)
+- [6. Degrees of Freedom](#6-degrees-of-freedom)
+- [7. Anthropic Compliance](#7-anthropic-compliance)
+- [8. Concept Integrity](#8-concept-integrity)
+- [9. Repository Independence and Portability (Default)](#9-repository-independence-and-portability-default)
+
 ## 1. SKILL.md Size
 
 | Metric | Threshold | Severity |

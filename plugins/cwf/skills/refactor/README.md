@@ -13,6 +13,7 @@ File-level map for [refactor](SKILL.md).
 - [references/holistic-criteria.provenance.yaml](references/holistic-criteria.provenance.yaml): Provenance sidecar for holistic-criteria.md.
 - [references/review-criteria.md](references/review-criteria.md): Reference file used by this skill (review-criteria).
 - [references/review-criteria.provenance.yaml](references/review-criteria.provenance.yaml): Provenance sidecar for review-criteria.md.
+- [references/session-bootstrap.md](references/session-bootstrap.md): Shared session-directory bootstrap snippet and mode key map.
 - [references/tidying-guide.md](references/tidying-guide.md): Reference file used by this skill (tidying-guide).
 - [scripts/bootstrap-codebase-contract.sh](scripts/bootstrap-codebase-contract.sh): Helper script used by this skill (codebase contract bootstrap for codebase mode).
 - [scripts/check-links.sh](scripts/check-links.sh): Helper script used by this skill (markdown link validation for docs mode).

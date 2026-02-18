@@ -2,6 +2,17 @@
 
 Checklist for the `--docs` mode. Evaluate documentation consistency across the repository with portability baseline always enabled.
 
+## Contents
+
+- [0. Deterministic Gate (Run First)](#0-deterministic-gate-run-first)
+- [0.5 Contract-Aware Scope Resolution](#05-contract-aware-scope-resolution)
+- [1. Agent Entry Docs Review](#1-agent-entry-docs-review)
+- [2. Project Context Review (Conditional)](#2-project-context-review-conditional)
+- [3. README Review (Baseline + Conditional Mirrors)](#3-readme-review-baseline--conditional-mirrors)
+- [4. Cross-Document Consistency](#4-cross-document-consistency)
+- [5. Document Design Quality](#5-document-design-quality)
+- [6. Structural Optimization](#6-structural-optimization)
+
 ## 0. Deterministic Gate (Run First)
 
 Run deterministic checks before semantic review:

@@ -2,18 +2,98 @@
 # quick-scan.sh: Scan all plugins' SKILL.md files for structural issues.
 # Checks word count, line count, unreferenced resource files, and Anthropic compliance.
 #
-# Usage: quick-scan.sh [repo-root]
+# Usage: quick-scan.sh [repo-root] [--include-local-skills] [--local-skill-glob "<glob>"]
 # Output: JSON report with per-skill results and summary
 
 set -euo pipefail
 
-REPO_ROOT="${1:-$(git rev-parse --show-toplevel 2>/dev/null || { cd "$(dirname "$0")/../../../../.." && pwd; })}"
+print_usage() {
+  cat <<'EOF'
+quick-scan.sh: Scan skill structure and resource hygiene.
+
+Usage:
+  quick-scan.sh [repo-root]
+  quick-scan.sh [repo-root] --include-local-skills
+  quick-scan.sh [repo-root] --local-skill-glob ".claude/skills/*/SKILL.md"
+
+Options:
+  --include-local-skills     Also scan local skills (defaults include .claude/skills/*/SKILL.md and .codex/skills/*/SKILL.md)
+  --local-skill-glob <glob>  Add one extra local-skill glob under repo root (repeatable)
+  -h, --help                 Show this help and exit
+EOF
+}
+
+REPO_ROOT_DEFAULT="$(git rev-parse --show-toplevel 2>/dev/null || { cd "$(dirname "$0")/../../../../.." && pwd; })"
+REPO_ROOT="$REPO_ROOT_DEFAULT"
+REPO_ROOT_ARG_SET="false"
+INCLUDE_LOCAL_SKILLS="false"
+LOCAL_SKILL_GLOBS=(
+  ".claude/skills/*/SKILL.md"
+  ".codex/skills/*/SKILL.md"
+)
+EXTRA_LOCAL_SKILL_GLOBS=()
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -h|--help)
+      print_usage
+      exit 0
+      ;;
+    --include-local-skills)
+      INCLUDE_LOCAL_SKILLS="true"
+      ;;
+    --local-skill-glob)
+      shift
+      if [[ $# -eq 0 ]]; then
+        echo "Error: --local-skill-glob requires a value" >&2
+        exit 1
+      fi
+      INCLUDE_LOCAL_SKILLS="true"
+      EXTRA_LOCAL_SKILL_GLOBS+=("$1")
+      ;;
+    --)
+      shift
+      if [[ $# -gt 0 ]]; then
+        echo "Error: unexpected trailing arguments: $*" >&2
+        exit 1
+      fi
+      break
+      ;;
+    -*)
+      echo "Error: unknown option: $1" >&2
+      print_usage
+      exit 1
+      ;;
+    *)
+      if [[ "$REPO_ROOT_ARG_SET" == "true" ]]; then
+        echo "Error: unexpected extra positional argument: $1" >&2
+        exit 1
+      fi
+      REPO_ROOT="$1"
+      REPO_ROOT_ARG_SET="true"
+      ;;
+  esac
+  shift
+done
+
+if [[ ! -d "$REPO_ROOT" ]]; then
+  echo "Error: repo-root not found: $REPO_ROOT" >&2
+  exit 1
+fi
+REPO_ROOT="$(cd "$REPO_ROOT" && pwd)"
+
+if [[ ${#EXTRA_LOCAL_SKILL_GLOBS[@]} -gt 0 ]]; then
+  LOCAL_SKILL_GLOBS+=("${EXTRA_LOCAL_SKILL_GLOBS[@]}")
+fi
+
+shopt -s nullglob
 
 # Collect results
 results=()
 total_skills=0
 warn_count=0
 error_count=0
+declare -A seen_skill_files=()
 
 get_frontmatter_description_length() {
   local skill_md="$1"
@@ -56,6 +136,8 @@ scan_skill() {
   local plugin_name="$1"
   local skill_name="$2"
   local skill_md="$3"
+  local scan_origin="${4:-marketplace}"
+  local plugin_json="${5:-}"
   local skill_dir
   skill_dir="$(dirname "$skill_md")"
 
@@ -118,16 +200,22 @@ scan_skill() {
     anthropic_flags+=("skill_folder_not_kebab_case: $skill_name")
   fi
 
-  # Check description length from plugin.json
-  local plugin_json="$REPO_ROOT/plugins/$plugin_name/.claude-plugin/plugin.json"
-  if [[ -f "$plugin_json" ]]; then
+  # Check description length from plugin.json (marketplace plugins)
+  if [[ -n "$plugin_json" && -f "$plugin_json" ]]; then
     local desc_len
-    desc_len=$(python3 -c "
-import json, sys
-with open('$plugin_json') as f:
-    d = json.load(f)
-print(len(d.get('description', '')))
-" 2>/dev/null || echo "0")
+    desc_len=$(python3 - "$plugin_json" <<'PY'
+import json
+import sys
+
+path = sys.argv[1]
+try:
+    with open(path, encoding="utf-8") as f:
+        data = json.load(f)
+    print(len(data.get("description", "")))
+except Exception:
+    print(0)
+PY
+)
     if [[ "$desc_len" -gt 1024 ]]; then
       anthropic_flags+=("description_too_long: ${desc_len} chars (max 1024)")
     fi
@@ -197,6 +285,7 @@ print(len(d.get('description', '')))
   fi
 
   results+=("{
+    \"origin\": $(printf '%s' "$scan_origin" | jq -Rs .),
     \"plugin\": $(printf '%s' "$plugin_name" | jq -Rs .),
     \"skill\": $(printf '%s' "$skill_name" | jq -Rs .),
     \"word_count\": $word_count,
@@ -212,25 +301,70 @@ print(len(d.get('description', '')))
   total_skills=$((total_skills + 1))
 }
 
-# Scan marketplace plugins (skip deprecated)
-for skill_md in "$REPO_ROOT"/plugins/*/skills/*/SKILL.md; do
-  [[ -f "$skill_md" ]] || continue
+scan_skill_file_once() {
+  local plugin_name="$1"
+  local skill_name="$2"
+  local skill_md="$3"
+  local scan_origin="$4"
+  local plugin_json="${5:-}"
 
-  # Extract plugin name and skill name from path
-  local_path="${skill_md#"$REPO_ROOT"/plugins/}"
-  plugin_name="${local_path%%/*}"
-
-  # Skip deprecated plugins
-  pjson="$REPO_ROOT/plugins/$plugin_name/.claude-plugin/plugin.json"
-  if [[ -f "$pjson" ]]; then
-    if python3 -c "import json; d=json.load(open('$pjson')); exit(0 if d.get('deprecated') else 1)" 2>/dev/null; then
-      continue
-    fi
+  [[ -f "$skill_md" ]] || return 0
+  if [[ -n "${seen_skill_files[$skill_md]:-}" ]]; then
+    return 0
   fi
+  seen_skill_files["$skill_md"]=1
+  scan_skill "$plugin_name" "$skill_name" "$skill_md" "$scan_origin" "$plugin_json"
+}
 
-  skill_name="$(basename "$(dirname "$skill_md")")"
-  scan_skill "$plugin_name" "$skill_name" "$skill_md"
-done
+scan_marketplace_plugins() {
+  local skill_md local_path plugin_name pjson skill_name
+  for skill_md in "$REPO_ROOT"/plugins/*/skills/*/SKILL.md; do
+    [[ -f "$skill_md" ]] || continue
+
+    local_path="${skill_md#"$REPO_ROOT"/plugins/}"
+    plugin_name="${local_path%%/*}"
+    pjson="$REPO_ROOT/plugins/$plugin_name/.claude-plugin/plugin.json"
+
+    # Skip deprecated marketplace plugins
+    if [[ -f "$pjson" ]]; then
+      if python3 - "$pjson" <<'PY'
+import json
+import sys
+path = sys.argv[1]
+try:
+    with open(path, encoding="utf-8") as f:
+        data = json.load(f)
+    raise SystemExit(0 if data.get("deprecated") else 1)
+except Exception:
+    raise SystemExit(1)
+PY
+      then
+        continue
+      fi
+    fi
+
+    skill_name="$(basename "$(dirname "$skill_md")")"
+    scan_skill_file_once "$plugin_name" "$skill_name" "$skill_md" "marketplace" "$pjson"
+  done
+}
+
+scan_local_skills() {
+  local skill_glob skill_md local_path plugin_name skill_name
+  for skill_glob in "${LOCAL_SKILL_GLOBS[@]}"; do
+    for skill_md in "$REPO_ROOT"/$skill_glob; do
+      [[ -f "$skill_md" ]] || continue
+      local_path="${skill_md#"$REPO_ROOT"/}"
+      plugin_name="${local_path%%/*}"
+      skill_name="$(basename "$(dirname "$skill_md")")"
+      scan_skill_file_once "$plugin_name" "$skill_name" "$skill_md" "local"
+    done
+  done
+}
+
+scan_marketplace_plugins
+if [[ "$INCLUDE_LOCAL_SKILLS" == "true" ]]; then
+  scan_local_skills
+fi
 
 # Build final JSON
 flagged_count=0
@@ -244,8 +378,17 @@ for i in "${!results[@]}"; do
 done
 results_json+="]"
 
+local_skill_globs_json="[]"
+if [[ ${#LOCAL_SKILL_GLOBS[@]} -gt 0 ]]; then
+  local_skill_globs_json=$(printf '%s\n' "${LOCAL_SKILL_GLOBS[@]}" | jq -Rs '[split("\n")[:-1][]]')
+fi
+
 cat <<EOF
 {
+  "options": {
+    "include_local_skills": $([[ "$INCLUDE_LOCAL_SKILLS" == "true" ]] && echo "true" || echo "false"),
+    "local_skill_globs": $local_skill_globs_json
+  },
   "total_skills": $total_skills,
   "warnings": $warn_count,
   "errors": $error_count,

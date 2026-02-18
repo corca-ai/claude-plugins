@@ -13,6 +13,7 @@ Control drift across code, skills, and docs as teams install and author more cap
 
 ```text
 cwf:refactor                        Quick scan all marketplace skills
+cwf:refactor --include-local-skills Quick scan marketplace + local skills
 cwf:refactor --tidy [branch]        Commit-based tidying (parallel sub-agents)
 cwf:refactor --codebase             Contract-driven whole-codebase quick scan
 cwf:refactor --codebase --deep      Codebase deep review with 4 expert sub-agents
@@ -36,6 +37,7 @@ Parse the user's input:
 | `--tidy` or `--tidy <branch>` | Code Tidying |
 | `--codebase` | Codebase Quick Scan |
 | `--codebase --deep` | Codebase Deep Review |
+| `--include-local-skills` (no other mode flags) | Quick Scan + local skills |
 | `--skill <name>` | Deep Review |
 | `--skill --holistic` or `--holistic` | Holistic Analysis |
 | `--docs` | Docs Review |
@@ -65,14 +67,7 @@ Provenance verification rules:
 
 ## Quick Scan Mode (no args)
 
-Resolve session directory (for deterministic artifact persistence):
-
-```bash
-session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . dir 2>/dev/null || true)
-if [[ -z "$session_dir" ]]; then
-  session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/next-prompt-dir.sh --bootstrap refactor-quick-scan)
-fi
-```
+Resolve session directory (for deterministic artifact persistence) using [references/session-bootstrap.md](references/session-bootstrap.md) with bootstrap key `refactor-quick-scan`.
 
 Run the structural scan script and persist raw output:
 
@@ -81,6 +76,15 @@ bash {SKILL_DIR}/scripts/quick-scan.sh {REPO_ROOT} > {session_dir}/refactor-quic
 ```
 
 `{REPO_ROOT}` is the git repository root (5 levels up from SKILL.md in marketplace path, or use `git rev-parse --show-toplevel`).
+
+Optional local-skill scope (portability hardening):
+
+```bash
+bash {SKILL_DIR}/scripts/quick-scan.sh \
+  {REPO_ROOT} \
+  --include-local-skills \
+  --local-skill-glob ".claude/skills/*/SKILL.md" > {session_dir}/refactor-quick-scan.json
+```
 
 Parse the JSON output and present a summary table. Also persist a concise summary to `{session_dir}/refactor-summary.md`:
 
@@ -120,14 +124,7 @@ bash {SKILL_DIR}/scripts/tidy-target-commits.sh 5 [branch]
 
 ### 2. Parallel Analysis with Sub-agents
 
-**Resolve session directory**: use live session first, then bootstrap a project session fallback.
-
-```bash
-session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . dir 2>/dev/null || true)
-if [[ -z "$session_dir" ]]; then
-  session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/next-prompt-dir.sh --bootstrap refactor-tidy)
-fi
-```
+**Resolve session directory** using [references/session-bootstrap.md](references/session-bootstrap.md) with bootstrap key `refactor-tidy`.
 
 Apply the [context recovery protocol](../../references/context-recovery-protocol.md) — for each commit N (1-indexed), check `{session_dir}/refactor-tidy-commit-{N}.md`.
 
@@ -205,12 +202,7 @@ bash {SKILL_DIR}/scripts/check-codebase-contract-runtime.sh
 
 ### 1. Resolve Session Directory
 
-```bash
-session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . dir 2>/dev/null || true)
-if [[ -z "$session_dir" ]]; then
-  session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/next-prompt-dir.sh --bootstrap refactor-codebase)
-fi
-```
+Use [references/session-bootstrap.md](references/session-bootstrap.md) with bootstrap key `refactor-codebase`.
 
 ### 2. Run Contract-Driven Scan and Persist Raw Output
 
@@ -266,12 +258,7 @@ Contract deep-review policy fields are defined in [references/codebase-contract.
 
 ### 1. Resolve Session Directory and Run Codebase Scan
 
-```bash
-session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . dir 2>/dev/null || true)
-if [[ -z "$session_dir" ]]; then
-  session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/next-prompt-dir.sh --bootstrap refactor-codebase-deep)
-fi
-```
+Use [references/session-bootstrap.md](references/session-bootstrap.md) with bootstrap key `refactor-codebase-deep`.
 
 ```bash
 bash {SKILL_DIR}/scripts/codebase-quick-scan.sh \
@@ -378,14 +365,7 @@ Read `{SKILL_DIR}/references/review-criteria.md` for the evaluation checklist.
 
 ### 5. Parallel Evaluation with Sub-agents
 
-**Resolve session directory**: use live session first, then bootstrap a project session fallback.
-
-```bash
-session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . dir 2>/dev/null || true)
-if [[ -z "$session_dir" ]]; then
-  session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/next-prompt-dir.sh --bootstrap refactor-skill)
-fi
-```
+**Resolve session directory** using [references/session-bootstrap.md](references/session-bootstrap.md) with bootstrap key `refactor-skill`.
 
 Derive a stable skill suffix from `--skill <name>` (lowercase, non-alphanumeric replaced with `-`):
 
@@ -484,14 +464,7 @@ Read `{SKILL_DIR}/references/holistic-criteria.md` for the three analysis axes a
 
 ### 4. Parallel Analysis with Sub-agents
 
-**Resolve session directory**: use live session first, then bootstrap a project session fallback.
-
-```bash
-session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . dir 2>/dev/null || true)
-if [[ -z "$session_dir" ]]; then
-  session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/next-prompt-dir.sh --bootstrap refactor-holistic)
-fi
-```
+**Resolve session directory** using [references/session-bootstrap.md](references/session-bootstrap.md) with bootstrap key `refactor-holistic`.
 
 Apply the [context recovery protocol](../../references/context-recovery-protocol.md) to these files:
 
@@ -605,6 +578,7 @@ Use `{SKILL_DIR}/references/docs-criteria.md` for evaluation criteria, [referenc
 - Concept synchronization map: [concept-map.md](../../references/concept-map.md)
 - Tidying techniques for --tidy mode: [references/tidying-guide.md](references/tidying-guide.md)
 - Codebase scan contract schema: [references/codebase-contract.md](references/codebase-contract.md)
+- Shared session bootstrap snippet: [references/session-bootstrap.md](references/session-bootstrap.md)
 - Codebase expert selector script: [scripts/select-codebase-experts.sh](scripts/select-codebase-experts.sh)
 - Docs review criteria: [references/docs-criteria.md](references/docs-criteria.md)
 - Docs review contract schema: [references/docs-contract.md](references/docs-contract.md)
