@@ -56,7 +56,9 @@ set +e
 host_rc=$?
 set -e
 [[ "$host_rc" -eq 0 ]] || fail "host fixture pre-push should pass (got rc=$host_rc)"
-grep -Fq 'index coverage checks skipped by policy (mode: authoring-only).' "$tmp_root/host-pre-push.out" || fail "host fixture should skip index coverage in authoring-only mode"
+grep -Fq 'index coverage checks skipped by policy (mode: authoring-only).' \
+  "$tmp_root/host-pre-push.out" \
+  || fail "host fixture should skip index coverage in authoring-only mode"
 
 # Fixture B: authoring-like repo should execute index-coverage gate in authoring-only mode.
 author_repo="$tmp_root/authoring-repo"
@@ -81,6 +83,8 @@ set +e
 author_rc=$?
 set -e
 [[ "$author_rc" -ne 0 ]] || fail "authoring fixture pre-push should fail on index-coverage gate"
-grep -Fq 'index coverage checks (mode: authoring-only, blocking: true)...' "$tmp_root/author-pre-push.out" || fail "authoring fixture should run blocking index coverage checks"
+grep -Fq 'index coverage checks (mode: authoring-only, blocking: true)...' \
+  "$tmp_root/author-pre-push.out" \
+  || fail "authoring fixture should run blocking index coverage checks"
 
 echo "CHECK_OK: portability fixtures verified (host-minimal + authoring-repo)"

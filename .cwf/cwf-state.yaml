@@ -421,6 +421,13 @@ sessions:
     branch: "marketplace-v3"
     artifacts: [plan.md, lessons.md]
 
+
+  - id: "S260218-03"
+    title: "pre-release-refactor-audit"
+    dir: ".cwf/projects/260218-03-pre-release-refactor-audit"
+    branch: "marketplace-v3"
+    artifacts: [plan.md, lessons.md]
+
 tools:
   codex: available
   gemini: available
@@ -445,12 +452,19 @@ hooks:
 # read by SessionStart(compact) hook for context recovery after auto-compact.
 # check-session.sh --live validates required fields are populated.
 live:
-  session_id: "260218-02"
-  dir: ".cwf/projects/260218-02-run-portability-contract-hardening"
+  session_id: "260218-03"
+  dir: ".cwf/projects/260218-03-pre-release-refactor-audit"
   branch: "marketplace-v3"
-  phase: "ship"
-  task: "Implement six portability guardrail improvements (contracts, claims, fixtures, generated-artifact sync, change-impact rules, unified gate)"
-  key_files: []
+  phase: "done"
+  task: "Pre-release audit complete"
+  key_files:
+    - ".cwf/projects/260218-03-pre-release-refactor-audit/clarify-result.md"
+    - ".cwf/projects/260218-03-pre-release-refactor-audit/plan.md"
+    - ".cwf/projects/260218-03-pre-release-refactor-audit/lessons.md"
+    - ".cwf/projects/260218-03-pre-release-refactor-audit/refactor-summary.md"
+    - ".cwf/projects/260218-03-pre-release-refactor-audit/sot-audit.md"
+    - ".cwf/projects/260218-03-pre-release-refactor-audit/review-code.md"
+    - ".cwf/projects/260218-03-pre-release-refactor-audit/retro.md"
   decisions: []
   decision_journal: []
   hitl:
@@ -458,20 +472,20 @@ live:
     state_file: ""
     rules_file: ""
     updated_at: ""
-  state_file: ".cwf/projects/260218-02-run-portability-contract-hardening/session-state.yaml"
+  state_file: ".cwf/projects/260218-03-pre-release-refactor-audit/session-state.yaml"
   remaining_gates: []
   state_version: "6"
   worktree_root: "/home/hwidong/codes/claude-plugins"
   worktree_branch: "marketplace-v3"
-  active_pipeline: "cwf:run"
-  user_directive: "Use cwf:run style end-to-end; ship output to docs instead of GitHub"
+  active_pipeline: ""
+  user_directive: "Run clarify→plan→implement fixes→review→retro for public release readiness"
   pipeline_override_reason: "ship persisted as docs artifact (ship.md), GitHub mutation intentionally skipped"
   ambiguity_mode: "defer-blocking"
   blocking_decisions_pending: "false"
-  ambiguity_decisions_file: ".cwf/projects/260218-02-run-portability-contract-hardening/run-ambiguity-decisions.md"
-  clarify_result_file: ""
+  ambiguity_decisions_file: ".cwf/projects/260218-03-pre-release-refactor-audit/run-ambiguity-decisions.md"
+  clarify_result_file: ".cwf/projects/260218-03-pre-release-refactor-audit/clarify-result.md"
   clarify_completed_at: "2026-02-18T06:48:00Z"
-  stage_provenance_file: ".cwf/projects/260218-02-run-portability-contract-hardening/run-stage-provenance.md"
+  stage_provenance_file: ".cwf/projects/260218-03-pre-release-refactor-audit/run-stage-provenance.md"
 # Expert roster for domain expert sub-agents (used by clarify, review, retro)
 # Semi-automatic evolution: usage_count auto-incremented, new experts user-approved
 # verified: true = skip web identity verification, cite source field directly

@@ -15,6 +15,7 @@ ARTIFACT_PATHS_SCRIPT="$PLUGIN_ROOT/scripts/cwf-artifact-paths.sh"
 BLOCKED_ACTION_REGEX='(^|[[:space:]])(cwf:ship|/ship|git[[:space:]]+push|git[[:space:]]+merge|'
 BLOCKED_ACTION_REGEX+='gh[[:space:]]+pr[[:space:]]+create|gh[[:space:]]+pr[[:space:]]+merge|'
 BLOCKED_ACTION_REGEX+='커밋해|푸시해|배포해)([[:space:]]|$)'
+RUN_CLOSING_GATES=(review-code refactor retro ship)
 
 json_block() {
   local reason="$1"
@@ -251,11 +252,19 @@ status_msg="[PIPELINE] Active: ${ACTIVE_PIPELINE} (phase: ${PHASE:-unknown}, "
 status_msg+="state_version: ${STATE_VERSION:-unset}). Remaining gates: ${gate_chain}. "
 status_msg+="Do NOT skip gates. Use Skill tool to invoke next stage."
 
-if list_contains "review-code" "${REMAINING_GATES[@]}" && [[ "$BLOCKED_REQUEST" == "true" ]]; then
+pending_run_closing_gates=()
+for run_stage in "${RUN_CLOSING_GATES[@]}"; do
+  if list_contains "$run_stage" "${REMAINING_GATES[@]}"; then
+    pending_run_closing_gates+=("$run_stage")
+  fi
+done
+
+if [[ "$BLOCKED_REQUEST" == "true" && "${#pending_run_closing_gates[@]}" -gt 0 ]]; then
+  pending_gate_chain="$(IFS=','; echo "${pending_run_closing_gates[*]}")"
   if [[ -n "$OVERRIDE_REASON" && "$OVERRIDE_REASON" != "null" ]]; then
     json_allow "${status_msg} Override active: ${OVERRIDE_REASON}."
   fi
-  json_block "${status_msg} BLOCKED action: ship/push/commit requested while review-code is still pending."
+  json_block "${status_msg} BLOCKED action: ship/push/commit requested while run-closing gates are still pending (${pending_gate_chain})."
 fi
 
 json_allow "$status_msg"

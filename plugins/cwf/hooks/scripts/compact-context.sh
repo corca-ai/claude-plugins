@@ -31,10 +31,36 @@ if [[ -f "$LIVE_RESOLVER_SCRIPT" ]]; then
     source "$LIVE_RESOLVER_SCRIPT"
 fi
 
+json_escape_string() {
+    local value="$1"
+    value="${value//\\/\\\\}"
+    value="${value//\"/\\\"}"
+    value="${value//$'\n'/\\n}"
+    value="${value//$'\r'/\\r}"
+    value="${value//$'\t'/\\t}"
+    value="${value//$'\b'/\\b}"
+    value="${value//$'\f'/\\f}"
+    printf '%s' "$value"
+}
+
+extract_input_field() {
+    local input_json="$1"
+    local field="$2"
+
+    if command -v jq >/dev/null 2>&1; then
+        printf '%s' "$input_json" | jq -r --arg key "$field" '.[$key] // empty' 2>/dev/null
+        return
+    fi
+
+    printf '%s' "$input_json" \
+        | sed -n "s/.*\"${field}\"[[:space:]]*:[[:space:]]*\"\\([^\"]*\\)\".*/\\1/p" \
+        | head -n 1
+}
+
 # Read stdin to extract session_id for session log lookup
 INPUT=$(cat)
-HOOK_SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty' 2>/dev/null || true)
-HOOK_CWD=$(echo "$INPUT" | jq -r '.cwd // empty' 2>/dev/null || true)
+HOOK_SESSION_ID="$(extract_input_field "$INPUT" "session_id" || true)"
+HOOK_CWD="$(extract_input_field "$INPUT" "cwd" || true)"
 if [[ -z "$HOOK_CWD" ]]; then
     HOOK_CWD="${CLAUDE_PROJECT_DIR:-$PWD}"
 fi
@@ -328,14 +354,17 @@ if [[ ${#decision_journal[@]} -gt 0 ]]; then
 
 Decision journal (impl-phase decisions made before compact):"
     for entry in "${decision_journal[@]}"; do
-        decoded_entry="$(printf '%s' "$entry" | sed 's/\\"/"/g')"
-        entry_summary="$(printf '%s' "$decoded_entry" | jq -r '
-            if type == "object" and (.decision_id // "") != "" then
-                "[" + .decision_id + "] " + (.question // "?") + " => " + (.answer // "?")
-            else
-                empty
-            end
-        ' 2>/dev/null || true)"
+        entry_summary=""
+        if command -v jq >/dev/null 2>&1; then
+            decoded_entry="$(printf '%s' "$entry" | sed 's/\\"/"/g')"
+            entry_summary="$(printf '%s' "$decoded_entry" | jq -r '
+                if type == "object" and (.decision_id // "") != "" then
+                    "[" + .decision_id + "] " + (.question // "?") + " => " + (.answer // "?")
+                else
+                    empty
+                end
+            ' 2>/dev/null || true)"
+        fi
         if [[ -n "$entry_summary" ]]; then
             context="${context}
   - ${entry_summary}"
@@ -358,5 +387,10 @@ ${recent_turns}"
 fi
 
 # Output JSON with additionalContext
-jq -n --arg ctx "$context" \
-    '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":$ctx}}'
+if command -v jq >/dev/null 2>&1; then
+    jq -n --arg ctx "$context" \
+        '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":$ctx}}'
+else
+    escaped_context="$(json_escape_string "$context")"
+    printf '%s\n' "{\"hookSpecificOutput\":{\"hookEventName\":\"SessionStart\",\"additionalContext\":\"${escaped_context}\"}}"
+fi

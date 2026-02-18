@@ -2,6 +2,13 @@
 
 Protocol for persisting planning artifacts and session learnings.
 
+## Contents
+
+- [Plan Document](#plan-document)
+- [Lessons Document](#lessons-document)
+- [Retro Document (optional)](#retro-document-optional)
+- [Handoff Document (milestone sessions)](#handoff-document-milestone-sessions)
+
 ## Plan Document
 
 ### Location

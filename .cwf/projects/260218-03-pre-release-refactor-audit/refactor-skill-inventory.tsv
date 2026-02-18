@@ -1,0 +1,14 @@
+skill|lines|words|frontmatter_keys|unused_resources
+clarify|458|2093|name,description|-
+gather|349|1874|name,description|-
+handoff|362|2135|name,description|-
+hitl|186|1195|name,description|-
+impl|455|2576|name,description|-
+plan|294|1615|name,description|-
+refactor|334|1588|name,description|-
+retro|414|2922|name,description|-
+review|486|2782|name,description|-
+run|473|2556|name,description|-
+setup|484|2510|name,description|assets/githooks/pre-commit.template.sh;assets/githooks/pre-push.template.sh
+ship|350|1793|name,description|-
+update|290|1188|name,description|-

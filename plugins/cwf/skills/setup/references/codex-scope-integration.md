@@ -4,6 +4,12 @@ Detailed command and prompt contract for `setup` Phase 2.4, 2.5, and 2.6.
 
 `SKILL.md` remains the routing and invariant source. Use this file for concrete prompt text, command templates, and reporting checklists.
 
+## Contents
+
+- [2.4 Full Setup Codex Integration](#24-full-setup-codex-integration)
+- [2.5 `--codex` Skill Sync Rerun](#25---codex-skill-sync-rerun)
+- [2.6 `--codex-wrapper` Wrapper Rerun](#26---codex-wrapper-wrapper-rerun)
+
 ## 2.4 Full Setup Codex Integration
 
 ### 2.4.1 Resolve Active Plugin Scope

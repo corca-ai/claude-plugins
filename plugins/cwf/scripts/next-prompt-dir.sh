@@ -59,28 +59,54 @@ fi
 title="$1"
 
 resolve_project_root() {
-  # Prefer git root so this script works from both repository-level and
-  # plugin-copied locations.
+  local git_root=""
+  local candidate=""
+  local script_dir=""
+  local root_override="${CWF_PROJECT_ROOT:-}"
+
+  if [[ -n "$root_override" ]]; then
+    if [[ -d "$root_override" ]]; then
+      printf '%s\n' "$(cd "$root_override" && pwd)"
+      return 0
+    fi
+    echo "Warning: CWF_PROJECT_ROOT is set but not a directory: $root_override" >&2
+  fi
+
+  # Prefer git root from the caller's current working directory.
   if git_root="$(git rev-parse --show-toplevel 2>/dev/null)"; then
     printf '%s\n' "$git_root"
     return 0
   fi
 
-  script_dir="$(cd "$(dirname "$0")" && pwd)"
-  for rel in .. ../.. ../../..; do
-    if candidate="$(cd "$script_dir/$rel" 2>/dev/null && pwd)"; then
-      :
-    else
-      candidate=""
-    fi
-    if [[ -n "$candidate" && ( -f "$candidate/AGENTS.md" || -d "$candidate/.git" ) ]]; then
+  # Fallback: walk ancestor directories from caller cwd.
+  candidate="$(pwd)"
+  while [[ -n "$candidate" ]]; do
+    if [[ -e "$candidate/.git" || -f "$candidate/AGENTS.md" ]]; then
       printf '%s\n' "$candidate"
       return 0
     fi
+    if [[ "$candidate" == "/" ]]; then
+      break
+    fi
+    candidate="$(dirname "$candidate")"
   done
 
-  # Last-resort fallback keeps prior behavior for repository-level script layout.
-  printf '%s\n' "$(cd "$script_dir/.." && pwd)"
+  # Compatibility fallback: walk ancestors from the script location.
+  script_dir="$(cd "$(dirname "$0")" && pwd)"
+  candidate="$script_dir"
+  while [[ -n "$candidate" ]]; do
+    if [[ -e "$candidate/.git" || -f "$candidate/AGENTS.md" ]]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+    if [[ "$candidate" == "/" ]]; then
+      break
+    fi
+    candidate="$(dirname "$candidate")"
+  done
+
+  echo "Unable to resolve project root from current working directory: $(pwd)" >&2
+  return 1
 }
 
 project_root="$(resolve_project_root)"
@@ -91,7 +117,7 @@ if [[ ! -f "$resolver_script" ]]; then
   exit 1
 fi
 
-# shellcheck source=./cwf-artifact-paths.sh
+# shellcheck source=plugins/cwf/scripts/cwf-artifact-paths.sh
 source "$resolver_script"
 projects_dir="$(resolve_cwf_projects_dir "$project_root")"
 projects_rel="$(resolve_cwf_projects_relpath "$project_root")"

@@ -264,7 +264,13 @@ collect_repo_tool_evidence() {
   if [[ "${#scan_files[@]}" -eq 0 ]]; then
     mapfile -t scan_files < <(
       find "$REPO_ROOT" \
-        \( -path "$REPO_ROOT/.git" -o -path "$REPO_ROOT/.cwf" -o -path "$REPO_ROOT/node_modules" -o -path "$REPO_ROOT/.venv" -o -path "$REPO_ROOT/venv" \) -prune -o \
+        \( \
+          -path "$REPO_ROOT/.git" \
+          -o -path "$REPO_ROOT/.cwf" \
+          -o -path "$REPO_ROOT/node_modules" \
+          -o -path "$REPO_ROOT/.venv" \
+          -o -path "$REPO_ROOT/venv" \
+        \) -prune -o \
         -type f \( -name '*.sh' -o -name '*.bash' -o -name '*.zsh' \) -print 2>/dev/null | sort -u
     )
   fi

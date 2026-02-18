@@ -2,6 +2,18 @@
 
 Shared validation protocol for sub-agent output file persistence and recovery after context compaction.
 
+## Contents
+
+- [Global Contract](#global-contract)
+- [Decision Journal Contract](#decision-journal-contract)
+- [Session Directory Resolution](#session-directory-resolution)
+- [File Validation](#file-validation)
+- [Stage-Tier Gate Policy](#stage-tier-gate-policy)
+- [Validation Loop Contract](#validation-loop-contract)
+- [Gate Path Visibility](#gate-path-visibility)
+- [Agent Self-Persistence](#agent-self-persistence)
+- [Design Notes](#design-notes)
+
 ## Global Contract
 
 This protocol exists to enforce context-deficit resilience across skills:

@@ -13,7 +13,7 @@
       "id": "change_impact",
       "mode": "fail",
       "contexts": ["manual", "hook", "post-run"],
-      "command": "bash \"$CWF_PLUGIN_ROOT/scripts/check-change-impact.sh\" --contract \"$CWF_PLUGIN_ROOT/contracts/change-impact.json\" --staged"
+      "command": "bash \"$CWF_PLUGIN_ROOT/scripts/check-change-impact.sh\""
     },
     {
       "id": "hook_sync",

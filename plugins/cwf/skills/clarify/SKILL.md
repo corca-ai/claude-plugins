@@ -451,7 +451,7 @@ This state is what `cwf:impl` Phase 1.0 checks as a pre-condition.
 
 ## References
 
-- [references/research-guide.md](references/research-guide.md) — Fallback research methodology
+- [references/research-guide.md](references/research-guide.md) — Default sub-agent research methodology
 - [references/aggregation-guide.md](references/aggregation-guide.md) — Tier classification rules
 - [references/advisory-guide.md](references/advisory-guide.md) — Advisor α/β methodology
 - [references/questioning-guide.md](references/questioning-guide.md) — Persistent questioning

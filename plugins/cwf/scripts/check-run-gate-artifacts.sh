@@ -256,6 +256,11 @@ check_ship_stage() {
   local blocking_open_count_raw=""
   local blocking_open_count=0
   local merge_allowed=""
+  local stage_provenance_row_pattern=""
+
+  stage_provenance_row_pattern+='^\| Stage \| Skill \| Args \| Started At \(UTC\) \|'
+  stage_provenance_row_pattern+=' Finished At \(UTC\) \| Duration \(s\) \| Artifacts \|'
+  stage_provenance_row_pattern+=' Gate Outcome \|$'
 
   ensure_nonempty_file "$stage" "$stage_provenance_file" || true
   if [[ -s "$stage_provenance_file" ]]; then
@@ -271,8 +276,8 @@ check_ship_stage() {
       append_fail "$stage" "run-stage-provenance.md missing required schema divider row"
     fi
 
-    stage_provenance_row_count="$(awk '
-      /^\| Stage \| Skill \| Args \| Started At \(UTC\) \| Finished At \(UTC\) \| Duration \(s\) \| Artifacts \| Gate Outcome \|$/ { header_seen=1; next }
+    stage_provenance_row_count="$(awk -v header_pattern="$stage_provenance_row_pattern" '
+      $0 ~ header_pattern { header_seen=1; next }
       header_seen && /^\|---\|---\|---\|---\|---\|---\|---\|---\|$/ { schema_seen=1; next }
       schema_seen && /^\|.*\|$/ {
         pipes = gsub(/\|/, "&")
@@ -331,7 +336,11 @@ check_ship_stage() {
     fi
 
     append_pass "$stage" "ambiguity debt state synchronized with live state"
-    derived_blocking_count="$(printf '%s\n' "$ambiguity_sync_output" | sed -n -E 's/^blocking_open_count:[[:space:]]*([0-9]+)$/\1/p' | head -n 1)"
+    derived_blocking_count="$(
+      printf '%s\n' "$ambiguity_sync_output" \
+        | sed -n -E 's/^blocking_open_count:[[:space:]]*([0-9]+)$/\1/p' \
+        | head -n 1
+    )"
     derived_mode="$(printf '%s\n' "$ambiguity_sync_output" | sed -n -E 's/^mode:[[:space:]]*(.*)$/\1/p' | head -n 1)"
 
     if [[ -n "$derived_blocking_count" && "$derived_blocking_count" -ne "$blocking_open_count" ]]; then

@@ -203,9 +203,12 @@ fi
 CHECK_LINKS="$(resolve_check_links_script || true)"
 
 if [[ -z "$CHECK_LINKS" ]]; then
+    missing_checker_reason="Link checker unavailable for ${FILE_PATH}:"
+    missing_checker_reason+=" check-links.sh is missing or not executable under"
+    missing_checker_reason+=" plugin root (${PLUGIN_ROOT}) and repo fallback"
+    missing_checker_reason+=" (${REPO_ROOT:-<no-repo>}/plugins/cwf)."
     REASON=$(
-        printf 'Link checker unavailable for %s: check-links.sh is missing or not executable under plugin root (%s) and repo fallback (%s/plugins/cwf).' \
-            "$FILE_PATH" "$PLUGIN_ROOT" "${REPO_ROOT:-<no-repo>}" | jq -Rs .
+        printf '%s' "$missing_checker_reason" | jq -Rs .
     )
     cat <<EOF
 {"decision":"block","reason":${REASON}}

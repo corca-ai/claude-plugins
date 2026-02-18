@@ -4,6 +4,16 @@ Detailed procedure reference for setup phases 2.7, 2.8, 2.9, 2.10, 3, 4, and 5.
 
 `SKILL.md` is the workflow router and invariant contract. Use this file for concrete prompt text, command matrices, and report/validation checklists.
 
+## Contents
+
+- [Phase 2.7: Git Hook Gate Installation](#phase-27-git-hook-gate-installation)
+- [Phase 2.8: Environment Migration and Project Config Bootstrap](#phase-28-environment-migration-and-project-config-bootstrap)
+- [Phase 2.9: Agent Team Mode Setup](#phase-29-agent-team-mode-setup)
+- [Phase 2.10: CWF Run Ambiguity Mode Setup](#phase-210-cwf-run-ambiguity-mode-setup)
+- [Phase 3: Generate CWF Capability Index (Explicit)](#phase-3-generate-cwf-capability-index-explicit)
+- [Phase 4: Generate Repository Index (Optional)](#phase-4-generate-repository-index-optional)
+- [Phase 5: Lessons Checkpoint](#phase-5-lessons-checkpoint)
+
 ## Phase 2.7: Git Hook Gate Installation
 
 Use this phase when:
@@ -261,7 +271,7 @@ Restart Claude Code (or open a new session) so Agent Team mode changes are appli
 
 ---
 
-## Phase 2.10: cwf:run Ambiguity Mode Setup
+## Phase 2.10: CWF Run Ambiguity Mode Setup
 
 Use this phase when:
 - Mode is full setup (`cwf:setup`)

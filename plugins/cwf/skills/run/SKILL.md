@@ -70,8 +70,9 @@ Operational note:
      stage_provenance_file="{session directory}/run-stage-provenance.md" \
      pipeline_override_reason="" \
      state_version="1"
+   planned_closing_gates="{comma-separated subset of review-code,refactor,retro,ship after applying --from/--skip filters}"
    bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh list-set . \
-     remaining_gates="review-code,refactor,retro,ship"
+     remaining_gates="$planned_closing_gates"
    ```
 
 1. Initialize ambiguity ledger file (all modes):
@@ -401,14 +402,34 @@ After all stages complete (or the pipeline is halted):
    ```bash
    bash {CWF_PLUGIN_DIR}/scripts/check-session.sh --impl
    session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . dir)
-   bash {CWF_PLUGIN_DIR}/scripts/check-run-gate-artifacts.sh \
-     --session-dir "$session_dir" \
-     --stage review-code \
-     --stage refactor \
-     --stage retro \
-     --stage ship \
-     --strict \
-     --record-lessons
+   stage_provenance_file=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . stage_provenance_file)
+   gate_args=()
+   for closing_stage in review-code refactor retro ship; do
+     if awk -F'|' -v stage="$closing_stage" '
+       BEGIN { found=0 }
+       /^\|/ {
+         s=$2; outcome=$9
+         gsub(/^[[:space:]]+|[[:space:]]+$/, "", s)
+         gsub(/^[[:space:]]+|[[:space:]]+$/, "", outcome)
+         if (s == stage && outcome != "Skipped") {
+           found=1
+         }
+       }
+       END { exit(found ? 0 : 1) }
+     ' "$stage_provenance_file"; then
+       gate_args+=(--stage "$closing_stage")
+     fi
+   done
+
+   if [[ "${#gate_args[@]}" -gt 0 ]]; then
+     bash {CWF_PLUGIN_DIR}/scripts/check-run-gate-artifacts.sh \
+       --session-dir "$session_dir" \
+       "${gate_args[@]}" \
+       --strict \
+       --record-lessons
+   else
+     echo "No run-closing stages were executed; skip final run-closing artifact gate."
+   fi
    ```
 
    If any FAIL items are reported, fix them before proceeding. This is a forced function — the pipeline is not complete until all checks pass.

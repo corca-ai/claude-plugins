@@ -2,6 +2,12 @@
 
 Detailed prompts, parsing patterns, and command matrix for `update` Phase 0 and Phase 3.
 
+## Contents
+
+- [Phase 0 Details](#phase-0-details)
+- [Phase 1 Cache Resolution Details](#phase-1-cache-resolution-details)
+- [Phase 3 Details](#phase-3-details)
+
 ## Phase 0 Details
 
 ### Safe Scope Detection (No `eval`)

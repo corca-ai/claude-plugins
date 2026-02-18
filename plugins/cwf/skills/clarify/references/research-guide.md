@@ -1,6 +1,6 @@
 # Research Guide
 
-This guide is for the **fallback research path** — used when `cwf:gather` is not available. When `cwf:gather` is available, the main SKILL.md routes research through it first.
+This guide defines the default sub-agent research protocol for `cwf:clarify` Phase 2. Use it whenever clarify launches codebase/web researchers. If `cwf:gather` is available and invoked beforehand, treat gather output as additional context for this same protocol.
 
 ## Table of Contents
 

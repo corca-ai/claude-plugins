@@ -472,6 +472,8 @@ Detailed lessons/checkpoint format: [runtime-and-index-phases.md](references/run
 - [install-wrapper.sh](../../scripts/codex/install-wrapper.sh) — Codex scope-aware wrapper management
 - [verify-skill-links.sh](../../scripts/codex/verify-skill-links.sh) — Codex skill link validation
 - [scripts/configure-git-hooks.sh](scripts/configure-git-hooks.sh) — installs and profiles repository git hook gates
+- [assets/githooks/pre-commit.template.sh](assets/githooks/pre-commit.template.sh) — pre-commit hook template rendered by `configure-git-hooks.sh`
+- [assets/githooks/pre-push.template.sh](assets/githooks/pre-push.template.sh) — pre-push hook template rendered by `configure-git-hooks.sh`
 - [scripts/migrate-env-vars.sh](scripts/migrate-env-vars.sh) — legacy env detection and canonical CWF env migration
 - [scripts/bootstrap-project-config.sh](scripts/bootstrap-project-config.sh) — project config template/bootstrap and `.gitignore` sync
 - [scripts/configure-agent-teams.sh](scripts/configure-agent-teams.sh) — toggles Claude Agent Team runtime mode in `~/.claude/settings.json`

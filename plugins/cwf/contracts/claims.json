@@ -53,7 +53,7 @@
     {
       "id": "portable_authoring_contract_split",
       "audience": "agent",
-      "assertion": "Portable and authoring gate policies are explicitly separated; auto uses portable baseline and authoring remains explicitly selectable.",
+      "assertion": "Portable and authoring gate policies are separated; auto uses portable baseline and authoring remains selectable.",
       "source_refs": [
         {
           "file": "plugins/cwf/contracts/portable-contract.json",
