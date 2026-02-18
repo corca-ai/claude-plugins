@@ -20,6 +20,7 @@ File-level map for [refactor](SKILL.md).
 - [scripts/bootstrap-docs-contract.sh](scripts/bootstrap-docs-contract.sh): Helper script used by this skill (docs contract bootstrap for docs mode).
 - [scripts/check-docs-contract-runtime.sh](scripts/check-docs-contract-runtime.sh): Helper script used by this skill (docs-contract runtime behavior check for docs mode).
 - [scripts/codebase-quick-scan.sh](scripts/codebase-quick-scan.sh): Helper script used by this skill (contract-driven codebase quick scan).
+- [scripts/codebase-quick-scan.py](scripts/codebase-quick-scan.py): Python backend for `codebase-quick-scan.sh` contract evaluation and findings aggregation.
 - [scripts/select-codebase-experts.sh](scripts/select-codebase-experts.sh): Helper script used by this skill (fixed+context expert selection for codebase deep review).
 - [scripts/doc-graph.mjs](scripts/doc-graph.mjs): Helper script used by this skill (doc graph/orphan analysis for docs mode).
 - [scripts/quick-scan.sh](scripts/quick-scan.sh): Helper script used by this skill (quick-scan.sh).
