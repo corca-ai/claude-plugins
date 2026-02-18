@@ -30,6 +30,8 @@ INTERACTIVE_TTY="false"
 if [ -t 0 ] && [ -t 1 ]; then
   INTERACTIVE_TTY="true"
 fi
+WRAPPER_DEBUG="${CWF_CODEX_WRAPPER_DEBUG:-false}"
+WRAPPER_DEBUG_LOG="${CWF_CODEX_WRAPPER_DEBUG_LOG:-$HOME/.codex/log/cwf-codex-wrapper.log}"
 
 # Keep trap path safe under nounset even if exit happens unexpectedly early.
 RUN_START_EPOCH=""
@@ -46,6 +48,22 @@ if [ "$SYNC_UNBOUNDED_FALLBACK" = "auto" ]; then
     SYNC_UNBOUNDED_FALLBACK="true"
   fi
 fi
+
+wrapper_log() {
+  if [ "$WRAPPER_DEBUG" != "true" ]; then
+    return 0
+  fi
+  local ts
+  local tty_name
+  ts="$(date '+%Y-%m-%d %H:%M:%S' 2>/dev/null || printf 'unknown-time')"
+  tty_name="$(tty 2>/dev/null || true)"
+  if [ -z "$tty_name" ] || [ "$tty_name" = "not a tty" ]; then
+    tty_name="notty"
+  fi
+  mkdir -p "$(dirname "$WRAPPER_DEBUG_LOG")" 2>/dev/null || true
+  printf '%s pid=%s ppid=%s tty=%s %s\n' \
+    "$ts" "$$" "${PPID:-0}" "$tty_name" "$*" >> "$WRAPPER_DEBUG_LOG" 2>/dev/null || true
+}
 
 is_same_file() {
   local a="$1"
@@ -79,40 +97,49 @@ if [ -z "$REAL_CODEX" ]; then
 fi
 
 RUN_START_EPOCH="$(date +%s 2>/dev/null || true)"
+wrapper_log "start real_codex=$REAL_CODEX interactive=$INTERACTIVE_TTY cwd=$PWD args=$* start_epoch=$RUN_START_EPOCH"
 
 run_with_optional_timeout() {
   local timeout_sec="$1"
   shift
   if command -v timeout >/dev/null 2>&1; then
     timeout "$timeout_sec" "$@" || true
-  else
-    "$@" || true
+    return 0
   fi
+  "$@" || true
 }
 
 run_sync_once() {
   if [ "${SYNC_DONE:-false}" = "true" ]; then
+    wrapper_log "sync skipped reason=already_done"
     return 0
   fi
   SYNC_DONE="true"
 
   if [ ! -x "${SYNC_SCRIPT:-}" ]; then
+    wrapper_log "sync skipped reason=missing_script path=${SYNC_SCRIPT:-}"
     return 0
   fi
 
   # First pass: bounded to this wrapper invocation window.
   if [ -n "${RUN_START_EPOCH:-}" ]; then
+    wrapper_log "sync bounded begin since_epoch=$RUN_START_EPOCH"
     run_with_optional_timeout "$SYNC_TIMEOUT_SEC" \
       "$SYNC_SCRIPT" --cwd "$PWD" --since-epoch "$RUN_START_EPOCH" --quiet
+    wrapper_log "sync bounded end"
   fi
   # Optional second pass: unbounded fallback can pick unrelated sessions when many are active.
   if [ "$SYNC_UNBOUNDED_FALLBACK" = "true" ]; then
+    wrapper_log "sync unbounded begin"
     run_with_optional_timeout "$SYNC_TIMEOUT_SEC" \
       "$SYNC_SCRIPT" --cwd "$PWD" --quiet
+    wrapper_log "sync unbounded end"
   fi
 }
 
 cleanup_on_exit() {
+  # shellcheck disable=SC2317
+  wrapper_log "trap EXIT"
   # shellcheck disable=SC2317
   run_sync_once
 }
@@ -124,6 +151,7 @@ set +e
 EXIT_CODE=$?
 RUN_COMPLETED="true"
 set -e
+wrapper_log "real codex returned exit_code=$EXIT_CODE"
 
 run_sync_once
 
@@ -142,15 +170,20 @@ if [ "$RUN_COMPLETED" = "true" ] && [ "$POST_RUN_ENABLED" = "true" ] && [ -x "$P
   if [ "${CWF_CODEX_POST_RUN_QUIET:-false}" = "true" ]; then
     post_args+=(--quiet)
   fi
+  wrapper_log "post_run begin mode=$POST_RUN_MODE"
   if run_with_optional_timeout "$POST_RUN_TIMEOUT_SEC" "$POST_RUN_SCRIPT" "${post_args[@]}"; then
+    wrapper_log "post_run end status=ok"
     :
   else
     POST_RUN_EXIT=$?
+    wrapper_log "post_run end status=fail exit=$POST_RUN_EXIT"
   fi
 fi
 
 if [ "$EXIT_CODE" -eq 0 ] && [ "$POST_RUN_EXIT" -ne 0 ]; then
   EXIT_CODE="$POST_RUN_EXIT"
 fi
+
+wrapper_log "exit final_exit=$EXIT_CODE"
 
 exit "$EXIT_CODE"
