@@ -70,6 +70,7 @@ if command -v jq &>/dev/null; then
 else
   if grep -q "\"name\": \"$PLUGIN_NAME\"" "$MARKETPLACE_JSON" 2>/dev/null; then
     in_marketplace=true
+    marketplace_version=$(grep -A6 "\"name\": \"$PLUGIN_NAME\"" "$MARKETPLACE_JSON" | grep -oP '"version"\s*:\s*"\K[^"]+' | head -1)
     marketplace_description=$(grep -A5 "\"name\": \"$PLUGIN_NAME\"" "$MARKETPLACE_JSON" | grep -oP '"description"\s*:\s*"\K[^"]+' | head -1)
   fi
 fi
@@ -87,9 +88,11 @@ fi
 # Version match check (only for existing plugins)
 version_match=false
 if [[ "$in_marketplace" == "true" && -n "$plugin_json_version" ]]; then
-  if [[ -n "$marketplace_version" && "$marketplace_version" != "$plugin_json_version" ]]; then
+  if [[ -z "$marketplace_version" ]]; then
+    gaps+=("marketplace.json entry for $PLUGIN_NAME is missing version field")
+  elif [[ "$marketplace_version" != "$plugin_json_version" ]]; then
     gaps+=("marketplace.json version ($marketplace_version) does not match plugin.json ($plugin_json_version)")
-  elif [[ -n "$marketplace_version" && "$marketplace_version" == "$plugin_json_version" ]]; then
+  elif [[ "$marketplace_version" == "$plugin_json_version" ]]; then
     version_match=true
   fi
 fi

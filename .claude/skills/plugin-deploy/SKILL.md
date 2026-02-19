@@ -55,6 +55,7 @@ Process each `gaps[]` item:
 | Gap | Action |
 |-----|--------|
 | Version not bumped (`version_match: true`) | AskUserQuestion: patch/minor/major → edit plugin.json |
+| marketplace version missing | Add `version` to marketplace.json entry to restore deterministic version checks |
 | marketplace.json mismatch/missing | Edit marketplace.json (add entry or sync version) |
 | Deprecated but still in marketplace | Remove entry from marketplace.json; clear local plugin cache |
 | README.md missing mention | Add table row + detail section (EN), same for README.ko.md (KO) |
@@ -72,7 +73,7 @@ Re-run check-consistency.sh → confirm `gap_count: 0`. Fix iteratively if gaps 
 For `cwf` plugin deployments, run:
 
 ```bash
-bash {SKILL_DIR}/../../../plugins/cwf/scripts/codex/sync-skills.sh --cleanup-legacy
+bash {SKILL_DIR}/../../../plugins/cwf/scripts/codex/sync-skills.sh --scope user
 ```
 
 This includes post-sync link validation ([plugins/cwf/scripts/codex/verify-skill-links.sh](../../../plugins/cwf/scripts/codex/verify-skill-links.sh)). If sync or validation fails, report exact stderr and stop (do not continue with stale links).

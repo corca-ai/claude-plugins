@@ -70,7 +70,7 @@ When a plugin is deprecated:
 
 - **Plugin with scripts but no SKILL.md/hooks.json**: invalid — needs entry point
 - **Plugin renamed**: treat as new plugin + deprecate old
-- **marketplace.json has no version field for plugin**: OK, version lives in plugin.json
+- **marketplace.json has no version field for plugin**: add `version` to keep deploy/version checks deterministic
 - **README section order**: Skills come before Hooks, within each group maintain existing order
 
 ## Commit Policy
