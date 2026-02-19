@@ -83,66 +83,6 @@ live_scalar_key_declared() {
   grep -Eq "^[[:space:]]{2}${key}:[[:space:]]*" "$LIVE_STATE_FILE"
 }
 
-live_list_is_inline_empty() {
-  local key="$1"
-  grep -Eq "^[[:space:]]{2}${key}:[[:space:]]*\\[[[:space:]]*\\][[:space:]]*$" "$LIVE_STATE_FILE"
-}
-
-live_list_block_has_lines() {
-  local key="$1"
-  awk -v key="$key" '
-    /^live:/ { in_live=1; next }
-    in_live && /^[^[:space:]]/ { exit }
-    in_live {
-      if ($0 ~ "^[[:space:]]{2}" key ":[[:space:]]*$") {
-        in_target=1
-        next
-      }
-      if (!in_target) {
-        next
-      }
-      if ($0 ~ /^[[:space:]]{2}[A-Za-z0-9_-]+:[[:space:]]*/) {
-        exit
-      }
-      if ($0 !~ /^[[:space:]]*$/) {
-        print "1"
-        exit
-      }
-    }
-  ' "$LIVE_STATE_FILE" | grep -q '^1$'
-}
-
-read_live_scalar_or_block() {
-  local base_dir="$1"
-  local key="$2"
-  local value=""
-  if ! live_scalar_key_declared "$key"; then
-    json_block "BLOCKED: workflow gate expected live.${key} in ${LIVE_STATE_FILE}, but key is missing or malformed."
-  fi
-  if ! value="$(read_live_scalar "$base_dir" "$key" 2>/dev/null)"; then
-    json_block "BLOCKED: workflow gate could not parse live.${key} from ${LIVE_STATE_FILE}. Fix live-state parser/state before continuing."
-  fi
-  printf '%s' "$value"
-}
-
-read_live_list_or_block() {
-  local base_dir="$1"
-  local key="$2"
-  local value=""
-  if ! live_scalar_key_declared "$key"; then
-    json_block "BLOCKED: workflow gate expected live.${key} in ${LIVE_STATE_FILE}, but key is missing or malformed."
-  fi
-  if ! value="$(read_live_list "$base_dir" "$key" 2>/dev/null)"; then
-    json_block "BLOCKED: workflow gate could not parse live.${key} from ${LIVE_STATE_FILE}. Fix live-state parser/state before continuing."
-  fi
-  if [[ -z "$value" ]] && ! live_list_is_inline_empty "$key"; then
-    if live_list_block_has_lines "$key"; then
-      json_block "BLOCKED: workflow gate detected malformed live.${key} entries in ${LIVE_STATE_FILE}."
-    fi
-  fi
-  printf '%s' "$value"
-}
-
 resolve_base_dir() {
   local input_json="$1"
   local cwd_from_input=""
@@ -213,14 +153,21 @@ if [[ -z "$LIVE_STATE_FILE" || ! -f "$LIVE_STATE_FILE" ]]; then
   json_allow "[WARNING] live state file unavailable; workflow gate skipped."
 fi
 
-ACTIVE_PIPELINE="$(read_live_scalar_or_block "$BASE_DIR" "active_pipeline")"
+if ! live_scalar_key_declared "active_pipeline"; then
+  if [[ "$BLOCKED_REQUEST" == "true" ]]; then
+    json_block "BLOCKED: workflow gate expected live.active_pipeline in ${LIVE_STATE_FILE}, but key is missing."
+  fi
+  json_allow "[WARNING] live.active_pipeline key missing; workflow gate skipped for non-protected prompts."
+fi
+
+ACTIVE_PIPELINE="$(read_live_scalar "$BASE_DIR" "active_pipeline" 2>/dev/null || true)"
 if [[ -z "$ACTIVE_PIPELINE" ]]; then
   json_allow "[WARNING] live.active_pipeline is empty; workflow gate treated this as no active pipeline."
 fi
 
 # Stale pipeline detection: if stored session_id differs from current, the
 # pipeline belongs to a previous session and should be cleaned up.
-STORED_SESSION_ID="$(read_live_scalar_or_block "$BASE_DIR" "session_id")"
+STORED_SESSION_ID="$(read_live_scalar "$BASE_DIR" "session_id" 2>/dev/null || true)"
 if [[ -n "$SESSION_ID" && -n "$STORED_SESSION_ID" && "$SESSION_ID" != "$STORED_SESSION_ID" ]]; then
   stale_reason="[WARNING] Stale pipeline detected: active_pipeline='${ACTIVE_PIPELINE}' "
   stale_reason+="belongs to session '${STORED_SESSION_ID}' but current session is '${SESSION_ID}'. "
@@ -228,11 +175,11 @@ if [[ -n "$SESSION_ID" && -n "$STORED_SESSION_ID" && "$SESSION_ID" != "$STORED_S
   json_allow "$stale_reason"
 fi
 
-PHASE="$(read_live_scalar_or_block "$BASE_DIR" "phase")"
-OVERRIDE_REASON="$(read_live_scalar_or_block "$BASE_DIR" "pipeline_override_reason")"
-STATE_VERSION="$(read_live_scalar_or_block "$BASE_DIR" "state_version")"
+PHASE="$(read_live_scalar "$BASE_DIR" "phase" 2>/dev/null || true)"
+OVERRIDE_REASON="$(read_live_scalar "$BASE_DIR" "pipeline_override_reason" 2>/dev/null || true)"
+STATE_VERSION="$(read_live_scalar "$BASE_DIR" "state_version" 2>/dev/null || true)"
 
-REMAINING_GATES_RAW="$(read_live_list_or_block "$BASE_DIR" "remaining_gates")"
+REMAINING_GATES_RAW="$(read_live_list "$BASE_DIR" "remaining_gates" 2>/dev/null || true)"
 REMAINING_GATES=()
 if [[ -n "$REMAINING_GATES_RAW" ]]; then
   while IFS= read -r line; do

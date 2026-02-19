@@ -299,6 +299,47 @@ suite_workflow_gate() {
   run_hook "$hook" "$sandbox" "$input_json"
   assert_decision "block" "workflow-gate blocks Korean commit intent while closing gate pending"
   assert_exit_code 1 "workflow-gate Korean commit block exit code"
+
+  cat > "$sandbox/.cwf/cwf-state.yaml" <<'EOF_STATE_MISSING_ACTIVE'
+live:
+  session_id: "S-TEST-1"
+  phase: "impl"
+  remaining_gates:
+    - "review-code"
+EOF_STATE_MISSING_ACTIVE
+  input_json="$(jq -nc \
+    --arg cwd "$sandbox" \
+    --arg session "S-TEST-1" \
+    --arg prompt "다음 단계 진행" \
+    '{cwd:$cwd,session_id:$session,prompt:$prompt}')"
+  run_hook "$hook" "$sandbox" "$input_json"
+  assert_decision "allow" "workflow-gate allows non-protected prompt when active_pipeline key is missing"
+  assert_exit_code 0 "workflow-gate missing active_pipeline allow exit code"
+
+  input_json="$(jq -nc \
+    --arg cwd "$sandbox" \
+    --arg session "S-TEST-1" \
+    --arg prompt "git push 해" \
+    '{cwd:$cwd,session_id:$session,prompt:$prompt}')"
+  run_hook "$hook" "$sandbox" "$input_json"
+  assert_decision "block" "workflow-gate blocks protected prompt when active_pipeline key is missing"
+  assert_exit_code 1 "workflow-gate missing active_pipeline block exit code"
+
+  cat > "$sandbox/.cwf/cwf-state.yaml" <<'EOF_STATE_MISSING_OPTIONAL'
+live:
+  session_id: "S-TEST-1"
+  active_pipeline: "cwf:run"
+  remaining_gates:
+    - "review-code"
+EOF_STATE_MISSING_OPTIONAL
+  input_json="$(jq -nc \
+    --arg cwd "$sandbox" \
+    --arg session "S-TEST-1" \
+    --arg prompt "git push 해" \
+    '{cwd:$cwd,session_id:$session,prompt:$prompt}')"
+  run_hook "$hook" "$sandbox" "$input_json"
+  assert_decision "block" "workflow-gate still blocks push when optional live keys are missing"
+  assert_exit_code 1 "workflow-gate missing optional keys block exit code"
 }
 
 suite_deletion_safety() {
