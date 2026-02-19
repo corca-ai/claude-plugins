@@ -1,0 +1,27 @@
+# I1-H33 markdown/link lint gate
+date: 2026-02-19T01:01:57Z
+markdown_script: plugins/cwf/hooks/scripts/check-markdown.sh
+link_script: plugins/cwf/hooks/scripts/check-links-local.sh
+tmp_repo: /tmp/cwf-h33-RtVp
+
+## Case A: markdown block (lint violation)
+command: jq -nc --arg p '/tmp/cwf-h33-RtVp/bad_markdown.md' --arg cwd '/tmp/cwf-h33-RtVp' '{tool_input:{file_path:$p},cwd:$cwd}' | bash plugins/cwf/hooks/scripts/check-markdown.sh
+exit_code: 0
+stdout:
+{"decision":"block","reason":"markdownlint-cli2 v0.21.0 (markdownlint v0.40.0)\nFinding: /tmp/cwf-h33-RtVp/bad_markdown.md !.cwf/projects/ !.cwf/prompt-logs/ !node_modules/ !**/node_modules/ !references/anthropic-skills-guide/\nLinting: 1 file(s)\nSummary: 1 error(s)\nbad_markdown.md:1 error MD041/first-line-heading/first-line-h1 First line in a file should be a top-level heading [Context: \"plain text without heading\"]"}
+
+## Case B: markdown allow (clean file)
+command: jq -nc --arg p '/tmp/cwf-h33-RtVp/good_markdown.md' --arg cwd '/tmp/cwf-h33-RtVp' '{tool_input:{file_path:$p},cwd:$cwd}' | bash plugins/cwf/hooks/scripts/check-markdown.sh
+exit_code: 0
+stdout: <empty>
+
+## Case C: link block (broken local link)
+command: jq -nc --arg p '/tmp/cwf-h33-RtVp/broken_link.md' --arg cwd '/tmp/cwf-h33-RtVp' '{tool_input:{file_path:$p},cwd:$cwd}' | bash plugins/cwf/hooks/scripts/check-links-local.sh
+exit_code: 0
+stdout:
+{"decision":"block","reason":"Broken links detected in /tmp/cwf-h33-RtVp/broken_link.md:\nRunning link check...\nMode: local only (skipping external URLs)\nIssues found in 1 input. Find details below.\n\n[/tmp/cwf-h33-RtVp/broken_link.md]:\n[ERROR] file:///tmp/cwf-h33-RtVp/missing-target.md | Cannot find file: File not found. Check if file exists and path is correct\n\n🔍 1 Total (in 0s) ✅ 0 OK 🚫 1 Error\n\nBroken links detected.\nFor triage guidance, see references/agent-patterns.md § Broken Link Triage Protocol"}
+
+## Case D: link allow (all local links valid)
+command: jq -nc --arg p '/tmp/cwf-h33-RtVp/valid_link.md' --arg cwd '/tmp/cwf-h33-RtVp' '{tool_input:{file_path:$p},cwd:$cwd}' | bash plugins/cwf/hooks/scripts/check-links-local.sh
+exit_code: 0
+stdout: <empty>

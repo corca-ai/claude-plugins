@@ -1,0 +1,16 @@
+# I1-H35 workflow gate push block
+date: 2026-02-19T01:02:40Z
+script: plugins/cwf/hooks/scripts/workflow-gate.sh
+tmp_repo: /tmp/cwf-h35-s4SV
+
+## Case A: block protected action (git push)
+command: jq -nc --arg prompt 'git push origin main' --arg sid 'sess-h35' --arg cwd '/tmp/cwf-h35-s4SV' '{prompt:$prompt,session_id:$sid,cwd:$cwd}' | bash plugins/cwf/hooks/scripts/workflow-gate.sh
+exit_code: 1
+stdout:
+{"decision":"block","reason":"[PIPELINE] Active: cwf:run (phase: impl, state_version: 7). Remaining gates: review-code refactor retro ship. Do NOT skip gates. Use Skill tool to invoke next stage. BLOCKED action: ship/push/commit requested while run-closing gates are still pending (review-code,refactor,retro,ship)."}
+
+## Case B: allow non-protected prompt (status warning)
+command: jq -nc --arg prompt '다음 게이트 진행해' --arg sid 'sess-h35' --arg cwd '/tmp/cwf-h35-s4SV' '{prompt:$prompt,session_id:$sid,cwd:$cwd}' | bash plugins/cwf/hooks/scripts/workflow-gate.sh
+exit_code: 0
+stdout:
+{"decision":"allow","reason":"[PIPELINE] Active: cwf:run (phase: impl, state_version: 7). Remaining gates: review-code refactor retro ship. Do NOT skip gates. Use Skill tool to invoke next stage."}

@@ -1,0 +1,16 @@
+[I1-S18] 2026-02-19T10:09:35+09:00
+repo=/home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-b
+--- command
+timeout 240 claude --print --dangerously-skip-permissions --plugin-dir /home/hwidong/codes/claude-plugins/plugins/cwf -- 'cwf:setup --repo-index --target both'
+--- output
+
+--- exit_code=0
+--- verify
+-rw-rw-r-- 1 hwidong hwidong 638 Feb 19 10:12 /home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-b/.cwf/indexes/repo-index.md
+-rw-rw-r-- 1 hwidong hwidong 671 Feb 19 10:11 /home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-b/AGENTS.md
+--- AGENTS managed block markers
+3:<!-- CWF:INDEX:START -->
+23:<!-- CWF:INDEX:END -->
+--- coverage check
+Index coverage check passed: AGENTS.md (no coverage inventory files detected)
+Index coverage check passed: .cwf/indexes/repo-index.md (no coverage inventory files detected)

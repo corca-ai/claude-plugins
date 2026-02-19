@@ -1,0 +1,50 @@
+[I1-S15] 2026-02-19T10:05:30+09:00
+repo=/home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-a
+--- command
+timeout 180 claude --print --dangerously-skip-permissions --plugin-dir /home/hwidong/codes/claude-plugins/plugins/cwf -- 'cwf:setup --env. Select: create project config templates now (yes), mode defer-blocking, scope shared. Execute and report changed files.'
+--- output
+
+--- exit_code=0
+--- repo file snapshot
+.cwf-config.local.yaml
+.cwf-config.yaml
+.cwf/sessions/260219-1000-5b55ef3f.claude.md
+.cwf/sessions/260219-1005-f4010cb5.claude.md
+.git/HEAD
+.git/config
+.git/cwf-session-worktree-map.tsv
+.git/description
+.git/hooks/applypatch-msg.sample
+.git/hooks/commit-msg.sample
+.git/hooks/fsmonitor-watchman.sample
+.git/hooks/post-update.sample
+.git/hooks/pre-applypatch.sample
+.git/hooks/pre-commit.sample
+.git/hooks/pre-merge-commit.sample
+.git/hooks/pre-push.sample
+.git/hooks/pre-rebase.sample
+.git/hooks/pre-receive.sample
+.git/hooks/prepare-commit-msg.sample
+.git/hooks/push-to-checkout.sample
+.git/hooks/update.sample
+.git/info/exclude
+.gitignore
+--- git status
+?? .cwf-config.yaml
+?? .cwf/
+?? .gitignore
+
+=== fallback: deterministic script simulation (--env) ===
+--- bootstrap project config
+project_root: /home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-a
+shared_config: exists (/home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-a/.cwf-config.yaml)
+local_config: exists (/home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-a/.cwf-config.local.yaml)
+gitignore: present (/home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-a/.gitignore)
+--- configure run mode
+project_root: /home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-a
+scope: shared
+config_file: /home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-a/.cwf-config.yaml
+key: CWF_RUN_AMBIGUITY_MODE
+value: defer-blocking
+--- verify
+.cwf-config.yaml:22:CWF_RUN_AMBIGUITY_MODE: "defer-blocking"

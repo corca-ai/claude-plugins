@@ -1,0 +1,120 @@
+[I1-S21] 2026-02-19T10:16:32+09:00
+--- attempt skill path
+
+
+`cwf-state.yaml` shows `codex: unavailable`. The skill sync ran successfully against the project scope using the repo's own source files (since this is the CWF authoring repo), but there's no Codex CLI to consume them.
+
+Skipping Phase 5 lessons (user requested summary only).
+
+---
+
+## Summary
+
+**Phase 2.5 — Codex Skill Sync (project scope)**
+
+| Item | Result |
+|------|--------|
+| Scope | `project` (`/home/hwidong/codes/claude-plugins`) |
+| Skills linked | **13** (clarify, gather, handoff, hitl, impl, plan, refactor, retro, review, run, setup, ship, update) |
+| References linked | 1 symlink (`.codex/references` → `plugins/cwf/references`) |
+| Paths checked | 61 — all OK, 0 missing |
+| Destination | `.codex/skills/` and `.codex/references/` |
+| Rollback | `.codex/.skill-sync-backup/` |
+| Codex CLI status | **unavailable** — skills are staged but no local Codex to use them |
+exit=0
+--- fallback script path
+Linked skill: clarify
+Linked skill: gather
+Linked skill: handoff
+Linked skill: hitl
+Linked skill: impl
+Linked skill: plan
+Linked skill: refactor
+Linked skill: retro
+Linked skill: review
+Linked skill: run
+Linked skill: setup
+Linked skill: ship
+Linked skill: update
+Linked references: /home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-b/.codex/references -> /home/hwidong/codes/claude-plugins/plugins/cwf/references
+== clarify ==
+OK   mdlink  ../../references/context-recovery-protocol.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/references/context-recovery-protocol.md
+OK   mdlink  ../../references/expert-advisor-guide.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/references/expert-advisor-guide.md
+OK   skdir   {SKILL_DIR}/references/advisory-guide.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/skills/clarify/references/advisory-guide.md
+OK   skdir   {SKILL_DIR}/references/aggregation-guide.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/skills/clarify/references/aggregation-guide.md
+OK   skdir   {SKILL_DIR}/references/questioning-guide.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/skills/clarify/references/questioning-guide.md
+OK   skdir   {SKILL_DIR}/references/research-guide.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/skills/clarify/references/research-guide.md
+== gather ==
+OK   skdir   {SKILL_DIR}/../setup/scripts/install-tooling-deps.sh -> /home/hwidong/codes/claude-plugins/plugins/cwf/skills/setup/scripts/install-tooling-deps.sh
+OK   skdir   {SKILL_DIR}/scripts/code-search.sh -> /home/hwidong/codes/claude-plugins/plugins/cwf/skills/gather/scripts/code-search.sh
+OK   skdir   {SKILL_DIR}/scripts/extract.sh -> /home/hwidong/codes/claude-plugins/plugins/cwf/skills/gather/scripts/extract.sh
+OK   skdir   {SKILL_DIR}/scripts/g-export.sh -> /home/hwidong/codes/claude-plugins/plugins/cwf/skills/gather/scripts/g-export.sh
+OK   skdir   {SKILL_DIR}/scripts/notion-to-md.py -> /home/hwidong/codes/claude-plugins/plugins/cwf/skills/gather/scripts/notion-to-md.py
+OK   skdir   {SKILL_DIR}/scripts/search.sh -> /home/hwidong/codes/claude-plugins/plugins/cwf/skills/gather/scripts/search.sh
+OK   skdir   {SKILL_DIR}/scripts/slack-api.mjs -> /home/hwidong/codes/claude-plugins/plugins/cwf/skills/gather/scripts/slack-api.mjs
+OK   skdir   {SKILL_DIR}/scripts/slack-to-md.sh -> /home/hwidong/codes/claude-plugins/plugins/cwf/skills/gather/scripts/slack-to-md.sh
+== handoff ==
+OK   mdlink  ../../references/agent-patterns.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/references/agent-patterns.md
+OK   mdlink  ../../references/plan-protocol.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/references/plan-protocol.md
+== hitl ==
+== impl ==
+OK   mdlink  ../../references/agent-patterns.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/references/agent-patterns.md
+OK   skdir   {SKILL_DIR}/../../references/agent-patterns.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/references/agent-patterns.md
+OK   skdir   {SKILL_DIR}/references/agent-prompts.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/skills/impl/references/agent-prompts.md
+== plan ==
+OK   mdlink  ../../references/context-recovery-protocol.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/references/context-recovery-protocol.md
+OK   mdlink  ../../references/plan-protocol.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/references/plan-protocol.md
+OK   skdir   {SKILL_DIR}/../../references/plan-protocol.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/references/plan-protocol.md
+== refactor ==
+OK   mdlink  ../../references/agent-patterns.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/references/agent-patterns.md
+OK   mdlink  ../../references/concept-map.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/references/concept-map.md
+OK   mdlink  ../../references/context-recovery-protocol.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/references/context-recovery-protocol.md
+OK   mdlink  ../../references/skill-conventions.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/references/skill-conventions.md
+OK   skdir   {SKILL_DIR}/references/docs-criteria.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/skills/refactor/references/docs-criteria.md
+OK   skdir   {SKILL_DIR}/references/tidying-guide.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/skills/refactor/references/tidying-guide.md
+OK   skdir   {SKILL_DIR}/scripts/bootstrap-codebase-contract.sh -> /home/hwidong/codes/claude-plugins/plugins/cwf/skills/refactor/scripts/bootstrap-codebase-contract.sh
+OK   skdir   {SKILL_DIR}/scripts/check-codebase-contract-runtime.sh -> /home/hwidong/codes/claude-plugins/plugins/cwf/skills/refactor/scripts/check-codebase-contract-runtime.sh
+OK   skdir   {SKILL_DIR}/scripts/codebase-quick-scan.sh -> /home/hwidong/codes/claude-plugins/plugins/cwf/skills/refactor/scripts/codebase-quick-scan.sh
+OK   skdir   {SKILL_DIR}/scripts/quick-scan.sh -> /home/hwidong/codes/claude-plugins/plugins/cwf/skills/refactor/scripts/quick-scan.sh
+OK   skdir   {SKILL_DIR}/scripts/tidy-target-commits.sh -> /home/hwidong/codes/claude-plugins/plugins/cwf/skills/refactor/scripts/tidy-target-commits.sh
+== retro ==
+OK   mdlink  ../../references/agent-patterns.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/references/agent-patterns.md
+OK   mdlink  ../../references/context-recovery-protocol.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/references/context-recovery-protocol.md
+OK   mdlink  ../../references/expert-advisor-guide.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/references/expert-advisor-guide.md
+OK   skdir   {SKILL_DIR}/references/cdm-guide.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/skills/retro/references/cdm-guide.md
+OK   skdir   {SKILL_DIR}/references/expert-lens-guide.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/skills/retro/references/expert-lens-guide.md
+== review ==
+OK   mdlink  ../../references/agent-patterns.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/references/agent-patterns.md
+OK   mdlink  ../../references/context-recovery-protocol.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/references/context-recovery-protocol.md
+OK   mdlink  ../../references/expert-advisor-guide.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/references/expert-advisor-guide.md
+OK   skdir   {SKILL_DIR}/references/external-review.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/skills/review/references/external-review.md
+OK   skdir   {SKILL_DIR}/references/prompts.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/skills/review/references/prompts.md
+== run ==
+OK   mdlink  ../../references/agent-patterns.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/references/agent-patterns.md
+OK   mdlink  ../../references/plan-protocol.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/references/plan-protocol.md
+== setup ==
+OK   mdlink  ../../hooks/hooks.json -> /home/hwidong/codes/claude-plugins/plugins/cwf/hooks/hooks.json
+OK   mdlink  ../../hooks/scripts/cwf-hook-gate.sh -> /home/hwidong/codes/claude-plugins/plugins/cwf/hooks/scripts/cwf-hook-gate.sh
+OK   mdlink  ../../references/agent-patterns.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/references/agent-patterns.md
+OK   mdlink  ../../scripts/codex/install-wrapper.sh -> /home/hwidong/codes/claude-plugins/plugins/cwf/scripts/codex/install-wrapper.sh
+OK   mdlink  ../../scripts/codex/sync-skills.sh -> /home/hwidong/codes/claude-plugins/plugins/cwf/scripts/codex/sync-skills.sh
+OK   mdlink  ../../scripts/codex/verify-skill-links.sh -> /home/hwidong/codes/claude-plugins/plugins/cwf/scripts/codex/verify-skill-links.sh
+OK   mdlink  ../../scripts/detect-plugin-scope.sh -> /home/hwidong/codes/claude-plugins/plugins/cwf/scripts/detect-plugin-scope.sh
+OK   skdir   {SKILL_DIR}/scripts/sync-hook-state.sh -> /home/hwidong/codes/claude-plugins/plugins/cwf/skills/setup/scripts/sync-hook-state.sh
+== ship ==
+OK   mdlink  ../../references/agent-patterns.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/references/agent-patterns.md
+OK   skdir   {SKILL_DIR}/../setup/scripts/install-tooling-deps.sh -> /home/hwidong/codes/claude-plugins/plugins/cwf/skills/setup/scripts/install-tooling-deps.sh
+OK   skdir   {SKILL_DIR}/references/issue-template.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/skills/ship/references/issue-template.md
+OK   skdir   {SKILL_DIR}/references/pr-template.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/skills/ship/references/pr-template.md
+== update ==
+OK   mdlink  ../../references/agent-patterns.md -> /home/hwidong/codes/claude-plugins/plugins/cwf/references/agent-patterns.md
+OK   mdlink  ../../scripts/codex/install-wrapper.sh -> /home/hwidong/codes/claude-plugins/plugins/cwf/scripts/codex/install-wrapper.sh
+OK   mdlink  ../../scripts/codex/sync-skills.sh -> /home/hwidong/codes/claude-plugins/plugins/cwf/scripts/codex/sync-skills.sh
+OK   mdlink  ../../scripts/detect-plugin-scope.sh -> /home/hwidong/codes/claude-plugins/plugins/cwf/scripts/detect-plugin-scope.sh
+---
+Skills scanned : 13
+Paths checked  : 61
+Missing paths  : 0
+Scope: project
+Project root: /home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-b
+Done. Linked 13 skill(s) into /home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-b/.codex/skills.

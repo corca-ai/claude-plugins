@@ -1,0 +1,9 @@
+이 repo의 `cwf-state.yaml`은 hooks 섹션만 있는 간소한 파일입니다. hooks 상태가 정확히 동기화되었습니다.
+
+**완료 요약:**
+
+- **Phase 1 (Hook Selection)**: 현재 런타임 상태 유지 적용
+- **Parity 검증**: `cwf-state.yaml` ↔ `cwf-hooks-enabled.sh` — CHECK_OK
+- **Enabled (8)**: attention, log, read, lint_shell, deletion_safety, workflow_gate, websearch_redirect, compact_recovery
+- **Disabled (1)**: lint_markdown
+- **기존 불일치 해소**: `cwf-state.yaml`의 `lint_markdown: true` → `false`로 런타임 실제 상태에 맞춰 수정됨

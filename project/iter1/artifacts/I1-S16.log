@@ -1,0 +1,49 @@
+[I1-S16] 2026-02-19T10:06:53+09:00
+repo=/home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-a
+--- command
+timeout 180 claude --print --dangerously-skip-permissions --plugin-dir /home/hwidong/codes/claude-plugins/plugins/cwf -- 'cwf:setup --agent-teams. Choose Enable Agent Team mode and report status.'
+--- output
+The `cwf-state.yaml` is large but I've read it fully. Now let me proceed with the phase steps as requested.
+
+## Phase 2.9: Agent Team Mode Setup
+
+### 2.9.1 — Policy Selection
+
+You requested **Enable Agent Team mode**. Applying now.
+
+### 2.9.2 — Apply
+
+Already executed above. Results:
+
+```
+action: enable
+settings_file: /home/hwidong/.claude/settings.json
+state: enabled
+key: CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS
+value: 1
+```
+
+### 2.9.3 — Effective State
+
+| Field | Value |
+|---|---|
+| Settings file | `~/.claude/settings.json` |
+| State | **enabled** |
+| Key | `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` |
+| Value | `1` |
+
+Restart Claude Code (or open a new session) so Agent Team mode changes are applied consistently.
+
+---
+
+## Phase 5: Lessons Checkpoint
+
+### 5.1 — Learnings
+
+Any learnings from this setup process? (If none, I'll skip and just update the stage checkpoint.)
+--- exit_code=0
+--- status check
+settings_file: /home/hwidong/.claude/settings.json
+state: enabled
+key: CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS
+value: 1

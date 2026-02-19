@@ -1,0 +1,60 @@
+[I1-S13] 2026-02-19T10:03:08+09:00
+repo=/home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-a
+--- command
+timeout 180 PATH=/usr/bin:/bin /home/hwidong/.local/bin/claude --print --dangerously-skip-permissions --plugin-dir /home/hwidong/codes/claude-plugins/plugins/cwf -- 'cwf:setup --tools. If missing dependencies are detected, choose Show commands only and print exact install commands.'
+--- output
+
+--- exit_code=0
+
+=== fallback: deterministic script simulation (show commands only) ===
+--- dependency check
+Tool dependency status:
+  - shellcheck: missing
+  - jq: available (/usr/bin/jq)
+  - gh: available (/usr/bin/gh)
+  - node: available (/usr/bin/node)
+  - python3: available (/usr/bin/python3)
+  - lychee: missing
+  - markdownlint-cli2: missing
+check exit=1
+--- extracted manual install commands from script(manual_hint)
+manual_hint() {
+  case "$1" in
+    shellcheck)
+      echo "brew install shellcheck  OR  sudo apt-get install -y shellcheck"
+      ;;
+    jq)
+      echo "brew install jq  OR  sudo apt-get install -y jq"
+      ;;
+    gh)
+      echo "brew install gh  OR  sudo apt-get install -y gh"
+      ;;
+    node)
+      echo "brew install node  OR  sudo apt-get install -y nodejs npm"
+      ;;
+    python3)
+      echo "brew install python  OR  sudo apt-get install -y python3"
+      ;;
+    lychee)
+      echo "brew install lychee  OR  sudo apt-get install -y lychee"
+      ;;
+    markdownlint-cli2)
+      echo "npm install -g markdownlint-cli2"
+      echo "  OR"
+      echo "npm install --prefix ~/.local markdownlint-cli2"
+      echo "  && ln -sf ~/.local/node_modules/.bin/markdownlint-cli2 ~/.local/bin/markdownlint-cli2"
+      ;;
+    yq)
+      echo "brew install yq  OR  sudo apt-get install -y yq"
+      ;;
+    rg)
+      echo "brew install ripgrep  OR  sudo apt-get install -y ripgrep"
+      ;;
+    realpath)
+      echo "brew install coreutils  OR  sudo apt-get install -y coreutils"
+      ;;
+    perl)
+      echo "brew install perl  OR  sudo apt-get install -y perl"
+      ;;
+  esac
+}

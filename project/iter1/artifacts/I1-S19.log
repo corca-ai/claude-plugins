@@ -1,0 +1,5 @@
+[I1-S19] 2026-02-19T10:13:46+09:00
+repo=/home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-b
+--- command
+timeout 240 claude --print --dangerously-skip-permissions --plugin-dir /home/hwidong/codes/claude-plugins/plugins/cwf -- 'cwf:setup --cap-index'
+--- output
