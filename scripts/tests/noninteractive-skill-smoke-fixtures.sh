@@ -83,6 +83,11 @@ case "$prompt" in
     echo "pass case"
     exit 0
     ;;
+  *WAIT_INPUT_CASE*)
+    echo "What task would you like the full CWF pipeline to work on?"
+    echo "Please describe the task."
+    exit 0
+    ;;
   *FAIL_CASE*)
     echo "fail case" >&2
     exit 7
@@ -102,6 +107,7 @@ chmod +x "$MOCK_CLAUDE"
 
 cat > "$CASES_FILE" <<'EOF'
 pass|PASS_CASE
+wait|WAIT_INPUT_CASE
 fail|FAIL_CASE
 timeout|TIMEOUT_CASE
 EOF
@@ -112,11 +118,12 @@ status="$(run_status bash "$SMOKE_SCRIPT" \
   --cases-file "$CASES_FILE" \
   --claude-bin "$MOCK_CLAUDE" \
   --timeout 1 \
-  --max-failures 1 \
+  --max-failures 2 \
   --max-timeouts 1 \
   --output-dir "$OUTPUT_A")"
 assert_eq "gate passes when thresholds allow fail/timeout" "0" "$status"
 assert_file_contains "summary has PASS row" "$OUTPUT_A/summary.tsv" "$(printf 'pass\tPASS')"
+assert_file_contains "summary has WAIT_INPUT row" "$OUTPUT_A/summary.tsv" "$(printf 'wait\tFAIL\tWAIT_INPUT')"
 assert_file_contains "summary has FAIL row" "$OUTPUT_A/summary.tsv" "$(printf 'fail\tFAIL')"
 assert_file_contains "summary has TIMEOUT row" "$OUTPUT_A/summary.tsv" "$(printf 'timeout\tTIMEOUT')"
 

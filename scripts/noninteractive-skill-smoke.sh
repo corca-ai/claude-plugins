@@ -234,6 +234,13 @@ FAIL_COUNT=0
 TIMEOUT_COUNT=0
 WAIT_INPUT_COUNT=0
 
+is_wait_input_log() {
+  local log_file="$1"
+  grep -Eiq \
+    'waiting for your selection|wait for your answer|select one of the options|질문이 표시|선택해 주세요|what task would you like|please describe the task|which option would you like|choose one of the following' \
+    "$log_file"
+}
+
 run_case() {
   local case_index="$1"
   local case_id="$2"
@@ -291,17 +298,29 @@ run_case() {
     reason="TIMEOUT"
     TIMEOUT_COUNT=$((TIMEOUT_COUNT + 1))
     exit_code=124
-    if grep -Eiq 'waiting for your selection|wait for your answer|select one of the options|질문이 표시|선택해 주세요' "$log_file"; then
+    if is_wait_input_log "$log_file"; then
       reason="WAIT_INPUT"
       WAIT_INPUT_COUNT=$((WAIT_INPUT_COUNT + 1))
     fi
   elif [[ "$exit_code" -eq 0 ]]; then
-    result="PASS"
-    reason="OK"
-    PASS_COUNT=$((PASS_COUNT + 1))
+    if is_wait_input_log "$log_file"; then
+      result="FAIL"
+      reason="WAIT_INPUT"
+      FAIL_COUNT=$((FAIL_COUNT + 1))
+      WAIT_INPUT_COUNT=$((WAIT_INPUT_COUNT + 1))
+    else
+      result="PASS"
+      reason="OK"
+      PASS_COUNT=$((PASS_COUNT + 1))
+    fi
   else
     result="FAIL"
-    reason="ERROR"
+    if is_wait_input_log "$log_file"; then
+      reason="WAIT_INPUT"
+      WAIT_INPUT_COUNT=$((WAIT_INPUT_COUNT + 1))
+    else
+      reason="ERROR"
+    fi
     FAIL_COUNT=$((FAIL_COUNT + 1))
   fi
 

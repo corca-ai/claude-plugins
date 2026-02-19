@@ -225,7 +225,9 @@ bash scripts/premerge-cwf-gate.sh \
 - `3`: INVALID_MARKETPLACE (invalid JSON shape)
 - `4`: MISSING_ENTRY
 
-`noninteractive-skill-smoke.sh` outputs per-case `PASS|FAIL|TIMEOUT` logs and fails gate (exit 1) when configured thresholds are exceeded.
+`noninteractive-skill-smoke.sh` outputs per-case `PASS|FAIL|TIMEOUT` with reason (`OK|ERROR|TIMEOUT|WAIT_INPUT`).
+- If a skill exits successfully but the log shows an interactive follow-up prompt, the case is classified as `FAIL` with reason `WAIT_INPUT` (to prevent false PASS in CI).
+- The script fails gate (exit 1) when configured failure/timeout thresholds are exceeded.
 
 ## Repo Git Hooks
 

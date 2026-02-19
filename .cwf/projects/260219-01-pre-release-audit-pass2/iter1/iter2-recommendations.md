@@ -17,6 +17,8 @@ Iteration 1에서 확인된 blocker/timeout을 바탕으로, 배포 리스크를
    - 실행:
      - `scripts/noninteractive-skill-smoke.sh` summary의 `reason` 컬럼(`WAIT_INPUT|TIMEOUT|ERROR|OK`) 기준으로 스킬별 정책 문서화
      - interactive-only 스킬은 fail-fast 메시지로 종료하도록 우선 보완
+   - 업데이트(2026-02-19):
+     - `cwf:run` 질문형 종료가 `PASS/OK`로 집계되는 false positive를 수정해 `FAIL/WAIT_INPUT`으로 분류되도록 반영 완료
 
 3. cwf:run/cwf:retro provenance 강제 기록 강화
    - 이유: timeout이 발생해도 어디서 멈췄는지 기록이 있어야 다음 수정이 반복 가능하다.
@@ -38,3 +40,10 @@ Iteration 1에서 확인된 blocker/timeout을 바탕으로, 배포 리스크를
   - predeploy gate PASS (public marketplace에서 `cwf` 확인)
 - Iteration 2 완료 조건(1차)
   - smoke 14 케이스 기준 `WAIT_INPUT + TIMEOUT` 합계가 Iteration 1 대비 감소
+
+## 현재 상태 메모 (2026-02-19)
+
+- premerge gate: PASS
+- predeploy gate: FAIL (`corca-ai/claude-plugins@main` marketplace `cwf` 누락)
+- `cwf:run` 단건 smoke: `FAIL/WAIT_INPUT` (false PASS 제거 확인)
+- `cwf:retro --light` 단건 smoke: `TIMEOUT` (잔여 개선 대상)

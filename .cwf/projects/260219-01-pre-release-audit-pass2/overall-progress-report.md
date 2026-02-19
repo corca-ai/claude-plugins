@@ -22,6 +22,7 @@
     - pre-release 점검 절차 문서화
     - premerge CI 게이트 추가(로컬 deterministic checks)
     - 공개 marketplace 진단 스크립트 추가(현재 main에서 `cwf` 누락 감지)
+    - non-interactive smoke false PASS 보정(`WAIT_INPUT`을 exit 0 케이스에서도 검출)
 
 ## 누적 핵심 리스크
 

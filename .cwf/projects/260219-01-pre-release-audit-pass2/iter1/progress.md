@@ -83,3 +83,15 @@
 3. 공개 marketplace 진단 경로 추가
    - 스크립트: [scripts/check-public-marketplace-entry.sh](../../../../scripts/check-public-marketplace-entry.sh)
    - 관찰: `corca-ai/claude-plugins@main` 기준 `cwf` 엔트리 누락(`MISSING_ENTRY`, exit 4)
+
+## 머지 전 추가 보강 (2026-02-19)
+
+1. non-interactive smoke false PASS 제거
+   - 문제: `cwf:run`이 질문 프롬프트만 출력하고 종료해도 `PASS/OK`로 집계되는 케이스 확인
+   - 조치: [scripts/noninteractive-skill-smoke.sh](../../../../scripts/noninteractive-skill-smoke.sh)에서 `WAIT_INPUT` 패턴 탐지를 timeout 전용에서 모든 종료 경로로 확장
+   - 결과: `cwf:run` 단건 재실행 시 `FAIL/WAIT_INPUT`으로 분류됨 (exit 0이어도 false PASS 차단)
+2. fixture/문서 동기화
+   - 테스트: [scripts/tests/noninteractive-skill-smoke-fixtures.sh](../../../../scripts/tests/noninteractive-skill-smoke-fixtures.sh)에 `WAIT_INPUT` 시나리오 추가
+   - 문서: [docs/plugin-dev-cheatsheet.md](../../../../docs/plugin-dev-cheatsheet.md)에 `FAIL/WAIT_INPUT` 분류 규칙 반영
+3. 현재 잔여 리스크
+   - `cwf:retro --light`는 60초 non-interactive 스모크에서 여전히 `TIMEOUT`

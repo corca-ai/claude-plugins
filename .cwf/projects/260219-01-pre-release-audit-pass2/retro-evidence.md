@@ -1,6 +1,6 @@
 # Retro Evidence Snapshot
 
-- Generated at: 2026-02-18T23:44:58Z
+- Generated at: 2026-02-19T03:39:05Z
 - Repository root: /home/hwidong/codes/claude-plugins
 - Session dir: .cwf/projects/260219-01-pre-release-audit-pass2
 - Since epoch filter: not set
@@ -59,16 +59,5 @@ _none_
 ```text
  M .cwf/cwf-state.yaml
  M .cwf/projects/260219-01-pre-release-audit-pass2/session-state.yaml
- M plugins/cwf/hooks/scripts/check-markdown.sh
- M plugins/cwf/skills/gather/SKILL.md
-?? .cwf/projects/260219-01-pre-release-audit-pass2/retro.md
-?? .cwf/projects/260219-01-pre-release-audit-pass2/review-architecture-code.md
-?? .cwf/projects/260219-01-pre-release-audit-pass2/review-correctness-code.md
-?? .cwf/projects/260219-01-pre-release-audit-pass2/review-expert-alpha-code.md
-?? .cwf/projects/260219-01-pre-release-audit-pass2/review-expert-beta-code.md
-?? .cwf/projects/260219-01-pre-release-audit-pass2/review-security-code.md
-?? .cwf/projects/260219-01-pre-release-audit-pass2/review-synthesis-code.md
-?? .cwf/projects/260219-01-pre-release-audit-pass2/review-target-code.diff
-?? .cwf/projects/260219-01-pre-release-audit-pass2/review-ux-dx-code.md
-?? .cwf/sessions/260219-0734-c2691816.codex.md
+?? .cwf/projects/260219-01-pre-release-audit-pass2/session-logs/260219-1238-6363aaa0.claude.md
 ```

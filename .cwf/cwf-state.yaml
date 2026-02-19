@@ -469,7 +469,7 @@ live:
   session_id: "260219-01"
   dir: ".cwf/projects/260219-01-pre-release-audit-pass2"
   branch: "marketplace-v3"
-  phase: "plan"
+  phase: "retro"
   task: "Iteration 1 findings remediation: marketplace install blocker, non-interactive deadlocks, cap-index deadlock"
   key_files:
     - ".cwf/projects/260219-01-pre-release-audit-pass2/clarify-result.md"
