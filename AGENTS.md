@@ -93,4 +93,5 @@ Runtime behavior belongs in [plugins/cwf/hooks](plugins/cwf/hooks/); repository 
 
 - [anthropic-skills-guide/README](references/anthropic-skills-guide/README.md): Anthropic skills guide index.
 - [essence-of-software/distillation](references/essence-of-software/distillation.md): Core concept distillation used by review and design docs.
+- [sw-factory/analysis](references/sw-factory/analysis.md): Analysis report on software-factory patterns and the agentic development model.
 <!-- CWF:INDEX:END -->
