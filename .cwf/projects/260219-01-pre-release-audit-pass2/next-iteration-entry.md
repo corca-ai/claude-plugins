@@ -4,11 +4,11 @@ Use this file as the only mention target when starting the next pre-release iter
 
 ## Single Mention Target
 
-- [project/next-iteration-entry.md](next-iteration-entry.md)
+- [.cwf/projects/260219-01-pre-release-audit-pass2/next-iteration-entry.md](next-iteration-entry.md)
 
 ## Mandatory Context Load Order
 
-1. [Initial request and operating philosophy](initial-req.md)
+1. [Initial request and operating philosophy](../../../project/initial-req.md)
 2. [Iteration 1 master scenarios](../.cwf/projects/260219-01-pre-release-audit-pass2/iter1/master-scenarios.md)
 3. [Iteration 1 progress](../.cwf/projects/260219-01-pre-release-audit-pass2/iter1/progress.md)
 4. [Iteration 2 recommendations](../.cwf/projects/260219-01-pre-release-audit-pass2/iter1/iter2-recommendations.md)
