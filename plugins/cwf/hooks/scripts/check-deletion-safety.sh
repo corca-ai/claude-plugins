@@ -90,12 +90,16 @@ append_runtime_artifact_prefix() {
   local candidate_rel="${1:-}"
   local normalized=""
   local existing=""
+  local i=0
+  local prefix_count=0
 
   [[ -n "$candidate_rel" ]] || return 0
   normalized="$(normalize_rel_path "$candidate_rel")"
   [[ -n "$normalized" && "$normalized" != "." ]] || return 0
 
-  for existing in "${RUNTIME_ARTIFACT_PREFIXES[@]}"; do
+  prefix_count=${#RUNTIME_ARTIFACT_PREFIXES[@]}
+  for ((i = 0; i < prefix_count; i++)); do
+    existing="${RUNTIME_ARTIFACT_PREFIXES[$i]}"
     if [[ "$existing" == "$normalized" ]]; then
       return 0
     fi
@@ -143,11 +147,16 @@ is_runtime_artifact_rel() {
   local rel_path="$1"
   local normalized=""
   local prefix=""
+  local i=0
+  local prefix_count=0
 
   normalized="$(normalize_rel_path "$rel_path")"
   [[ -n "$normalized" ]] || return 1
 
-  for prefix in "${RUNTIME_ARTIFACT_PREFIXES[@]}"; do
+  # Bash 3.2 + nounset can crash on empty "${arr[@]}" expansion.
+  prefix_count=${#RUNTIME_ARTIFACT_PREFIXES[@]}
+  for ((i = 0; i < prefix_count; i++)); do
+    prefix="${RUNTIME_ARTIFACT_PREFIXES[$i]}"
     if [[ "$normalized" == "$prefix" || "$normalized" == "$prefix/"* ]]; then
       return 0
     fi
@@ -313,7 +322,9 @@ for candidate in "${DELETED_RAW[@]}"; do
   fi
 
   is_dup=0
-  for existing in "${DELETED_REL[@]}"; do
+  existing_count=${#DELETED_REL[@]}
+  for ((i = 0; i < existing_count; i++)); do
+    existing="${DELETED_REL[$i]}"
     if [[ "$existing" == "$rel_path" ]]; then
       is_dup=1
       break
