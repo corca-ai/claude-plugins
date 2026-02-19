@@ -434,13 +434,21 @@ sessions:
     dir: ".cwf/projects/260219-01-pre-release-audit-pass2"
     branch: "marketplace-v3"
     artifacts: [plan.md, lessons.md]
+    stage_checkpoints: [setup]
 
 tools:
-  codex: available
-  gemini: available
-  agent_browser: available
+  codex: unavailable
+  gemini: unavailable
+  agent_browser: unavailable
   tavily: available
   exa: available
+  shellcheck: unavailable
+  jq: available
+  gh: available
+  node: available
+  python3: available
+  lychee: unavailable
+  markdownlint_cli2: unavailable
 
 # Hook group toggle state (mirrors ~/.claude/cwf-hooks-enabled.sh)
 # Default: all enabled — hooks work without cwf:setup
@@ -454,7 +462,6 @@ hooks:
   workflow_gate: true
   websearch_redirect: true
   compact_recovery: true
-
 # Live session state — updated by CWF skills at phase transitions,
 # read by SessionStart(compact) hook for context recovery after auto-compact.
 # check-session.sh --live validates required fields are populated.
@@ -462,8 +469,8 @@ live:
   session_id: "260219-01"
   dir: ".cwf/projects/260219-01-pre-release-audit-pass2"
   branch: "marketplace-v3"
-  phase: "retro"
-  task: "pre-release pass2 retrospective"
+  phase: "plan"
+  task: "Iteration 1 findings remediation: marketplace install blocker, non-interactive deadlocks, cap-index deadlock"
   key_files:
     - ".cwf/projects/260219-01-pre-release-audit-pass2/clarify-result.md"
     - ".cwf/projects/260219-01-pre-release-audit-pass2/plan.md"
@@ -489,8 +496,8 @@ live:
   ambiguity_mode: "defer-blocking"
   blocking_decisions_pending: "false"
   ambiguity_decisions_file: ".cwf/projects/260218-03-pre-release-refactor-audit/run-ambiguity-decisions.md"
-  clarify_result_file: ".cwf/projects/260218-03-pre-release-refactor-audit/clarify-result.md"
-  clarify_completed_at: "2026-02-18T06:48:00Z"
+  clarify_result_file: "project/initial-req.md"
+  clarify_completed_at: "2026-02-19T00:40:57Z"
   stage_provenance_file: ".cwf/projects/260218-03-pre-release-refactor-audit/run-stage-provenance.md"
 # Expert roster for domain expert sub-agents (used by clarify, review, retro)
 # Semi-automatic evolution: usage_count auto-incremented, new experts user-approved

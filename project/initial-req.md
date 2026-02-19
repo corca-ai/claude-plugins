@@ -14,7 +14,7 @@
 
 ## 확정 운영 원칙
 
-- 마스터 시나리오 파일 1개 + [project/iter1/scenarios](iter1/scenarios) 개별 시나리오 파일 구조
+- 마스터 시나리오 파일 1개 + [.cwf/projects/260219-01-pre-release-audit-pass2/iter1/scenarios](../.cwf/projects/260219-01-pre-release-audit-pass2/iter1/scenarios) 개별 시나리오 파일 구조
 - 시나리오/마스터 문서는 한글 작성
 - 실제 시뮬레이션 기반 검토 수행
 - 의도와 다르게 동작한 경로는 중단 후 기록만 남김

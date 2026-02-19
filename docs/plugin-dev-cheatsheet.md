@@ -203,7 +203,7 @@ bash scripts/check-marketplace-entry.sh --source . --plugin cwf
 # 2) Run non-interactive smoke across core CWF skills
 bash scripts/noninteractive-skill-smoke.sh \
   --plugin-dir plugins/cwf \
-  --workdir project/iter1/sandbox/user-repo-b \
+  --workdir <user-repo-path> \
   --timeout 45 \
   --max-failures 0 \
   --max-timeouts 0
