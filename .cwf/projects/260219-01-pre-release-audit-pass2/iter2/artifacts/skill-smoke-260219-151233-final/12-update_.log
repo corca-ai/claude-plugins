@@ -1,0 +1,12 @@
+**CWF Update Summary**
+
+```text
+Target scope:       none (development tree — not plugin-installed)
+Current version:    0.8.0
+Install path:       /home/hwidong/codes/claude-plugins/plugins/cwf/
+Installed plugins:  [] (no CWF plugin in any scope)
+```
+
+**Result: No update available via plugin system.** CWF is running directly from the local development tree, not as an installed Claude plugin. The `claude plugin update` / `claude plugin install` commands are also blocked inside the current nested Claude Code session.
+
+To update CWF in this setup, pull the latest changes in the development repo via `git pull` instead of using the plugin update flow. If you later install CWF as a plugin (`claude plugin install cwf@corca-plugins --scope user`), this update skill will work end-to-end.

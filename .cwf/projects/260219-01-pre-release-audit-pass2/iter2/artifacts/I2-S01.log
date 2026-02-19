@@ -1,0 +1,27 @@
+$ date -Iseconds
+2026-02-19T14:33:42+09:00
+$ pwd
+/home/hwidong/codes/claude-plugins/.cwf/projects/260219-01-pre-release-audit-pass2/iter2/sandbox/repo-install
+$ claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
+Adding marketplace...
+Refreshing marketplace cache…
+Cloning repository: https://github.com/corca-ai/claude-plugins.git
+Clone complete, validating marketplace…
+Cleaning up old marketplace cache…
+✘ Failed to add marketplace: Marketplace 'corca-plugins' is already installed. Please remove it first using '/plugin marketplace remove corca-plugins' if you want to re-install it.
+$ claude plugin install cwf@corca-plugins --scope project
+Installing plugin "cwf@corca-plugins"...
+✔ Successfully installed plugin: cwf@corca-plugins (scope: project)
+$ claude plugin list
+Installed plugins:
+
+  ❯ claude-dashboard@claude-dashboard
+    Version: 1.8.1
+    Scope: user
+    Status: ✔ enabled
+
+  ❯ cwf@corca-plugins
+    Version: 0.8.0
+    Scope: project
+    Status: ✔ enabled
+

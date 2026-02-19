@@ -5,8 +5,8 @@ live:
   session_id: "260219-01"
   dir: ".cwf/projects/260219-01-pre-release-audit-pass2"
   branch: "marketplace-v3"
-  phase: "retro"
-  task: "Iteration 1 findings remediation: marketplace install blocker, non-interactive deadlocks, cap-index deadlock"
+  phase: "plan"
+  task: "create a minimal smoke plan"
   key_files:
     - ".cwf/projects/260219-01-pre-release-audit-pass2/clarify-result.md"
     - ".cwf/projects/260219-01-pre-release-audit-pass2/plan.md"

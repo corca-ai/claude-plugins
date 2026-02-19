@@ -1,0 +1,4 @@
+$ date -Iseconds
+2026-02-19T14:51:55+09:00
+$ timeout 180s claude --print --dangerously-skip-permissions "cwf:run build a tiny hello-world shell script and explain how to run it"
+CLAUDE_EXIT=124

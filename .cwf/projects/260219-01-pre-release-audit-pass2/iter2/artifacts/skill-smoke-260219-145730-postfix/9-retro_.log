@@ -1,0 +1,20 @@
+Now the **Retro Brief** and **Persist Proposals** (direct invocation report):
+
+---
+
+## Retro Brief
+
+- **세션 목표/결과**: sandbox repo에서 CWF plan→impl→retro 파이프라인 smoke test 수행. hello.txt 생성 성공, refactor는 bootstrap만 진행.
+- **주요 낭비 신호**: `next-prompt-dir --bootstrap` 2회 호출로 빈 프로젝트 디렉토리 2개 잔존 — stale bootstrap 감지 메커니즘 부재가 근본 원인.
+- **CDM 핵심 교훈**: smoke test에서는 "파이프라인 전체 도달"을 개별 스킬 완전 검증보다 우선. 최소 단위 변경(신규 파일 1개)이 가장 깨끗한 테스트 경로.
+- **도구/역량 핵심**: `cwf-live-state.sh`의 auto-init 부재로 setup 없는 sandbox에서 실패. 스크립트 내 upsert 로직 추가가 구조적 해결책.
+
+## Persist Proposals
+
+| # | Finding | Tier | Target | Apply Now? |
+|---|---------|------|--------|------------|
+| 1 | stale bootstrap dir 감지 없음 | Eval-Hook | `check-run-gate-artifacts.sh` 또는 retro 시작 시 경고 로직 | 이후 세션 |
+| 2 | `cwf-live-state.sh set`에 auto-init (upsert) 로직 추가 | Eval-Hook | `plugins/cwf/scripts/cwf-live-state.sh` | 이후 세션 |
+| 3 | smoke test 파이프라인 우선순위 패턴 | Doc | `docs/project-context.md` | 선택 |
+
+persist proposal을 지금 적용할까요?

@@ -88,9 +88,33 @@ case "$prompt" in
     echo "Please describe the task."
     exit 0
     ;;
+  *WAIT_INPUT_ALT_CASE*)
+    echo "A bare file path isn't a supported input. What did you have in mind?"
+    echo "Which would you like?"
+    exit 0
+    ;;
+  *WAIT_INPUT_RUN_CASE*)
+    echo "What would you like cwf:run to work on?"
+    echo "Please provide your task description."
+    exit 0
+    ;;
+  *WAIT_INPUT_CONFIRM_CASE*)
+    echo "Could you confirm which file to review?"
+    echo "Please confirm."
+    exit 0
+    ;;
+  *WAIT_INPUT_PIPELINE_CASE*)
+    echo "What task should the cwf:run pipeline execute?"
+    echo "Which file should I review?"
+    echo "Would you like to provide a different path?"
+    exit 0
+    ;;
   *FAIL_CASE*)
     echo "fail case" >&2
     exit 7
+    ;;
+  *EMPTY_CASE*)
+    exit 0
     ;;
   *TIMEOUT_CASE*)
     sleep 3
@@ -108,7 +132,12 @@ chmod +x "$MOCK_CLAUDE"
 cat > "$CASES_FILE" <<'EOF'
 pass|PASS_CASE
 wait|WAIT_INPUT_CASE
+wait-alt|WAIT_INPUT_ALT_CASE
+wait-run|WAIT_INPUT_RUN_CASE
+wait-confirm|WAIT_INPUT_CONFIRM_CASE
+wait-pipeline|WAIT_INPUT_PIPELINE_CASE
 fail|FAIL_CASE
+empty|EMPTY_CASE
 timeout|TIMEOUT_CASE
 EOF
 
@@ -118,13 +147,18 @@ status="$(run_status bash "$SMOKE_SCRIPT" \
   --cases-file "$CASES_FILE" \
   --claude-bin "$MOCK_CLAUDE" \
   --timeout 1 \
-  --max-failures 2 \
+  --max-failures 7 \
   --max-timeouts 1 \
   --output-dir "$OUTPUT_A")"
 assert_eq "gate passes when thresholds allow fail/timeout" "0" "$status"
 assert_file_contains "summary has PASS row" "$OUTPUT_A/summary.tsv" "$(printf 'pass\tPASS')"
 assert_file_contains "summary has WAIT_INPUT row" "$OUTPUT_A/summary.tsv" "$(printf 'wait\tFAIL\tWAIT_INPUT')"
+assert_file_contains "summary has WAIT_INPUT alt row" "$OUTPUT_A/summary.tsv" "$(printf 'wait-alt\tFAIL\tWAIT_INPUT')"
+assert_file_contains "summary has WAIT_INPUT run row" "$OUTPUT_A/summary.tsv" "$(printf 'wait-run\tFAIL\tWAIT_INPUT')"
+assert_file_contains "summary has WAIT_INPUT confirm row" "$OUTPUT_A/summary.tsv" "$(printf 'wait-confirm\tFAIL\tWAIT_INPUT')"
+assert_file_contains "summary has WAIT_INPUT pipeline row" "$OUTPUT_A/summary.tsv" "$(printf 'wait-pipeline\tFAIL\tWAIT_INPUT')"
 assert_file_contains "summary has FAIL row" "$OUTPUT_A/summary.tsv" "$(printf 'fail\tFAIL')"
+assert_file_contains "summary has NO_OUTPUT row" "$OUTPUT_A/summary.tsv" "$(printf 'empty\tFAIL\tNO_OUTPUT')"
 assert_file_contains "summary has TIMEOUT row" "$OUTPUT_A/summary.tsv" "$(printf 'timeout\tTIMEOUT')"
 
 status="$(run_status bash "$SMOKE_SCRIPT" \

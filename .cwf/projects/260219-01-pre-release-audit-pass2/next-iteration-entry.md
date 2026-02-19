@@ -9,22 +9,23 @@ Use this file as the only mention target when starting the next pre-release iter
 ## Mandatory Context Load Order
 
 1. [Initial request and operating philosophy](../../../project/initial-req.md)
-2. [Iteration 1 master scenarios](../.cwf/projects/260219-01-pre-release-audit-pass2/iter1/master-scenarios.md)
-3. [Iteration 1 progress](../.cwf/projects/260219-01-pre-release-audit-pass2/iter1/progress.md)
-4. [Iteration 2 recommendations](../.cwf/projects/260219-01-pre-release-audit-pass2/iter1/iter2-recommendations.md)
-5. [Overall progress report](../.cwf/projects/260219-01-pre-release-audit-pass2/overall-progress-report.md)
+2. [Iteration 2 master scenarios](iter2/master-scenarios.md)
+3. [Iteration 2 progress](iter2/progress.md)
+4. [Iteration 3 recommendations](iter2/iter3-recommendations.md)
+5. [Overall progress report](overall-progress-report.md)
 
 ## Current Known Risks Before Main Merge
 
-1. Public marketplace entry for `cwf` is still missing on `corca-ai/claude-plugins@main` (`predeploy` gate fails with `MISSING_ENTRY`).
-2. `cwf:retro --light` still times out in non-interactive smoke.
-3. Interactive prompt exits must be treated as `WAIT_INPUT` (already fixed in smoke classifier; keep enforcing this).
+1. `cwf:retro --light` still times out in non-interactive single-run.
+2. `cwf:run` with explicit task still times out in non-interactive single-run.
+3. setup 계열은 non-interactive에서 질문형 종료/timeout 변동성이 있다.
+4. smoke 분류는 `WAIT_INPUT/NO_OUTPUT`까지 보강했지만 문구 기반 휴리스틱 유지가 필요하다.
 
 ## Immediate Iteration Start Checklist
 
 1. Re-validate deterministic local gate: `bash scripts/premerge-cwf-gate.sh --mode premerge --plugin cwf`.
-2. Re-check public gate only when main is updated: `bash scripts/premerge-cwf-gate.sh --mode predeploy --plugin cwf --repo corca-ai/claude-plugins --ref main`.
-3. Restart scenario loop from master and update scenario scratchpads under `.cwf/projects/260219-01-pre-release-audit-pass2/iter*/scenarios`.
+2. Re-check public gate on latest main: `bash scripts/premerge-cwf-gate.sh --mode predeploy --plugin cwf --repo corca-ai/claude-plugins --ref main`.
+3. Restart scenario loop from `iter2` master and create `iter3/scenarios` scratchpads.
 4. If behavior diverges from intent, stop that branch immediately and record in both scenario file and master.
 5. Finish iteration with plan -> review -> impl -> review -> refactor -> retro artifacts, then update overall progress report.
 

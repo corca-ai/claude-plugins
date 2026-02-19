@@ -1,0 +1,25 @@
+Smoke output dir: .cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/skill-smoke-260219-143747
+Smoke workdir: .cwf/projects/260219-01-pre-release-audit-pass2/iter2/sandbox/repo-smoke
+Smoke plugin-dir: /home/hwidong/codes/claude-plugins/plugins/cwf
+Smoke timeout: 60s
+Smoke cases: 14
+---
+[TIMEOUT] id=setup-env reason=TIMEOUT exit=124 duration=60s log=.cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/skill-smoke-260219-143747/1-setup-env_.log
+[PASS] id=setup-git-hooks reason=OK exit=0 duration=41s log=.cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/skill-smoke-260219-143747/2-setup-git-hooks_.log
+[PASS] id=gather reason=OK exit=0 duration=16s log=.cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/skill-smoke-260219-143747/3-gather_.log
+[TIMEOUT] id=clarify reason=TIMEOUT exit=124 duration=60s log=.cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/skill-smoke-260219-143747/4-clarify_.log
+[TIMEOUT] id=plan reason=TIMEOUT exit=124 duration=60s log=.cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/skill-smoke-260219-143747/5-plan_.log
+[TIMEOUT] id=review reason=TIMEOUT exit=124 duration=60s log=.cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/skill-smoke-260219-143747/6-review_.log
+[TIMEOUT] id=impl reason=TIMEOUT exit=124 duration=60s log=.cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/skill-smoke-260219-143747/7-impl_.log
+[TIMEOUT] id=refactor reason=TIMEOUT exit=124 duration=60s log=.cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/skill-smoke-260219-143747/8-refactor_.log
+[PASS] id=retro reason=OK exit=0 duration=32s log=.cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/skill-smoke-260219-143747/9-retro_.log
+[TIMEOUT] id=handoff reason=TIMEOUT exit=124 duration=60s log=.cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/skill-smoke-260219-143747/10-handoff_.log
+[PASS] id=ship reason=OK exit=0 duration=6s log=.cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/skill-smoke-260219-143747/11-ship_.log
+[TIMEOUT] id=update reason=TIMEOUT exit=124 duration=60s log=.cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/skill-smoke-260219-143747/12-update_.log
+[FAIL] id=run reason=WAIT_INPUT exit=0 duration=38s log=.cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/skill-smoke-260219-143747/13-run_.log
+[TIMEOUT] id=hitl reason=TIMEOUT exit=124 duration=60s log=.cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/skill-smoke-260219-143747/14-hitl_.log
+---
+Totals: pass=4 fail=1 timeout=9 wait_input=1
+Thresholds: max_failures=99 max_timeouts=99
+Summary: .cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/skill-smoke-260219-143747/summary.tsv
+Gate result: PASS

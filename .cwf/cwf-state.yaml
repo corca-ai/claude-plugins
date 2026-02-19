@@ -436,6 +436,16 @@ sessions:
     artifacts: [plan.md, lessons.md]
     stage_checkpoints: [setup]
 
+
+  - id: "S260219-03"
+    title: "minimal-smoke-plan"
+    dir: ".cwf/projects/260219-03-minimal-smoke-plan"
+    branch: "iter2/260219-01-pre-release-audit-pass2"
+    completed_at: "2026-02-19"
+    summary: "Created minimal CWF skill smoke test plan: 6 cases (3 core must-pass + 3 extended informational) with 2-tier classification based on prior timeout analysis, 45s timeout, and max-failures/max-timeouts gate thresholds."
+    artifacts: [plan.md, lessons.md, next-session.md]
+    stage_checkpoints: [handoff]
+
 tools:
   codex: unavailable
   gemini: unavailable
@@ -462,22 +472,21 @@ hooks:
   workflow_gate: true
   websearch_redirect: true
   compact_recovery: true
+# Git hook gate configuration (set by cwf:setup --git-hooks)
+git_hooks:
+  install_mode: both
+  gate_profile: balanced
+  hooks_path: .githooks
 # Live session state — updated by CWF skills at phase transitions,
 # read by SessionStart(compact) hook for context recovery after auto-compact.
 # check-session.sh --live validates required fields are populated.
 live:
-  session_id: "260219-01"
-  dir: ".cwf/projects/260219-01-pre-release-audit-pass2"
-  branch: "marketplace-v3"
-  phase: "retro"
-  task: "Iteration 1 findings remediation: marketplace install blocker, non-interactive deadlocks, cap-index deadlock"
-  key_files:
-    - ".cwf/projects/260219-01-pre-release-audit-pass2/clarify-result.md"
-    - ".cwf/projects/260219-01-pre-release-audit-pass2/plan.md"
-    - ".cwf/projects/260219-01-pre-release-audit-pass2/lessons.md"
-    - ".cwf/projects/260219-01-pre-release-audit-pass2/plan-codebase-analysis.md"
-    - ".cwf/projects/260219-01-pre-release-audit-pass2/plan-claim-map.md"
-    - ".cwf/projects/260219-01-pre-release-audit-pass2/plan-prior-art-research.md"
+  session_id: ""
+  dir: ""
+  branch: ""
+  phase: ""
+  task: ""
+  key_files: []
   decisions: []
   decision_journal: []
   hitl:
@@ -485,16 +494,16 @@ live:
     state_file: ""
     rules_file: ""
     updated_at: ""
-  state_file: ".cwf/projects/260219-01-pre-release-audit-pass2/session-state.yaml"
+  state_file: ""
   remaining_gates: []
   state_version: "6"
-  worktree_root: "/home/hwidong/codes/claude-plugins"
-  worktree_branch: "marketplace-v3"
+  worktree_root: ""
+  worktree_branch: ""
   active_pipeline: ""
-  user_directive: "Run clarify→plan→implement fixes→review→retro for public release readiness"
-  pipeline_override_reason: "ship persisted as docs artifact (ship.md), GitHub mutation intentionally skipped"
-  ambiguity_mode: "defer-blocking"
-  blocking_decisions_pending: "false"
+  user_directive: ""
+  pipeline_override_reason: ""
+  ambiguity_mode: ""
+  blocking_decisions_pending: ""
   ambiguity_decisions_file: ".cwf/projects/260218-03-pre-release-refactor-audit/run-ambiguity-decisions.md"
   clarify_result_file: "project/initial-req.md"
   clarify_completed_at: "2026-02-19T00:40:57Z"

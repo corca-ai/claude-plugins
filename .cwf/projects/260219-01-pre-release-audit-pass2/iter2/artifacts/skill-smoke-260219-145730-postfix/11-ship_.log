@@ -1,0 +1,14 @@
+
+
+```text
+Ship — GitHub workflow automation for cwf sessions
+
+Usage:
+  /ship                                  Show this message
+  /ship issue [--base B] [--no-branch]   Create issue + feature branch
+  /ship pr [--base B] [--issue N] [--draft]  Create PR
+  /ship merge [--squash|--merge|--rebase]    Merge approved PR
+  /ship status                           Show issues, PRs, checks
+
+Defaults: base=auto-detected (origin/HEAD -> main -> master), merge=squash
+```

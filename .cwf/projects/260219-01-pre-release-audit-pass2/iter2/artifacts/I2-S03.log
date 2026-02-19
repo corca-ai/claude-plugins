@@ -1,0 +1,23 @@
+$ date -Iseconds
+2026-02-19T14:34:12+09:00
+$ claude plugin install cwf@corca-plugins --scope local
+Installing plugin "cwf@corca-plugins"...
+✔ Successfully installed plugin: cwf@corca-plugins (scope: local)
+$ claude plugin list
+Installed plugins:
+
+  ❯ claude-dashboard@claude-dashboard
+    Version: 1.8.1
+    Scope: user
+    Status: ✔ enabled
+
+  ❯ cwf@corca-plugins
+    Version: 0.8.0
+    Scope: project
+    Status: ✔ enabled
+
+  ❯ cwf@corca-plugins
+    Version: 0.8.0
+    Scope: local
+    Status: ✔ enabled
+

@@ -1,0 +1,6 @@
+The file `project/iter1/improvement-plan.md` does not exist in this repository. The available plan files are:
+
+1. **`.cwf/projects/260219-01-minimal-smoke-plan/plan.md`** — Minimal smoke plan (add hello.txt to verify CWF pipeline)
+2. **`.cwf/projects/260219-02-refactor-quick-scan/plan.md`** — Empty stub/placeholder
+
+Could you confirm which plan to review, or provide the correct file path?

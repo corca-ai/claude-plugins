@@ -1,0 +1,13 @@
+Plan drafted at `.cwf/projects/260219-01-minimal-smoke-plan/plan.md`.
+
+**Summary**: 1 step — create `hello.txt` with "Hello, smoke test!" at repo root. That's it. Simplest possible change to verify the pipeline works.
+
+For a multi-perspective review before implementation, run:
+```
+cwf:review --mode plan
+```
+
+Or to implement directly:
+```
+cwf:impl
+```

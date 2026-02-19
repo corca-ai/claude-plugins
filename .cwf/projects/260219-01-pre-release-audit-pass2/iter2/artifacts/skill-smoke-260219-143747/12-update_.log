@@ -1,0 +1,35 @@
+## CWF Update Check — Summary
+
+```
+Active scope:       none (current cwd not in an installed project path)
+Installed scopes:   project (repo-install), local (repo-install), project (repo-setup)
+Install path:       /home/hwidong/.claude/plugins/cache/corca-plugins/cwf/0.8.0
+
+Current version:    0.8.0
+Marketplace version: 0.8.0
+Source version:     0.8.0
+```
+
+**Result: Already up to date.** All versions match at `0.8.0` — no update needed.
+
+---
+
+### Codex Integration Status
+
+| Signal | Status |
+|---|---|
+| Skills links (`~/.agents/skills`) | Present — 13 CWF skill symlinks pointing to source repo |
+| Wrapper (`~/.local/bin/codex`) | Active — symlink to `codex-with-log.sh` in source repo |
+| Project-scope `.codex/` | Not present for this repo |
+
+Since no update was applied, **no Codex reconciliation is needed** — all symlinks already point to the correct source paths.
+
+---
+
+### Note
+
+The active scope resolved to `none` because the current working directory (`repo-smoke`) is not registered as an installed project path. CWF is installed for `repo-install` and `repo-setup` project paths. If you need CWF installed for this project, you can run:
+
+```bash
+claude plugin install "cwf@corca-plugins" --scope project
+```

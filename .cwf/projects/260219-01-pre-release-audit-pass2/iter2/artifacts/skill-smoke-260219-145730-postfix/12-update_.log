@@ -1,0 +1,32 @@
+Here's what I found:
+
+**Scope Detection Summary:**
+
+| Field | Value |
+|---|---|
+| **Active scope** | `project` |
+| **Installed scopes** | `project` |
+| **Install path** | `~/.claude/plugins/cache/corca-plugins/cwf/0.8.0` |
+| **Project path** | `.../repo-install` (different project from current cwd) |
+| **Current version** | `0.8.0` |
+| **Latest cached version** | `0.8.0` |
+
+The `detect-plugin-scope.sh` returned `none` because CWF is installed with project scope bound to `repo-install`, not the current working directory (`repo-smoke`). However, the plugin registry confirms CWF **is** installed at scope `project`.
+
+**Marketplace refresh** could not run because we're inside a nested Claude Code session (`claude plugin marketplace update` is blocked).
+
+**Version comparison:**
+
+```text
+Target scope:    project
+Current version: 0.8.0
+Latest version:  0.8.0 (cached — marketplace refresh unavailable in nested session)
+```
+
+Versions match based on cached metadata. Since `claude plugin marketplace update` cannot run inside this nested session, I cannot confirm whether a newer version exists on the marketplace.
+
+**No update needed** based on available data — current and latest cached versions are both **0.8.0**.
+
+**Codex Integration:** No Codex integration detected for this scope (no skills links, no wrapper).
+
+To get a definitive check, run `cwf:update` from a top-level Claude Code session (not nested) so the marketplace metadata can be refreshed. If a newer version exists upstream, it will be detected at that point.

@@ -1,0 +1,15 @@
+id	result	reason	exit_code	duration_sec	log_file
+setup-env	PASS	OK	0	42	.cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/skill-smoke-260219-145730-postfix/1-setup-env_.log
+setup-git-hooks	TIMEOUT	TIMEOUT	124	60	.cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/skill-smoke-260219-145730-postfix/2-setup-git-hooks_.log
+gather	PASS	OK	0	16	.cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/skill-smoke-260219-145730-postfix/3-gather_.log
+clarify	PASS	OK	0	59	.cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/skill-smoke-260219-145730-postfix/4-clarify_.log
+plan	TIMEOUT	TIMEOUT	124	60	.cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/skill-smoke-260219-145730-postfix/5-plan_.log
+review	PASS	OK	0	41	.cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/skill-smoke-260219-145730-postfix/6-review_.log
+impl	TIMEOUT	TIMEOUT	124	60	.cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/skill-smoke-260219-145730-postfix/7-impl_.log
+refactor	TIMEOUT	TIMEOUT	124	60	.cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/skill-smoke-260219-145730-postfix/8-refactor_.log
+retro	TIMEOUT	TIMEOUT	124	60	.cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/skill-smoke-260219-145730-postfix/9-retro_.log
+handoff	TIMEOUT	TIMEOUT	124	60	.cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/skill-smoke-260219-145730-postfix/10-handoff_.log
+ship	PASS	OK	0	6	.cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/skill-smoke-260219-145730-postfix/11-ship_.log
+update	PASS	OK	0	39	.cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/skill-smoke-260219-145730-postfix/12-update_.log
+run	PASS	OK	0	33	.cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/skill-smoke-260219-145730-postfix/13-run_.log
+hitl	TIMEOUT	TIMEOUT	124	60	.cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/skill-smoke-260219-145730-postfix/14-hitl_.log

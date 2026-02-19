@@ -1,0 +1,24 @@
+These session logs are from earlier today and I can't reliably determine which one corresponds to this specific sandbox session without reading them. Since this is a smoke test in a nested sandbox, the session logs may not directly correspond. I'll skip symlink silently as specified.
+
+Now the retro is complete. Let me provide the direct invocation report.
+
+---
+
+## Retro Brief
+
+- **세션 목표/결과**: sandbox repo-smoke에서 CWF plan→impl iteration 2 (hello.txt edit 경로) 실행 및 retro까지 파이프라인 도달 완료.
+- **최대 낭비/근본 원인**: bootstrap-only 프로젝트 디렉토리(`260219-05`) 재발 — 이전 retro에서 이미 지적했으나 smoke test 맥락이라 미적용. One-off로 분류.
+- **핵심 CDM 교훈**: smoke test는 코드 경로(create/edit/delete)별 사전 정의 목록이 있으면 iteration간 즉석 결정 비용이 제거됨.
+- **도구/역량 핵심**: 이전 retro에서 제안된 stale-dir 감지, cwf-state auto-init 두 항목이 여전히 미구현 carry-forward 상태.
+
+## Persist Proposals
+
+| # | Finding | Tier | Target | Apply Now? |
+|---|---------|------|--------|------------|
+| 1 | Stale bootstrap dir 감지 규칙 (carry-forward) | Eval-Hook | `check-session.sh` | No — smoke test 범위 밖, production 세션에서 적용 |
+| 2 | `cwf-live-state.sh` auto-init (carry-forward) | Eval-Hook | `cwf-live-state.sh` | No — 별도 impl 세션 필요 |
+| 3 | Smoke test case 사전 정의 | Doc | `iter2/` 레벨 테스트 문서 | No — audit pass2 계획에서 다룰 항목 |
+
+Retro 작성 완료: `.cwf/projects/260219-04-minimal-smoke-plan/retro.md`
+
+Persist proposals를 지금 적용할까요?

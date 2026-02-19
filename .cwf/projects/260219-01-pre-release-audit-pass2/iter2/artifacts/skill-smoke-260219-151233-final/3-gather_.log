@@ -1,0 +1,29 @@
+Here's a summary of `docs/plugin-dev-cheatsheet.md`:
+
+## Plugin Dev Cheatsheet — Key Points
+
+**Directory Patterns** — Three layouts:
+- **Skill-only**: `plugins/{name}/` with `.claude-plugin/plugin.json` + `skills/{name}/SKILL.md`
+- **Hook-only**: same root with `hooks/hooks.json` + scripts
+- **Hybrid**: both hooks and skills
+
+**plugin.json** — Standard metadata (name, description, version, author, repository)
+
+**marketplace.json** — Each plugin gets an entry with `name` (kebab-case), `source` (relative path), `description`, `keywords`. Plugins are cached on install — files outside the plugin dir won't be available; use `${CLAUDE_PLUGIN_ROOT}`.
+
+**SKILL.md** — YAML frontmatter (name, description, triggers, allowed-tools). Keep under 500 lines; move details to `references/`. English only.
+
+**hooks.json** — Matchers: `PreToolUse`, `PostToolUse`, `Notification`. Types: `command` or `prompt`. Hooks are snapshots at session start (no hot-reload).
+
+**Scripts** — Cross-platform (macOS Bash 3.2 + Linux), `#!/usr/bin/env bash`, `set -euo pipefail`. Notable gotchas: `((var++))` fails at 0 under `set -e`, curl needs `set +e` wrapper, empty array iteration under `set -u`.
+
+**Testing** — Pipe JSON to hook scripts, verify SKILL.md frontmatter, use `claude --plugin-dir` for integration tests.
+
+**Pre-Release Validation** — Three gates:
+1. `premerge-cwf-gate.sh --mode premerge`
+2. `check-marketplace-entry.sh`
+3. `noninteractive-skill-smoke.sh`
+
+**Version Bumps** — patch (bugfix), minor (new feature/flag), major (breaking change)
+
+**Deploy Workflow** — Bump version → sync marketplace → update changelog/README → test → commit → on main run `cwf:update`

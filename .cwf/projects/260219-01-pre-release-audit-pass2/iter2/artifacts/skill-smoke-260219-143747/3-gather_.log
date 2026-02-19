@@ -1,0 +1,14 @@
+The file `docs/plugin-dev-cheatsheet.md` doesn't exist in the current repository or anywhere reachable.
+
+`cwf:gather` expects one of:
+- A **URL** (e.g., `https://...`)
+- `--search <query>` for web/code search
+- `--local <query>` for local codebase exploration
+
+A bare file path isn't a supported input. What did you have in mind?
+
+1. **If this is a file you want to find or create** — I can search the broader workspace or help draft it.
+2. **If this is a URL you meant to paste** — please share the full URL and I'll gather it.
+3. **If you want to explore the local codebase for plugin development patterns** — I can run `cwf:gather --local "plugin dev cheatsheet"`.
+
+Which would you like?
