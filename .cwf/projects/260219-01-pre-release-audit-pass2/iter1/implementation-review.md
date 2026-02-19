@@ -2,11 +2,11 @@
 
 ## 구현 대상
 
-- [scripts/check-marketplace-entry.sh](../../scripts/check-marketplace-entry.sh)
-- [scripts/noninteractive-skill-smoke.sh](../../scripts/noninteractive-skill-smoke.sh)
-- [scripts/tests/check-marketplace-entry-fixtures.sh](../../scripts/tests/check-marketplace-entry-fixtures.sh)
-- [scripts/tests/noninteractive-skill-smoke-fixtures.sh](../../scripts/tests/noninteractive-skill-smoke-fixtures.sh)
-- [docs/plugin-dev-cheatsheet.md](../../docs/plugin-dev-cheatsheet.md)
+- [scripts/check-marketplace-entry.sh](../../../../scripts/check-marketplace-entry.sh)
+- [scripts/noninteractive-skill-smoke.sh](../../../../scripts/noninteractive-skill-smoke.sh)
+- [scripts/tests/check-marketplace-entry-fixtures.sh](../../../../scripts/tests/check-marketplace-entry-fixtures.sh)
+- [scripts/tests/noninteractive-skill-smoke-fixtures.sh](../../../../scripts/tests/noninteractive-skill-smoke-fixtures.sh)
+- [docs/plugin-dev-cheatsheet.md](../../../../docs/plugin-dev-cheatsheet.md)
 
 ## 리뷰 기준 대비 결과
 

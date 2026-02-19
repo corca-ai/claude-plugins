@@ -20,6 +20,8 @@
     - marketplace 엔트리 검증 스크립트 추가
     - non-interactive 스킬 smoke 스크립트/테스트 추가
     - pre-release 점검 절차 문서화
+    - premerge CI 게이트 추가(로컬 deterministic checks)
+    - 공개 marketplace 진단 스크립트 추가(현재 main에서 `cwf` 누락 감지)
 
 ## 누적 핵심 리스크
 

@@ -23,13 +23,13 @@
 
 ## 작업 항목
 
-1. [scripts/check-marketplace-entry.sh](../../scripts/check-marketplace-entry.sh) 추가
+1. [scripts/check-marketplace-entry.sh](../../../../scripts/check-marketplace-entry.sh) 추가
    - 원격/로컬 marketplace 소스에서 특정 plugin name 존재 여부를 검사
    - 실패 시 non-zero 반환으로 release gate에 연결 가능
-2. [scripts/noninteractive-skill-smoke.sh](../../scripts/noninteractive-skill-smoke.sh) 추가
+2. [scripts/noninteractive-skill-smoke.sh](../../../../scripts/noninteractive-skill-smoke.sh) 추가
    - `claude --print --plugin-dir ...` 기반으로 주요 스킬 trigger를 timeout 포함 스모크 실행
    - 케이스별 exit/status 요약 리포트 출력
-3. [docs/plugin-dev-cheatsheet.md](../../docs/plugin-dev-cheatsheet.md) 업데이트
+3. [docs/plugin-dev-cheatsheet.md](../../../../docs/plugin-dev-cheatsheet.md) 업데이트
    - 배포 전 필수 점검에 위 두 스크립트 추가
 
 ## BDD 성공 기준
@@ -49,7 +49,7 @@
 ### 시나리오 C: Non-interactive skill deadlock 조기 포착
 
 - Given 스킬 trigger 목록과 timeout 설정이 있다
-- When [scripts/noninteractive-skill-smoke.sh](../../scripts/noninteractive-skill-smoke.sh) 를 실행하면
+- When [scripts/noninteractive-skill-smoke.sh](../../../../scripts/noninteractive-skill-smoke.sh) 를 실행하면
 - Then 케이스별 `PASS|FAIL|TIMEOUT` 결과와 로그 경로가 출력된다
 
 ## 검증 계획

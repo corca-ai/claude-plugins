@@ -16,13 +16,13 @@
 ## 최종 실행 범위 (현재 세션)
 
 - 구현
-  - [scripts/check-marketplace-entry.sh](../../scripts/check-marketplace-entry.sh) 신규 추가
-  - [scripts/noninteractive-skill-smoke.sh](../../scripts/noninteractive-skill-smoke.sh) 신규 추가
+  - [scripts/check-marketplace-entry.sh](../../../../scripts/check-marketplace-entry.sh) 신규 추가
+  - [scripts/noninteractive-skill-smoke.sh](../../../../scripts/noninteractive-skill-smoke.sh) 신규 추가
 - 테스트
   - fixture 기반 스크립트 테스트 추가
   - 실제 샌드박스에서 smoke 1회 실행
 - 문서
-  - [docs/plugin-dev-cheatsheet.md](../../docs/plugin-dev-cheatsheet.md)에 배포 전 점검 절차 추가
+  - [docs/plugin-dev-cheatsheet.md](../../../../docs/plugin-dev-cheatsheet.md)에 배포 전 점검 절차 추가
 - 기록
   - [.cwf/projects/260219-01-pre-release-audit-pass2/iter1/implementation-review.md](implementation-review.md)
   - [.cwf/projects/260219-01-pre-release-audit-pass2/iter1/refactor.md](refactor.md)

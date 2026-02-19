@@ -31,6 +31,10 @@ Options:
 Case file format:
   - One case per line: <id>|<prompt>
   - Empty lines and '#' comments are ignored.
+
+Summary fields:
+  - result: PASS|FAIL|TIMEOUT
+  - reason: OK|ERROR|TIMEOUT|WAIT_INPUT
 USAGE
 }
 
@@ -157,7 +161,7 @@ fi
 mkdir -p "$OUTPUT_DIR"
 
 SUMMARY_FILE="$OUTPUT_DIR/summary.tsv"
-printf "id\tresult\texit_code\tduration_sec\tlog_file\n" > "$SUMMARY_FILE"
+printf "id\tresult\treason\texit_code\tduration_sec\tlog_file\n" > "$SUMMARY_FILE"
 
 declare -a CASE_IDS=()
 declare -a CASE_PROMPTS=()
@@ -228,6 +232,7 @@ fi
 PASS_COUNT=0
 FAIL_COUNT=0
 TIMEOUT_COUNT=0
+WAIT_INPUT_COUNT=0
 
 run_case() {
   local case_index="$1"
@@ -241,6 +246,7 @@ run_case() {
   local duration
   local exit_code
   local result
+  local reason
   local case_pid
   local watcher_pid
 
@@ -277,21 +283,30 @@ run_case() {
   end_ts="$(date +%s)"
   duration=$((end_ts - start_ts))
 
+  reason=""
+
   if [[ -f "$marker_file" ]]; then
     rm -f "$marker_file" >/dev/null 2>&1 || true
     result="TIMEOUT"
+    reason="TIMEOUT"
     TIMEOUT_COUNT=$((TIMEOUT_COUNT + 1))
     exit_code=124
+    if grep -Eiq 'waiting for your selection|wait for your answer|select one of the options|질문이 표시|선택해 주세요' "$log_file"; then
+      reason="WAIT_INPUT"
+      WAIT_INPUT_COUNT=$((WAIT_INPUT_COUNT + 1))
+    fi
   elif [[ "$exit_code" -eq 0 ]]; then
     result="PASS"
+    reason="OK"
     PASS_COUNT=$((PASS_COUNT + 1))
   else
     result="FAIL"
+    reason="ERROR"
     FAIL_COUNT=$((FAIL_COUNT + 1))
   fi
 
-  printf "%s\t%s\t%s\t%s\t%s\n" "$case_id" "$result" "$exit_code" "$duration" "$log_file" >> "$SUMMARY_FILE"
-  printf "[%s] id=%s exit=%s duration=%ss log=%s\n" "$result" "$case_id" "$exit_code" "$duration" "$log_file"
+  printf "%s\t%s\t%s\t%s\t%s\t%s\n" "$case_id" "$result" "$reason" "$exit_code" "$duration" "$log_file" >> "$SUMMARY_FILE"
+  printf "[%s] id=%s reason=%s exit=%s duration=%ss log=%s\n" "$result" "$case_id" "$reason" "$exit_code" "$duration" "$log_file"
 }
 
 echo "Smoke output dir: $OUTPUT_DIR"
@@ -307,7 +322,7 @@ for i in "${!CASE_IDS[@]}"; do
 done
 
 echo "---"
-echo "Totals: pass=$PASS_COUNT fail=$FAIL_COUNT timeout=$TIMEOUT_COUNT"
+echo "Totals: pass=$PASS_COUNT fail=$FAIL_COUNT timeout=$TIMEOUT_COUNT wait_input=$WAIT_INPUT_COUNT"
 echo "Thresholds: max_failures=$MAX_FAILURES max_timeouts=$MAX_TIMEOUTS"
 echo "Summary: $SUMMARY_FILE"
 

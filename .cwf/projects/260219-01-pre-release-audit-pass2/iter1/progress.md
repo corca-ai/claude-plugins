@@ -56,16 +56,30 @@
   - 통합 계획: [.cwf/projects/260219-01-pre-release-audit-pass2/iter1/plan-review.md](plan-review.md)
 - 구현
   - 신규 스크립트
-    - [scripts/check-marketplace-entry.sh](../../scripts/check-marketplace-entry.sh)
-    - [scripts/noninteractive-skill-smoke.sh](../../scripts/noninteractive-skill-smoke.sh)
+    - [scripts/check-marketplace-entry.sh](../../../../scripts/check-marketplace-entry.sh)
+    - [scripts/noninteractive-skill-smoke.sh](../../../../scripts/noninteractive-skill-smoke.sh)
+    - [scripts/check-public-marketplace-entry.sh](../../../../scripts/check-public-marketplace-entry.sh)
+    - [scripts/premerge-cwf-gate.sh](../../../../scripts/premerge-cwf-gate.sh)
+    - [scripts/hook-core-smoke.sh](../../../../scripts/hook-core-smoke.sh)
   - 신규 테스트
-    - [scripts/tests/check-marketplace-entry-fixtures.sh](../../scripts/tests/check-marketplace-entry-fixtures.sh)
-    - [scripts/tests/noninteractive-skill-smoke-fixtures.sh](../../scripts/tests/noninteractive-skill-smoke-fixtures.sh)
+    - [scripts/tests/check-marketplace-entry-fixtures.sh](../../../../scripts/tests/check-marketplace-entry-fixtures.sh)
+    - [scripts/tests/noninteractive-skill-smoke-fixtures.sh](../../../../scripts/tests/noninteractive-skill-smoke-fixtures.sh)
   - 문서 업데이트
-    - [docs/plugin-dev-cheatsheet.md](../../docs/plugin-dev-cheatsheet.md)
+    - [docs/plugin-dev-cheatsheet.md](../../../../docs/plugin-dev-cheatsheet.md)
 - 구현 리뷰
   - [.cwf/projects/260219-01-pre-release-audit-pass2/iter1/implementation-review.md](implementation-review.md)
   - 핵심 결과: 픽스처 테스트 전부 PASS, 실제 smoke(14 케이스) `pass 2 / timeout 12`
 - refactor/retro
   - refactor 기록: [.cwf/projects/260219-01-pre-release-audit-pass2/iter1/refactor.md](refactor.md) (PASS, 단 스캔 대상 0)
   - retro 기록: [.cwf/projects/260219-01-pre-release-audit-pass2/iter1/retro.md](retro.md) (`cwf:retro` non-interactive timeout 포함)
+
+## 머지 전 추가 자동화
+
+1. premerge 게이트 자동화 추가
+   - 스크립트: [scripts/premerge-cwf-gate.sh](../../../../scripts/premerge-cwf-gate.sh)
+   - 포함 체크: local marketplace, fixture tests, hook core smoke
+2. CI 워크플로우 추가
+   - 파일: [.github/workflows/cwf-premerge-gate.yml](../../../../.github/workflows/cwf-premerge-gate.yml)
+3. 공개 marketplace 진단 경로 추가
+   - 스크립트: [scripts/check-public-marketplace-entry.sh](../../../../scripts/check-public-marketplace-entry.sh)
+   - 관찰: `corca-ai/claude-plugins@main` 기준 `cwf` 엔트리 누락(`MISSING_ENTRY`, exit 4)

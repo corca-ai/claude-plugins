@@ -197,6 +197,9 @@ Alternative: add hooks via `/hooks` menu in the current session (goes through re
 Run these checks before public release (or before merging release-bound changes):
 
 ```bash
+# 0) Consolidated gate (recommended)
+bash scripts/premerge-cwf-gate.sh --mode premerge --plugin cwf
+
 # 1) Verify marketplace entry visibility
 bash scripts/check-marketplace-entry.sh --source . --plugin cwf
 
@@ -207,6 +210,13 @@ bash scripts/noninteractive-skill-smoke.sh \
   --timeout 45 \
   --max-failures 0 \
   --max-timeouts 0
+
+# 3) Public marketplace verification (run in main or after merge)
+bash scripts/premerge-cwf-gate.sh \
+  --mode predeploy \
+  --plugin cwf \
+  --repo corca-ai/claude-plugins \
+  --ref main
 ```
 
 `check-marketplace-entry.sh` exit codes:

@@ -30,6 +30,6 @@
 
 ## Iteration 2 액션
 
-1. [scripts/noninteractive-skill-smoke.sh](../../scripts/noninteractive-skill-smoke.sh)에 `--include-local-skills` 대응 케이스 세트 추가
+1. [scripts/noninteractive-skill-smoke.sh](../../../../scripts/noninteractive-skill-smoke.sh)에 `--include-local-skills` 대응 케이스 세트 추가
 2. CI에 `check-marketplace-entry` + smoke job 연결(실패 시 릴리스 차단)
 3. `retro`/`run` timeout 원인 추적용 provenance 수집 포인트 추가
