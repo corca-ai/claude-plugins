@@ -23,6 +23,7 @@ import argparse
 import json
 import re
 import string
+import subprocess
 import sys
 from pathlib import Path
 
@@ -144,6 +145,34 @@ def _make_minhash(shingles: set, num_perm: int = 128) -> MinHash:
     return mh
 
 
+def _collect_markdown_files(repo_root: Path) -> list[Path]:
+    """Collect markdown files while honoring .gitignore when possible."""
+    try:
+        proc = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(repo_root),
+                "ls-files",
+                "-z",
+                "--cached",
+                "--others",
+                "--exclude-standard",
+                "--",
+                "*.md",
+            ],
+            check=True,
+            capture_output=True,
+            text=False,
+        )
+        entries = [p for p in proc.stdout.split(b"\0") if p]
+        paths = [repo_root / p.decode("utf-8", errors="replace") for p in entries]
+        return sorted(p for p in paths if p.is_file())
+    except Exception:
+        # Fallback for non-git environments.
+        return sorted(repo_root.rglob("*.md"))
+
+
 # --- Main logic --------------------------------------------------------------
 
 
@@ -183,8 +212,8 @@ def main():
     # Discover repo root (same heuristic as sibling scripts)
     repo_root = Path(__file__).resolve().parent.parent
 
-    # Collect target .md files (no symlink following)
-    md_files = sorted(repo_root.rglob("*.md"))
+    # Collect target .md files.
+    md_files = _collect_markdown_files(repo_root)
 
     # Always exclude non-documentation directories
     always_exclude = [repo_root / "node_modules", repo_root / ".git"]

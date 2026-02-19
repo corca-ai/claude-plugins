@@ -6,6 +6,8 @@ work-in-progress
 .env.local
 .cwf-config.local.yaml
 .cache/
+*.pyc
+__pycache__/
 **/__pycache__/
 /tmux
 

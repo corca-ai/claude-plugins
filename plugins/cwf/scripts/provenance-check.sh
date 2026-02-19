@@ -77,15 +77,34 @@ fi
 REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
 cd "$REPO_ROOT"
 
-# Count current skills and hooks
-CURRENT_SKILLS=$(find plugins/cwf/skills -name "SKILL.md" -mindepth 2 -maxdepth 2 2>/dev/null | wc -l | tr -d ' ')
-CURRENT_HOOKS=$(find plugins/cwf/hooks/scripts -name "*.sh" ! -name "cwf-hook-gate.sh" 2>/dev/null | wc -l | tr -d ' ')
-
-# Find all provenance files
+# Count current skills/hooks and collect provenance files while honoring .gitignore.
+CURRENT_SKILLS=0
+CURRENT_HOOKS=0
 PROVENANCE_FILES=()
-while IFS= read -r f; do
-  PROVENANCE_FILES+=("$f")
-done < <(find . -name "*.provenance.yaml" -type f 2>/dev/null | sort)
+
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  CURRENT_SKILLS="$(
+    git ls-files --cached --others --exclude-standard \
+      | awk '/^plugins\/cwf\/skills\/.*\/SKILL\.md$/ {n++} END {print n+0}'
+  )"
+  CURRENT_HOOKS="$(
+    git ls-files --cached --others --exclude-standard \
+      | awk '
+          /^plugins\/cwf\/hooks\/scripts\/.*\.sh$/ && $0 != "plugins/cwf/hooks/scripts/cwf-hook-gate.sh" {n++}
+          END {print n+0}
+        '
+  )"
+  while IFS= read -r f; do
+    [[ -n "$f" ]] || continue
+    PROVENANCE_FILES+=("$f")
+  done < <(git ls-files --cached --others --exclude-standard -- '*.provenance.yaml' | sort)
+else
+  CURRENT_SKILLS=$(find plugins/cwf/skills -name "SKILL.md" -mindepth 2 -maxdepth 2 2>/dev/null | wc -l | tr -d ' ')
+  CURRENT_HOOKS=$(find plugins/cwf/hooks/scripts -name "*.sh" ! -name "cwf-hook-gate.sh" 2>/dev/null | wc -l | tr -d ' ')
+  while IFS= read -r f; do
+    PROVENANCE_FILES+=("$f")
+  done < <(find . -name "*.provenance.yaml" -type f 2>/dev/null | sort)
+fi
 
 if [[ ${#PROVENANCE_FILES[@]} -eq 0 ]]; then
   if [[ "$JSON_OUTPUT" == "true" ]]; then

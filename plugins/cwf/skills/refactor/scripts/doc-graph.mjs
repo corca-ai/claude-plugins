@@ -10,7 +10,7 @@
 
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { resolve, relative, dirname, extname } from 'node:path';
-import { execSync } from 'node:child_process';
+import { execSync, spawnSync } from 'node:child_process';
 
 const DOC_GRAPH_IGNORE_FILE = '.doc-graph-ignore';
 
@@ -253,9 +253,26 @@ function readdirRecursive(dir) {
   return results;
 }
 
+function collectMdFilesFromGit(rootDir) {
+  const result = spawnSync(
+    'git',
+    ['-C', rootDir, 'ls-files', '-z', '--cached', '--others', '--exclude-standard', '--', '*.md'],
+    { encoding: 'utf8' }
+  );
+  if (result.status !== 0) {
+    return null;
+  }
+  return result.stdout
+    .split('\0')
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .map((relPath) => resolve(rootDir, relPath));
+}
+
 function collectMdFiles(rootDir) {
   const ignoreRules = loadIgnoreRules(rootDir);
-  const allFiles = readdirRecursive(rootDir);
+  const gitFiles = collectMdFilesFromGit(rootDir);
+  const allFiles = Array.isArray(gitFiles) ? gitFiles : readdirRecursive(rootDir);
   const results = [];
   for (const file of allFiles) {
     const relPath = normalizeRelPath(relative(repoRoot, file));

@@ -84,11 +84,35 @@ if [[ "$JSON_OUTPUT" == "true" ]]; then
   LYCHEE_ARGS+=("--format" "json")
 fi
 
-# Target: single file or all .md files
+collect_markdown_targets() {
+  if git -C "$REPO_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    while IFS= read -r -d '' rel_path; do
+      [[ -n "$rel_path" ]] || continue
+      [[ -f "$rel_path" ]] || continue
+      printf '%s\0' "$rel_path"
+    done < <(git -C "$REPO_ROOT" ls-files -z --cached --others --exclude-standard -- '*.md')
+    return
+  fi
+
+  while IFS= read -r abs_path; do
+    [[ -n "$abs_path" ]] || continue
+    printf '%s\0' "${abs_path#./}"
+  done < <(find . -name '*.md' -type f ! -path './.git/*' ! -path '*/node_modules/*' | sort)
+}
+
+# Target: single file or all markdown files that honor .gitignore
 if [[ -n "$SINGLE_FILE" ]]; then
   LYCHEE_ARGS+=("$SINGLE_FILE")
 else
-  LYCHEE_ARGS+=("**/*.md")
+  MARKDOWN_TARGETS=()
+  while IFS= read -r -d '' target; do
+    MARKDOWN_TARGETS+=("$target")
+  done < <(collect_markdown_targets)
+  if [[ ${#MARKDOWN_TARGETS[@]} -eq 0 ]]; then
+    echo -e "${YELLOW}No markdown files found to check.${NC}" >&2
+    exit 0
+  fi
+  LYCHEE_ARGS+=("${MARKDOWN_TARGETS[@]}")
 fi
 
 echo -e "${GREEN}Running link check...${NC}" >&2

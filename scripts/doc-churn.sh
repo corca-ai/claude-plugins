@@ -84,8 +84,19 @@ STALE_EPOCH=$((NOW - STALE_DAYS * 86400))
 FRESH_EPOCH=$((NOW - 7 * 86400))
 CURRENT_EPOCH=$((NOW - 30 * 86400))
 
-# Collect .md files
-mapfile -t MD_FILES < <(find . -name "*.md" -type f ! -path "./.git/*" ! -path "*/node_modules/*" | sort)
+# Collect markdown files while honoring .gitignore.
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  mapfile -t MD_FILES < <(
+    git ls-files --cached --others --exclude-standard -- '*.md' \
+      | sort
+  )
+else
+  mapfile -t MD_FILES < <(
+    find . -name "*.md" -type f ! -path "./.git/*" ! -path "*/node_modules/*" \
+      | sed 's|^\./||' \
+      | sort
+  )
+fi
 
 # Filter project artifact directories unless requested
 if [[ "$INCLUDE_PROJECT_ARTIFACTS" != "true" ]]; then

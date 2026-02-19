@@ -78,9 +78,10 @@ is_ignored() {
   local path="$1"
   local pattern
   for pattern in "${ignore_patterns[@]}"; do
-    if [[ "$path" == $pattern ]]; then
-      return 0
-    fi
+    # shellcheck disable=SC2254
+    case "$path" in
+      $pattern) return 0 ;;
+    esac
   done
   return 1
 }
@@ -108,7 +109,7 @@ collect_required_paths_repo() {
   done
 
   if [ -d docs ]; then
-    find docs -maxdepth 1 -type f -name "*.md" | sort
+    git ls-files --cached --others --exclude-standard -- 'docs/*.md' | sort
   fi
 
   if [ -f "plugins/cwf/hooks/README.md" ]; then
@@ -120,19 +121,16 @@ collect_required_paths_repo() {
   fi
 
   if [ -d references ]; then
-    find references -type f -name "*.md" | sort
+    git ls-files --cached --others --exclude-standard -- '*.md' \
+      | grep '^references/.*\.md$' \
+      | sort || true
   fi
 
-  find . \
-    \( -path "./.git" -o -path "./.claude" -o -path "./.cwf" -o -path "./node_modules" -o -path "./projects" \) -prune -o \
-    -type f -name "SKILL.md" -print \
-    | sed 's|^\./||' \
-    | grep "/skills/" || true
+  git ls-files --cached --others --exclude-standard \
+    | grep '/SKILL\.md$' \
+    | grep '/skills/' || true
 
-  find . \
-    \( -path "./.git" -o -path "./.claude" -o -path "./.cwf" -o -path "./node_modules" -o -path "./projects" \) -prune -o \
-    -type f -name "*.md" -print \
-    | sed 's|^\./||' \
+  git ls-files --cached --others --exclude-standard -- '*.md' \
     | grep "/references/" \
     | grep -v "/skills/.*/references/" || true
 }
@@ -159,11 +157,15 @@ collect_required_paths_cap() {
   fi
 
   if [ -d "plugins/cwf/skills" ]; then
-    find plugins/cwf/skills -mindepth 2 -maxdepth 2 -type f -name "SKILL.md" | sort
+    git ls-files --cached --others --exclude-standard \
+      | grep '^plugins/cwf/skills/.*/SKILL\.md$' \
+      | sort || true
   fi
 
   if [ -d "plugins/cwf/references" ]; then
-    find plugins/cwf/references -type f -name "*.md" | sort
+    git ls-files --cached --others --exclude-standard -- '*.md' \
+      | grep '^plugins/cwf/references/.*\.md$' \
+      | sort || true
   fi
 }
 
@@ -173,7 +175,7 @@ else
   collect_required_paths_cap | sort -u > "$REQUIRED"
 fi
 
-> "$REQUIRED_FILTERED"
+: > "$REQUIRED_FILTERED"
 while IFS= read -r path; do
   if is_ignored "$path"; then
     continue
