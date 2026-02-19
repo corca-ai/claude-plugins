@@ -1,0 +1,66 @@
+name: CWF Premerge Gate
+
+on:
+  pull_request:
+  push:
+    branches-ignore:
+      - main
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Gate mode (premerge or predeploy)"
+        required: true
+        default: "premerge"
+        type: choice
+        options:
+          - premerge
+          - predeploy
+      public_ref:
+        description: "Public ref for predeploy marketplace check"
+        required: false
+        default: "main"
+        type: string
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Ensure jq
+        run: |
+          if ! command -v jq >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y jq
+          fi
+
+      - name: Make scripts executable
+        run: |
+          chmod +x scripts/check-marketplace-entry.sh
+          chmod +x scripts/check-public-marketplace-entry.sh
+          chmod +x scripts/noninteractive-skill-smoke.sh
+          chmod +x scripts/hook-core-smoke.sh
+          chmod +x scripts/premerge-cwf-gate.sh
+          chmod +x scripts/tests/check-marketplace-entry-fixtures.sh
+          chmod +x scripts/tests/noninteractive-skill-smoke-fixtures.sh
+
+      - name: Run premerge gate (PR/push)
+        if: github.event_name != 'workflow_dispatch'
+        run: |
+          bash scripts/premerge-cwf-gate.sh --mode premerge --plugin cwf
+
+      - name: Run gate (manual dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          bash scripts/premerge-cwf-gate.sh \
+            --mode "${{ inputs.mode }}" \
+            --plugin cwf \
+            --repo "${{ github.repository }}" \
+            --ref "${{ inputs.public_ref }}"

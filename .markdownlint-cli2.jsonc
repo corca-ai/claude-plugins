@@ -1,3 +1,23 @@
 {
-  "ignores": ["prompt-logs/", "node_modules/", "references/anthropic-skills-guide/"]
+  "noBanner": true,
+  "noProgress": true,
+  "ignores": [
+    ".cwf/projects/",
+    ".cwf/sessions/",
+    ".cwf/prompt-logs/",
+    "node_modules/",
+    "node_modules/**",
+    "**/node_modules/",
+    "**/node_modules/**",
+    "references/",
+    "references/**",
+    "references/anthropic-skills-guide/"
+  ],
+  "customRules": [
+    "./scripts/markdownlint-rules/no-inline-md-path-literals.cjs",
+    "./scripts/markdownlint-rules/no-hard-wrapped-prose.cjs",
+    "./scripts/markdownlint-rules/skill-frontmatter-schema.cjs",
+    "./scripts/markdownlint-rules/skill-skeleton-language-contract.cjs",
+    "./scripts/markdownlint-rules/no-plugin-external-links.cjs"
+  ]
 }

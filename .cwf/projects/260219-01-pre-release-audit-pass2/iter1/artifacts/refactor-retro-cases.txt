@@ -1,0 +1,2 @@
+refactor|cwf:refactor --mode quick
+retro|cwf:retro --light

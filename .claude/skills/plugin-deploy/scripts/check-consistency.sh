@@ -37,14 +37,20 @@ fi
 
 # --- 2. plugin.json exists and has version ---
 plugin_json_version=""
+plugin_json_description=""
 if [[ -f "$PLUGIN_JSON" ]]; then
   if command -v jq &>/dev/null; then
     plugin_json_version=$(jq -r '.version // empty' "$PLUGIN_JSON")
+    plugin_json_description=$(jq -r '.description // empty' "$PLUGIN_JSON")
   else
     plugin_json_version=$(grep -oP '"version"\s*:\s*"\K[^"]+' "$PLUGIN_JSON" | head -1)
+    plugin_json_description=$(grep -oP '"description"\s*:\s*"\K[^"]+' "$PLUGIN_JSON" | head -1)
   fi
   if [[ -z "$plugin_json_version" ]]; then
     gaps+=("plugin.json exists but has no version field")
+  fi
+  if [[ -z "$plugin_json_description" ]]; then
+    gaps+=("plugin.json exists but has no description field")
   fi
 else
   gaps+=("plugin.json not found at .claude-plugin/plugin.json")
@@ -52,16 +58,19 @@ fi
 
 # --- 3. marketplace.json entry ---
 marketplace_version=""
+marketplace_description=""
 in_marketplace=false
 if command -v jq &>/dev/null; then
   marketplace_entry=$(jq -r --arg name "$PLUGIN_NAME" '.plugins[] | select(.name == $name)' "$MARKETPLACE_JSON" 2>/dev/null || true)
   if [[ -n "$marketplace_entry" ]]; then
     in_marketplace=true
     marketplace_version=$(echo "$marketplace_entry" | jq -r '.version // empty' 2>/dev/null || true)
+    marketplace_description=$(echo "$marketplace_entry" | jq -r '.description // empty' 2>/dev/null || true)
   fi
 else
   if grep -q "\"name\": \"$PLUGIN_NAME\"" "$MARKETPLACE_JSON" 2>/dev/null; then
     in_marketplace=true
+    marketplace_description=$(grep -A5 "\"name\": \"$PLUGIN_NAME\"" "$MARKETPLACE_JSON" | grep -oP '"description"\s*:\s*"\K[^"]+' | head -1)
   fi
 fi
 
@@ -82,6 +91,12 @@ if [[ "$in_marketplace" == "true" && -n "$plugin_json_version" ]]; then
     gaps+=("marketplace.json version ($marketplace_version) does not match plugin.json ($plugin_json_version)")
   elif [[ -n "$marketplace_version" && "$marketplace_version" == "$plugin_json_version" ]]; then
     version_match=true
+  fi
+fi
+
+if [[ "$in_marketplace" == "true" && -n "$plugin_json_description" ]]; then
+  if [[ "$marketplace_description" != "$plugin_json_description" ]]; then
+    gaps+=("marketplace.json description does not match plugin.json for $PLUGIN_NAME")
   fi
 fi
 
@@ -183,7 +198,9 @@ cat <<EOF
   "plugin_name": "$PLUGIN_NAME",
   "plugin_dir": "plugins/$PLUGIN_NAME/",
   "plugin_json_version": $(json_str "$plugin_json_version"),
+  "plugin_json_description": $(json_str "$plugin_json_description"),
   "marketplace_version": $(json_str "$marketplace_version"),
+  "marketplace_description": $(json_str "$marketplace_description"),
   "in_marketplace": $in_marketplace,
   "detected_new": $detected_new,
   "version_match": $version_match,

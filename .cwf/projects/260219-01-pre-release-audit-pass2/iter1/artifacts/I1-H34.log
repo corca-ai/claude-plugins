@@ -1,0 +1,15 @@
+# I1-H34 shellcheck present/missing
+date: 2026-02-19T01:02:28Z
+script: plugins/cwf/hooks/scripts/check-shell.sh
+tmp_repo: /tmp/cwf-h34-WjTc
+
+## Case A: shellcheck present -> block on lint issue
+command: jq -nc --arg p '/tmp/cwf-h34-WjTc/bad.sh' --arg cwd '/tmp/cwf-h34-WjTc' '{tool_input:{file_path:$p},cwd:$cwd}' | bash plugins/cwf/hooks/scripts/check-shell.sh
+exit_code: 0
+stdout:
+{"decision":"block","reason":"/tmp/cwf-h34-WjTc/bad.sh:2:1: error: Did you forget the 'then' for this 'if'? [SC1049]\n/tmp/cwf-h34-WjTc/bad.sh:2:1: error: Couldn't parse this if expression. Fix to allow more checks. [SC1073]\n/tmp/cwf-h34-WjTc/bad.sh:4:1: error: Expected 'then'. [SC1050]\n/tmp/cwf-h34-WjTc/bad.sh:4:3: error: Unexpected keyword/token. Fix any mentioned problems and try again. [SC1072]"}
+
+## Case B: shellcheck missing -> skip (allow)
+command: PATH='/usr/bin:/bin' jq -nc --arg p '/tmp/cwf-h34-WjTc/bad.sh' --arg cwd '/tmp/cwf-h34-WjTc' '{tool_input:{file_path:$p},cwd:$cwd}' | PATH='/usr/bin:/bin' bash plugins/cwf/hooks/scripts/check-shell.sh
+exit_code: 0
+stdout: <empty>

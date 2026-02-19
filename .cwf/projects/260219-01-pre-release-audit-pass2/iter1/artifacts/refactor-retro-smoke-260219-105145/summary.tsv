@@ -1,0 +1,3 @@
+id	result	exit_code	duration_sec	log_file
+refactor	PASS	0	73	project/iter1/artifacts/refactor-retro-smoke-260219-105145/1-refactor_.log
+retro	TIMEOUT	124	90	project/iter1/artifacts/refactor-retro-smoke-260219-105145/2-retro_.log

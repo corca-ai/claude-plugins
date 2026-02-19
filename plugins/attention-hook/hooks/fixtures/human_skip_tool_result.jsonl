@@ -1,3 +1,0 @@
-{"type":"user","message":{"content":"Real user request"}}
-{"type":"assistant","message":{"content":[{"type":"text","text":"Let me run a command"},{"type":"tool_use","id":"toolu_01FuHiDcs7544yxznELngvYw","name":"Bash","input":{"command":"ls -la"}}]}}
-{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"toolu_01FuHiDcs7544yxznELngvYw","content":"total 64\ndrwxr-xr-x  10 user  staff   320 Jan  9 10:00 ."}]}}

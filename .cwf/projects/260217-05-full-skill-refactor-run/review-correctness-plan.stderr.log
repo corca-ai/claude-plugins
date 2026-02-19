@@ -1,0 +1,537 @@
+OpenAI Codex v0.101.0 (research preview)
+--------
+workdir: /home/hwidong/codes/claude-plugins
+model: gpt-5.3-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+session id: 019c6a8d-7f9b-7072-b971-5105fb53315f
+--------
+user
+You are a correctness and performance reviewer for PLAN review mode.
+
+Read:
+- .cwf/projects/260217-05-full-skill-refactor-run/plan.md
+- .cwf/projects/260217-05-full-skill-refactor-run/plan-checkpoint-matrix.md
+- .cwf/projects/260217-05-full-skill-refactor-run/context.md (if missing, use provided constraints)
+
+Assess for:
+- logic completeness of stage order and verification,
+- missing edge cases in gate closure and artifact persistence,
+- contradictions in success criteria,
+- hidden failure paths (e.g., missing output files, fallback ambiguity).
+
+Use this required output format:
+## Correctness Review
+### Concerns (blocking)
+- **[C1]** ...
+  Severity: critical | security | moderate
+(If none: "No blocking concerns identified.")
+### Suggestions (non-blocking)
+- **[S1]** ...
+(If none: "No suggestions.")
+### Behavioral Criteria Assessment
+- [x] ... or [ ] ...
+### Provenance
+source: REAL_EXECUTION
+tool: codex
+reviewer: Correctness
+duration_ms: —
+command: codex exec --sandbox read-only -c model_reasoning_effort='high' -
+
+mcp startup: no servers
+2026-02-17T07:43:04.116548Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c5c1a-1ba3-7c90-a572-1930457798a4
+2026-02-17T07:43:04.138223Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a83-6f31-7562-939f-e1374a0adf4b
+2026-02-17T07:43:04.159793Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a88-9fba-7540-bd33-3d3223e67c5e
+2026-02-17T07:43:04.181280Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a88-a018-7a81-b159-8655b02db26d
+2026-02-17T07:43:04.202807Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a7f-a705-7583-bc92-0c8b2ee8c361
+2026-02-17T07:43:04.224421Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a8d-7d7d-7c83-8257-340c7a61c8e2
+2026-02-17T07:43:04.246081Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a85-5583-7b12-b053-9d168817aebb
+2026-02-17T07:43:04.267776Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a83-6f53-73a3-bfe3-08fa3e974454
+2026-02-17T07:43:04.289856Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a8d-7da6-72f0-896d-b8443d1b9f9f
+2026-02-17T07:43:04.311714Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c5c1a-1be7-7621-95f8-c7cb7c620e26
+2026-02-17T07:43:04.333977Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a7f-a69d-7520-b946-f126d79e81b4
+2026-02-17T07:43:04.355907Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c68bd-6e2b-7982-89be-fa3ea9b60d42
+2026-02-17T07:43:04.378051Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c5c1a-1bb3-7b23-9980-28a39c92f9cc
+2026-02-17T07:43:04.399968Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a7a-de59-79f3-b7f7-9d3396417c55
+2026-02-17T07:43:04.421647Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c5c1a-1bd8-7061-a6e5-1786773c1e89
+2026-02-17T07:43:04.443457Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a7f-a715-7803-8142-bdc8072d538b
+2026-02-17T07:43:04.465166Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6899-6d93-75d3-b8fc-fc876181af32
+2026-02-17T07:43:04.486950Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a7f-a6ab-7041-a38f-575dad852e76
+2026-02-17T07:43:04.508723Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a88-a00c-7242-82e2-043f50e5247d
+2026-02-17T07:43:04.530693Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a88-a027-7422-98ec-7dd48b7fbb2d
+2026-02-17T07:43:04.552195Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c68bc-916c-7853-9dfb-7012361f9a3c
+2026-02-17T07:43:04.573742Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a7f-a728-77a2-b6c4-016e5329618c
+2026-02-17T07:43:04.595492Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c5bdf-18bd-78d3-9f82-ba816d4c136a
+2026-02-17T07:43:04.617108Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c6a85-55c6-78c2-bdce-ccb825d63613
+
+thinking
+**Starting plan review inspection**
+codex
+요청하신 PLAN 정확성/성능 관점 검토를 진행하겠습니다. 먼저 지정된 3개 문서를 읽고, 단계 순서·검증·게이트 종료·산출물 지속성·성공기준 충돌을 중심으로 블로킹 이슈부터 추려서 정리하겠습니다.
+
+thinking
+**Planning parallel file reading**
+exec
+/usr/bin/zsh -lc "sed -n '1,260p' .cwf/projects/260217-05-full-skill-refactor-run/plan-checkpoint-matrix.md" in /home/hwidong/codes/claude-pluginsexec
+/usr/bin/zsh -lc "sed -n '1,220p' .cwf/projects/260217-05-full-skill-refactor-run/plan.md" in /home/hwidong/codes/claude-plugins succeeded in 50ms:
+# Plan Checkpoint Matrix
+
+This matrix follows `.cwf/projects/260217-05-full-skill-refactor-run/clarify-result.md` and enforces fail-fast verification per stage.
+
+## review-plan
+
+Required artifacts:
+- `review-security-plan.md`
+- `review-ux-dx-plan.md`
+- `review-correctness-plan.md`
+- `review-architecture-plan.md`
+- `review-expert-alpha-plan.md`
+- `review-expert-beta-plan.md`
+- `review-synthesis-plan.md`
+
+Verification command:
+```bash
+set -euo pipefail
+session_dir="$(bash plugins/cwf/scripts/cwf-live-state.sh get . dir)"
+for f in \
+ succeeded in 51ms:
+# Plan — Full Skill Refactor Run
+
+## Context
+This run executes a full cwf:run-style pre-deploy quality pass across all CWF skills with explicit artifact persistence and checkpoint commits.
+
+The user constraints are:
+- maximize practical sub-agent and external-agent usage,
+- exclude Gemini,
+- run refactor for each skill via `cwf:refactor --skill <name>`,
+- persist intermediate outputs and commit progressively.
+
+## Goal
+Produce a gate-safe, review-backed refactor pass for all skills and complete run-closing artifacts (`review-code`, `refactor`, `retro`, `ship`) so deployment readiness can be evaluated deterministically.
+
+## Steps
+1. Finalize plan-stage artifacts and checkpoint matrix for deterministic verification.
+2. Run `review-plan` with six reviewer slots (Security, UX/DX, Correctness, Architecture, Expert Alpha, Expert Beta), using external providers `codex` and `claude` only (no Gemini), and persist all slot outputs + synthesis.
+   - Immediately run stage-local strict verification from `plan-checkpoint-matrix.md` (fail-fast).
+   - Verify provider policy by checking reviewer provenance tools do not contain `gemini`.
+3. Implement approved refactors in code/docs/scripts with commit boundaries:
+exec
+/usr/bin/zsh -lc "if [ -f .cwf/projects/260217-05-full-skill-refactor-run/context.md ]; then sed -n '1,260p' .cwf/projects/260217-05-full-skill-refactor-run/context.md; else echo '__MISSING_CONTEXT__'; fi" in /home/hwidong/codes/claude-plugins succeeded in 51ms:
+__MISSING_CONTEXT__
+
+thinking
+**Assessing constraint verifications**
+codex
+지정 문서 확인 결과 `context.md`는 없고, 제공된 제약 기반으로 검토하면 됩니다. 이제 실제 게이트 스크립트(`check-run-gate-artifacts.sh`, `check-session.sh`)의 요구사항과 계획 문서가 충돌하는지 대조해서 숨은 실패 경로를 찾겠습니다.
+exec
+/usr/bin/zsh -lc "sed -n '1,260p' plugins/cwf/scripts/check-session.sh" in /home/hwidong/codes/claude-pluginsexec
+/usr/bin/zsh -lc "sed -n '1,280p' plugins/cwf/scripts/check-run-gate-artifacts.sh" in /home/hwidong/codes/claude-pluginsexec
+/usr/bin/zsh -lc "sed -n '1,260p' plugins/cwf/scripts/cwf-live-state.sh" in /home/hwidong/codes/claude-plugins succeeded in 50ms:
+#!/usr/bin/env bash
+set -euo pipefail
+
+# check-session.sh — Verify session completion artifacts
+# Usage: check-session.sh [--impl|--live|--semantic-gap] [session-id|session-dir]
+#   --impl    Check impl_complete artifacts only (plan.md, lessons.md, next-session.md)
+#             Use after implementation, before retro. Prevents dismissing FAIL
+#             because "retro.md is expected to be missing at this stage."
+#   --live    Check that the CWF state file live section has required fields populated
+#             (session_id, dir, phase, task). Use to verify context is preserved
+#             for compact recovery.
+#   --semantic-gap
+#             Check first-wave semantic closure relations for gap-analysis artifacts:
+#             (1) GAP(Unresolved/Unknown) -> BL linkage, (2) CW -> GAP linkage,
+#             (3) optional RANGE consistency.
+#   (default) Check all artifacts (always + milestone)
+# If no selector, checks the most recent session in the CWF state file
+# Reads expected artifacts from session entry or session_defaults
+# Exit 0 = all good, Exit 1 = missing/empty artifacts
+
+ succeeded in 51ms:
+#!/usr/bin/env bash
+set -euo pipefail
+
+# check-run-gate-artifacts.sh — deterministic artifact gate for cwf:run stages.
+#
+# Validates stage completion artifacts for:
+#   review-code, refactor, retro, ship
+#
+# Usage:
+#   check-run-gate-artifacts.sh --stage review-code --session-dir .cwf/projects/...
+#   check-run-gate-artifacts.sh --stage retro --strict --record-lessons
+
+usage() {
+  cat <<'USAGE'
+check-run-gate-artifacts.sh — validate cwf:run stage artifacts
+
+Usage:
+  check-run-gate-artifacts.sh [options]
+
+Options:
+ succeeded in 51ms:
+#!/usr/bin/env bash
+set -euo pipefail
+
+# cwf-live-state.sh — shared helper for hybrid live state (D-003).
+#
+# Root state (.cwf/cwf-state.yaml):
+#   - global metadata (workflow/session history/tools/hooks)
+#   - live pointer metadata (live.state_file)
+#
+# Session state (.cwf/projects/<session>/session-state.yaml):
+#   - volatile live execution state (phase/task/decisions/journal/hitl pointer)
+#
+# Commands:
+#   resolve [base_dir]
+#     Print effective live-state file path.
+#   sync [base_dir]
+#     Copy root live section to session live-state file and upsert live.state_file pointer.
+#   get [base_dir] key
+#     Read a scalar field from resolved live state and print normalized value.
+#   list-get [base_dir] key
+
+thinking
+**Inspecting full check-run script**
+exec
+/usr/bin/zsh -lc "sed -n '280,560p' plugins/cwf/scripts/check-run-gate-artifacts.sh" in /home/hwidong/codes/claude-plugins succeeded in 51ms:
+
+  [[ "$RECORD_LESSONS" == true ]] || return 0
+  [[ "${#FAILS[@]}" -gt 0 ]] || return 0
+
+  ts="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+  if [[ ! -f "$lessons_file" ]]; then
+    cat > "$lessons_file" <<'EOF_LESSONS'
+# Lessons
+
+EOF_LESSONS
+  fi
+
+  {
+    printf '\n## Run Gate Violation — %s\n' "$ts"
+    printf -- "- Gate checker: \`%s\`\n" "plugins/cwf/scripts/check-run-gate-artifacts.sh"
+    printf -- '- Recorded failures:\n'
+    for item in "${FAILS[@]}"; do
+      printf '  - %s\n' "$item"
+    done
+  } >> "$lessons_file"
+exec
+/usr/bin/zsh -lc "sed -n '260,620p' plugins/cwf/scripts/check-session.sh" in /home/hwidong/codes/claude-plugins succeeded in 51ms:
+  open_gaps=$(awk -F'|' '/^\| GAP-[0-9]+ /{id=$2; cls=$7; gsub(/^[ \t]+|[ \t]+$/,"",id); gsub(/^[ \t]+|[ \t]+$/,"",cls); if (cls=="Unresolved" || cls=="Unknown") print id}' "$gap_file")
+  backlog_gaps=$(grep -oE 'GAP-[0-9]+' "$backlog_file" | sort -u || true)
+
+  if [[ -n "$open_gaps" ]]; then
+    while IFS= read -r gap; do
+      [[ -n "$gap" ]] || continue
+      open_count=$((open_count + 1))
+      if ! echo "$backlog_gaps" | grep -qx "$gap"; then
+        missing_open="${missing_open}${gap} "
+      fi
+    done <<< "$open_gaps"
+  fi
+
+  if [[ -n "$backlog_gaps" ]]; then
+    backlog_count=$(echo "$backlog_gaps" | grep -c '^GAP-' || true)
+  fi
+
+  if [[ -z "$missing_open" ]]; then
+    echo -e "  ${GREEN}✓${NC} SC-S1 GAP(open)->BL linkage (open=${open_count}, backlog_gap_refs=${backlog_count})"
+    semantic_pass=$((semantic_pass + 1))
+
+thinking
+**Reviewing skill requirements**
+codex
+이 작업은 `review` 스킬의 `--mode plan` 범주와 직접 일치하므로, 스킬 지침을 짧게 확인한 뒤 현재 플랜 문서에 맞춰 정확성/성능 리뷰 결과를 산출하겠습니다.
+exec
+/usr/bin/zsh -lc "sed -n '1,260p' plugins/cwf/skills/review/SKILL.md" in /home/hwidong/codes/claude-plugins succeeded in 51ms:
+---
+name: review
+description: "Universal review with narrative verdicts for consistent quality gates before and after implementation. 6 parallel reviewers: 2 internal (Security, UX/DX) via Task + 2 external slots via available providers (Codex/Gemini CLI, Claude Task fallback) + 2 domain experts via Task. Graceful fallback when CLIs are unavailable. Modes: --mode clarify/plan/code. Triggers: \"/review\""
+---
+
+# Review (/review)
+
+Apply consistent multi-perspective quality gates before implementation (plan) and after implementation (code) via 6 parallel reviewers (2 internal + 2 external slots + 2 domain experts).
+
+**Language**: Match the user's language for synthesis. Reviewer prompts in English.
+
+## Quick Reference
+
+```text
+/review                 Code review (default)
+/review --mode plan     Plan/spec review
+/review --mode clarify  Requirement review
+/review --mode code --base marketplace-v3 --scenarios .cwf/projects/holdout.md
+/review --mode code --correctness-provider gemini --architecture-provider claude
+```
+
+thinking
+**Assessing output format and constraints**
+codex
+게이트 요구사항과의 정합성을 더 정확히 보려고, 매트릭스가 근거로 참조한 `clarify-result.md`도 확인해 제약 누락/충돌 여부를 함께 점검하겠습니다.
+exec
+/usr/bin/zsh -lc "sed -n '1,300p' .cwf/projects/260217-05-full-skill-refactor-run/clarify-result.md" in /home/hwidong/codes/claude-plugins succeeded in 51ms:
+# Clarify Result
+
+## Task Interpretation
+Deliver a pre-deploy full-skill refactor run with maximum practical sub-agent/external-agent usage, excluding Gemini, while preserving deterministic run gates and producing persisted artifacts with commit checkpoints.
+
+## Scope Decision
+This run is **gate-safe refactor + targeted quality fixes**, not a full architecture rewrite of all SKILL.md files.
+
+## Decisions
+
+| Decision ID | Decision | Blocking | Reversible | This Run Action |
+|---|---|---|---|---|
+| D1 | Review gate contract ownership (`run` vs `review`) | no | yes | Defer redesign; keep existing behavior and enforce current deterministic outputs. |
+| D2 | `/ship merge` should enforce ship-stage gate | no | yes | Apply now (align ship instructions and artifact contract). |
+| D3 | Structured unresolved-item metadata for handoff continuity | no | yes | Apply minimal contract now (template-level structured section in clarify/plan outputs). |
+| D4 | Shared context-recovery manifest/helper | no | yes | Defer implementation; keep existing references and document follow-up debt. |
+| D5 | Plan→handoff ready signal automation | no | yes | Defer implementation; preserve manual/explicit handoff flow for this run. |
+
+## Accepted Constraints
+- No Gemini usage in external review slots.
+
+thinking
+**Identifying hidden gate and policy failure paths**
+codex
+추가로 `check-session.sh --impl`가 실제로 어떤 파일을 필수로 요구하는지 확인하겠습니다. 여기와 플랜 산출물이 맞지 않으면 마지막 단계에서 항상 실패하는 경로가 생깁니다.
+exec
+/usr/bin/zsh -lc "sed -n '1,260p' .cwf/cwf-state.yaml" in /home/hwidong/codes/claude-plugins succeeded in 51ms:
+# cwf-state.yaml — Corca Workflow Framework project state
+# Git-tracked, per-project. Read/written by cwf skills.
+
+workflow:
+  current_stage: harden
+  started_at: "2026-02-08"
+  stages:
+    clarify: "S0"
+    refactor: "S1–S2"
+    scaffold: "S3–S4.6"
+    review: "S5a–S5b"
+    build: "S6a–S10"
+    harden: "S11–S13"
+    launch: "S14–S15"
+
+# Default artifact expectations for sessions
+session_defaults:
+  artifacts:
+    impl_complete: [plan.md, lessons.md, next-session.md]
+    always: [plan.md, lessons.md, retro.md]
+
+thinking
+**Investigating next-session generation**
+codex
+`--impl` 기본 요구 산출물에 `next-session.md`가 포함되는 것을 확인했습니다. 이 파일이 현재 플랜 단계/산출물 목록에서 보장되는지 확인하려고 `retro` 스킬의 실제 출력 계약을 빠르게 대조하겠습니다.
+exec
+/usr/bin/zsh -lc "rg -n \"next-session\\.md|artifacts|output\" plugins/cwf/skills/retro/SKILL.md | sed -n '1,200p'" in /home/hwidong/codes/claude-plugins succeeded in 51ms:
+20:- `path`: optional override for output directory
+48:Before reading artifacts, run the evidence collector:
+51:bash {CWF_PLUGIN_DIR}/scripts/retro-collect-evidence.sh --session-dir "{output-dir}"
+110:Stage-tier policy for deep mode outputs:
+115:For all outputs: bounded retry = 1 for missing/invalid files.
+116:- Shared output persistence contract: [agent-patterns.md § Sub-agent Output Persistence Contract](../../references/agent-patterns.md#sub-agent-output-persistence-contract).
+123:Wait for Batch 1 to complete. Read output files from session directory:
+131:- Record gate path in output (`PERSISTENCE_GATE=HARD_FAIL` or
+139:After Batch 2: read output files from session directory (`{session_dir}/retro-expert-alpha.md`, `{session_dir}/retro-expert-beta.md`). Draft Section 7 inline (capability/tool scan), then integrate all results into retro.md.
+143:  render Section 5 from available expert output(s) plus explicit omission note.
+144:- Record soft gate path in output (`PERSISTENCE_GATE=SOFT_CONTINUE` or equivalent).
+179:- **Deep mode**: Produced by Agent A (Batch 1). Integrate the agent's output here.
+185:**Mode: deep only.** In light mode, output: "Run `/retro --deep` for expert analysis."
+195:**Mode: deep only.** In light mode, output: "Run `/retro --deep` for learning resources."
+199:**Execution** (deep mode): Produced by Agent B from Batch 1. Integrate the agent's output here. Each resource: title + URL, 2-3 sentence summary of key takeaways, and why it matters for the user's work.
+243:Write to `{output-dir}/retro.md` using the format below.
+248:bash {CWF_PLUGIN_DIR}/scripts/check-run-gate-artifacts.sh \
+249:  --session-dir "{output-dir}" \
+255:If this gate fails, do not mark retro complete. Fix artifacts/mode labeling first, then re-run the gate.
+270:3. Ensure `{output-dir}/session-logs/` exists.
+
+thinking
+**Searching next-session references**
+exec
+/usr/bin/zsh -lc "rg -n \"next-session\\.md|next session|handoff\" plugins/cwf/skills/retro -S" in /home/hwidong/codes/claude-plugins exited 1 in 51ms:
+
+
+thinking
+**Analyzing session and lifecycle gating gaps**
+exec
+/usr/bin/zsh -lc "sed -n '1,260p' .claude/skills/plugin-deploy/SKILL.md" in /home/hwidong/codes/claude-plugins succeeded in 51ms:
+---
+name: plugin-deploy
+description: Automate the post-modification plugin lifecycle (version checks, marketplace sync, README updates, local testing, deployment prep). Trigger: "/plugin-deploy".
+allowed-tools:
+  - Bash
+  - Read
+  - Edit
+  - Write
+  - Glob
+  - Grep
+  - AskUserQuestion
+---
+
+# Plugin Deploy (/plugin-deploy)
+
+Automate the plugin lifecycle after creation or modification. Ensures no step is skipped.
+
+For detailed edge cases and README formatting examples, see [checklist](references/checklist.md).
+
+**Language**: Match the user's language.
+
+thinking
+**Assessing plan and matrix inconsistencies**
+exec
+/usr/bin/zsh -lc "nl -ba .cwf/projects/260217-05-full-skill-refactor-run/plan.md | sed -n '1,260p'" in /home/hwidong/codes/claude-plugins succeeded in 51ms:
+     1	# Plan — Full Skill Refactor Run
+     2	
+     3	## Context
+     4	This run executes a full cwf:run-style pre-deploy quality pass across all CWF skills with explicit artifact persistence and checkpoint commits.
+     5	
+     6	The user constraints are:
+     7	- maximize practical sub-agent and external-agent usage,
+     8	- exclude Gemini,
+     9	- run refactor for each skill via `cwf:refactor --skill <name>`,
+    10	- persist intermediate outputs and commit progressively.
+    11	
+    12	## Goal
+    13	Produce a gate-safe, review-backed refactor pass for all skills and complete run-closing artifacts (`review-code`, `refactor`, `retro`, `ship`) so deployment readiness can be evaluated deterministically.
+    14	
+    15	## Steps
+    16	1. Finalize plan-stage artifacts and checkpoint matrix for deterministic verification.
+    17	2. Run `review-plan` with six reviewer slots (Security, UX/DX, Correctness, Architecture, Expert Alpha, Expert Beta), using external providers `codex` and `claude` only (no Gemini), and persist all slot outputs + synthesis.
+    18	   - Immediately run stage-local strict verification from `plan-checkpoint-matrix.md` (fail-fast).
+    19	   - Verify provider policy by checking reviewer provenance tools do not contain `gemini`.
+    20	3. Implement approved refactors in code/docs/scripts with commit boundaries:
+exec
+/usr/bin/zsh -lc "nl -ba .cwf/projects/260217-05-full-skill-refactor-run/plan-checkpoint-matrix.md | sed -n '1,260p'" in /home/hwidong/codes/claude-pluginsexec
+/usr/bin/zsh -lc "nl -ba .cwf/cwf-state.yaml | sed -n '1,80p'" in /home/hwidong/codes/claude-plugins succeeded in 51ms:
+     1	# Plan Checkpoint Matrix
+     2	
+     3	This matrix follows `.cwf/projects/260217-05-full-skill-refactor-run/clarify-result.md` and enforces fail-fast verification per stage.
+     4	
+     5	## review-plan
+     6	
+     7	Required artifacts:
+     8	- `review-security-plan.md`
+     9	- `review-ux-dx-plan.md`
+    10	- `review-correctness-plan.md`
+    11	- `review-architecture-plan.md`
+    12	- `review-expert-alpha-plan.md`
+    13	- `review-expert-beta-plan.md`
+    14	- `review-synthesis-plan.md`
+    15	
+    16	Verification command:
+    17	```bash
+    18	set -euo pipefail
+    19	session_dir="$(bash plugins/cwf/scripts/cwf-live-state.sh get . dir)"
+    20	for f in \
+ succeeded in 51ms:
+     1	# cwf-state.yaml — Corca Workflow Framework project state
+     2	# Git-tracked, per-project. Read/written by cwf skills.
+     3	
+     4	workflow:
+     5	  current_stage: harden
+     6	  started_at: "2026-02-08"
+     7	  stages:
+     8	    clarify: "S0"
+     9	    refactor: "S1–S2"
+    10	    scaffold: "S3–S4.6"
+    11	    review: "S5a–S5b"
+    12	    build: "S6a–S10"
+    13	    harden: "S11–S13"
+    14	    launch: "S14–S15"
+    15	
+    16	# Default artifact expectations for sessions
+    17	session_defaults:
+    18	  artifacts:
+    19	    impl_complete: [plan.md, lessons.md, next-session.md]
+    20	    always: [plan.md, lessons.md, retro.md]
+
+thinking
+**Planning line reference extraction**
+exec
+/usr/bin/zsh -lc "nl -ba plugins/cwf/scripts/check-session.sh | sed -n '470,620p'" in /home/hwidong/codes/claude-pluginsexec
+/usr/bin/zsh -lc "nl -ba plugins/cwf/scripts/check-run-gate-artifacts.sh | sed -n '90,270p'" in /home/hwidong/codes/claude-plugins succeeded in 51ms:
+   470	#   2) existing directory selector -> check by explicit session dir
+   471	#   3) fallback -> treat selector as session ID
+   472	if [[ -z "$SESSION_SELECTOR" ]]; then
+   473	  # Get the last session ID
+   474	  SESSION_ID=$(grep '^\s*- id:' "$STATE_FILE" | tail -1 | sed 's/.*id:\s*//' | tr -d ' "')
+   475	  if [[ -z "$SESSION_ID" ]]; then
+   476	    echo -e "${RED}Error: No sessions found in $STATE_FILE${NC}" >&2
+   477	    exit 1
+   478	  fi
+   479	  echo -e "${YELLOW}No session ID specified, checking most recent: ${SESSION_ID}${NC}"
+   480	else
+   481	  selector_dir="$(normalize_session_dir_selector "$SESSION_SELECTOR" 2>/dev/null || true)"
+   482	  if [[ -n "$selector_dir" ]]; then
+   483	    SESSION_DIR="$selector_dir"
+   484	    if find_session_by_dir "$selector_dir"; then
+   485	      :
+   486	    else
+   487	      # Path mode without matching session metadata: use defaults for artifact set.
+   488	      SESSION_ID="$(basename "$selector_dir")"
+   489	      echo -e "${YELLOW}Session dir selector provided; no matching session ID found in state. Using defaults for: ${SESSION_DIR}${NC}"
+ succeeded in 50ms:
+    90	    return 1
+    91	  fi
+    92	  raw_dir="$(bash "$LIVE_STATE_SCRIPT" get "$BASE_DIR" dir 2>/dev/null || true)"
+    93	  if [[ -z "$raw_dir" ]]; then
+    94	    append_fail "global" "unable to resolve session dir from live state"
+    95	    return 1
+    96	  fi
+    97	  if [[ "$raw_dir" == /* ]]; then
+    98	    SESSION_DIR="$raw_dir"
+    99	  else
+   100	    SESSION_DIR="$REPO_ROOT/$raw_dir"
+   101	  fi
+   102	  return 0
+   103	}
+   104	
+   105	check_review_code_stage() {
+   106	  local stage="review-code"
+   107	  local synthesis_file="$SESSION_DIR/review-synthesis-code.md"
+   108	  local slot_file=""
+   109	  local slot_files=(
+
+thinking
+**Summarizing blocking and moderate correctness concerns**
+codex
+핵심 검토 포인트를 정리했고, 블로킹 이슈는 최종 게이트 실패 가능성과 Gemini 정책 검증 누락, 세션 경로 해석 모호성 중심으로 확정했습니다. 이제 요청하신 고정 포맷으로 결과만 전달하겠습니다.
+codex
+## Correctness Review
+### Concerns (blocking)
+- **[C1]** Final closure can deterministically fail because `check-session.sh --impl` requires `next-session.md`, but the plan does not guarantee creating it.
+  Evidence: `.cwf/projects/260217-05-full-skill-refactor-run/plan.md:39`, `.cwf/projects/260217-05-full-skill-refactor-run/plan.md:43`, `.cwf/projects/260217-05-full-skill-refactor-run/plan-checkpoint-matrix.md:154`, `.cwf/cwf-state.yaml:19`, `plugins/cwf/scripts/check-session.sh:546`.
+  Severity: critical
+- **[C2]** “No Gemini” policy is not enforceable for `review-code` and is weakly matched for `review-plan`; gate can pass while violating stated constraints.
+  Evidence: `.cwf/projects/260217-05-full-skill-refactor-run/plan.md:23`, `.cwf/projects/260217-05-full-skill-refactor-run/plan-checkpoint-matrix.md:53`, `.cwf/projects/260217-05-full-skill-refactor-run/plan-checkpoint-matrix.md:38`, `plugins/cwf/scripts/check-run-gate-artifacts.sh:105`.
+  Severity: critical
+- **[C3]** All matrix checks resolve `session_dir` from live state at execution time; if live pointer drifts, verification can target the wrong directory (false pass/fail, broken persistence guarantees).
+  Evidence: `.cwf/projects/260217-05-full-skill-refactor-run/plan-checkpoint-matrix.md:19`, `.cwf/projects/260217-05-full-skill-refactor-run/plan-checkpoint-matrix.md:55`, `.cwf/projects/260217-05-full-skill-refactor-run/plan-checkpoint-matrix.md:88`, `.cwf/projects/260217-05-full-skill-refactor-run/plan-checkpoint-matrix.md:153`.
+  Severity: moderate
+- **[C4]** Success criteria are partially untestable/contradictory: `review-synthesis-plan.md` sentinel is claimed but not checked, and “holistic completed” is claimed without deterministic proof artifact.
+  Evidence: `.cwf/projects/260217-05-full-skill-refactor-run/plan.md:55`, `.cwf/projects/260217-05-full-skill-refactor-run/plan.md:57`, `.cwf/projects/260217-05-full-skill-refactor-run/plan-checkpoint-matrix.md:32`, `.cwf/projects/260217-05-full-skill-refactor-run/plan-checkpoint-matrix.md:95`.
+  Severity: moderate
+
+### Suggestions (non-blocking)
+- **[S1]** Add freshness markers (run timestamp/session id) to per-skill refactor snapshots and verify them to prevent stale-file false positives.
+- **[S2]** Add `check-session.sh --live` to final completion to explicitly validate compact-recovery readiness.
+- **[S3]** Performance: execute per-skill refactor runs in isolated temp work dirs with bounded parallelism to reduce runtime while avoiding output-collision risk.
+
+### Behavioral Criteria Assessment
+- [x] Post-impl stage order respects `review-code -> refactor -> retro -> ship`.
+- [ ] Final closure is deterministically reachable without implicit artifact generation.
+- [ ] No-Gemini constraint is deterministically enforced in both review stages.
+- [ ] Refactor completion criteria provide deterministic proof for holistic execution.
+- [ ] `review-plan` sentinel requirement is fully covered by gate checks.
+
+### Provenance
+source: REAL_EXECUTION
+tool: codex
+reviewer: Correctness
+duration_ms: —
+command: codex exec --sandbox read-only -c model_reasoning_effort='high' -
+tokens used
+44,977

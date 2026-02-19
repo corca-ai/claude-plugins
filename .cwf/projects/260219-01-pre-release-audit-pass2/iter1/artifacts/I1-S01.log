@@ -1,0 +1,31 @@
+## pwd
+/home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-a
+## claude plugin marketplace add
+Adding marketplace...
+Refreshing marketplace cache…
+Cloning repository: https://github.com/corca-ai/claude-plugins.git
+Clone complete, validating marketplace…
+Cleaning up old marketplace cache…
+✔ Successfully added marketplace: corca-plugins
+## claude plugin marketplace list
+Configured marketplaces:
+
+  ❯ claude-plugins-official
+    Source: GitHub (anthropics/claude-plugins-official)
+
+  ❯ claude-dashboard
+    Source: GitHub (uppinote20/claude-dashboard)
+
+  ❯ corca-plugins
+    Source: Git (https://github.com/corca-ai/claude-plugins.git)
+
+## claude plugin install cwf@corca-plugins --scope project
+Installing plugin "cwf@corca-plugins"...
+## claude plugin list
+Installed plugins:
+
+  ❯ claude-dashboard@claude-dashboard
+    Version: 1.8.1
+    Scope: user
+    Status: ✔ enabled
+

@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cwf-state.schema.json",
+  "title": "CWF State",
+  "description": "Schema for .cwf/cwf-state.yaml — Corca Workflow Framework project state",
+  "type": "object",
+  "required": ["workflow", "sessions", "tools", "hooks", "live"],
+  "additionalProperties": true,
+  "properties": {
+    "workflow": {
+      "type": "object",
+      "required": ["current_stage", "started_at", "stages"],
+      "additionalProperties": true,
+      "properties": {
+        "current_stage": {
+          "type": "string",
+          "enum": ["clarify", "refactor", "scaffold", "review", "build", "harden", "launch"]
+        },
+        "started_at": {
+          "type": "string"
+        },
+        "stages": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "session_defaults": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "sessions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/session"
+      }
+    },
+    "tools": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "hooks": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "boolean"
+      }
+    },
+    "live": {
+      "type": "object",
+      "required": ["session_id", "dir", "branch", "phase", "task"],
+      "additionalProperties": true,
+      "properties": {
+        "session_id": {
+          "type": "string"
+        },
+        "dir": {
+          "type": "string"
+        },
+        "branch": {
+          "type": "string"
+        },
+        "phase": {
+          "type": "string"
+        },
+        "task": {
+          "type": "string"
+        }
+      }
+    },
+    "expert_roster": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/expert"
+      }
+    }
+  },
+  "$defs": {
+    "session": {
+      "type": "object",
+      "required": ["id", "title", "dir", "branch"],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9._-]*$"
+        },
+        "title": {
+          "type": "string"
+        },
+        "dir": {
+          "type": "string"
+        },
+        "branch": {
+          "type": "string"
+        },
+        "completed_at": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "expert": {
+      "type": "object",
+      "required": ["name", "domain"],
+      "additionalProperties": true,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "domain": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "rationale": {
+          "type": "string"
+        },
+        "introduced": {
+          "type": "string"
+        },
+        "usage_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

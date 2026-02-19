@@ -6,62 +6,29 @@
   },
   "metadata": {
     "description": "A collection of Claude Code plugins for AI-Native Product Teams",
-    "version": "2.1.0"
+    "version": "3.0.0"
   },
   "plugins": [
     {
-      "name": "clarify",
-      "source": "./plugins/clarify",
-      "description": "Unified requirement clarification: research-first with autonomous decision-making, or lightweight direct Q&A",
-      "keywords": ["requirements", "specification", "clarification", "research", "sub-agents", "autonomous"]
-    },
-    {
-      "name": "retro",
-      "source": "./plugins/retro",
-      "description": "Adaptive session retrospective — light by default, deep on request — with CDM analysis, expert lens, and installed skills scan",
-      "keywords": ["retrospective", "session-review", "learning", "improvement", "cdm", "expert-analysis"]
-    },
-    {
-      "name": "refactor",
-      "source": "./plugins/refactor",
-      "description": "Multi-mode code and skill review: quick scan, deep skill review, holistic cross-plugin analysis, commit-based tidying, and docs consistency check",
-      "keywords": ["refactoring", "review", "tidying", "code-quality", "tidy-first", "skill-review", "docs"]
-    },
-    {
-      "name": "gather-context",
-      "source": "./plugins/gather-context",
-      "description": "Unified information acquisition: URL auto-detect (Google/Slack/Notion/GitHub/web), web search, and local codebase exploration",
-      "keywords": ["url", "export", "google", "slack", "notion", "github", "gather", "context", "search", "tavily", "exa", "code-search"]
-    },
-    {
-      "name": "attention-hook",
-      "source": "./plugins/attention-hook",
-      "description": "Slack notifications with threading when Claude Code is waiting — idle alerts, AskUserQuestion prompts, plan mode approval, and periodic heartbeat status updates",
-      "keywords": ["notification", "slack", "hook"]
-    },
-    {
-      "name": "plan-and-lessons",
-      "source": "./plugins/plan-and-lessons",
-      "description": "A hook that injects the Plan & Lessons Protocol when entering plan mode",
-      "keywords": ["plan", "lessons", "protocol", "plan-mode", "hook"]
-    },
-    {
-      "name": "smart-read",
-      "source": "./plugins/smart-read",
-      "description": "A hook that enforces intelligent file reading based on file size — warns on medium files, blocks full reads on large files",
-      "keywords": ["read", "file-size", "context", "hook", "guard"]
-    },
-    {
-      "name": "prompt-logger",
-      "source": "./plugins/prompt-logger",
-      "description": "A hook that auto-logs every conversation turn to markdown files for retrospective analysis",
-      "keywords": ["logging", "transcript", "prompt", "retrospective", "hook"]
-    },
-    {
-      "name": "markdown-guard",
-      "source": "./plugins/markdown-guard",
-      "description": "A hook that validates markdown files after Write/Edit — reports lint violations so Claude self-corrects",
-      "keywords": ["markdown", "lint", "quality", "hook", "guard"]
+      "name": "cwf",
+      "source": "./plugins/cwf",
+      "description": "Corca Workflow Framework — consolidated hooks and skill orchestration for structured development sessions",
+      "keywords": [
+        "workflow",
+        "cwf",
+        "skills",
+        "hooks",
+        "clarify",
+        "plan",
+        "impl",
+        "retro",
+        "refactor",
+        "gather",
+        "review",
+        "ship",
+        "handoff",
+        "hitl"
+      ]
     }
   ]
 }

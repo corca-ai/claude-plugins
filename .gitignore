@@ -4,5 +4,17 @@ work-in-progress
 
 # Plugin secrets
 .env.local
+.cwf-config.local.yaml
 .cache/
+*.pyc
+__pycache__/
 **/__pycache__/
+/tmux
+
+# Static analysis tooling
+.lycheecache
+scripts/node_modules/
+
+# Generated doc-graph artifacts (local working files)
+docs/doc-graph.snapshot.json
+docs/doc-graph.scope.json

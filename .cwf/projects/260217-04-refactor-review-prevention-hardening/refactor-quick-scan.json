@@ -1,0 +1,169 @@
+{
+  "total_skills": 13,
+  "warnings": 7,
+  "errors": 0,
+  "flagged_skills": 4,
+  "results": [{
+    "plugin": "cwf",
+    "skill": "clarify",
+    "word_count": 2100,
+    "line_count": 451,
+    "size_severity": "ok",
+    "resource_files": 4,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "plugin": "cwf",
+    "skill": "gather",
+    "word_count": 1405,
+    "line_count": 263,
+    "size_severity": "ok",
+    "resource_files": 14,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "plugin": "cwf",
+    "skill": "handoff",
+    "word_count": 2072,
+    "line_count": 415,
+    "size_severity": "ok",
+    "resource_files": 0,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "plugin": "cwf",
+    "skill": "hitl",
+    "word_count": 1235,
+    "line_count": 209,
+    "size_severity": "ok",
+    "resource_files": 0,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "plugin": "cwf",
+    "skill": "impl",
+    "word_count": 2456,
+    "line_count": 446,
+    "size_severity": "ok",
+    "resource_files": 2,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "plugin": "cwf",
+    "skill": "plan",
+    "word_count": 1705,
+    "line_count": 351,
+    "size_severity": "ok",
+    "resource_files": 0,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "plugin": "cwf",
+    "skill": "refactor",
+    "word_count": 2221,
+    "line_count": 434,
+    "size_severity": "ok",
+    "resource_files": 11,
+    "unreferenced_files": [
+  "references/review-criteria.provenance.yaml",
+  "references/holistic-criteria.provenance.yaml",
+  "references/docs-criteria.provenance.yaml"
+],
+    "large_references": [],
+    "flag_count": 3,
+    "flags": [
+  "unreferenced: references/review-criteria.provenance.yaml",
+  "unreferenced: references/holistic-criteria.provenance.yaml",
+  "unreferenced: references/docs-criteria.provenance.yaml"
+]
+  },{
+    "plugin": "cwf",
+    "skill": "retro",
+    "word_count": 3071,
+    "line_count": 402,
+    "size_severity": "warning",
+    "resource_files": 2,
+    "unreferenced_files": [
+  "references/expert-lens-guide.md"
+],
+    "large_references": [],
+    "flag_count": 2,
+    "flags": [
+  "word_count_warning (3071w > 3000)",
+  "unreferenced: references/expert-lens-guide.md"
+]
+  },{
+    "plugin": "cwf",
+    "skill": "review",
+    "word_count": 4485,
+    "line_count": 767,
+    "size_severity": "warning",
+    "resource_files": 2,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 2,
+    "flags": [
+  "word_count_warning (4485w > 3000)",
+  "line_count_warning (767L > 500)"
+]
+  },{
+    "plugin": "cwf",
+    "skill": "run",
+    "word_count": 1287,
+    "line_count": 246,
+    "size_severity": "ok",
+    "resource_files": 0,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "plugin": "cwf",
+    "skill": "setup",
+    "word_count": 3724,
+    "line_count": 856,
+    "size_severity": "warning",
+    "resource_files": 6,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 2,
+    "flags": [
+  "word_count_warning (3724w > 3000)",
+  "line_count_warning (856L > 500)"
+]
+  },{
+    "plugin": "cwf",
+    "skill": "ship",
+    "word_count": 1506,
+    "line_count": 304,
+    "size_severity": "ok",
+    "resource_files": 2,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "plugin": "cwf",
+    "skill": "update",
+    "word_count": 382,
+    "line_count": 112,
+    "size_severity": "ok",
+    "resource_files": 0,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  }]
+}

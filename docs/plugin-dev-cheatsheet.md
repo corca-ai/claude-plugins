@@ -1,6 +1,6 @@
 # Plugin Development Cheat Sheet
 
-Quick reference for adding and modifying plugins. For full details, see [adding-plugin.md](adding-plugin.md), [modifying-plugin.md](modifying-plugin.md), [skills-guide.md](skills-guide.md), [claude-marketplace.md](claude-marketplace.md).
+Quick reference for developing, testing, and deploying plugins.
 
 ## Directory Patterns
 
@@ -13,14 +13,14 @@ plugins/{name}/
     ├── references/          # optional
     └── scripts/             # optional
 
-# Hook-only (e.g., smart-read, plan-and-lessons)
+# Hook-only (e.g., read-guard, session-log)
 plugins/{name}/
 ├── .claude-plugin/plugin.json
 └── hooks/
     ├── hooks.json
     └── scripts/
 
-# Hybrid (e.g., gather-context)
+# Hybrid (e.g., cwf)
 plugins/{name}/
 ├── .claude-plugin/plugin.json
 ├── hooks/
@@ -46,7 +46,7 @@ plugins/{name}/
 
 ## marketplace.json Entry
 
-Add to `.claude-plugin/marketplace.json` → `plugins[]`:
+Add to [.claude-plugin/marketplace.json](../.claude-plugin/marketplace.json) → `plugins[]`:
 
 ```json
 {
@@ -57,7 +57,13 @@ Add to `.claude-plugin/marketplace.json` → `plugins[]`:
 }
 ```
 
-## SKILL.md Frontmatter
+Rules: `name` = kebab-case matching directory name. `source` = relative path. `description` should match plugin.json.
+
+**Plugin caching**: Plugins are copied to a cache location on install. Files outside the plugin directory won't be available. Use `${CLAUDE_PLUGIN_ROOT}` in hooks and MCP configs to reference files within the installed plugin.
+
+## SKILL.md
+
+### Frontmatter
 
 ```yaml
 ---
@@ -72,6 +78,19 @@ allowed-tools:
 ```
 
 Keep SKILL.md < 500 lines. Move details to `references/`.
+
+### Content Rules
+
+1. Keep SKILL.md concise — move details to `references/`
+2. No duplication between SKILL.md and references
+3. Progressive disclosure — SKILL.md loads on trigger, references load as needed
+4. English only for all skill files
+
+### Design Principles
+
+- **Concise is Key**: Context window is shared resource. Don't explain what the agent already knows
+- **Degrees of Freedom**: High (text) for multiple valid approaches, medium (pseudocode) for preferred patterns, low (scripts) for exact sequences
+- **Execution-heavy skills** (API calls, file processing): delegate to wrapper scripts. SKILL.md handles intent; scripts handle execution
 
 ## hooks.json
 
@@ -93,23 +112,27 @@ Matchers: `PreToolUse`, `PostToolUse`, `Notification` (idle_prompt, etc.)
 
 For simple context injection (no JSON formatting), use `"type": "prompt"` instead of `"type": "command"`.
 
+Hooks are **snapshots at session start** (no hot-reload).
+
 ## Environment Variables
 
-Naming: `CLAUDE_CORCA_{PLUGIN_NAME}_{SETTING}`
+Naming: `CWF_{DOMAIN}_{SETTING}`
 
-3-tier loading in scripts (needed because Claude Code runs Bash sessions — `~/.zshrc` is not sourced automatically):
+Priority: CLI argument > environment variable > hardcoded default
+
+Plugin directories are replaced on update (version-specific cache). User config **must** live outside the skill directory — environment variables in shell profile survive any plugin update.
+
+Use the shared loader ([plugins/cwf/hooks/scripts/env-loader.sh](../plugins/cwf/hooks/scripts/env-loader.sh)) and keep this source order:
+- project-local config (.cwf-config.local.yaml)
+- project-shared config (.cwf-config.yaml)
+- process env
+- shell profiles (`~/.zshenv`, `~/.zprofile`, `~/.zshrc`, `~/.bash_profile`, `~/.bashrc`, `~/.profile`)
+
+This is needed because Claude Code runs non-interactive Bash sessions — profile files are not auto-sourced.
 ```bash
-# 1. Shell env (already set)
-# 2. ~/.claude/.env
-[ -f "$HOME/.claude/.env" ] && { set -a; source "$HOME/.claude/.env"; set +a; }
-# 3. Shell profiles (fallback: safe extraction without eval)
-if [ -z "${VAR:-}" ]; then
-  _line=$(grep -shm1 '^export VAR=' ~/.zshrc ~/.bashrc 2>/dev/null) || true
-  if [ -n "${_line:-}" ]; then
-    VAR="${_line#*=}"; VAR="${VAR#[\"\']}"; VAR="${VAR%[\"\']}"
-    export VAR
-  fi
-fi
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../../../hooks/scripts/env-loader.sh"
+cwf_env_load_vars CWF_FOO_BAR
 ```
 
 ## Script Guidelines
@@ -136,7 +159,7 @@ fi
   CURL_EXIT=$?
   set -e
   ```
-- `&&` chains under `set -e`: `[ -f "$f" ] && VAR="$f" && break` exits the script if `[ -f ]` fails (exit code 1). Use `if/then` blocks instead:
+- `&&` chains under `set -e`: `[ -f "$f" ] && VAR="$f" && break` exits the script if `[ -f ]` fails (exit code 1). Use if/then blocks instead:
   ```bash
   # BAD: exits under set -e when condition is false
   [ -f "$f" ] && RESULT="$f" && break
@@ -144,6 +167,9 @@ fi
   if [ -f "$f" ]; then RESULT="$f"; break; fi
   ```
 - Empty array iteration under `set -u`: `"${arr[@]}"` on an empty array causes "unbound variable". Guard with `if [[ ${#arr[@]} -gt 0 ]]; then ... fi`.
+- Bash regex: in `[[ =~ ]]`, `"?` makes `?` literal (quoted), not a regex quantifier. Use `\"?` for optional literal-quote matching. Bash and zsh have different regex semantics — always debug bash scripts with `bash -c` or `bash -x`, not directly in the Bash tool (which uses zsh).
+- When researching Claude Code features (hooks, settings, plugins), verify against the [official docs](https://code.claude.com/docs/en/) via WebFetch.
+- When testing scripts, do not manually set up the environment (e.g., `source ~/.zshrc`). Test in a clean environment to reproduce real-world conditions.
 
 ## Testing
 
@@ -152,12 +178,86 @@ fi
 echo '{"tool_input":{"file_path":"/path/to/file"}}' | plugins/{name}/hooks/scripts/{script}.sh
 ```
 
-**Integration** — hooks are **snapshots at session start** (no hot-reload). Start a new session:
+**Skills** — verify SKILL.md frontmatter, script executability, and run directly to verify behavior.
+
+**Integration** — start a new session with `--plugin-dir`:
 ```bash
 claude --plugin-dir ./plugins/{name} --dangerously-skip-permissions --resume
 ```
 
-**Skills** — verify SKILL.md frontmatter and script executability.
+Alternative: add hooks via `/hooks` menu in the current session (goes through review process).
+
+**Apply locally** after modifying an installed plugin:
+```bash
+/plugin install <plugin-name>@corca-plugins
+```
+
+## Pre-Release Validation Gates
+
+Run these checks before public release (or before merging release-bound changes):
+
+```bash
+# 0) Consolidated gate (recommended)
+bash scripts/premerge-cwf-gate.sh --mode premerge --plugin cwf
+
+# 1) Verify marketplace entry visibility
+bash scripts/check-marketplace-entry.sh --source . --plugin cwf
+
+# 2) Run non-interactive smoke across core CWF skills
+bash scripts/noninteractive-skill-smoke.sh \
+  --plugin-dir plugins/cwf \
+  --workdir <user-repo-path> \
+  --timeout 45 \
+  --max-failures 0 \
+  --max-timeouts 0
+
+# 3) Public marketplace verification (run in main or after merge)
+bash scripts/premerge-cwf-gate.sh \
+  --mode predeploy \
+  --plugin cwf \
+  --repo corca-ai/claude-plugins \
+  --ref main
+```
+
+`check-marketplace-entry.sh` exit codes:
+- `0`: FOUND
+- `2`: LOOKUP_FAILED (network/path/http)
+- `3`: INVALID_MARKETPLACE (invalid JSON shape)
+- `4`: MISSING_ENTRY
+
+`noninteractive-skill-smoke.sh` outputs per-case `PASS|FAIL|TIMEOUT` with reason (`OK|ERROR|TIMEOUT|WAIT_INPUT`).
+- If a skill exits successfully but the log shows an interactive follow-up prompt, the case is classified as `FAIL` with reason `WAIT_INPUT` (to prevent false PASS in CI).
+- The script fails gate (exit 1) when configured failure/timeout thresholds are exceeded.
+
+## Repo Git Hooks
+
+Recommended (interactive, single entrypoint):
+```text
+cwf:setup
+```
+Full setup asks whether to install git hooks and which gate profile to use.
+
+Explicit mode (non-interactive):
+```text
+cwf:setup --git-hooks both --gate-profile balanced
+```
+
+Manual fallback:
+```bash
+git config core.hooksPath .githooks
+```
+
+- Profiles:
+  - `fast`: markdownlint only
+  - `balanced` (recommended): markdownlint + local link checks + staged shellcheck + push-time index coverage
+  - `strict`: `balanced` + provenance freshness and growth-drift reports on push
+- Contract gate:
+  - pre-commit/pre-push also run `check-portability-contract.sh --contract auto --context hook`
+  - `auto` resolves `authoring` only for CWF authoring repos; all other repos use `portable`
+  - contract files live under `plugins/cwf/contracts/` (`portable-contract.json`, `authoring-contract.json`, `claims.json`, `change-impact.json`)
+- [pre-commit](../.githooks/pre-commit): staged checks for markdown and shell scripts.
+- [pre-push](../.githooks/pre-push): repo-wide markdown/link checks plus index coverage checks.
+- [plugins/cwf/skills/setup/scripts/configure-git-hooks.sh](../plugins/cwf/skills/setup/scripts/configure-git-hooks.sh): deterministic hook installer/profile applier used by setup.
 
 ## Version Bump Rules
 
@@ -169,11 +269,45 @@ claude --plugin-dir ./plugins/{name} --dangerously-skip-permissions --resume
 
 ## Deploy Workflow
 
+Default executor for plugin changes: [plugin-deploy](../.claude/skills/plugin-deploy/SKILL.md). Use manual steps below only when the skill is unavailable or explicitly skipped.
+
 1. Bump version in `plugin.json` (see version bump rules above)
 2. Sync `marketplace.json` entry (version if listed, description, keywords)
-3. Update `CHANGELOG.md` if the plugin has one (describe what changed)
-4. Update `README.md` and `README.ko.md` (table + detail section)
-5. New plugins: check `AI_NATIVE_PRODUCT_TEAM.md` for link opportunities
+3. Update [CHANGELOG.md](../CHANGELOG.md) if the plugin has one (describe what changed)
+4. Update [README.md](../README.md) and [README.ko.md](../README.ko.md) (table + detail section)
+5. New plugins: check [AI_NATIVE_PRODUCT_TEAM.md](../AI_NATIVE_PRODUCT_TEAM.md) for link opportunities
 6. Test locally
 7. Commit and push
-8. Run `bash scripts/update-all.sh`
+8. On **main branch**: run `cwf:update` to sync installed behavior with latest plugin changes
+
+Inform users after deploy:
+```text
+The plugin has been updated. To apply:
+1. /plugin marketplace update
+2. /plugin install <plugin-name>@corca-plugins
+```
+
+## Adding New Plugins
+
+Checklist for new plugins (in addition to the deploy workflow above):
+
+1. Add entry to [.claude-plugin/marketplace.json](../.claude-plugin/marketplace.json) → `plugins[]`
+2. Bump marketplace metadata version
+3. Update [README.md](../README.md) and [README.ko.md](../README.ko.md) (table + detail section)
+4. Check [AI_NATIVE_PRODUCT_TEAM.md](../AI_NATIVE_PRODUCT_TEAM.md) for link opportunities
+
+## Marketplace User Commands
+
+```bash
+# Add marketplace
+/plugin marketplace add corca-ai/claude-plugins
+
+# Update marketplace catalog
+/plugin marketplace update
+
+# Install/update a plugin
+/plugin install {name}@corca-plugins
+/plugin update {name}@corca-plugins
+```
+
+For full marketplace documentation, see the [official Claude Code docs](https://code.claude.com/docs/en/plugin-marketplaces).

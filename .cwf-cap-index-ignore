@@ -1,0 +1,2 @@
+# Optional exclusions for `bash scripts/check-index-coverage.sh <index-file> --profile cap`
+# One glob per line. Leave empty for full CWF capability coverage.

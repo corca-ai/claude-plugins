@@ -1,0 +1,9 @@
+# I1-H31 websearch redirect deny
+date: 2026-02-19T01:01:30Z
+script: plugins/cwf/hooks/scripts/redirect-websearch.sh
+
+## Case A: deny (WebSearch blocked)
+command: jq -nc '{tool_name:"WebSearch",tool_input:{query:"CWF hooks"}}' | bash plugins/cwf/hooks/scripts/redirect-websearch.sh
+exit_code: 0
+stdout:
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Built-in WebSearch is disabled. Use cwf:gather --search instead: Skill(skill: \"cwf:gather\", args: \"--search <query>\"). For code search: args: \"--search code <query>\"."}}

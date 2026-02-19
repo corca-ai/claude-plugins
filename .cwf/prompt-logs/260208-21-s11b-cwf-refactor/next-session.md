@@ -1,0 +1,180 @@
+# S12 Handoff — Build cwf:setup + cwf:update + cwf:handoff
+
+## Context Files to Read
+
+1. `CLAUDE.md` — project rules and protocols
+2. `docs/plugin-dev-cheatsheet.md` — plugin development patterns
+3. `cwf-state.yaml` — session history, hook config, tool availability
+4. `prompt-logs/260208-03-cwf-v3-master-plan/master-plan.md` — architecture decisions #4–6, #12–13, #18–19
+5. `plugins/cwf/.claude-plugin/plugin.json` — current version (0.6.0)
+6. `plugins/cwf/hooks/hooks.json` — all hook definitions (7 groups) and gate mechanism
+7. `plugins/cwf/hooks/scripts/cwf-hook-gate.sh` — how hooks source `~/.claude/cwf-hooks-enabled.sh`
+8. `plugins/cwf/references/agent-patterns.md` — shared agent patterns (cwf:setup = Single pattern)
+9. `plugins/cwf/references/plan-protocol.md` — handoff document format (lines 105–114)
+10. `plugins/cwf/skills/retro/SKILL.md` — pattern reference: cwf-state.yaml reading, persist hierarchy
+11. `plugins/cwf/skills/impl/SKILL.md` — pattern reference: adaptive team sizing, domain signals
+12. `scripts/install.sh` — current category-based installer (stages 1–6 + infra)
+13. `scripts/update-all.sh` — current update script (parses ~/.claude/settings.json)
+14. `scripts/check-session.sh` — session artifact validator
+
+## Task Scope
+
+Build 3 new CWF skills + rewrite 2 scripts. These are the final infrastructure pieces before the holistic refactor (S13).
+
+### What to Build
+
+#### 1. `cwf:setup` — Initial Configuration Skill
+
+**Location**: `plugins/cwf/skills/setup/SKILL.md`
+
+**Responsibilities** (from master-plan decisions #4, #5, #6, #18):
+- Hook selection: interactive toggle of 7 hook groups (attention, log, read, lint_markdown, lint_shell, websearch_redirect, plan_protocol)
+- Write `~/.claude/cwf-hooks-enabled.sh` with `HOOK_{GROUP}_ENABLED=true|false` vars
+- Update `cwf-state.yaml` `hooks:` section to mirror runtime state
+- External tool detection: check `codex`, `gemini`, `tavily`, `exa` availability via `command -v`
+- Update `cwf-state.yaml` `tools:` section with results
+- Generate `index.md` (progressive disclosure codebase index — decision #18)
+- Agent pattern: **Single** (interactive config, no sub-agents)
+
+**Current hook gate mechanism** (already implemented in S6a/S6b):
+- `cwf-hook-gate.sh` sources `~/.claude/cwf-hooks-enabled.sh` if it exists
+- Checks `HOOK_{GROUP}_ENABLED` env var (defaults to enabled if file missing)
+- cwf:setup creates/updates this file
+
+#### 2. `cwf:update` — Version Update Skill
+
+**Location**: `plugins/cwf/skills/update/SKILL.md`
+
+**Responsibilities** (from master-plan decision #6):
+- Check current vs latest CWF plugin version
+- Run `claude plugin marketplace update` + reinstall cwf
+- Show changelog / new feature summary
+- Agent pattern: **Single**
+
+**Current update mechanism** (`scripts/update-all.sh`):
+- Reads `~/.claude/settings.json` for installed corca-plugins
+- Uses jq/python3/grep for JSON parsing (graceful degradation)
+- Updates marketplace, then reinstalls each plugin
+
+#### 3. `cwf:handoff` — Auto-generate Session Handoff
+
+**Location**: `plugins/cwf/skills/handoff/SKILL.md`
+
+**Responsibilities** (from master-plan decision #13):
+- Read `cwf-state.yaml` for session history, current stage, project context
+- Read current session's `plan.md`, `lessons.md` for scope and learnings
+- Read master-plan.md for next session's task definition
+- Auto-generate `next-session.md` following established format:
+  1. Context Files to Read
+  2. Task Scope (what changes, design points from master-plan)
+  3. Don't Touch (infer from master-plan session roadmap)
+  4. Lessons from Prior Sessions (aggregate from cwf-state + lessons.md)
+  5. Success Criteria (BDD format)
+  6. Dependencies (from master-plan session dependency graph)
+  7. Start Command
+- Agent pattern: **Single** (reads state, generates doc)
+
+**Handoff format reference**: See `plugins/cwf/references/plan-protocol.md` lines 105–114 and any existing `next-session.md` files (e.g., `prompt-logs/260208-20-s11a-cwf-retro/next-session.md`).
+
+#### 4. Rewrite `scripts/install.sh`
+
+**Current**: Installs individual plugins by stage category (gather-context, clarify, plan-and-lessons, etc.)
+**Target**: Install the single `cwf` plugin. Keep backward-compat flags for documentation but redirect to cwf install.
+
+#### 5. Rewrite `scripts/update-all.sh`
+
+**Current**: Finds all corca-plugins in settings.json, updates each individually.
+**Target**: Update cwf plugin. Simpler since it's one plugin now.
+
+### Key Design Points
+
+- **cwf:setup is interactive** (decision #19: auto=false). Use AskUserQuestion for hook selection, not batch defaults.
+- **Default-enabled hooks**: The gate mechanism already defaults to enabled. cwf:setup creates the config file only when the user wants to disable specific hooks.
+- **cwf-state.yaml is SSOT**: cwf:setup writes tool/hook state here. cwf:handoff reads session history from here.
+- **index.md generation** (decision #18): "when to read what" pointers, not content summaries. Generated by cwf:setup, checked by cwf:retro.
+- **install.sh migration**: Old stage-based flags should print deprecation warnings pointing to `cwf` plugin.
+
+## Don't Touch
+
+- `plugins/cwf/skills/gather/` — gather skill (S7)
+- `plugins/cwf/skills/clarify/` — clarify skill (S8)
+- `plugins/cwf/skills/plan/` — plan skill (S9)
+- `plugins/cwf/skills/impl/` — impl skill (S10)
+- `plugins/cwf/skills/retro/` — retro skill (S11a)
+- `plugins/cwf/skills/refactor/` — refactor skill (S11b)
+- `plugins/cwf/hooks/` — hook definitions (S6a/S6b, already complete)
+- `plugins/plan-and-lessons/` — keep intact until S14
+
+## Lessons from Prior Sessions
+
+1. **Skill migration pattern** (S7–S11b): frontmatter with `Triggers:`, `Task` first in allowed-tools, Rules section at bottom, reference link to `agent-patterns.md`
+2. **Verbatim copy verification**: `diff` for files that shouldn't change (S7, S11b)
+3. **eval > state > doc persist hierarchy** (S11a): ask "can a script catch this?" before suggesting doc rules
+4. **cwf-state.yaml as SSOT** (S7-prep): all session history, hook config, tool availability tracked here
+5. **Hook gate defaults** (S6a): hooks work without cwf:setup — the config file is opt-out, not opt-in
+6. **Write + grep verification** (S11a): faster than sequential Edit for distributed changes
+7. **check-session.sh** (S7-prep): validates `session_defaults.artifacts` (always + milestone) — S12 must pass this
+8. **Single-plugin architecture** (S0): `{plugin}:{skill}` naming is automatic — cwf plugin with skill named setup → `cwf:setup`
+9. **Scripts use `set -euo pipefail`** (S1): all new/rewritten scripts must include strict mode + `#!/usr/bin/env bash`
+
+## Success Criteria
+
+```gherkin
+Given cwf:setup is invoked
+When the user selects hook preferences
+Then ~/.claude/cwf-hooks-enabled.sh is created with correct HOOK_*_ENABLED vars
+And cwf-state.yaml hooks section mirrors the selections
+
+Given cwf:setup detects external tools
+When codex/gemini/tavily/exa are checked
+Then cwf-state.yaml tools section is updated with available/unavailable status
+
+Given cwf:setup generates index.md
+When the project has source directories
+Then index.md contains "when to read" pointers (not content summaries)
+
+Given cwf:update is invoked
+When a newer CWF version exists
+Then the plugin is updated and changelog is shown
+
+Given cwf:handoff is invoked after a session
+When cwf-state.yaml has session history
+Then next-session.md is generated with all 7 sections
+And context files, task scope, and success criteria are populated from master-plan
+
+Given scripts/install.sh is rewritten
+When run with old stage flags (e.g., --stage-1)
+Then a deprecation warning is shown pointing to cwf plugin
+
+Given scripts/install.sh is run without flags
+When cwf plugin is not installed
+Then cwf plugin is installed from marketplace
+
+Given scripts/update-all.sh is rewritten
+When cwf plugin is installed
+Then it is updated to the latest version
+```
+
+## Dependencies
+
+- Requires: S11b completed (all workflow stage skills exist)
+- Blocks: S13 (holistic refactor needs all skills including setup/update/handoff)
+
+## Version Bump
+
+CWF plugin version: `0.6.0` → `0.7.0` (3 new skills = minor bump)
+
+## After Completion
+
+1. Run `bash scripts/check-session.sh` — fix all FAIL items
+2. Register S12 in `cwf-state.yaml` with summary and artifacts
+3. Write `next-session.md` for S13 (holistic refactor on entire CWF plugin)
+4. Commit to `marketplace-v3` branch
+
+## Start Command
+
+```text
+Read the context files listed above, then build cwf:setup, cwf:update, and cwf:handoff
+skills in plugins/cwf/skills/. Rewrite scripts/install.sh and scripts/update-all.sh
+for single-plugin architecture. Follow the CWF skill conventions established in S7–S11b.
+```

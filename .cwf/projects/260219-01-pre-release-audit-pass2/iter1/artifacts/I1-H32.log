@@ -1,0 +1,14 @@
+# I1-H32 deletion safety block/allow
+date: 2026-02-19T01:01:40Z
+script: plugins/cwf/hooks/scripts/check-deletion-safety.sh
+
+## Case A: block (repo file with callers)
+command: jq -nc '{tool_name:"Bash",tool_input:{command:"rm plugins/cwf/hooks/scripts/cwf-hook-gate.sh"}}' | bash plugins/cwf/hooks/scripts/check-deletion-safety.sh
+exit_code: 1
+stdout:
+{"decision":"block","reason":"BLOCKED: deleted file(s) have runtime callers: plugins/cwf/hooks/scripts/cwf-hook-gate.sh. Callers: .cwf/codebase-contract.json; AGENTS.md; docs/doc-graph.snapshot.json; docs/v3-migration-decisions.md; plugins/cwf/hooks/README.md; plugins/cwf/hooks/scripts/attention.sh. Restore file(s) or remove callers first."}
+
+## Case B: allow (external /tmp target)
+command: jq -nc --arg cmd 'rm /tmp/cwf-h32-allow.txt' '{tool_name:"Bash",tool_input:{command:$cmd}}' | bash plugins/cwf/hooks/scripts/check-deletion-safety.sh
+exit_code: 0
+stdout: <empty>

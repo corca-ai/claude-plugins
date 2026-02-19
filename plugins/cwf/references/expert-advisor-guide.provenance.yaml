@@ -1,0 +1,9 @@
+target: expert-advisor-guide.md
+written_session: S13.5-B
+last_reviewed: S26
+skill_count: 13
+hook_count: 19
+designed_for:
+  - "Shared expert analysis guide for clarify and review stages"
+  - "Context-parameterized: clarify (decision analysis), review (reviewer)"
+  - "Extends expert-lens-guide.md pattern with multi-stage support"

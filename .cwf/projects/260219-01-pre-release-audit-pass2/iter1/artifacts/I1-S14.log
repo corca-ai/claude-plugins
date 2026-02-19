@@ -1,0 +1,23 @@
+[I1-S14] 2026-02-19T10:04:14+09:00
+repo=/home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-a
+--- command
+timeout 180 PATH=/usr/bin:/bin /home/hwidong/.local/bin/claude --print --dangerously-skip-permissions --plugin-dir /home/hwidong/codes/claude-plugins/plugins/cwf -- 'cwf:setup --tools. If missing dependencies are detected, choose Skip for now and continue setup.'
+--- output
+
+--- exit_code=0
+
+=== fallback: deterministic script simulation (skip for now) ===
+--- dependency check
+Tool dependency status:
+  - shellcheck: missing
+  - jq: available (/usr/bin/jq)
+  - gh: available (/usr/bin/gh)
+  - node: available (/usr/bin/node)
+  - python3: available (/usr/bin/python3)
+  - lychee: missing
+  - markdownlint-cli2: missing
+check exit=1
+--- skip installation by policy
+No install command executed.
+--- repo status evidence
+?? .cwf/

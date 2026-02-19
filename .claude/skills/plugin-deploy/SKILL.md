@@ -1,9 +1,6 @@
 ---
 name: plugin-deploy
-description: |
-  Automate the post-modification plugin lifecycle: version checks, marketplace sync,
-  README updates, local testing, and deployment preparation.
-  Triggers: "/plugin-deploy"
+description: Automate the post-modification plugin lifecycle (version checks, marketplace sync, README updates, local testing, deployment prep). Trigger: "/plugin-deploy".
 allowed-tools:
   - Bash
   - Read
@@ -18,6 +15,8 @@ allowed-tools:
 
 Automate the plugin lifecycle after creation or modification. Ensures no step is skipped.
 
+For detailed edge cases and README formatting examples, see [checklist](references/checklist.md).
+
 **Language**: Match the user's language.
 
 ## Commands
@@ -27,6 +26,7 @@ Automate the plugin lifecycle after creation or modification. Ensures no step is
 /plugin-deploy <name> --new        Force new-plugin flow
 /plugin-deploy <name> --dry-run    Check only, no modifications
 /plugin-deploy <name> --skip-test  Skip local testing step
+/plugin-deploy <name> --skip-codex-sync  Skip Codex user-scope sync (cwf only)
 ```
 
 No args or "help" → print usage and stop.
@@ -45,6 +45,7 @@ Parse JSON output. If `error` field exists → report and stop.
 
 - `detected_new: true` → new plugin: needs marketplace entry, README sections, AI_NATIVE check
 - `detected_new: false` → modified plugin: needs version bump check, marketplace sync
+- `name == "cwf"` → include Codex user-scope sync step via [plugins/cwf/scripts/codex/sync-skills.sh](../../../plugins/cwf/scripts/codex/sync-skills.sh)
 - `--dry-run` → display report, list actions, stop
 
 ### 3. Fix Gaps
@@ -66,7 +67,17 @@ For README edits: read the file, find the plugin overview table and the Skills/H
 
 Re-run check-consistency.sh → confirm `gap_count: 0`. Fix iteratively if gaps remain.
 
-### 5. Local Test (unless --skip-test)
+### 5. Codex User-Scope Sync (cwf only, unless --skip-codex-sync)
+
+For `cwf` plugin deployments, run:
+
+```bash
+bash {SKILL_DIR}/../../../plugins/cwf/scripts/codex/sync-skills.sh --cleanup-legacy
+```
+
+This includes post-sync link validation ([plugins/cwf/scripts/codex/verify-skill-links.sh](../../../plugins/cwf/scripts/codex/verify-skill-links.sh)). If sync or validation fails, report exact stderr and stop (do not continue with stale links).
+
+### 6. Local Test (unless --skip-test)
 
 By `plugin_type`:
 
@@ -74,9 +85,20 @@ By `plugin_type`:
 - **skill**: verify SKILL.md frontmatter, check script executability
 - **hybrid**: both
 
-### 6. Summary
+### 7. Summary
 
-Report: plugin name, type, version change, files modified, remaining manual steps (commit).
+Report: plugin name, type, version change, files modified, commit status, and created commit hash(es) when committed.
+
+## Rules
+
+1. **All code fences must have language specifier**: Never use bare fences.
+2. **Consistency check is the source of truth**: Always run `check-consistency.sh` before and after changes.
+3. **Missing dependency interaction**: When prerequisites are missing, ask to install/configure now; do not only report unavailability.
+4. **Commit policy (autonomy-first)**: Commit by default after successful re-verification, using meaningful units and selective staging only. Ask the user only when commit boundaries are ambiguous or unrelated worktree changes make safe selective staging unclear.
+
+## References
+
+- [checklist.md](references/checklist.md) — Detailed edge cases and README formatting examples
 
 ## Usage Message
 
@@ -88,7 +110,9 @@ Usage:
   /plugin-deploy <name> --new        New plugin flow
   /plugin-deploy <name> --dry-run    Check only
   /plugin-deploy <name> --skip-test  Skip local tests
+  /plugin-deploy <name> --skip-codex-sync  Skip Codex sync (cwf only)
 
 Checks: plugin.json version, marketplace.json sync, README mentions,
-        AI_NATIVE links (new only), skill/hook structure
+        AI_NATIVE links (new only), skill/hook structure,
+        Codex user-scope links for cwf
 ```

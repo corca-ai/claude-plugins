@@ -1,0 +1,610 @@
+# cwf-state.yaml — Corca Workflow Framework project state
+# Git-tracked, per-project. Read/written by cwf skills.
+
+workflow:
+  current_stage: harden
+  started_at: "2026-02-08"
+  stages:
+    clarify: "S0"
+    refactor: "S1–S2"
+    scaffold: "S3–S4.6"
+    review: "S5a–S5b"
+    build: "S6a–S10"
+    harden: "S11–S13"
+    launch: "S14–S15"
+
+# Default artifact expectations for sessions
+session_defaults:
+  artifacts:
+    impl_complete: [plan.md, lessons.md, next-session.md]
+    always: [plan.md, lessons.md, retro.md]
+    milestone: [next-session.md]
+
+# Session history (populated by cwf:retro and cwf:handoff)
+sessions:
+  - id: S0
+    title: "Clarify + master plan"
+    dir: .cwf/projects/260208-03-cwf-v3-master-plan
+    branch: main
+    completed_at: "2026-02-08"
+    summary: "Designed CWF v3 architecture with 15-session plan and single-plugin approach"
+    artifacts: [master-plan.md, initial-plan-req.md, lessons.md, retro.md, next-session.md, session-log.md]
+
+  - id: S1
+    title: "Refactor critical issues"
+    dir: .cwf/projects/260208-04-refactor-critical
+    branch: main
+    completed_at: "2026-02-08"
+    summary: "Fixed shebang/strict-mode/eval issues across 6 plugins, established JSON safety patterns"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md, session-log.md]
+
+  - id: S2
+    title: "Refactor session 2"
+    dir: .cwf/projects/260208-05-refactor-s2
+    branch: main
+    completed_at: "2026-02-08"
+    summary: "Aligned env var naming to CWF_{PLUGIN}_{SETTING} across attention-hook"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md]
+
+  - id: S3
+    title: "Ship skill"
+    dir: .cwf/projects/260208-06-ship-skill
+    branch: main
+    completed_at: "2026-02-08"
+    summary: "Built /ship local skill for GitHub workflow automation with templating system"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md, session-log.md]
+
+  - id: S4
+    title: "CWF scaffold"
+    dir: .cwf/projects/260208-04-cwf-scaffold
+    branch: main
+    completed_at: "2026-02-08"
+    summary: "Scaffolded CWF plugin with gate mechanism and 13 source/stub files for hooks"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md, session-log.md]
+
+  - id: S4.5
+    title: "Ship skill improvements"
+    dir: .cwf/projects/260208-07-ship-improve
+    branch: main
+    completed_at: "2026-02-08"
+    summary: "Enhanced /ship with Korean PR templates and 2x2 autonomous-merge decision matrix"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md, session-log.md]
+
+  - id: S4.6
+    title: "SW Factory discussion"
+    dir: .cwf/projects/260208-08-sw-factory-discussion
+    branch: main
+    completed_at: "2026-02-08"
+    summary: "Applied SW Factory concepts: sernarative review, progressive disclosure, BDD criteria"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md, session-log.md]
+
+  - id: S5a
+    title: "CWF review — internal reviewers"
+    dir: .cwf/projects/260208-09-cwf-review-internal
+    branch: main
+    completed_at: "2026-02-08"
+    summary: "Implemented /review skill with 2 internal parallel reviewers (Security, UX/DX)"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md]
+
+  - id: S5b
+    title: "CWF review — external reviewers"
+    dir: .cwf/projects/260208-03-s5b-external-reviewers
+    branch: main
+    completed_at: "2026-02-08"
+    summary: "Expanded /review to 4 reviewers with external CLIs (Codex, Gemini) and provenance format"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md, session-log.md]
+
+  - id: S6a
+    title: "CWF infra hooks"
+    dir: .cwf/projects/260208-11-cwf-infra-hooks
+    branch: main
+    completed_at: "2026-02-08"
+    summary: "Migrated 3 simple hooks (check-markdown, read-guard, log-turn) into CWF plugin"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md, session-log.md]
+
+  - id: S6b
+    title: "CWF hook migration"
+    dir: .cwf/projects/260208-12-s6b-cwf-migration
+    branch: marketplace-v3
+    completed_at: "2026-02-08"
+    summary: "Migrated attention-hook (5 scripts + 2 utilities) into CWF, added check-shell.sh"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md]
+
+  - id: S7-prep
+    title: "Populate cwf-state.yaml + update handoff workflow"
+    dir: .cwf/projects/260208-13-s7-prep-cwf-state
+    branch: marketplace-v3
+    completed_at: "2026-02-08"
+    summary: "Created machine-readable SSOT for session history, updated handoff template"
+    artifacts: [plan.md, lessons.md, next-session.md]
+
+  - id: S7
+    title: "Migrate gather → cwf:gather"
+    dir: .cwf/projects/260208-15-s7-cwf-gather-migration
+    branch: marketplace-v3
+    completed_at: "2026-02-08"
+    summary: "Copied gather skill into CWF as cwf:gather (8 scripts, 6 references, adapted SKILL.md), activated WebSearch redirect hook"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md, session-log.md]
+
+  - id: S8
+    title: "Migrate clarify → cwf:clarify"
+    dir: .cwf/projects/260208-16-s8-cwf-clarify-migration
+    branch: marketplace-v3
+    completed_at: "2026-02-08"
+    summary: "Copied clarify skill into CWF as cwf:clarify (SKILL.md + 4 reference files), updated Path A to use cwf:gather search script"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md]
+
+  - id: S9
+    title: "Migrate plan-and-lessons → cwf:plan"
+    dir: .cwf/projects/260208-18-s9-cwf-plan
+    branch: marketplace-v3
+    completed_at: "2026-02-08"
+    summary: "Created cwf:plan skill with 2-agent research + synthesizer pattern, synced plan-protocol.md Handoff Document section"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md]
+
+  - id: S10
+    title: "Build cwf:impl"
+    dir: .cwf/projects/260208-19-s10-cwf-impl
+    branch: marketplace-v3
+    completed_at: "2026-02-08"
+    summary: "Created cwf:impl skill with 4-phase orchestration (Load Plan → Analyze & Decompose → Execute 3a/3b → Verify), adaptive team sizing, domain signal table"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md]
+
+  - id: S11a
+    title: "Migrate retro → cwf:retro"
+    dir: .cwf/projects/260208-20-s11a-cwf-retro
+    branch: marketplace-v3
+    completed_at: "2026-02-08"
+    summary: "Migrated retro v2.0.2 into CWF as cwf:retro with 2-batch parallel sub-agent design for deep mode and eval>state>doc persist hierarchy"
+
+  - id: S11b
+    title: "Migrate refactor → cwf:refactor"
+    dir: .cwf/projects/260208-21-s11b-cwf-refactor
+    branch: marketplace-v3
+    completed_at: "2026-02-08"
+    summary: "Migrated refactor v1.1.2 into CWF as cwf:refactor with 2-agent Deep Review and 3-agent Holistic parallel sub-agents"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md, session-log.md]
+
+  - id: S12
+    title: "Build cwf:setup + cwf:update + cwf:handoff"
+    dir: .cwf/projects/260208-22-s12-cwf-setup-update-handoff
+    branch: marketplace-v3
+    completed_at: "2026-02-08"
+    summary: "Built cwf:setup (hook toggle + tool detection + index.md), cwf:update (version check), cwf:handoff (state-based handoff generation). Rewrote install.sh and update-all.sh for single cwf plugin."
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md]
+
+  - id: S13
+    title: "Holistic refactor review on entire CWF plugin"
+    dir: .cwf/projects/260208-23-s13-holistic-refactor
+    branch: marketplace-v3
+    completed_at: "2026-02-09"
+    summary: "Cross-cutting quality gate on 9 skills + 14 hooks. Fixed broken refs (4 skills), missing Rules (gather), Language inconsistency. Created skill-conventions.md. Deep retro surfaced self-healing criteria need (Meadows/Woods). Hard wrap cleanup on 16 files."
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md]
+
+  - id: S13.5-A
+    title: "Self-healing provenance system"
+    dir: .cwf/projects/260209-24-s13.5-feedback-loop-infra
+    branch: s13.5-a-provenance
+    completed_at: "2026-02-09"
+    summary: "Implemented provenance sidecar pattern: 6 .provenance.yaml files, provenance-check.sh script, refactor holistic integration (Phase 1b), handoff unresolved items propagation (Phase 4b), skill-conventions Provenance Rule. Deep retro with Meadows/Woods expert analysis."
+    artifacts: [lessons.md, retro.md, next-session.md]
+
+  - id: S13.5-B
+    title: "Expert-in-the-loop + phase handoff"
+    dir: .cwf/projects/260209-25-s13.5-b-expert-loop
+    branch: s13.5-b-expert-loop
+    completed_at: "2026-02-09"
+    summary: "Expert-in-the-loop for clarify (Phase 2.5), review (Slots 5-6), retro (roster maintenance). Shared expert-advisor-guide.md. Phase handoff --phase mode for handoff/impl/clarify skills. Deep retro with Klein RPD + Argyris double-loop."
+    artifacts: [plan.md, lessons.md, retro.md, phase-handoff.md, next-session.md]
+
+  - id: S13.5-B2
+    title: "Concept distillation + README v3"
+    dir: .cwf/projects/260209-26-s13.5-b2-concept-distillation
+    branch: marketplace-v3
+    completed_at: "2026-02-09"
+    summary: "Applied Jackson's Essence of Software to analyze CWF into 6 generic + 9 application concepts. Rewrote README.md around CWF single-plugin structure (336→273 lines). Identified 3 refactor integration points for concept-based analysis (unimplemented)."
+    artifacts: [concept-distillation.md, lessons.md, retro.md, next-session.md, phase-handoff.md, session-log.md]
+
+  - id: S13.5-B3
+    title: "Concept refactor plan + hook observability fix + implementation"
+    dir: .cwf/projects/260209-27-s13.5-b3-concept-refactor
+    branch: feat/concept-refactor-integration
+    completed_at: "2026-02-09"
+    summary: "Designed and implemented Form/Meaning/Function restructuring of holistic + deep review frameworks. Created concept-map.md (6 concepts + 9×6 sync map). Restructured holistic-criteria.md (PP/BI/MC → Form/Meaning/Function) and review-criteria.md (merged 4+5, added Concept Integrity). Fixed exit-plan-mode.sh observability. GitHub issue #17."
+    artifacts: [plan.md, phase-handoff.md, lessons.md, retro.md, next-session.md, session-log.md]
+
+  - id: post-B3
+    title: "Post S13.5-B3 housekeeping"
+    dir: .cwf/projects/260209-28-post-b3-housekeeping
+    branch: marketplace-v3
+    completed_at: "2026-02-09"
+    summary: "Provenance hook_count update, expert roster, master-plan B3 row, hook audit, next-prompt-dir script, plan mode protocol"
+    artifacts: [plan.md, lessons.md, next-session.md]
+
+  - id: S29
+    title: "Plan mode removal + live state + compact recovery"
+    dir: .cwf/projects/260209-29-live-state-compact-recovery
+    branch: marketplace-v3
+    completed_at: "2026-02-09"
+    summary: "Removed plan mode hooks, added cwf-state.yaml live section, built SessionStart(compact) hook with session log turn injection, deprecated plan-and-lessons plugin"
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md, session-log.md]
+
+  - id: S32-impl
+    title: "L1-L3+L9 implementation"
+    dir: .cwf/projects/260210-03-docs-overhaul-impl
+    branch: marketplace-v3
+    completed_at: "2026-02-10"
+    summary: "Implemented branch gate (impl Phase 0.5), clarify completion gate (Phase 1.0), sub-agent file persistence with context recovery protocol (5 skills), log-turn.sh fix, review error observability. Extracted shared context-recovery-protocol.md. Full pipeline: clarify→plan→review→impl(4 agents)→review(6 reviewers)→fix→commit. Deep retro with Brooks + Ousterhout."
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md, session-log.md]
+
+  - id: S33
+    title: "CDM improvements + auto-chaining"
+    dir: .cwf/projects/260210-04-s33-cdm-auto-chain
+    branch: marketplace-v3
+    completed_at: "2026-02-10"
+    summary: "4 CDM fixes (plan cross-cutting gate, impl commit strategy branching, decision journal + phase-aware compact recovery, review fail-fast for CAPACITY errors) + cwf:run auto-chaining skill + impl gate extraction to shared reference. 6 commits, 5/5 BDD pass."
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md]
+
+  - id: S14
+    title: "Integration test + agent-browser plan"
+    dir: .cwf/projects/260211-01-s14-integration-test
+    branch: marketplace-v3
+    completed_at: "2026-02-11"
+    summary: "Integration test: 5/5 CDM items verified, 7/7 run logic checks, 6/6 fail-fast checks, 28/28 cross-refs clean. compact-context.sh 2 bugs fixed (decisions leak, quote stripping). v3-migration-decisions.md written. Web research replay exposed WebFetch 9% success rate → agent-browser integration planned."
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md, agent-browser-plan.md, session-log.md]
+    stage_checkpoints: [setup]
+
+  - id: S15
+    title: "Agent-browser integration into sub-agent prompts"
+    dir: .cwf/projects/260211-02-s15-agent-browser-integration
+    branch: marketplace-v3
+    completed_at: "2026-02-11"
+    summary: "Completed agent-browser integration: cwf:setup tool detection, 4 skill sub-agent prompts updated to reference Web Research Protocol (clarify, plan, retro, review), regression test 3/3 BDD pass (deming.org: WebFetch empty → agent-browser full content)."
+    artifacts: [plan.md, lessons.md, retro.md, session-log.md]
+
+  - id: S16
+    title: "V3 exhaustive analysis handoff design"
+    dir: .cwf/projects/260211-03-s16-v3-gap-analysis-handoff
+    branch: marketplace-v3
+    completed_at: "2026-02-11"
+    summary: "Created a single-file next-session handoff for omission-resistant CWF v3 analysis anchored to 42d2cd9..HEAD, including purpose, evidence hierarchy, decision rationale, extraction workflow, and completion gates."
+    artifacts: [plan.md, lessons.md, next-session.md, next-session.review.claude.md, retro.md, session-log.md]
+
+  - id: S17
+    title: "Harden S16 handoff protocol from integrated review"
+    dir: .cwf/projects/260211-04-s17-next-session-hardening
+    branch: feat/s17-handoff-protocol-hardening
+    completed_at: "2026-02-11"
+    summary: "Implemented integrated-review fixes for S16 next-session handoff: scope freeze, full-scope manifest gate, stable GAP/UTT/CW/BL traceability, semantic completion checks, redaction policy, and canonical milestone mapping."
+    artifacts: [plan.md, lessons.md, next-session.md]
+
+  - id: S18
+    title: "Execute hardened S16 gap-analysis protocol"
+    dir: .cwf/projects/260211-05-s18-v3-gap-analysis-execution
+    branch: feat/s17-handoff-protocol-hardening
+    completed_at: "2026-02-11"
+    summary: "Executed S16 hardened protocol end-to-end on frozen range 42d2cd9..01293b3: full-scope manifest, 74-row coverage matrix, 734-item redacted utterance index, GAP/CW/BL traceability set, semantic completion gate pass, and explicit blocking-risk summary."
+    artifacts: [plan.md, lessons.md, next-session.md, scope-freeze.md, analysis-manifest.md, coverage-matrix.md, user-utterances-index.md, gap-candidates.md, consistency-check.md, discussion-backlog.md, gap-decisions.md, completion-check.md, summary.md]
+
+  - id: S19
+    title: "Resolve top open gaps from S18"
+    dir: .cwf/projects/260211-06-s19-resolve-top-open-gaps
+    branch: feat/s17-handoff-protocol-hardening
+    completed_at: "2026-02-11"
+    summary: "Implemented BL-001/002/003 closures: executable review contracts for --scenarios and --base, canonical runtime log migration to sessions/*.codex.md + sessions/*.claude.md with legacy compatibility reads, and aligned setup/readme/retro/handoff contracts with smoke validation evidence."
+    artifacts: [clarify-result.md, plan.md, review-plan.md, lessons.md, impl-validation.md, review-code.md, retro.md, next-session.md]
+
+  - id: S20
+    title: "Close remaining open gap set"
+    dir: .cwf/projects/260211-07-s20-close-remaining-open-gap-set
+    branch: feat/s17-handoff-protocol-hardening
+    completed_at: "2026-02-11"
+    summary: "Closed DEC-003/006/007 scope: GAP-003 dedicated trace with binary resolved verdict, stage-tier persistence gate policy encoded (hard critical / soft non-critical), and check-session semantic extension via --semantic-gap with positive/negative validation evidence."
+    artifacts: [clarify-result.md, plan.md, review-plan.md, gap-003-trace.md, gap-closure-update.md, lessons.md, impl-validation.md, review-code.md, retro.md, next-session.md]
+
+  - id: S21
+    title: "Profile-first env loader + review provider routing"
+    dir: .cwf/projects/260211-08-s21-env-loader-review-provider-routing
+    branch: feat/s17-handoff-protocol-hardening
+    completed_at: "2026-02-11"
+    summary: "Introduced shared env-loader (env -> shell profiles -> legacy .claude/.env) and migrated hook/gather scripts to it; aligned docs to profile-first policy; updated review skill to provider-routed external slots across codex/gemini/claude fallback."
+    artifacts: [plan.md, lessons.md, next-session.md]
+
+  - id: S22
+    title: "Pre-release readiness audit plan"
+    dir: .cwf/projects/260211-09-s22-pre-release-readiness-audit-plan
+    branch: marketplace-v3
+    completed_at: "2026-02-11"
+    summary: "Established release-readiness audit scope and gates for concerns 1-4 with explicit pre-Step4 split and mention-only execution contract."
+    artifacts: [plan.md, lessons.md, next-session.md]
+
+  - id: S24
+    title: "Static analysis tooling integration"
+    dir: .cwf/projects/260212-01-static-analysis-tooling
+    branch: feat/s24-static-analysis-tooling
+    completed_at: "2026-02-12"
+    summary: "Added 5 standalone analysis scripts (check-links.sh, doc-graph.mjs, find-duplicates.py, check-schemas.sh, doc-churn.sh) + 3 JSON schemas + .lychee.toml + vale stub. Full cwf:run pipeline execution. PR #23."
+    artifacts: [plan.md, lessons.md, retro.md, session-log.md]
+
+  - id: S25
+    title: "Post-S24 follow-up: structural fixes + document sync"
+    dir: .cwf/projects/260213-01-s25-post-s24-followup
+    branch: feat/s25-post-s24-followup
+    completed_at: "2026-02-13"
+    summary: "Applied S24 retro-driven fixes: check-links-local.sh PostToolUse hook, check-schemas.sh positional args refactor, review mode-namespaced output files, dynamic max_turns scaling, expert verified field for all 15 roster entries. Synced cwf-index.md, README.md, README.ko.md."
+    artifacts: [plan.md, lessons.md, next-session.md]
+
+  - id: S23
+    title: "Execute concerns 1-3 + prepare Step 4 prompt"
+    dir: .cwf/projects/260211-09-s22-pre-release-readiness-audit-plan
+    branch: feat/s23-prestep4-audit-exec
+    completed_at: "2026-02-11"
+    summary: "Executed full pre-Step4 evidence package with 12-skill coverage, script-path audit, README/discoverability gates, and interactive Step4 prompt. Added commit-checkpoint rule to handoff execution contracts."
+    artifacts: [plan.md, lessons.md, retro.md, refactor-evidence.md, skill-coverage-matrix.md, script-coverage-matrix.md, readme-framing-audit.md, discoverability-audit.md, readiness-prestep4.md, step4-interactive-prompt.md, next-session.md]
+
+  - id: S260216-01
+    title: "README review restart"
+    dir: .cwf/projects/260216-01-readme-review-restart
+    branch: marketplace-v3
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md]
+
+  - id: S260216-02
+    title: "HITL README update"
+    dir: .cwf/projects/260216-02-hitl-readme
+    branch: marketplace-v3
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md]
+
+  - id: S260216-03
+    title: "HITL README restart"
+    dir: .cwf/projects/260216-03-hitl-readme-restart
+    branch: marketplace-v3
+    artifacts: [plan.md, lessons.md, retro.md, next-session.md, session-log.md]
+
+# External tool availability (detected by cwf:setup)
+
+  - id: "S260216-04"
+    title: "full-repo-refactor"
+    dir: ".cwf/projects/260216-04-full-repo-refactor"
+    branch: "marketplace-v3"
+    artifacts: [plan.md, lessons.md, retro.md]
+
+
+  - id: "S260217-02"
+    title: "refactor-review-prevention-run"
+    dir: ".cwf/projects/260217-02-refactor-review-prevention-run"
+    branch: "marketplace-v3"
+    artifacts: [plan.md, lessons.md, next-session.md]
+
+
+  - id: "S260217-03"
+    title: "refactor-review-prevention-impl"
+    dir: ".cwf/projects/260217-03-refactor-review-prevention-impl"
+    branch: "marketplace-v3"
+    artifacts: [plan.md, lessons.md, next-session.md, ship-summary-origin-marketplace-v3.md]
+    stage_checkpoints: [handoff]
+
+
+  - id: "S260217-04"
+    title: "refactor-review-prevention-hardening"
+    dir: ".cwf/projects/260217-04-refactor-review-prevention-hardening"
+    branch: "marketplace-v3"
+    artifacts: [plan.md, lessons.md]
+
+
+  - id: "S260217-05"
+    title: "full-skill-refactor-run"
+    dir: ".cwf/projects/260217-05-full-skill-refactor-run"
+    branch: "marketplace-v3"
+    artifacts: [plan.md, lessons.md]
+
+
+  - id: "S260217-10"
+    title: "refactor-portability-default"
+    dir: ".cwf/projects/260217-10-refactor-portability-default"
+    branch: "marketplace-v3"
+    completed_at: "2026-02-17"
+    summary: "Implemented portability-default refactor baseline with docs contract bootstrap, fallback metadata, contract-gated docs flow, and plugin lifecycle verification."
+    artifacts: [plan.md, lessons.md, review-synthesis-plan.md, review-synthesis-impl.md, retro.md, next-session.md]
+    stage_checkpoints: [retro, handoff]
+
+
+  - id: "S260218-01"
+    title: "refactor-codebase-deep"
+    dir: ".cwf/projects/260218-01-refactor-codebase-deep"
+    branch: "marketplace-v3"
+    artifacts: [plan.md, lessons.md]
+
+
+  - id: "S260218-02"
+    title: "run-portability-contract-hardening"
+    dir: ".cwf/projects/260218-02-run-portability-contract-hardening"
+    branch: "marketplace-v3"
+    artifacts: [plan.md, lessons.md]
+
+
+  - id: "S260218-03"
+    title: "pre-release-refactor-audit"
+    dir: ".cwf/projects/260218-03-pre-release-refactor-audit"
+    branch: "marketplace-v3"
+    artifacts: [plan.md, lessons.md]
+
+
+  - id: "S260219-01"
+    title: "pre-release-audit-pass2"
+    dir: ".cwf/projects/260219-01-pre-release-audit-pass2"
+    branch: "marketplace-v3"
+    artifacts: [plan.md, lessons.md]
+    stage_checkpoints: [setup]
+
+tools:
+  codex: unavailable
+  gemini: unavailable
+  agent_browser: unavailable
+  tavily: available
+  exa: available
+  shellcheck: unavailable
+  jq: available
+  gh: available
+  node: available
+  python3: available
+  lychee: unavailable
+  markdownlint_cli2: unavailable
+
+# Hook group toggle state (mirrors ~/.claude/cwf-hooks-enabled.sh)
+# Default: all enabled — hooks work without cwf:setup
+hooks:
+  attention: true
+  log: true
+  read: true
+  lint_markdown: true
+  lint_shell: true
+  deletion_safety: true
+  workflow_gate: true
+  websearch_redirect: true
+  compact_recovery: true
+# Live session state — updated by CWF skills at phase transitions,
+# read by SessionStart(compact) hook for context recovery after auto-compact.
+# check-session.sh --live validates required fields are populated.
+live:
+  session_id: "260219-01"
+  dir: ".cwf/projects/260219-01-pre-release-audit-pass2"
+  branch: "marketplace-v3"
+  phase: "retro"
+  task: "Iteration 1 findings remediation: marketplace install blocker, non-interactive deadlocks, cap-index deadlock"
+  key_files:
+    - ".cwf/projects/260219-01-pre-release-audit-pass2/clarify-result.md"
+    - ".cwf/projects/260219-01-pre-release-audit-pass2/plan.md"
+    - ".cwf/projects/260219-01-pre-release-audit-pass2/lessons.md"
+    - ".cwf/projects/260219-01-pre-release-audit-pass2/plan-codebase-analysis.md"
+    - ".cwf/projects/260219-01-pre-release-audit-pass2/plan-claim-map.md"
+    - ".cwf/projects/260219-01-pre-release-audit-pass2/plan-prior-art-research.md"
+  decisions: []
+  decision_journal: []
+  hitl:
+    session_id: ""
+    state_file: ""
+    rules_file: ""
+    updated_at: ""
+  state_file: ".cwf/projects/260219-01-pre-release-audit-pass2/session-state.yaml"
+  remaining_gates: []
+  state_version: "6"
+  worktree_root: "/home/hwidong/codes/claude-plugins"
+  worktree_branch: "marketplace-v3"
+  active_pipeline: ""
+  user_directive: "Run clarify→plan→implement fixes→review→retro for public release readiness"
+  pipeline_override_reason: "ship persisted as docs artifact (ship.md), GitHub mutation intentionally skipped"
+  ambiguity_mode: "defer-blocking"
+  blocking_decisions_pending: "false"
+  ambiguity_decisions_file: ".cwf/projects/260218-03-pre-release-refactor-audit/run-ambiguity-decisions.md"
+  clarify_result_file: "project/initial-req.md"
+  clarify_completed_at: "2026-02-19T00:40:57Z"
+  stage_provenance_file: ".cwf/projects/260218-03-pre-release-refactor-audit/run-stage-provenance.md"
+# Expert roster for domain expert sub-agents (used by clarify, review, retro)
+# Semi-automatic evolution: usage_count auto-incremented, new experts user-approved
+# verified: true = skip web identity verification, cite source field directly
+expert_roster:
+  - name: "Donella Meadows"
+    domain: "systems thinking, feedback loops, leverage points"
+    source: "Thinking in Systems (2008)"
+    rationale: "Applied to provenance system design — feedback loops for self-healing"
+    introduced: "S13.5-A"
+    usage_count: 1
+    verified: true
+  - name: "David Woods"
+    domain: "resilience engineering, graceful extensibility"
+    source: "The Theory of Graceful Extensibility (2018)"
+    rationale: "Applied to agent boundary awareness and system resilience"
+    introduced: "S13.5-A"
+    usage_count: 1
+    verified: true
+  - name: "David Parnas"
+    domain: "information hiding, modular decomposition criteria"
+    source: "On the Criteria To Be Used in Decomposing Systems into Modules (CACM, 1972)"
+    rationale: "Applied to concept vs principle distinction and directory structure classification, S24 retro: script decomposition as Decomposition 2 (secrets = detection algorithms), check-schemas.sh target encoding as information leakage, review filename collision as namespace sharing violation"
+    introduced: "S13.5-B2"
+    usage_count: 3
+    verified: true
+  - name: "Gary Klein"
+    domain: "naturalistic decision-making, recognition-primed decision model"
+    source: "Sources of Power: How People Make Decisions (MIT Press, 1998)"
+    rationale: "Applied to agreement bias analysis and mental simulation protocols, S260217-01: RPD analysis of triage distortion and deletion decision-point intervention"
+    introduced: "S13.5-B2"
+    usage_count: 3
+    verified: true
+  - name: "James Reason"
+    domain: "organizational accidents, Swiss cheese model, defense-in-depth"
+    source: "Managing the Risks of Organizational Accidents (Ashgate, 1997)"
+    rationale: "Applied to hook chain defense layer analysis, S260217-01: Swiss cheese model applied to prevention proposal defense layers (empty recovery layer finding), S260217-03 code review: 4 independent defense barriers confirmed via Swiss cheese model"
+    introduced: "S13.5-B3"
+    usage_count: 3
+    verified: true
+  - name: "Sidney Dekker"
+    domain: "drift into failure, local rationality, just culture"
+    source: "Drift into Failure (Ashgate, 2011)"
+    rationale: "Applied to agent behavioral drift analysis, S260216-04: practical drift in ship skill hardcoding accumulation, decrementalism in lint-convention doc silent divergence, erosion of safety margins in README structural misalignment, S260217-03 retro: exit-code drift as practical drift, grep limitation normalization of deviance, compaction as shift-handoff memory loss"
+    introduced: "S13.5-B3"
+    usage_count: 4
+    verified: true
+  - name: "Frederick P. Brooks Jr."
+    domain: "conceptual integrity, communication overhead, plan-to-throw-one-away, essential vs accidental complexity"
+    source: "The Mythical Man-Month (1975/1995), No Silver Bullet (1986), The Design of Design (2010)"
+    rationale: "Applied to parallel agent conceptual integrity failure, compact recovery as first system, plan over-engineering (second-system effect)"
+    introduced: "S32"
+    usage_count: 1
+    verified: true
+  - name: "John Ousterhout"
+    domain: "deep vs shallow modules, information leakage, strategic vs tactical programming, interface bloat"
+    source: "A Philosophy of Software Design (2018/2021), Always Measure One Level Deeper (CACM, 2018)"
+    rationale: "Applied to context recovery protocol depth analysis, SKILL.md interface bloat from tactical accumulation, concept-level vs file-level plan decomposition, S24 code review: doc-graph.mjs shallow module pattern, check-schemas.sh target encoding as shallow abstraction"
+    introduced: "S32"
+    usage_count: 2
+    verified: true
+  - name: "W. Edwards Deming"
+    domain: "systems thinking, common cause vs special cause variation, PDCA cycle, build quality into process"
+    source: "Out of the Crisis (MIT Press, 1986), Point 3: cease dependence on inspection"
+    rationale: "Applied to convention-vs-structure enforcement gap, commit strategy recurrence as common cause variation, check-session.sh as inspection-to-process conversion, TOOL_ERROR as common cause variation, Check vs Study distinction in review orchestration, S24 retro: 5 inspection tools as Point 3 tension, 4/6 agent failure as common cause variation, datasketch threshold as PDCA cycle, additionalProperties as statistical process control"
+    introduced: "S33"
+    usage_count: 5
+    verified: true
+  - name: "Chris Argyris"
+    domain: "espoused theory vs theory-in-use, single-loop vs double-loop learning, defensive routines"
+    source: "Organizational Learning: A Theory of Action Perspective (Argyris & Schön, 1978), Teaching Smart People How to Learn (HBR, 1991)"
+    rationale: "Applied to teaching-practicing gap analysis, SKILL.md recording vs current behavior gap as espoused/theory-in-use divergence, eval>state>doc as double-loop learning mechanism"
+    introduced: "S33"
+    usage_count: 2
+    verified: true
+  - name: "Gojko Adzic"
+    domain: "specification by example, living documentation, key examples, collaborative specification"
+    source: "Specification by Example (Manning, 2011), Bridging the Communication Gap (Neuri, 2009)"
+    rationale: "Applied to SKILL.md-as-executable-specification insight, key examples for protocol validation, bottom-up failure classification as example classification, S16 handoff review: key example absence and existence-only completion criteria"
+    introduced: "S14"
+    usage_count: 2
+    verified: true
+  - name: "Richard Cook"
+    domain: "complex system failure, latent failures, line of representation, going solid, defense in depth"
+    source: "How Complex Systems Fail (1998/2000), Above the Line Below the Line (ACM Queue, 2020), Going Solid (BMJ QS, 2005)"
+    rationale: "Applied to S33 protocol masking deeper WebFetch failure, agent mental model gap (line of representation), compact-context.sh tight coupling progression"
+    introduced: "S14"
+    usage_count: 1
+    verified: true
+  - name: "Martin Fowler"
+    domain: "refactoring patterns, knowledge duplication (Rule of Three), shared abstractions, evolutionary design"
+    source: "Refactoring: Improving the Design of Existing Code 2nd ed. (2018), Is Design Dead? (martinfowler.com), BeckDesignRules (martinfowler.com/bliki)"
+    rationale: "Applied to inline rule duplication as Duplicated Code smell, protocol reference extraction as Extract Function structural extension, Shotgun Surgery smell for partial category updates, S260216-04: unenforced convention Aspirational demotion via Fewest Elements, extraction priority reranking by change-frequency × instance-count"
+    introduced: "S15"
+    usage_count: 2
+    verified: true
+  - name: "Charles Perrow"
+    domain: "normal accident theory, interactive complexity vs linear interaction, tight/loose coupling, common-mode failure"
+    source: "Normal Accidents: Living with High-Risk Technologies (Basic Books, 1984; Princeton UP revised, 1999)"
+    rationale: "Applied to component vs interaction failure distinction in error taxonomy, common-mode failure in review systems (tool shares defect class with target), tight coupling buffer analysis for in-session fix decisions, S260217-03 code review: common-mode failure from duplicated YAML parsers, interactive complexity between hooks"
+    introduced: "S16"
+    usage_count: 2
+    verified: true
+  - name: "Nancy Leveson"
+    domain: "systems safety engineering, STAMP/STPA, system-level hazard analysis, control structure analysis"
+    source: "Engineering a Safer World: Systems Thinking Applied to Safety (MIT Press, 2011)"
+    rationale: "Applied to parallel agent file conflict as UCA (control action not provided), inline rule drift as open-loop control / feedback loop degradation, defensive consistency as hazard prevention, S16 handoff review: open-loop Phase 0→1 transition, unenforced Do Not Skip constraints, S260217-03 retro: STAMP control structure analysis of hook design (PreToolUse as closed-loop, fail-mode calibration as safety constraint enforcement, compaction as feedback channel severance)"
+    introduced: "S15"
+    usage_count: 3
+    verified: true

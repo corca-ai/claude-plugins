@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "offset": 6403072,
+  "jsonl_path": "/home/hwidong/.codex/sessions/2026/02/19/rollout-2026-02-19T07-34-02-019c72e3-9269-7cc0-9ecf-74140190b16a.jsonl",
+  "out_file": "/home/hwidong/codes/claude-plugins/.cwf/sessions/260219-0734-c2691816.codex.md",
+  "last_mtime": 1771458269,
+  "emitted_turns": 2,
+  "has_turn": false,
+  "turn_user_text": "",
+  "turn_user_ts": "",
+  "turn_assistant_text": "",
+  "turn_assistant_last_ts": "",
+  "turn_tools": "",
+  "last_turn_fingerprint": "2855afc884fa055b5fbfa2a308980067463c2128f1c8bf928a0fade30e149847"
+}

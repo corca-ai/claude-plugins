@@ -1,0 +1,150 @@
+{
+  "total_skills": 13,
+  "warnings": 0,
+  "errors": 0,
+  "flagged_skills": 0,
+  "results": [{
+    "plugin": "cwf",
+    "skill": "clarify",
+    "word_count": 2073,
+    "line_count": 457,
+    "size_severity": "ok",
+    "resource_files": 4,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "plugin": "cwf",
+    "skill": "gather",
+    "word_count": 1804,
+    "line_count": 334,
+    "size_severity": "ok",
+    "resource_files": 14,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "plugin": "cwf",
+    "skill": "handoff",
+    "word_count": 2080,
+    "line_count": 357,
+    "size_severity": "ok",
+    "resource_files": 0,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "plugin": "cwf",
+    "skill": "hitl",
+    "word_count": 1195,
+    "line_count": 186,
+    "size_severity": "ok",
+    "resource_files": 1,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "plugin": "cwf",
+    "skill": "impl",
+    "word_count": 2576,
+    "line_count": 455,
+    "size_severity": "ok",
+    "resource_files": 2,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "plugin": "cwf",
+    "skill": "plan",
+    "word_count": 1615,
+    "line_count": 294,
+    "size_severity": "ok",
+    "resource_files": 0,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "plugin": "cwf",
+    "skill": "refactor",
+    "word_count": 2063,
+    "line_count": 419,
+    "size_severity": "ok",
+    "resource_files": 12,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "plugin": "cwf",
+    "skill": "retro",
+    "word_count": 2907,
+    "line_count": 408,
+    "size_severity": "ok",
+    "resource_files": 3,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "plugin": "cwf",
+    "skill": "review",
+    "word_count": 2764,
+    "line_count": 480,
+    "size_severity": "ok",
+    "resource_files": 4,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "plugin": "cwf",
+    "skill": "run",
+    "word_count": 2503,
+    "line_count": 465,
+    "size_severity": "ok",
+    "resource_files": 0,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "plugin": "cwf",
+    "skill": "setup",
+    "word_count": 2341,
+    "line_count": 462,
+    "size_severity": "ok",
+    "resource_files": 10,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "plugin": "cwf",
+    "skill": "ship",
+    "word_count": 1714,
+    "line_count": 337,
+    "size_severity": "ok",
+    "resource_files": 2,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "plugin": "cwf",
+    "skill": "update",
+    "word_count": 1148,
+    "line_count": 276,
+    "size_severity": "ok",
+    "resource_files": 1,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  }]
+}

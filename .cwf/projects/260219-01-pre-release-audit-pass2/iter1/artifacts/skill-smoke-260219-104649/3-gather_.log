@@ -1,0 +1,9 @@
+The file `docs/plugin-dev-cheatsheet.md` doesn't exist locally. Since the argument isn't a URL, `--search`, `--local`, or `help`, it doesn't match any gather mode.
+
+**Did you mean one of these?**
+
+1. **`cwf:gather --local plugin-dev-cheatsheet`** — Explore the local codebase for plugin development patterns and generate a cheatsheet
+2. **`cwf:gather --search "plugin development cheatsheet"`** — Web search for plugin dev cheatsheet content
+3. **Read an existing file** — If you have a specific file path in mind, I can read it directly
+
+Which would you like?

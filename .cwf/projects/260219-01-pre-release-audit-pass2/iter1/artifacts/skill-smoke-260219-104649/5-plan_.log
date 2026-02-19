@@ -1,0 +1,12 @@
+Plan drafted at `.cwf/projects/260219-03-hello-script-run/plan.md`.
+
+**Summary**: 2-step minimal smoke plan:
+1. Ensure `hello.sh` and `test_hello.sh` are executable
+2. Run `test_hello.sh` and verify PASS output with exit code 0
+
+Skipped parallel research (adaptive sizing gate — trivially narrow scope).
+
+For a multi-perspective review before implementation, run:
+```
+cwf:review --mode plan
+```

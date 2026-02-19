@@ -1,0 +1,9 @@
+target: holistic-criteria.md
+written_session: S11a
+last_reviewed: S26
+skill_count: 13
+hook_count: 19
+designed_for:
+  - "Cross-plugin analysis across 13 CWF skills with single-mode routing"
+  - "19 hook scripts in 7 functional groups"
+  - "Form (Convention Compliance), Meaning (Concept Integrity), Function (Workflow Coherence) axes"

@@ -1,0 +1,43 @@
+[I1-S22] 2026-02-19T10:17:25+09:00
+--- wrapper opt-in (enable)
+Wrapper already active: /home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-b/.codex/bin/codex
+Scope         : project
+Project root  : /home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-b
+Wrapper source: /home/hwidong/codes/claude-plugins/plugins/cwf/scripts/codex/codex-with-log.sh
+Wrapper link  : /home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-b/.codex/bin/codex
+Active        : true
+command -v codex: /home/hwidong/.local/bin/codex
+which -a codex:
+  - /home/hwidong/.local/bin/codex
+  - /usr/local/bin/codex
+Use PATH override to activate project wrapper: export PATH="/home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-b/.codex/bin:$PATH"
+Aliases that call 'codex' (e.g., codexyolo='codex ...') will also use the wrapper.
+Scope         : project
+Project root  : /home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-b
+Wrapper source: /home/hwidong/codes/claude-plugins/plugins/cwf/scripts/codex/codex-with-log.sh
+Wrapper link  : /home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-b/.codex/bin/codex
+Active        : true
+command -v codex: /home/hwidong/.local/bin/codex
+which -a codex:
+  - /home/hwidong/.local/bin/codex
+  - /usr/local/bin/codex
+--- wrapper decline/rollback branch (disable)
+Removed wrapper symlink: /home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-b/.codex/bin/codex
+Scope         : project
+Project root  : /home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-b
+Wrapper source: /home/hwidong/codes/claude-plugins/plugins/cwf/scripts/codex/codex-with-log.sh
+Wrapper link  : /home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-b/.codex/bin/codex
+Active        : false
+command -v codex: /home/hwidong/.local/bin/codex
+which -a codex:
+  - /home/hwidong/.local/bin/codex
+  - /usr/local/bin/codex
+Scope         : project
+Project root  : /home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-b
+Wrapper source: /home/hwidong/codes/claude-plugins/plugins/cwf/scripts/codex/codex-with-log.sh
+Wrapper link  : /home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-b/.codex/bin/codex
+Active        : false
+command -v codex: /home/hwidong/.local/bin/codex
+which -a codex:
+  - /home/hwidong/.local/bin/codex
+  - /usr/local/bin/codex

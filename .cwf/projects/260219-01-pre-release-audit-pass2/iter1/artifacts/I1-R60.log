@@ -1,0 +1,15 @@
+# I1-R60
+UTC_START=2026-02-19T01:19:30Z
+WORKDIR=/home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-b
+CLAUDE_CMD=timeout -k 5s 90s claude --print --dangerously-skip-permissions --plugin-dir /home/hwidong/codes/claude-plugins/plugins/cwf -- "cwf:run. task: create hello script + test, run full pipeline as far as possible, report hard stop phase."
+--- CLAUDE OUTPUT START ---
+--- CLAUDE OUTPUT END ---
+CLAUDE_EXIT=124
+
+GEMINI_CMD=timeout -k 5s 25s gemini -p "cwf:run tiny hello script end-to-end"
+--- GEMINI OUTPUT START ---
+Loaded cached credentials.
+Hook registry initialized with 0 hook entries
+--- GEMINI OUTPUT END ---
+GEMINI_EXIT=124
+UTC_END=2026-02-19T01:21:25Z

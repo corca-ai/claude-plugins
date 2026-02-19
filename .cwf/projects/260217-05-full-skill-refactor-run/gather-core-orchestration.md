@@ -1,0 +1,24 @@
+Executive Summary
+- The `cwf:run` orchestrator is the single truthful pipeline, but it still retains stage-specific gating loops, artifact checks, and worktree guards that duplicate logic already existing in `cwf:review`, `cwf:refactor`, and `cwf:impl`. That duplication is a prime source of drift, because any change to a gate (e.g., the strict `check-run-gate-artifacts` requirements before `review-code`/`refactor`/`retro`/`ship`) has to be copied in multiple places.
+- `cwf:review` codifies the heaviest set of deterministic and human-facing rules (six reviewers, CLI/Task fallbacks, session log cross-check, provenance table, error-classification, and confidence notes). Without a tight contract between `run` and `review` about when each gate fires and how CLI failures influence gate state, the combination is brittle.
+- `cwf:refactor` and `cwf:impl` bring their own commit+lesson+phase-handoff protocols. Running them from the same pipeline without a shared gate registry makes it easy for deterministic gating (like branch/clarify/commit gates) to fall out of sync, which would block deployment or cause hidden drift before a ship stage gate is checked.
+
+Findings
+- High: Gate duplication in `cwf:run` vs. the sub-skills. `run` replays a `check-run-gate-artifacts.sh --strict` invocation for each downstream stage (`review-code`, `refactor`, `retro`, `ship`), but `cwf:review` already insists on the same gate, and `cwf:impl`/`cwf:refactor` both call related gates/hooks in their phases (`references/impl-gates.md`, `check-run-gate-artifacts`). If one skill changes the gate contract (new required artifact or metadata) and `run` is not updated, pipelines will either fail unexpectedly or bypass a gate, leaving drift unchecked. The same holds for the worktree consistency guard that `run` checks before every stage while `impl`/`refactor` enforce branch gates of their own.
+- Medium: Ambiguous gate ownership between `run` and `review`. `run` treats `review-code` as auto but still requires an `AskUserQuestion` for stage completion, whereas `cwf:review` contains complex fallback, CLI failure classification, and artifact persistence rules that determine verdicts before `run` sees them. There is no explicit contract describing when `run` should re-run a review (after fallback) or how it interprets `review`'s `confidence note`, so edge cases (e.g., CLI-auth `AUTH` or prompt cutoff) could lead to inconsistent gating decisions or user-facing contradictions about whether a stage is complete.
+- Medium: Drift/duplication risk around stage-provided artifacts and lessons. `cwf:refactor`'s quick-scan writes `refactor-summary.md` and immediately runs `check-run-gate-artifacts`, mirroring the `run` stage’s own gate. Both also depend on persistent outputs under the same `session_dir`, but there is no shared helper to enumerate required files/artifacts. As a result, any refactor-mode change that touches artifact naming or gating flags needs edits in two places, increasing the chance that one path records a stale result or runs with outdated parameters.
+
+Proposed Refactors (prioritized)
+1. Extract deterministic gate orchestration into a shared helper script/config so `run`, `review`, `refactor`, and `impl` all call `check-run-gate-artifacts` (and related gate runners) through the same interface. Include metadata about which files/artifacts each gate requires so the helper can fail fast when a dependency gets renamed.
+2. Make `run` treat `cwf:review` as the single source of truth for review completion by letting the review skill persist a gate result (verdict + `confidence note`). `run` would then only re-run/check artifacts when the review gate helper reports failure, avoiding duplicate stage-level AskUserQuestion prompts and preventing contradictory instructions from cascading.
+3. Create a shared `session-artifact-registry` (or reuse the `context recovery protocol`) so `refactor` quick-scan outputs, `run` stage artifacts, and `review` synthesis files are referenced from one list. This would reduce duplication of artifact names and guard clauses when a deterministic gate checks for the existence or validity of expected files.
+
+Affected Files
+- `plugins/cwf/skills/run/SKILL.md`
+- `plugins/cwf/skills/review/SKILL.md`
+- `plugins/cwf/skills/refactor/SKILL.md`
+- `plugins/cwf/skills/impl/SKILL.md`
+
+Open Questions
+- Should `cwf:run` rerun the `review-code` stage automatically when `cwf:review` falls back to Task agents (fallback is recorded only in the Provenance table and Confidence Note) or is a manual restart sufficient?
+- When `cwf:review` hits the external CLI prompt cutoff (>1200 lines) and routes straight to fallbacks, should `run` be notified to adjust gating expectations (e.g., skip `external_cli_allowed` metadata) so deterministic gates remain aligned?

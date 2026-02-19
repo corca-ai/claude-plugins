@@ -1,0 +1,170 @@
+{
+  "options": {
+    "include_local_skills": false,
+    "local_skill_globs": [
+  ".claude/skills/*/SKILL.md",
+  ".codex/skills/*/SKILL.md"
+]
+  },
+  "total_skills": 13,
+  "warnings": 0,
+  "errors": 0,
+  "flagged_skills": 0,
+  "results": [{
+    "origin": "marketplace",
+    "plugin": "cwf",
+    "skill": "clarify",
+    "word_count": 2093,
+    "line_count": 458,
+    "size_severity": "ok",
+    "resource_files": 4,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "origin": "marketplace",
+    "plugin": "cwf",
+    "skill": "gather",
+    "word_count": 1874,
+    "line_count": 349,
+    "size_severity": "ok",
+    "resource_files": 14,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "origin": "marketplace",
+    "plugin": "cwf",
+    "skill": "handoff",
+    "word_count": 2135,
+    "line_count": 362,
+    "size_severity": "ok",
+    "resource_files": 0,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "origin": "marketplace",
+    "plugin": "cwf",
+    "skill": "hitl",
+    "word_count": 1195,
+    "line_count": 186,
+    "size_severity": "ok",
+    "resource_files": 1,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "origin": "marketplace",
+    "plugin": "cwf",
+    "skill": "impl",
+    "word_count": 2576,
+    "line_count": 455,
+    "size_severity": "ok",
+    "resource_files": 2,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "origin": "marketplace",
+    "plugin": "cwf",
+    "skill": "plan",
+    "word_count": 1615,
+    "line_count": 294,
+    "size_severity": "ok",
+    "resource_files": 0,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "origin": "marketplace",
+    "plugin": "cwf",
+    "skill": "refactor",
+    "word_count": 1588,
+    "line_count": 334,
+    "size_severity": "ok",
+    "resource_files": 25,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "origin": "marketplace",
+    "plugin": "cwf",
+    "skill": "retro",
+    "word_count": 2922,
+    "line_count": 414,
+    "size_severity": "ok",
+    "resource_files": 3,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "origin": "marketplace",
+    "plugin": "cwf",
+    "skill": "review",
+    "word_count": 2782,
+    "line_count": 486,
+    "size_severity": "ok",
+    "resource_files": 4,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "origin": "marketplace",
+    "plugin": "cwf",
+    "skill": "run",
+    "word_count": 2552,
+    "line_count": 472,
+    "size_severity": "ok",
+    "resource_files": 0,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "origin": "marketplace",
+    "plugin": "cwf",
+    "skill": "setup",
+    "word_count": 2466,
+    "line_count": 472,
+    "size_severity": "ok",
+    "resource_files": 13,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "origin": "marketplace",
+    "plugin": "cwf",
+    "skill": "ship",
+    "word_count": 1774,
+    "line_count": 342,
+    "size_severity": "ok",
+    "resource_files": 2,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "origin": "marketplace",
+    "plugin": "cwf",
+    "skill": "update",
+    "word_count": 1188,
+    "line_count": 290,
+    "size_severity": "ok",
+    "resource_files": 1,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  }]
+}

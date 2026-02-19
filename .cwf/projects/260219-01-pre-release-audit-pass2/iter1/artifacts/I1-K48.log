@@ -1,0 +1,18 @@
+# I1-K48
+UTC_START=2026-02-19T01:22:10Z
+WORKDIR=/home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-b
+CLAUDE_CMD=timeout -k 5s 60s claude --print --dangerously-skip-permissions --plugin-dir /home/hwidong/codes/claude-plugins/plugins/cwf -- "/ship"
+--- CLAUDE OUTPUT START ---
+Ship output persisted to `.cwf/projects/260219-03-hello-script-run/ship.md`.
+
+To proceed, run `/ship` with a subcommand — e.g., `/ship pr` to create a pull request from the current `feat/hello-script` branch.
+--- CLAUDE OUTPUT END ---
+CLAUDE_EXIT=0
+
+GEMINI_CMD=timeout -k 5s 20s gemini -p "/ship"
+--- GEMINI OUTPUT START ---
+Loaded cached credentials.
+Hook registry initialized with 0 hook entries
+--- GEMINI OUTPUT END ---
+GEMINI_EXIT=124
+UTC_END=2026-02-19T01:23:01Z

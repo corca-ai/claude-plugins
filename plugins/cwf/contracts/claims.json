@@ -1,0 +1,114 @@
+{
+  "version": 1,
+  "claims": [
+    {
+      "id": "readme_ko_sot",
+      "audience": "user",
+      "assertion": "README.ko.md is the user-facing policy source of truth.",
+      "source_refs": [
+        {
+          "file": "README.md",
+          "selector": "Disclaimer (SoT)"
+        },
+        {
+          "file": "README.ko.md",
+          "selector": "Disclaimer: Single Source Of Truth"
+        }
+      ],
+      "tests": [
+        {
+          "id": "readme_structure_parity",
+          "path": "plugins/cwf/scripts/check-readme-structure.sh",
+          "command": "bash plugins/cwf/scripts/check-readme-structure.sh --strict"
+        }
+      ]
+    },
+    {
+      "id": "repo_agnostic_execution",
+      "audience": "agent",
+      "assertion": "CWF execution remains repository-agnostic and host-specific checks are contract-gated.",
+      "source_refs": [
+        {
+          "file": "docs/project-context.md",
+          "selector": "execution must remain repository-agnostic"
+        },
+        {
+          "file": "plugins/cwf/skills/setup/references/setup-contract.md",
+          "selector": "Hook Policy Field"
+        },
+        {
+          "file": "plugins/cwf/skills/setup/SKILL.md",
+          "selector": "check-configure-git-hooks-runtime.sh"
+        },
+        {
+          "file": "plugins/cwf/skills/update/SKILL.md",
+          "selector": "CWF_UPDATE_CACHE_ROOTS"
+        }
+      ],
+      "tests": [
+        {
+          "id": "setup_contract_runtime",
+          "path": "plugins/cwf/skills/setup/scripts/check-setup-contract-runtime.sh",
+          "command": "bash plugins/cwf/skills/setup/scripts/check-setup-contract-runtime.sh"
+        },
+        {
+          "id": "portability_fixtures",
+          "path": "plugins/cwf/scripts/check-portability-fixtures.sh",
+          "command": "bash plugins/cwf/scripts/check-portability-fixtures.sh"
+        },
+        {
+          "id": "configure_git_hooks_runtime",
+          "path": "plugins/cwf/skills/setup/scripts/check-configure-git-hooks-runtime.sh",
+          "command": "bash plugins/cwf/skills/setup/scripts/check-configure-git-hooks-runtime.sh"
+        },
+        {
+          "id": "next_prompt_dir_fixtures",
+          "path": "scripts/tests/next-prompt-dir-fixtures.sh",
+          "command": "bash scripts/tests/next-prompt-dir-fixtures.sh"
+        },
+        {
+          "id": "workflow_gate_matrix",
+          "path": "plugins/cwf/scripts/test-hook-exit-codes.sh",
+          "command": "bash plugins/cwf/scripts/test-hook-exit-codes.sh --suite workflow-gate"
+        },
+        {
+          "id": "compact_context_no_jq",
+          "path": "plugins/cwf/scripts/test-hook-exit-codes.sh",
+          "command": "bash plugins/cwf/scripts/test-hook-exit-codes.sh --suite compact-context-no-jq"
+        }
+      ]
+    },
+    {
+      "id": "portable_authoring_contract_split",
+      "audience": "agent",
+      "assertion": "Portable and authoring gate policies are separated; auto uses portable baseline and authoring remains selectable.",
+      "source_refs": [
+        {
+          "file": "plugins/cwf/contracts/portable-contract.json",
+          "selector": "name=portable"
+        },
+        {
+          "file": "plugins/cwf/contracts/authoring-contract.json",
+          "selector": "name=authoring"
+        }
+      ],
+      "tests": [
+        {
+          "id": "unified_gate_portable",
+          "path": "plugins/cwf/scripts/check-portability-contract.sh",
+          "command": "bash plugins/cwf/scripts/check-portability-contract.sh --contract portable --context manual"
+        },
+        {
+          "id": "unified_gate_auto",
+          "path": "plugins/cwf/scripts/check-portability-contract.sh",
+          "command": "bash plugins/cwf/scripts/check-portability-contract.sh --contract auto --context manual"
+        },
+        {
+          "id": "unified_gate_authoring",
+          "path": "plugins/cwf/scripts/check-portability-contract.sh",
+          "command": "bash plugins/cwf/scripts/check-portability-contract.sh --contract authoring --context manual"
+        }
+      ]
+    }
+  ]
+}

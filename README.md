@@ -1,334 +1,561 @@
-# corca-plugins
+# CWF (Corca Workflow Framework)
+
+> **Disclaimer (SoT)**  
+> `README.ko.md` is the single source of truth for CWF user-facing policy. If docs and implementation diverge, fix the plugin to match docs and report the mismatch via issue/PR.
 
 [한국어](README.ko.md)
 
-A Claude Code plugin marketplace maintained by Corca for the [AI-Native Product Team](AI_NATIVE_PRODUCT_TEAM.md).
+A Claude Code plugin that turns structured development sessions into a repeatable workflow — from gathering context through retrospective analysis. Maintained by [Corca](https://www.corca.ai/) for [AI-Native Product Teams](AI_NATIVE_PRODUCT_TEAM.md).
 
 ## Installation
 
-### 1. Add and update the marketplace
+### Quick start
 
 ```bash
+# Add the marketplace
 claude plugin marketplace add https://github.com/corca-ai/claude-plugins.git
+
+# Install CWF
+claude plugin install cwf@corca-plugins
+
+# Restart Claude Code for hooks to take effect
 ```
 
-When new plugins are added or existing plugins are updated, update the marketplace first:
+After restart, run one-time bootstrap in Claude Code / Codex CLI:
+
+```text
+cwf:setup
+```
+
+`cwf:setup` standardizes first-run behavior by handling:
+
+- project config bootstrap (`.cwf-config.yaml`, `.cwf-config.local.yaml`)
+- tool detection (Codex/Gemini/Tavily/Exa) and optional Codex integration
+- local runtime dependency checks with install prompts (`shellcheck`, `jq`, `gh`, `node`, `python3`, `lychee`, `markdownlint-cli2`)
+- optional index generation (improves agent routing and progressive-disclosure navigation)
+
+For detailed flags, see [setup](#setup).
+
+### Codex users (recommended)
+
+If you also use Codex CLI, running only `cwf:setup` is enough to get guided defaults. Codex integration now follows the active plugin scope by default (`local > project > user`). Use the commands below when you want to re-apply Codex integration only:
+
+```bash
+cwf:setup --codex
+cwf:setup --codex-wrapper
+```
+
+### First workflow scenario
+
+In Claude Code / Codex CLI, start with a plain prompt:
+
+```text
+I need to solve <problem>. Please use CWF and drive the workflow.
+```
+
+The agent can invoke `cwf:run` and chain gather → clarify → plan → review(plan) → impl → review(code) → refactor → retro → ship. If automated review is not enough, switch to `cwf:hitl` to document key decision points and user concerns first, then continue chunk-by-chunk review.
+
+You do not need to memorize every skill. The sections below explain why each skill exists and when to use it.
+
+### Update to latest version
+
 ```bash
 claude plugin marketplace update corca-plugins
+claude plugin update cwf@corca-plugins
 ```
 
-Then install or update the plugin you need:
-```bash
-claude plugin install <plugin-name>@corca-plugins  # install
-claude plugin update <plugin-name>@corca-plugins   # update
-```
+Or from inside Claude Code / Codex CLI:
 
-Restart Claude Code after installing/updating for changes to take effect.
-
-Or install by category using the installer script:
-```bash
-bash scripts/install.sh --all        # all 9 plugins
-bash scripts/install.sh --workflow   # workflow stages 1-6 only
-bash scripts/install.sh --infra     # attention-hook + prompt-logger + markdown-guard
-bash scripts/install.sh --context --clarify  # combine stages
-```
-
-To update the marketplace and **all** installed plugins at once:
-```bash
-bash scripts/update-all.sh
-```
-
-You can do the same from inside Claude Code (instead of your terminal):
 ```text
-/plugin marketplace add corca-ai/claude-plugins
-/plugin marketplace update
+cwf:update               # Check + update if newer version exists
+cwf:update --check       # Version check only
 ```
 
-### 2. Plugin overview
+### Standalone plugins (legacy)
 
-| Plugin | Type | Stage | Description |
-|---------|------|-------|-------------|
-| [gather-context](#gather-context) | Skill + Hook | 1. Context | Unified information acquisition: URL auto-detect, web search, local code exploration |
-| [clarify](#clarify) | Skill | 2. Clarify | Unified requirement clarification: research-first or lightweight Q&A |
-| [plan-and-lessons](#plan-and-lessons) | Hook | 3. Plan | Inject the Plan & Lessons Protocol when entering plan mode |
-| [smart-read](#smart-read) | Hook | 4. Implement | Enforce intelligent file reading based on file size |
-| [retro](#retro) | Skill | 5. Reflect | Adaptive session retrospective — light by default, deep with expert lens |
-| [refactor](#refactor) | Skill | 6. Refactor | Multi-mode code and skill review: quick scan, deep review, tidying, docs check |
-| [attention-hook](#attention-hook) | Hook | Infra | Send a Slack notification when idle/waiting |
-| [prompt-logger](#prompt-logger) | Hook | Infra | Auto-log conversation turns to markdown for retrospective analysis |
-| [markdown-guard](#markdown-guard) | Hook | Infra | Validate markdown after Write/Edit — lint violations trigger self-correction |
+As of v3.0.0, legacy standalone plugins have been removed from the marketplace. If pre-v3.0 standalone plugins are installed, uninstall them and install `cwf` instead.
 
-## Skills
+## Operating Principles
 
-### [gather-context](plugins/gather-context/skills/gather-context/SKILL.md)
+### What CWF Is
 
-**Install**: `claude plugin install gather-context@corca-plugins` | **Update**: `claude plugin update gather-context@corca-plugins`
+- A single workflow plugin (`cwf`) that integrates context gathering, requirement clarification, planning, implementation, review, retrospective, handoff, and shipping.
+- A stateful workflow system where .cwf/cwf-state.yaml, session-log artifacts, and hooks preserve context across phase/session boundaries.
+- A composable skill framework built on shared concepts (Expert Advisor, Tier Classification, Agent Orchestration, Decision Point, Handoff, Provenance Tracking, Adaptive Setup Contract).
+- A cross-skill context-deficit resilience contract: after auto-compact/session restart, skills recover from persisted state/artifacts/handoff files instead of implicit chat memory.
+- A roadmap toward lower user bottlenecks by chaining smaller approval units (for example, dark-factory-style operating patterns).
 
-Unified information acquisition layer with three modes: URL auto-detect, web search, and local codebase exploration. Absorbs all `web-search` functionality — a single plugin for all external information needs. Built-in converters for Google Docs, Slack, Notion, and GitHub content. Uses Tavily and Exa APIs for search.
+### What CWF Is Not
 
-**Usage**:
-- URL gathering: `/gather-context <url>` (auto-detects Google, Slack, Notion, GitHub, or generic web)
-- Web search: `/gather-context --search <query>` (Tavily)
-- Code search: `/gather-context --search code <query>` (Exa)
-- News/deep: `/gather-context --search --news <query>`, `/gather-context --search --deep <query>`
-- Local exploration: `/gather-context --local <topic>`
-- Help: `/gather-context` or `/gather-context help`
+- Not a replacement for project-specific engineering standards, CI gates, or human product ownership decisions.
+- Not a guarantee that every decision can be fully automated; subjective decisions still require user confirmation.
+- While each skill can be invoked independently, CWF is intentionally designed as a tightly coupled system and works best when skills are used together.
 
-**Supported URL services**:
+### Assumptions
 
-| URL pattern | Handler |
-|----------|--------|
-| `docs.google.com/{document,presentation,spreadsheets}/d/*` | Google Export (built-in script) |
-| `*.slack.com/archives/*/p*` | Slack to MD (built-in script) |
-| `*.notion.site/*`, `www.notion.so/*` | Notion to MD (built-in script) |
-| `github.com/*/pull/*`, `github.com/*/issues/*` | GitHub (`gh` CLI) |
-| Other URLs | Tavily extract → WebFetch fallback |
+- Users work in repositories where session artifacts (.cwf/projects/, .cwf/cwf-state.yaml) are allowed and useful.
+- Users accept progressive disclosure: start from AGENTS.md, then load deeper docs as needed.
+- Users prefer deterministic validation scripts for recurring quality checks over relying on behavioral memory.
+- Users expect missing prerequisites to trigger an install/configure prompt with retry, not a passive unavailable-only message.
+- Users expect skills to remain operable when prior conversation context is missing, using persisted state/artifacts/handoff contracts.
+- Users assume tokens are already cheap and likely to get cheaper (CWF targets heavy coding-agent usage patterns, including Claude Code/Codex `$200 Max` plan users).
 
-**Output directory**: default `./gathered/` (override with `CLAUDE_CORCA_GATHER_CONTEXT_OUTPUT_DIR`; per-service env vars also supported)
+## Why CWF?
 
-**Requirements**:
-- `TAVILY_API_KEY` — web search and URL extraction ([get a key](https://app.tavily.com/home))
-- `EXA_API_KEY` — code search ([get a key](https://dashboard.exa.ai/api-keys))
-- Set keys in `~/.zshrc` or `~/.claude/.env`
+### Problem
 
-**Built-in WebSearch redirect** (Hook):
-- Installing this plugin registers a `PreToolUse` hook that blocks Claude's built-in `WebSearch` tool and redirects to `/gather-context --search`.
+AI coding sessions lose context at every boundary. When a session ends, the next one starts from scratch. When requirements shift from clarification to implementation, protocols and constraints are forgotten. When quality criteria are written for a five-skill system, they silently become irrelevant as the system grows.
 
-**Caution**:
-- Search queries are sent to external services. Do not include confidential code or sensitive information.
+As long-running work is parallelized, the final bottleneck shifts to human cognition and review throughput. Agent output can scale faster than human decision/verification capacity, so token minimization alone does not reduce end-to-end lead time.
 
-### [clarify](plugins/clarify/skills/clarify/SKILL.md)
+### Approach
 
-**Install**: `claude plugin install clarify@corca-plugins` | **Update**: `claude plugin update clarify@corca-plugins`
+CWF addresses this with seven building-block concepts that compose across thirteen skills.
 
-Unified requirement clarification that merges the best of clarify v1, deep-clarify, and interview into a single skill. Two modes: research-first (default) and lightweight direct Q&A (`--light`). Originally based on Team Attention's [Clarify skill](https://github.com/team-attention/plugins-for-claude-natives/blob/main/plugins/clarify/SKILL.md).
+Design choices behind this approach:
 
-**Usage**:
-- `/clarify <requirement>` — research-first (default)
-- `/clarify <requirement> --light` — direct Q&A, no sub-agents
+1. **Unified plugin over standalone plugins**
+   - Why: prevent context loss and protocol drift between phases.
+2. **Pre-impl human gates, post-impl autonomous chaining (`run`)**
+   - Why: keep high-judgment decisions human-controlled while preserving execution speed after scope is fixed.
+3. **File-path-only handoff start contracts**
+   - Why: make session continuation deterministic and reduce startup ambiguity.
+4. **Provenance Tracking checks for concept/review references**
+   - Why: detect stale criteria when skill/hook inventory changes.
 
-**Default mode** (research-first):
-1. Capture & decompose requirement into decision points
-2. Parallel research: codebase exploration + web/best-practice research (uses gather-context if installed, falls back to built-in tools)
-3. Tier classification: T1 (codebase-resolved) → auto-decide, T2 (best-practice-resolved) → auto-decide, T3 (subjective) → ask human
-4. Advisory sub-agents argue opposing perspectives for T3 items
-5. Persistent questioning with why-digging and tension detection
-6. Output: decision table + clarified requirement
+CWF prioritizes effectiveness over immediate token efficiency. It spends tokens to reduce human review bottlenecks up front, uses agent assistance during human review (`cwf:hitl`), then improves efficiency over repeated sessions through retro-driven iteration.
 
-**--light mode** (direct Q&A):
-- Iterative questioning via AskUserQuestion
-- Why-digging on surface-level answers
-- Tension detection between answers
-- Before/After comparison output
+### Result
 
-**Key features**:
-- Researches autonomously before asking — only asks about genuinely subjective decisions
-- Integrates with gather-context for research (graceful fallback when not installed)
-- Persistent questioning: why-digs 2-3 levels, detects contradictions
-- Skips advisory and questioning phases entirely when all items are resolvable
-- Adapts to user's language (Korean/English)
+The result: one plugin (`cwf`), thirteen skills, nine hook groups. Context survives session boundaries. Decisions are evidence-backed. Quality criteria evolve with the system.
 
-### [retro](plugins/retro/skills/retro/SKILL.md)
+## Core Concepts
 
-**Install**: `claude plugin install retro@corca-plugins` | **Update**: `claude plugin update retro@corca-plugins`
+Seven reusable behavioral patterns that CWF skills compose. Each concept below describes a job CWF must do to keep long-running AI sessions reliable.
 
-Adaptive session retrospective. If `lessons.md` in the [Plan & Lessons Protocol](plugins/plan-and-lessons/protocol.md) is a progressively accumulated learning log, `retro` is a "full-session, bird's-eye" retrospective. Light by default (fast, low cost); use `--deep` for full expert analysis.
+**Expert Advisor** — JTBD: re-check the same decision points through different expert frames so hidden assumptions and risks surface early. Decision Point structures what to decide; Expert Advisor strengthens how that decision is validated.
 
-**Usage**:
-- End of a session (light): `/retro`
-- Full analysis with expert lens: `/retro --deep`
-- With a specific directory: `/retro prompt-logs/260130-my-session`
+**Tier Classification** — JTBD: route each decision to the right authority at the right time. Evidence-backed decisions (T1/T2) stay autonomous; genuinely subjective decisions (T3) are escalated to the user.
 
-**Modes**:
-- **Light** (default): Sections 1-4 + 7. No sub-agents, no web search. Agent auto-selects based on session weight.
-- **Deep** (`--deep`): Full 7 sections including Expert Lens (parallel sub-agents) and Learning Resources (web search).
+**Agent Orchestration** — JTBD: increase throughput without losing consistency. The orchestrator sizes agent teams by complexity, executes dependency-aware batches, and synthesizes outputs into one coherent result.
 
-**Key features**:
-- Documents user/org/project context that will help future work
-- Observes working style and collaboration patterns and suggests CLAUDE.md updates (applies only with user approval)
-- Waste Reduction analysis: identifies wasted turns, over-engineering, missed shortcuts, context waste, and communication inefficiencies
-- Analyzes critical decisions using Gary Klein's CDM (Critical Decision Method) with session-specific probes
-- Expert Lens (deep only): parallel sub-agents adopt real expert identities to analyze the session through contrasting frameworks
-- Learning Resources (deep only): web-searched resources tailored to the user's knowledge level
-- Scans installed skills for relevance before suggesting external skill discovery
+**Decision Point** — JTBD: turn ambiguity into explicit, reviewable choices. Requirements are decomposed into concrete questions so every decision has recorded evidence and rationale.
 
-**Outputs**:
-- `prompt-logs/{YYMMDD}-{NN}-{title}/retro.md` — saved alongside plan.md and lessons.md
+**Handoff** — JTBD: prevent restart-from-zero at phase/session boundaries. Session handoffs preserve task context and lessons, while phase handoffs preserve protocols and constraints.
 
-### [refactor](plugins/refactor/skills/refactor/SKILL.md)
+**Provenance Tracking** — JTBD: prevent stale standards from silently driving current work. Reference docs carry system-state metadata and are checked before reuse.
 
-**Install**: `claude plugin install refactor@corca-plugins` | **Update**: `claude plugin update refactor@corca-plugins`
+**Adaptive Setup Contract** — JTBD: keep setup portable while still adapting to each repository's real toolchain. First-run setup bootstraps a contract with core deterministic dependencies plus repo-specific tool suggestions for explicit approval.
 
-Multi-mode code and skill review tool. Five modes for different review scopes — from a quick structural scan to full cross-plugin analysis. Absorbs suggest-tidyings' commit-based tidying workflow.
+## The Workflow
 
-**Usage**:
-- `/refactor` — quick scan all marketplace skills
-- `/refactor --code [branch]` — commit-based tidying (parallel sub-agents)
-- `/refactor --skill <name>` — deep review of a single skill
-- `/refactor --skill --holistic` — cross-plugin analysis
-- `/refactor --docs` — documentation consistency review
+CWF's default `cwf:run` chain is:
 
-**Modes**:
-- **Quick scan** (no args): Runs structural checks on all marketplace SKILL.md files — word/line count, unreferenced resources, Anthropic compliance (kebab-case, description length). Outputs a summary table with flags.
-- **Code tidying** (`--code`): Analyzes recent non-tidying commits for safe refactoring opportunities. Parallel sub-agents apply 8 tidying techniques (guard clauses, dead code, explaining variables, etc.) from Kent Beck's "Tidy First?" philosophy.
-- **Deep review** (`--skill <name>`): Evaluates a single skill against Progressive Disclosure criteria + Anthropic compliance. Produces a structured report with prioritized refactoring suggestions.
-- **Holistic** (`--skill --holistic`): Cross-plugin analysis across three dimensions — pattern propagation, boundary issues, missing connections. Saves report to `prompt-logs/`.
-- **Docs review** (`--docs`): Checks consistency between CLAUDE.md, README, project-context.md, marketplace.json, and plugin.json files. Flags dead links, stale references, and structural mismatches.
+```text
+gather → clarify → plan → review(plan) → impl → review(code) → refactor → retro → ship
+```
+
+| # | Skill | Trigger | What It Does |
+|---|-------|---------|-------------|
+| 1 | [gather](#gather) | `cwf:gather` | Acquire information — URLs, web search, local code exploration |
+| 2 | [clarify](#clarify) | `cwf:clarify` | Turn vague requirements into precise specs via research + tier classification |
+| 3 | [plan](#plan) | `cwf:plan` | Draft a research-backed implementation plan with explicit testable success criteria |
+| 4 | [impl](#impl) | `cwf:impl` | Orchestrate parallel implementation from a plan |
+| 5 | [retro](#retro) | `cwf:retro` | Extract durable learnings through CDM analysis and expert lens |
+| 6 | [refactor](#refactor) | `cwf:refactor` | Multi-mode code and skill review — scan, tidy, deep review, holistic |
+| 7 | [handoff](#handoff) | `cwf:handoff` | Generate session or phase handoff documents |
+| 8 | [ship](#ship) | `cwf:ship` | Automate GitHub workflow — issues, PRs, and merge management |
+| 9 | [review](#review) | `cwf:review` | Multi-perspective review with 6 parallel reviewers |
+| 10 | [hitl](#hitl) | `cwf:hitl` | Human-in-the-loop diff/chunk review with resumable state and rule propagation |
+| 11 | [run](#run) | `cwf:run` | Orchestrate full pipeline chaining from gather to ship with stage gates |
+| 12 | [setup](#setup) | `cwf:setup` | Configure hooks/tools, bootstrap setup/env/index contracts, and propose repo-specific setup dependencies |
+| 13 | [update](#update) | `cwf:update` | Check and apply CWF plugin updates |
+
+## Skills Reference
+
+This section is outcome-focused by design.
+
+- It defines each skill by intent (`why`) and expected behavior (`what happens`).
+- It omits detailed flag matrices, edge-case command flows, and rollback internals.
+- For full execution contracts, read each linked `SKILL.md` and its local references.
+- This summary format is standardized in [skill-conventions](plugins/cwf/references/skill-conventions.md#readme-skill-summary-format).
+
+### [gather](plugins/cwf/skills/gather/SKILL.md)
+
+Primary trigger: `cwf:gather`
+
+**Why**
+
+Turn scattered external context into local, reusable evidence before reasoning and implementation start.
+
+**What Happens**
+
+Collects URL/web/local context, normalizes it into artifact files under `.cwf/projects/`, and preserves provenance so downstream stages reason from files rather than memory.
+
+**Expected Outcomes**
+
+1. Scattered documents and links are converted into normalized local artifacts with source traceability.
+2. If external web-search keys are missing, setup guidance is reported while available collection paths continue.
+3. Downstream skills can reference explicit gathered evidence instead of implicit chat memory.
+
+### [clarify](plugins/cwf/skills/clarify/SKILL.md)
+
+Primary trigger: `cwf:clarify`
+
+**Why**
+
+Resolve ambiguity early so implementation does not absorb avoidable rework.
+
+**What Happens**
+
+Decomposes requirements into decision points, classifies them by tier (evidence/standards/subjective), resolves what can be resolved autonomously, and escalates only true preference/policy choices.
+
+**Expected Outcomes**
+
+1. Vague requests are transformed into explicit decision points.
+2. Evidence-backed questions produce autonomous answers with rationale.
+3. Remaining preference or policy choices are returned to the user with concrete trade-offs.
+
+### [plan](plugins/cwf/skills/plan/SKILL.md)
+
+Primary trigger: `cwf:plan`
+
+**Why**
+
+Create an execution contract that implementation and review can enforce consistently.
+
+**What Happens**
+
+Builds a structured `plan.md` with scope, file-level changes, and testable success criteria, then records carry-forward lessons for later phases.
+
+**Expected Outcomes**
+
+1. `plan.md` includes explicit scope, target files, and testable success criteria.
+2. Unresolved assumptions are surfaced as open items instead of being embedded silently.
+3. `cwf:review --mode plan` can validate contract quality before coding starts.
+
+### [impl](plugins/cwf/skills/impl/SKILL.md)
+
+Primary trigger: `cwf:impl`
+
+**Why**
+
+Convert an approved plan into predictable execution without losing constraints.
+
+**What Happens**
+
+Decomposes approved work into dependency-aware execution units, runs safe parallel batches, and validates completion against the plan's success criteria.
+
+**Expected Outcomes**
+
+1. Produced changes map back to approved plan work units.
+2. Order-sensitive tasks remain sequenced while independent tasks are parallelized.
+3. Unresolved risks and follow-up actions are captured with supporting evidence.
+
+### [retro](plugins/cwf/skills/retro/SKILL.md)
+
+Primary trigger: `cwf:retro`
+
+**Why**
+
+Turn a single session into durable operating improvements instead of one-off notes.
+
+**What Happens**
+
+Analyzes session evidence, captures causes and decisions, and routes actionable improvements into reusable documentation/check/process changes.
+
+**Expected Outcomes**
+
+1. `retro.md` records what happened, why it happened, and what should change next.
+2. Repeated friction patterns are categorized by enforcement tier.
+3. Deep mode persists expert-lens outputs and learning resources alongside core retro artifacts.
+
+### [refactor](plugins/cwf/skills/refactor/SKILL.md)
+
+Primary trigger: `cwf:refactor`
+
+**Why**
+
+Control drift across code, skills, docs, hooks, and scripts as capability surface grows.
+
+**What Happens**
+
+Runs quick/deep/docs-oriented inspections and produces concrete findings and fix targets so maintainability can be recovered systematically.
+
+**Expected Outcomes**
+
+1. Structural and quality drift is reported with explicit severity and impacted scope.
+2. Docs mode surfaces consistency, link, and provenance issues deterministically.
+3. Re-runs after fixes show warning/error convergence with traceable evidence.
+
+### [handoff](plugins/cwf/skills/handoff/SKILL.md)
+
+Primary trigger: `cwf:handoff`
+
+**Why**
+
+Preserve continuity across session and phase boundaries without relying on conversational memory.
+
+**What Happens**
+
+Generates session or phase handoff artifacts from persisted state and outputs, capturing scope, constraints, unresolved items, and restart instructions.
+
+**Expected Outcomes**
+
+1. The next session gets an explicit file-based starting contract.
+2. Phase handoff adds HOW-level constraints that complement WHAT-level planning artifacts.
+3. After compact/restart events, execution can resume from artifacts without hidden memory assumptions.
+
+### [ship](plugins/cwf/skills/ship/SKILL.md)
+
+Primary trigger: `cwf:ship`
+
+**Why**
+
+Standardize issue/PR/merge preparation while keeping final human judgment explicit.
+
+**What Happens**
+
+Transforms validated session artifacts into structured issue/PR/merge-ready outputs with clear guardrails for unresolved risk.
+
+**Expected Outcomes**
+
+1. Issue and PR materials include decision context and verification evidence.
+2. Unresolved blocking items hold progression and are surfaced explicitly.
+3. Merge remains actionable only with explicit user approval and a clean state.
+
+### [review](plugins/cwf/skills/review/SKILL.md)
+
+Primary trigger: `cwf:review`
+
+**Why**
+
+Apply one consistent quality gate at high-leverage points before and after implementation.
+
+**What Happens**
+
+Runs parallel multi-perspective review (internal, external, domain experts), synthesizes findings into a verdict, and records deterministic gate outcomes.
+
+**Expected Outcomes**
+
+1. Plan-mode review exposes specification risks before code is written.
+2. Code-mode review synthesizes regression, security, and architecture concerns into explicit findings.
+3. Fallback routing preserves gate semantics when external providers are unavailable.
+
+### [hitl](plugins/cwf/skills/hitl/SKILL.md)
+
+Primary trigger: `cwf:hitl`
+
+**Why**
+
+Inject deliberate human judgment where automated review is insufficient.
+
+**What Happens**
+
+Starts with an agreement round, then runs resumable chunk-based review with persisted rules/state so long review sessions remain controllable.
+
+**Expected Outcomes**
+
+1. Large diffs are reviewed as resumable chunks with persisted cursor/state.
+2. New review rules are propagated to the remaining queue behavior.
+3. Interrupted review sessions can restore progress and rationale from artifacts.
+
+### [run](plugins/cwf/skills/run/SKILL.md)
+
+Primary trigger: `cwf:run`
+
+**Why**
+
+Delegate end-to-end workflow orchestration without manually chaining individual skills.
+
+**What Happens**
+
+Orchestrates the default stage chain with human gates before implementation and autonomous chaining after implementation, while persisting stage state for safe continuation.
+
+**Expected Outcomes**
+
+1. The pipeline progresses stage by stage with explicit gates.
+2. Unresolved pre-implementation ambiguity triggers user decisions before irreversible execution.
+3. Persisted run-state checkpoints support reliable resume after compact/restart events.
+
+### [setup](plugins/cwf/skills/setup/SKILL.md)
+
+Primary trigger: `cwf:setup`
+
+**Why**
+
+Standardize runtime/tool contracts once so later workflow runs stay reproducible.
+
+**What Happens**
+
+Guides initial contract bootstrap for hooks, dependencies, environment, config, and optional integrations, then persists the chosen baseline for deterministic operation.
+
+**Expected Outcomes**
+
+1. Baseline setup artifacts and policy context are created for a fresh repository.
+2. Missing required dependencies trigger interactive install-now prompts and deterministic rechecks.
+3. Selected Codex integration reports reconciled scope-aware links and wrapper state.
+
+### [update](plugins/cwf/skills/update/SKILL.md)
+
+Primary trigger: `cwf:update`
+
+**Why**
+
+Keep installed CWF behavior aligned with the latest contracts, fixes, and guardrails.
+
+**What Happens**
+
+Checks scope-specific installed vs latest state, requires explicit confirmation before mutation, applies updates, and reconciles scope-aware Codex linkage when needed.
+
+**Expected Outcomes**
+
+1. A newer version requires explicit user confirmation before mutation.
+2. Check mode reports status without installation or reconcile mutations.
+3. Reconcile reports before/after integration state when install-path drift exists.
+
+### Codex Integration
+
+If Codex CLI is installed, recommended setup is:
+
+```bash
+cwf:setup --codex
+cwf:setup --codex-wrapper
+```
+
+What this enables:
+- Script map for Codex/session helpers: [plugins/cwf/scripts/README.md](plugins/cwf/scripts/README.md)
+- Scope-aware target resolution (active plugin scope precedence: `local > project > user`)
+- User scope targets: `~/.agents/skills/*`, `~/.agents/references`, `~/.local/bin/codex`
+- Project/local scope targets: `{projectRoot}/.codex/skills/*`, `{projectRoot}/.codex/references`, `{projectRoot}/.codex/bin/codex`
+- Non-user runs do not mutate user-global Codex paths unless explicitly confirmed
+- Every `codex` run auto-syncs session markdown logs into `.cwf/sessions/` as `*.codex.md`
+- Session log sync is append-first with checkpointed incremental updates to reduce exit-time latency; if state is missing/inconsistent, it safely falls back to full rebuild
+- Session artifact directories (`plan.md`, `retro.md`, `next-session.md`) remain under `.cwf/projects/{YYMMDD}-{NN}-{title}/`
+- Sync is anchored to the session updated during the current run (reduces wrong-session exports on shared cwd)
+- Raw JSONL copy is opt-in (`--raw`); redaction still applies when raw export is enabled
+- Post-run quality checks on changed files (markdownlint, local link checks, shellcheck when available, live state check, `apply_patch via exec_command` hygiene detection, and HITL scratchpad sync detection for doc edits) with `warn|strict` mode control
+- `cwf:update` reconciles stale Codex symlink/wrapper targets for the selected scope after plugin update
+- Runtime controls:
+  - `CWF_CODEX_POST_RUN_CHECKS=true|false` (default: `true`)
+  - `CWF_CODEX_POST_RUN_MODE=warn|strict` (default: `warn`)
+  - `CWF_CODEX_POST_RUN_QUIET=true|false` (default: `false`)
+
+Verify:
+
+```bash
+bash plugins/cwf/scripts/codex/install-wrapper.sh --scope user --status
+# or for project/local scope
+bash plugins/cwf/scripts/codex/install-wrapper.sh --scope project --project-root "$PWD" --status
+type -a codex
+```
+
+For one-time cleanup of existing session logs:
+
+```bash
+bash plugins/cwf/scripts/codex/redact-session-logs.sh
+```
+
+After install, open a new shell (or `source ~/.zshrc`). Aliases that call `codex` (for example `codexyolo='codex ...'`) also use the wrapper.
 
 ## Hooks
 
-### [attention-hook](plugins/attention-hook/README.md)
+CWF includes 9 hook groups that run automatically. All are enabled by default; use `cwf:setup --hooks` to toggle individual groups.
 
-**Install**: `claude plugin install attention-hook@corca-plugins` | **Update**: `claude plugin update attention-hook@corca-plugins`
+| Group | Hook Type | What It Does |
+|-------|-----------|-------------|
+| `attention` | Notification, Pre/PostToolUse | Slack notifications on idle and AskUserQuestion |
+| `log` | Stop, SessionEnd | Auto-log conversation turns to markdown |
+| `read` | PreToolUse → Read | File-size aware reading guard (warn >500 lines, block >2000) |
+| `lint_markdown` | PostToolUse → Write\|Edit | Markdown lint + local link validation — lint violations trigger self-correction, broken links reported async |
+| `lint_shell` | PostToolUse → Write\|Edit | ShellCheck validation for shell scripts |
+| `deletion_safety` | PreToolUse → Bash | Block risky deletion commands and require policy-compliant justification |
+| `workflow_gate` | UserPromptSubmit | Block ship/push/merge intents when run-stage gates are unresolved |
+| `websearch_redirect` | PreToolUse → WebSearch | Redirect Claude's WebSearch to `cwf:gather --search` |
+| `compact_recovery` | SessionStart → compact, UserPromptSubmit | Inject live session state after auto-compact and guard session↔worktree binding on prompts |
 
-Slack notifications with threading when Claude Code is waiting for input. All notifications from a single session are grouped into one Slack thread, keeping your channel clean. Useful when running on a remote server. (Background: [blog post](https://www.stdy.blog/1p1w-03-attention-hook/))
+## Configuration
 
-**Key features**:
-- **Thread grouping**: first user prompt creates a parent message; subsequent notifications appear as thread replies
-- **Idle notification**: when Claude waits 60+ seconds for input (`idle_prompt`)
-- **AskUserQuestion notification**: when Claude asks a question and gets no response for 30+ seconds (`CLAUDE_CORCA_ATTENTION_DELAY`)
-- **Plan mode notification**: when Claude enters or exits plan mode and gets no response for 30+ seconds
-- **Heartbeat status**: periodic updates during long autonomous operations (5+ min idle)
-- **Backward compatible**: falls back to webhook (no threading) if only `SLACK_WEBHOOK_URL` is set
+CWF runtime loads configuration in this priority order:
 
-> **Compatibility note**: this script parses Claude Code's internal transcript structure using `jq`. It may break when Claude Code updates. See the script comments for the tested version info.
+1. `.cwf-config.local.yaml` (local/secret, highest priority)
+2. `.cwf-config.yaml` (team-shared defaults)
+3. Process environment
+4. Shell profiles (`~/.zshenv`, `~/.zprofile`, `~/.zshrc`, `~/.bash_profile`, `~/.bashrc`, `~/.profile`)
 
-**Requirements**:
-- `jq` installed (for JSON parsing)
-- Slack App with `chat:write` + `im:write` scopes (recommended) or Incoming Webhook URL
+`cwf:setup` bootstraps project config templates and ensures `.cwf-config.local.yaml` is gitignored.
 
-**Setup** (Slack App — enables threading):
+Use `.cwf-config.yaml` for shared non-secret defaults:
 
-1. Create a Slack App at [api.slack.com/apps](https://api.slack.com/apps), add `chat:write` and `im:write` scopes, install to workspace
-2. Get the channel ID: open a DM with your bot → click the bot name → copy the Channel ID (starts with `D`). For channels, use `/invite @YourBotName` first.
-3. Create `~/.claude/.env`:
-```bash
-# ~/.claude/.env
-SLACK_BOT_TOKEN="xoxb-your-bot-token"
-SLACK_CHANNEL_ID="D0123456789"  # Bot DM channel (or C... for channels)
-CLAUDE_CORCA_ATTENTION_DELAY=30  # AskUserQuestion notification delay in seconds (default: 30)
+```yaml
+# .cwf-config.yaml
+# Optional artifact path overrides
+# CWF_ARTIFACT_ROOT: ".cwf"
+# CWF_PROJECTS_DIR: ".cwf/projects"
+# CWF_STATE_FILE: ".cwf/cwf-state.yaml"
+
+# Optional runtime overrides (non-secret)
+# CWF_GATHER_OUTPUT_DIR: ".cwf/projects"
+# CWF_READ_WARN_LINES: 500
+# CWF_READ_DENY_LINES: 2000
+# CWF_SESSION_LOG_DIR: ".cwf/sessions"
+# CWF_SESSION_LOG_ENABLED: true
+# CWF_SESSION_LOG_TRUNCATE: 10
+# CWF_SESSION_LOG_AUTO_COMMIT: false
 ```
 
-For legacy webhook setup (no threading), set `SLACK_WEBHOOK_URL` instead. See [plugin README](plugins/attention-hook/README.md) for details.
+Use `.cwf-config.local.yaml` for local/secret values:
 
-**Notification contents**:
-- 📝 User request (first/last 5 lines, truncated)
-- 🤖 Claude response (first/last 5 lines, truncated)
-- ❓ Waiting on a question: AskUserQuestion prompt + choices (if any)
-- ✅ Todo: counts of done/in-progress/pending items and their text
-- 💓 Heartbeat: periodic status with todo progress during long tasks
-
-**Examples**:
-
-<img src="assets/attention-hook-normal-response.png" alt="Slack notification example 1 - normal response" width="600">
-
-<img src="assets/attention-hook-AskUserQuestion.png" alt="Slack notification example 2 - AskUserQuestion" width="600">
-
-### [plan-and-lessons](plugins/plan-and-lessons/hooks/hooks.json)
-
-**Install**: `claude plugin install plan-and-lessons@corca-plugins` | **Update**: `claude plugin update plan-and-lessons@corca-plugins`
-
-A hook that automatically injects the Plan & Lessons Protocol when Claude Code enters plan mode (via the `EnterPlanMode` tool call). The protocol defines a workflow that creates plan.md and lessons.md under `prompt-logs/{YYMMDD}-{NN}-{title}/`.
-
-**How it works**:
-- Uses a `PreToolUse` → `EnterPlanMode` matcher to detect plan-mode entry
-- Injects the protocol document path via `additionalContext`
-- Claude reads the protocol and follows it
-
-**Notes**:
-- If you enter plan mode directly via `/plan` or Shift+Tab, the hook won't fire (CLI mode toggle; no tool call happens)
-- For better coverage, also referencing the protocol from `CLAUDE.md` is recommended
-
-### [smart-read](plugins/smart-read/hooks/hooks.json)
-
-**Install**: `claude plugin install smart-read@corca-plugins` | **Update**: `claude plugin update smart-read@corca-plugins`
-
-A hook that intercepts Read tool calls and enforces intelligent file reading based on file size. Prevents context waste by warning on medium files and blocking full reads on large files, guiding Claude to use offset/limit or Grep instead.
-
-**How it works**:
-- Uses a `PreToolUse` → `Read` matcher to intercept file reads
-- Checks file size (line count) before allowing full reads
-- Small files (≤500 lines): allowed silently
-- Medium files (500-2000 lines): allowed with `additionalContext` showing line count
-- Large files (>2000 lines): denied with guidance to use `offset`/`limit` or `Grep`
-- Binary files (PDF, images, notebooks): always allowed (Read handles these natively)
-
-**Bypass**: Claude can bypass the deny by setting `offset` or `limit` explicitly — the hook only blocks when both are absent, so intentional partial reads always go through.
-
-**Configuration** (optional):
-
-Set thresholds in `~/.claude/.env`:
-```bash
-# ~/.claude/.env
-CLAUDE_CORCA_SMART_READ_WARN_LINES=500   # Lines above which additionalContext is added (default: 500)
-CLAUDE_CORCA_SMART_READ_DENY_LINES=2000  # Lines above which read is denied (default: 2000)
+```yaml
+# .cwf-config.local.yaml
+SLACK_BOT_TOKEN: "xoxb-your-bot-token"
+SLACK_CHANNEL_ID: "D0123456789"
+TAVILY_API_KEY: "tvly-your-key"
+EXA_API_KEY: "your-key"
+# SLACK_WEBHOOK_URL: "https://hooks.slack.com/services/..."
 ```
 
-### [prompt-logger](plugins/prompt-logger/README.md)
+If you prefer global fallback defaults, environment variables are still supported:
 
-**Install**: `claude plugin install prompt-logger@corca-plugins` | **Update**: `claude plugin update prompt-logger@corca-plugins`
-
-A hook that auto-logs every conversation turn to markdown files. Uses `Stop` and `SessionEnd` hooks to incrementally capture turns as they happen — no model involvement, pure bash + jq processing.
-
-**How it works**:
-- `Stop` hook fires when Claude finishes responding → logs the completed turn
-- `SessionEnd` hook fires on exit/clear → catches any unlogged final content
-- Both call the same idempotent script with offset-based incremental processing
-
-**Output**: One markdown file per session at `{cwd}/prompt-logs/sessions/{date}-{hash}.md`, containing:
-- Session metadata (model, branch, CWD, Claude Code version)
-- Each turn with timestamps, duration, and token usage
-- Full user prompts (with `[Image]` placeholders for images)
-- Truncated assistant responses (first 5 + last 5 lines if > threshold)
-- Tool call summaries (tool name + key parameter)
-
-**Configuration** (optional):
-
-Set in `~/.claude/.env`:
 ```bash
-# ~/.claude/.env
-CLAUDE_CORCA_PROMPT_LOGGER_DIR="/custom/path"        # Output directory (default: {cwd}/prompt-logs/sessions)
-CLAUDE_CORCA_PROMPT_LOGGER_ENABLED=false              # Disable logging (default: true)
-CLAUDE_CORCA_PROMPT_LOGGER_TRUNCATE=20                # Truncation threshold in lines (default: 10)
+# Required — Slack notifications (attention hook)
+SLACK_BOT_TOKEN="xoxb-your-bot-token"           # Slack App with chat:write + im:write scopes
+SLACK_CHANNEL_ID="D0123456789"                  # Bot DM channel ID (or C... for channels)
+# SLACK_WEBHOOK_URL="https://hooks.slack.com/services/..."  # Optional fallback, no threading
+
+# Required — search APIs (gather)
+TAVILY_API_KEY="tvly-..."                       # Web search and URL extraction (https://app.tavily.com)
+EXA_API_KEY="..."                               # Code search (https://dashboard.exa.ai)
+
+# Optional overrides — attention
+CWF_ATTENTION_DELAY=45                          # default: 30
+CWF_ATTENTION_REPLY_BROADCAST=true              # default: false
+CWF_ATTENTION_TRUNCATE=20                       # default: 10
+CWF_ATTENTION_USER_ID="U0123456789"             # default: unset
+# CWF_ATTENTION_USER_HANDLE="your-handle"       # default: unset
+# CWF_ATTENTION_PARENT_MENTION="<@U0123456789>" # default: unset
+
+# Optional overrides — gather/read/session log
+CWF_GATHER_OUTPUT_DIR=".cwf/projects"               # default: .cwf/projects
+CWF_READ_WARN_LINES=700                            # default: 500
+CWF_READ_DENY_LINES=2500                           # default: 2000
+CWF_SESSION_LOG_DIR=".cwf/sessions"                # default: .cwf/sessions
+CWF_SESSION_LOG_ENABLED=false                      # default: true
+CWF_SESSION_LOG_TRUNCATE=20                        # default: 10
+CWF_SESSION_LOG_AUTO_COMMIT=true                   # default: false
+
+# Optional overrides — artifact layout (advanced)
+# CWF_ARTIFACT_ROOT=".cwf-data"                    # default: .cwf
+# CWF_PROJECTS_DIR=".cwf/projects"                 # default: {CWF_ARTIFACT_ROOT}/projects
+# CWF_STATE_FILE=".cwf/custom-state.yaml"          # default: {CWF_ARTIFACT_ROOT}/cwf-state.yaml
 ```
 
-### [markdown-guard](plugins/markdown-guard/hooks/hooks.json)
+Legacy env migration is intentionally out of the default `cwf:setup` flow in v3. If you are upgrading from pre-v3 keys (`CLAUDE_CORCA_*`, `CLAUDE_ATTENTION_*`), run this prompt in Claude Code / Codex:
 
-**Install**: `claude plugin install markdown-guard@corca-plugins` | **Update**: `claude plugin update markdown-guard@corca-plugins`
-
-A PostToolUse hook that validates markdown files after every Write or Edit operation. When `markdownlint-cli2` detects violations (bare code fences, missing blank lines around headings, etc.), the hook blocks the operation and reports the issues so Claude can self-correct immediately.
-
-**How it works**:
-- Uses a `PostToolUse` → `Write|Edit` matcher (regex) to intercept markdown writes
-- Runs `npx markdownlint-cli2` on the written file (respects `.markdownlint.json` config)
-- If violations found: blocks with a reason containing the lint output
-- If clean: passes silently
-
-**Notes**:
-- Skips non-`.md` files and `prompt-logs/` paths automatically
-- Gracefully skips if `npx` or `markdownlint-cli2` is not available
-- Requires `markdownlint-cli2` (installed automatically via `npx`)
-
-## Removed Plugins
-
-The following plugins were removed from the marketplace. Source code is available in commit `238f82d` for reference.
-
-### Removed in v2.0.0
-
-| Removed plugin | Replacement | Command mapping |
-|------------|------|------|
-| `suggest-tidyings` | [refactor](#refactor) `--code` | `/suggest-tidyings` → `/refactor --code` |
-| `deep-clarify` | [clarify](#clarify) | `/deep-clarify <req>` → `/clarify <req>` |
-| `interview` | [clarify](#clarify) | `/interview <topic>` → `/clarify <req>` |
-| `web-search` | [gather-context](#gather-context) | `/web-search <q>` → `/gather-context --search <q>` |
-
-### Removed in v1.8.0
-
-| Removed plugin | Replacement |
-|------------|------|
-| `g-export` | `gather-context` (built-in Google Docs/Slides/Sheets) |
-| `slack-to-md` | `gather-context` (built-in Slack thread export) |
-| `notion-to-md` | `gather-context` (built-in Notion page export) |
+```text
+I upgraded from a pre-v3 CWF setup and may still have legacy CLAUDE_CORCA_* / CLAUDE_ATTENTION_* env vars.
+Please detect my installed CWF plugin path, run migrate-env-vars.sh --scan, show the migration candidates, and ask for confirmation before running --apply --cleanup-legacy --include-placeholders.
+```
 
 ## License
 

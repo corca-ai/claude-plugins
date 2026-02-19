@@ -1,0 +1,15 @@
+# I1-H30 read-guard deny/allow
+date: 2026-02-19T01:01:24Z
+script: plugins/cwf/hooks/scripts/read-guard.sh
+tmp_dir: /tmp/cwf-h30-HXQO
+
+## Case A: allow (small file)
+command: jq -nc --arg p '/tmp/cwf-h30-HXQO/small.txt' '{tool_name:"Read",tool_input:{file_path:$p}}' | bash plugins/cwf/hooks/scripts/read-guard.sh
+exit_code: 0
+stdout: <empty>
+
+## Case B: deny (large file)
+command: jq -nc --arg p '/tmp/cwf-h30-HXQO/large.txt' '{tool_name:"Read",tool_input:{file_path:$p}}' | bash plugins/cwf/hooks/scripts/read-guard.sh
+exit_code: 0
+stdout:
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"File has 2105 lines (exceeds 2000-line threshold). To read this file, choose one: (1) Read with offset/limit, (2) Grep first, or (3) Task with Explore agent."}}

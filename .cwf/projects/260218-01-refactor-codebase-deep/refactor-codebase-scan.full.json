@@ -1,0 +1,517 @@
+{
+  "contract": {
+    "status": "loaded",
+    "path": "/tmp/tmp.5tKFegnqwA",
+    "version": 1
+  },
+  "source": {
+    "mode": "git_ls_files",
+    "candidate_files": 1023
+  },
+  "scope": {
+    "include_globs": [
+      "**/*"
+    ],
+    "exclude_globs": [
+      ".git/**",
+      ".cwf/**",
+      "node_modules/**",
+      "dist/**",
+      "build/**",
+      "coverage/**",
+      ".venv/**",
+      "venv/**",
+      "**/*.md",
+      "**/*.mdx",
+      "**/*.png",
+      "**/*.jpg",
+      "**/*.jpeg",
+      "**/*.gif",
+      "**/*.svg",
+      "**/*.pdf",
+      "**/*.lock",
+      "**/*.snap",
+      "**/*.min.js",
+      "**/*.min.css"
+    ],
+    "include_extensions": [
+      ".bash",
+      ".cfg",
+      ".cjs",
+      ".conf",
+      ".cs",
+      ".go",
+      ".ini",
+      ".java",
+      ".js",
+      ".json",
+      ".jsx",
+      ".kt",
+      ".lua",
+      ".mjs",
+      ".php",
+      ".py",
+      ".rb",
+      ".rs",
+      ".scala",
+      ".sh",
+      ".sql",
+      ".swift",
+      ".toml",
+      ".ts",
+      ".tsx",
+      ".xml",
+      ".yaml",
+      ".yml",
+      ".zsh"
+    ],
+    "scanned_files": 97,
+    "excluded_scope": 855,
+    "excluded_extension": 3,
+    "excluded_binary": 0
+  },
+  "summary": {
+    "errors": 1,
+    "warnings": 68,
+    "total_lines": 22209,
+    "checks": {
+      "large_file_lines": {
+        "warnings": 16,
+        "errors": 1
+      },
+      "long_line_length": {
+        "warnings": 27
+      },
+      "todo_markers": {
+        "warnings": 15
+      },
+      "shell_strict_mode": {
+        "warnings": 10
+      }
+    }
+  },
+  "findings": {
+    "errors": [
+      {
+        "severity": "error",
+        "check": "large_file_lines",
+        "path": "plugins/cwf/scripts/cwf-live-state.sh",
+        "detail": "1095 lines (error threshold: 800)"
+      }
+    ],
+    "warnings": [
+      {
+        "severity": "warning",
+        "check": "large_file_lines",
+        "path": "plugins/cwf/hooks/scripts/check-deletion-safety.sh",
+        "detail": "409 lines (warning threshold: 400)"
+      },
+      {
+        "severity": "warning",
+        "check": "large_file_lines",
+        "path": "plugins/cwf/hooks/scripts/log-turn.sh",
+        "detail": "751 lines (warning threshold: 400)"
+      },
+      {
+        "severity": "warning",
+        "check": "large_file_lines",
+        "path": "plugins/cwf/scripts/check-growth-drift.sh",
+        "detail": "582 lines (warning threshold: 400)"
+      },
+      {
+        "severity": "warning",
+        "check": "large_file_lines",
+        "path": "plugins/cwf/scripts/check-run-gate-artifacts.sh",
+        "detail": "766 lines (warning threshold: 400)"
+      },
+      {
+        "severity": "warning",
+        "check": "large_file_lines",
+        "path": "plugins/cwf/scripts/check-session.sh",
+        "detail": "613 lines (warning threshold: 400)"
+      },
+      {
+        "severity": "warning",
+        "check": "large_file_lines",
+        "path": "plugins/cwf/scripts/codex/post-run-checks.sh",
+        "detail": "582 lines (warning threshold: 400)"
+      },
+      {
+        "severity": "warning",
+        "check": "large_file_lines",
+        "path": "plugins/cwf/scripts/codex/sync-session-logs.sh",
+        "detail": "781 lines (warning threshold: 400)"
+      },
+      {
+        "severity": "warning",
+        "check": "large_file_lines",
+        "path": "plugins/cwf/scripts/test-hook-exit-codes.sh",
+        "detail": "471 lines (warning threshold: 400)"
+      },
+      {
+        "severity": "warning",
+        "check": "large_file_lines",
+        "path": "plugins/cwf/skills/gather/scripts/notion-to-md.py",
+        "detail": "568 lines (warning threshold: 400)"
+      },
+      {
+        "severity": "warning",
+        "check": "large_file_lines",
+        "path": "plugins/cwf/skills/refactor/scripts/codebase-quick-scan.sh",
+        "detail": "541 lines (warning threshold: 400)"
+      },
+      {
+        "severity": "warning",
+        "check": "large_file_lines",
+        "path": "plugins/cwf/skills/refactor/scripts/doc-graph.mjs",
+        "detail": "548 lines (warning threshold: 400)"
+      },
+      {
+        "severity": "warning",
+        "check": "large_file_lines",
+        "path": "plugins/cwf/skills/refactor/scripts/select-codebase-experts.sh",
+        "detail": "417 lines (warning threshold: 400)"
+      },
+      {
+        "severity": "warning",
+        "check": "large_file_lines",
+        "path": "plugins/cwf/skills/setup/scripts/bootstrap-setup-contract.sh",
+        "detail": "403 lines (warning threshold: 400)"
+      },
+      {
+        "severity": "warning",
+        "check": "large_file_lines",
+        "path": "plugins/cwf/skills/setup/scripts/configure-git-hooks.sh",
+        "detail": "498 lines (warning threshold: 400)"
+      },
+      {
+        "severity": "warning",
+        "check": "large_file_lines",
+        "path": "plugins/cwf/skills/setup/scripts/install-tooling-deps.sh",
+        "detail": "472 lines (warning threshold: 400)"
+      },
+      {
+        "severity": "warning",
+        "check": "large_file_lines",
+        "path": "scripts/package-lock.json",
+        "detail": "747 lines (warning threshold: 400)"
+      },
+      {
+        "severity": "warning",
+        "check": "long_line_length",
+        "path": "plugins/cwf/hooks/markdownlint/rules/skill-frontmatter-schema.cjs",
+        "detail": "1 lines exceed 140 chars; first at line 105 (151 chars)"
+      },
+      {
+        "severity": "warning",
+        "check": "long_line_length",
+        "path": "plugins/cwf/hooks/scripts/attention.sh",
+        "detail": "1 lines exceed 140 chars; first at line 53 (196 chars)"
+      },
+      {
+        "severity": "warning",
+        "check": "long_line_length",
+        "path": "plugins/cwf/hooks/scripts/check-links-local.sh",
+        "detail": "3 lines exceed 140 chars; first at line 157 (155 chars)"
+      },
+      {
+        "severity": "warning",
+        "check": "long_line_length",
+        "path": "plugins/cwf/hooks/scripts/log-turn.sh",
+        "detail": "2 lines exceed 140 chars; first at line 189 (156 chars)"
+      },
+      {
+        "severity": "warning",
+        "check": "long_line_length",
+        "path": "plugins/cwf/hooks/scripts/parse-transcript.sh",
+        "detail": "2 lines exceed 140 chars; first at line 53 (149 chars)"
+      },
+      {
+        "severity": "warning",
+        "check": "long_line_length",
+        "path": "plugins/cwf/hooks/scripts/read-guard.sh",
+        "detail": "2 lines exceed 140 chars; first at line 87 (188 chars)"
+      },
+      {
+        "severity": "warning",
+        "check": "long_line_length",
+        "path": "plugins/cwf/hooks/scripts/redirect-websearch.sh",
+        "detail": "1 lines exceed 140 chars; first at line 14 (283 chars)"
+      },
+      {
+        "severity": "warning",
+        "check": "long_line_length",
+        "path": "plugins/cwf/hooks/scripts/track-user-input.sh",
+        "detail": "1 lines exceed 140 chars; first at line 141 (181 chars)"
+      },
+      {
+        "severity": "warning",
+        "check": "long_line_length",
+        "path": "plugins/cwf/hooks/scripts/workflow-gate.sh",
+        "detail": "4 lines exceed 140 chars; first at line 15 (191 chars)"
+      },
+      {
+        "severity": "warning",
+        "check": "long_line_length",
+        "path": "plugins/cwf/scripts/check-growth-drift.sh",
+        "detail": "1 lines exceed 140 chars; first at line 163 (297 chars)"
+      },
+      {
+        "severity": "warning",
+        "check": "long_line_length",
+        "path": "plugins/cwf/scripts/check-run-gate-artifacts.sh",
+        "detail": "2 lines exceed 140 chars; first at line 153 (143 chars)"
+      },
+      {
+        "severity": "warning",
+        "check": "long_line_length",
+        "path": "plugins/cwf/scripts/check-script-deps.sh",
+        "detail": "1 lines exceed 140 chars; first at line 131 (207 chars)"
+      },
+      {
+        "severity": "warning",
+        "check": "long_line_length",
+        "path": "plugins/cwf/scripts/check-session.sh",
+        "detail": "1 lines exceed 140 chars; first at line 273 (185 chars)"
+      },
+      {
+        "severity": "warning",
+        "check": "long_line_length",
+        "path": "plugins/cwf/scripts/codex/post-run-checks.sh",
+        "detail": "2 lines exceed 140 chars; first at line 516 (182 chars)"
+      },
+      {
+        "severity": "warning",
+        "check": "long_line_length",
+        "path": "plugins/cwf/scripts/codex/sync-session-logs.sh",
+        "detail": "1 lines exceed 140 chars; first at line 521 (141 chars)"
+      },
+      {
+        "severity": "warning",
+        "check": "long_line_length",
+        "path": "plugins/cwf/scripts/provenance-check.sh",
+        "detail": "1 lines exceed 140 chars; first at line 189 (182 chars)"
+      },
+      {
+        "severity": "warning",
+        "check": "long_line_length",
+        "path": "plugins/cwf/scripts/test-hook-exit-codes.sh",
+        "detail": "6 lines exceed 140 chars; first at line 188 (142 chars)"
+      },
+      {
+        "severity": "warning",
+        "check": "long_line_length",
+        "path": "plugins/cwf/skills/gather/scripts/search.sh",
+        "detail": "1 lines exceed 140 chars; first at line 120 (184 chars)"
+      },
+      {
+        "severity": "warning",
+        "check": "long_line_length",
+        "path": "plugins/cwf/skills/gather/scripts/slack-api.mjs",
+        "detail": "2 lines exceed 140 chars; first at line 151 (153 chars)"
+      },
+      {
+        "severity": "warning",
+        "check": "long_line_length",
+        "path": "plugins/cwf/skills/refactor/scripts/bootstrap-codebase-contract.sh",
+        "detail": "1 lines exceed 140 chars; first at line 213 (163 chars)"
+      },
+      {
+        "severity": "warning",
+        "check": "long_line_length",
+        "path": "plugins/cwf/skills/refactor/scripts/select-codebase-experts.sh",
+        "detail": "2 lines exceed 140 chars; first at line 228 (172 chars)"
+      },
+      {
+        "severity": "warning",
+        "check": "long_line_length",
+        "path": "plugins/cwf/skills/setup/scripts/configure-git-hooks.sh",
+        "detail": "3 lines exceed 140 chars; first at line 181 (173 chars)"
+      },
+      {
+        "severity": "warning",
+        "check": "long_line_length",
+        "path": "plugins/cwf/skills/setup/scripts/install-tooling-deps.sh",
+        "detail": "5 lines exceed 140 chars; first at line 142 (157 chars)"
+      },
+      {
+        "severity": "warning",
+        "check": "long_line_length",
+        "path": "scripts/check-schemas.sh",
+        "detail": "1 lines exceed 140 chars; first at line 125 (160 chars)"
+      },
+      {
+        "severity": "warning",
+        "check": "long_line_length",
+        "path": "scripts/markdownlint-rules/skill-frontmatter-schema.cjs",
+        "detail": "1 lines exceed 140 chars; first at line 104 (151 chars)"
+      },
+      {
+        "severity": "warning",
+        "check": "long_line_length",
+        "path": "scripts/package-lock.json",
+        "detail": "1 lines exceed 140 chars; first at line 428 (159 chars)"
+      },
+      {
+        "severity": "warning",
+        "check": "long_line_length",
+        "path": "scripts/tests/next-prompt-dir-fixtures.sh",
+        "detail": "1 lines exceed 140 chars; first at line 81 (162 chars)"
+      },
+      {
+        "severity": "warning",
+        "check": "shell_strict_mode",
+        "path": "plugins/cwf/hooks/scripts/cwf-hook-gate.sh",
+        "detail": "missing strict mode set (-e, -u, pipefail)"
+      },
+      {
+        "severity": "warning",
+        "check": "shell_strict_mode",
+        "path": "plugins/cwf/hooks/scripts/env-loader.sh",
+        "detail": "missing strict mode set (-e, -u, pipefail)"
+      },
+      {
+        "severity": "warning",
+        "check": "shell_strict_mode",
+        "path": "plugins/cwf/hooks/scripts/slack-send.sh",
+        "detail": "missing strict mode set (-e, -u, pipefail)"
+      },
+      {
+        "severity": "warning",
+        "check": "shell_strict_mode",
+        "path": "plugins/cwf/hooks/scripts/text-format.sh",
+        "detail": "missing strict mode set (-e, -u, pipefail)"
+      },
+      {
+        "severity": "warning",
+        "check": "shell_strict_mode",
+        "path": "plugins/cwf/skills/gather/scripts/csv-to-toon.sh",
+        "detail": "missing strict mode set (-e, -u, pipefail)"
+      },
+      {
+        "severity": "warning",
+        "check": "shell_strict_mode",
+        "path": "plugins/cwf/skills/gather/scripts/g-export.sh",
+        "detail": "missing strict mode set (-e, -u, pipefail)"
+      },
+      {
+        "severity": "warning",
+        "check": "shell_strict_mode",
+        "path": "plugins/cwf/skills/gather/scripts/slack-to-md.sh",
+        "detail": "missing strict mode set (-e, -u, pipefail)"
+      },
+      {
+        "severity": "warning",
+        "check": "shell_strict_mode",
+        "path": "plugins/cwf/skills/refactor/scripts/bootstrap-codebase-contract.sh",
+        "detail": "missing strict mode set (-e, -u, pipefail)"
+      },
+      {
+        "severity": "warning",
+        "check": "shell_strict_mode",
+        "path": "plugins/cwf/skills/refactor/scripts/bootstrap-docs-contract.sh",
+        "detail": "missing strict mode set (-e, -u, pipefail)"
+      },
+      {
+        "severity": "warning",
+        "check": "shell_strict_mode",
+        "path": "plugins/cwf/skills/setup/scripts/bootstrap-setup-contract.sh",
+        "detail": "missing strict mode set (-e, -u, pipefail)"
+      },
+      {
+        "severity": "warning",
+        "check": "todo_markers",
+        "path": "plugins/cwf/hooks/scripts/attention.sh",
+        "detail": "6 markers; first at line 69"
+      },
+      {
+        "severity": "warning",
+        "check": "todo_markers",
+        "path": "plugins/cwf/hooks/scripts/check-deletion-safety.sh",
+        "detail": "1 markers; first at line 237"
+      },
+      {
+        "severity": "warning",
+        "check": "todo_markers",
+        "path": "plugins/cwf/hooks/scripts/heartbeat.sh",
+        "detail": "6 markers; first at line 77"
+      },
+      {
+        "severity": "warning",
+        "check": "todo_markers",
+        "path": "plugins/cwf/hooks/scripts/parse-transcript.sh",
+        "detail": "3 markers; first at line 11"
+      },
+      {
+        "severity": "warning",
+        "check": "todo_markers",
+        "path": "plugins/cwf/scripts/test-hook-exit-codes.sh",
+        "detail": "4 markers; first at line 108"
+      },
+      {
+        "severity": "warning",
+        "check": "todo_markers",
+        "path": "plugins/cwf/skills/refactor/scripts/bootstrap-codebase-contract.sh",
+        "detail": "5 markers; first at line 196"
+      },
+      {
+        "severity": "warning",
+        "check": "todo_markers",
+        "path": "plugins/cwf/skills/refactor/scripts/bootstrap-docs-contract.sh",
+        "detail": "1 markers; first at line 286"
+      },
+      {
+        "severity": "warning",
+        "check": "todo_markers",
+        "path": "plugins/cwf/skills/refactor/scripts/check-codebase-contract-runtime.sh",
+        "detail": "1 markers; first at line 31"
+      },
+      {
+        "severity": "warning",
+        "check": "todo_markers",
+        "path": "plugins/cwf/skills/refactor/scripts/check-docs-contract-runtime.sh",
+        "detail": "1 markers; first at line 31"
+      },
+      {
+        "severity": "warning",
+        "check": "todo_markers",
+        "path": "plugins/cwf/skills/refactor/scripts/codebase-quick-scan.sh",
+        "detail": "2 markers; first at line 108"
+      },
+      {
+        "severity": "warning",
+        "check": "todo_markers",
+        "path": "plugins/cwf/skills/setup/scripts/bootstrap-setup-contract.sh",
+        "detail": "1 markers; first at line 376"
+      },
+      {
+        "severity": "warning",
+        "check": "todo_markers",
+        "path": "plugins/cwf/skills/setup/scripts/check-setup-contract-runtime.sh",
+        "detail": "1 markers; first at line 31"
+      },
+      {
+        "severity": "warning",
+        "check": "todo_markers",
+        "path": "plugins/cwf/skills/setup/scripts/configure-agent-teams.sh",
+        "detail": "1 markers; first at line 107"
+      },
+      {
+        "severity": "warning",
+        "check": "todo_markers",
+        "path": "scripts/check-schemas.sh",
+        "detail": "1 markers; first at line 114"
+      },
+      {
+        "severity": "warning",
+        "check": "todo_markers",
+        "path": "scripts/sync-marketplace-descriptions.sh",
+        "detail": "1 markers; first at line 113"
+      }
+    ]
+  },
+  "omitted_findings": {
+    "errors": 0,
+    "warnings": 0
+  }
+}

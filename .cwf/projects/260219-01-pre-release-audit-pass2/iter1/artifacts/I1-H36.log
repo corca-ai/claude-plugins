@@ -1,0 +1,27 @@
+# I1-H36 compact recovery inject/guard
+date: 2026-02-19T01:03:02Z
+script: plugins/cwf/hooks/scripts/compact-context.sh
+tmp_repo_inject: /tmp/cwf-h36-inject-Enek
+tmp_repo_guard: /tmp/cwf-h36-guard-f3HY
+
+## Case A: inject (live populated, worktree matches)
+command: CLAUDE_PROJECT_DIR='/tmp/cwf-h36-inject-Enek' jq -nc --arg sid 'sid-h36-inject' --arg cwd '/tmp/cwf-h36-inject-Enek' '{source:"compact",session_id:$sid,cwd:$cwd}' | CLAUDE_PROJECT_DIR='/tmp/cwf-h36-inject-Enek' bash plugins/cwf/hooks/scripts/compact-context.sh
+exit_code: 0
+stdout:
+{
+  "hookSpecificOutput": {
+    "hookEventName": "SessionStart",
+    "additionalContext": "[Compact Recovery] Session: sid-h36-inject | Phase: clarify\nTask: compact inject test\nBranch: feat/h36\nSession dir: project/iter1/session-a\nExpected worktree: /tmp/cwf-h36-inject-Enek\nExpected worktree branch: feat/h36\nKey files to read for context:\n  - docs/project-context.md\nDo NOT modify:\n  - README.md\nKey decisions:\n  - Keep deterministic gates\n\nRead the CWF state file and the plan file in the session dir to restore full context."
+  }
+}
+
+## Case B: guard alert (expected worktree mismatch)
+command: CLAUDE_PROJECT_DIR='/tmp/cwf-h36-guard-f3HY' jq -nc --arg sid 'sid-h36-guard' --arg cwd '/tmp/cwf-h36-guard-f3HY' '{source:"compact",session_id:$sid,cwd:$cwd}' | CLAUDE_PROJECT_DIR='/tmp/cwf-h36-guard-f3HY' bash plugins/cwf/hooks/scripts/compact-context.sh
+exit_code: 0
+stdout:
+{
+  "hookSpecificOutput": {
+    "hookEventName": "SessionStart",
+    "additionalContext": "[Compact Recovery] Session: sid-h36-guard | Phase: clarify\nTask: compact guard test\nBranch: feat/h36\nSession dir: project/iter1/session-b\nExpected worktree: /tmp/expected-other-worktree\nExpected worktree branch: feat/h36\n\n[WORKTREE ALERT] Current worktree (/tmp/cwf-h36-guard-f3HY) does not match bound session worktree (/tmp/expected-other-worktree).\nSwitch before continuing:\n  cd /tmp/expected-other-worktree\n  git switch feat/h36\nKey files to read for context:\n  - docs/architecture-patterns.md\n\nRead the CWF state file and the plan file in the session dir to restore full context."
+  }
+}

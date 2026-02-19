@@ -1,0 +1,12 @@
+version: 1
+
+stages:
+  review-code: fail
+  refactor: fail
+  retro: fail
+  ship: fail
+
+policies:
+  # External provider preference should be resilient to local environment/auth gaps.
+  # Use warn by default (no hard fail) unless a session needs stricter enforcement.
+  provider_gemini_mode: warn

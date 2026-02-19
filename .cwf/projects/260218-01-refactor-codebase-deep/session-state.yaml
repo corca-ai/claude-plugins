@@ -1,0 +1,34 @@
+# session-state.yaml — volatile session live state
+# Synced from .cwf/cwf-state.yaml live section.
+
+live:
+  session_id: "260218-02"
+  dir: ".cwf/projects/260218-02-run-portability-contract-hardening"
+  branch: "marketplace-v3"
+  phase: "gather"
+  task: "Implement six portability guardrail improvements (contracts, claims, fixtures, generated-artifact sync, change-impact rules, unified gate)"
+  key_files: []
+  decisions: []
+  decision_journal: []
+  hitl:
+    session_id: ""
+    state_file: ""
+    rules_file: ""
+    updated_at: ""
+  remaining_gates:
+    - "review-code"
+    - "refactor"
+    - "retro"
+    - "ship"
+  state_version: "2"
+  worktree_root: "/home/hwidong/codes/claude-plugins"
+  worktree_branch: "marketplace-v3"
+  active_pipeline: "cwf:run"
+  user_directive: "Use cwf:run style end-to-end; ship output to docs instead of GitHub"
+  pipeline_override_reason: ""
+  ambiguity_mode: "defer-blocking"
+  blocking_decisions_pending: "false"
+  ambiguity_decisions_file: ".cwf/projects/260218-02-run-portability-contract-hardening/run-ambiguity-decisions.md"
+  clarify_result_file: ""
+  clarify_completed_at: ""
+  stage_provenance_file: ".cwf/projects/260218-02-run-portability-contract-hardening/run-stage-provenance.md"

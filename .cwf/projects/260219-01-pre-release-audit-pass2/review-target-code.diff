@@ -1,0 +1,2882 @@
+diff --git a/.cwf/cwf-state.yaml b/.cwf/cwf-state.yaml
+index ccf1739..855418f 100644
+--- a/.cwf/cwf-state.yaml
++++ b/.cwf/cwf-state.yaml
+@@ -428,6 +428,13 @@ sessions:
+     branch: "marketplace-v3"
+     artifacts: [plan.md, lessons.md]
+ 
++
++  - id: "S260219-01"
++    title: "pre-release-audit-pass2"
++    dir: ".cwf/projects/260219-01-pre-release-audit-pass2"
++    branch: "marketplace-v3"
++    artifacts: [plan.md, lessons.md]
++
+ tools:
+   codex: available
+   gemini: available
+@@ -452,19 +459,18 @@ hooks:
+ # read by SessionStart(compact) hook for context recovery after auto-compact.
+ # check-session.sh --live validates required fields are populated.
+ live:
+-  session_id: "260218-03"
+-  dir: ".cwf/projects/260218-03-pre-release-refactor-audit"
++  session_id: "260219-01"
++  dir: ".cwf/projects/260219-01-pre-release-audit-pass2"
+   branch: "marketplace-v3"
+-  phase: "done"
+-  task: "Pre-release audit complete"
++  phase: "plan"
++  task: "pre-release pass2 plan finalized"
+   key_files:
+-    - ".cwf/projects/260218-03-pre-release-refactor-audit/clarify-result.md"
+-    - ".cwf/projects/260218-03-pre-release-refactor-audit/plan.md"
+-    - ".cwf/projects/260218-03-pre-release-refactor-audit/lessons.md"
+-    - ".cwf/projects/260218-03-pre-release-refactor-audit/refactor-summary.md"
+-    - ".cwf/projects/260218-03-pre-release-refactor-audit/sot-audit.md"
+-    - ".cwf/projects/260218-03-pre-release-refactor-audit/review-code.md"
+-    - ".cwf/projects/260218-03-pre-release-refactor-audit/retro.md"
++    - ".cwf/projects/260219-01-pre-release-audit-pass2/clarify-result.md"
++    - ".cwf/projects/260219-01-pre-release-audit-pass2/plan.md"
++    - ".cwf/projects/260219-01-pre-release-audit-pass2/lessons.md"
++    - ".cwf/projects/260219-01-pre-release-audit-pass2/plan-codebase-analysis.md"
++    - ".cwf/projects/260219-01-pre-release-audit-pass2/plan-claim-map.md"
++    - ".cwf/projects/260219-01-pre-release-audit-pass2/plan-prior-art-research.md"
+   decisions: []
+   decision_journal: []
+   hitl:
+@@ -472,7 +478,7 @@ live:
+     state_file: ""
+     rules_file: ""
+     updated_at: ""
+-  state_file: ".cwf/projects/260218-03-pre-release-refactor-audit/session-state.yaml"
++  state_file: ".cwf/projects/260219-01-pre-release-audit-pass2/session-state.yaml"
+   remaining_gates: []
+   state_version: "6"
+   worktree_root: "/home/hwidong/codes/claude-plugins"
+diff --git a/.cwf/projects/260219-01-pre-release-audit-pass2/backcompat-audit.md b/.cwf/projects/260219-01-pre-release-audit-pass2/backcompat-audit.md
+new file mode 100644
+index 0000000..5fb1016
+--- /dev/null
++++ b/.cwf/projects/260219-01-pre-release-audit-pass2/backcompat-audit.md
+@@ -0,0 +1,14 @@
++# Backcompat audit (pre-release pass 2)
++
++## Required
++- **Per-user hook disable gate** (`plugins/cwf/hooks/scripts/cwf-hook-gate.sh`, lines 10‑33): we must continue to source `~/.claude/cwf-hooks-enabled.sh` and honor the `HOOK_<GROUP>_ENABLED` flag because v2 installations already expose that toggle (and CI docs describe editing it). Removing it would break the only supported way for users to opt hooks out without running `cwf:setup`, so the gate stays as a deliberate compatibility contract.
++
++## Optional (user decision needed)
++- **Codex skill sync legacy cleanup** (`plugins/cwf/scripts/codex/sync-skills.sh`, lines 220‑257 and related setup references in `plugins/cwf/skills/setup/references/codex-scope-integration.md`): the `--cleanup-legacy` path still moves `~/.codex/skills/*` entries that pre‑v3 standalone plugins left behind. Early adopters might still trigger it, but every unshipped v3 install now starts from a clean `~/.codex/skills` layout, so the flag mostly resurfaces redundant logging. Removing the option/logic shrinks the user-visible command surface, but it also drops an automated migration hook for stray legacy installs, so I need your decision on whether we keep the cleanup hook until we are confident no v2 caches exist.
++
++## Remove-now candidates
++- **Legacy env var migration script** (`plugins/cwf/skills/setup/scripts/migrate-env-vars.sh`, lines 98‑123): this script is the only place still referencing `CLAUDE_CORCA_*`, `CLAUDE_ATTENTION_*`, and other v2 env names, yet no runtime code reads those variables anymore. The mapping is pure baggage now—every skill, hook, and doc already prefers the canonical `CWF_*` names. As soon as we drop the script and the surrounding setup instructions, users will simply be told to rename their env vars manually, which is acceptable for a clean pre-release.
++- **Session log path fallback** (`plugins/cwf/hooks/scripts/log-turn.sh`, lines 72‑80): once `plugins/cwf/scripts/cwf-artifact-paths.sh` exists (it ships with every hook), `resolve_cwf_session_logs_dir` is always defined, so the fallback branch that looks for `ARTIFACT_ROOT/sessions` or the legacy `ARTIFACT_ROOT/projects/sessions` never runs. That branch is a read‑only holdover from the old artifact layout; removing it would leave the script relying solely on the canonical resolver, reducing confusion and failure modes (missing `CWF_*` env today implies misinstallation rather than running dead code).
++- **Plugin layout detection branch** (`plugins/cwf/scripts/codex/sync-skills.sh`, lines 176‑230): the “plugin-local layout vs repository root layout” branch was only necessary when the marketplace shipped `skills/`/`references/` at the repo root. Our tree now puts every skill under `plugins/cwf/skills`, and the root never stores a standalone `skills/` tree, so the `if [[ -d "$REPO_ROOT/skills" ]]` branch never fires. Removing that branch lets us assume the marketplace layout, simplifies path handling, and eliminates the outdated comment about a “legacy/dev scripts path”.
++
++<!-- AGENT_COMPLETE -->
+diff --git a/.cwf/projects/260219-01-pre-release-audit-pass2/clarify-result.md b/.cwf/projects/260219-01-pre-release-audit-pass2/clarify-result.md
+new file mode 100644
+index 0000000..62abeac
+--- /dev/null
++++ b/.cwf/projects/260219-01-pre-release-audit-pass2/clarify-result.md
+@@ -0,0 +1,42 @@
++# Clarify Result — pre-release-audit-pass2
++
++## Original Requirement (verbatim)
++"퍼블릭 배포 전 점검 중입니다. 할때마다 새로운 게 발견되어 몇 번 반복하고 있습니다. 토큰 많이 들어도 되니 서브에이전트 최대한 활용해서 제대로 다음을 해주세요.
++1. refactor --codebase 후 발견된 것 수정
++2. --skill 전체에 대해 deep 후 발견된 것 수정
++3. --docs 후 발견된 것 수정
++4. 리드미가 주장하는 SoT에 대해 cwf 플러그인이(모든 스킬과 훅이) 그 약속을 정말 잘 맞추고 있는지, 그리고 플러그인이 repo-agnostic하게 / 또는 첫 실행시 계약 기반으로 훌륭하게 동작하는지 (즉 이 repo -> cwf 는 강하게 의존하지만, cwf -> 이 repo 의존성은 없어서, 다른 유저의 리포에서 독립적으로 잘 동작하게 되는지), 쓸데없이 하위호환을 유지하려고 하진 않는지(v3는 아직 미배포 상태고 v2 대비 어치피 대격변이라서 하위호환 불필요. v3가 깔끔하게 잘 되는 게 가장 중요) 등등, 그리고 그 외 여러가지 더 지능적으로 잘, 깊이 검토해주세요.
++
++이 과정에서 제 의사결정이 필요한 게 있으면 멈추고, 각 선택지의 트레이드오프를 보여주세요. 함께 논의하고 결정해서 갑시다. 모호한 점이 있으면 clarify 하고, cwf:plan 해서 시작합시다. 구현 후에는 cwf:review 하고, 마지막에 retro. 이해하셨나요? 적절한 단위로 커밋하면서 진행하고, 마지막에는 retro 결과 보여주면서 persist 후보도 제안해주세요."
++
++## Scope Summary
++- Goal: Raise release readiness of CWF v3 by fixing concrete findings from codebase/skill/docs reviews and validating architecture-level promises (SoT compliance, repo-agnostic behavior, contract-first first-run behavior, and no unnecessary v2 compatibility baggage).
++- Non-goal: Preserve v2 behavior if it weakens v3 clarity or robustness.
++- Process constraint: Use sub-agents aggressively for analysis and parallel review.
++- Human gate constraint: Stop and ask the user when a meaningful design/policy choice has trade-offs.
++- Delivery constraint: Commit in meaningful units during execution.
++
++## Decision Points
++1. Should this pass prioritize v3 cleanliness over v2 compatibility where both cannot be kept safely?
++2. What is the minimum evidence bar to claim repo-agnostic behavior and SoT conformance?
++3. What should be the commit granularity across codebase/skill/docs/systemic fixes?
++4. How should we handle findings that are architectural and cannot be safely auto-fixed in one pass?
++
++## Resolutions
++1. v3 cleanliness wins by default (explicitly requested by user). Any breaking cleanup is allowed when it improves v3 reliability.
++2. Evidence must include deterministic checks + code/document references + at least one cross-check against contracts/provenance/hook behavior.
++3. Commit by concern boundary: (a) codebase-scan findings, (b) skill-deep findings, (c) docs findings, (d) systemic SoT/repo-agnostic/back-compat cleanup.
++4. For architectural findings with high-impact trade-offs, pause and present options before implementation.
++
++## Success Criteria (BDD + Qualitative)
++### Behavioral (BDD)
++- Given `cwf:refactor --codebase` findings, when this pass finishes, then all actionable findings selected for this pass are fixed or explicitly documented with rationale.
++- Given deep review over all CWF skills, when this pass finishes, then each skill has either a fix applied or an explicit defer decision.
++- Given `cwf:refactor --docs`, when this pass finishes, then deterministic docs gates pass for modified docs.
++- Given SoT and portability promises in README/docs, when this pass finishes, then implementation and hooks show no repo-specific hard dependency and first-run contract bootstrap works.
++- Given requested lifecycle, when this pass finishes, then review artifacts and retro artifacts exist in the active session directory.
++
++### Qualitative
++- Keep contracts and deterministic gates as source of truth (no prose override).
++- Prefer removal/simplification over compatibility shims for unshipped v3.
++- Keep changes auditable with focused commit boundaries.
+diff --git a/.cwf/projects/260219-01-pre-release-audit-pass2/lessons.md b/.cwf/projects/260219-01-pre-release-audit-pass2/lessons.md
+new file mode 100644
+index 0000000..ea90035
+--- /dev/null
++++ b/.cwf/projects/260219-01-pre-release-audit-pass2/lessons.md
+@@ -0,0 +1,31 @@
++# Lessons — pre-release-audit-pass2
++
++### v3 우선 정책 확정
++
++- **Expected**: 기존 하위호환을 가능한 한 유지하면서 점진 개선
++- **Actual**: 사용자 의도가 명확히 v3 완성도 우선(미배포 v3 기준 하위호환 불필요)
++- **Takeaway**: pre-release major 전환에서는 기술부채를 남기는 호환 레이어보다 명확한 계약/동작을 우선한다
++
++When pre-1.0 대격변 구간이라면 -> compatibility shim 추가보다 제거/단순화를 기본값으로 둔다.
++
++### 의사결정 게이트 방식
++
++- **Expected**: 대부분 자율 처리
++- **Actual**: 아키텍처/정책 트레이드오프가 있으면 사용자와 합의 후 진행이 필요
++- **Takeaway**: 자동 수정과 사용자 의사결정 경계를 계획 단계에서 명시해야 재작업이 줄어든다
++
++When 선택지 간 장단점이 명확히 갈리는 구조적 변경이면 -> 즉시 옵션/트레이드오프를 제시하고 중단한다.
++
++### 서브에이전트 활용 기준
++
++- **Expected**: 일부 탐색만 병렬화
++- **Actual**: 사용자가 토큰 비용보다 검토 품질을 우선하므로 병렬 분석 최대화가 요구됨
++- **Takeaway**: 분석 단계(코드/클레임/외부 prior-art)를 분리해 병렬 수집 후 합성하는 방식이 적합하다
++
++When 점검 범위가 코드+문서+운영계약까지 걸치면 -> 탐색 서브에이전트를 도메인별로 분리해 동시에 실행한다.
++
++## Run Gate Violation — 2026-02-18T22:43:23Z
++- Gate checker: `plugins/cwf/scripts/check-run-gate-artifacts.sh`
++- Persistence gate: `HARD_FAIL`
++- Recorded failures:
++  - [refactor] refactor-summary.md missing heading: ## Refactor Summary
+diff --git a/.cwf/projects/260219-01-pre-release-audit-pass2/plan-claim-map.md b/.cwf/projects/260219-01-pre-release-audit-pass2/plan-claim-map.md
+new file mode 100644
+index 0000000..7c767ea
+--- /dev/null
++++ b/.cwf/projects/260219-01-pre-release-audit-pass2/plan-claim-map.md
+@@ -0,0 +1,39 @@
++# Claim-to-Implementation Mapping (SoT & Portability)
++
++> Evidence only; no interpretation.
++
++## Claim 1 — README.ko is the user-facing policy single source of truth
++- Source documents:
++  - `README.md:3-6` (SoT disclaimer pointing to README.ko as the authoritative policy record).
++  - `README.ko.md:1-6` (Korean disclaimer describing this file as the SSOT and asking for mismatch reports).
++- Implementation evidence:
++  1. `plugins/cwf/contracts/claims.json:5-25` — direct: the `readme_ko_sot` claim stores the assertion and links to README/README.ko for verification, plus ties to `check-readme-structure.sh` as its test.
++  2. `plugins/cwf/scripts/check-readme-structure.sh:1-160` — direct: the strict heading-parity check referenced by the claim keeps the English/Korean READMEs aligned so the SSOT declaration remains valid.
++
++## Claim 2 — Adaptive Setup Contract keeps runtime portable while allowing repo-specific tooling
++- Source documents:
++  - `README.md:149-153` (Adaptive Setup Contract described as keeping setup portable with repo-specific tool proposals).
++  - `README.ko.md:130-142` (Korean equivalent describing the same adaptive, portable setup contract).
++- Implementation evidence:
++  1. `plugins/cwf/skills/setup/references/setup-contract.md:7-130` — direct: details bootstrap goals, the core dependency baseline, repo-tool suggestions, `policy.hook_index_coverage_mode`, and the approval prompt flow.
++  2. `plugins/cwf/skills/setup/scripts/check-setup-contract-runtime.sh:1-90` — direct: end-to-end runtime check covering creation, idempotence, forced update, fallback, and repo_tool detection (e.g., `yq`).
++  3. `plugins/cwf/contracts/portable-contract.json:1-18` — direct: portable gate definition with the `setup_contract_runtime` and `portability_fixtures` checks referenced by the setup contract claim.
++  4. `plugins/cwf/contracts/authoring-contract.json:1-60` — direct: authoring gate definition layering claim/test mapping, change impact, hook sync, script deps, growth drift, provenance, and README structure checks on top of the portable baseline.
++  5. `plugins/cwf/scripts/check-portability-contract.sh:7-174` — direct: unified gate runner defaulting `auto` → portable, resolving contract paths, filtering by context, and executing each check entry.
++  6. `plugins/cwf/scripts/check-portability-fixtures.sh:1-90` — direct: regression fixtures proving host-minimal repos skip index coverage while authoring repos run blocking index coverage, exercising the portable/authoring split.
++  7. `plugins/cwf/skills/setup/scripts/configure-git-hooks.sh:4-200` — direct: installs `.githooks`, renders templates per profile, and surfaces the hook installation surface through which the portability policy executes.
++  8. `plugins/cwf/skills/setup/assets/githooks/pre-push.template.sh:150-320` — direct: the pre-push hook template reads `hook_index_coverage_mode`, conditionally runs index coverage, invokes the unified portability gate, and enforces authoring-only checks under the `strict` profile.
++
++## Top 10 Claim-Risk Areas Requiring Verification
++1. `plugins/cwf/scripts/check-readme-structure.sh:1-160` — confirm the parity safeguard still runs when README/README.ko change so the SSOT assertion does not drift.
++2. `plugins/cwf/contracts/claims.json:5-25` — verify the `readme_ko_sot` claim entry stays accurate and that the associated tests cover the right files after documentation edits.
++3. `plugins/cwf/skills/setup/scripts/check-setup-contract-runtime.sh:1-90` — rerun to ensure the bootstrap still reports `created`/`existing`/`updated`/`fallback` statuses and detects repo-specific tools in generic host repos.
++4. `plugins/cwf/skills/setup/references/setup-contract.md:7-130` — re-review policy fields (core/repo tools, hook coverage mode, install hints) whenever portability needs evolve.
++5. `plugins/cwf/contracts/portable-contract.json:1-18` — confirm the portable profile still only lists the fail/warn gates safe for arbitrary host repositories.
++6. `plugins/cwf/contracts/authoring-contract.json:1-60` — verify the authoring profile continues to layer claim/test mapping, change-impact, hook sync, and README-structure checks over the portable baseline.
++7. `plugins/cwf/scripts/check-portability-contract.sh:7-174` — verify the runner still defaults `auto` to the portable contract and respects `--context` filters so hooks/resources execute the intended gate.
++8. `plugins/cwf/scripts/check-portability-fixtures.sh:1-90` — rerun fixtures after changes to ensure host vs authoring behavior (skip vs enforce index coverage) remains reliable.
++9. `plugins/cwf/skills/setup/scripts/configure-git-hooks.sh:4-200` — verify the hook profiles (`fast`, `balanced`, `strict`) and template rendering still align with portable/authoring expectations and do not hardcode repo-specific paths.
++10. `plugins/cwf/skills/setup/assets/githooks/pre-push.template.sh:150-320` — confirm the pre-push hook still respects `hook_index_coverage_mode`, runs the unified portability gate, and only exercises authoring-only strict checks when appropriate.
++
++<!-- AGENT_COMPLETE -->
+diff --git a/.cwf/projects/260219-01-pre-release-audit-pass2/plan-codebase-analysis.md b/.cwf/projects/260219-01-pre-release-audit-pass2/plan-codebase-analysis.md
+new file mode 100644
+index 0000000..38ae0da
+--- /dev/null
++++ b/.cwf/projects/260219-01-pre-release-audit-pass2/plan-codebase-analysis.md
+@@ -0,0 +1,52 @@
++# Codebase Execution Analysis
++
++## Requested Workflow Execution Paths
++
++### Refactor (`cwf:refactor --codebase` / `--codebase --deep`)
++- Bootstrap the repository-local contract before scanning so that the quick scan (and the deep-review expert configuration) read the pre-populated scope/checks/deep settings; the shell-strict-mode clause also communicates the require-contract-and-pragma rule for specific files (`plugins/cwf/skills/refactor/scripts/bootstrap-codebase-contract.sh:4-381`).
++- Run the contract-driven quick scan via `plugins/cwf/skills/refactor/scripts/codebase-quick-scan.sh` (which enumerates git-index files, resolves the artifact root, and shells out to the Python backend) and write `{session_dir}/refactor-codebase-scan.json`, then summarize and gate with `plugins/cwf/scripts/check-run-gate-artifacts.sh` once `refactor-summary.md` is persisted (`plugins/cwf/skills/refactor/SKILL.md:201-236`, `plugins/cwf/skills/refactor/scripts/codebase-quick-scan.sh:16-131`, `plugins/cwf/scripts/check-run-gate-artifacts.sh:73-203`).
++- For `--codebase --deep`, chain the scan with the expert-selection+deep agent flow in `plugins/cwf/skills/refactor/references/codebase-deep-review-flow.md:1-44`; run `plugins/cwf/skills/refactor/scripts/select-codebase-experts.sh` to produce `{session_dir}/refactor-codebase-experts.json`, spawn four expert agents (Fowler, Beck, two contextual contractors), write their sentinel-marked outputs, then merge everything into the same `refactor-summary.md` before re-running the same gate (`plugins/cwf/skills/refactor/references/codebase-deep-review-flow.md:1-52`, `plugins/cwf/skills/refactor/scripts/select-codebase-experts.sh:4-376`).
++
++### Deep review for each skill (`cwf:refactor --skill <name>`)
++- Locate the target SKILL.md per the deep-review flow, read its `references/`, `scripts/`, and `assets/`, verify `review-criteria.provenance.yaml` via `plugins/cwf/scripts/provenance-check.sh`, and let two Task agents (structural vs. quality/concept) run in parallel with session files `refactor-deep-structural-<skill>.md` and `refactor-deep-quality-<skill>.md` (`plugins/cwf/skills/refactor/SKILL.md:255-265`, `plugins/cwf/skills/refactor/references/deep-review-flow.md:3-97`).
++- Persist the two sentinel-appended outputs, merge them into the unified report shown in the reference template, and respect the same `check-run-gate` invocation that watches `refactor-summary.md` plus deep-run artifacts (`plugins/cwf/skills/refactor/references/deep-review-flow.md:69-97`, `plugins/cwf/scripts/check-run-gate-artifacts.sh:111-203`).
++
++### Docs review (`cwf:refactor --docs`)
++- Bootstrap the docs contract, run the deterministic tool pass (markdownlint + `plugins/cwf/skills/refactor/scripts/check-links.sh` + `plugins/cwf/skills/refactor/scripts/doc-graph.mjs`), verify docs criteria provenance, and iterate on entry-doc/project-context/README consistency before synthesizing the narrative (`plugins/cwf/skills/refactor/SKILL.md:283-294`, `plugins/cwf/skills/refactor/scripts/check-links.sh:4-107`, `plugins/cwf/skills/refactor/scripts/doc-graph.mjs:1-548`).
++- Exercise `plugins/cwf/skills/refactor/scripts/check-docs-contract-runtime.sh` as the regression gate for Bootstrap/Force/Fallback outcomes before relying on the docs contract content (`plugins/cwf/skills/refactor/scripts/check-docs-contract-runtime.sh:4-77`).
++
++### SoT and repository-agnostic checks
++- Treat `README.ko.md` as the user-facing SoT and use `plugins/cwf/scripts/check-readme-structure.sh --strict` to keep the English/Korean heading tree paired before calling the others (`README.md:1-5`, `plugins/cwf/contracts/claims.json:5-104`, `plugins/cwf/scripts/check-readme-structure.sh:4-161`).
++- Respect the repository-agnostic requirement documented in `docs/project-context.md` (skills must detect host structure and degrade gracefully) and enforce the complementary claim `repo_agnostic_execution` that executes the contract-driven portability gates listed in `plugins/cwf/contracts/claims.json:27-71`.
++- Run `plugins/cwf/scripts/check-portability-contract.sh` for the portable/authoring-context constraints and the host/authoring fixture smoke tests in `plugins/cwf/scripts/check-portability-fixtures.sh` so that the portable baseline remains the default and the authoring profile only layered when needed (`plugins/cwf/scripts/check-portability-contract.sh:4-174`, `plugins/cwf/scripts/check-portability-fixtures.sh:4-90`).
++
++### Review (`/review`)
++- Determine the review mode (`code`, `plan`, or `clarify`), resolve the target diff/plan/clarify artifact (upstream detection, staged diff, plan lookup), and build the six-slot prompts; each slot writes `{session_dir}/review-*-{mode}.md` with `<!-- AGENT_COMPLETE -->` while external slots fall back to Task agents on CLI failures (`plugins/cwf/skills/review/SKILL.md:200-345`).
++- After aggregating the six outputs, synthesize the verdict plus provenance and run `plugins/cwf/scripts/check-run-gate-artifacts.sh` with `--stage review-code` when in code mode so the run gate asserts session-log fields, review synthesis template, and the same 6 outputs (`plugins/cwf/skills/review/SKILL.md:374-419`, `plugins/cwf/scripts/check-run-gate-artifacts.sh:73-203`).
++
++### Retro (`/retro` deep path)
++- Update live state (`plugins/cwf/scripts/cwf-live-state.sh set`), determine the session directory, sync Codex logs, and capture evidence via `plugins/cwf/scripts/retro-collect-evidence.sh` before reading `plan.md`, `lessons.md`, AGENTS.md, project context, and cwf-state (`plugins/cwf/skills/retro/SKILL.md:24-90`, `plugins/cwf/scripts/cwf-live-state.sh:1-175`, `plugins/cwf/scripts/retro-collect-evidence.sh:1-267`).
++- In deep mode, launch the CDM Analysis + Learning Resources batch (critical hard gate on `retro-cdm-analysis.md`) followed by the two expert agents, then draft Sections 1‑7 and run the run-gate script so the retro stage must prove the sentinel outputs before completion (`plugins/cwf/skills/retro/SKILL.md:91-204`, `plugins/cwf/scripts/check-run-gate-artifacts.sh:204-230`).
++
++## Key Scripts and Files to Touch or Validate
++- `plugins/cwf/skills/refactor/scripts/bootstrap-codebase-contract.sh:4-381` (contract creation, scope, shell-strict overrides) and `plugins/cwf/skills/refactor/scripts/codebase-quick-scan.sh:16-131` + its Python backend for scanning + candidate cleanup.
++- `plugins/cwf/skills/refactor/scripts/select-codebase-experts.sh:4-376` (deterministic expert roster), `plugins/cwf/scripts/check-run-gate-artifacts.sh:73-235` (refactor/review/retro stage gate), and the deep-review references mentioned above for sentinel outputs.
++- Documentation tooling: `plugins/cwf/skills/refactor/scripts/check-links.sh:4-107`, `plugins/cwf/skills/refactor/scripts/doc-graph.mjs:1-548`, and `plugins/cwf/skills/refactor/scripts/check-docs-contract-runtime.sh:4-77` cover the deterministic docs contract check.
++- Repository-agnostic/SoT scripts: `plugins/cwf/scripts/check-portability-contract.sh:4-174`, `plugins/cwf/scripts/check-portability-fixtures.sh:4-90`, and `plugins/cwf/scripts/check-readme-structure.sh:4-161`.
++- State/evidence helpers: `plugins/cwf/scripts/cwf-live-state.sh:1-175` (resolve/set live state) and `plugins/cwf/scripts/retro-collect-evidence.sh:1-267` (retro evidence snapshot).
++
++## Risk Hotspots & Deterministic Gates
++| Risk Hotspot | Gate / Script | Impact | Evidence |
++|--------------|---------------|--------|----------|
++| Missing `refactor-summary.md`/quick-scan or deep expert outputs (or their sentinel) trips the `refactor` gate that inspects summary headings, quick-scan JSON schema, expert roster, deep/tidy artifacts, and records `PERSISTENCE_GATE=HARD_FAIL` on failure. | `plugins/cwf/scripts/check-run-gate-artifacts.sh:111-203` | High | Gate body enumerates required files, JSON patterns, and sentinel checks for the refactor stage (`plugins/cwf/scripts/check-run-gate-artifacts.sh:111-198`). |
++| The docs toolchain (`markdownlint`, `lychee` via `check-links.sh`, and `doc-graph.mjs`) must succeed before moving on; missing `lychee` or broken refs causes immediate non-zero exit because the scripts fail fast, blocking the docs flow. | `plugins/cwf/skills/refactor/scripts/check-links.sh:4-107`, `plugins/cwf/skills/refactor/scripts/doc-graph.mjs:1-548` | Medium | Each script reports failure on missing dependencies/refs and refuses to exit cleanly until the issues are fixed (`plugins/cwf/skills/refactor/scripts/check-links.sh:60-107`, `plugins/cwf/skills/refactor/scripts/doc-graph.mjs:456-548`). |
++| Shell strict mode is enforced via the contract `shell_strict_mode.require_contract_and_pragma`, so any modified shell helper still needs the contract allowance and `cwf: shell-strict-mode relax` pragma or the scan flags it as a violation during the quick scan. | `plugins/cwf/skills/refactor/scripts/bootstrap-codebase-contract.sh:189-245` | High | The contract lists the strict-mode check and file-specific overrides, making contract/pragma metadata mandatory before the quick scan accepts the file (`plugins/cwf/skills/refactor/scripts/bootstrap-codebase-contract.sh:189-245`). |
++| SoT/repo-agnostic claims are enforced through the unified gate runner plus portability fixtures; if `check-portability-contract.sh` or `check-portability-fixtures.sh` fail, the `repo_agnostic_execution` claim cannot be satisfied. | `plugins/cwf/scripts/check-portability-contract.sh:4-174`, `plugins/cwf/scripts/check-portability-fixtures.sh:4-90` | High | Both scripts exit non-zero on missing contract paths or failing pre-push behaviors, so the portable baseline remains the gatekeeper (`plugins/cwf/scripts/check-portability-contract.sh:4-174`, `plugins/cwf/scripts/check-portability-fixtures.sh:34-90`). |
++| The `/retro --deep` flow treats `retro-cdm-analysis.md` as a hard gate, while expert files are tracked as non-critical soft gates; missing or sentinel-less files block the retro stage because the gate never transitions out of deep mode. | `plugins/cwf/scripts/check-run-gate-artifacts.sh:204-230` | Medium | The retro section of the gate explicitly checks for the `- Mode:` line and the CDM file before allowing completion (`plugins/cwf/scripts/check-run-gate-artifacts.sh:205-230`). |
++
++## Impact Levels
++- **High**: Stage/gate failures (refactor summary, SoT contracts, shell strict contract, review/retro critical outputs) halt the run and drive `PERSISTENCE_GATE=HARD_FAIL`, so missing artifacts or tooling violations must be resolved before progressing.
++- **Medium**: Tool dependencies (link checker, retro expert files) require manual setup or retries but do not block other stages unless repeated failures accumulate; successful reruns clear the gate because `check-run-gate-artifacts.sh` records soft warnings only when non-critical files are missing (`plugins/cwf/scripts/check-run-gate-artifacts.sh:43-230`, `plugins/cwf/skills/refactor/scripts/check-links.sh:60-107`).
++- **Low**: Single-source-of-truth alignment between README.md and README.ko.md is fast to re-run via `check-readme-structure.sh` and only fails when heading counts diverge, so it is not a blocking gate unless a mismatch persists (`plugins/cwf/scripts/check-readme-structure.sh:4-161`).
++
++<!-- AGENT_COMPLETE -->
+diff --git a/.cwf/projects/260219-01-pre-release-audit-pass2/plan-prior-art-research.md b/.cwf/projects/260219-01-pre-release-audit-pass2/plan-prior-art-research.md
+new file mode 100644
+index 0000000..b4f998f
+--- /dev/null
++++ b/.cwf/projects/260219-01-pre-release-audit-pass2/plan-prior-art-research.md
+@@ -0,0 +1,97 @@
++# Prior-Art Research for Planning
++
++Date: 2026-02-18  
++Scope: planning input for pre-release audit pass 2 (not implementation decisions)
++
++## 1) Repository-agnostic plugin/automation tooling
++
++### Prior-art signals
++- GitHub reusable workflows define a reusable contract surface (`on.workflow_call`) with typed inputs/secrets and explicit outputs, while keeping call sites repository-local in `.github/workflows`.
++- Reusable workflow security/portability constraints are explicit: access policy boundaries, no redirects for action/workflow references, and preference for immutable references (SHA pinning).
++- `pre-commit` demonstrates repository-agnostic hook orchestration across many languages, supporting both remote repos and `local`/`meta` sentinels with explicit `rev`.
++
++### Planning implications for this repository
++- Treat reusable automation interfaces as small, explicit contracts (inputs/secrets/outputs), with repository-specific behavior behind that interface.
++- Plan portability boundaries up front: what must be cross-repo reusable vs what remains repo-owned adapters.
++- Plan supply-chain trust posture as part of workflow architecture (immutable references, provenance/audit visibility), not as late hardening work.
++
++## 2) Contract-first first-run bootstrap patterns
++
++### Prior-art signals
++- JSON Schema separates assertions from annotations; notably, `default` is annotation-oriented and not applied automatically during validation.
++- Twelve-Factor guidance emphasizes strict config/code separation and environment-based variability for portability.
++- Reusable workflow contracts require declared inputs/secrets before invocation, reinforcing “contract before execution.”
++
++### Planning implications for this repository
++- Plan first-run bootstrap as two distinct concerns:
++  - Contract validation (schema/assertions).
++  - Default/config materialization (bootstrap step), explicitly outside pure validation.
++- Plan a clear config precedence model (for example: environment, checked-in project config, generated defaults) and capture it as planning constraints.
++- Plan first-run success criteria around deterministic contract checks plus explicit bootstrap outputs/artifacts.
++
++## 3) Deterministic gates vs narrative policy boundaries
++
++### Prior-art signals
++- GitHub rulesets encode hard deterministic controls (for example, required status checks before merge).
++- GitHub rulesets also support an “Evaluate” enforcement mode, enabling non-blocking measurement before mandatory enforcement.
++- GitHub explicitly scopes some narrative governance (metadata restrictions improve consistency but do not replace security controls).
++- OPA formalizes policy-as-code and decouples policy decision from enforcement; CI usage patterns distinguish static config validation (often Conftest) from runtime/contextual checks.
++
++### Planning implications for this repository
++- Plan policy layers explicitly:
++  - Deterministic blocking gates.
++  - Evaluate/shadow gates.
++  - Narrative guidance for non-automatable judgment.
++- Plan to avoid narrative duplication of deterministic checks; prose should describe intent, risk model, and exception handling.
++- Plan promotion criteria from narrative rules to deterministic gates when a rule becomes automatable and high-value.
++
++## 4) Removing unnecessary backward compatibility in pre-release major versions
++
++### Prior-art signals
++- SemVer 2.0.0: `0.y.z` is initial development; anything may change; API not considered stable.
++- Go modules guidance: `v0` has no compatibility guarantee; `v1` is the explicit compatibility commitment.
++- Cargo SemVer guidance: in `0.y.z`, `y` is commonly treated as a breaking boundary (left-most non-zero component convention).
++
++### Planning implications for this repository
++- Plan an explicit “pre-1.0 compatibility envelope” stating what remains unstable vs temporarily preserved.
++- Plan deprecation/removal decisions against published API surface inventory, so compatibility work is deliberate rather than habitual.
++- Plan migration communication artifacts (changelog framing, upgrade notes, cutoff timelines) as part of release planning, not post-hoc cleanup.
++
++## Planning notes and open decisions
++
++- Define “public API” for this repository before compatibility policy is finalized (skills, command flags, manifests, docs contracts, generated artifacts).
++- Decide which policy controls should start in evaluate mode vs immediate blocking mode.
++- Decide compatibility horizon for remaining pre-1.0 releases (what is intentionally breakable now to reduce long-term maintenance load).
++
++## Source Index (concrete URLs)
++
++1. GitHub Docs: Reuse workflows  
++   https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows
++2. GitHub Docs: Reusing workflow configurations  
++   https://docs.github.com/en/actions/reference/workflows-and-actions/reusing-workflow-configurations
++3. GitHub Docs: Secure use reference for GitHub Actions  
++   https://docs.github.com/en/actions/reference/security/secure-use
++4. GitHub Docs: Available rules for rulesets  
++   https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets
++5. GitHub Docs: Creating rulesets for a repository  
++   https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/creating-rulesets-for-a-repository
++6. pre-commit documentation  
++   https://pre-commit.com/
++7. JSON Schema: Annotations reference  
++   https://json-schema.org/understanding-json-schema/reference/annotations
++8. JSON Schema 2020-12 Validation vocabulary  
++   https://json-schema.org/draft/2020-12/draft-bhutton-json-schema-validation-00
++9. The Twelve-Factor App: Config  
++   https://12factor.net/config
++10. Open Policy Agent: Using OPA in CI/CD Pipelines  
++    https://www.openpolicyagent.org/docs/cicd
++11. Semantic Versioning 2.0.0  
++    https://semver.org/
++12. Go Modules Reference  
++    https://go.dev/ref/mod
++13. Go: Module release and versioning workflow  
++    https://go.dev/doc/modules/release-workflow
++14. Rust Cargo Book: SemVer compatibility  
++    https://doc.rust-lang.org/cargo/reference/semver.html
++
++<!-- AGENT_COMPLETE -->
+diff --git a/.cwf/projects/260219-01-pre-release-audit-pass2/plan.md b/.cwf/projects/260219-01-pre-release-audit-pass2/plan.md
+new file mode 100644
+index 0000000..a4a184b
+--- /dev/null
++++ b/.cwf/projects/260219-01-pre-release-audit-pass2/plan.md
+@@ -0,0 +1,111 @@
++# Plan — pre-release-audit-pass2
++
++## Task
++"Pre-release pass: run `cwf:refactor --codebase`, deep-review all skills, run `cwf:refactor --docs`, fix discovered issues, perform deep SoT/repo-agnostic/contract-first audit, then run `cwf:review` and `cwf:retro` with meaningful commit units."
++
++## Scope Summary
++- **Goal**: Raise CWF v3 release readiness by converging implementation, deterministic gates, and documentation promises.
++- **Key Decisions**:
++  - Prefer v3 cleanliness over preserving v2 compatibility shims.
++  - Keep deterministic checks/contracts as pass/fail authority.
++  - Stop for user decision only on true architectural trade-offs.
++- **Known Constraints**:
++  - Use sub-agents aggressively for parallel analysis.
++  - Keep docs/code in English; user-facing conversation in Korean.
++  - Do not delete user-created files without explicit confirmation.
++
++## Inputs and Evidence
++- `.cwf/projects/260219-01-pre-release-audit-pass2/clarify-result.md`
++- `.cwf/projects/260219-01-pre-release-audit-pass2/plan-codebase-analysis.md`
++- `.cwf/projects/260219-01-pre-release-audit-pass2/plan-claim-map.md`
++- `.cwf/projects/260219-01-pre-release-audit-pass2/plan-prior-art-research.md`
++
++## Files to Create/Modify
++- Session artifacts under `.cwf/projects/260219-01-pre-release-audit-pass2/`
++- Code/docs/contracts/hooks/scripts touched by findings from:
++  - `cwf:refactor --codebase`
++  - `cwf:refactor --skill <name>` for all CWF skills
++  - `cwf:refactor --docs`
++  - SoT/portability/contract-first deep audit checks
++
++## Execution Steps
++1. **Codebase scan + fix cycle**
++- Bootstrap codebase contract and run codebase scan scripts.
++- Persist scan output and summary in current session directory.
++- Fix actionable findings, then re-run scan/gates until clean.
++
++2. **Deep review all skills + fix cycle**
++- Build CWF skill inventory from `plugins/cwf/skills/*`.
++- Run deep review in parallel batches across all skills using sub-agents.
++- Aggregate findings; apply fixes with consistent conventions/provenance discipline.
++- Re-run targeted checks after each batch.
++
++3. **Docs review + fix cycle**
++- Bootstrap docs contract and run deterministic docs toolchain (`markdownlint`, links, doc-graph).
++- Apply doc fixes for consistency, portability, and drift.
++- Re-run docs deterministic checks to green.
++
++4. **SoT + repo-agnostic + contract-first deep audit**
++- Cross-check README SoT claims vs actual behavior in skills/hooks/scripts/contracts.
++- Validate host-repo independence and first-run contract bootstrap behavior.
++- Remove or simplify unnecessary backward-compat code paths that weaken v3 clarity.
++- Run portability fixtures and contract gates.
++
++5. **Code review + fix cycle**
++- Run `cwf:review --mode code` on final diff state.
++- Fix material concerns and regenerate review artifacts.
++
++6. **Retro and persistence recommendations**
++- Run deep retro.
++- Produce concrete persist candidates (agent guide/docs/contracts/scripts).
++
++## Commit Strategy
++- **Per concern boundary** (explicit):
++  1. Codebase-scan finding fixes
++  2. Skill-deep finding fixes
++  3. Docs finding fixes
++  4. Systemic SoT/repo-agnostic/back-compat cleanup
++  5. Review follow-up fixes (if any)
++  6. Retro artifact updates (if separated)
++- Enforce checkpoint after first completed unit: inspect `git status --short`, confirm boundary, commit before moving to next major unit.
++
++## Decision Log
++| # | Decision Point | Evidence / Source (artifact or URL + confidence) | Alternatives Considered | Resolution | Status | Resolved By | Resolved At (UTC) |
++|---|----------------|---------------------------------------------------|-------------------------|------------|--------|-------------|-------------------|
++| 1 | v3 cleanliness vs v2 compatibility | `clarify-result.md` + SemVer/Go/Cargo prior-art (high) | Keep compatibility shims longer | Prefer v3 cleanliness; remove nonessential compatibility baggage | resolved | user directive + assistant | 2026-02-18T22:35:35Z |
++| 2 | Proof bar for portability/SoT | `plan-claim-map.md`, `plan-codebase-analysis.md` (high) | Narrative-only verification | Deterministic checks + file:line evidence + contract/provenance cross-check | resolved | assistant | 2026-02-18T22:45:00Z |
++| 3 | Skill deep-review execution model | `refactor` skill deep-flow references (high) | Sequential per skill | Parallel sub-agent batches with persisted artifacts | resolved | assistant | 2026-02-18T22:45:00Z |
++| 4 | Removal scope for backward-compat paths | Runtime findings during implementation (medium) | Keep all legacy paths | TBD only where behavior/safety trade-offs are substantial | open | TBD | TBD |
++
++## Success Criteria
++
++```gherkin
++Given codebase quick/deep scans are run
++When implementation is complete
++Then all actionable findings in scope are either fixed or explicitly deferred with rationale in session artifacts
++
++Given deep reviews are executed for every skill under plugins/cwf/skills
++When implementation is complete
++Then each skill has resolved findings or documented defer decisions with evidence
++
++Given docs review deterministic tools are run
++When implementation is complete
++Then markdownlint, link checks, and doc graph checks pass for the modified scope
++
++Given README/README.ko SoT and portability claims
++When implementation is complete
++Then claims map to concrete behavior in skills/hooks/scripts/contracts without repo-specific hard dependency
++
++Given the requested workflow includes review and retro
++When implementation is complete
++Then review and retro artifacts exist and pass required run-gate checks
++```
++
++## Qualitative Criteria
++- Deterministic gates remain authoritative; prose does not override checks.
++- Prefer simplification/removal over compatibility indirection for unshipped v3.
++- Keep changes auditable and isolated by commit boundary.
++- Preserve repo-agnostic operation with contract-based adaptation.
++
++## Deferred Actions
++- [ ] Decide any high-impact backward-compat removal that materially changes public behavior (ask user with options/trade-offs when encountered).
+diff --git a/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-codebase-scan.json b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-codebase-scan.json
+new file mode 100644
+index 0000000..3c20b47
+--- /dev/null
++++ b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-codebase-scan.json
+@@ -0,0 +1,141 @@
++{
++  "contract": {
++    "status": "loaded",
++    "path": "/home/hwidong/codes/claude-plugins/.cwf/codebase-contract.json",
++    "version": 1
++  },
++  "source": {
++    "mode": "git_ls_files",
++    "candidate_files": 1121
++  },
++  "scope": {
++    "include_globs": [
++      "**/*"
++    ],
++    "exclude_globs": [
++      ".git/**",
++      ".cwf/**",
++      "node_modules/**",
++      "dist/**",
++      "build/**",
++      "coverage/**",
++      ".venv/**",
++      "venv/**",
++      "**/*.md",
++      "**/*.mdx",
++      "**/*.png",
++      "**/*.jpg",
++      "**/*.jpeg",
++      "**/*.gif",
++      "**/*.svg",
++      "**/*.pdf",
++      "**/*.lock",
++      "**/package-lock.json",
++      "**/pnpm-lock.yaml",
++      "**/yarn.lock",
++      "**/bun.lock",
++      "**/bun.lockb",
++      "**/*.snap",
++      "**/*.min.js",
++      "**/*.min.css"
++    ],
++    "include_extensions": [
++      ".bash",
++      ".cfg",
++      ".cjs",
++      ".conf",
++      ".cs",
++      ".go",
++      ".ini",
++      ".java",
++      ".js",
++      ".json",
++      ".jsx",
++      ".kt",
++      ".lua",
++      ".mjs",
++      ".php",
++      ".py",
++      ".rb",
++      ".rs",
++      ".scala",
++      ".sh",
++      ".sql",
++      ".swift",
++      ".toml",
++      ".ts",
++      ".tsx",
++      ".xml",
++      ".yaml",
++      ".yml",
++      ".zsh"
++    ],
++    "scanned_files": 123,
++    "excluded_scope": 903,
++    "excluded_extension": 3,
++    "excluded_binary": 0
++  },
++  "summary": {
++    "errors": 0,
++    "warnings": 0,
++    "total_lines": 24802,
++    "checks": {
++      "large_file_lines": {
++        "warnings": 0,
++        "errors": 0
++      },
++      "long_line_length": {
++        "warnings": 0
++      },
++      "todo_markers": {
++        "warnings": 0
++      },
++      "shell_strict_mode": {
++        "warnings": 0
++      }
++    }
++  },
++  "relaxations": {
++    "shell_strict_mode": {
++      "applied": 4,
++      "items": [
++        {
++          "path": "plugins/cwf/hooks/scripts/cwf-hook-gate.sh",
++          "action": "relax",
++          "detail": "relaxed by contract+pragma",
++          "ticket": "CWF-STRICT-RELAX-001",
++          "expires": "2026-12-31"
++        },
++        {
++          "path": "plugins/cwf/hooks/scripts/env-loader.sh",
++          "action": "relax",
++          "detail": "relaxed by contract+pragma",
++          "ticket": "CWF-STRICT-RELAX-002",
++          "expires": "2026-12-31"
++        },
++        {
++          "path": "plugins/cwf/hooks/scripts/slack-send.sh",
++          "action": "relax",
++          "detail": "relaxed by contract+pragma",
++          "ticket": "CWF-STRICT-RELAX-003",
++          "expires": "2026-12-31"
++        },
++        {
++          "path": "plugins/cwf/hooks/scripts/text-format.sh",
++          "action": "relax",
++          "detail": "relaxed by contract+pragma",
++          "ticket": "CWF-STRICT-RELAX-004",
++          "expires": "2026-12-31"
++        }
++      ]
++    }
++  },
++  "findings": {
++    "errors": [],
++    "warnings": []
++  },
++  "omitted_findings": {
++    "errors": 0,
++    "warnings": 0
++  }
++}
+diff --git a/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-deep-batch-a.md b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-deep-batch-a.md
+new file mode 100644
+index 0000000..513ec41
+--- /dev/null
++++ b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-deep-batch-a.md
+@@ -0,0 +1,37 @@
++## clarify
++
++### Findings
++| Severity | Criterion | Finding | Evidence | Suggestion |
++|---|---|---|---|---|
++| info | 1 | no material finding (456 lines / ~2 080 words, below the warning/error thresholds) | `plugins/cwf/skills/clarify/SKILL.md:1-456` | n/a |
++| info | 2 | no material finding (front matter limited to `name`/`description`; body focuses on the Quick Start plus phased workflow rather than “When to use” prose) | `plugins/cwf/skills/clarify/SKILL.md:1-35,6-83` | n/a |
++| info | 3 | no material finding (research/aggregation/questioning procedures reference dedicated docs without copying their content into the SKILL.md body) | `plugins/cwf/skills/clarify/SKILL.md:86-345` | n/a |
++| info | 4 | no material finding (each reference listed in `references/` is invoked by the workflow and there are no unused scripts/assets) | `plugins/cwf/skills/clarify/SKILL.md:86-345` | n/a |
++| info | 5 | no material finding (imperative instructions such as “Use the live-state helper,” “Decompose into decision points,” and “Launch sub-agents” dominate the entire workflow) | `plugins/cwf/skills/clarify/SKILL.md:40-345` | n/a |
++| info | 6 | no material finding (low freedom flows; every phase has exact Task contracts, classification rules, and evidence-gathering steps) | `plugins/cwf/skills/clarify/SKILL.md:86-324` | n/a |
++| info | 7 | no material finding (front matter contains only `name`/`description` plus trigger phrases) | `plugins/cwf/skills/clarify/SKILL.md:1-35` | n/a |
++| info | 8 | no material finding (concept map marks `clarify` for Expert Advisor, Tier Classification, Agent Orchestration, and Decision Point, and the SKILL implements all those phases with explicit sub-agent contracts, classification tables, and decision-point aggregation) | `plugins/cwf/references/concept-map.md:158-197` + `plugins/cwf/skills/clarify/SKILL.md:66-345` | n/a |
++| info | 9 | no material finding (session directory and live-state helper are resolved via `{CWF_PLUGIN_DIR}`/`cwf-live-state.sh`, avoiding hard-coded repo paths) | `plugins/cwf/skills/clarify/SKILL.md:40-64` | n/a |
++
++### Prioritized actions
++1. None — all criteria are satisfied.
++
++## gather
++
++### Findings
++| Severity | Criterion | Finding | Evidence | Suggestion |
++|---|---|---|---|---|
++| info | 1 | no material finding (347 lines / ~1 860 words, below the warning thresholds) | `plugins/cwf/skills/gather/SKILL.md:1-347` | n/a |
++| info | 2 | no material finding (metadata limited to name/description with triggers; the body concentrates on the workflow and handler dispatch table) | `plugins/cwf/skills/gather/SKILL.md:1-49,53-347` | n/a |
++| info | 3 | no material finding (details such as Google/Slack/Notion exports and query intelligence live in reference docs rather than being duplicated) | `plugins/cwf/skills/gather/SKILL.md:53-347` | n/a |
++| warning | 4 | `scripts/__pycache__/notion-to-md.cpython-310.pyc` is a compiled artifact that is neither referenced in SKILL.md nor needed in source control, so it bloats the resource directory. | `plugins/cwf/skills/gather/scripts/__pycache__/notion-to-md.cpython-310.pyc` | delete the `.pyc`/`__pycache__` entry (or add it to `.gitignore`) so only tracked source scripts remain. |
++| info | 5 | no material finding (imperative language drives each handler: “Parse args,” “Run Task once,” “Validate output,” etc.) | `plugins/cwf/skills/gather/SKILL.md:28-339` | n/a |
++| info | 6 | no material finding (highly prescriptive operations, such as the Generic URL routine and Task contracts, keep fragile external integrations under low freedom control) | `plugins/cwf/skills/gather/SKILL.md:53-339` | n/a |
++| info | 7 | no material finding (front matter contains only the required fields and the description lists trigger phrases) | `plugins/cwf/skills/gather/SKILL.md:1-4` | n/a |
++| info | 8 | no material finding (concept map marks `gather` only for Agent Orchestration, and the SKILL orchestrates multiple handlers, metadata passes, and Task-based local exploration) | `plugins/cwf/references/concept-map.md:158-197` + `plugins/cwf/skills/gather/SKILL.md:28-270` | n/a |
++| info | 9 | no material finding (output directory resolution and env var fallbacks ensure the skill adapts to arbitrary repo layouts without hard-coded paths) | `plugins/cwf/skills/gather/SKILL.md:28-49,274-287` | n/a |
++
++### Prioritized actions
++1. Remove `plugins/cwf/skills/gather/scripts/__pycache__/notion-to-md.cpython-310.pyc` (or keep it out of version control) to avoid drifting compiled artifacts into the scripts directory; effort: small.
++
++<!-- AGENT_COMPLETE -->
+diff --git a/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-deep-batch-b.md b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-deep-batch-b.md
+new file mode 100644
+index 0000000..7771e31
+--- /dev/null
++++ b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-deep-batch-b.md
+@@ -0,0 +1,32 @@
++# Deep Review Batch B
++
++Skills under review: `handoff` (session/phase handoff orchestration) and `hitl` (human-in-the-loop chunk review). All nine criteria from `plugins/cwf/skills/refactor/references/review-criteria.md` were applied to each skill as required for the planned deep skill audit.
++
++## handoff
++
++### Highlights
++- Phase 3 instructs the agent to build each of the nine canonical sections from `plan-protocol.md` (context files, scope, don't touch, lessons, success criteria, dependencies, dogfooding, execution contract, and start command) and to defer implied `Execution Contract` clauses to the canonical reference, ensuring the session handoff remains lean yet complete (`plugins/cwf/skills/handoff/SKILL.md:87-131`).
++- Phase 4 (registering the session) plus Phase 4b (propagating deferred actions, lesson proposals, and retro action items) cover the required `Handoff` state (session artifacts and unresolved items) and actions (scan artifacts, propagate context, generate doc, register in `cwf-state.yaml`) without duplication (`plugins/cwf/skills/handoff/SKILL.md:221-331`).
++
++### Findings
++- None. All nine review criteria are satisfied and the documented workflow cleanly implements the Handoff concept without redundant prose or missing references.
++
++### Portability
++- No portability risks were observed; the skill uses relative paths within the CWF workspace and provides fallbacks when master-plan artifacts are absent, so it degrades gracefully across repositories.
++
++## hitl
++
++### Highlights
++- Decision points are surfaced by the agreement round (Phase 0.5) and the chunk-review loop (Phase 2) that force the reviewer to spell out the chunk, excerpt, intent, focused questions, and follow-up prompts before pausing; this satisfies Criterion 8 for both the Decision Point and the Handoff concepts (`plugins/cwf/skills/hitl/SKILL.md:51-123`).
++- The State Model plus the Resume/Close steps persist the scratchpad, queue, rules, and events under `.cwf/projects/{session-dir}/hitl/` and keep only pointers in `cwf-state.yaml`, satisfying the Handoff requirements for resumable state and the ability to restart without losing intent (`plugins/cwf/skills/hitl/SKILL.md:8-49`, `137-158`).
++
++### Findings
++1. **[Criterion 3] Duplication risk in intent-resync instructions.** Phase 0.75 lays out the full intent-resync gate and the manual-edit guard, yet Rules 13-15 repeat the same gate semantics verbatim (set `intent_resync_required`, pause chunk review, log the change). Having the same operational contract in two places makes it easy to forget to update one copy, which undermines the deterministic-gate posture the skill depends on (`plugins/cwf/skills/hitl/SKILL.md:80-85` vs `plugins/cwf/skills/hitl/SKILL.md:175-177`).
++2. **[Criterion 9] Portability assumption on cwf-state live pointer.** The first `--resume` step assumes `cwf-state.yaml` provides `live.hitl.state_file`; if that pointer is absent (e.g., running `cwf:hitl` before any session state exists), the skill has no bootstrap path for `state.yaml`/`rules.yaml` and fails to locate its working directory (`plugins/cwf/skills/hitl/SKILL.md:47-49`).
++
++### Portability Risk Analysis
++- **Assumption:** `live.hitl.state_file` is already set in `cwf-state.yaml` before `cwf:hitl` loads `state.yaml` (`plugins/cwf/skills/hitl/SKILL.md:47-49`).
++- **Impact:** In a repo with no live state (fresh clone or the first HITL run) the skill cannot resolve the session directory, so it cannot persist state or resume; the user must manually create the `.cwf/projects/.../hitl` structure, defeating the expectation of automatic continuity.
++- **Hardening:** Detect the missing pointer at Phase 0; when absent, prompt the user for the desired session directory (or auto-create one) and record the resolved path in `cwf-state.yaml` so future runs have a bootstrap reference. This keeps portability intact and avoids silent failures on first-run repositories.
++
++<!-- AGENT_COMPLETE -->
+diff --git a/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-deep-batch-c.md b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-deep-batch-c.md
+new file mode 100644
+index 0000000..85b7ee5
+--- /dev/null
++++ b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-deep-batch-c.md
+@@ -0,0 +1,13 @@
++# Refactor Deep Batch C Review
++
++## Per-skill summary
++- **plan**: Phase 2 orchestrates live-state resolution, dual sub-agent research, context recovery, and persistence gating before drafting, while Phase 3/4 layers in cross-cutting checks, the mandated commit-strategy/decision-log metadata, and the final plan+lessons artifacts per the plan protocol, so the entire contract is guarded before coding (`plugins/cwf/skills/plan/SKILL.md:32`, `plugins/cwf/skills/plan/SKILL.md:61`, `plugins/cwf/skills/plan/SKILL.md:202`, `plugins/cwf/skills/plan/SKILL.md:245`).
++- **impl**: Phases 0-1 update live state, enforce the branch gate, and load/confirm the plan, Phases 2-3 decompose work items, build agent prompts, and enforce commit/lesson rules during direct or agent-team execution, and Phases 4+ verify BDD/qualitative criteria, run session-completeness checks, and codify hard rules so implementation stays aligned with the plan (`plugins/cwf/skills/impl/SKILL.md:21`, `plugins/cwf/skills/impl/SKILL.md:68`, `plugins/cwf/skills/impl/SKILL.md:200`, `plugins/cwf/skills/impl/SKILL.md:260`, `plugins/cwf/skills/impl/SKILL.md:347`, `plugins/cwf/skills/impl/SKILL.md:429`).
++
++## Findings
++- **None** – both skills satisfy refactor deep review criteria 1-9 (no severity-level issues detected).
++
++## Concrete fixes
++- **None required**.
++
++<!-- AGENT_COMPLETE -->
+diff --git a/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-deep-batch-d.md b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-deep-batch-d.md
+new file mode 100644
+index 0000000..5053143
+--- /dev/null
++++ b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-deep-batch-d.md
+@@ -0,0 +1,31 @@
++# Deep Review Batch D
++
++Skills under review: `refactor` (multi-mode drift control) and `retro` (session retrospectives). All nine criteria from `plugins/cwf/skills/refactor/references/review-criteria.md` were applied, with the requested emphasis on internal consistency, concept integrity, and portability.
++
++## refactor
++
++### Highlights
++- The **Provenance Sidecars** procedure forces a deterministic metadata check before any criteria document is loaded, so every review run reports the current skill/hook counts, flags stale sidecars, and documents deltas before analysis begins; this mirrors the `Provenance` column in the concept map and keeps different review paths on the same facts (`plugins/cwf/skills/refactor/SKILL.md:43-63`, `plugins/cwf/references/concept-map.md:165-178`).
++- Mode routing, sessions, and scan scripts orchestrate every review path through the same agent framework, so the skill behaves like the `Agent Orchestration` row in the concept map: the quick scan resolves the repo root via `{REPO_ROOT}`/`git rev-parse`, writes structured JSON + summaries, and gates the artifacts through `check-run-gate-artifacts.sh` before continuing, while the codebase mode bootstraps `codebase-contract.json`, records contract metadata, and runs `check-codebase-contract-runtime.sh` when available (`plugins/cwf/skills/refactor/SKILL.md:10-200`, `plugins/cwf/references/concept-map.md:165-178`). This keeps the workflow internally consistent and aligned with the requested axes.
++
++### Findings
++- None — the skill stays under the size thresholds, keeps “when to use” instructions in the description, pushes implementation details into references (scripts + flows), and documents fallback + gating for each admission point, so all nine criteria are satisfied (`plugins/cwf/skills/refactor/SKILL.md:1-200`).
++
++### Portability
++- Session/building scripts resolve every path dynamically (session bootstrap for quick scan, optional `--include-local-skills`, and `git rev-parse` to identify the repo root), so the skill runs regardless of the host repo layout and still writes summary artifacts next to the active session directory (`plugins/cwf/skills/refactor/SKILL.md:66-104`).
++- Codebase quick scan bootstraps the repository-local contract and handles missing contracts by continuing with documented fallback defaults (contract metadata status, warnings, and shell-strict-mode overrides), which keeps the skill usable in fresh clones or unfamiliar repos without breaking the run (`plugins/cwf/skills/refactor/SKILL.md:167-200`).
++
++## retro
++
++### Highlights
++- The retro workflow updates `cwf-state` (`phase="retro"`), reads the relevant session directory (reuse/new-date logic), syncs Codex logs, and runs the evidence collector before writing anything, so every retrospective takes the same context snapshot and avoids stale artifacts (`plugins/cwf/skills/retro/SKILL.md:24-58`).
++- Deep mode enforces the two-batch agent choreography required by the `Expert Advisor` and `Agent Orchestration` concepts in the map: Batch 1 (CDM + learning resources) produces the foundation; Batch 2 (Expert α/β) consumes it, and each output is subject to hard/soft gating, retry bounds, and explicit persistence contracts (`plugins/cwf/skills/retro/SKILL.md:83-150`, `plugins/cwf/references/concept-map.md:165-178`). That choreography keeps expert analysis consistent and portable across sessions.
++
++### Findings
++- None — the workflow documents each section’s intent, ties it to session state in `.cwf/projects`, and mandates why/how/when to drop in sub-agent outputs, so the instructions already satisfy every criterion (`plugins/cwf/skills/retro/SKILL.md:6-200`).
++
++### Portability
++- Directory selection prompts make it safe to reuse an existing session or bootstrap a new dated directory, then copy `plan.md`/`lessons.md` as needed; these safeguards plus the `cwf-live-state` helper mean the skill can run in any repo without hard-coded session roots (`plugins/cwf/skills/retro/SKILL.md:31-105`).
++- External dependencies (Codex sync, retro-collect-evidence, multi-agent flows) live inside the plugin, and the gating scripts explicitly note when fallbacks/warnings are necessary, so the workflow degrades gracefully when a referenced artifact or log is missing (`plugins/cwf/skills/retro/SKILL.md:44-150`).
++
++<!-- AGENT_COMPLETE -->
+diff --git a/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-deep-batch-e.md b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-deep-batch-e.md
+new file mode 100644
+index 0000000..926a654
+--- /dev/null
++++ b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-deep-batch-e.md
+@@ -0,0 +1,41 @@
++# Deep Review Batch E
++
++Skills under review: `review` (universal review orchestrator) and `run` (pipeline orchestrator). Criteria 1‑9 from `plugins/cwf/skills/refactor/references/review-criteria.md` were applied to each skill.
++
++## review
++
++### Findings
++| Severity | Criterion | Finding | Evidence | Suggestion |
++|---|---|---|---|---|
++| info | 1 (Size) | SKILL.md spans 485 lines (2,781 words) so it stays below both the warning thresholds (500 lines, 3,000 words). | `plugins/cwf/skills/review/SKILL.md:1-485` | n/a |
++| info | 2 (Progressive Disclosure) | Front matter contains only `name`/`description`/triggers and the body focuses on the review workflow rather than inserting “When to use” prose. | `plugins/cwf/skills/review/SKILL.md:1-39` | n/a |
++| info | 3 (Duplication) | Heavy-weight guidance (prompt structure, CLI templates, synthesis rules) is sourced from references; the SKILL only assembles those artifacts rather than copying them. | `plugins/cwf/skills/review/SKILL.md:204-345` | n/a |
++| warning | 4 (Resource Health) | Phase 2.2 detects `codex`/`npx` only by `command -v`; it still launches the CLI even when the binary is unauthenticated, which can cause repeated timeouts before the fallback Task agent runs. | `plugins/cwf/skills/review/SKILL.md:265-279` | Check authentication status (e.g., `codex auth status`/`npx @google/gemini-cli auth`) before invoking the CLI and treat unauthenticated results as immediate fallbacks so the review stage fails fast. |
++| info | 5 (Writing Style) | Prompt-building, gating, and synthesis sections use imperative steps (“Build prompt,” “Run cross-check,” “Append provenance”) so agents follow low-freedom instructions. | `plugins/cwf/skills/review/SKILL.md:223-431` | n/a |
++| info | 6 (Degrees of Freedom) | The workflow predefines reviewer slots, context-recovery contracts, failure flows, and artifact gates, keeping the review execution deterministic. | `plugins/cwf/skills/review/SKILL.md:188-420` | n/a |
++| info | 7 (Anthropic Compliance) | Front matter sticks to the required fields and keeps the short description within the expected pattern. | `plugins/cwf/skills/review/SKILL.md:1-4` | n/a |
++| info | 8 (Concept Integrity) | Agent Orchestration is satisfied by launching the six reviewers in a single batch with provenance files, and Expert Advisor is covered via the expert slots + roster update instructions pointing to `expert-advisor-guide.md`. | `plugins/cwf/skills/review/SKILL.md:188-408` | n/a |
++| info | 9 (Repository Independence) | All scripts and helpers are resolved through `{CWF_PLUGIN_DIR}` (live-state helper, codex sync, `check-run-gate-artifacts`), so the skill adapts to any repository layout. | `plugins/cwf/skills/review/SKILL.md:224-428` | n/a |
++
++### Prioritized actions
++1. Before launching `codex`/`gemini`, run their auth-status commands (or similar lightweight checks) and skip the CLI attempt when they are unauthenticated so the workflow falls back immediately without CLI timeouts.
++
++## run
++
++### Findings
++| Severity | Criterion | Finding | Evidence | Suggestion |
++|---|---|---|---|---|
++| info | 1 (Size) | SKILL.md covers 492 lines (2,623 words) so it remains below the warning thresholds. | `plugins/cwf/skills/run/SKILL.md:1-492` | n/a |
++| info | 2 (Progressive Disclosure) | Front matter only exposes name/description while the majority of the document stays on workflow orchestration. | `plugins/cwf/skills/run/SKILL.md:1-24` | n/a |
++| info | 3 (Duplication) | Stage definitions, ambiguity handling, gating, and completion logic are described once in the SKILL; no duplicated reference material appears alongside them. | `plugins/cwf/skills/run/SKILL.md:27-441` | n/a |
++| info | 4 (Resource Health) | The only external references (agent-patterns, plan-protocol) are credited at the end and reused to explain pattern expectations. | `plugins/cwf/skills/run/SKILL.md:489-492` | n/a |
++| info | 5 (Writing Style) | Initialization, stage loop, and gate sections present commands and checklist items in imperative format so automation follows predictable steps. | `plugins/cwf/skills/run/SKILL.md:29-340` | n/a |
++| info | 6 (Degrees of Freedom) | Worktree verification, ambiguity ledger, stage provenance, and review failure handling are scripted with little room for improvisation, matching low-degree-of-freedom needs. | `plugins/cwf/skills/run/SKILL.md:27-367` | n/a |
++| info | 7 (Anthropic Compliance) | Front matter obeys metadata constraints while the description is concise and trigger-focused. | `plugins/cwf/skills/run/SKILL.md:1-4` | n/a |
++| warning | 8 (Concept Integrity) | The skill claims Agent Orchestration but the implementation runs stages strictly sequentially (stage table + single-threaded execution loop) without documenting parallel batches or adaptive team sizing, so the asserted concept misaligns with the actual behavior. | `plugins/cwf/skills/run/SKILL.md:120-341` | Clarify that `cwf:run` is a sequential pipeline in the concept map (or add explicit parallel batching/adaptive sub-agents per stage) so the Agent Orchestration claim matches the documented execution model. |
++| info | 9 (Repository Independence) | Scripts are invoked via `cwf-live-state.sh`, `check-run-gate-artifacts.sh`, and other `{CWF_PLUGIN_DIR}` helpers, avoiding hard-coded repo paths and keeping the skill portable. | `plugins/cwf/skills/run/SKILL.md:32-431` | n/a |
++
++### Prioritized actions
++1. Either adjust the concept-map claim to treat `cwf:run` as a sequential pipeline orchestrator or enrich the skill with explicit batch/agent-team descriptions (e.g., stage-level helper agents) to preserve the Agent Orchestration narrative.
++
++<!-- AGENT_COMPLETE -->
+diff --git a/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-deep-batch-f.md b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-deep-batch-f.md
+new file mode 100644
+index 0000000..2984d5f
+--- /dev/null
++++ b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-deep-batch-f.md
+@@ -0,0 +1,41 @@
++# Deep Review Batch F
++
++Skills under review: `setup` (initial CWF configuration) and `update` (marketplace version reconciliation). All nine criteria from `plugins/cwf/skills/refactor/references/review-criteria.md` were applied with an emphasis on portability.
++
++## setup
++
++### Findings
++| Severity | Criterion | Finding | Evidence | Suggestion |
++|---|---|---|---|---|
++| info | 1 | ~2,514 words across 459 lines keeps the skill under the >3 000/500 thresholds. | `plugins/cwf/skills/setup/SKILL.md:459` | n/a |
++| info | 2 | Metadata is limited to name/description/triggers and the Quick Start plus mode-routing table deliver the “when to use” guidance before the body continues with phase references. | `plugins/cwf/skills/setup/SKILL.md:1`; `plugins/cwf/skills/setup/SKILL.md:10` | n/a |
++| info | 3 | Phase 2 (and later phases) point directly to reference docs for detailed checks (tool detection, Codex, etc.), so no duplication of the reference material appears in the SKILL body. | `plugins/cwf/skills/setup/SKILL.md:147` | n/a |
++| warning | 4 | `scripts/check-configure-git-hooks-runtime.sh` is documented in the directory README but missing from SKILL.md’s references, so its regression check sits outside the skill’s narrative and looks unused. | `plugins/cwf/skills/setup/SKILL.md:461`; `plugins/cwf/skills/setup/README.md:15` | Mention the runtime regression script in SKILL.md (Phase 2.7 or the References section) or retire it so the workflow’s resource list matches reality. |
++| info | 5 | Phase descriptions use imperative language (“read cwf-state,” “Use AskUserQuestion,” “run the sync script”), keeping the writing style consistent with expectations. | `plugins/cwf/skills/setup/SKILL.md:67` | n/a |
++| info | 6 | Each phase enumerates precise scripts, prompts, and gate requirements (e.g., the entire tool-detection flow in Phase 2), so the freedom level matches the low-freedom operations being performed. | `plugins/cwf/skills/setup/SKILL.md:143` | n/a |
++| info | 7 | Front matter contains only the required `name`/`description` pair plus trigger phrases, so the metadata aligns with the Anthropic schema. | `plugins/cwf/skills/setup/SKILL.md:1` | n/a |
++| info | 8 | Concept map labels `setup` as infrastructure-only (the sparse row), so no additional generic concept checks are needed. | `plugins/cwf/references/concept-map.md:178` | n/a |
++| info | 9 | Phase 2.4.1 resolves the active plugin scope via `detect-plugin-scope.sh` and only falls back to the git top-level (for project/local root discovery) after explicit confirmation, preventing hard-coded repo paths. | `plugins/cwf/skills/setup/SKILL.md:189`; `plugins/cwf/skills/setup/SKILL.md:193` | n/a |
++
++### Portability
++Phase 2.4.1 and its safety guards resolve the active plugin scope before touching Codex links, and project/local scopes delegate to the repository’s git top-level when no explicit root exists, so this skill adapts to different repo layouts without relying on fixed paths. `plugins/cwf/skills/setup/SKILL.md:189`; `plugins/cwf/skills/setup/SKILL.md:193`
++
++## update
++
++### Findings
++| Severity | Criterion | Finding | Evidence | Suggestion |
++|---|---|---|---|---|
++| info | 1 | The SKILL spans ~269 lines (line 269 begins the rules) and ~1.2 k words, keeping it below both the 3 000-word and 500-line thresholds. | `plugins/cwf/skills/update/SKILL.md:269` | n/a |
++| info | 2 | Metadata is minimal (line 1) and the Quick Start block lists only `cwf:update`/`cwf:update --check`, so the body can focus on the workflow without duplicating “when to use” prose. | `plugins/cwf/skills/update/SKILL.md:1`; `plugins/cwf/skills/update/SKILL.md:10` | n/a |
++| info | 3 | Phase 0 defers all scope-resolution detail to `references/scope-reconcile.md`, avoiding duplication. | `plugins/cwf/skills/update/SKILL.md:23` | n/a |
++| info | 4 | The only reference in the skill directory is `scope-reconcile.md`, and it is invoked where needed, so there are no unused scripts/items. | `plugins/cwf/skills/update/SKILL.md:23` | n/a |
++| info | 5 | Phase 1 lists imperative shell checks and command sequences (list plugin JSON, copy snapshots), so the writing style stays directive. | `plugins/cwf/skills/update/SKILL.md:42` | n/a |
++| info | 6 | Phase 2 walks through the confirm/apply flows with exact commands (including the install fallback), so the operation is constrained to low freedom. | `plugins/cwf/skills/update/SKILL.md:123` | n/a |
++| info | 7 | Front matter is limited to the required fields plus trigger phrases, satisfying the schema. | `plugins/cwf/skills/update/SKILL.md:1` | n/a |
++| info | 8 | Concept map also flags `update` as a sparse infrastructural row, so no extra concept-verification is needed. | `plugins/cwf/references/concept-map.md:178` | n/a |
++| warning | 9 | The version check only searches `${CLAUDE_HOME:-$HOME/.claude}/plugins/cache` and `$HOME/.claude/plugins/cache`, so installs with nonstandard cache roots immediately hit the error path that tells the user to set `CLAUDE_HOME` instead of continuing automatically—this makes updates brittle on alternative layouts. | `plugins/cwf/skills/update/SKILL.md:83`; `plugins/cwf/skills/update/SKILL.md:97` | Allow adding extra cache paths (e.g., `--cache-root`) or search the standard XDG cache cascade before failing so nonstandard installs can still detect the latest metadata. |
++
++### Portability
++Scope detection prints the active scope/install path before any mutation (Phase 0.1), but the latest-version check only looks at the two hard-coded cache roots above and exits if nothing is found; adding either additional default scan locations (e.g., `/usr/local/share/claude/plugins/cache`, `$XDG_CACHE_HOME/claude/plugins/cache`) or a flag for extra cache roots would keep the skill portable across alternative runtimes. `plugins/cwf/skills/update/SKILL.md:23`; `plugins/cwf/skills/update/SKILL.md:83`; `plugins/cwf/skills/update/SKILL.md:97`
++
++<!-- AGENT_COMPLETE -->
+diff --git a/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-deep-batch-g.md b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-deep-batch-g.md
+new file mode 100644
+index 0000000..be3fc05
+--- /dev/null
++++ b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-deep-batch-g.md
+@@ -0,0 +1,28 @@
++# Deep Review Batch G
++
++Skills under review: `ship`. Criteria 1‑9 from `plugins/cwf/skills/refactor/references/review-criteria.md` were applied to each section below; every finding includes line-level evidence.
++
++## ship
++
++### Highlights
++- The mandatory output persistence block (write `{session_dir}/ship.md`, sync ambiguity debt, and run the `check-run-gate-artifacts` stage gate) enforces the deterministic-run contract before any GitHub operation finishes, keeping the skill aligned with the run/ship pipeline’s pass/fail authority (`plugins/cwf/skills/ship/SKILL.md:48-78`).
++- `/ship issue`, `/ship pr`, `/ship merge`, and `/ship status` all list the exact `gh`/`git` commands, guards, and user prompts needed to keep the DMZ between autonomous agents and GitHub state clear, which matches the recorded error-handling checklist (`plugins/cwf/skills/ship/SKILL.md:82-314`).
++- The narrative templates live entirely under `references/issue-template.md` and `references/pr-template.md`, and the SKILL simply tells the agent to load those files and substitute the required variables, preventing duplication while keeping the workflow description compact (`plugins/cwf/skills/ship/SKILL.md:98-187`; `plugins/cwf/skills/ship/references/issue-template.md:1-31`; `plugins/cwf/skills/ship/references/pr-template.md:1-64`).
++
++### Findings
++| Severity | Criterion | Finding | Evidence | Suggestion |
++|---|---|---|---|---|
++| info | 1 | no material finding (349 lines / ~1,800 words, well below the warning thresholds) | `plugins/cwf/skills/ship/SKILL.md:1-349` | n/a |
++| info | 2 | no material finding (front matter contains only `name`/`description` with the `/ship` trigger, and the body focuses on actionable workflows instead of “when to use” prose) | `plugins/cwf/skills/ship/SKILL.md:1-35` | n/a |
++| info | 3 | no material finding (issue/pr workflows refer to templates in `references/` rather than copying their content, so there is only one source for each narrative) | `plugins/cwf/skills/ship/SKILL.md:98-187` + `plugins/cwf/skills/ship/references/issue-template.md:1-31` + `plugins/cwf/skills/ship/references/pr-template.md:1-64` | n/a |
++| info | 4 | no material finding (only the two reference templates exist, both under 100 lines and both referenced; there are no unused scripts or assets) | `plugins/cwf/skills/ship/references/issue-template.md:1-31` + `plugins/cwf/skills/ship/references/pr-template.md:1-64` + `plugins/cwf/skills/ship/SKILL.md:98-187` | n/a |
++| info | 5 | no material finding (imperative instructions dominate every section: “Before any subcommand, verify…,” “Create a GitHub issue…,” “Check PR status…,” etc.) | `plugins/cwf/skills/ship/SKILL.md:27-299` | n/a |
++| info | 6 | no material finding (low-freedom operations: concrete `gh`, `git`, and gate commands plus the decision matrix for merging keep fragile GitHub state transitions explicit) | `plugins/cwf/skills/ship/SKILL.md:32-263` | n/a |
++| info | 7 | no material finding (front matter obeys the metadata-only rule, the description includes the trigger, and the rules section enforces the user-language override) | `plugins/cwf/skills/ship/SKILL.md:1-4` + `plugins/cwf/skills/ship/SKILL.md:333-344` | n/a |
++| info | 8 | no material finding (`ship` is a sparse/concept-free skill in the synchronization map, so there are no missing generic concept obligations to check) | `plugins/cwf/references/concept-map.md:158-178` + `plugins/cwf/skills/ship/SKILL.md:82-299` | n/a |
++| info | 9 | no material finding (`ship` relies on `live.dir`, `CWF_PLUGIN_DIR`, remote-base detection, and session-path indirection instead of hard-coded repo names, keeping the workflow portable) | `plugins/cwf/skills/ship/SKILL.md:48-131` | n/a |
++
++### Prioritized actions
++1. None — all nine criteria are satisfied for `ship`.
++
++<!-- AGENT_COMPLETE -->
+diff --git a/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-contract-runtime.log b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-contract-runtime.log
+new file mode 100644
+index 0000000..b91eabd
+--- /dev/null
++++ b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-contract-runtime.log
+@@ -0,0 +1 @@
++CHECK_OK: docs-contract runtime behavior verified
+diff --git a/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-contract.json b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-contract.json
+new file mode 100644
+index 0000000..f199227
+--- /dev/null
++++ b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-contract.json
+@@ -0,0 +1 @@
++{"status":"existing","path":"/home/hwidong/codes/claude-plugins/.cwf/docs-contract.yaml","artifact_root":"/home/hwidong/codes/claude-plugins/.cwf"}
+diff --git a/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-doc-graph.err b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-doc-graph.err
+new file mode 100644
+index 0000000..e69de29
+diff --git a/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-doc-graph.json b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-doc-graph.json
+new file mode 100644
+index 0000000..1932ee7
+--- /dev/null
++++ b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-doc-graph.json
+@@ -0,0 +1,723 @@
++{
++  "stats": {
++    "total_docs": 86,
++    "total_links": 531,
++    "orphan_count": 0,
++    "broken_ref_count": 0
++  },
++  "adjacency": {
++    ".claude/skills/plugin-deploy/SKILL.md": [
++      ".claude/skills/plugin-deploy/references/checklist.md",
++      "plugins/cwf/scripts/codex/sync-skills.sh",
++      "plugins/cwf/scripts/codex/verify-skill-links.sh",
++      ".claude/skills/plugin-deploy/references/checklist.md"
++    ],
++    ".claude/skills/plugin-deploy/references/checklist.md": [
++      "docs/plugin-dev-cheatsheet.md"
++    ],
++    "AGENTS.md": [
++      ".claude/skills/plugin-deploy/SKILL.md",
++      "docs/documentation-guide.md",
++      "plugins/cwf/skills/refactor/references/docs-criteria.md",
++      ".markdownlint-cli2.jsonc",
++      "plugins/cwf/hooks/hooks.json",
++      "plugins/cwf/skills/refactor/scripts/check-links.sh",
++      "plugins/cwf/skills/refactor/scripts/doc-graph.mjs",
++      "README.md",
++      "AGENTS.md",
++      "CLAUDE.md",
++      ".cwf/cwf-state.yaml",
++      "README.ko.md",
++      "plugins/cwf/skills/setup/SKILL.md",
++      "plugins/cwf/skills/update/SKILL.md",
++      "plugins/cwf/skills/gather/SKILL.md",
++      "plugins/cwf/skills/clarify/SKILL.md",
++      "plugins/cwf/skills/plan/SKILL.md",
++      "plugins/cwf/skills/review/SKILL.md",
++      "plugins/cwf/skills/hitl/SKILL.md",
++      "plugins/cwf/skills/impl/SKILL.md",
++      "plugins/cwf/skills/retro/SKILL.md",
++      "plugins/cwf/skills/handoff/SKILL.md",
++      "plugins/cwf/skills/ship/SKILL.md",
++      "plugins/cwf/skills/run/SKILL.md",
++      "plugins/cwf/skills/refactor/SKILL.md",
++      "plugins/cwf/skills/clarify/README.md",
++      "plugins/cwf/references/skill-conventions.md",
++      "plugins/cwf/references/plan-protocol.md",
++      "plugins/cwf/references/agent-patterns.md",
++      "plugins/cwf/references/context-recovery-protocol.md",
++      "plugins/cwf/references/concept-map.md",
++      "plugins/cwf/references/expert-advisor-guide.md",
++      "plugins/cwf/hooks/hooks.json",
++      "plugins/cwf/hooks/scripts/cwf-hook-gate.sh",
++      "plugins/cwf/hooks/README.md",
++      "plugins/cwf/scripts/README.md",
++      "plugins/cwf/scripts",
++      "plugins/cwf/hooks",
++      "scripts",
++      "scripts/check-schemas.sh",
++      "scripts/doc-churn.sh",
++      "scripts/find-duplicates.py",
++      "docs/project-context.md",
++      "docs/architecture-patterns.md",
++      "docs/cwf-artifact-migration-plan.md",
++      "docs/documentation-guide.md",
++      "docs/plugin-dev-cheatsheet.md",
++      "docs/interactive-doc-review-protocol.md",
++      "references/anthropic-skills-guide/README.md",
++      "references/essence-of-software/distillation.md"
++    ],
++    "AI_NATIVE_PRODUCT_TEAM.ko.md": [
++      "AI_NATIVE_PRODUCT_TEAM.md",
++      "plugins/cwf/skills/gather/SKILL.md",
++      "plugins/cwf/skills/clarify/SKILL.md",
++      "plugins/cwf/skills/retro/SKILL.md",
++      "plugins/cwf/skills/refactor/SKILL.md",
++      "plugins/cwf/hooks/README.md"
++    ],
++    "AI_NATIVE_PRODUCT_TEAM.md": [
++      "AI_NATIVE_PRODUCT_TEAM.ko.md",
++      "plugins/cwf/skills/gather/SKILL.md",
++      "plugins/cwf/skills/clarify/SKILL.md",
++      "plugins/cwf/skills/retro/SKILL.md",
++      "plugins/cwf/skills/refactor/SKILL.md",
++      "plugins/cwf/hooks/README.md"
++    ],
++    "CLAUDE.md": [
++      "AGENTS.md",
++      "AGENTS.md",
++      "plugins/cwf/hooks/hooks.json"
++    ],
++    "README.ko.md": [
++      "README.md",
++      "AI_NATIVE_PRODUCT_TEAM.ko.md",
++      "references/essence-of-software/distillation.md",
++      "plugins/cwf/references/skill-conventions.md",
++      "plugins/cwf/skills/gather/SKILL.md",
++      "plugins/cwf/skills/clarify/SKILL.md",
++      "plugins/cwf/skills/plan/SKILL.md",
++      "plugins/cwf/skills/impl/SKILL.md",
++      "plugins/cwf/skills/retro/SKILL.md",
++      "plugins/cwf/skills/refactor/SKILL.md",
++      "plugins/cwf/skills/handoff/SKILL.md",
++      "plugins/cwf/skills/ship/SKILL.md",
++      "plugins/cwf/skills/review/SKILL.md",
++      "plugins/cwf/skills/hitl/SKILL.md",
++      "plugins/cwf/skills/run/SKILL.md",
++      "plugins/cwf/skills/setup/SKILL.md",
++      "plugins/cwf/skills/update/SKILL.md"
++    ],
++    "README.md": [
++      "README.ko.md",
++      "AI_NATIVE_PRODUCT_TEAM.md",
++      "plugins/cwf/references/skill-conventions.md",
++      "plugins/cwf/skills/gather/SKILL.md",
++      "plugins/cwf/skills/clarify/SKILL.md",
++      "plugins/cwf/skills/plan/SKILL.md",
++      "plugins/cwf/skills/impl/SKILL.md",
++      "plugins/cwf/skills/retro/SKILL.md",
++      "plugins/cwf/skills/refactor/SKILL.md",
++      "plugins/cwf/skills/handoff/SKILL.md",
++      "plugins/cwf/skills/ship/SKILL.md",
++      "plugins/cwf/skills/review/SKILL.md",
++      "plugins/cwf/skills/hitl/SKILL.md",
++      "plugins/cwf/skills/run/SKILL.md",
++      "plugins/cwf/skills/setup/SKILL.md",
++      "plugins/cwf/skills/update/SKILL.md",
++      "plugins/cwf/scripts/README.md"
++    ],
++    "docs/architecture-patterns.md": [
++      "plugins/cwf/references/skill-conventions.md",
++      ".claude/settings.json",
++      ".cwf/cwf-state.yaml",
++      "plugins/cwf/scripts/check-session.sh"
++    ],
++    "docs/cwf-artifact-migration-plan.md": [
++      ".cwf/cwf-state.yaml"
++    ],
++    "docs/documentation-guide.md": [
++      "AGENTS.md",
++      "CLAUDE.md",
++      "AGENTS.md"
++    ],
++    "docs/interactive-doc-review-protocol.md": [
++      ".cwf/projects",
++      "AGENTS.md",
++      "README.md",
++      "README.ko.md",
++      "CLAUDE.md",
++      "AI_NATIVE_PRODUCT_TEAM.md",
++      "AI_NATIVE_PRODUCT_TEAM.ko.md",
++      "CHANGELOG.md",
++      "docs",
++      "plugins/cwf/references",
++      "plugins/cwf/skills",
++      "references",
++      ".cwf/projects",
++      "plugins/cwf/skills",
++      ".claude",
++      "docs",
++      "plugins/cwf/references",
++      "plugins/cwf/skills",
++      "references",
++      "plugins/cwf/skills/refactor/scripts/doc-graph.mjs",
++      ".doc-graph-ignore",
++      "docs/doc-graph.snapshot.json",
++      "docs/doc-graph.snapshot.json"
++    ],
++    "docs/plugin-dev-cheatsheet.md": [
++      ".claude-plugin/marketplace.json",
++      "plugins/cwf/hooks/scripts/env-loader.sh",
++      ".githooks/pre-commit",
++      ".githooks/pre-push",
++      "plugins/cwf/skills/setup/scripts/configure-git-hooks.sh",
++      ".claude/skills/plugin-deploy/SKILL.md",
++      "CHANGELOG.md",
++      "README.md",
++      "README.ko.md",
++      "AI_NATIVE_PRODUCT_TEAM.md",
++      ".claude-plugin/marketplace.json",
++      "README.md",
++      "README.ko.md",
++      "AI_NATIVE_PRODUCT_TEAM.md"
++    ],
++    "docs/project-context.md": [
++      "plugins/cwf/scripts/next-prompt-dir.sh",
++      "plugins/cwf/scripts/check-session.sh",
++      ".cwf/cwf-state.yaml",
++      ".cwf/cwf-state.yaml"
++    ],
++    "plugins/cwf/hooks/README.md": [
++      "plugins/cwf/hooks/scripts",
++      "plugins/cwf/hooks/scripts/cwf-hook-gate.sh",
++      "plugins/cwf/hooks/scripts/attention.sh",
++      "plugins/cwf/hooks/scripts/start-timer.sh",
++      "plugins/cwf/hooks/scripts/cancel-timer.sh",
++      "plugins/cwf/hooks/scripts/heartbeat.sh",
++      "plugins/cwf/hooks/scripts/track-user-input.sh",
++      "plugins/cwf/hooks/scripts/log-turn.sh",
++      "plugins/cwf/hooks/scripts/log-turn-lib.sh",
++      "plugins/cwf/hooks/scripts/parse-transcript.sh",
++      "plugins/cwf/hooks/scripts/read-guard.sh",
++      "plugins/cwf/hooks/scripts/redirect-websearch.sh",
++      "plugins/cwf/hooks/scripts/check-markdown.sh",
++      "plugins/cwf/hooks/scripts/check-links-local.sh",
++      "plugins/cwf/hooks/scripts/check-shell.sh",
++      "plugins/cwf/hooks/scripts/compact-context.sh",
++      "plugins/cwf/hooks/scripts/env-loader.sh",
++      "plugins/cwf/hooks/scripts/slack-send.sh",
++      "plugins/cwf/hooks/scripts/text-format.sh"
++    ],
++    "plugins/cwf/references/agent-patterns.md": [],
++    "plugins/cwf/references/concept-map.md": [],
++    "plugins/cwf/references/context-recovery-protocol.md": [],
++    "plugins/cwf/references/expert-advisor-guide.md": [],
++    "plugins/cwf/references/plan-protocol.md": [],
++    "plugins/cwf/references/skill-conventions.md": [
++      "plugins/cwf/skills/gather/SKILL.md",
++      "plugins/cwf/references/agent-patterns.md",
++      "plugins/cwf/references/plan-protocol.md",
++      "plugins/cwf/references/expert-advisor-guide.md",
++      "plugins/cwf/references/skill-conventions.md"
++    ],
++    "plugins/cwf/scripts/README.md": [
++      "plugins/cwf/scripts",
++      "plugins/cwf/scripts/check-session.sh",
++      "plugins/cwf/scripts/check-growth-drift.sh",
++      "plugins/cwf/scripts/test-hook-exit-codes.sh",
++      "plugins/cwf/scripts/test-hook-exit-codes-suite-decision-journal.sh",
++      "plugins/cwf/scripts/check-script-deps.sh",
++      "plugins/cwf/scripts/check-readme-structure.sh",
++      "plugins/cwf/scripts/check-portability-contract.sh",
++      "plugins/cwf/scripts/check-claim-test-mapping.sh",
++      "plugins/cwf/scripts/check-change-impact.sh",
++      "plugins/cwf/scripts/check-hook-sync.sh",
++      "plugins/cwf/scripts/check-portability-fixtures.sh",
++      "plugins/cwf/scripts/check-review-routing.sh",
++      "plugins/cwf/scripts/check-shared-reference-conformance.sh",
++      "plugins/cwf/scripts/check-run-gate-artifacts.sh",
++      "plugins/cwf/scripts/check-run-gate-artifacts-lib.sh",
++      "plugins/cwf/scripts/bootstrap-review-code-artifacts.sh",
++      "plugins/cwf/scripts/sync-ambiguity-debt.sh",
++      "plugins/cwf/scripts/check-session-lib.sh",
++      "plugins/cwf/scripts/next-prompt-dir.sh",
++      "plugins/cwf/scripts/cwf-artifact-paths.sh",
++      "plugins/cwf/scripts/cwf-live-state.sh",
++      "plugins/cwf/scripts/cwf-live-state-core.sh",
++      "plugins/cwf/scripts/cwf-live-state-journal.sh",
++      "plugins/cwf/scripts/cwf-live-state-mutate.sh",
++      "plugins/cwf/scripts/detect-plugin-scope.sh",
++      "plugins/cwf/scripts/retro-collect-evidence.sh",
++      "plugins/cwf/scripts/provenance-check.sh",
++      "plugins/cwf/scripts/codex/codex-with-log.sh",
++      "plugins/cwf/scripts/codex/post-run-checks.sh",
++      "plugins/cwf/scripts/codex/install-wrapper.sh",
++      "plugins/cwf/scripts/codex/sync-skills.sh",
++      "plugins/cwf/scripts/codex/verify-skill-links.sh",
++      "plugins/cwf/scripts/codex/sync-session-logs.sh",
++      "plugins/cwf/scripts/codex/sync-session-logs-lib.sh",
++      "plugins/cwf/scripts/codex/sync-session-logs.sh",
++      "plugins/cwf/scripts/codex/redact-session-logs.sh",
++      "plugins/cwf/scripts/codex/redact-jsonl.sh",
++      "plugins/cwf/scripts/codex/redact-sensitive.pl"
++    ],
++    "plugins/cwf/skills/clarify/README.md": [
++      "plugins/cwf/skills/clarify/SKILL.md",
++      "plugins/cwf/skills/clarify/README.md",
++      "plugins/cwf/skills/clarify/SKILL.md",
++      "plugins/cwf/skills/clarify/references/advisory-guide.md",
++      "plugins/cwf/skills/clarify/references/aggregation-guide.md",
++      "plugins/cwf/skills/clarify/references/questioning-guide.md",
++      "plugins/cwf/skills/clarify/references/research-guide.md"
++    ],
++    "plugins/cwf/skills/clarify/SKILL.md": [
++      "plugins/cwf/references/context-recovery-protocol.md",
++      "plugins/cwf/references/agent-patterns.md",
++      "plugins/cwf/references/context-recovery-protocol.md",
++      "plugins/cwf/references/context-recovery-protocol.md",
++      "plugins/cwf/skills/clarify/references/research-guide.md",
++      "plugins/cwf/skills/clarify/references/aggregation-guide.md",
++      "plugins/cwf/skills/clarify/references/advisory-guide.md",
++      "plugins/cwf/skills/clarify/references/questioning-guide.md",
++      "plugins/cwf/references/expert-advisor-guide.md"
++    ],
++    "plugins/cwf/skills/clarify/references/advisory-guide.md": [],
++    "plugins/cwf/skills/clarify/references/aggregation-guide.md": [],
++    "plugins/cwf/skills/clarify/references/questioning-guide.md": [],
++    "plugins/cwf/skills/clarify/references/research-guide.md": [],
++    "plugins/cwf/skills/gather/README.md": [
++      "plugins/cwf/skills/gather/SKILL.md",
++      "plugins/cwf/skills/gather/README.md",
++      "plugins/cwf/skills/gather/SKILL.md",
++      "plugins/cwf/skills/gather/references/TOON.md",
++      "plugins/cwf/skills/gather/references/google-export.md",
++      "plugins/cwf/skills/gather/references/notion-export.md",
++      "plugins/cwf/skills/gather/references/query-intelligence.md",
++      "plugins/cwf/skills/gather/references/search-api-reference.md",
++      "plugins/cwf/skills/gather/references/slack-export.md",
++      "plugins/cwf/skills/gather/scripts/code-search.sh",
++      "plugins/cwf/skills/gather/scripts/csv-to-toon.sh",
++      "plugins/cwf/skills/gather/scripts/extract.sh",
++      "plugins/cwf/skills/gather/scripts/g-export.sh",
++      "plugins/cwf/skills/gather/scripts/notion-to-md.py",
++      "plugins/cwf/skills/gather/scripts/search.sh",
++      "plugins/cwf/skills/gather/scripts/slack-api.mjs",
++      "plugins/cwf/skills/gather/scripts/slack-to-md.sh"
++    ],
++    "plugins/cwf/skills/gather/SKILL.md": [
++      "plugins/cwf/skills/gather/scripts/g-export.sh",
++      "plugins/cwf/skills/gather/scripts/slack-api.mjs",
++      "plugins/cwf/skills/gather/scripts/slack-to-md.sh",
++      "plugins/cwf/skills/gather/scripts/notion-to-md.py",
++      "plugins/cwf/skills/gather/scripts/extract.sh",
++      "plugins/cwf/skills/gather/references/google-export.md",
++      "plugins/cwf/skills/gather/references/TOON.md",
++      "plugins/cwf/skills/gather/scripts/csv-to-toon.sh",
++      "plugins/cwf/skills/gather/references/slack-export.md",
++      "plugins/cwf/skills/gather/references/notion-export.md",
++      "plugins/cwf/skills/gather/references/query-intelligence.md",
++      "plugins/cwf/skills/gather/scripts/search.sh",
++      "plugins/cwf/skills/gather/scripts/code-search.sh",
++      "plugins/cwf/skills/gather/references/query-intelligence.md",
++      "plugins/cwf/skills/gather/references/search-api-reference.md",
++      "plugins/cwf/skills/gather/references/google-export.md",
++      "plugins/cwf/skills/gather/references/slack-export.md",
++      "plugins/cwf/skills/gather/references/notion-export.md",
++      "plugins/cwf/skills/gather/references/TOON.md",
++      "plugins/cwf/skills/gather/references/search-api-reference.md",
++      "plugins/cwf/skills/gather/references/query-intelligence.md"
++    ],
++    "plugins/cwf/skills/gather/references/TOON.md": [],
++    "plugins/cwf/skills/gather/references/google-export.md": [],
++    "plugins/cwf/skills/gather/references/notion-export.md": [],
++    "plugins/cwf/skills/gather/references/query-intelligence.md": [],
++    "plugins/cwf/skills/gather/references/search-api-reference.md": [],
++    "plugins/cwf/skills/gather/references/slack-export.md": [],
++    "plugins/cwf/skills/handoff/README.md": [
++      "plugins/cwf/skills/handoff/SKILL.md",
++      "plugins/cwf/skills/handoff/README.md",
++      "plugins/cwf/skills/handoff/SKILL.md"
++    ],
++    "plugins/cwf/skills/handoff/SKILL.md": [
++      "plugins/cwf/references/plan-protocol.md",
++      "plugins/cwf/references/plan-protocol.md",
++      "plugins/cwf/references/plan-protocol.md",
++      "plugins/cwf/references/agent-patterns.md"
++    ],
++    "plugins/cwf/skills/hitl/README.md": [
++      "plugins/cwf/skills/hitl/SKILL.md",
++      "plugins/cwf/skills/hitl/README.md",
++      "plugins/cwf/skills/hitl/SKILL.md",
++      "plugins/cwf/skills/hitl/references/hitl-state-model.md"
++    ],
++    "plugins/cwf/skills/hitl/SKILL.md": [
++      "plugins/cwf/skills/hitl/references/hitl-state-model.md",
++      "plugins/cwf/skills/hitl/references/hitl-state-model.md",
++      "plugins/cwf/skills/hitl/references/hitl-state-model.md"
++    ],
++    "plugins/cwf/skills/hitl/references/hitl-state-model.md": [
++      "plugins/cwf/skills/hitl/SKILL.md"
++    ],
++    "plugins/cwf/skills/impl/README.md": [
++      "plugins/cwf/skills/impl/SKILL.md",
++      "plugins/cwf/skills/impl/README.md",
++      "plugins/cwf/skills/impl/SKILL.md",
++      "plugins/cwf/skills/impl/references/agent-prompts.md",
++      "plugins/cwf/skills/impl/references/impl-gates.md"
++    ],
++    "plugins/cwf/skills/impl/SKILL.md": [
++      "plugins/cwf/skills/impl/references/impl-gates.md",
++      "plugins/cwf/skills/impl/references/impl-gates.md",
++      "plugins/cwf/skills/impl/references/impl-gates.md",
++      "plugins/cwf/skills/impl/references/impl-gates.md",
++      "plugins/cwf/skills/impl/references/impl-gates.md",
++      "plugins/cwf/skills/impl/references/impl-gates.md",
++      "plugins/cwf/skills/impl/references/impl-gates.md",
++      "plugins/cwf/references/agent-patterns.md",
++      "plugins/cwf/skills/impl/references/impl-gates.md",
++      "plugins/cwf/skills/impl/references/agent-prompts.md",
++      "plugins/cwf/references/agent-patterns.md"
++    ],
++    "plugins/cwf/skills/impl/references/agent-prompts.md": [],
++    "plugins/cwf/skills/impl/references/impl-gates.md": [],
++    "plugins/cwf/skills/plan/README.md": [
++      "plugins/cwf/skills/plan/SKILL.md",
++      "plugins/cwf/skills/plan/README.md",
++      "plugins/cwf/skills/plan/SKILL.md"
++    ],
++    "plugins/cwf/skills/plan/SKILL.md": [
++      "plugins/cwf/references/context-recovery-protocol.md",
++      "plugins/cwf/references/agent-patterns.md",
++      "plugins/cwf/references/plan-protocol.md",
++      "plugins/cwf/references/plan-protocol.md"
++    ],
++    "plugins/cwf/skills/refactor/README.md": [
++      "plugins/cwf/skills/refactor/SKILL.md",
++      "plugins/cwf/skills/refactor/README.md",
++      "plugins/cwf/skills/refactor/SKILL.md",
++      "plugins/cwf/skills/refactor/references/codebase-contract.md",
++      "plugins/cwf/skills/refactor/references/docs-criteria.md",
++      "plugins/cwf/skills/refactor/references/docs-contract.md",
++      "plugins/cwf/skills/refactor/references/docs-review-flow.md",
++      "plugins/cwf/skills/refactor/references/docs-criteria.provenance.yaml",
++      "plugins/cwf/skills/refactor/references/codebase-deep-review-flow.md",
++      "plugins/cwf/skills/refactor/references/deep-review-flow.md",
++      "plugins/cwf/skills/refactor/references/holistic-criteria.md",
++      "plugins/cwf/skills/refactor/references/holistic-review-flow.md",
++      "plugins/cwf/skills/refactor/references/holistic-criteria.provenance.yaml",
++      "plugins/cwf/skills/refactor/references/review-criteria.md",
++      "plugins/cwf/skills/refactor/references/review-criteria.provenance.yaml",
++      "plugins/cwf/skills/refactor/references/session-bootstrap.md",
++      "plugins/cwf/skills/refactor/references/tidying-guide.md",
++      "plugins/cwf/skills/refactor/scripts/bootstrap-codebase-contract.sh",
++      "plugins/cwf/skills/refactor/scripts/check-links.sh",
++      "plugins/cwf/skills/refactor/scripts/check-codebase-contract-runtime.sh",
++      "plugins/cwf/skills/refactor/scripts/bootstrap-docs-contract.sh",
++      "plugins/cwf/skills/refactor/scripts/check-docs-contract-runtime.sh",
++      "plugins/cwf/skills/refactor/scripts/codebase-quick-scan.sh",
++      "plugins/cwf/skills/refactor/scripts/codebase-quick-scan.py",
++      "plugins/cwf/skills/refactor/scripts/select-codebase-experts.sh",
++      "plugins/cwf/skills/refactor/scripts/doc-graph.mjs",
++      "plugins/cwf/skills/refactor/scripts/quick-scan.sh",
++      "plugins/cwf/skills/refactor/scripts/tidy-target-commits.sh"
++    ],
++    "plugins/cwf/skills/refactor/SKILL.md": [
++      "plugins/cwf/skills/refactor/references/review-criteria.md",
++      "plugins/cwf/skills/refactor/references/review-criteria.provenance.yaml",
++      "plugins/cwf/skills/refactor/references/holistic-criteria.md",
++      "plugins/cwf/skills/refactor/references/holistic-criteria.provenance.yaml",
++      "plugins/cwf/skills/refactor/references/docs-criteria.md",
++      "plugins/cwf/skills/refactor/references/docs-criteria.provenance.yaml",
++      "plugins/cwf/skills/refactor/references/session-bootstrap.md",
++      "plugins/cwf/skills/refactor/references/session-bootstrap.md",
++      "plugins/cwf/references/context-recovery-protocol.md",
++      "plugins/cwf/references/agent-patterns.md",
++      "plugins/cwf/skills/refactor/references/codebase-contract.md",
++      "plugins/cwf/skills/refactor/references/session-bootstrap.md",
++      "plugins/cwf/skills/refactor/scripts/codebase-quick-scan.sh",
++      "plugins/cwf/skills/refactor/scripts/codebase-quick-scan.py",
++      "plugins/cwf/skills/refactor/references/codebase-deep-review-flow.md",
++      "plugins/cwf/skills/refactor/references/session-bootstrap.md",
++      "plugins/cwf/skills/refactor/references/deep-review-flow.md",
++      "plugins/cwf/skills/refactor/references/session-bootstrap.md",
++      "plugins/cwf/skills/refactor/references/holistic-review-flow.md",
++      "plugins/cwf/skills/refactor/references/session-bootstrap.md",
++      "plugins/cwf/skills/refactor/scripts/check-links.sh",
++      "plugins/cwf/skills/refactor/scripts/doc-graph.mjs",
++      "plugins/cwf/skills/refactor/scripts/check-docs-contract-runtime.sh",
++      "plugins/cwf/skills/refactor/references/docs-contract.md",
++      "plugins/cwf/skills/refactor/references/docs-review-flow.md",
++      "plugins/cwf/skills/refactor/references/review-criteria.md",
++      "plugins/cwf/skills/refactor/references/holistic-criteria.md",
++      "plugins/cwf/skills/refactor/references/codebase-deep-review-flow.md",
++      "plugins/cwf/skills/refactor/references/deep-review-flow.md",
++      "plugins/cwf/skills/refactor/references/holistic-review-flow.md",
++      "plugins/cwf/references/concept-map.md",
++      "plugins/cwf/skills/refactor/references/tidying-guide.md",
++      "plugins/cwf/skills/refactor/references/codebase-contract.md",
++      "plugins/cwf/skills/refactor/references/session-bootstrap.md",
++      "plugins/cwf/skills/refactor/scripts/select-codebase-experts.sh",
++      "plugins/cwf/skills/refactor/references/docs-criteria.md",
++      "plugins/cwf/skills/refactor/references/docs-contract.md",
++      "plugins/cwf/skills/refactor/references/docs-review-flow.md",
++      "plugins/cwf/skills/refactor/references/review-criteria.provenance.yaml",
++      "plugins/cwf/skills/refactor/references/holistic-criteria.provenance.yaml",
++      "plugins/cwf/skills/refactor/references/docs-criteria.provenance.yaml",
++      "plugins/cwf/references/agent-patterns.md",
++      "plugins/cwf/references/skill-conventions.md"
++    ],
++    "plugins/cwf/skills/refactor/references/codebase-contract.md": [],
++    "plugins/cwf/skills/refactor/references/codebase-deep-review-flow.md": [
++      "plugins/cwf/skills/refactor/references/codebase-contract.md",
++      "plugins/cwf/skills/refactor/references/session-bootstrap.md",
++      "plugins/cwf/skills/refactor/scripts/codebase-quick-scan.py"
++    ],
++    "plugins/cwf/skills/refactor/references/deep-review-flow.md": [
++      "plugins/cwf/skills/refactor/references/review-criteria.provenance.yaml",
++      "plugins/cwf/skills/refactor/references/session-bootstrap.md",
++      "plugins/cwf/references/context-recovery-protocol.md"
++    ],
++    "plugins/cwf/skills/refactor/references/docs-contract.md": [],
++    "plugins/cwf/skills/refactor/references/docs-criteria.md": [
++      "plugins/cwf/skills/refactor/references/docs-contract.md"
++    ],
++    "plugins/cwf/skills/refactor/references/docs-review-flow.md": [
++      "plugins/cwf/skills/refactor/references/docs-contract.md",
++      "plugins/cwf/skills/refactor/references/docs-criteria.provenance.yaml"
++    ],
++    "plugins/cwf/skills/refactor/references/holistic-criteria.md": [],
++    "plugins/cwf/skills/refactor/references/holistic-review-flow.md": [
++      "plugins/cwf/skills/refactor/references/holistic-criteria.provenance.yaml",
++      "plugins/cwf/skills/refactor/references/session-bootstrap.md",
++      "plugins/cwf/references/context-recovery-protocol.md"
++    ],
++    "plugins/cwf/skills/refactor/references/review-criteria.md": [],
++    "plugins/cwf/skills/refactor/references/session-bootstrap.md": [],
++    "plugins/cwf/skills/refactor/references/tidying-guide.md": [],
++    "plugins/cwf/skills/retro/README.md": [
++      "plugins/cwf/skills/retro/SKILL.md",
++      "plugins/cwf/skills/retro/README.md",
++      "plugins/cwf/skills/retro/SKILL.md",
++      "plugins/cwf/skills/retro/references/cdm-guide.md",
++      "plugins/cwf/skills/retro/references/expert-lens-guide.md",
++      "plugins/cwf/skills/retro/references/retro-gates-checklist.md"
++    ],
++    "plugins/cwf/skills/retro/SKILL.md": [
++      "plugins/cwf/references/context-recovery-protocol.md",
++      "plugins/cwf/references/agent-patterns.md",
++      "plugins/cwf/skills/retro/references/retro-gates-checklist.md",
++      "plugins/cwf/skills/retro/references/retro-gates-checklist.md",
++      "plugins/cwf/references/expert-advisor-guide.md",
++      "plugins/cwf/references/agent-patterns.md"
++    ],
++    "plugins/cwf/skills/retro/references/cdm-guide.md": [],
++    "plugins/cwf/skills/retro/references/expert-lens-guide.md": [],
++    "plugins/cwf/skills/retro/references/retro-gates-checklist.md": [],
++    "plugins/cwf/skills/review/README.md": [
++      "plugins/cwf/skills/review/SKILL.md",
++      "plugins/cwf/skills/review/README.md",
++      "plugins/cwf/skills/review/SKILL.md",
++      "plugins/cwf/skills/review/references/external-review.md",
++      "plugins/cwf/skills/review/references/orchestration-and-fallbacks.md",
++      "plugins/cwf/skills/review/references/prompts.md",
++      "plugins/cwf/skills/review/references/synthesis-and-gates.md"
++    ],
++    "plugins/cwf/skills/review/SKILL.md": [
++      "plugins/cwf/references/agent-patterns.md",
++      "plugins/cwf/references/context-recovery-protocol.md",
++      "plugins/cwf/skills/review/references/orchestration-and-fallbacks.md",
++      "plugins/cwf/skills/review/references/orchestration-and-fallbacks.md",
++      "plugins/cwf/skills/review/references/synthesis-and-gates.md",
++      "plugins/cwf/skills/review/references/synthesis-and-gates.md",
++      "plugins/cwf/skills/review/references/synthesis-and-gates.md",
++      "plugins/cwf/skills/review/references/prompts.md",
++      "plugins/cwf/skills/review/references/external-review.md",
++      "plugins/cwf/skills/review/references/orchestration-and-fallbacks.md",
++      "plugins/cwf/skills/review/references/synthesis-and-gates.md",
++      "plugins/cwf/references/agent-patterns.md",
++      "plugins/cwf/references/expert-advisor-guide.md"
++    ],
++    "plugins/cwf/skills/review/references/external-review.md": [],
++    "plugins/cwf/skills/review/references/orchestration-and-fallbacks.md": [],
++    "plugins/cwf/skills/review/references/prompts.md": [],
++    "plugins/cwf/skills/review/references/synthesis-and-gates.md": [],
++    "plugins/cwf/skills/run/README.md": [
++      "plugins/cwf/skills/run/SKILL.md",
++      "plugins/cwf/skills/run/README.md",
++      "plugins/cwf/skills/run/SKILL.md"
++    ],
++    "plugins/cwf/skills/run/SKILL.md": [
++      "plugins/cwf/references/agent-patterns.md",
++      "plugins/cwf/references/plan-protocol.md"
++    ],
++    "plugins/cwf/skills/setup/README.md": [
++      "plugins/cwf/skills/setup/SKILL.md",
++      "plugins/cwf/skills/setup/README.md",
++      "plugins/cwf/skills/setup/SKILL.md",
++      "plugins/cwf/skills/setup/references/tool-detection-and-deps.md",
++      "plugins/cwf/skills/setup/references/setup-contract.md",
++      "plugins/cwf/skills/setup/references/codex-scope-integration.md",
++      "plugins/cwf/skills/setup/references/runtime-and-index-phases.md",
++      "plugins/cwf/skills/setup/scripts/bootstrap-setup-contract.sh",
++      "plugins/cwf/skills/setup/scripts/check-setup-contract-runtime.sh",
++      "plugins/cwf/skills/setup/scripts/check-index-coverage.sh",
++      "plugins/cwf/skills/setup/scripts/configure-git-hooks.sh",
++      "plugins/cwf/skills/setup/scripts/check-configure-git-hooks-runtime.sh",
++      "plugins/cwf/skills/setup/scripts/bootstrap-project-config.sh",
++      "plugins/cwf/skills/setup/scripts/configure-agent-teams.sh",
++      "plugins/cwf/skills/setup/scripts/configure-run-mode.sh",
++      "plugins/cwf/skills/setup/scripts/install-tooling-deps.sh",
++      "plugins/cwf/skills/setup/scripts/sync-hook-state.sh"
++    ],
++    "plugins/cwf/skills/setup/SKILL.md": [
++      "plugins/cwf/skills/setup/references/tool-detection-and-deps.md",
++      "plugins/cwf/skills/setup/references/tool-detection-and-deps.md",
++      "plugins/cwf/skills/setup/references/tool-detection-and-deps.md",
++      "plugins/cwf/skills/setup/references/codex-scope-integration.md",
++      "plugins/cwf/skills/setup/references/codex-scope-integration.md",
++      "plugins/cwf/skills/setup/references/codex-scope-integration.md",
++      "plugins/cwf/skills/setup/references/codex-scope-integration.md",
++      "plugins/cwf/skills/setup/references/codex-scope-integration.md",
++      "plugins/cwf/skills/setup/references/codex-scope-integration.md",
++      "plugins/cwf/skills/setup/references/codex-scope-integration.md",
++      "plugins/cwf/skills/setup/references/codex-scope-integration.md",
++      "plugins/cwf/skills/setup/references/codex-scope-integration.md",
++      "plugins/cwf/skills/setup/references/codex-scope-integration.md",
++      "plugins/cwf/skills/setup/references/codex-scope-integration.md",
++      "plugins/cwf/skills/setup/scripts/configure-git-hooks.sh",
++      "plugins/cwf/skills/setup/references/runtime-and-index-phases.md",
++      "plugins/cwf/skills/setup/references/runtime-and-index-phases.md",
++      "plugins/cwf/skills/setup/scripts/configure-agent-teams.sh",
++      "plugins/cwf/skills/setup/references/runtime-and-index-phases.md",
++      "plugins/cwf/skills/setup/scripts/configure-run-mode.sh",
++      "plugins/cwf/skills/setup/references/runtime-and-index-phases.md",
++      "plugins/cwf/skills/setup/references/runtime-and-index-phases.md",
++      "plugins/cwf/skills/setup/references/runtime-and-index-phases.md",
++      "plugins/cwf/skills/setup/references/runtime-and-index-phases.md",
++      "plugins/cwf/hooks/scripts/cwf-hook-gate.sh",
++      "plugins/cwf/hooks/hooks.json",
++      "plugins/cwf/references/agent-patterns.md",
++      "plugins/cwf/skills/setup/references/tool-detection-and-deps.md",
++      "plugins/cwf/skills/setup/references/setup-contract.md",
++      "plugins/cwf/skills/setup/references/codex-scope-integration.md",
++      "plugins/cwf/skills/setup/references/runtime-and-index-phases.md",
++      "plugins/cwf/scripts/detect-plugin-scope.sh",
++      "plugins/cwf/scripts/codex/sync-skills.sh",
++      "plugins/cwf/scripts/codex/install-wrapper.sh",
++      "plugins/cwf/scripts/codex/verify-skill-links.sh",
++      "plugins/cwf/skills/setup/scripts/configure-git-hooks.sh",
++      "plugins/cwf/skills/setup/scripts/check-configure-git-hooks-runtime.sh",
++      "plugins/cwf/skills/setup/assets/githooks/pre-commit.template.sh",
++      "plugins/cwf/skills/setup/assets/githooks/pre-push.template.sh",
++      "plugins/cwf/skills/setup/scripts/bootstrap-project-config.sh",
++      "plugins/cwf/skills/setup/scripts/configure-agent-teams.sh",
++      "plugins/cwf/skills/setup/scripts/configure-run-mode.sh",
++      "plugins/cwf/skills/setup/scripts/bootstrap-setup-contract.sh",
++      "plugins/cwf/skills/setup/scripts/check-setup-contract-runtime.sh",
++      "plugins/cwf/skills/setup/scripts/install-tooling-deps.sh",
++      "plugins/cwf/skills/setup/scripts/check-index-coverage.sh"
++    ],
++    "plugins/cwf/skills/setup/references/codex-scope-integration.md": [],
++    "plugins/cwf/skills/setup/references/runtime-and-index-phases.md": [
++      "plugins/cwf/.claude-plugin/plugin.json",
++      "plugins/cwf/hooks/hooks.json",
++      "plugins/cwf/hooks/scripts/cwf-hook-gate.sh",
++      "plugins/cwf/hooks/README.md",
++      "plugins/cwf/scripts/README.md",
++      "plugins/cwf/scripts/check-session.sh",
++      "plugins/cwf/scripts/codex",
++      "plugins/cwf/skills",
++      "plugins/cwf/hooks/README.md",
++      "plugins/cwf/scripts/README.md",
++      "plugins/cwf/hooks/README.md",
++      "plugins/cwf/scripts/README.md",
++      "plugins/cwf/hooks/README.md",
++      "plugins/cwf/scripts/README.md",
++      "plugins/cwf/skills"
++    ],
++    "plugins/cwf/skills/setup/references/setup-contract.md": [
++      "plugins/cwf/contracts/portable-contract.json",
++      "plugins/cwf/contracts/authoring-contract.json"
++    ],
++    "plugins/cwf/skills/setup/references/tool-detection-and-deps.md": [
++      "plugins/cwf/skills/setup/references/setup-contract.md"
++    ],
++    "plugins/cwf/skills/ship/README.md": [
++      "plugins/cwf/skills/ship/SKILL.md",
++      "plugins/cwf/skills/ship/README.md",
++      "plugins/cwf/skills/ship/SKILL.md",
++      "plugins/cwf/skills/ship/references/issue-template.md",
++      "plugins/cwf/skills/ship/references/pr-template.md"
++    ],
++    "plugins/cwf/skills/ship/SKILL.md": [
++      "plugins/cwf/skills/ship/references/issue-template.md",
++      "plugins/cwf/skills/ship/references/pr-template.md",
++      "plugins/cwf/references/agent-patterns.md"
++    ],
++    "plugins/cwf/skills/ship/references/issue-template.md": [],
++    "plugins/cwf/skills/ship/references/pr-template.md": [],
++    "plugins/cwf/skills/update/README.md": [
++      "plugins/cwf/skills/update/SKILL.md",
++      "plugins/cwf/skills/update/README.md",
++      "plugins/cwf/skills/update/SKILL.md",
++      "plugins/cwf/skills/update/references/scope-reconcile.md"
++    ],
++    "plugins/cwf/skills/update/SKILL.md": [
++      "plugins/cwf/skills/update/references/scope-reconcile.md",
++      "plugins/cwf/skills/update/references/scope-reconcile.md",
++      "plugins/cwf/skills/update/references/scope-reconcile.md",
++      "plugins/cwf/skills/update/references/scope-reconcile.md",
++      "plugins/cwf/skills/update/README.md",
++      "plugins/cwf/references/agent-patterns.md",
++      "plugins/cwf/skills/update/references/scope-reconcile.md",
++      "plugins/cwf/scripts/detect-plugin-scope.sh",
++      "plugins/cwf/scripts/codex/sync-skills.sh",
++      "plugins/cwf/scripts/codex/install-wrapper.sh"
++    ],
++    "plugins/cwf/skills/update/references/scope-reconcile.md": []
++  },
++  "orphans": [],
++  "broken_refs": [],
++  "top_referenced": [
++    {
++      "file": "plugins/cwf/references/agent-patterns.md",
++      "count": 17
++    },
++    {
++      "file": "plugins/cwf/skills/setup/references/codex-scope-integration.md",
++      "count": 13
++    },
++    {
++      "file": "plugins/cwf/skills/refactor/references/session-bootstrap.md",
++      "count": 11
++    },
++    {
++      "file": "plugins/cwf/references/context-recovery-protocol.md",
++      "count": 10
++    },
++    {
++      "file": "plugins/cwf/skills/impl/references/impl-gates.md",
++      "count": 9
++    },
++    {
++      "file": "plugins/cwf/skills/setup/references/runtime-and-index-phases.md",
++      "count": 9
++    },
++    {
++      "file": "plugins/cwf/skills/gather/SKILL.md",
++      "count": 8
++    },
++    {
++      "file": "plugins/cwf/references/plan-protocol.md",
++      "count": 8
++    },
++    {
++      "file": "plugins/cwf/skills/clarify/SKILL.md",
++      "count": 7
++    },
++    {
++      "file": "plugins/cwf/skills/retro/SKILL.md",
++      "count": 7
++    }
++  ]
++}
+diff --git a/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-doc-graph.rc b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-doc-graph.rc
+new file mode 100644
+index 0000000..573541a
+--- /dev/null
++++ b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-doc-graph.rc
+@@ -0,0 +1 @@
++0
+diff --git a/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-links.err b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-links.err
+new file mode 100644
+index 0000000..b705755
+--- /dev/null
++++ b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-links.err
+@@ -0,0 +1,3 @@
++Running link check...
++Mode: local only (skipping external URLs)
++All links are valid.
+diff --git a/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-links.json b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-links.json
+new file mode 100644
+index 0000000..bd9cff7
+--- /dev/null
++++ b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-links.json
+@@ -0,0 +1,18 @@
++{
++  "total": 560,
++  "successful": 544,
++  "unknown": 0,
++  "unsupported": 0,
++  "timeouts": 0,
++  "redirects": 0,
++  "excludes": 16,
++  "errors": 0,
++  "cached": 0,
++  "success_map": {},
++  "error_map": {},
++  "suggestion_map": {},
++  "redirect_map": {},
++  "excluded_map": {},
++  "duration_secs": 0,
++  "detailed_stats": false
++}
+diff --git a/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-links.rc b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-links.rc
+new file mode 100644
+index 0000000..573541a
+--- /dev/null
++++ b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-links.rc
+@@ -0,0 +1 @@
++0
+diff --git a/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-markdownlint.log b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-markdownlint.log
+new file mode 100644
+index 0000000..e69de29
+diff --git a/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-markdownlint.rc b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-markdownlint.rc
+new file mode 100644
+index 0000000..573541a
+--- /dev/null
++++ b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-markdownlint.rc
+@@ -0,0 +1 @@
++0
+diff --git a/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-provenance.json b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-provenance.json
+new file mode 100644
+index 0000000..311d24d
+--- /dev/null
++++ b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-docs-provenance.json
+@@ -0,0 +1 @@
++{"current":{"skills":13,"hooks":19},"files":[{"file":"CLAUDE.provenance.yaml","target":"CLAUDE.md","written_session":"S7","last_reviewed":"S26","recorded_skills":13,"recorded_hooks":19,"status":"fresh","skill_delta":0,"hook_delta":0},{"file":"plugins/cwf/references/concept-map.provenance.yaml","target":"concept-map.md","written_session":"S24","last_reviewed":"S26","recorded_skills":13,"recorded_hooks":19,"status":"fresh","skill_delta":0,"hook_delta":0},{"file":"plugins/cwf/references/expert-advisor-guide.provenance.yaml","target":"expert-advisor-guide.md","written_session":"S13.5-B","last_reviewed":"S26","recorded_skills":13,"recorded_hooks":19,"status":"fresh","skill_delta":0,"hook_delta":0},{"file":"plugins/cwf/references/skill-conventions.provenance.yaml","target":"skill-conventions.md","written_session":"S13","last_reviewed":"S26","recorded_skills":13,"recorded_hooks":19,"status":"fresh","skill_delta":0,"hook_delta":0},{"file":"plugins/cwf/skills/refactor/references/docs-criteria.provenance.yaml","target":"docs-criteria.md","written_session":"S11b","last_reviewed":"S26","recorded_skills":13,"recorded_hooks":19,"status":"fresh","skill_delta":0,"hook_delta":0},{"file":"plugins/cwf/skills/refactor/references/holistic-criteria.provenance.yaml","target":"holistic-criteria.md","written_session":"S11a","last_reviewed":"S26","recorded_skills":13,"recorded_hooks":19,"status":"fresh","skill_delta":0,"hook_delta":0},{"file":"plugins/cwf/skills/refactor/references/review-criteria.provenance.yaml","target":"review-criteria.md","written_session":"S11b","last_reviewed":"S26","recorded_skills":13,"recorded_hooks":19,"status":"fresh","skill_delta":0,"hook_delta":0}],"summary":{"total":7,"fresh":7,"stale":0}}
+diff --git a/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-summary.md b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-summary.md
+new file mode 100644
+index 0000000..0753be5
+--- /dev/null
++++ b/.cwf/projects/260219-01-pre-release-audit-pass2/refactor-summary.md
+@@ -0,0 +1,67 @@
++## Refactor Summary
++
++Session: `pre-release-audit-pass2`
++
++### Mode: `cwf:refactor --codebase`
++- Contract: `.cwf/codebase-contract.json` (`existing`)
++- Scan artifact: `.cwf/projects/260219-01-pre-release-audit-pass2/refactor-codebase-scan.json`
++- Finding fixed:
++  - `plugins/cwf/scripts/test-hook-exit-codes-suite-decision-journal.sh`: added `set -euo pipefail`
++- Re-run result: `errors=0`, `warnings=0`
++
++### Mode: `cwf:refactor --skill <all>` (deep batches)
++- Artifacts:
++  - `.cwf/projects/260219-01-pre-release-audit-pass2/refactor-deep-batch-a.md`
++  - `.cwf/projects/260219-01-pre-release-audit-pass2/refactor-deep-batch-b.md`
++  - `.cwf/projects/260219-01-pre-release-audit-pass2/refactor-deep-batch-c.md`
++  - `.cwf/projects/260219-01-pre-release-audit-pass2/refactor-deep-batch-d.md`
++  - `.cwf/projects/260219-01-pre-release-audit-pass2/refactor-deep-batch-e.md`
++  - `.cwf/projects/260219-01-pre-release-audit-pass2/refactor-deep-batch-f.md`
++  - `.cwf/projects/260219-01-pre-release-audit-pass2/refactor-deep-batch-g.md`
++- Key fixes applied from deep findings:
++  - `plugins/cwf/skills/hitl/SKILL.md`: intent-resync duplication reduced + first-run pointer-missing bootstrap path added.
++  - `plugins/cwf/skills/review/SKILL.md`: Codex auth-aware preflight routing guidance added.
++  - `plugins/cwf/skills/review/references/orchestration-and-fallbacks.md`: AUTH classifier expanded for faster fallback path.
++  - `plugins/cwf/skills/setup/SKILL.md`: missing `check-configure-git-hooks-runtime.sh` reference added.
++  - `plugins/cwf/skills/update/SKILL.md` and `plugins/cwf/skills/update/references/scope-reconcile.md`: cache root portability (`CWF_UPDATE_CACHE_ROOTS`, XDG, `/usr/local/share`) added.
++  - `plugins/cwf/references/concept-map.md`: `run` concept map row aligned with actual sequential pipeline behavior.
++- Deferred item:
++  - compiled artifact in `plugins/cwf/skills/gather/scripts/__pycache__/` is still present (deletion/move policy decision pending).
++
++### Mode: `cwf:refactor --docs`
++- Contract: `.cwf/docs-contract.yaml`
++- Deterministic checks:
++  - `markdownlint`: pass
++  - local link check: pass
++  - `doc-graph`: pass (`broken_ref_count=0`)
++- Fix applied:
++  - `plugins/cwf/references/skill-conventions.md` example link corrected to valid relative path.
++
++### Systemic audit fixes (SoT / repo-agnostic / contract-first / backcompat)
++- `plugins/cwf/scripts/codex/sync-skills.sh`
++  - removed `--cleanup-legacy` behavior and obsolete legacy layout branch.
++  - simplified to current plugin-root layout only.
++- `plugins/cwf/skills/setup/scripts/bootstrap-setup-contract.sh`
++  - fallback path is now fail-safe (non-zero exit).
++- `plugins/cwf/skills/refactor/scripts/bootstrap-codebase-contract.sh`
++  - fallback path is now fail-safe (non-zero exit).
++- Runtime checks updated for fail-safe semantics:
++  - `plugins/cwf/skills/setup/scripts/check-setup-contract-runtime.sh`
++  - `plugins/cwf/skills/refactor/scripts/check-codebase-contract-runtime.sh`
++- setup flow decoupled from legacy env migration script:
++  - `plugins/cwf/skills/setup/SKILL.md`
++  - `plugins/cwf/skills/setup/references/runtime-and-index-phases.md`
++  - `plugins/cwf/skills/setup/README.md`
++- README-level manual migration prompt added (skill flow excluded):
++  - `README.md`
++  - `README.ko.md`
++
++### Validation summary after fixes
++- `bash plugins/cwf/scripts/check-growth-drift.sh --level warn` → pass
++- `bash plugins/cwf/scripts/check-portability-contract.sh --contract auto --context manual` → pass
++- `bash plugins/cwf/scripts/check-setup-contract-runtime.sh` → pass
++- `bash plugins/cwf/skills/refactor/scripts/check-codebase-contract-runtime.sh` → pass
++- `bash plugins/cwf/scripts/check-readme-structure.sh --strict` → pass
++- `bash plugins/cwf/scripts/check-change-impact.sh --working` → pass
++- `bash plugins/cwf/scripts/check-claim-test-mapping.sh` → pass
++- `bash plugins/cwf/scripts/check-hook-sync.sh` → pass
+diff --git a/.cwf/projects/260219-01-pre-release-audit-pass2/repo-agnostic-audit.md b/.cwf/projects/260219-01-pre-release-audit-pass2/repo-agnostic-audit.md
+new file mode 100644
+index 0000000..102a835
+--- /dev/null
++++ b/.cwf/projects/260219-01-pre-release-audit-pass2/repo-agnostic-audit.md
+@@ -0,0 +1,25 @@
++# Repository-Agnostic Audit (Pass 2)
++
++## Findings Table
++| Severity | File:Line | Impact | Hardening |
++| --- | --- | --- | --- |
++| High | `plugins/cwf/skills/setup/scripts/bootstrap-setup-contract.sh:385-437` | Any failure to create the artifact root or render/write `setup-contract.yaml` is swallowed (`status=fallback` with exit 0) so `cwf:setup` continues without a repo-local contract, silently dropping repo-specific tooling proposals and hook-index expectations. | Treat `fallback` as a blocking event: surface the warning in `cwf-state.yaml`, halt the run until the filesystem issue is fixed, and/or require an explicit retry so the contract exists for downstream phases. |
++| Medium | `plugins/cwf/skills/refactor/scripts/bootstrap-codebase-contract.sh:331-360` | The `codebase-contract` bootstrap mirrors the same fail-open pattern; if it cannot create the contract the quick-scan proceeds with fallback defaults, meaning `cwf:refactor --codebase` can report findings without any tailored scope or strict-mode guidance. | Record the `fallback` status in the session summary and fail the scan early (or at least skip contract-sourced checks) so reviewers know the scan ran without a repo-specific contract rather than assuming the default policy. |
++| Medium | `plugins/cwf/hooks/scripts/check-markdown.sh:157-160` | When `markdownlint-cli2` is missing the hook exits cleanly, leaving large Markdown changes unlinted on hosts that do not have the dependency installed. | Log a one-time warning or suggest installing markdownlint during `cwf:setup` so the absence of the dependency does not silently disable Markdown coverage. |
++
++## Contract/Bootstrap Verification
++- **Setup**: `cwf:setup` enforces the setup-contract invariant (`rules 2.8-2.10` plus rule 8 in [plugins/cwf/skills/setup/SKILL.md:447-457]). It always runs `scripts/bootstrap-setup-contract.sh --json`, reports the `created|existing|updated|fallback` status, and is meant to drive the repo-specific tool proposal described in `references/setup-contract.md`. The runtime check `scripts/check-setup-contract-runtime.sh` exercises the `created/existing/updated/fallback` paths so the flow is already guarded.
++- **Refactor**: `cwf:refactor --codebase` begins by bootstrapping `codebase-contract.json` (`plugins/cwf/skills/refactor/SKILL.md:163-200`) and captures the contract metadata before scanning. The companion `scripts/check-codebase-contract-runtime.sh` verifies the same lifecycle states, so the first-run contract is detectable before any deep review occurs.
++- **Update**: The update workflow resolves scope before any mutation (`plugins/cwf/skills/update/SKILL.md:19-37`) and refuses to default to `user` when detection fails; missing scopes or non-installed targets stop the run. This makes the first interaction with a new repo safe because scope selection and confirmations occur before installing or updating Codex artifacts.
++
++## Fail-open vs fail-safe patterns
++- **Fail-open**: Both `bootstrap-setup-contract.sh` and `bootstrap-codebase-contract.sh` emit `fallback` metadata and exit 0 whenever directory creation, tempfile allocation, or file writes fail (`setup:385-437`, `refactor:331-360`). These loops are intentionally non-blocking so that the rest of the skill can proceed even when the contract cannot be stored, but that means later stages might operate without the expected contract data.
++- **Fail-open (hooks)**: PostToolUse hooks such as `check-markdown` also bail out when dependencies (e.g., `markdownlint-cli2`) are missing (`check-markdown:157-160`), so lint enforcement is invisible on machines lacking the tooling.
++- **Fail-safe**: `scripts/check-portability-contract.sh:108-115` treats missing or malformed contracts as fatal (`fail`), ensuring gating commands only run when contracts load successfully; this is the opposite posture, preventing a host from skipping portable checks accidentally.
++
++## Priority remediation
++1. **Hard fail on contract bootstrap fallback**: Upgrade `bootstrap-setup-contract.sh` and `bootstrap-codebase-contract.sh` to stop the skill when they cannot emit a contract (or at least surface a forced retry path) so users know the repository remains uncontracted.
++2. **Surface missing hooks tooling**: Follow `check-markdown` with a warning state (preferably in `cwf-state.yaml` or `lessons.md`) and include the missing dependency in the setup-contract report so `cwf:setup` can drive installation instead of letting lint gates be silently disabled.
++3. **Document fail-open trade-offs**: Call out the fallback behavior in repo-facing docs (e.g., `references/setup-contract.md`) so maintainers understand when `fallback` appears in the logs and how to rerun the bootstrap properly, keeping portability assumptions explicit.
++
++<!-- AGENT_COMPLETE -->
+diff --git a/.cwf/projects/260219-01-pre-release-audit-pass2/session-state.yaml b/.cwf/projects/260219-01-pre-release-audit-pass2/session-state.yaml
+new file mode 100644
+index 0000000..1dcc77f
+--- /dev/null
++++ b/.cwf/projects/260219-01-pre-release-audit-pass2/session-state.yaml
+@@ -0,0 +1,36 @@
++# session-state.yaml — volatile session live state
++# Synced from .cwf/cwf-state.yaml live section.
++
++live:
++  session_id: "260219-01"
++  dir: ".cwf/projects/260219-01-pre-release-audit-pass2"
++  branch: "marketplace-v3"
++  phase: "plan"
++  task: "pre-release pass2 plan finalized"
++  key_files:
++    - ".cwf/projects/260219-01-pre-release-audit-pass2/clarify-result.md"
++    - ".cwf/projects/260219-01-pre-release-audit-pass2/plan.md"
++    - ".cwf/projects/260219-01-pre-release-audit-pass2/lessons.md"
++    - ".cwf/projects/260219-01-pre-release-audit-pass2/plan-codebase-analysis.md"
++    - ".cwf/projects/260219-01-pre-release-audit-pass2/plan-claim-map.md"
++    - ".cwf/projects/260219-01-pre-release-audit-pass2/plan-prior-art-research.md"
++  decisions: []
++  decision_journal: []
++  hitl:
++    session_id: ""
++    state_file: ""
++    rules_file: ""
++    updated_at: ""
++  remaining_gates: []
++  state_version: "6"
++  worktree_root: "/home/hwidong/codes/claude-plugins"
++  worktree_branch: "marketplace-v3"
++  active_pipeline: ""
++  user_directive: "Run clarify→plan→implement fixes→review→retro for public release readiness"
++  pipeline_override_reason: "ship persisted as docs artifact (ship.md), GitHub mutation intentionally skipped"
++  ambiguity_mode: "defer-blocking"
++  blocking_decisions_pending: "false"
++  ambiguity_decisions_file: ".cwf/projects/260218-03-pre-release-refactor-audit/run-ambiguity-decisions.md"
++  clarify_result_file: ".cwf/projects/260218-03-pre-release-refactor-audit/clarify-result.md"
++  clarify_completed_at: "2026-02-18T06:48:00Z"
++  stage_provenance_file: ".cwf/projects/260218-03-pre-release-refactor-audit/run-stage-provenance.md"
+diff --git a/.cwf/projects/260219-01-pre-release-audit-pass2/sot-conformance-audit.md b/.cwf/projects/260219-01-pre-release-audit-pass2/sot-conformance-audit.md
+new file mode 100644
+index 0000000..fc41c4b
+--- /dev/null
++++ b/.cwf/projects/260219-01-pre-release-audit-pass2/sot-conformance-audit.md
+@@ -0,0 +1,42 @@
++# SoT Conformance Audit
++
++- Date: 2026-02-18
++- Scope: Verify claims from `README.md` / `README.ko.md` against implementing skills/hooks/scripts and deterministic checks.
++
++## Claim 1 — 단일 `cwf` 플러그인이 컨텍스트 수집 → 요구사항 명확화 → 계획 → 구현 → 리뷰 → 회고 → 핸드오프 → 배포 준비 일련의 워크플로우를 통합한다
++- SoT source: `README.md:83-87`, `README.ko.md:75-78`
++- Implementation evidence: `plugins/cwf/skills/run/SKILL.md:1-24` describes the `cwf:run` skill as the centralized orchestrator, and `plugins/cwf/skills/run/SKILL.md:122-132` enumerates the stage table that invokes each skill in the stated sequence.
++- Classification: MATCH
++- Notes: `cwf:run` is the single entry point that obeys Decision #19 (human gates pre-impl, autonomy afterward) while chaining every skill listed in the SoT claim, so the implementation aligns with the documented promise.
++
++## Claim 2 — `.cwf/cwf-state.yaml`, 세션 로그, 훅이 페이즈/세션 경계를 넘어 상태/교훈을 보존하는 stateful 워크플로우
++- SoT source: `README.md:84-101` (stateful workflow plus assumptions about artifacts), `README.ko.md:75-92`
++- Implementation evidence: `.cwf/cwf-state.yaml:1-120` holds the workflow stages, session defaults, and history referenced by the SoT; `plugins/cwf/hooks/scripts/workflow-gate.sh:190-229` loads the live state file (falling back to `BASE/.cwf/cwf-state.yaml`) whenever the workflow gate runs, proving hooks depend on that persistence; deterministic-check evidence: `scripts/check-schemas.sh:150-179` always validates `.cwf/cwf-state.yaml` (among other files) before declaring schema compliance, so the state file is both present and syntactically enforced.
++- Classification: MATCH
++- Notes: The SoT claim is upheld by the tracked state file plus gate enforcement and schema validation, giving deterministic proof that the implementation preserves context as described.
++
++## Claim 3 — `context-deficit resilience` 계약에서 skills는 오토컴팩트/재시작 이후에 암묵적 채팅 대신 persisted artifacts/핸드오프로 복구한다
++- SoT source: `README.md:86, 99-101`, `README.ko.md:75-91`
++- Implementation evidence: `plugins/cwf/references/context-recovery-protocol.md:17-120` codifies the global contract (persisted files only, sentinel markers, file validation loops, agent self-persistence); `plugins/cwf/skills/run/SKILL.md:20-24` stresses `cwf:run` recovers from persisted artifacts and `plugins/cwf/skills/run/SKILL.md:469-485` enumerates context-deficit resilience rules enforced at runtime (state tracking, recovery before downstream invocation, gating on stored worktree/root data).
++- Classification: MATCH
++- Notes: Both the protocol reference and the orchestrator enforce the exact recovery behavior described in the SoT claim.
++
++## Claim 4 — `cwf:setup` 표준화: 훅 그룹 선택, 외부 도구 탐지, env 마이그레이션/프로젝트 config 부트스트랩, 선택적 Codex/인덱스 통합이 포함됨
++- SoT source: `README.md:171-173` (setup row in skill table), `README.ko.md:152-167` (setup row and adaptive setup contract description)
++- Implementation evidence: `plugins/cwf/skills/setup/SKILL.md:37-179` details the full phase routing (hook toggles, tool detection + dependency installs, agent team/run-mode prompts, codex integration, cap-index/repo-index options, plus deterministic rewrite of `cwf-state.yaml`); `plugins/cwf/skills/setup/SKILL.md:65-140` describes hook group sync and `plugins/cwf/skills/setup/SKILL.md:145-177` spells out the required external/local dependency checks and re-runs, satisfying every piece of the SoT description.
++- Classification: MATCH
++- Notes: The implementation keeps `cwf:setup` as the comprehensive entry point with the documented optional sub-flows (hooks, tools, codex, indexes).
++
++## Claim 5 — `cwf:handoff`는 `cwf-state.yaml`과 세션 산출물을 읽어서 `next-session.md` 혹은 `phase-handoff.md`를 만들고 `cwf-state`를 갱신한다
++- SoT source: `README.md:167`, `README.ko.md:160-167`
++- Implementation evidence: `plugins/cwf/skills/handoff/SKILL.md:1-65` shows the skill is described as generating handoff docs from `cwf-state.yaml` and artifacts, `plugins/cwf/skills/handoff/SKILL.md:22-58` explains how the `sessions` history and `session_defaults` guide the process, and `plugins/cwf/skills/handoff/SKILL.md:85-132` documents how canonical sections are filled before updating `cwf-state.yaml` with the new artifacts/summary (including `phase-handoff` options and registration rules).
++- Classification: MATCH
++- Notes: The doc proves the implementation meets the SoT claim about file-based handoffs.
++
++## Claim 6 — `/review`은 6명의 병렬 리뷰어(2 내·부, 2 외부 CLI/대체, 2 도메인 전문가)를 사용하는 다각도 품질 게이트임
++- SoT source: `README.md:169`, `README.ko.md:323-337`
++- Implementation evidence: `plugins/cwf/skills/review/SKILL.md:1-35` states the 6-reviewer composition in the description and quick reference, and `plugins/cwf/skills/review/SKILL.md:186-218` describes Phase 2 launching six reviewers with the slot table (Security, UX/DX, Correctness, Architecture, Expert α, Expert β) and parallel persistence requirements.
++- Classification: MATCH
++- Notes: The skill documentation shows the six-reviewer runtime exactly as the SoT text states.
++
++<!-- AGENT_COMPLETE -->
+diff --git a/README.ko.md b/README.ko.md
+index 32ff163..54fc5dd 100644
+--- a/README.ko.md
++++ b/README.ko.md
+@@ -21,7 +21,6 @@ claude plugin install cwf@corca-plugins
+ 
+ 이제 Claude Code에서 `cwf:setup`을 실행해주세요. setup은 다음과 같이 작동합니다.
+ 
+-- v3 이전 레거시 환경 변수를 표준 `CWF_*` 키로 마이그레이션
+ - 프로젝트 설정 파일(`.cwf-config.yaml`, `.cwf-config.local.yaml`) 부트스트랩
+ - 외부 도구 감지(Codex/Gemini/Tavily/Exa) 및 선택적 Codex 연동
+ - 로컬 실행 의존성(`shellcheck`, `jq`, `gh`, `node`, `python3`, `lychee`, `markdownlint-cli2`) 점검 및 설치 선택
+@@ -162,7 +161,7 @@ gather → clarify → plan → review(plan) → impl → review(code) → refac
+ | 9 | [review](#review) | `cwf:review` | 요구/계획/코드에 공통 품질 게이트를 적용하는 다각도 리뷰 |
+ | 10 | [hitl](#hitl) | `cwf:hitl` | 합의 라운드와 청크 검토를 재개 가능한 상태로 운영 |
+ | 11 | [run](#run) | `cwf:run` | gather부터 ship까지 전체 파이프라인을 단계 게이트로 조율 |
+-| 12 | [setup](#setup) | `cwf:setup` | 훅/도구/setup·환경/인덱스 계약을 초기 표준값으로 부트스트랩하고 repo별 제안을 분리 제시 |
++| 12 | [setup](#setup) | `cwf:setup` | 훅/도구/setup·설정/인덱스 계약을 초기 표준값으로 부트스트랩하고 repo별 제안을 분리 제시 |
+ | 13 | [update](#update) | `cwf:update` | CWF 동작을 최신 계약/수정사항과 동기화 |
+ 
+ ## 스킬 레퍼런스
+@@ -455,7 +454,7 @@ CWF 런타임은 아래 우선순위로 설정을 읽습니다.
+ 3. 프로세스 환경 변수
+ 4. 셸 프로파일(`~/.zshenv`, `~/.zprofile`, `~/.zshrc`, `~/.bash_profile`, `~/.bashrc`, `~/.profile`)
+ 
+-`cwf:setup`을 수행하면 레거시 키를 `CWF_*`로 마이그레이션하고, 프로젝트 설정 템플릿을 부트스트랩하며, `.cwf-config.local.yaml`을 `.gitignore`에 등록합니다.
++`cwf:setup`을 수행하면 프로젝트 설정 템플릿을 부트스트랩하고, `.cwf-config.local.yaml`을 `.gitignore`에 등록합니다.
+ 
+ 팀 공유 기본값은 `.cwf-config.yaml`에 두세요.
+ 
+@@ -522,6 +521,14 @@ CWF_SESSION_LOG_AUTO_COMMIT=true                    # 기본값: false
+ # CWF_STATE_FILE=".cwf/custom-state.yaml"           # 기본값: {CWF_ARTIFACT_ROOT}/cwf-state.yaml
+ ```
+ 
++v3에서는 레거시 env 마이그레이션을 기본 `cwf:setup` 흐름에서 분리했습니다. v3 이전 키(`CLAUDE_CORCA_*`, `CLAUDE_ATTENTION_*`)를 쓰던 사용자라면 Claude Code / Codex에서 아래 프롬프트를 실행하세요.
++
++```text
++pre-v3 CWF 환경에서 업그레이드해서 CLAUDE_CORCA_* / CLAUDE_ATTENTION_* 레거시 env 키가 남아 있을 수 있습니다.
++설치된 CWF 플러그인 경로를 자동으로 찾고, migrate-env-vars.sh --scan 결과를 먼저 보여준 다음,
++--apply --cleanup-legacy --include-placeholders 실행 전에 확인을 요청해 주세요.
++```
++
+ ## 라이선스
+ 
+ MIT
+diff --git a/README.md b/README.md
+index ce409f6..e22f21a 100644
+--- a/README.md
++++ b/README.md
+@@ -29,7 +29,6 @@ cwf:setup
+ 
+ `cwf:setup` standardizes first-run behavior by handling:
+ 
+-- legacy env migration to canonical `CWF_*` keys
+ - project config bootstrap (`.cwf-config.yaml`, `.cwf-config.local.yaml`)
+ - tool detection (Codex/Gemini/Tavily/Exa) and optional Codex integration
+ - local runtime dependency checks with install prompts (`shellcheck`, `jq`, `gh`, `node`, `python3`, `lychee`, `markdownlint-cli2`)
+@@ -484,7 +483,7 @@ CWF runtime loads configuration in this priority order:
+ 3. Process environment
+ 4. Shell profiles (`~/.zshenv`, `~/.zprofile`, `~/.zshrc`, `~/.bash_profile`, `~/.bashrc`, `~/.profile`)
+ 
+-`cwf:setup` environment flow migrates legacy keys to canonical `CWF_*`, bootstraps project config templates, and ensures `.cwf-config.local.yaml` is gitignored.
++`cwf:setup` bootstraps project config templates and ensures `.cwf-config.local.yaml` is gitignored.
+ 
+ Use `.cwf-config.yaml` for shared non-secret defaults:
+ 
+@@ -551,6 +550,13 @@ CWF_SESSION_LOG_AUTO_COMMIT=true                   # default: false
+ # CWF_STATE_FILE=".cwf/custom-state.yaml"          # default: {CWF_ARTIFACT_ROOT}/cwf-state.yaml
+ ```
+ 
++Legacy env migration is intentionally out of the default `cwf:setup` flow in v3. If you are upgrading from pre-v3 keys (`CLAUDE_CORCA_*`, `CLAUDE_ATTENTION_*`), run this prompt in Claude Code / Codex:
++
++```text
++I upgraded from a pre-v3 CWF setup and may still have legacy CLAUDE_CORCA_* / CLAUDE_ATTENTION_* env vars.
++Please detect my installed CWF plugin path, run migrate-env-vars.sh --scan, show the migration candidates, and ask for confirmation before running --apply --cleanup-legacy --include-placeholders.
++```
++
+ ## License
+ 
+ MIT
+diff --git a/plugins/cwf/contracts/claims.json b/plugins/cwf/contracts/claims.json
+index 4fecdf1..547979c 100644
+--- a/plugins/cwf/contracts/claims.json
++++ b/plugins/cwf/contracts/claims.json
+@@ -35,6 +35,14 @@
+         {
+           "file": "plugins/cwf/skills/setup/references/setup-contract.md",
+           "selector": "Hook Policy Field"
++        },
++        {
++          "file": "plugins/cwf/skills/setup/SKILL.md",
++          "selector": "check-configure-git-hooks-runtime.sh"
++        },
++        {
++          "file": "plugins/cwf/skills/update/SKILL.md",
++          "selector": "CWF_UPDATE_CACHE_ROOTS"
+         }
+       ],
+       "tests": [
+diff --git a/plugins/cwf/references/concept-map.md b/plugins/cwf/references/concept-map.md
+index b1451d1..c82746c 100644
+--- a/plugins/cwf/references/concept-map.md
++++ b/plugins/cwf/references/concept-map.md
+@@ -164,7 +164,7 @@ Which generic concepts each skill composes:
+ | retro | x | | x | | | |
+ | refactor | | | x | | | x |
+ | review | x | | x | | | |
+-| run | | | x | | | |
++| run | | | | | | |
+ | handoff | | | | | x | |
+ | hitl | | | | x | x | |
+ | ship | | | | | | |
+@@ -178,6 +178,7 @@ Which generic concepts each skill composes:
+ - **Sparse row** (setup, ship, update) = infrastructure/operational skill, no generic concept synchronization
+ - **Dense row** (clarify) = complex skill composing many concepts
+ - **Dense column** (Agent Orchestration) = pervasive concept reused across most skills
++- `run` remains a pipeline router (stage sequencing) and is intentionally not counted as Agent Orchestration until it adds adaptive/parallel sub-agent decomposition.
+ - `hitl` composes Decision Point (agreement round, chunk-level discussion prompts, intent-resync confirmation) and Handoff (resumable state transfer via `state.yaml`, `queue.json`, and `hitl-scratchpad.md` across pauses/resume).
+ 
+ ## 3. Usage Guide
+diff --git a/plugins/cwf/references/skill-conventions.md b/plugins/cwf/references/skill-conventions.md
+index 82e7391..eca6dc2 100644
+--- a/plugins/cwf/references/skill-conventions.md
++++ b/plugins/cwf/references/skill-conventions.md
+@@ -35,7 +35,7 @@ Skeleton policy (enforced):
+ 
+ The top-level repository README (including locale mirrors) MUST keep each skill summary in this section order:
+ 
+-1. Skill heading link (`### [skill](.../SKILL.md)`)
++1. Skill heading link (for example, ``### [gather](../skills/gather/SKILL.md)``)
+ 2. Primary trigger
+ 3. `Why`
+ 4. `What Happens`
+diff --git a/plugins/cwf/scripts/codex/sync-skills.sh b/plugins/cwf/scripts/codex/sync-skills.sh
+index 0c1f668..d937976 100755
+--- a/plugins/cwf/scripts/codex/sync-skills.sh
++++ b/plugins/cwf/scripts/codex/sync-skills.sh
+@@ -7,30 +7,23 @@
+ #
+ # Usage:
+ #   plugins/cwf/scripts/codex/sync-skills.sh
+-#   plugins/cwf/scripts/codex/sync-skills.sh --cleanup-legacy
+ #   plugins/cwf/scripts/codex/sync-skills.sh --dry-run
+ #
+ # Notes:
+ # - This script never uses rm. When replacing files/dirs, it moves them to backup.
+-# - Legacy ~/.codex/skills cleanup is user-scope only and opt-in.
+ 
+ set -euo pipefail
+ 
+ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+-REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
++PLUGIN_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+ 
+-PLUGIN_NAME="cwf"
+ AGENTS_HOME="${AGENTS_HOME:-$HOME/.agents}"
+ DEST_SKILLS_DIR="$AGENTS_HOME/skills"
+ DEST_REFERENCES_PATH="$AGENTS_HOME/references"
+ SCOPE="${CWF_CLAUDE_PLUGIN_SCOPE:-user}"
+ PROJECT_ROOT=""
+ 
+-CODEX_HOME_LEGACY="${CODEX_HOME:-$HOME/.codex}"
+-LEGACY_SKILLS_DIR="$CODEX_HOME_LEGACY/skills"
+-
+ LINK_REFERENCES=true
+-CLEANUP_LEGACY=false
+ DRY_RUN=false
+ VERIFY_LINKS=true
+ 
+@@ -45,12 +38,10 @@ Options:
+   --scope <user|project|local>
+                         Integration scope (default: user)
+   --project-root <path> Project root for project/local scope (default: git root or cwd)
+-  --repo-root <path>      Repository root (default: auto-detect from script location)
++  --repo-root <path>      Plugin root override (default: auto-detect from script location)
+   --agents-home <path>    Agents home (default: ~/.agents or $AGENTS_HOME)
+   --skills-dir <path>     Destination skills dir (overrides --agents-home)
+-  --plugin <name>         Plugin name under plugins/ (default: cwf)
+   --no-references         Do not link ~/.agents/references
+-  --cleanup-legacy        Move non-.system entries from legacy $CODEX_HOME/skills to backup
+   --no-verify             Skip post-sync reference validation
+   --dry-run               Print actions without modifying files
+   -h, --help              Show this help
+@@ -104,7 +95,7 @@ while [[ $# -gt 0 ]]; do
+       shift 2
+       ;;
+     --repo-root)
+-      REPO_ROOT="${2:-}"
++      PLUGIN_ROOT="${2:-}"
+       shift 2
+       ;;
+     --agents-home)
+@@ -117,18 +108,10 @@ while [[ $# -gt 0 ]]; do
+       DEST_SKILLS_DIR="${2:-}"
+       shift 2
+       ;;
+-    --plugin)
+-      PLUGIN_NAME="${2:-}"
+-      shift 2
+-      ;;
+     --no-references)
+       LINK_REFERENCES=false
+       shift
+       ;;
+-    --cleanup-legacy)
+-      CLEANUP_LEGACY=true
+-      shift
+-      ;;
+     --no-verify)
+       VERIFY_LINKS=false
+       shift
+@@ -173,20 +156,9 @@ else
+   BACKUP_BASE="$AGENTS_HOME/.skill-sync-backup"
+ fi
+ 
+-# Support both layouts:
+-# 1) Plugin-local layout (marketplace source = ./plugins/cwf)
+-#    {REPO_ROOT}/skills, {REPO_ROOT}/references
+-# 2) Repository-root layout (legacy/dev scripts path)
+-#    {REPO_ROOT}/plugins/{name}/skills, {REPO_ROOT}/plugins/{name}/references
+-if [[ -d "$REPO_ROOT/skills" ]]; then
+-  SOURCE_SKILLS_DIR="$REPO_ROOT/skills"
+-  SOURCE_REFERENCES_DIR="$REPO_ROOT/references"
+-  SCRIPT_ROOT="$REPO_ROOT/scripts"
+-else
+-  SOURCE_SKILLS_DIR="$REPO_ROOT/plugins/$PLUGIN_NAME/skills"
+-  SOURCE_REFERENCES_DIR="$REPO_ROOT/plugins/$PLUGIN_NAME/references"
+-  SCRIPT_ROOT="$REPO_ROOT/plugins/$PLUGIN_NAME/scripts"
+-fi
++SOURCE_SKILLS_DIR="$PLUGIN_ROOT/skills"
++SOURCE_REFERENCES_DIR="$PLUGIN_ROOT/references"
++SCRIPT_ROOT="$PLUGIN_ROOT/scripts"
+ 
+ if [[ ! -d "$SOURCE_SKILLS_DIR" ]]; then
+   echo "Source skills directory not found: $SOURCE_SKILLS_DIR" >&2
+@@ -217,46 +189,6 @@ if [[ "$LINK_REFERENCES" == "true" ]]; then
+   echo "Linked references: $DEST_REFERENCES_PATH -> $SOURCE_REFERENCES_DIR"
+ fi
+ 
+-if [[ "$CLEANUP_LEGACY" == "true" ]]; then
+-  if [[ "$SCOPE" != "user" ]]; then
+-    echo "Skipping legacy cleanup for scope '$SCOPE' (legacy path is user-scoped: $LEGACY_SKILLS_DIR)."
+-  elif [[ "$LEGACY_SKILLS_DIR" == "$DEST_SKILLS_DIR" ]]; then
+-    echo "Skipping legacy cleanup: destination and legacy path are identical."
+-  elif [[ -d "$LEGACY_SKILLS_DIR" ]]; then
+-    run_cmd mkdir -p "$CODEX_HOME_LEGACY/tmp"
+-    legacy_backup="$(backup_path_for "$CODEX_HOME_LEGACY/tmp" "skills-custom-migrated")"
+-    moved_any=false
+-
+-    shopt -s nullglob dotglob
+-    for entry in "$LEGACY_SKILLS_DIR"/*; do
+-      entry_name="$(basename "$entry")"
+-      if [[ "$entry_name" == "." || "$entry_name" == ".." || "$entry_name" == ".system" ]]; then
+-        continue
+-      fi
+-      if [[ "$moved_any" == "false" ]]; then
+-        run_cmd mkdir -p "$legacy_backup"
+-      fi
+-      run_cmd mv "$entry" "$legacy_backup/"
+-      moved_any=true
+-      echo "Moved legacy entry: $entry_name"
+-    done
+-    shopt -u nullglob dotglob
+-
+-    if [[ "$moved_any" == "true" ]]; then
+-      echo "Moved legacy custom entries to: $legacy_backup"
+-    else
+-      echo "No legacy custom entries found in: $LEGACY_SKILLS_DIR"
+-    fi
+-
+-    if [[ -d "$LEGACY_SKILLS_DIR" ]] && [[ -z "$(find "$LEGACY_SKILLS_DIR" -mindepth 1 -maxdepth 1 -print -quit)" ]]; then
+-      run_cmd rmdir "$LEGACY_SKILLS_DIR"
+-      echo "Removed empty legacy directory: $LEGACY_SKILLS_DIR"
+-    fi
+-  else
+-    echo "Legacy skills directory not found (or not a directory): $LEGACY_SKILLS_DIR"
+-  fi
+-fi
+-
+ if [[ "$VERIFY_LINKS" == "true" ]]; then
+   verify_script="$SCRIPT_ROOT/codex/verify-skill-links.sh"
+   if [[ ! -x "$verify_script" ]]; then
+diff --git a/plugins/cwf/scripts/test-hook-exit-codes-suite-decision-journal.sh b/plugins/cwf/scripts/test-hook-exit-codes-suite-decision-journal.sh
+index 29e0b1b..bb24e00 100644
+--- a/plugins/cwf/scripts/test-hook-exit-codes-suite-decision-journal.sh
++++ b/plugins/cwf/scripts/test-hook-exit-codes-suite-decision-journal.sh
+@@ -1,4 +1,5 @@
+ #!/usr/bin/env bash
++set -euo pipefail
+ # test-hook-exit-codes-suite-decision-journal.sh
+ # Provides suite_decision_journal_e2e() for test-hook-exit-codes.sh.
+ 
+diff --git a/plugins/cwf/skills/hitl/SKILL.md b/plugins/cwf/skills/hitl/SKILL.md
+index 5a67fea..91eefc4 100644
+--- a/plugins/cwf/skills/hitl/SKILL.md
++++ b/plugins/cwf/skills/hitl/SKILL.md
+@@ -46,7 +46,12 @@ At minimum, keep these runtime artifacts:
+    - fallback `main`
+ 2. Resolve review scope (`docs|code|all`, default `all`).
+ 3. Build diff target: `git diff --name-only <base>...HEAD`.
+-4. If `--resume`, load from `live.hitl.state_file` pointer in `cwf-state.yaml` (fallback: latest `.cwf/projects/*/hitl/`).
++4. If `--resume`, load from `live.hitl.state_file` pointer in `cwf-state.yaml`.
++   - If pointer is missing, fallback to latest `.cwf/projects/*/hitl/`.
++   - If both are missing, bootstrap HITL state interactively:
++     - ask whether to initialize under current `live.dir` (recommended) or a new session dir
++     - create `.cwf/projects/{session-dir}/hitl/` artifacts
++     - persist the resolved pointer back to `cwf-state.yaml` `live.hitl.state_file`
+ 
+ ## Phase 0.5: Agreement Round (Default)
+ 
+@@ -172,9 +177,9 @@ On `--close` (or EOF completion):
+ 11. For comment-driven doc HITL (for example README reflection), present each item in this order: `Before` (current text), `After` (proposed text), `After Intent` (why this reflects the user's concern and any trade-off/opinion).
+     - `Before`/`After` must include enough surrounding context for user judgment (for example, the full paragraph or subsection, not a single isolated sentence).
+ 12. Do not ask a separate "proceed to next item?" question. When the current item is agreed, present the next pending item immediately; if not agreed, keep discussing the same item until agreement.
+-13. If user manual edits are detected/reported, set `intent_resync_required=true` immediately and record the trigger in `events.log`.
+-14. Never present a next chunk while `intent_resync_required=true`.
+-15. Clearing `intent_resync_required` requires both: (a) scratchpad intent update and (b) `last_intent_resync_at` timestamp update.
++13. If user manual edits are detected/reported, trigger Phase 0.75 immediately (set `intent_resync_required=true` and append trigger to `events.log`).
++14. While `intent_resync_required=true`, apply the Phase 0.75 block rule (no next chunk presentation).
++15. Clear `intent_resync_required` only through the Phase 0.75 completion contract (`hitl-scratchpad.md` intent delta + `last_intent_resync_at` update).
+ 16. During active HITL doc review, document edits and scratchpad state must stay synchronized; post-run checks should flag missing scratchpad updates.
+ 17. **Language override**: review-facing HITL outputs follow the user's language by default unless the user explicitly requests another language.
+ 
+diff --git a/plugins/cwf/skills/refactor/SKILL.md b/plugins/cwf/skills/refactor/SKILL.md
+index ee6a1d3..6a945c1 100644
+--- a/plugins/cwf/skills/refactor/SKILL.md
++++ b/plugins/cwf/skills/refactor/SKILL.md
+@@ -177,11 +177,11 @@ Behavior:
+ - Default location: `{artifact_root}/codebase-contract.json`
+ - If contract is missing: create a draft contract
+ - If contract exists: do not overwrite unless explicit force is used
+-- If bootstrap/contract load fails: continue with fallback defaults and prepend a contract warning
++- If bootstrap fails (`status=fallback` with non-zero exit): stop this mode and fix bootstrap/path issues before scanning
+ 
+ Capture metadata for final summary:
+ 
+-- `CONTRACT_STATUS`: `created`, `existing`, `updated`, or `fallback`
++- `CONTRACT_STATUS`: `created`, `existing`, `updated`, or `fallback` (`fallback` is fail-safe and must halt the stage)
+ - `CONTRACT_PATH`
+ - `CONTRACT_WARNING` (optional)
+ 
+diff --git a/plugins/cwf/skills/refactor/references/codebase-contract.md b/plugins/cwf/skills/refactor/references/codebase-contract.md
+index 6d98977..2a21ae0 100644
+--- a/plugins/cwf/skills/refactor/references/codebase-contract.md
++++ b/plugins/cwf/skills/refactor/references/codebase-contract.md
+@@ -27,7 +27,7 @@ Path resolution follows CWF artifact rules:
+ 
+ - Existing contract is never overwritten unless `--force` is used.
+ - First run is advisory defaults.
+-- If bootstrap write fails, codebase scan should continue with fallback defaults and warning metadata.
++- If bootstrap write fails, emit `status=fallback` and halt with non-zero exit (fail-safe).
+ 
+ ## Fields
+ 
+@@ -58,7 +58,7 @@ Path resolution follows CWF artifact rules:
+ 
+ ## Fallback Defaults (No Contract)
+ 
+-When no contract can be loaded, `--codebase` should still run with best-effort defaults:
++When no contract can be loaded via direct scan invocation (outside the bootstrap gate), `codebase-quick-scan` may still run with best-effort defaults:
+ 
+ - Source: tracked files when git is available; otherwise filesystem walk
+ - Scope: include all files, exclude common generated/non-code paths and common lockfiles (`*.lock`, `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `bun.lock*`)
+diff --git a/plugins/cwf/skills/refactor/scripts/bootstrap-codebase-contract.sh b/plugins/cwf/skills/refactor/scripts/bootstrap-codebase-contract.sh
+index ec15dd0..ca4e95f 100755
+--- a/plugins/cwf/skills/refactor/scripts/bootstrap-codebase-contract.sh
++++ b/plugins/cwf/skills/refactor/scripts/bootstrap-codebase-contract.sh
+@@ -10,7 +10,7 @@ set -euo pipefail
+ # - Default contract location: {artifact_root}/codebase-contract.json
+ # - Artifact root resolution: CWF config/env via cwf-artifact-paths.sh, fallback ./.cwf
+ # - Idempotent by default: existing contract is never overwritten unless --force
+-# - On bootstrap failure, emit fallback metadata and return success so scan can continue
++# - On bootstrap failure, emit fallback metadata and exit non-zero (fail-safe)
+ 
+ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+@@ -342,9 +342,9 @@ else
+ fi
+ 
+ if ! mkdir -p "$(dirname "$CONTRACT_PATH")" 2>/dev/null; then
+-  append_warning "unable to create contract directory; continue with fallback defaults"
++  append_warning "unable to create contract directory; bootstrap failed"
+   emit_result "fallback" "$CONTRACT_PATH" "$ARTIFACT_ROOT_ABS" "$WARNING"
+-  exit 0
++  exit 2
+ fi
+ 
+ if [[ -f "$CONTRACT_PATH" && "$FORCE" != "true" ]]; then
+@@ -357,21 +357,21 @@ tmp_file="$(mktemp "$CONTRACT_PATH.tmp.XXXXXX" 2>/dev/null || true)"
+ if [[ -z "$tmp_file" ]]; then
+   append_warning "unable to allocate temporary file for contract generation"
+   emit_result "fallback" "$CONTRACT_PATH" "$ARTIFACT_ROOT_ABS" "$WARNING"
+-  exit 0
++  exit 2
+ fi
+ 
+ if ! write_contract_file "$tmp_file" "$generated_at_utc"; then
+   mv "$tmp_file" "$tmp_file.failed" >/dev/null 2>&1 || true
+-  append_warning "failed to render contract draft; continue with fallback defaults"
++  append_warning "failed to render contract draft; bootstrap failed"
+   emit_result "fallback" "$CONTRACT_PATH" "$ARTIFACT_ROOT_ABS" "$WARNING"
+-  exit 0
++  exit 2
+ fi
+ 
+ if ! mv "$tmp_file" "$CONTRACT_PATH" 2>/dev/null; then
+   mv "$tmp_file" "$tmp_file.failed" >/dev/null 2>&1 || true
+-  append_warning "failed to write contract file; continue with fallback defaults"
++  append_warning "failed to write contract file; bootstrap failed"
+   emit_result "fallback" "$CONTRACT_PATH" "$ARTIFACT_ROOT_ABS" "$WARNING"
+-  exit 0
++  exit 2
+ fi
+ 
+ if [[ "$FORCE" == "true" ]]; then
+diff --git a/plugins/cwf/skills/refactor/scripts/check-codebase-contract-runtime.sh b/plugins/cwf/skills/refactor/scripts/check-codebase-contract-runtime.sh
+index 7269960..f11792c 100755
+--- a/plugins/cwf/skills/refactor/scripts/check-codebase-contract-runtime.sh
++++ b/plugins/cwf/skills/refactor/scripts/check-codebase-contract-runtime.sh
+@@ -9,7 +9,7 @@ set -euo pipefail
+ # - create path (status=created)
+ # - idempotent re-run (status=existing)
+ # - force update (status=updated)
+-# - fallback degradation (status=fallback, exit 0)
++# - fallback degradation (status=fallback, non-zero exit)
+ # - required contract keys exist for codebase scan parsing
+ 
+ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+@@ -73,7 +73,7 @@ set +e
+ fallback_json="$(bash "$BOOTSTRAP_SCRIPT" --json --contract "/dev/null/codebase-contract.json" 2>/dev/null)"
+ fallback_rc=$?
+ set -e
+-[[ "$fallback_rc" -eq 0 ]] || fail "fallback execution returned non-zero: $fallback_rc"
++[[ "$fallback_rc" -ne 0 ]] || fail "fallback execution unexpectedly returned success"
+ 
+ fallback_status="$(printf '%s' "$fallback_json" | jq -r '.status')"
+ [[ "$fallback_status" == "fallback" ]] || fail "expected fallback, got: $fallback_status"
+diff --git a/plugins/cwf/skills/review/SKILL.md b/plugins/cwf/skills/review/SKILL.md
+index 0d8ddac..81cdbcd 100644
+--- a/plugins/cwf/skills/review/SKILL.md
++++ b/plugins/cwf/skills/review/SKILL.md
+@@ -262,27 +262,32 @@ For **external** reviewer slots (Correctness, Architecture):
+ 
+ ### 2.2 Detect provider availability and route external slots
+ 
+-Single Bash call to check both:
++Single Bash call for provider preflight:
+ 
+ ```bash
+-command -v codex && echo CODEX_FOUND; command -v npx && echo NPX_FOUND
++command -v codex >/dev/null 2>&1 && echo CODEX_FOUND
++command -v npx >/dev/null 2>&1 && echo NPX_FOUND
++if command -v codex >/dev/null 2>&1; then
++  codex auth status >/dev/null 2>&1 && echo CODEX_AUTH_OK || true
++fi
+ ```
+ 
+ Parse the output:
+-- Contains `CODEX_FOUND` → Codex CLI binary exists (auth assumed OK)
++- Contains `CODEX_FOUND` + `CODEX_AUTH_OK` → Codex CLI is preflight-ready
++- Contains `CODEX_FOUND` without `CODEX_AUTH_OK` → Codex exists but is not authenticated; treat as not ready for auto routing
+ - Contains `NPX_FOUND` → npx exists, Gemini CLI *may* be available
+ 
+-Note: `NPX_FOUND` only confirms npx is installed, not that Gemini CLI is authenticated or cached. Runtime failures are handled in Phase 3.2.
++Note: `NPX_FOUND` only confirms npx is installed, not that Gemini CLI is authenticated/cached. Runtime auth/tool failures are still handled in Phase 3.2 with immediate fallback or install/auth prompt.
+ 
+ If `external_cli_allowed=false` (from the 1200-line cutoff), skip detection and set both slots to `claude`.
+ 
+ Otherwise, resolve providers for external slots:
+ 
+ - Slot 3 (Correctness):
+-  - `--correctness-provider auto` → prefer `codex`, then `gemini`, then `claude`
++  - `--correctness-provider auto` → prefer `codex` only when `CODEX_AUTH_OK`; otherwise `gemini`, then `claude`
+   - explicit `codex` / `gemini` / `claude` overrides auto
+ - Slot 4 (Architecture):
+-  - `--architecture-provider auto` → prefer `gemini`, then `codex`, then `claude`
++  - `--architecture-provider auto` → prefer `gemini`, then `codex` only when `CODEX_AUTH_OK`, then `claude`
+   - explicit `gemini` / `codex` / `claude` overrides auto
+ 
+ Provider semantics:
+diff --git a/plugins/cwf/skills/review/references/orchestration-and-fallbacks.md b/plugins/cwf/skills/review/references/orchestration-and-fallbacks.md
+index 56108f0..16610f5 100644
+--- a/plugins/cwf/skills/review/references/orchestration-and-fallbacks.md
++++ b/plugins/cwf/skills/review/references/orchestration-and-fallbacks.md
+@@ -207,7 +207,7 @@ When an external CLI exits non-zero, parse stderr **immediately** for error type
+ 1. Classify by the **first matching** pattern:
+    - `MODEL_CAPACITY_EXHAUSTED`, `429`, `ResourceExhausted`, `quota` → **CAPACITY**: fail-fast, immediate fallback, no retry
+    - `INTERNAL_ERROR`, `500`, `InternalError`, `server error` → **INTERNAL**: 1 retry then fallback
+-   - `AUTHENTICATION`, `401`, `UNAUTHENTICATED`, `API key` → **AUTH**: abort immediately with setup hint
++   - `AUTHENTICATION`, `401`, `UNAUTHENTICATED`, `API key`, `auth login`, `not logged in`, `Please login` → **AUTH**: abort immediately with setup hint
+    - `Tool.*not found`, `Did you mean one of` → **TOOL_ERROR**: fail-fast, immediate fallback, no retry
+ 1. Apply the action:
+    - **CAPACITY**: Skip exit code check. Launch fallback immediately.
+@@ -222,7 +222,7 @@ When an external CLI exits non-zero, parse stderr **immediately** for error type
+ |-----------|---------|--------|
+ | 0 + non-empty output | Success | `source: REAL_EXECUTION` |
+ | 0 + empty output | Silent failure | `source: FAILED` → launch Task fallback |
+-| 124 | Timeout (120s exceeded) | `source: FAILED` → launch Task fallback |
++| 124 | Timeout (120s exceeded) | If stderr indicates auth prompt, classify as `AUTH`; otherwise `source: FAILED` → launch Task fallback |
+ | 126-127 | Permission denied / not found | `source: FAILED` → launch Task fallback |
+ | Other non-zero | Unclassified error | `source: FAILED` → launch Task fallback |
+ 
+diff --git a/plugins/cwf/skills/setup/README.md b/plugins/cwf/skills/setup/README.md
+index 573aa96..921ceb5 100644
+--- a/plugins/cwf/skills/setup/README.md
++++ b/plugins/cwf/skills/setup/README.md
+@@ -9,11 +9,10 @@ File-level map for [setup](SKILL.md).
+ - [references/codex-scope-integration.md](references/codex-scope-integration.md): Detailed prompts/commands for scope-aware Codex integration phases (`2.4`/`2.5`/`2.6`).
+ - [references/runtime-and-index-phases.md](references/runtime-and-index-phases.md): Detailed prompts/commands for setup phases `2.7`~`2.10` and index/lessons phases (`3`/`4`/`5`).
+ - [scripts/bootstrap-setup-contract.sh](scripts/bootstrap-setup-contract.sh): Bootstraps a repository-local setup contract file under the configured CWF artifact root with core + repo-specific tool scopes.
+-- [scripts/check-setup-contract-runtime.sh](scripts/check-setup-contract-runtime.sh): Runtime regression check for setup-contract status flow (`created|existing|updated|fallback`).
++- [scripts/check-setup-contract-runtime.sh](scripts/check-setup-contract-runtime.sh): Runtime regression check for setup-contract status flow (`created|existing|updated|fallback`, with fail-safe fallback exit).
+ - [scripts/check-index-coverage.sh](scripts/check-index-coverage.sh): Validates generated index coverage for cap/repo profiles.
+ - [scripts/configure-git-hooks.sh](scripts/configure-git-hooks.sh): Installs/removes repo git hooks and applies gate profiles (`fast`, `balanced`, `strict`).
+ - [scripts/check-configure-git-hooks-runtime.sh](scripts/check-configure-git-hooks-runtime.sh): Runtime regression check for hook rendering path (`perl`) and deterministic degraded paths (`sed`, `sha-unavailable` marker).
+-- [scripts/migrate-env-vars.sh](scripts/migrate-env-vars.sh): Migrates legacy env keys to canonical `CWF_*` keys in shell profiles.
+ - [scripts/bootstrap-project-config.sh](scripts/bootstrap-project-config.sh): Bootstraps .cwf-config.yaml + .cwf-config.local.yaml and ensures local config gitignore.
+ - [scripts/configure-agent-teams.sh](scripts/configure-agent-teams.sh): Toggles Claude Agent Team runtime mode by editing `~/.claude/settings.json` env key.
+ - [scripts/configure-run-mode.sh](scripts/configure-run-mode.sh): Persists `cwf:run` ambiguity mode (`strict|defer-blocking|defer-reversible|explore-worktrees`) into project config.
+diff --git a/plugins/cwf/skills/setup/SKILL.md b/plugins/cwf/skills/setup/SKILL.md
+index fb7638a..52554ca 100644
+--- a/plugins/cwf/skills/setup/SKILL.md
++++ b/plugins/cwf/skills/setup/SKILL.md
+@@ -1,19 +1,19 @@
+ ---
+ name: setup
+-description: "Initial CWF configuration to standardize environment/tool contracts before workflow execution: hook group selection, external tool detection, setup-contract bootstrap, env migration + project config bootstrap, optional Agent Team mode setup, optional Codex integration, optional git hook gate installation, optional CWF capability index generation, and optional repository index generation. Triggers: \"cwf:setup\", \"setup hooks\", \"configure cwf\""
++description: "Initial CWF configuration to standardize environment/tool contracts before workflow execution: hook group selection, external tool detection, setup-contract bootstrap, project config bootstrap, optional Agent Team mode setup, optional Codex integration, optional git hook gate installation, optional CWF capability index generation, and optional repository index generation. Triggers: \"cwf:setup\", \"setup hooks\", \"configure cwf\""
+ ---
+ 
+ # Setup
+ 
+-Standardize hooks, tool contracts, and environment wiring once so later workflow runs stay reproducible. Includes interactive hook toggles, external tool detection, setup-contract bootstrap for repo-adaptive suggestions, env migration/bootstrap, optional Agent Team mode setup, optional Codex integration, optional git hook gate installation, optional CWF capability index generation, and optional repository index generation.
++Standardize hooks, tool contracts, and project/runtime config wiring once so later workflow runs stay reproducible. Includes interactive hook toggles, external tool detection, setup-contract bootstrap for repo-adaptive suggestions, project config bootstrap, optional Agent Team mode setup, optional Codex integration, optional git hook gate installation, optional CWF capability index generation, and optional repository index generation.
+ 
+ ## Quick Start
+ 
+ ```text
+-cwf:setup                # Full setup (hooks + tools + env + Agent Team + optional Codex/repo-index prompts)
++cwf:setup                # Full setup (hooks + tools + config + Agent Team + optional Codex/repo-index prompts)
+ cwf:setup --hooks        # Hook group selection only
+ cwf:setup --tools        # External tool detection only
+-cwf:setup --env          # Environment variable migration/bootstrap only
++cwf:setup --env          # Project config bootstrap + runtime priority guidance only
+ cwf:setup --agent-teams  # Agent Team mode setup only
+ cwf:setup --run-mode     # Configure default cwf:run ambiguity mode only
+ cwf:setup --codex        # Codex integration-only rerun (scope-aware skills/references sync)
+@@ -54,7 +54,7 @@ When mode is full setup and Codex CLI is available, do not silently skip Codex i
+ 
+ When mode is full setup, do not expect users to supply optional flags manually. Always ask for git hook installation mode and gate profile in Phase 2.7.
+ 
+-When mode is full setup or tools-only setup, always run Phase 2.8 so legacy env keys are migrated to canonical names and project config files are bootstrapped with explicit user choice.
++When mode is full setup or tools-only setup, always run Phase 2.8 so project config files are bootstrapped with explicit user choice.
+ 
+ When mode is full setup or tools-only setup, always run Phase 2.9 so Agent Team mode is explicitly aligned with CWF's multi-agent workflow assumptions.
+ 
+@@ -172,7 +172,7 @@ When `Install missing now` was selected, re-run 2.1 -> 2.2 -> 2.3 in full so `cw
+ 
+ ### 2.3.4 Setup Contract Bootstrap + Repo-Tool Proposal (Required for full/tools setup)
+ 
+-Bootstrap setup contract draft (`.cwf/setup-contract.yaml` by default), report contract status (`created|existing|updated|fallback`), and ask whether to apply repo-specific tool suggestions now.
++Bootstrap setup contract draft (`.cwf/setup-contract.yaml` by default), report contract status (`created|existing|updated|fallback`), and ask whether to apply repo-specific tool suggestions now. If bootstrap returns `fallback`, stop setup immediately and resolve bootstrap failure first.
+ 
+ Detailed checks, prompts, and commands: [tool-detection-and-deps.md](references/tool-detection-and-deps.md).
+ 
+@@ -299,37 +299,18 @@ Detailed prompts, command templates, and reporting checklist: [runtime-and-index
+ 
+ ---
+ 
+-## Phase 2.8: Environment Migration and Project Config Bootstrap
++## Phase 2.8: Project Config Bootstrap
+ 
+ Use this phase when:
+ - Mode is full setup (`cwf:setup`)
+ - User runs `cwf:setup --tools`
+ - User runs `cwf:setup --env`
+ 
+-### 2.8.1 Scan Existing Environment Config
+-
+-Run environment scan via [scripts/migrate-env-vars.sh](scripts/migrate-env-vars.sh) with `--scan` and report legacy-key migration candidates plus missing required keys.
+-
+-### 2.8.2 Ask Apply Strategy
+-
+-Use AskUserQuestion to choose one path:
+-- `Auto migrate now`
+-- `Review first`
+-- `Skip for now`
+-
+-### 2.8.3 Apply Migration
+-
+-When approved, run `migrate-env-vars.sh --apply` flow (with optional `--target-profile`).
+-
+-### 2.8.4 Report Effective State
+-
+-Always report applied profile, migrated keys, missing required keys, and shell reload guidance.
+-
+-### 2.8.5 Bootstrap Project Config Files
++### 2.8.1 Bootstrap Project Config Files
+ 
+ Ask whether to bootstrap project config templates, then run `bootstrap-project-config.sh` (`--force` when overwrite is selected).
+ 
+-### 2.8.6 Explain Runtime Priority
++### 2.8.2 Explain Runtime Priority
+ 
+ Always report effective runtime priority:
+ 1. `.cwf-config.local.yaml`
+@@ -447,13 +428,13 @@ Detailed lessons/checkpoint format: [runtime-and-index-phases.md](references/run
+ ## Rules
+ 
+ 1. **State SSOT + idempotency**: Read and edit `cwf-state.yaml` (do not overwrite wholesale), and keep reruns safe/idempotent across all phases.
+-2. **Single-entry setup UX**: Full setup (`cwf:setup`) must execute the integrated optional decision flow for Codex, hooks, setup-contract proposal, env/bootstrap, agent-teams, and run-mode phases in one run.
++2. **Single-entry setup UX**: Full setup (`cwf:setup`) must execute the integrated optional decision flow for Codex, hooks, setup-contract proposal, config bootstrap, agent-teams, and run-mode phases in one run.
+ 3. **Index generation is explicit and deterministic**: Capability index runs only via `--cap-index`; repository index runs via `--repo-index` with target resolution (`agents`, `file`, `both`) from CLI or repository context.
+ 4. **Index coverage/link policy is mandatory**: Generated indexes must use Markdown relative links and pass deterministic coverage checks (cap/repo profiles).
+ 5. **File safety**: Codex sync must use symlink + backup move (no direct user file deletion).
+ 6. **Scope-aware Codex integration**: Resolve active plugin scope first; non-user context must not mutate user-global Codex paths without explicit user confirmation.
+ 7. **No fail-open scope fallback**: If scope detection fails or returns `none`, require explicit user scope selection before any Codex mutation.
+-8. **Setup-contract first-run invariant**: Full/tools setup must bootstrap setup-contract and explicitly report `created|existing|updated|fallback` status before continuing.
++8. **Setup-contract first-run invariant**: Full/tools setup must bootstrap setup-contract and explicitly report `created|existing|updated|fallback` status. `fallback` is fail-safe and must halt setup.
+ 9. **Formatting invariant**: All code fences in this skill must include language specifiers.
+ 
+ ## References
+@@ -470,14 +451,14 @@ Detailed lessons/checkpoint format: [runtime-and-index-phases.md](references/run
+ - [install-wrapper.sh](../../scripts/codex/install-wrapper.sh) — Codex scope-aware wrapper management
+ - [verify-skill-links.sh](../../scripts/codex/verify-skill-links.sh) — Codex skill link validation
+ - [scripts/configure-git-hooks.sh](scripts/configure-git-hooks.sh) — installs and profiles repository git hook gates
++- [scripts/check-configure-git-hooks-runtime.sh](scripts/check-configure-git-hooks-runtime.sh) — validates configure-git-hooks runtime behavior across profile/force paths
+ - [assets/githooks/pre-commit.template.sh](assets/githooks/pre-commit.template.sh) — pre-commit hook template rendered by `configure-git-hooks.sh`
+ - [assets/githooks/pre-push.template.sh](assets/githooks/pre-push.template.sh) — pre-push hook template rendered by `configure-git-hooks.sh`
+-- [scripts/migrate-env-vars.sh](scripts/migrate-env-vars.sh) — legacy env detection and canonical CWF env migration
+ - [scripts/bootstrap-project-config.sh](scripts/bootstrap-project-config.sh) — project config template/bootstrap and `.gitignore` sync
+ - [scripts/configure-agent-teams.sh](scripts/configure-agent-teams.sh) — toggles Claude Agent Team runtime mode in `~/.claude/settings.json`
+ - [scripts/configure-run-mode.sh](scripts/configure-run-mode.sh) — persists default `cwf:run` ambiguity mode into project config
+ - [scripts/bootstrap-setup-contract.sh](scripts/bootstrap-setup-contract.sh) — bootstraps repository-local setup contract (`.cwf/setup-contract.yaml`) from core baseline + repo scan
+-- [scripts/check-setup-contract-runtime.sh](scripts/check-setup-contract-runtime.sh) — validates setup-contract bootstrap status semantics (`created|existing|updated|fallback`)
++- [scripts/check-setup-contract-runtime.sh](scripts/check-setup-contract-runtime.sh) — validates setup-contract bootstrap status semantics (`created|existing|updated|fallback`, with fail-safe fallback)
+ - [scripts/install-tooling-deps.sh](scripts/install-tooling-deps.sh) — checks/installs missing local runtime dependencies for CWF workflows
+ - [scripts/check-index-coverage.sh](scripts/check-index-coverage.sh) — deterministic index coverage validation
+ - .cwf-cap-index-ignore — optional intentional exclusion list for capability index coverage
+diff --git a/plugins/cwf/skills/setup/references/codex-scope-integration.md b/plugins/cwf/skills/setup/references/codex-scope-integration.md
+index 464beab..c959593 100644
+--- a/plugins/cwf/skills/setup/references/codex-scope-integration.md
++++ b/plugins/cwf/skills/setup/references/codex-scope-integration.md
+@@ -111,7 +111,7 @@ Options:
+ If `Skills + wrapper (recommended)`:
+ 
+ ```bash
+-bash {CWF_PLUGIN_DIR}/scripts/codex/sync-skills.sh --scope "$selected_scope" ${selected_project_root:+--project-root "$selected_project_root"} --cleanup-legacy
++bash {CWF_PLUGIN_DIR}/scripts/codex/sync-skills.sh --scope "$selected_scope" ${selected_project_root:+--project-root "$selected_project_root"}
+ if [ "$selected_scope" = "user" ]; then
+   bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --scope "$selected_scope" --enable --add-path
+ else
+@@ -123,7 +123,7 @@ bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --scope "$selected_scope"
+ If `Skills only`:
+ 
+ ```bash
+-bash {CWF_PLUGIN_DIR}/scripts/codex/sync-skills.sh --scope "$selected_scope" ${selected_project_root:+--project-root "$selected_project_root"} --cleanup-legacy
++bash {CWF_PLUGIN_DIR}/scripts/codex/sync-skills.sh --scope "$selected_scope" ${selected_project_root:+--project-root "$selected_project_root"}
+ ```
+ 
+ If `Skip for now`: do not mutate Codex integration.
+@@ -169,13 +169,12 @@ From non-user context, user-global override requires explicit confirmation.
+ ### 2.5.2 Run Sync
+ 
+ ```bash
+-bash {CWF_PLUGIN_DIR}/scripts/codex/sync-skills.sh --scope "$selected_scope" ${selected_project_root:+--project-root "$selected_project_root"} --cleanup-legacy
++bash {CWF_PLUGIN_DIR}/scripts/codex/sync-skills.sh --scope "$selected_scope" ${selected_project_root:+--project-root "$selected_project_root"}
+ ```
+ 
+ Expected behavior:
+ - user: links into `~/.agents/skills` and `~/.agents/references`
+ - project/local: links into `{projectRoot}/.codex/skills` and `{projectRoot}/.codex/references`
+-- user scope may move legacy custom entries from `~/.codex/skills` to backup (keeping `.system`)
+ - relative skill references are validated by `verify-skill-links.sh`
+ 
+ ### 2.5.3 Report Results
+@@ -183,7 +182,6 @@ Expected behavior:
+ Report:
+ - linked skill count
+ - destination paths
+-- whether legacy `~/.codex/skills` entries were moved (user scope)
+ - before/after touched paths
+ - rollback guidance from `.skill-sync-backup`
+ 
+diff --git a/plugins/cwf/skills/setup/references/runtime-and-index-phases.md b/plugins/cwf/skills/setup/references/runtime-and-index-phases.md
+index 80858b1..fdb7ea5 100644
+--- a/plugins/cwf/skills/setup/references/runtime-and-index-phases.md
++++ b/plugins/cwf/skills/setup/references/runtime-and-index-phases.md
+@@ -7,7 +7,7 @@ Detailed procedure reference for setup phases 2.7, 2.8, 2.9, 2.10, 3, 4, and 5.
+ ## Contents
+ 
+ - [Phase 2.7: Git Hook Gate Installation](#phase-27-git-hook-gate-installation)
+-- [Phase 2.8: Environment Migration and Project Config Bootstrap](#phase-28-environment-migration-and-project-config-bootstrap)
++- [Phase 2.8: Project Config Bootstrap](#phase-28-project-config-bootstrap)
+ - [Phase 2.9: Agent Team Mode Setup](#phase-29-agent-team-mode-setup)
+ - [Phase 2.10: CWF Run Ambiguity Mode Setup](#phase-210-cwf-run-ambiguity-mode-setup)
+ - [Phase 3: Generate CWF Capability Index (Explicit)](#phase-3-generate-cwf-capability-index-explicit)
+@@ -91,78 +91,14 @@ And summarize:
+ 
+ ---
+ 
+-## Phase 2.8: Environment Migration and Project Config Bootstrap
++## Phase 2.8: Project Config Bootstrap
+ 
+ Use this phase when:
+ - Mode is full setup (`cwf:setup`)
+ - User runs `cwf:setup --tools`
+ - User runs `cwf:setup --env`
+ 
+-### 2.8.1 Scan Existing Environment Config
+-
+-Run:
+-
+-```bash
+-bash {SKILL_DIR}/scripts/migrate-env-vars.sh --scan
+-```
+-
+-This scan checks `~/.zshrc`, `~/.bashrc`, and `~/.claude/.env` (if present), and reports:
+-- legacy-to-canonical migration candidates (`CLAUDE_CORCA_*`/`CLAUDE_ATTENTION_*` → `CWF_*`)
+-- missing required keys (`SLACK_BOT_TOKEN`, `SLACK_CHANNEL_ID`, `TAVILY_API_KEY`, `EXA_API_KEY`)
+-
+-### 2.8.2 Ask Apply Strategy
+-
+-Use AskUserQuestion (single choice):
+-
+-```text
+-Apply environment variable migration now?
+-```
+-
+-Options:
+-- `Auto migrate now (recommended)`:
+-  - apply canonical exports into active shell profile
+-  - comment legacy assignments in scanned files
+-  - include commented placeholders for missing required keys
+-- `Review first`:
+-  - show scan output and the exact apply command
+-  - ask one additional confirm question before applying
+-- `Skip for now`:
+-  - no file modifications in this phase
+-
+-### 2.8.3 Apply Migration
+-
+-When apply is approved, run:
+-
+-```bash
+-bash {SKILL_DIR}/scripts/migrate-env-vars.sh --apply --cleanup-legacy --include-placeholders
+-```
+-
+-If the user wants a specific target profile, pass:
+-
+-```bash
+-bash {SKILL_DIR}/scripts/migrate-env-vars.sh --apply --cleanup-legacy --include-placeholders --target-profile ~/.zshrc
+-```
+-
+-### 2.8.4 Report Effective State
+-
+-Always report:
+-- applied profile path
+-- migrated key list
+-- missing required keys still needing real values
+-
+-Provide verification command:
+-
+-```bash
+-rg -n "CWF_|TAVILY_API_KEY|EXA_API_KEY|SLACK_BOT_TOKEN|SLACK_CHANNEL_ID" ~/.zshrc ~/.bashrc ~/.claude/.env
+-```
+-
+-Include activation note:
+-
+-```text
+-Open a new shell (or source ~/.zshrc / ~/.bashrc) so updated exports are loaded.
+-```
+-
+-### 2.8.5 Bootstrap Project Config Files
++### 2.8.1 Bootstrap Project Config Files
+ 
+ Ask whether to create project-level config files (.cwf-config.yaml, .cwf-config.local.yaml) now:
+ 
+@@ -193,9 +129,9 @@ When user selects `Overwrite templates`, run:
+ bash {SKILL_DIR}/scripts/bootstrap-project-config.sh --force
+ ```
+ 
+-### 2.8.6 Explain Runtime Priority
++### 2.8.2 Explain Runtime Priority
+ 
+-After migration/bootstrap decisions, always report the effective CWF config source priority:
++After bootstrap decisions, always report the effective CWF config source priority:
+ 
+ 1. .cwf-config.local.yaml
+ 2. .cwf-config.yaml
+diff --git a/plugins/cwf/skills/setup/references/setup-contract.md b/plugins/cwf/skills/setup/references/setup-contract.md
+index 93f4a01..eb8a62d 100644
+--- a/plugins/cwf/skills/setup/references/setup-contract.md
++++ b/plugins/cwf/skills/setup/references/setup-contract.md
+@@ -61,7 +61,7 @@ Status values:
+ - `created`: first draft contract generated this run
+ - `existing`: contract already present; no overwrite
+ - `updated`: existing contract refreshed via `--force`
+-- `fallback`: bootstrap degraded (for example, path/write failure); continue setup with core defaults
++- `fallback`: bootstrap failed (for example, path/write failure); stop and fix before continuing
+ 
+ ## First-Run Flow (Required)
+ 
+@@ -111,14 +111,14 @@ bash {SKILL_DIR}/scripts/install-tooling-deps.sh --check
+ 
+ If bootstrap returns `fallback`:
+ 
+-- continue setup using core dependency defaults,
++- stop setup flow immediately (fail-safe),
+ - report `warning` text,
+-- suggest manual rerun after environment/path issues are resolved.
++- request path/permission fix and rerun bootstrap.
+ 
+ Example report line:
+ 
+ ```text
+-setup-contract: fallback (using core defaults); reason: <warning>
++setup-contract: fallback (bootstrap failed); reason: <warning>
+ ```
+ 
+ ## Runtime Validation
+diff --git a/plugins/cwf/skills/setup/references/tool-detection-and-deps.md b/plugins/cwf/skills/setup/references/tool-detection-and-deps.md
+index 977c7d5..e91a60e 100644
+--- a/plugins/cwf/skills/setup/references/tool-detection-and-deps.md
++++ b/plugins/cwf/skills/setup/references/tool-detection-and-deps.md
+@@ -139,7 +139,7 @@ Handle by `status`:
+ - `existing`:
+   - report contract path and continue with current contract
+ - `fallback`:
+-  - report warning and continue with core defaults
++  - report warning and stop this setup run (fail-safe)
+ 
+ Prompt text:
+ 
+diff --git a/plugins/cwf/skills/setup/scripts/bootstrap-setup-contract.sh b/plugins/cwf/skills/setup/scripts/bootstrap-setup-contract.sh
+index 59a4715..240f654 100755
+--- a/plugins/cwf/skills/setup/scripts/bootstrap-setup-contract.sh
++++ b/plugins/cwf/skills/setup/scripts/bootstrap-setup-contract.sh
+@@ -5,7 +5,7 @@ set -euo pipefail
+ # Usage: bootstrap-setup-contract.sh [--contract <path>] [--force] [--json]
+ # Defaults to {artifact_root}/setup-contract.yaml; artifact root resolves via
+ # cwf-artifact-paths.sh (fallback: ./.cwf). Existing files are preserved unless
+-# --force. On bootstrap failure, emit fallback metadata and keep setup flow moving.
++# --force. On bootstrap failure, emit fallback metadata and exit non-zero (fail-safe).
+ 
+ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+@@ -396,9 +396,9 @@ else
+ fi
+ 
+ if ! mkdir -p "$(dirname "$CONTRACT_PATH")" 2>/dev/null; then
+-  append_warning "unable to create contract directory; continue with fallback defaults"
++  append_warning "unable to create contract directory; bootstrap failed"
+   emit_result "fallback" "$CONTRACT_PATH" "$ARTIFACT_ROOT_ABS" "$WARNING"
+-  exit 0
++  exit 2
+ fi
+ 
+ if [[ -f "$CONTRACT_PATH" && "$FORCE" != "true" ]]; then
+@@ -413,21 +413,21 @@ tmp_file="$(mktemp "$CONTRACT_PATH.tmp.XXXXXX" 2>/dev/null || true)"
+ if [[ -z "$tmp_file" ]]; then
+   append_warning "unable to allocate temporary file for contract generation"
+   emit_result "fallback" "$CONTRACT_PATH" "$ARTIFACT_ROOT_ABS" "$WARNING"
+-  exit 0
++  exit 2
+ fi
+ 
+ if ! write_contract_file "$tmp_file" "$generated_at_utc"; then
+   mv "$tmp_file" "$tmp_file.failed" >/dev/null 2>&1 || true
+-  append_warning "failed to render setup contract draft"
++  append_warning "failed to render setup contract draft; bootstrap failed"
+   emit_result "fallback" "$CONTRACT_PATH" "$ARTIFACT_ROOT_ABS" "$WARNING"
+-  exit 0
++  exit 2
+ fi
+ 
+ if ! mv "$tmp_file" "$CONTRACT_PATH" 2>/dev/null; then
+   mv "$tmp_file" "$tmp_file.failed" >/dev/null 2>&1 || true
+-  append_warning "failed to write setup contract file"
++  append_warning "failed to write setup contract file; bootstrap failed"
+   emit_result "fallback" "$CONTRACT_PATH" "$ARTIFACT_ROOT_ABS" "$WARNING"
+-  exit 0
++  exit 2
+ fi
+ 
+ if [[ "$FORCE" == "true" ]]; then
+diff --git a/plugins/cwf/skills/setup/scripts/check-setup-contract-runtime.sh b/plugins/cwf/skills/setup/scripts/check-setup-contract-runtime.sh
+index 0847ebd..b702185 100755
+--- a/plugins/cwf/skills/setup/scripts/check-setup-contract-runtime.sh
++++ b/plugins/cwf/skills/setup/scripts/check-setup-contract-runtime.sh
+@@ -9,7 +9,7 @@ set -euo pipefail
+ # - create path (status=created)
+ # - idempotent re-run (status=existing)
+ # - force update (status=updated)
+-# - fallback degradation (status=fallback, exit 0)
++# - fallback degradation (status=fallback, non-zero exit)
+ # - required contract keys exist for setup-flow parsing
+ 
+ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+@@ -66,7 +66,7 @@ set +e
+ fallback_json="$(bash "$BOOTSTRAP_SCRIPT" --json --contract '/dev/null/setup-contract.yaml' 2>/dev/null)"
+ fallback_rc=$?
+ set -e
+-[[ "$fallback_rc" -eq 0 ]] || fail "fallback execution returned non-zero: $fallback_rc"
++[[ "$fallback_rc" -ne 0 ]] || fail "fallback execution unexpectedly returned success"
+ 
+ fallback_status="$(printf '%s' "$fallback_json" | jq -r '.status')"
+ [[ "$fallback_status" == "fallback" ]] || fail "expected fallback, got: $fallback_status"
+diff --git a/plugins/cwf/skills/update/SKILL.md b/plugins/cwf/skills/update/SKILL.md
+index b4240c9..f488d9e 100644
+--- a/plugins/cwf/skills/update/SKILL.md
++++ b/plugins/cwf/skills/update/SKILL.md
+@@ -81,10 +81,18 @@ claude plugin marketplace update corca-plugins
+ Resolve latest marketplace payload snapshot:
+ 
+ ```bash
++extra_cache_roots_raw="${CWF_UPDATE_CACHE_ROOTS:-}"
++IFS=':' read -r -a extra_cache_roots <<< "$extra_cache_roots_raw"
+ cache_roots=(
+   "${CLAUDE_HOME:-$HOME/.claude}/plugins/cache"
+   "$HOME/.claude/plugins/cache"
++  "${XDG_CACHE_HOME:-$HOME/.cache}/claude/plugins/cache"
++  "/usr/local/share/claude/plugins/cache"
+ )
++for extra_root in "${extra_cache_roots[@]}"; do
++  [ -n "$extra_root" ] || continue
++  cache_roots+=("$extra_root")
++done
+ latest_plugin_json=""
+ for cache_root in "${cache_roots[@]}"; do
+   [ -d "$cache_root" ] || continue
+@@ -97,7 +105,7 @@ done
+ [ -n "$latest_plugin_json" ] || {
+   echo "Latest CWF metadata not found after marketplace update."
+   echo "Checked cache roots: ${cache_roots[*]}"
+-  echo "Set CLAUDE_HOME or provide a valid cache root."
++  echo "Set CLAUDE_HOME, CWF_UPDATE_CACHE_ROOTS, or provide a valid cache root."
+   exit 1
+ }
+ 
+diff --git a/plugins/cwf/skills/update/references/scope-reconcile.md b/plugins/cwf/skills/update/references/scope-reconcile.md
+index ba21185..519e7e5 100644
+--- a/plugins/cwf/skills/update/references/scope-reconcile.md
++++ b/plugins/cwf/skills/update/references/scope-reconcile.md
+@@ -101,10 +101,18 @@ If declined, return to scope selection.
+ After marketplace metadata refresh, resolve latest cached `plugin.json` using context-aware cache roots:
+ 
+ ```bash
++extra_cache_roots_raw="${CWF_UPDATE_CACHE_ROOTS:-}"
++IFS=':' read -r -a extra_cache_roots <<< "$extra_cache_roots_raw"
+ cache_roots=(
+   "${CLAUDE_HOME:-$HOME/.claude}/plugins/cache"
+   "$HOME/.claude/plugins/cache"
++  "${XDG_CACHE_HOME:-$HOME/.cache}/claude/plugins/cache"
++  "/usr/local/share/claude/plugins/cache"
+ )
++for extra_root in "${extra_cache_roots[@]}"; do
++  [ -n "$extra_root" ] || continue
++  cache_roots+=("$extra_root")
++done
+ latest_plugin_json=""
+ for cache_root in "${cache_roots[@]}"; do
+   [ -d "$cache_root" ] || continue
+@@ -116,7 +124,7 @@ for cache_root in "${cache_roots[@]}"; do
+ done
+ ```
+ 
+-If unresolved, stop with explicit guidance (`CLAUDE_HOME` or cache-root path).
++If unresolved, stop with explicit guidance (`CLAUDE_HOME`, `CWF_UPDATE_CACHE_ROOTS`, or cache-root path).
+ 
+ ## Phase 3 Details
+ 
+@@ -156,7 +164,7 @@ Commands:
+ 
+ ```bash
+ # skills reconcile
+-bash {CWF_PLUGIN_DIR}/scripts/codex/sync-skills.sh --scope "$selected_scope" ${selected_project_root:+--project-root "$selected_project_root"} --cleanup-legacy
++bash {CWF_PLUGIN_DIR}/scripts/codex/sync-skills.sh --scope "$selected_scope" ${selected_project_root:+--project-root "$selected_project_root"}
+ 
+ # wrapper reconcile
+ bash {CWF_PLUGIN_DIR}/scripts/codex/install-wrapper.sh --scope "$selected_scope" ${selected_project_root:+--project-root "$selected_project_root"} --enable

@@ -1,0 +1,231 @@
+#!/usr/bin/env bash
+# cwf-hook-source-sha=e8d099ad2f5bd235335ca55e45b86d26e804f819ef43ac651d38ebd5282a6463
+set -euo pipefail
+
+PROFILE="balanced"
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+CWF_PLUGIN_ROOT="${CWF_PLUGIN_ROOT:-/home/hwidong/codes/claude-plugins/plugins/cwf}"
+
+resolve_cwf_path() {
+  local rel="$1"
+  local candidate=""
+  for candidate in \
+    "$CWF_PLUGIN_ROOT/$rel" \
+    "$CWF_PLUGIN_ROOT/plugins/cwf/$rel" \
+    "$REPO_ROOT/$rel" \
+    "$REPO_ROOT/plugins/cwf/$rel"; do
+    if [[ -f "$candidate" ]]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
+resolve_cwf_exec_path() {
+  local rel="$1"
+  local candidate=""
+  for candidate in \
+    "$CWF_PLUGIN_ROOT/$rel" \
+    "$CWF_PLUGIN_ROOT/plugins/cwf/$rel" \
+    "$REPO_ROOT/$rel" \
+    "$REPO_ROOT/plugins/cwf/$rel"; do
+    if [[ -x "$candidate" ]]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
+CWF_LINK_CHECKER="$(resolve_cwf_exec_path "skills/refactor/scripts/check-links.sh" || true)"
+CWF_ARTIFACT_PATHS="$(resolve_cwf_path "scripts/cwf-artifact-paths.sh" || true)"
+CWF_PLUGIN_DESC_SYNC="$(resolve_cwf_exec_path "scripts/sync-marketplace-descriptions.sh" || true)"
+CWF_UNIFIED_GATE="$(resolve_cwf_exec_path "scripts/check-portability-contract.sh" || true)"
+
+normalize_rel_path() {
+  local value="$1"
+  value="${value#./}"
+  value="${value%/}"
+  printf '%s' "$value"
+}
+
+add_skip_prefix() {
+  local rel_path="${1:-}"
+  local normalized=""
+  local existing=""
+  [[ -n "$rel_path" ]] || return 0
+  normalized="$(normalize_rel_path "$rel_path")"
+  [[ -n "$normalized" && "$normalized" != "." ]] || return 0
+  for existing in "${RUNTIME_SKIP_PREFIXES[@]}"; do
+    if [[ "$existing" == "$normalized" ]]; then
+      return 0
+    fi
+  done
+  RUNTIME_SKIP_PREFIXES+=("$normalized")
+}
+
+add_skip_abs_dir() {
+  local abs_path="${1:-}"
+  local rel_path=""
+  [[ -n "$abs_path" ]] || return 0
+  abs_path="${abs_path%/}"
+  if [[ "$abs_path" == "$REPO_ROOT" || "$abs_path" != "$REPO_ROOT/"* ]]; then
+    return 0
+  fi
+  rel_path="${abs_path#"$REPO_ROOT"/}"
+  add_skip_prefix "$rel_path"
+}
+
+init_runtime_skip_prefixes() {
+  local projects_dir=""
+  local sessions_dir=""
+  local prompt_logs_dir=""
+  RUNTIME_SKIP_PREFIXES=()
+  if [[ -f "$CWF_ARTIFACT_PATHS" ]]; then
+    # shellcheck source=plugins/cwf/scripts/cwf-artifact-paths.sh
+    source "$CWF_ARTIFACT_PATHS"
+    projects_dir="$(resolve_cwf_projects_dir "$REPO_ROOT" 2>/dev/null || true)"
+    sessions_dir="$(resolve_cwf_session_logs_dir "$REPO_ROOT" 2>/dev/null || true)"
+    prompt_logs_dir="$(resolve_cwf_prompt_logs_dir "$REPO_ROOT" 2>/dev/null || true)"
+    add_skip_abs_dir "$projects_dir"
+    add_skip_abs_dir "$sessions_dir"
+    add_skip_abs_dir "$prompt_logs_dir"
+  fi
+  add_skip_prefix ".cwf/projects"
+  add_skip_prefix ".cwf/sessions"
+  add_skip_prefix ".cwf/prompt-logs"
+}
+
+is_runtime_skip_path() {
+  local rel_path="$1"
+  local normalized=""
+  local prefix=""
+  normalized="$(normalize_rel_path "$rel_path")"
+  [[ -n "$normalized" ]] || return 1
+  for prefix in "${RUNTIME_SKIP_PREFIXES[@]}"; do
+    if [[ "$normalized" == "$prefix" || "$normalized" == "$prefix/"* ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+is_cwf_authoring_repo() {
+  [[ -d "$REPO_ROOT/plugins/cwf" && -f "$REPO_ROOT/README.md" && -f "$REPO_ROOT/README.ko.md" ]]
+}
+
+ensure_markdownlint_cli2() {
+  if command -v markdownlint-cli2 >/dev/null 2>&1; then
+    return 0
+  fi
+  echo "[pre-commit] markdownlint-cli2 not found; run 'cwf:setup --tools'." >&2
+  exit 1
+}
+
+RUNTIME_SKIP_PREFIXES=()
+init_runtime_skip_prefixes
+
+mapfile -t plugin_meta_files < <(
+  git diff --cached --name-only --diff-filter=ACMR -- \
+    '.claude-plugin/marketplace.json' \
+    'plugins/*/.claude-plugin/plugin.json' \
+    || true
+)
+if [ "${#plugin_meta_files[@]}" -gt 0 ]; then
+  if [[ -z "$CWF_PLUGIN_DESC_SYNC" ]]; then
+    echo "[pre-commit] sync-marketplace-descriptions.sh not found; skipping marketplace sync." >&2
+  else
+    run_all_plugins=false
+    declare -a plugin_sync_args=()
+    declare -a plugin_names_seen=()
+
+    has_seen_plugin() {
+      local candidate="$1"
+      local existing=""
+      for existing in "${plugin_names_seen[@]}"; do
+        if [[ "$existing" == "$candidate" ]]; then
+          return 0
+        fi
+      done
+      return 1
+    }
+
+    for file in "${plugin_meta_files[@]}"; do
+      if [[ "$file" == ".claude-plugin/marketplace.json" ]]; then
+        run_all_plugins=true
+        continue
+      fi
+      if [[ "$file" =~ ^plugins/([^/]+)/\.claude-plugin/plugin\.json$ ]]; then
+        plugin_name="${BASH_REMATCH[1]}"
+        if ! has_seen_plugin "$plugin_name"; then
+          plugin_names_seen+=("$plugin_name")
+          plugin_sync_args+=(--plugin "$plugin_name")
+        fi
+      fi
+    done
+
+    echo "[pre-commit] syncing marketplace descriptions from plugin manifests..."
+    if [[ "$run_all_plugins" == "true" || "${#plugin_sync_args[@]}" -eq 0 ]]; then
+      bash "$CWF_PLUGIN_DESC_SYNC"
+      bash "$CWF_PLUGIN_DESC_SYNC" --check
+    else
+      bash "$CWF_PLUGIN_DESC_SYNC" "${plugin_sync_args[@]}"
+      bash "$CWF_PLUGIN_DESC_SYNC" --check "${plugin_sync_args[@]}"
+    fi
+
+    git add .claude-plugin/marketplace.json
+  fi
+fi
+
+mapfile -t md_candidates < <(git diff --cached --name-only --diff-filter=ACMR -- '*.md' '*.mdx' || true)
+md_files=()
+for file in "${md_candidates[@]}"; do
+  if [[ "$file" == references/anthropic-skills-guide/* ]]; then
+    continue
+  fi
+  if is_runtime_skip_path "$file"; then
+    continue
+  fi
+  md_files+=("$file")
+done
+
+if [ "${#md_files[@]}" -gt 0 ]; then
+  ensure_markdownlint_cli2
+  echo "[pre-commit] markdownlint on staged markdown files..."
+  markdownlint-cli2 "${md_files[@]}"
+
+  if [[ "$PROFILE" != "fast" ]]; then
+    if [[ -n "$CWF_LINK_CHECKER" ]]; then
+      echo "[pre-commit] local link validation on staged markdown files..."
+      for file in "${md_files[@]}"; do
+        case "$file" in
+          CHANGELOG.md|references/*)
+            continue
+            ;;
+        esac
+        bash "$CWF_LINK_CHECKER" --local --json --file "$file" >/dev/null
+      done
+    else
+      echo "[pre-commit] CWF link checker unavailable; skipping local link validation." >&2
+    fi
+  fi
+fi
+
+if [[ "$PROFILE" != "fast" ]]; then
+  mapfile -t sh_files < <(git diff --cached --name-only --diff-filter=ACMR -- '*.sh' || true)
+  if [ "${#sh_files[@]}" -gt 0 ]; then
+    if command -v shellcheck >/dev/null 2>&1; then
+      echo "[pre-commit] shellcheck on staged shell scripts..."
+      shellcheck -x "${sh_files[@]}"
+    else
+      echo "[pre-commit] shellcheck not found; skipping shell lint" >&2
+    fi
+  fi
+fi
+
+if [[ -n "$CWF_UNIFIED_GATE" ]]; then
+  echo "[pre-commit] unified portability gate (hook context)..."
+  bash "$CWF_UNIFIED_GATE" --contract auto --context hook
+fi

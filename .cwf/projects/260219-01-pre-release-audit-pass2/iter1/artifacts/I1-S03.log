@@ -1,0 +1,10 @@
+## claude plugin install cwf@corca-plugins --scope local
+Installing plugin "cwf@corca-plugins"...
+## claude plugin list
+Installed plugins:
+
+  ❯ claude-dashboard@claude-dashboard
+    Version: 1.8.1
+    Scope: user
+    Status: ✔ enabled
+

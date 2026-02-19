@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hooks.schema.json",
+  "title": "Claude Hooks Configuration",
+  "description": "Schema for hooks.json — Claude hooks runtime configuration",
+  "type": "object",
+  "required": ["hooks"],
+  "additionalProperties": true,
+  "properties": {
+    "hooks": {
+      "type": "object",
+      "$comment": "Unknown event names indicate drift — the Claude hooks runtime only supports these 7 event types",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^(SessionStart|UserPromptSubmit|Notification|PreToolUse|PostToolUse|Stop|SessionEnd)$": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/hook-group"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "hook-group": {
+      "type": "object",
+      "required": ["matcher", "hooks"],
+      "additionalProperties": true,
+      "properties": {
+        "matcher": {
+          "type": "string"
+        },
+        "hooks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/hook-entry"
+          }
+        }
+      }
+    },
+    "hook-entry": {
+      "type": "object",
+      "required": ["type", "command"],
+      "additionalProperties": true,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["command"]
+        },
+        "command": {
+          "type": "string"
+        },
+        "async": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

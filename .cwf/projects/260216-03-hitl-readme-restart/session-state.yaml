@@ -1,0 +1,31 @@
+# session-state.yaml — volatile session live state
+# Synced from .cwf/cwf-state.yaml live section.
+
+live:
+  session_id: "S260217-04"
+  dir: ".cwf/projects/260217-04-refactor-review-prevention-hardening"
+  branch: "marketplace-v3"
+  phase: "gather"
+  task: "Post-merge hardening Pack A/B/C from .cwf/projects/260217-03-refactor-review-prevention-impl/next-session.md"
+  key_files:
+    - README.ko.md
+    - .cwf/projects/260216-03-hitl-readme-restart/next-session.md
+    - .cwf/projects/260216-03-hitl-readme-restart/hitl/hitl-scratchpad.md
+  decisions: []
+  decision_journal: []
+  hitl:
+    session_id: "260216-03-hitl"
+    state_file: ".cwf/projects/260216-03-hitl-readme-restart/hitl/state.yaml"
+    rules_file: ".cwf/projects/260216-03-hitl-readme-restart/hitl/rules.yaml"
+    updated_at: "2026-02-16T02:42:35Z"
+  remaining_gates:
+    - "review-code"
+    - "refactor"
+    - "retro"
+    - "ship"
+  state_version: "2"
+  worktree_root: "/home/hwidong/codes/claude-plugins"
+  worktree_branch: "marketplace-v3"
+  active_pipeline: "cwf:run"
+  user_directive: "cwf:run .cwf/projects/260217-03-refactor-review-prevention-impl/next-session.md"
+  pipeline_override_reason: ""

@@ -7,7 +7,7 @@ For version bump rules, marketplace.json format, and deploy workflow, see [plugi
 ## New Plugin Checklist
 
 - [ ] `plugins/{name}/` directory with correct structure
-- [ ] `.claude-plugin/plugin.json` with name, description, version, author, repository
+- [ ] `plugins/{name}/.claude-plugin/plugin.json` with name, description, version, author, repository
 - [ ] SKILL.md (skill) or hooks.json (hook) or both (hybrid)
 - [ ] marketplace.json entry added
 - [ ] README.md: add to overview table + detail section under Skills or Hooks
@@ -72,3 +72,10 @@ When a plugin is deprecated:
 - **Plugin renamed**: treat as new plugin + deprecate old
 - **marketplace.json has no version field for plugin**: OK, version lives in plugin.json
 - **README section order**: Skills come before Hooks, within each group maintain existing order
+
+## Commit Policy
+
+- Default: auto-commit after verification.
+- Commit by meaningful unit; split unrelated changes into separate commits.
+- Ask before commit only when boundary selection is ambiguous or unrelated dirty files cannot be safely excluded.
+- Always use selective staging (`git add <intended files>`), never broad-stage unrelated worktree changes.

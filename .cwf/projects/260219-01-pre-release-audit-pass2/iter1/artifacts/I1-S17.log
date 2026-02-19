@@ -1,0 +1,154 @@
+[I1-S17] 2026-02-19T10:07:47+09:00
+repo=/home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-a
+--- command
+timeout 180 claude --print --dangerously-skip-permissions --plugin-dir /home/hwidong/codes/claude-plugins/plugins/cwf -- 'cwf:setup --git-hooks both --gate-profile balanced'
+--- output
+
+--- exit_code=0
+--- verify
+.githooks
+total 28
+drwxrwxr-x 2 hwidong hwidong 4096 Feb 19 10:08 .
+drwxrwxr-x 5 hwidong hwidong 4096 Feb 19 10:08 ..
+-rwxrwxr-x 1 hwidong hwidong 6805 Feb 19 10:08 pre-commit
+-rwxrwxr-x 1 hwidong hwidong 9810 Feb 19 10:08 pre-push
+#!/usr/bin/env bash
+# cwf-hook-source-sha=e8d099ad2f5bd235335ca55e45b86d26e804f819ef43ac651d38ebd5282a6463
+set -euo pipefail
+
+PROFILE="balanced"
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+CWF_PLUGIN_ROOT="${CWF_PLUGIN_ROOT:-/home/hwidong/codes/claude-plugins/plugins/cwf}"
+
+resolve_cwf_path() {
+  local rel="$1"
+  local candidate=""
+  for candidate in \
+    "$CWF_PLUGIN_ROOT/$rel" \
+    "$CWF_PLUGIN_ROOT/plugins/cwf/$rel" \
+    "$REPO_ROOT/$rel" \
+    "$REPO_ROOT/plugins/cwf/$rel"; do
+    if [[ -f "$candidate" ]]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
+resolve_cwf_exec_path() {
+  local rel="$1"
+  local candidate=""
+  for candidate in \
+    "$CWF_PLUGIN_ROOT/$rel" \
+    "$CWF_PLUGIN_ROOT/plugins/cwf/$rel" \
+    "$REPO_ROOT/$rel" \
+    "$REPO_ROOT/plugins/cwf/$rel"; do
+    if [[ -x "$candidate" ]]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
+CWF_LINK_CHECKER="$(resolve_cwf_exec_path "skills/refactor/scripts/check-links.sh" || true)"
+CWF_ARTIFACT_PATHS="$(resolve_cwf_path "scripts/cwf-artifact-paths.sh" || true)"
+CWF_PLUGIN_DESC_SYNC="$(resolve_cwf_exec_path "scripts/sync-marketplace-descriptions.sh" || true)"
+CWF_UNIFIED_GATE="$(resolve_cwf_exec_path "scripts/check-portability-contract.sh" || true)"
+
+normalize_rel_path() {
+  local value="$1"
+  value="${value#./}"
+  value="${value%/}"
+  printf '%s' "$value"
+}
+
+add_skip_prefix() {
+  local rel_path="${1:-}"
+  local normalized=""
+  local existing=""
+  [[ -n "$rel_path" ]] || return 0
+  normalized="$(normalize_rel_path "$rel_path")"
+  [[ -n "$normalized" && "$normalized" != "." ]] || return 0
+#!/usr/bin/env bash
+# cwf-hook-source-sha=e8d099ad2f5bd235335ca55e45b86d26e804f819ef43ac651d38ebd5282a6463
+set -euo pipefail
+
+PROFILE="balanced"
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+CWF_PLUGIN_ROOT="${CWF_PLUGIN_ROOT:-/home/hwidong/codes/claude-plugins/plugins/cwf}"
+
+resolve_cwf_path() {
+  local rel="$1"
+  local candidate=""
+  for candidate in \
+    "$CWF_PLUGIN_ROOT/$rel" \
+    "$CWF_PLUGIN_ROOT/plugins/cwf/$rel" \
+    "$REPO_ROOT/$rel" \
+    "$REPO_ROOT/plugins/cwf/$rel"; do
+    if [[ -f "$candidate" ]]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
+resolve_cwf_exec_path() {
+  local rel="$1"
+  local candidate=""
+  for candidate in \
+    "$CWF_PLUGIN_ROOT/$rel" \
+    "$CWF_PLUGIN_ROOT/plugins/cwf/$rel" \
+    "$REPO_ROOT/$rel" \
+    "$REPO_ROOT/plugins/cwf/$rel"; do
+    if [[ -x "$candidate" ]]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
+CWF_LINK_CHECKER="$(resolve_cwf_exec_path "skills/refactor/scripts/check-links.sh" || true)"
+CWF_ARTIFACT_PATHS="$(resolve_cwf_path "scripts/cwf-artifact-paths.sh" || true)"
+CWF_INDEX_COVERAGE="$(resolve_cwf_exec_path "skills/setup/scripts/check-index-coverage.sh" || true)"
+CWF_PROVENANCE="$(resolve_cwf_exec_path "scripts/provenance-check.sh" || true)"
+CWF_GROWTH_DRIFT="$(resolve_cwf_exec_path "scripts/check-growth-drift.sh" || true)"
+CWF_SCRIPT_DEPS="$(resolve_cwf_exec_path "scripts/check-script-deps.sh" || true)"
+CWF_README_STRUCTURE="$(resolve_cwf_exec_path "scripts/check-readme-structure.sh" || true)"
+CWF_UNIFIED_GATE="$(resolve_cwf_exec_path "scripts/check-portability-contract.sh" || true)"
+
+normalize_rel_path() {
+  local value="$1"
+  value="${value#./}"
+  value="${value%/}"
+  printf '%s' "$value"
+}
+
+add_skip_prefix() {
+  local rel_path="${1:-}"
+  local normalized=""
+  local existing=""
+  [[ -n "$rel_path" ]] || return 0
+  normalized="$(normalize_rel_path "$rel_path")"
+  [[ -n "$normalized" && "$normalized" != "." ]] || return 0
+  for existing in "${RUNTIME_SKIP_PREFIXES[@]}"; do
+    if [[ "$existing" == "$normalized" ]]; then
+      return 0
+    fi
+  done
+  RUNTIME_SKIP_PREFIXES+=("$normalized")
+}
+
+add_skip_abs_dir() {
+  local abs_path="${1:-}"
+  local rel_path=""
+  [[ -n "$abs_path" ]] || return 0
+  abs_path="${abs_path%/}"
+  if [[ "$abs_path" == "$REPO_ROOT" || "$abs_path" != "$REPO_ROOT/"* ]]; then
+    return 0
+  fi

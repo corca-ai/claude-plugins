@@ -1,0 +1,35 @@
+# I1-H37 attention/log smoke
+date: 2026-02-19T01:03:33Z
+attention_script: plugins/cwf/hooks/scripts/attention.sh
+log_script: plugins/cwf/hooks/scripts/log-turn.sh
+tmp_repo: /tmp/cwf-h37-XfQ7
+transcript: /tmp/cwf-h37-XfQ7/transcript.jsonl
+
+## Case A: log-turn smoke (Stop hook path)
+command: jq -nc --arg sid 'sess-h37-smoke' --arg tr '/tmp/cwf-h37-XfQ7/transcript.jsonl' --arg cwd '/tmp/cwf-h37-XfQ7' '{session_id:$sid,transcript_path:$tr,cwd:$cwd}' | bash plugins/cwf/hooks/scripts/log-turn.sh
+exit_code: 0
+stdout: <empty>
+out_file: /tmp/cwf-h37-XfQ7/.cwf/sessions/260219-1000-cda4ede4.claude.md
+out_file_preview:
+# Session: cda4ede4
+Model: claude-test | Branch: main
+Recorded by: hwidong@narnia
+CWD: /tmp/cwf-h37-XfQ7
+Started: 2026-02-19 10:00:00 KST | Claude Code v1.2.3
+
+---
+## Turn 1 [10:00:00 → 10:00:05] (5s) | Tokens: 10↑ 20↓
+
+### User
+hook smoke 요청
+
+### Assistant (1 lines)
+hook smoke 응답
+
+## Case B: attention smoke (idle_prompt, dedup guard)
+command: jq -nc --arg sid 'sess-h37-smoke' '{session_id:$sid,tool_name:"idle_prompt"}' | bash plugins/cwf/hooks/scripts/attention.sh
+exit_code: 0
+stdout: <empty>
+attention_debug_tail:
+Thu Feb 19 10:03:34 KST 2026: attention.sh called (tool_name=idle_prompt, hash=cda4ede46d98, thread-ts-exists=no)
+Thu Feb 19 10:03:37 KST 2026: slack_send parent: ok=true ts=1771463017.309969 saved=yes
