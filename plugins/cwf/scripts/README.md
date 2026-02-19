@@ -28,6 +28,7 @@ This file maps scripts under [plugins/cwf/scripts](.).
 - [cwf-live-state-mutate.sh](cwf-live-state-mutate.sh): Sync/set/list-set mutation handlers for `cwf-live-state`.
 - [detect-plugin-scope.sh](detect-plugin-scope.sh): Detects active Claude plugin scope (`user`/`project`/`local`) for a cwd with deterministic precedence.
 - [retro-collect-evidence.sh](retro-collect-evidence.sh): Collects retro evidence snapshot (token-limit signals, HITL decisions/events, warning lines, changed-files context).
+- [agent-slot-preflight.sh](agent-slot-preflight.sh): Computes slot availability and recommended batch sizing before parallel sub-agent launches.
 - [provenance-check.sh](provenance-check.sh): Verifies provenance sidecar freshness against current CWF skill/hook counts.
 - [codex/codex-with-log.sh](codex/codex-with-log.sh): Wrapper entrypoint that runs Codex and syncs logs.
 - [codex/post-run-checks.sh](codex/post-run-checks.sh): Post-run quality checks (changed files only) for markdown/shell/link/live-state gates plus tool-hygiene, HITL scratchpad sync guards, and contract-driven portability gate (`--context post-run`).

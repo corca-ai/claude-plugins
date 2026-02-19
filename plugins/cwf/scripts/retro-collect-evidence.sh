@@ -40,6 +40,8 @@ warn() {
 
 run_best_effort_codex_sync() {
   local args=()
+  local timeout_sec="${CWF_RETRO_SYNC_TIMEOUT_SEC:-15}"
+  local sync_status=0
   if [[ ! -x "$CODEX_SYNC_SCRIPT" ]]; then
     return 0
   fi
@@ -49,8 +51,24 @@ run_best_effort_codex_sync() {
     args+=(--since-epoch "$SINCE_EPOCH")
   fi
 
+  if ! [[ "$timeout_sec" =~ ^[0-9]+$ ]] || [[ "$timeout_sec" -le 0 ]]; then
+    timeout_sec=15
+  fi
+
+  if command -v timeout >/dev/null 2>&1; then
+    if ! timeout "$timeout_sec" bash "$CODEX_SYNC_SCRIPT" "${args[@]}"; then
+      sync_status=$?
+      if [[ "$sync_status" -eq 124 ]]; then
+        warn "best-effort Codex session log sync timed out after ${timeout_sec}s; continuing evidence collection"
+      else
+        warn "best-effort Codex session log sync failed; continuing evidence collection"
+      fi
+    fi
+    return 0
+  fi
+
   if ! bash "$CODEX_SYNC_SCRIPT" "${args[@]}"; then
-    warn "best-effort Codex session log sync failed; continuing evidence collection"
+    warn "best-effort Codex session log sync failed (timeout unavailable); continuing evidence collection"
   fi
 }
 

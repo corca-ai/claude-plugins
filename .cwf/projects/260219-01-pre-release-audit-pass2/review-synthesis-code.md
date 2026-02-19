@@ -20,6 +20,10 @@
 - legacy `.pyc` 산출물 처리 정책(삭제 승인 기반)을 명시적으로 기록하거나 `.gitignore`/청소 절차를 운영 가이드에 명확화.
 - 외부 CLI 슬롯(Codex/Gemini) 인증 상태 점검 UX를 계속 fail-fast로 유지.
 
+### Considered-Not-Adopted
+- **Expert Alpha/Architecture**: `sync-skills`에 legacy cleanup/layout 분기 재도입 제안.
+  Reason not adopted: 사용자 확정 결정 `1A`(cleanup 제거, v3 단일 경로 우선) 및 본 세션 계획 제약과 충돌.
+
 ### Commit Boundary Guidance
 - `behavior-policy`: 리뷰 지적 반영(가더 복구 안내, markdown hook dependency fail-open 제거) 1개 커밋으로 묶기 적합.
 - 필요 시 이후 `tidy`(문구/정리)와 분리.

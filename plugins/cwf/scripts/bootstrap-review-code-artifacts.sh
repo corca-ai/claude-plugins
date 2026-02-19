@@ -98,6 +98,9 @@ write_slot_file "$SESSION_DIR/review-expert-beta-code.md" "Expert Beta (Code)"
 write_file "$SESSION_DIR/review-synthesis-code.md" "## Review Synthesis
 ### Verdict: REVISE
 
+### Considered-Not-Adopted
+- None.
+
 session_log_present: unknown
 session_log_lines: 0
 session_log_turns: 0

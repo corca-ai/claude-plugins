@@ -6,9 +6,22 @@ Detailed `review` procedure for heavy execution blocks:
 
 `SKILL.md` keeps mode routing and invariant summaries, while this file stores full templates.
 
-## 2.3 Launch all 6 in ONE message
+## 2.3 Launch reviewers (single batch or deterministic batches)
 
-All 6 reviewers launch in a single message for parallel execution:
+Run agent-slot preflight first:
+
+```bash
+bash {CWF_PLUGIN_DIR}/scripts/agent-slot-preflight.sh --required 6 --json
+```
+
+Batching policy:
+- `launch_mode=single_batch`: launch all 6 reviewers in one message.
+- `launch_mode=multi_batch`: launch in deterministic order:
+  1. Slots 1-4 (Security, UX/DX, Correctness, Architecture)
+  2. Slots 5-6 (Expert α, Expert β)
+- `launch_mode=blocked`: close/wait active agents, retry preflight once.
+
+Below templates apply per slot regardless of single-batch or multi-batch launch mode.
 
 **Slot 1 — Security (always Task):**
 

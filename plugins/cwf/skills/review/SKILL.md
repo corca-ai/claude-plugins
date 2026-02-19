@@ -185,7 +185,7 @@ Store the resolved `cli_timeout` value for use in Phase 2.
 
 ## Phase 2: Launch All Reviewers
 
-Launch **six** reviewers in parallel: 2 internal (Task agents) + 2 external (CLI or Task fallback) + 2 domain experts (Task agents). All launched in a **single message** for maximum parallelism.
+Launch **six** reviewers in parallel: 2 internal (Task agents) + 2 external (CLI or Task fallback) + 2 domain experts (Task agents). Default is a **single-message launch**; when slot capacity is insufficient, split into deterministic batches after preflight.
 - Shared output persistence contract: [agent-patterns.md § Sub-agent Output Persistence Contract](../../references/agent-patterns.md#sub-agent-output-persistence-contract).
 
 ### 2.0 Resolve session directory and context recovery
@@ -294,9 +294,24 @@ Provider semantics:
 - `codex` / `gemini`: run external CLI for that slot
 - `claude`: run Task fallback directly for that slot (no CLI attempt)
 
-### 2.3 Launch all 6 in ONE message
+### 2.2.1 Agent-slot preflight (capacity-aware)
 
-Launch all 6 slots in one message with mode-suffixed output persistence:
+Before launching reviewers, run:
+
+```bash
+bash {CWF_PLUGIN_DIR}/scripts/agent-slot-preflight.sh --required 6 --json
+```
+
+Use preflight result:
+- `launch_mode=single_batch` → launch all 6 in one message.
+- `launch_mode=multi_batch` → launch deterministic batches in order: Slots 1-4 (Security, UX/DX, Correctness, Architecture), then Slots 5-6 (Expert α, Expert β).
+- `launch_mode=blocked` → close/wait active agents, then retry preflight once.
+
+Record the preflight decision in synthesis Confidence Note when batching was required.
+
+### 2.3 Launch reviewers (single batch or deterministic batches)
+
+Launch slots with mode-suffixed output persistence:
 - Slot 1/2: internal Task reviewers (Security, UX/DX)
 - Slot 3/4: provider-routed external reviewers (Correctness, Architecture)
 - Slot 5/6: expert Task reviewers with contrasting frameworks
@@ -468,9 +483,11 @@ Use the deterministic error-handling matrix in [references/synthesis-and-gates.m
 12. **Commit-boundary split for mixed follow-up work** — when review findings
     imply both `tidy` and `behavior-policy` changes, recommend separate commit
     units and `tidy` first.
-13. **Code-mode session-log fields are mandatory** — always include deterministic `session_log_*` keys in Confidence Note for `--mode code`.
-14. **Code-mode artifact gate is mandatory** — `review-code` is not complete unless `check-run-gate-artifacts.sh --stage review-code --strict` passes.
-15. **Language override** — synthesis output follows the user's language; reviewer prompts remain in English.
+13. **Preserve explicit decisions** — when reviewer suggestions conflict with explicit user decisions or accepted plan constraints, include them under `Considered-Not-Adopted` with reason/reference.
+14. **Capacity-aware launch** — run agent-slot preflight before reviewer launch; if capacity is insufficient, use deterministic batches instead of oversubscribing.
+15. **Code-mode session-log fields are mandatory** — always include deterministic `session_log_*` keys in Confidence Note for `--mode code`.
+16. **Code-mode artifact gate is mandatory** — `review-code` is not complete unless `check-run-gate-artifacts.sh --stage review-code --strict` passes.
+17. **Language override** — synthesis output follows the user's language; reviewer prompts remain in English.
 
 ---
 

@@ -38,6 +38,13 @@ Output to the conversation **and** persist to `{session_dir}/review-synthesis-{m
 
 (If none: "No suggestions.")
 
+### Considered-Not-Adopted
+(Only when reviewer requests conflict with explicit user decisions or accepted plan constraints)
+- **{reviewer}**: {suggestion summary}
+  Reason not adopted: {explicit decision/constraint reference}
+
+(If none: "No considered-not-adopted items.")
+
 ### Commit Boundary Guidance
 (Only when follow-up implementation is requested after this review)
 - `tidy`: structural/readability-only changes with no behavior or policy effect
@@ -62,6 +69,8 @@ Output to the conversation **and** persist to `{session_dir}/review-synthesis-{m
   Include setup hint based on failed provider:
   "Codex -> `codex auth login`; Gemini -> `npx @google/gemini-cli`."
 - Perspective differences between real CLI output and fallback interpretation
+- Suggestions deliberately not adopted due to explicit user decision or approved plan constraints:
+  "Considered-not-adopted: {item} — {reason/reference}"
 - Session-log cross-check fields (code mode):
   - `session_log_present: {true|false}`
   - `session_log_lines: {int}`
@@ -159,8 +168,11 @@ This prevents sensitive review content (diffs, plans) from persisting in `/tmp/`
 12. **Commit-boundary split for mixed follow-up work** — when review findings
     imply both `tidy` and `behavior-policy` changes, recommend separate commit
     units and `tidy` first.
-13. **Code-mode session-log fields are mandatory** — always include deterministic `session_log_*` keys in Confidence Note for `--mode code`.
-14. **Code-mode artifact gate is mandatory** — `review-code` is not complete unless `check-run-gate-artifacts.sh --stage review-code --strict` passes.
+13. **Preserve explicit decisions** — when a reviewer suggestion conflicts with
+    explicit user decisions or accepted plan constraints, list it under
+    `Considered-Not-Adopted` with concrete reason/reference instead of silently dropping.
+14. **Code-mode session-log fields are mandatory** — always include deterministic `session_log_*` keys in Confidence Note for `--mode code`.
+15. **Code-mode artifact gate is mandatory** — `review-code` is not complete unless `check-run-gate-artifacts.sh --stage review-code --strict` passes.
 
 ---
 
@@ -188,6 +200,10 @@ Then /review deterministically uses that base and records base_strategy=explicit
 Given review findings include both structural tidy changes and behavior-policy changes
 When /review renders synthesis
 Then the synthesis includes commit-boundary guidance to split tidy and behavior-policy commits
+
+Given a reviewer suggestion conflicts with an explicit user decision
+When /review renders synthesis
+Then the suggestion is listed under Considered-Not-Adopted with reason/reference
 
 Given a review target whose external prompt length is 1201 lines
 When /review resolves external reviewer routing

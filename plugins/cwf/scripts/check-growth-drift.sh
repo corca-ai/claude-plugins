@@ -283,6 +283,7 @@ plugins/cwf/scripts/check-run-gate-artifacts.sh
 plugins/cwf/scripts/next-prompt-dir.sh
 plugins/cwf/scripts/cwf-artifact-paths.sh
 plugins/cwf/scripts/cwf-live-state.sh
+plugins/cwf/scripts/agent-slot-preflight.sh
 plugins/cwf/scripts/retro-collect-evidence.sh
 plugins/cwf/scripts/provenance-check.sh
 plugins/cwf/scripts/codex/codex-with-log.sh
@@ -331,8 +332,10 @@ check_live_state_pointers() {
     return
   fi
 
+  # shellcheck disable=SC1091
   # shellcheck source=plugins/cwf/scripts/cwf-artifact-paths.sh
   source "$resolver"
+  # shellcheck disable=SC1091
   # shellcheck source=plugins/cwf/scripts/cwf-live-state.sh
   source "$live_resolver"
   state_file="$(resolve_cwf_state_file "$REPO_ROOT")"

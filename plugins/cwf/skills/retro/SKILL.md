@@ -43,13 +43,7 @@ Resolution order:
 
 ### 2. Read Existing Artifacts
 
-Before reading artifacts, run a best-effort Codex sync:
-
-```bash
-bash {CWF_PLUGIN_DIR}/scripts/codex/sync-session-logs.sh --cwd "$PWD" --quiet || true
-```
-
-Then run the evidence collector:
+Before reading artifacts, run the evidence collector (it includes best-effort Codex session-log sync with timeout protection):
 
 ```bash
 bash {CWF_PLUGIN_DIR}/scripts/retro-collect-evidence.sh --session-dir "{output-dir}"
@@ -119,7 +113,17 @@ Stage-tier policy for deep mode outputs:
 For all outputs: bounded retry = 1 for missing/invalid files.
 - Shared output persistence contract: [agent-patterns.md § Sub-agent Output Persistence Contract](../../references/agent-patterns.md#sub-agent-output-persistence-contract).
 
-**Batch 1** — launch in a single message with 2 parallel Task calls (only for agents whose result files are missing or invalid):
+Run slot preflight before each batch launch:
+
+```bash
+bash {CWF_PLUGIN_DIR}/scripts/agent-slot-preflight.sh --required 2 --json
+```
+
+- If preflight returns `launch_mode=blocked`, wait/close active agents and retry once.
+- If it returns `launch_mode=multi_batch`, run the batch sequentially agent-by-agent.
+- Otherwise keep the default parallel launch.
+
+**Batch 1** — launch with the preflight-selected mode (only for agents whose result files are missing or invalid):
 
 - **Agent A — CDM Analysis**: `subagent_type: general-purpose`, `max_turns: 16`. Prompt: "Read `{SKILL_DIR}/references/cdm-guide.md`. Analyze the following session summary using CDM methodology. Session summary: {Sections 1-3 summary}. cwf-state context: {relevant cwf-state.yaml content}. Output Section 4 content. **Output Persistence**: Write your complete analysis to: `{session_dir}/retro-cdm-analysis.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`"
 - **Agent B — Learning Resources**: `subagent_type: general-purpose`, `max_turns: 20`. Prompt: "Based on the following session summary, search the web for 2-3 learning resources calibrated to the user's knowledge level. Follow the Web Research Protocol in {CWF_PLUGIN_DIR}/references/agent-patterns.md (discover URLs via WebSearch, fetch with WebFetch then agent-browser fallback for JS-rendered pages). You have Bash access for agent-browser CLI commands. Session summary: {Sections 1-3 summary}. For each resource: title + URL, 2-3 sentence summary of key takeaways, and why it matters for the user's work. Output Section 6 content. **Output Persistence**: Write your complete findings to: `{session_dir}/retro-learning-resources.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`"
@@ -135,7 +139,7 @@ Gate behavior after Batch 1:
 - Record gate path in output (`PERSISTENCE_GATE=HARD_FAIL` or
   `PERSISTENCE_GATE=SOFT_CONTINUE`, or equivalent wording).
 
-**Batch 2** — launch in a single message with 2 parallel Task calls (after Batch 1, only for agents whose result files are missing or invalid):
+**Batch 2** — launch with the preflight-selected mode (after Batch 1, only for agents whose result files are missing or invalid):
 
 - **Agent C — Expert alpha**: `subagent_type: general-purpose`, `max_turns: 20`. Prompt: "Read `{CWF_PLUGIN_DIR}/references/expert-advisor-guide.md` and `{SKILL_DIR}/references/expert-lens-guide.md`. You are Expert α, operating in **retro mode**. Session summary: {Sections 1-4 summary, including CDM results from Agent A}. Deep-clarify experts: {names or 'not available'}. Analyze through your framework. Use web search to verify expert identity and cite published work (follow Web Research Protocol in {CWF_PLUGIN_DIR}/references/agent-patterns.md; you have Bash access for agent-browser fallback). Output your Expert α section. **Output Persistence**: Write your complete analysis to: `{session_dir}/retro-expert-alpha.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`"
 - **Agent D — Expert beta**: `subagent_type: general-purpose`, `max_turns: 20`. Prompt: "Read `{CWF_PLUGIN_DIR}/references/expert-advisor-guide.md` and `{SKILL_DIR}/references/expert-lens-guide.md`. You are Expert β, operating in **retro mode**. Session summary: {Sections 1-4 summary, including CDM results from Agent A}. Deep-clarify experts: {names or 'not available'}. Analyze through your framework. Use web search to verify expert identity and cite published work (follow Web Research Protocol in {CWF_PLUGIN_DIR}/references/agent-patterns.md; you have Bash access for agent-browser fallback). Output your Expert β section. **Output Persistence**: Write your complete analysis to: `{session_dir}/retro-expert-beta.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`"
