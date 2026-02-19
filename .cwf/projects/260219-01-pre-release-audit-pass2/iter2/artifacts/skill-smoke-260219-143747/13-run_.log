@@ -1,0 +1,7 @@
+I need a task description to run the pipeline. What task would you like to execute through the full CWF pipeline (gather → clarify → plan → review → impl → review → refactor → retro → ship)?
+
+You can provide:
+- A task description (e.g., "Add error handling to the API layer")
+- Optional flags: `--from <stage>`, `--skip <stages>`, `--ambiguity-mode <mode>`
+
+Please describe what you'd like to accomplish.

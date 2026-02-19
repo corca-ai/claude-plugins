@@ -1,0 +1,11 @@
+I need a task description to run the pipeline. What would you like `cwf:run` to work on? For example:
+
+- A feature to implement
+- A bug to fix
+- A refactoring task
+
+You can also use flags like:
+- `cwf:run --from impl` to resume from a specific stage
+- `cwf:run --skip ship` to skip certain stages
+
+Please provide your task description.

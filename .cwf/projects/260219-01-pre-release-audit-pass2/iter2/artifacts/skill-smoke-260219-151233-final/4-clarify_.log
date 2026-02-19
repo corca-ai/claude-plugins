@@ -1,0 +1,8 @@
+The repo already has `hello.txt` committed at `8df3333`. What exactly do you want to do with "smoke test only"?
+
+- **Verify** — Check that `hello.txt` exists with correct content and artifacts are consistent
+- **New plan** — Draft a new minimal plan to test `cwf:plan` itself
+- **Full pipeline** — Run `cwf:run` end-to-end as a smoke test of the CWF toolchain
+- **This was it** — You wanted `cwf:clarify` itself to run as the smoke test, and it just did
+
+Which one?

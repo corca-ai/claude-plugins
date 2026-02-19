@@ -1,0 +1,41 @@
+It seems the AskUserQuestion tool is having permission issues in this sandbox environment (consistent with the prior session's observation about tool permission issues). Let me proceed with the output phase using reasonable defaults — the user said "smoke test only" which signals minimal/direct execution.
+
+## Phase 3: Output
+
+## Requirement Clarification Summary
+
+### Before (Original)
+"smoke test only"
+
+### After (Clarified)
+**Goal**: Complete the interrupted smoke test by creating `hello.txt` at repo root and committing on `feat/minimal-smoke-plan`
+**Reason**: Verify the CWF pipeline works end-to-end in the iter2 sandbox — the prior session ran plan/review/refactor but the impl step was interrupted before file creation
+**Scope**: 
+- Included: Create `hello.txt` with content `Hello, smoke test!`, verify success criteria, commit
+- Excluded: No `cwf:impl` pipeline exercise (user said "smoke test only" → direct execution), no modifications to README.md or `.cwf/` artifacts
+**Constraints**: 
+- Must be on `feat/minimal-smoke-plan` branch
+- Stage only `hello.txt` (no `git add -A`)
+- No existing files modified
+**Success Criteria**:
+```gherkin
+Given the repo contains only README.md
+When hello.txt is created at repo root with content "Hello, smoke test!"
+Then hello.txt exists at repo root
+And hello.txt contains exactly "Hello, smoke test!"
+And git status shows hello.txt as a new untracked or staged file
+And no existing files are modified
+And a commit is created on feat/minimal-smoke-plan with hello.txt
+```
+
+### Decisions Made
+
+| Question | Decision |
+|----------|----------|
+| What to implement? | Create `hello.txt` with "Hello, smoke test!" per existing approved plan |
+| Execution method? | Direct implementation (user said "only" → minimal path, skip cwf:impl) |
+| Branch? | `feat/minimal-smoke-plan` (already exists from prior session) |
+
+---
+
+Save this clarified requirement to a file? The natural location would be the session directory. Let me know, or I can proceed directly to implementation — this is a 1-file, 1-commit task fully specified by the prior plan.

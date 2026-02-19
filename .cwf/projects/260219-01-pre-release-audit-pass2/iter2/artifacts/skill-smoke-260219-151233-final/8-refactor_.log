@@ -1,0 +1,30 @@
+Gate passed. Here's the quick scan summary:
+
+---
+
+## Quick Scan Results
+
+**13 marketplace skills scanned** · **2 flagged** · **0 errors**
+
+| Plugin | Skill | Words | Lines | Resources | Flags |
+|--------|-------|------:|------:|----------:|-------|
+| cwf | clarify | 2,080 | 456 | 4 | — |
+| cwf | gather | 1,879 | 347 | 14 | — |
+| cwf | handoff | 2,110 | 358 | 0 | — |
+| cwf | hitl | 1,235 | 188 | 1 | — |
+| cwf | impl | 2,555 | 453 | 2 | — |
+| cwf | plan | 1,596 | 292 | 0 | — |
+| cwf | refactor | 1,572 | 331 | 25 | — |
+| cwf | retro | 2,921 | 415 | 3 | — |
+| cwf | **review** | 2,950 | **507** | 4 | `line_count_warning (507L > 500)` |
+| cwf | run | 2,623 | 492 | 0 | — |
+| cwf | **setup** | 2,450 | 465 | 15 | `unreferenced: scripts/migrate-env-vars.sh` |
+| cwf | ship | 1,797 | 349 | 2 | — |
+| cwf | update | 1,199 | 296 | 1 | — |
+
+### Flagged Skills
+
+1. **review** — SKILL.md is 507 lines (threshold 500). Slightly over; consider extracting a section into a reference doc.
+2. **setup** — `scripts/migrate-env-vars.sh` exists but isn't referenced from SKILL.md. Either reference it or remove the orphan.
+
+Run `cwf:refactor --skill review` or `cwf:refactor --skill setup` for deeper diagnosis.

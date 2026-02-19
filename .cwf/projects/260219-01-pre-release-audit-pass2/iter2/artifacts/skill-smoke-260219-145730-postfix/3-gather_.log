@@ -1,0 +1,17 @@
+The file `docs/plugin-dev-cheatsheet.md` doesn't exist in this repository or any parent directory. 
+
+This path isn't a URL, a `--search` query, or a `--local` query — it's a file path that doesn't exist. Here's what you can do instead:
+
+**If you want to find it online:**
+```text
+cwf:gather --search "plugin dev cheatsheet"
+```
+
+**If you want to explore local code for plugin development patterns:**
+```text
+cwf:gather --local "plugin development cheatsheet"
+```
+
+**If it's a URL you meant to paste**, please share the full URL and I'll gather it.
+
+Would you like me to try one of these alternatives?

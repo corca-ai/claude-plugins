@@ -1,0 +1,29 @@
+Both hooks rendered correctly with `PROFILE="balanced"` and correct `CWF_PLUGIN_ROOT`. Now let me complete Phase 5 — the lessons checkpoint.
+
+## Phase 2.7 — Git Hook Gate Installation Complete
+
+**Effective State:**
+
+| Setting | Value |
+|---------|-------|
+| `core.hooksPath` | `.githooks` |
+| `pre-commit` | installed |
+| `pre-push` | installed |
+| Profile | `balanced` |
+
+**What each hook enforces at `balanced` profile:**
+
+| Hook | Checks |
+|------|--------|
+| **pre-commit** | staged markdownlint + local link checks + staged shellcheck (if available) |
+| **pre-push** | repo-wide markdownlint + local link checks + index coverage checks |
+
+**Contract gate policy:**
+- `--contract auto` always resolves to `portable` (consumer-repo checks only)
+- Authoring-level checks (CWF internal invariants) require explicit `--contract authoring` from maintainer workflows
+
+---
+
+## Phase 5: Lessons Checkpoint
+
+Any learnings from the setup process?

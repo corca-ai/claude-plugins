@@ -1,0 +1,34 @@
+Waiting for your response on the learnings question. In the meantime, here's the **Phase 2.7 report**:
+
+---
+
+## Git Hook Gate — Effective State
+
+| Setting | Value |
+|---------|-------|
+| `core.hooksPath` | `.githooks` |
+| `pre-commit` | installed |
+| `pre-push` | installed |
+| Gate profile | **balanced** |
+
+### What each hook enforces (balanced profile)
+
+| Hook | Checks |
+|------|--------|
+| **pre-commit** | staged markdownlint + local link checks + staged shellcheck (if available) |
+| **pre-push** | repo-wide markdownlint + local link checks + shellcheck + index coverage checks |
+
+### Contract gate policy
+
+- Hook scripts call `check-portability-contract.sh --contract auto --context hook`
+- `auto` always resolves to **`portable`** (consumer-safe defaults)
+- Authoring-level checks require explicit invocation (`--contract authoring`) from repo-maintainer workflows
+
+### cwf-state.yaml updated
+
+```yaml
+git_hooks:
+  install_mode: both
+  gate_profile: balanced
+  hooks_path: .githooks
+```

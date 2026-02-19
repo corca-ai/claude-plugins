@@ -1,0 +1,4 @@
+$ date -Iseconds
+2026-02-19T14:35:54+09:00
+$ timeout 90s claude --print --dangerously-skip-permissions "cwf:setup --env"
+CLAUDE_EXIT=124

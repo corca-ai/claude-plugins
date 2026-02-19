@@ -1,0 +1,5 @@
+What task should the `cwf:run` pipeline execute? I need a task description to start the full gather → clarify → plan → review → impl → review → refactor → retro → ship pipeline.
+
+You can either:
+- **Type a task description** directly
+- Or I can **infer from the branch context** (`feat/minimal-smoke-plan` + recent commits)

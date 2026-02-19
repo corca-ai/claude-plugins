@@ -1,0 +1,12 @@
+$ date -Iseconds
+2026-02-19T14:55:44+09:00
+$ git rev-parse --abbrev-ref HEAD
+iter2/260219-01-pre-release-audit-pass2
+$ git rev-parse --short HEAD
+71684a9
+$ git rev-parse --short origin/main
+71684a9
+$ claude --version
+2.1.45 (Claude Code)
+$ gemini --version
+0.27.3

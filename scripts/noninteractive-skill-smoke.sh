@@ -34,7 +34,7 @@ Case file format:
 
 Summary fields:
   - result: PASS|FAIL|TIMEOUT
-  - reason: OK|ERROR|TIMEOUT|WAIT_INPUT
+  - reason: OK|ERROR|TIMEOUT|WAIT_INPUT|NO_OUTPUT
 USAGE
 }
 
@@ -237,7 +237,7 @@ WAIT_INPUT_COUNT=0
 is_wait_input_log() {
   local log_file="$1"
   grep -Eiq \
-    'waiting for your selection|wait for your answer|select one of the options|질문이 표시|선택해 주세요|what task would you like|please describe the task|which option would you like|choose one of the following' \
+    'waiting for your selection|wait for your answer|select one of the options|질문이 표시|선택해 주세요|what task would you like|what task should .* pipeline execute|what would you like .* to work on|please describe the task|please provide your task description|which option would you like|which file should i review|choose one of the following|what did you have in mind|which would you like|would you like me to|would you like to provide|could you confirm|please confirm|please reply with your choice|any learnings from the setup process|should i create the project config templates|save this clarified requirement to a file|let me know,? or i can proceed' \
     "$log_file"
 }
 
@@ -308,6 +308,10 @@ run_case() {
       reason="WAIT_INPUT"
       FAIL_COUNT=$((FAIL_COUNT + 1))
       WAIT_INPUT_COUNT=$((WAIT_INPUT_COUNT + 1))
+    elif [[ ! -s "$log_file" ]] || [[ "$(wc -c < "$log_file")" -le 1 ]]; then
+      result="FAIL"
+      reason="NO_OUTPUT"
+      FAIL_COUNT=$((FAIL_COUNT + 1))
     else
       result="PASS"
       reason="OK"

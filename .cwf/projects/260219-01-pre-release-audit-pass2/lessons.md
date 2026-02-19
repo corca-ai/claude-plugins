@@ -35,3 +35,11 @@ When 점검 범위가 코드+문서+운영계약까지 걸치면 -> 탐색 서�
 - Persistence gate: `HARD_FAIL`
 - Recorded failures:
   - [retro] retro.md missing '- Mode:' declaration
+
+## Iteration 2 Lesson — Smoke False PASS Hardening (2026-02-19)
+
+- **Expected**: `WAIT_INPUT` 패턴만 보강하면 non-interactive false PASS가 충분히 줄어든다.
+- **Actual**: 질문형 문구가 스킬/상황마다 다양하고, 빈 출력(`exit 0`) 케이스도 존재해 추가 누락이 발생했다.
+- **Takeaway**: smoke 분류는 `WAIT_INPUT` + `NO_OUTPUT`를 fail-closed 기본값으로 두고, 신규 문구는 픽스처부터 추가해야 한다.
+
+When non-interactive smoke reports unexpected PASS with incomplete behavior -> first add fixture and classifier rule, then rerun gate before concluding.
