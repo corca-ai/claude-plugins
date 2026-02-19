@@ -48,3 +48,24 @@
    - A: 스킬에서 non-interactive fallback 명시 지원
    - B: interactive-only 공식 선언 후 테스트 하네스 분리
 3. cwf:run timeout 원인 분해(stage provenance 강제 기록)
+
+## 개선 사이클 진행(Plan→Review→Impl→Review→Refactor→Retro)
+
+- Plan 대체/리뷰
+  - `cwf:plan` non-interactive deadlock으로 수동 계획 문서로 대체
+  - 통합 계획: [project/iter1/plan-review.md](plan-review.md)
+- 구현
+  - 신규 스크립트
+    - [scripts/check-marketplace-entry.sh](../../scripts/check-marketplace-entry.sh)
+    - [scripts/noninteractive-skill-smoke.sh](../../scripts/noninteractive-skill-smoke.sh)
+  - 신규 테스트
+    - [scripts/tests/check-marketplace-entry-fixtures.sh](../../scripts/tests/check-marketplace-entry-fixtures.sh)
+    - [scripts/tests/noninteractive-skill-smoke-fixtures.sh](../../scripts/tests/noninteractive-skill-smoke-fixtures.sh)
+  - 문서 업데이트
+    - [docs/plugin-dev-cheatsheet.md](../../docs/plugin-dev-cheatsheet.md)
+- 구현 리뷰
+  - [project/iter1/implementation-review.md](implementation-review.md)
+  - 핵심 결과: 픽스처 테스트 전부 PASS, 실제 smoke(14 케이스) `pass 2 / timeout 12`
+- refactor/retro
+  - refactor 기록: [project/iter1/refactor.md](refactor.md) (PASS, 단 스캔 대상 0)
+  - retro 기록: [project/iter1/retro.md](retro.md) (`cwf:retro` non-interactive timeout 포함)

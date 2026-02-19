@@ -16,6 +16,10 @@
   - setup 일부 분기는 PASS, 일부는 non-interactive deadlock/partial
   - skill/cwf:run 다수는 timeout으로 안정성 이슈 노출
   - 신규 사용자 설치 기본 경로는 blocker
+  - 개선 사이클 구현 결과
+    - marketplace 엔트리 검증 스크립트 추가
+    - non-interactive 스킬 smoke 스크립트/테스트 추가
+    - pre-release 점검 절차 문서화
 
 ## 누적 핵심 리스크
 
@@ -28,3 +32,14 @@
 1. Iteration 2 시작 전 설치 blocker 해결 여부 확인
 2. headless 지원 정책 결정 후 스킬별 종료 조건 정리
 3. cwf:run stage provenance 강제 기록 개선 후 재검증
+
+## 이번 사이클 산출물
+
+- 계획/리뷰
+  - [project/iter1/plan-review.md](iter1/plan-review.md)
+- 구현/검증
+  - [project/iter1/implementation-review.md](iter1/implementation-review.md)
+  - [project/iter1/artifacts/skill-smoke-260219-104649/summary.tsv](iter1/artifacts/skill-smoke-260219-104649/summary.tsv)
+- refactor/retro
+  - [project/iter1/refactor.md](iter1/refactor.md)
+  - [project/iter1/retro.md](iter1/retro.md)

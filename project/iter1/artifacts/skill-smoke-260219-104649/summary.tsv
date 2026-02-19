@@ -1,0 +1,15 @@
+id	result	exit_code	duration_sec	log_file
+setup-env	TIMEOUT	124	20	project/iter1/artifacts/skill-smoke-260219-104649/1-setup-env_.log
+setup-git-hooks	TIMEOUT	124	20	project/iter1/artifacts/skill-smoke-260219-104649/2-setup-git-hooks_.log
+gather	PASS	0	17	project/iter1/artifacts/skill-smoke-260219-104649/3-gather_.log
+clarify	TIMEOUT	124	20	project/iter1/artifacts/skill-smoke-260219-104649/4-clarify_.log
+plan	TIMEOUT	124	20	project/iter1/artifacts/skill-smoke-260219-104649/5-plan_.log
+review	TIMEOUT	124	20	project/iter1/artifacts/skill-smoke-260219-104649/6-review_.log
+impl	TIMEOUT	124	20	project/iter1/artifacts/skill-smoke-260219-104649/7-impl_.log
+refactor	TIMEOUT	124	20	project/iter1/artifacts/skill-smoke-260219-104649/8-refactor_.log
+retro	TIMEOUT	124	20	project/iter1/artifacts/skill-smoke-260219-104649/9-retro_.log
+handoff	TIMEOUT	124	20	project/iter1/artifacts/skill-smoke-260219-104649/10-handoff_.log
+ship	PASS	0	7	project/iter1/artifacts/skill-smoke-260219-104649/11-ship_.log
+update	TIMEOUT	124	20	project/iter1/artifacts/skill-smoke-260219-104649/12-update_.log
+run	TIMEOUT	124	20	project/iter1/artifacts/skill-smoke-260219-104649/13-run_.log
+hitl	TIMEOUT	124	20	project/iter1/artifacts/skill-smoke-260219-104649/14-hitl_.log

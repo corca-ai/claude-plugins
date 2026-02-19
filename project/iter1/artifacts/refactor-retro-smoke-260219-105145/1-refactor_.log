@@ -1,0 +1,15 @@
+Gate passed. Here's the summary:
+
+---
+
+## Refactor Quick Scan Results
+
+| Plugin | Skill | Words | Lines | Flags |
+|--------|-------|-------|-------|-------|
+| *(none)* | — | — | — | — |
+
+**Total skills scanned:** 0 | **Flagged:** 0 | **Warnings:** 0 | **Errors:** 0
+
+This repository (`user-repo-b`) has no marketplace skills installed, so there is no skill drift to report. The scan completed cleanly and the persistence gate passed.
+
+To include local skills in the scan, run: `cwf:refactor --include-local-skills`

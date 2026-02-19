@@ -71,3 +71,4 @@
 - 2026-02-19: 마스터 시나리오 초안 작성
 - 2026-02-19: 설치/셋업 외 cwf:run 시나리오(I1-R60) 추가
 - 2026-02-19: Iteration 1 실행 완료(총 38 시나리오)
+- 2026-02-19: 개선 사이클 산출물 추가(plan review/implementation review/refactor/retro)

@@ -1,0 +1,15 @@
+id	result	exit_code	duration_sec	log_file
+setup-env	FAIL	1	4	project/iter1/artifacts/skill-smoke-260219-104448/1-setup-env_.log
+setup-git-hooks	FAIL	1	4	project/iter1/artifacts/skill-smoke-260219-104448/2-setup-git-hooks_.log
+gather	FAIL	1	3	project/iter1/artifacts/skill-smoke-260219-104448/3-gather_.log
+clarify	FAIL	1	3	project/iter1/artifacts/skill-smoke-260219-104448/4-clarify_.log
+plan	FAIL	1	3	project/iter1/artifacts/skill-smoke-260219-104448/5-plan_.log
+review	FAIL	1	3	project/iter1/artifacts/skill-smoke-260219-104448/6-review_.log
+impl	FAIL	1	4	project/iter1/artifacts/skill-smoke-260219-104448/7-impl_.log
+refactor	FAIL	1	2	project/iter1/artifacts/skill-smoke-260219-104448/8-refactor_.log
+retro	FAIL	1	3	project/iter1/artifacts/skill-smoke-260219-104448/9-retro_.log
+handoff	FAIL	1	5	project/iter1/artifacts/skill-smoke-260219-104448/10-handoff_.log
+ship	FAIL	1	3	project/iter1/artifacts/skill-smoke-260219-104448/11-ship_.log
+update	FAIL	1	4	project/iter1/artifacts/skill-smoke-260219-104448/12-update_.log
+run	FAIL	1	3	project/iter1/artifacts/skill-smoke-260219-104448/13-run_.log
+hitl	FAIL	1	2	project/iter1/artifacts/skill-smoke-260219-104448/14-hitl_.log

@@ -1,0 +1,23 @@
+Gate passed. Here's the summary:
+
+---
+
+## Quick Scan Results
+
+| Plugin | Skill | Words | Lines | Flags |
+|--------|-------|-------|-------|-------|
+| *(none)* | — | — | — | — |
+
+**Total skills scanned:** 0 | **Flagged:** 0 | **Warnings:** 0 | **Errors:** 0
+
+This sandbox repo (`user-repo-b` on `feat/hello-script`) has no marketplace skills installed, so the quick scan found nothing to flag. If you'd like to also scan local skills (e.g. under `.claude/skills/`), run:
+
+```
+cwf:refactor --include-local-skills
+```
+
+Or for a whole-codebase contract-driven scan of the actual shell scripts:
+
+```
+cwf:refactor --codebase
+```

@@ -192,6 +192,31 @@ Alternative: add hooks via `/hooks` menu in the current session (goes through re
 /plugin install <plugin-name>@corca-plugins
 ```
 
+## Pre-Release Validation Gates
+
+Run these checks before public release (or before merging release-bound changes):
+
+```bash
+# 1) Verify marketplace entry visibility
+bash scripts/check-marketplace-entry.sh --source . --plugin cwf
+
+# 2) Run non-interactive smoke across core CWF skills
+bash scripts/noninteractive-skill-smoke.sh \
+  --plugin-dir plugins/cwf \
+  --workdir project/iter1/sandbox/user-repo-b \
+  --timeout 45 \
+  --max-failures 0 \
+  --max-timeouts 0
+```
+
+`check-marketplace-entry.sh` exit codes:
+- `0`: FOUND
+- `2`: LOOKUP_FAILED (network/path/http)
+- `3`: INVALID_MARKETPLACE (invalid JSON shape)
+- `4`: MISSING_ENTRY
+
+`noninteractive-skill-smoke.sh` outputs per-case `PASS|FAIL|TIMEOUT` logs and fails gate (exit 1) when configured thresholds are exceeded.
+
 ## Repo Git Hooks
 
 Recommended (interactive, single entrypoint):
