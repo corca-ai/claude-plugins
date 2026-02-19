@@ -36,8 +36,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/track-user-input.sh",
-            "async": true
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/track-user-input.sh"
           }
         ]
       }

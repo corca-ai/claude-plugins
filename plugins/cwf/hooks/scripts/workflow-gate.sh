@@ -31,23 +31,25 @@ json_block() {
   cat <<JSON
 {"decision":"block","reason":${reason_json}}
 JSON
-  exit 1
+  exit 0
 }
 
 json_allow() {
-  local reason="$1"
-  local reason_json="$reason"
-  if command -v jq >/dev/null 2>&1; then
-    reason_json="$(printf '%s' "$reason" | jq -Rs .)"
-  else
-    reason_json="${reason_json//\\/\\\\}"
-    reason_json="${reason_json//\"/\\\"}"
-    reason_json="${reason_json//$'\n'/ }"
-    reason_json="\"$reason_json\""
-  fi
-  cat <<JSON
-{"decision":"allow","reason":${reason_json}}
+  local reason="${1:-}"
+  if [[ -n "$reason" ]]; then
+    local reason_json="$reason"
+    if command -v jq >/dev/null 2>&1; then
+      reason_json="$(printf '%s' "$reason" | jq -Rs .)"
+    else
+      reason_json="${reason_json//\\/\\\\}"
+      reason_json="${reason_json//\"/\\\"}"
+      reason_json="${reason_json//$'\n'/ }"
+      reason_json="\"$reason_json\""
+    fi
+    cat <<JSON
+{"additionalContext":${reason_json}}
 JSON
+  fi
   exit 0
 }
 
