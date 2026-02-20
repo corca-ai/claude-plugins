@@ -80,7 +80,8 @@ run_capture() {
 if [[ ! -x "$HOOK_DIR/read-guard.sh" ]] \
   || [[ ! -x "$HOOK_DIR/check-deletion-safety.sh" ]] \
   || [[ ! -x "$HOOK_DIR/workflow-gate.sh" ]] \
-  || [[ ! -x "$HOOK_DIR/track-user-input.sh" ]]; then
+  || [[ ! -x "$HOOK_DIR/track-user-input.sh" ]] \
+  || [[ ! -x "$HOOK_DIR/compact-context.sh" ]]; then
   echo "Error: expected hook scripts are missing or not executable under $HOOK_DIR" >&2
   exit 1
 fi
@@ -197,6 +198,45 @@ out="$(printf '%s\n' "$result" | sed -n '2,$p')"
 assert_eq "track-user-input guard fails closed when session_id is empty and binding map exists" "0" "$rc"
 assert_contains "track-user-input missing session_id emits block payload" "\"decision\":\"block\"" "$out"
 assert_contains "track-user-input missing session_id includes explicit reason" "missing session_id" "$out"
+
+#
+# Case group E: compact-context metadata-all-missing alert path
+#
+COMPACT_REPO="$TMP_DIR/compact-repo"
+COMPACT_WT="$TMP_DIR/compact-wt"
+mkdir -p "$COMPACT_REPO/.cwf"
+git -C "$COMPACT_REPO" init -q
+git -C "$COMPACT_REPO" config user.name "hook smoke"
+git -C "$COMPACT_REPO" config user.email "hook-smoke@example.com"
+echo "seed" > "$COMPACT_REPO/README.md"
+git -C "$COMPACT_REPO" add README.md
+git -C "$COMPACT_REPO" commit -q -m "seed"
+git -C "$COMPACT_REPO" worktree add --detach "$COMPACT_WT" >/dev/null
+
+cat > "$COMPACT_REPO/.cwf/cwf-state.yaml" <<EOF
+live:
+  session_id: "sid-compact"
+  dir: ".cwf/projects/s-compact"
+  branch: "main"
+  phase: "impl"
+  task: "compact metadata alert fixture"
+  worktree_root: ""
+  worktree_branch: ""
+  key_files: []
+  dont_touch: []
+  decisions: []
+  decision_journal: []
+EOF
+
+COMPACT_MAP_FILE="$(git -C "$COMPACT_WT" rev-parse --git-common-dir)/cwf-session-worktree-map.tsv"
+: > "$COMPACT_MAP_FILE"
+
+result="$(run_capture bash -c "jq -nc --arg sid '' --arg cwd '$COMPACT_WT' '{\"session_id\":\$sid,\"cwd\":\$cwd,\"source\":\"compact\"}' | CLAUDE_PROJECT_DIR='$COMPACT_REPO' bash '$HOOK_DIR/compact-context.sh'")"
+rc="$(printf '%s\n' "$result" | sed -n '1p')"
+out="$(printf '%s\n' "$result" | sed -n '2,$p')"
+assert_eq "compact-context runs when metadata-all-missing boundary is exercised" "0" "$rc"
+assert_contains "compact-context metadata-all-missing emits WORKTREE ALERT" "WORKTREE ALERT" "$out"
+assert_contains "compact-context metadata-all-missing explains missing binding metadata" "Unable to verify bound session worktree" "$out"
 
 echo "---"
 echo "Hook smoke summary: PASS=$PASS FAIL=$FAIL"

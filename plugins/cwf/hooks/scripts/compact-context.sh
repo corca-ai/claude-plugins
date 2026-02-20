@@ -200,16 +200,20 @@ fi
 expected_worktree=""
 expected_branch=""
 expected_recorded_at=""
+session_map_file=""
+session_map_row_found="false"
+missing_worktree_binding_reason=""
 current_worktree_root=$(git -C "$HOOK_CWD" rev-parse --show-toplevel 2>/dev/null || true)
 
 if [[ -n "$HOOK_SESSION_ID" ]]; then
-    SESSION_MAP_FILE=$(session_map_file_for_cwd "$HOOK_CWD" 2>/dev/null || true)
-    if [[ -n "$SESSION_MAP_FILE" ]]; then
-        SESSION_MAP_ROW=$(session_map_lookup "$SESSION_MAP_FILE" "$HOOK_SESSION_ID" 2>/dev/null || true)
+    session_map_file=$(session_map_file_for_cwd "$HOOK_CWD" 2>/dev/null || true)
+    if [[ -n "$session_map_file" ]]; then
+        SESSION_MAP_ROW=$(session_map_lookup "$session_map_file" "$HOOK_SESSION_ID" 2>/dev/null || true)
         if [[ -n "$SESSION_MAP_ROW" ]]; then
             expected_worktree=$(printf '%s' "$SESSION_MAP_ROW" | awk -F '\t' '{print $1}')
             expected_branch=$(printf '%s' "$SESSION_MAP_ROW" | awk -F '\t' '{print $2}')
             expected_recorded_at=$(printf '%s' "$SESSION_MAP_ROW" | awk -F '\t' '{print $3}')
+            session_map_row_found="true"
         fi
     fi
 fi
@@ -255,6 +259,25 @@ Switch before continuing:
         context="${context}
 Binding recorded at epoch: ${expected_recorded_at}"
     fi
+fi
+
+if [[ -z "$expected_worktree" && -z "$worktree_root" ]]; then
+    if [[ -z "$HOOK_SESSION_ID" ]]; then
+        missing_worktree_binding_reason="hook input session_id is empty and live.worktree_root is unset"
+    elif [[ "$session_map_row_found" != "true" ]]; then
+        if [[ -n "$session_map_file" ]]; then
+            missing_worktree_binding_reason="no session-worktree map binding exists for session_id ${HOOK_SESSION_ID} and live.worktree_root is unset"
+        else
+            missing_worktree_binding_reason="session-worktree map file is unavailable and live.worktree_root is unset"
+        fi
+    fi
+fi
+
+if [[ -n "$missing_worktree_binding_reason" ]]; then
+    context="${context}
+
+[WORKTREE ALERT] Unable to verify bound session worktree because ${missing_worktree_binding_reason}.
+Capture or restore binding metadata before continuing (session-worktree map or live.worktree_root)."
 fi
 
 if [[ ${#key_files[@]} -gt 0 ]]; then
