@@ -124,3 +124,19 @@ When setup non-interactive spot-check still shows `NO_OUTPUT` after phrasing har
 - **Takeaway**: current release readiness에서는 direct runtime 경로보다 deterministic fast-path(`retro-light-fastpath.sh` + retro gate)를 신뢰 가능한 완료 경로로 명시하고 운영해야 한다.
 
 When direct `cwf:retro --light` keeps timing out even on local plugin path -> rely on deterministic fast-path+gate as authoritative completion path, and track direct runtime timeout separately as known residual risk.
+
+## Iteration 5 Lesson — Runtime Residual Closure Needs Command-Path Fallback (2026-02-20)
+
+- **Expected**: retrying `cwf:setup` in strict smoke would be enough to eliminate intermittent `NO_OUTPUT`.
+- **Actual**: some runs still ended with empty output after retries, while `cwf:setup --hooks` produced stable interactive guidance.
+- **Takeaway**: for non-interactive runtime closure, retries alone are insufficient; add a deterministic command-path fallback before recording strict failure.
+
+When strict runtime smoke still reports `NO_OUTPUT` after bounded retries -> execute a lower-variance setup fallback prompt (for example `cwf:setup --hooks`) and classify based on the fallback result.
+
+## Iteration 5 Lesson — YAML Shape Compatibility Must Include Inline Empty Lists (2026-02-20)
+
+- **Expected**: session auto-registration handled by `next-prompt-dir --bootstrap` regardless of whether `sessions` was block-style or inline-empty.
+- **Actual**: inline `sessions: []` bypassed append logic and created directory/state drift.
+- **Takeaway**: state mutation helpers must treat equivalent YAML shapes as first-class inputs and fixtures should cover both.
+
+When parsing mutable list fields in `cwf-state.yaml` -> support both block and inline-empty list syntax, and enforce coverage with deterministic fixtures.

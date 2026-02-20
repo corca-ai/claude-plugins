@@ -1,0 +1,22 @@
+It seems AskUserQuestion is being blocked. Per the Non-Interactive Fail-Fast Policy, I need to emit a WAIT_INPUT response.
+
+---
+
+**WAIT_INPUT**: setup requires user selection at phase **1.2** (Hook Group Selection).
+
+All 9 hook groups are currently **enabled**. Please choose one:
+
+1. **Keep all enabled** (Recommended) — no changes, all 9 groups stay active
+2. **Customize** — tell me which groups to enable/disable from this list:
+   - `attention` — Slack notifications on idle/waiting
+   - `log` — Auto-log turns + auto-commit transcripts
+   - `read` — File-size aware reading guard
+   - `lint_markdown` — Markdown validation after Write/Edit
+   - `lint_shell` — ShellCheck validation after Write/Edit
+   - `deletion_safety` — Blocks risky file deletions
+   - `workflow_gate` — Enforces workflow stage/branch safety rules
+   - `websearch_redirect` — Redirect WebSearch to cwf:gather
+   - `compact_recovery` — Inject live session state after auto-compact
+3. **Disable all** — turn off all CWF hooks
+
+Please reply with your choice.

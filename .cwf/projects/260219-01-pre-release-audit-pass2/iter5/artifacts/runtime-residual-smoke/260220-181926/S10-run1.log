@@ -1,0 +1,17 @@
+WAIT_INPUT: setup requires user selection at phase 1.2.
+
+Select which CWF hook groups to enable (all 9 are currently enabled):
+
+| # | Group | Description | Current |
+|---|-------|-------------|---------|
+| 1 | `attention` | Slack notifications on idle/waiting | enabled |
+| 2 | `log` | Auto-log turns + auto-commit transcripts | enabled |
+| 3 | `read` | File-size aware reading guard | enabled |
+| 4 | `lint_markdown` | Markdown validation after Write/Edit | enabled |
+| 5 | `lint_shell` | ShellCheck validation after Write/Edit | enabled |
+| 6 | `deletion_safety` | Blocks risky file deletions with policy-compliant justification | enabled |
+| 7 | `workflow_gate` | Enforces workflow stage/branch safety rules before edits and commands | enabled |
+| 8 | `websearch_redirect` | Redirect WebSearch to cwf:gather | enabled |
+| 9 | `compact_recovery` | Inject live session state after auto-compact and guard session/worktree binding | enabled |
+
+Please reply with your choice (e.g., "all", "1,2,3,5,6,9", or "keep current").

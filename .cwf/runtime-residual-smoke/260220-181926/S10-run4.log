@@ -1,0 +1,25 @@
+Hmm, it seems AskUserQuestion is being blocked. Per the Non-Interactive Fail-Fast Policy, I need to present the choices directly.
+
+---
+
+**WAIT_INPUT**: setup requires user selection at phase **1.2** (Hook Group Selection).
+
+All 9 hook groups are currently **enabled**. Which should stay enabled?
+
+| # | Group | Description | Current |
+|---|-------|-------------|---------|
+| 1 | `attention` | Slack notifications on idle/waiting | enabled |
+| 2 | `log` | Auto-log turns + auto-commit transcripts | enabled |
+| 3 | `read` | File-size aware reading guard | enabled |
+| 4 | `lint_markdown` | Markdown validation after Write/Edit | enabled |
+| 5 | `lint_shell` | ShellCheck validation after Write/Edit | enabled |
+| 6 | `deletion_safety` | Blocks risky file deletions, requires justification | enabled |
+| 7 | `workflow_gate` | Enforces workflow stage/branch safety rules | enabled |
+| 8 | `websearch_redirect` | Redirect WebSearch to cwf:gather | enabled |
+| 9 | `compact_recovery` | Inject live session state after auto-compact | enabled |
+
+Options:
+- **A**: Keep all enabled (no changes)
+- **B**: List the numbers to enable (e.g., "1,2,3,6,7,9" — unlisted ones will be disabled)
+
+Please reply with your choice.

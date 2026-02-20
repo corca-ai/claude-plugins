@@ -44,6 +44,17 @@ assert_file_contains() {
   fi
 }
 
+assert_file_exists() {
+  local name="$1"
+  local file_path="$2"
+  if [[ -f "$file_path" ]]; then
+    pass "$name"
+  else
+    fail "$name"
+    echo "  missing: $file_path"
+  fi
+}
+
 run_status() {
   set +e
   "$@" >/dev/null 2>&1
@@ -95,7 +106,7 @@ if [[ "$prompt" == "cwf:retro --light" ]]; then
   exit 0
 fi
 
-if [[ "$prompt" == "cwf:setup" ]]; then
+if [[ "$prompt" == "cwf:setup" || "$prompt" == "cwf:setup --hooks" ]]; then
   run_no=1
   if [[ -n "$state_file" ]]; then
     if [[ -f "$state_file" ]]; then
@@ -140,7 +151,8 @@ status="$(run_status env MOCK_MODE=mixed MOCK_STATE_FILE="$STATE_FILE" bash "$SM
   --output-dir "$OUT_OBS")"
 assert_eq "observe mode exits 0 on residuals" "0" "$status"
 assert_file_contains "observe summary has K46 timeout" "$OUT_OBS/summary.tsv" "$(printf 'K46\t1\tFAIL\tTIMEOUT')"
-assert_file_contains "observe summary has S10 no_output" "$OUT_OBS/summary.tsv" "$(printf 'S10\t2\tFAIL\tNO_OUTPUT')"
+assert_file_contains "observe summary retries S10 into WAIT_INPUT" "$OUT_OBS/summary.tsv" "$(printf 'S10\t2\tPASS\tWAIT_INPUT')"
+assert_file_exists "observe output keeps retry evidence" "$OUT_OBS/S10-run2.log.retry2"
 
 rm -f "$STATE_FILE"
 status="$(run_status env MOCK_MODE=mixed MOCK_STATE_FILE="$STATE_FILE" bash "$SMOKE_SCRIPT" \

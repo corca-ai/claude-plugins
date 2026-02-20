@@ -1,0 +1,21 @@
+This is the current session — the most recent log that isn't already symlinked. Since this is a tiny retro-only session, I'll skip log linking (no clear way to identify which log corresponds to this specific session without reading many files, and the session is trivial).
+
+Now the direct invocation report (Step 8).
+
+---
+
+**Retro Brief**
+
+- **세션 목적/결과**: `cwf:retro --light` 단독 실행 — 오늘 4번째 시도, light fast-path 정상 완료 및 gate PASS.
+- **주요 낭비 신호**: 동일 날짜 4회 반복 retro-light 실행 — 근본 원인은 스크립트 edge case 미처리, smoke test 미실행으로 사전 감지 불가.
+- **CDM 교훈**: light 모드에서 결정론적 산출물 완결을 분석 심도보다 우선한 것은 파이프라인 안정성 검증 목적에 적합.
+- **도구/역량 핵심**: smoke test 계획(S260219-03)은 수립되었으나 미실행 — 이를 실행하면 반복 실패를 사전 차단 가능.
+
+**Persist Proposals**
+
+| # | Finding | Tier | Target | Apply now? |
+|---|---------|------|--------|------------|
+| 1 | retro-light 반복 실패 → smoke test 미실행이 근본 원인 | Eval-Hook | `runtime-residual-smoke.sh` 실행 자동화 | 이번 세션 범위 밖 — 별도 세션 권장 |
+| 2 | 동일 날짜 다수 bootstrap 디렉토리 생성 패턴 | Doc | `project-context.md`에 디버깅 세션 패턴 기록 | 낮은 우선순위 |
+
+Persist 제안을 지금 적용할까요?

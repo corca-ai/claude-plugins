@@ -1,0 +1,10 @@
+I'll wait for your response. The question is:
+
+**All 9 hook groups are currently enabled. How would you like to configure them?**
+
+1. **Keep all enabled** (Recommended) — No changes to current hook configuration
+2. **Disable lint hooks only** — Disable lint_markdown and lint_shell, keep the rest enabled
+3. **Disable all** — Turn off all hook groups
+4. Or specify a custom selection (tell me which to enable/disable)
+
+Please reply with your choice.

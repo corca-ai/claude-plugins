@@ -453,6 +453,41 @@ sessions:
     branch: "main"
     artifacts: [plan.md, lessons.md]
 
+
+  - id: "S260220-02"
+    title: "retro-light-2"
+    dir: ".cwf/projects/260220-02-retro-light-2"
+    branch: "main"
+    artifacts: [plan.md, lessons.md]
+
+
+  - id: "S260220-03"
+    title: "retro-light"
+    dir: ".cwf/projects/260220-03-retro-light"
+    branch: "main"
+    artifacts: [plan.md, lessons.md]
+
+
+  - id: "S260220-04"
+    title: "retro-light-4"
+    dir: ".cwf/projects/260220-04-retro-light-4"
+    branch: "main"
+    artifacts: [plan.md, lessons.md]
+
+
+  - id: "S260220-05"
+    title: "retro-light-5"
+    dir: ".cwf/projects/260220-05-retro-light-5"
+    branch: "main"
+    artifacts: [plan.md, lessons.md]
+
+
+  - id: "S260220-06"
+    title: "retro-light"
+    dir: ".cwf/projects/260220-06-retro-light"
+    branch: "main"
+    artifacts: [plan.md, lessons.md]
+
 tools:
   codex: unavailable
   gemini: unavailable

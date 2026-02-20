@@ -60,6 +60,20 @@ Close the remaining runtime residuals while keeping `main=deploy` stability.
    - [.cwf/projects/260219-01-pre-release-audit-pass2/iter4/artifacts/runtime-residual-smoke/260220-173004/summary.tsv](iter4/artifacts/runtime-residual-smoke/260220-173004/summary.tsv)
    - signal: `K46 timeout=0`, `S10 no_output=2`
 
+## Iteration 5 Execution Update (2026-02-20)
+
+1. Runtime residual strict close condition is now PASS:
+   - [.cwf/projects/260219-01-pre-release-audit-pass2/iter5/artifacts/runtime-residual-smoke/260220-181135/summary.tsv](iter5/artifacts/runtime-residual-smoke/260220-181135/summary.tsv)
+   - signal: `K46 timeout=0`, `S10 no_output=0`
+2. Integrated strict gate is PASS:
+   - [.cwf/projects/260219-01-pre-release-audit-pass2/iter5/artifacts/runtime-residual-smoke/260220-181926/summary.tsv](iter5/artifacts/runtime-residual-smoke/260220-181926/summary.tsv)
+   - signal: `K46 timeout=0`, `S10 no_output=0` (all runs `WAIT_INPUT`)
+3. Bootstrap compatibility gap (`sessions: []`) is closed:
+   - code fix: `plugins/cwf/scripts/next-prompt-dir.sh`
+   - fixture evidence: [.cwf/projects/260219-01-pre-release-audit-pass2/iter5/artifacts/I5-B20-next-prompt-inline-fixtures-20260220T092656Z.log](iter5/artifacts/I5-B20-next-prompt-inline-fixtures-20260220T092656Z.log)
+4. Deterministic local gate remains PASS after hardening:
+   - [.cwf/projects/260219-01-pre-release-audit-pass2/iter5/artifacts/I5-G01-premerge-20260220T092656Z.log](iter5/artifacts/I5-G01-premerge-20260220T092656Z.log)
+
 ## Immediate Iteration Start Checklist
 
 1. Re-validate deterministic local gate:

@@ -3,9 +3,9 @@
 ## 범위
 
 - 프로젝트: CWF 퍼블릭 배포 전 시나리오 검토
-- 완료 iteration: 3
-- 진행 중 iteration: 4
-- 다음 iteration 준비: final merge readiness
+- 완료 iteration: 5
+- 진행 중 iteration: 없음 (runtime hardening close documented)
+- 다음 iteration 준비: merge readiness evidence refresh only
 
 ## Iteration별 요약
 
@@ -51,12 +51,29 @@
   - `I4-K46` direct `cwf:retro --light` timeout은 여전히 지속
   - `I4-S10` setup full은 WAIT_INPUT 비중이 늘었지만 `NO_OUTPUT` 재발 잔여
 
+### Iteration 5 (runtime hardening close)
+
+- 마스터: [.cwf/projects/260219-01-pre-release-audit-pass2/iter5/master-scenarios.md](iter5/master-scenarios.md)
+- 상세: [.cwf/projects/260219-01-pre-release-audit-pass2/iter5/progress.md](iter5/progress.md)
+- 시작 계약: [.cwf/projects/260219-01-pre-release-audit-pass2/next-iteration-entry-iter5-runtime-hardening.md](next-iteration-entry-iter5-runtime-hardening.md)
+- 결론
+  - `runtime-residual-smoke` strict close 달성(`K46 timeout=0`, `S10 no_output=0`)
+  - `next-prompt-dir --bootstrap` inline `sessions: []` 등록 누락 호환성 갭 해소
+  - `premerge` + integrated `predeploy --runtime-residual-mode strict` 모두 PASS
+
 ## 누적 핵심 리스크 (Iteration 4 중간 기준)
 
 1. `retro --light` direct non-interactive timeout 지속
 2. setup 계열 non-interactive 결과 변동성(질문형/timeout/무출력 혼재)
 3. smoke 분류는 개선됐지만 문구 기반 휴리스틱 유지 관리 필요
 4. worktree metadata-all-missing 경계는 Iteration 4에서 dedicated alert로 보강 완료(리스크 해소)
+
+## Iteration 5 Closure Snapshot (2026-02-20)
+
+1. `K46` strict timeout residual: CLOSED (strict PASS evidence recorded)
+2. `S10` strict no-output residual: CLOSED (retry + fallback hardening, strict PASS)
+3. `next-prompt-dir` inline `sessions: []` registration gap: CLOSED (fixture PASS)
+4. Remaining watch item: direct runtime output variance can still occur transiently, but strict gate now closes deterministically.
 
 ## 다음 단계(권장)
 
@@ -100,3 +117,18 @@
   - [.cwf/projects/260219-01-pre-release-audit-pass2/iter4/artifacts/I4-K46-retro-light-direct-fixed-localplugin-20260220T073928Z.log](iter4/artifacts/I4-K46-retro-light-direct-fixed-localplugin-20260220T073928Z.log)
   - [.cwf/projects/260219-01-pre-release-audit-pass2/iter4/artifacts/I4-S10-setup-full-repeated-fixed-localplugin-valid-20260220T073542Z.log](iter4/artifacts/I4-S10-setup-full-repeated-fixed-localplugin-valid-20260220T073542Z.log)
   - [.cwf/projects/260219-01-pre-release-audit-pass2/iter4/artifacts/I4-W20-worktree-metadata-boundary-fixed-20260220T073219Z.log](iter4/artifacts/I4-W20-worktree-metadata-boundary-fixed-20260220T073219Z.log)
+
+## 이번 사이클(Iteration 5, 완료) 산출물
+
+- 마스터/프로그레스/시나리오
+  - [.cwf/projects/260219-01-pre-release-audit-pass2/iter5/master-scenarios.md](iter5/master-scenarios.md)
+  - [.cwf/projects/260219-01-pre-release-audit-pass2/iter5/progress.md](iter5/progress.md)
+  - [.cwf/projects/260219-01-pre-release-audit-pass2/iter5/scenarios/I5-G01.md](iter5/scenarios/I5-G01.md)
+  - [.cwf/projects/260219-01-pre-release-audit-pass2/iter5/scenarios/I5-R10.md](iter5/scenarios/I5-R10.md)
+  - [.cwf/projects/260219-01-pre-release-audit-pass2/iter5/scenarios/I5-B20.md](iter5/scenarios/I5-B20.md)
+  - [.cwf/projects/260219-01-pre-release-audit-pass2/iter5/scenarios/I5-G02.md](iter5/scenarios/I5-G02.md)
+- 핵심 증거
+  - [.cwf/projects/260219-01-pre-release-audit-pass2/iter5/artifacts/I5-G01-premerge-20260220T092656Z.log](iter5/artifacts/I5-G01-premerge-20260220T092656Z.log)
+  - [.cwf/projects/260219-01-pre-release-audit-pass2/iter5/artifacts/I5-B20-next-prompt-inline-fixtures-20260220T092656Z.log](iter5/artifacts/I5-B20-next-prompt-inline-fixtures-20260220T092656Z.log)
+  - [.cwf/projects/260219-01-pre-release-audit-pass2/iter5/artifacts/runtime-residual-smoke/260220-181135/summary.tsv](iter5/artifacts/runtime-residual-smoke/260220-181135/summary.tsv)
+  - [.cwf/projects/260219-01-pre-release-audit-pass2/iter5/artifacts/runtime-residual-smoke/260220-181926/summary.tsv](iter5/artifacts/runtime-residual-smoke/260220-181926/summary.tsv)

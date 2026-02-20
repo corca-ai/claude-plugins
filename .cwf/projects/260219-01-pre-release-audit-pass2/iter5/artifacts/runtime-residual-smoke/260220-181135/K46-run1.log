@@ -1,0 +1,24 @@
+The fast-path produced the minimal gate-compliant retro.md. Since this is a tiny session (just the retro invocation itself), the light fast-path content is appropriate. Let me enrich it slightly with session-specific observations before reporting.
+
+The retro is complete. Here's the direct invocation report:
+
+---
+
+**Retro Brief**
+
+- 이번 세션은 `cwf:retro --light` 단독 호출 — 선행 작업 없는 최소 세션
+- `retro-light-fastpath.sh` → gate PASS로 결정론적 아티팩트 완결 확인
+- 오늘 `.cwf/projects/` 아래 retro-light 디렉토리가 5개 (260220-01~05) 누적 — 반복 호출 패턴 관찰됨
+- 핵심 낭비 신호: light retro가 반복 실행되면서 실질 분석 없이 아티팩트만 생성되는 루프 가능성
+
+**Persist Proposals**
+
+| # | Finding | Tier | Target | Apply-now |
+|---|---------|------|--------|-----------|
+| 1 | 같은 날 retro-light 5회 반복 — 빈 세션 retro는 skip 또는 dedup 필요 | Tier 1 (Eval/Hook) | `retro-light-fastpath.sh` 또는 `check-session.sh` — 선행 작업 없으면 경고 | 권장 |
+| 2 | `live:` 섹션의 `session_id`, `dir`, `branch`가 빈 문자열 — retro 전에 live state 미설정 | Tier 2 (State) | `cwf-state.yaml` live 섹션 초기화 로직 | 보류 |
+
+Output: `.cwf/projects/260220-05-retro-light-5/retro.md`
+Gate: `PERSISTENCE_GATE=PASS`
+
+persist proposal을 지금 적용할까요?

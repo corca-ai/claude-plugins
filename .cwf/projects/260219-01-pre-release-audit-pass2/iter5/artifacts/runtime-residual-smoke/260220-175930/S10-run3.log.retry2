@@ -1,0 +1,20 @@
+AskUserQuestion is limited to 4 options max. I'll present the 9 hook groups as a text-based selection instead.
+
+Current hook state (all enabled):
+
+| # | Group | Description | Current |
+|---|-------|-------------|---------|
+| 1 | `attention` | Slack notifications on idle/waiting | enabled |
+| 2 | `log` | Auto-log turns + auto-commit transcripts | enabled |
+| 3 | `read` | File-size aware reading guard | enabled |
+| 4 | `lint_markdown` | Markdown validation after Write/Edit | enabled |
+| 5 | `lint_shell` | ShellCheck validation after Write/Edit | enabled |
+| 6 | `deletion_safety` | Blocks risky file deletions, requires justification | enabled |
+| 7 | `workflow_gate` | Enforces workflow stage/branch safety rules | enabled |
+| 8 | `websearch_redirect` | Redirect WebSearch to cwf:gather | enabled |
+| 9 | `compact_recovery` | Inject live state after auto-compact, guard session binding | enabled |
+
+**Which groups should be enabled?** Reply with:
+- `all` to keep all enabled (current state)
+- A comma-separated list of numbers to enable only those (e.g., `1,2,3,6,7,9`)
+- Or name specific groups to **disable** (e.g., `disable lint_markdown, lint_shell`)

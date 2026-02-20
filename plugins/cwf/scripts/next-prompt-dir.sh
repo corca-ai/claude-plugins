@@ -155,7 +155,7 @@ session_entry_exists() {
 
   awk -v target="$target_dir" '
     BEGIN { in_sessions=0; found=0 }
-    /^sessions:[[:space:]]*$/ { in_sessions=1; next }
+    /^sessions:[[:space:]]*(#.*)?$/ { in_sessions=1; next }
     in_sessions && /^[^[:space:]#]/ { exit }
     in_sessions {
       if ($0 ~ /^[[:space:]]*dir:[[:space:]]*/) {
@@ -188,8 +188,21 @@ append_session_entry() {
     -v stitle="$session_title" \
     -v sdir="$session_dir" \
     -v sbranch="$session_branch" '
-    BEGIN { in_sessions=0; inserted=0 }
-    /^sessions:[[:space:]]*$/ {
+    BEGIN { in_sessions=0; inserted=0; saw_sessions=0 }
+    /^sessions:[[:space:]]*\[[[:space:]]*\][[:space:]]*(#.*)?$/ {
+      saw_sessions=1
+      print "sessions:"
+      print ""
+      print "  - id: \"" sid "\""
+      print "    title: \"" stitle "\""
+      print "    dir: \"" sdir "\""
+      print "    branch: \"" sbranch "\""
+      print "    artifacts: [plan.md, lessons.md]"
+      inserted=1
+      next
+    }
+    /^sessions:[[:space:]]*(#.*)?$/ {
+      saw_sessions=1
       in_sessions=1
       print
       next
@@ -256,7 +269,7 @@ EOF
     return 0
   fi
 
-  if ! grep -q '^sessions:[[:space:]]*$' "$state_file"; then
+  if ! grep -Eq '^sessions:[[:space:]]*($|\[[[:space:]]*\][[:space:]]*)(#.*)?$' "$state_file"; then
     return 0
   fi
 

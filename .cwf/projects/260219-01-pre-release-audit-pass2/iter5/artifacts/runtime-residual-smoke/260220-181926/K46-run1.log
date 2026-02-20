@@ -1,0 +1,19 @@
+This session hasn't produced a session log file yet (it's the current active session), so no logs to link. 
+
+---
+
+## Retro Brief
+
+- **세션**: 단일 턴 `/retro --light` 호출 — 선행 작업 없는 회고 전용 세션
+- **낭비 신호**: `.cwf/projects/`에 retro-light 디렉토리 6개 누적, `.cwf/runtime-residual-smoke/` 잔여물 다수 — 테스트 후 정리 미비
+- **CDM**: light 모드 선택은 적절 — 분석 대상 없는 세션에서 비용 절약 의도 충족
+- **도구**: CWF retro 파이프라인(fast-path, gate) 정상 동작 확인. smoke/test 잔여물 자동 정리 도구 부재
+
+## Persist Proposals
+
+| Finding | Tier | Target | Apply Now? |
+|---------|------|--------|------------|
+| smoke-test / retro-light 잔여물 누적 | Eval-Hook | cleanup 스크립트 신규 작성 또는 기존 hook에 추가 | 선택적 |
+| `runtime-residual-smoke/` 5개 디렉토리 잔존 | Doc | `project-context.md`에 정리 절차 기록 | 선택적 |
+
+잔여물 정리 스크립트를 지금 만들거나, 수동 정리를 진행할까요?

@@ -1,0 +1,81 @@
+CWF gate mode: premerge
+Plugin: cwf
+---
+[gate] local marketplace entry
+status=FOUND
+source=./.claude-plugin/marketplace.json
+plugin=cwf
+message=Marketplace entry found.
+---
+[gate] plugin consistency
+---
+[gate] marketplace checker fixtures
+[PASS] found entry exits 0
+[PASS] found entry status output
+[PASS] case-insensitive plugin name is accepted
+[PASS] case-insensitive output status
+[PASS] missing entry exits 4
+[PASS] missing entry status output
+[PASS] invalid marketplace exits 3
+[PASS] invalid marketplace status output
+[PASS] missing file exits 2
+[PASS] missing file status output
+[PASS] json mode exits 0 for found entry
+[PASS] json mode status field
+---
+Fixtures: PASS=12 FAIL=0
+---
+[gate] non-interactive smoke fixtures
+[PASS] gate passes when thresholds allow fail/timeout
+[PASS] summary has PASS row
+[PASS] summary has WAIT_INPUT row
+[PASS] summary has WAIT_INPUT alt row
+[PASS] summary has WAIT_INPUT run row
+[PASS] summary has WAIT_INPUT confirm row
+[PASS] summary has WAIT_INPUT pipeline row
+[PASS] summary has WAIT_INPUT setup row
+[PASS] summary has WAIT_INPUT dashboard row
+[PASS] summary has FAIL row
+[PASS] summary has NO_OUTPUT row
+[PASS] summary has TIMEOUT row
+[PASS] gate fails when thresholds are strict
+[PASS] strict run summary exists
+---
+Fixtures: PASS=14 FAIL=0
+---
+[gate] runtime residual smoke fixtures
+[PASS] observe mode exits 0 on residuals
+[PASS] observe summary has K46 timeout
+[PASS] observe summary retries S10 into WAIT_INPUT
+[PASS] observe output keeps retry evidence
+[PASS] strict mode fails on timeout/no_output
+[PASS] strict mode passes when residuals absent
+[PASS] strict pass summary has K46 OK
+---
+Fixtures: PASS=7 FAIL=0
+---
+[gate] hook core smoke
+[PASS] read-guard allows small file
+[PASS] read-guard small file output is empty
+[PASS] read-guard large file exits 0 with deny payload
+[PASS] read-guard large file includes deny decision
+[PASS] deletion-safety blocks repo file deletion
+[PASS] deletion-safety block payload
+[PASS] deletion-safety allows /tmp deletion
+[PASS] deletion-safety allow output is empty
+[PASS] workflow-gate blocks push while closing gates remain
+[PASS] workflow-gate block reason includes pending gates
+[PASS] workflow-gate allows non-protected prompt
+[PASS] workflow-gate allow payload
+[PASS] track-user-input guard blocks mismatched worktree with session_id
+[PASS] track-user-input guard mismatch emits block payload
+[PASS] track-user-input guard fails closed when session_id is empty and binding map exists
+[PASS] track-user-input missing session_id emits block payload
+[PASS] track-user-input missing session_id includes explicit reason
+[PASS] compact-context runs when metadata-all-missing boundary is exercised
+[PASS] compact-context metadata-all-missing emits WORKTREE ALERT
+[PASS] compact-context metadata-all-missing explains missing binding metadata
+---
+Hook smoke summary: PASS=20 FAIL=0
+---
+CWF gate result: PASS

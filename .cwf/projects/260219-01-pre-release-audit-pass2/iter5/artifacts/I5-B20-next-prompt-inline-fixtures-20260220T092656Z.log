@@ -1,0 +1,16 @@
+[PASS] plugin script uses max same-day sequence
+[PASS] plugin script resets sequence across day boundary
+[PASS] plugin script supports artifact-root based output path
+[PASS] plugin bootstrap returns resolved path
+[PASS] plugin bootstrap creates session directory
+[PASS] plugin bootstrap initializes plan.md
+[PASS] plugin bootstrap initializes lessons.md
+[PASS] plugin bootstrap registers session dir in state
+[PASS] plugin bootstrap returns resolved path for inline sessions list
+[PASS] plugin bootstrap registers session dir for inline sessions list
+[PASS] plugin bootstrap expands inline empty sessions into block format
+[PASS] invalid override date is rejected
+[PASS] plugin resolves project root from caller cwd git context
+[PASS] plugin honors CWF_PROJECT_ROOT override for root resolution
+---
+Fixtures: PASS=14 FAIL=0

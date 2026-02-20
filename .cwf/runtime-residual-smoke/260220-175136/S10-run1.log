@@ -1,0 +1,10 @@
+WAIT_INPUT: setup requires user selection at phase 1.2.
+
+All 9 hook groups are currently **enabled**. How would you like to proceed?
+
+1. **Keep all enabled** (Recommended) — all 9 groups stay active
+2. **Disable lint hooks only** — disable `lint_markdown` + `lint_shell`; keep remaining 7
+3. **Minimal set** — enable only `log`, `read`, `deletion_safety`, `compact_recovery`
+4. **Customize individually** — specify which hooks to enable/disable
+
+Please reply with your choice.

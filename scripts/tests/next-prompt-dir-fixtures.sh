@@ -111,6 +111,42 @@ else
   fail "plugin bootstrap registers session dir in state"
 fi
 
+STATE_FILE_INLINE="$TMP_DIR/cwf-state-inline.yaml"
+cat > "$STATE_FILE_INLINE" <<'EOF'
+workflow:
+  current_stage: harden
+sessions: []
+tools: {}
+hooks: {}
+live:
+  session_id: ""
+  dir: ""
+  branch: ""
+  phase: ""
+  task: ""
+EOF
+
+plugin_bootstrap_inline_path="$(
+  CWF_PROJECTS_DIR="$PROJECTS_DIR" \
+  CWF_STATE_FILE="$STATE_FILE_INLINE" \
+  CWF_NEXT_PROMPT_DATE=260214 \
+  bash "$PLUGIN_SCRIPT" --bootstrap boot-inline
+)"
+expected_plugin_bootstrap_inline="$PROJECTS_DIR/260214-04-boot-inline"
+assert_eq "plugin bootstrap returns resolved path for inline sessions list" "$expected_plugin_bootstrap_inline" "$plugin_bootstrap_inline_path"
+
+if grep -Fq "dir: \"$expected_plugin_bootstrap_inline\"" "$STATE_FILE_INLINE"; then
+  pass "plugin bootstrap registers session dir for inline sessions list"
+else
+  fail "plugin bootstrap registers session dir for inline sessions list"
+fi
+
+if grep -Eq '^sessions:[[:space:]]*$' "$STATE_FILE_INLINE"; then
+  pass "plugin bootstrap expands inline empty sessions into block format"
+else
+  fail "plugin bootstrap expands inline empty sessions into block format"
+fi
+
 set +e
 CWF_PROJECTS_DIR="$PROJECTS_DIR" CWF_NEXT_PROMPT_DATE=2026-02-14 bash "$PLUGIN_SCRIPT" bad >/dev/null 2>&1
 invalid_status=$?

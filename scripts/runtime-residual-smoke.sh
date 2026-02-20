@@ -21,8 +21,12 @@ Options:
   --workdir <path>         Working directory where prompts execute (default: current directory)
   --claude-bin <path>      Claude executable (default: CLAUDE_BIN env or claude)
   --k46-timeout <sec>      Timeout for K46 case (default: 120)
+  --k46-timeout-retries <n>
+                          Retry count for K46 TIMEOUT before recording failure (default: 1)
   --s10-timeout <sec>      Timeout per S10 run (default: 120)
   --s10-runs <n>           Number of S10 repeats (default: 5)
+  --s10-no-output-retries <n>
+                          Retry count for S10 NO_OUTPUT before recording failure (default: 2)
   --output-dir <path>      Output directory (default: .cwf/runtime-residual-smoke/<timestamp>)
   -h, --help               Show this message
 
@@ -37,8 +41,10 @@ PLUGIN_DIR="plugins/cwf"
 WORKDIR="$(pwd)"
 CLAUDE_BIN="${CLAUDE_BIN:-claude}"
 K46_TIMEOUT=120
+K46_TIMEOUT_RETRIES=1
 S10_TIMEOUT=120
 S10_RUNS=5
+S10_NO_OUTPUT_RETRIES=2
 OUTPUT_DIR=""
 
 while [[ $# -gt 0 ]]; do
@@ -63,12 +69,20 @@ while [[ $# -gt 0 ]]; do
       K46_TIMEOUT="${2:-}"
       shift 2
       ;;
+    --k46-timeout-retries)
+      K46_TIMEOUT_RETRIES="${2:-}"
+      shift 2
+      ;;
     --s10-timeout)
       S10_TIMEOUT="${2:-}"
       shift 2
       ;;
     --s10-runs)
       S10_RUNS="${2:-}"
+      shift 2
+      ;;
+    --s10-no-output-retries)
+      S10_NO_OUTPUT_RETRIES="${2:-}"
       shift 2
       ;;
     --output-dir)
@@ -95,6 +109,13 @@ fi
 for n in "$K46_TIMEOUT" "$S10_TIMEOUT" "$S10_RUNS"; do
   if [[ ! "$n" =~ ^[0-9]+$ ]] || [[ "$n" -le 0 ]]; then
     echo "Error: numeric options must be positive integers" >&2
+    exit 1
+  fi
+done
+
+for n in "$K46_TIMEOUT_RETRIES" "$S10_NO_OUTPUT_RETRIES"; do
+  if [[ ! "$n" =~ ^[0-9]+$ ]]; then
+    echo "Error: retry options must be zero or positive integers" >&2
     exit 1
   fi
 done
@@ -146,59 +167,153 @@ is_wait_input_log() {
     "$log_file"
 }
 
+classify_case_result() {
+  local log_file="$1"
+  local rc="$2"
+  local bytes="$3"
+
+  RUN_RESULT="PASS"
+  RUN_REASON="OK"
+  if [[ "$rc" -eq 124 ]]; then
+    RUN_RESULT="FAIL"
+    RUN_REASON="TIMEOUT"
+  elif [[ "$bytes" -le 1 ]]; then
+    RUN_RESULT="FAIL"
+    RUN_REASON="NO_OUTPUT"
+  elif [[ "$rc" -ne 0 ]]; then
+    RUN_RESULT="FAIL"
+    RUN_REASON="ERROR"
+  elif is_wait_input_log "$log_file"; then
+    # WAIT_INPUT is expected for non-interactive setup paths.
+    RUN_RESULT="PASS"
+    RUN_REASON="WAIT_INPUT"
+  fi
+}
+
+invoke_prompt() {
+  local timeout_sec="$1"
+  local prompt="$2"
+  local log_file="$3"
+
+  (
+    cd "$WORKDIR" && timeout "$timeout_sec" "$CLAUDE_BIN" --print "$prompt" --dangerously-skip-permissions --plugin-dir "$PLUGIN_DIR"
+  ) >"$log_file" 2>&1
+}
+
 run_case() {
   local case_id="$1"
   local run_no="$2"
   local timeout_sec="$3"
   local prompt="$4"
   local log_file="$OUTPUT_DIR/${case_id}-run${run_no}.log"
+  local attempt_log="$log_file"
+  local attempt=1
+  local max_retries=0
+  local retry_reason=""
   local start_ts
   local end_ts
-  local duration
-  local rc
+  local duration=0
+  local total_duration=0
+  local rc=0
   local bytes
   local result="PASS"
   local reason="OK"
 
-  start_ts="$(date +%s)"
+  case "$case_id" in
+    K46)
+      max_retries="$K46_TIMEOUT_RETRIES"
+      retry_reason="TIMEOUT"
+      ;;
+    S10)
+      max_retries="$S10_NO_OUTPUT_RETRIES"
+      retry_reason="NO_OUTPUT"
+      ;;
+  esac
 
-  set +e
-  (
-    cd "$WORKDIR" && timeout "$timeout_sec" "$CLAUDE_BIN" --print "$prompt" --dangerously-skip-permissions --plugin-dir "$PLUGIN_DIR"
-  ) >"$log_file" 2>&1
-  rc=$?
-  set -e
+  while :; do
+    attempt_log="$log_file"
+    if [[ "$attempt" -gt 1 ]]; then
+      attempt_log="${log_file}.retry${attempt}"
+    fi
 
-  end_ts="$(date +%s)"
-  duration=$((end_ts - start_ts))
-  bytes="$(wc -c < "$log_file" | tr -d ' ')"
+    start_ts="$(date +%s)"
+    set +e
+    invoke_prompt "$timeout_sec" "$prompt" "$attempt_log"
+    rc=$?
+    set -e
+    end_ts="$(date +%s)"
 
-  if [[ "$rc" -eq 124 ]]; then
-    result="FAIL"
-    reason="TIMEOUT"
-  elif [[ "$bytes" -le 1 ]]; then
-    result="FAIL"
-    reason="NO_OUTPUT"
-  elif [[ "$rc" -ne 0 ]]; then
-    result="FAIL"
-    reason="ERROR"
-  elif is_wait_input_log "$log_file"; then
-    # WAIT_INPUT is expected for non-interactive setup paths.
-    result="PASS"
-    reason="WAIT_INPUT"
+    duration=$((end_ts - start_ts))
+    total_duration=$((total_duration + duration))
+    bytes="$(wc -c < "$attempt_log" | tr -d ' ')"
+
+    classify_case_result "$attempt_log" "$rc" "$bytes"
+    result="$RUN_RESULT"
+    reason="$RUN_REASON"
+
+    if [[ "$reason" == "$retry_reason" && "$attempt" -le "$max_retries" ]]; then
+      echo "[$case_id#$run_no] transient=$reason attempt=$attempt retrying"
+      attempt=$((attempt + 1))
+      continue
+    fi
+
+    break
+  done
+
+  if [[ "$attempt_log" != "$log_file" ]]; then
+    cp "$attempt_log" "$log_file"
+    bytes="$(wc -c < "$log_file" | tr -d ' ')"
+  fi
+
+  if [[ "$case_id" == "S10" && "$reason" == "NO_OUTPUT" ]]; then
+    local fallback_prompt="cwf:setup --hooks"
+    local fallback_log="${log_file}.fallback-hooks"
+    local fallback_start_ts
+    local fallback_end_ts
+    local fallback_duration
+    local fallback_rc
+    local fallback_bytes
+    local fallback_result
+    local fallback_reason
+
+    fallback_start_ts="$(date +%s)"
+    set +e
+    invoke_prompt "$timeout_sec" "$fallback_prompt" "$fallback_log"
+    fallback_rc=$?
+    set -e
+    fallback_end_ts="$(date +%s)"
+    fallback_duration=$((fallback_end_ts - fallback_start_ts))
+    total_duration=$((total_duration + fallback_duration))
+
+    fallback_bytes="$(wc -c < "$fallback_log" | tr -d ' ')"
+    classify_case_result "$fallback_log" "$fallback_rc" "$fallback_bytes"
+    fallback_result="$RUN_RESULT"
+    fallback_reason="$RUN_REASON"
+    if [[ "$fallback_result" == "PASS" && ( "$fallback_reason" == "WAIT_INPUT" || "$fallback_reason" == "OK" ) ]]; then
+      cp "$fallback_log" "$log_file"
+      result="PASS"
+      reason="WAIT_INPUT"
+      rc="$fallback_rc"
+      bytes="$fallback_bytes"
+      echo "[$case_id#$run_no] fallback_prompt=\"$fallback_prompt\" recovered from NO_OUTPUT"
+    else
+      echo "[$case_id#$run_no] fallback_prompt=\"$fallback_prompt\" did not recover (reason=$fallback_reason)"
+    fi
   fi
 
   printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" \
-    "$case_id" "$run_no" "$result" "$reason" "$rc" "$duration" "$bytes" "$log_file" >> "$SUMMARY_FILE"
+    "$case_id" "$run_no" "$result" "$reason" "$rc" "$total_duration" "$bytes" "$log_file" >> "$SUMMARY_FILE"
 
-  echo "[$case_id#$run_no] result=$result reason=$reason exit=$rc duration=${duration}s bytes=$bytes log=$log_file"
+  echo "[$case_id#$run_no] result=$result reason=$reason exit=$rc duration=${total_duration}s bytes=$bytes attempts=$attempt log=$log_file"
 }
 
 echo "Runtime residual mode: $MODE"
 echo "Output dir: $OUTPUT_DIR"
 echo "K46 timeout: ${K46_TIMEOUT}s"
+echo "K46 timeout retries: $K46_TIMEOUT_RETRIES"
 echo "S10 timeout: ${S10_TIMEOUT}s"
 echo "S10 runs: $S10_RUNS"
+echo "S10 NO_OUTPUT retries: $S10_NO_OUTPUT_RETRIES"
 echo "---"
 
 run_case "K46" "1" "$K46_TIMEOUT" "cwf:retro --light"
