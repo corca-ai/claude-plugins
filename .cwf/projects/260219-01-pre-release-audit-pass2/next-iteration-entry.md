@@ -9,12 +9,13 @@ Use this file as the only mention target when starting the next pre-release iter
 ## Mandatory Context Load Order
 
 1. [Initial request and operating philosophy](project/initial-req.md)
-2. [Iteration 3 master scenarios](iter3/master-scenarios.md)
-3. [Iteration 3 progress](iter3/progress.md)
-4. [Iteration 4 recommendations](iter3/iter4-recommendations.md)
-5. [Lessons](lessons.md)
-6. [Overall progress report](overall-progress-report.md)
-7. [Iteration 3 retro](iter3/retro.md)
+2. [Iteration 3 progress](iter3/progress.md)
+3. [Iteration 4 recommendations](iter3/iter4-recommendations.md)
+4. [Iteration 4 master scenarios](iter4/master-scenarios.md)
+5. [Iteration 4 progress](iter4/progress.md)
+6. [Lessons](lessons.md)
+7. [Overall progress report](overall-progress-report.md)
+8. [Iteration 3 retro](iter3/retro.md)
 
 ## Current Known Risks Before Main Merge
 

@@ -5,6 +5,7 @@
 - 프로젝트: CWF 퍼블릭 배포 전 시나리오 검토
 - 완료 iteration: 2
 - 진행 중 iteration: 3
+- 다음 iteration 준비: 4
 
 ## Iteration별 요약
 
@@ -38,6 +39,12 @@
   - `cwf:retro --light` 직접 단건 timeout은 지속
   - `retro-light-fastpath.sh` + retro gate strict PASS로 deterministic 우회 경로 확보
   - iter1/iter2 sandbox gitlink 경계를 tracked directory로 정규화하고 내부 `.git` 스냅샷을 보존 백업으로 전환
+
+### Iteration 4 (ready)
+
+- 마스터: [.cwf/projects/260219-01-pre-release-audit-pass2/iter4/master-scenarios.md](iter4/master-scenarios.md)
+- 상세: [.cwf/projects/260219-01-pre-release-audit-pass2/iter4/progress.md](iter4/progress.md)
+- 시작 계약: [.cwf/projects/260219-01-pre-release-audit-pass2/next-iteration-entry.md](next-iteration-entry.md)
 
 ## 누적 핵심 리스크 (Iteration 2 기준)
 
