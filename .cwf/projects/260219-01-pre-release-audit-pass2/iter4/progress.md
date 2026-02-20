@@ -39,6 +39,5 @@
 
 ## Next Action
 
-1. Re-run full premerge/predeploy gates after current code/doc changes.
-2. Finalize plugin version bump + consistency sync + push.
-3. Close iteration with retro + persist candidate proposal.
+1. `K46`/`S10` 잔여 리스크를 known residual로 유지할지, runtime-layer 보강을 위해 추가 iteration을 열지 의사결정한다.
+2. merge 전 최종 sanity check(`premerge`, `predeploy`, `check-consistency`)를 release tag 기준으로 1회 재실행한다.
