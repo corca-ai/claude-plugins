@@ -115,6 +115,12 @@ case "$prompt" in
     echo "Please reply with your choice."
     exit 0
     ;;
+  *WAIT_INPUT_DASHBOARD_CASE*)
+    echo "To reconfigure, you can run with arguments directly:"
+    echo "- /claude-dashboard:setup normal"
+    echo "Would you like to change your display mode or any other setting?"
+    exit 0
+    ;;
   *FAIL_CASE*)
     echo "fail case" >&2
     exit 7
@@ -143,6 +149,7 @@ wait-run|WAIT_INPUT_RUN_CASE
 wait-confirm|WAIT_INPUT_CONFIRM_CASE
 wait-pipeline|WAIT_INPUT_PIPELINE_CASE
 wait-setup|WAIT_INPUT_SETUP_CASE
+wait-dashboard|WAIT_INPUT_DASHBOARD_CASE
 fail|FAIL_CASE
 empty|EMPTY_CASE
 timeout|TIMEOUT_CASE
@@ -154,7 +161,7 @@ status="$(run_status bash "$SMOKE_SCRIPT" \
   --cases-file "$CASES_FILE" \
   --claude-bin "$MOCK_CLAUDE" \
   --timeout 1 \
-  --max-failures 8 \
+  --max-failures 9 \
   --max-timeouts 1 \
   --output-dir "$OUTPUT_A")"
 assert_eq "gate passes when thresholds allow fail/timeout" "0" "$status"
@@ -165,6 +172,7 @@ assert_file_contains "summary has WAIT_INPUT run row" "$OUTPUT_A/summary.tsv" "$
 assert_file_contains "summary has WAIT_INPUT confirm row" "$OUTPUT_A/summary.tsv" "$(printf 'wait-confirm\tFAIL\tWAIT_INPUT')"
 assert_file_contains "summary has WAIT_INPUT pipeline row" "$OUTPUT_A/summary.tsv" "$(printf 'wait-pipeline\tFAIL\tWAIT_INPUT')"
 assert_file_contains "summary has WAIT_INPUT setup row" "$OUTPUT_A/summary.tsv" "$(printf 'wait-setup\tFAIL\tWAIT_INPUT')"
+assert_file_contains "summary has WAIT_INPUT dashboard row" "$OUTPUT_A/summary.tsv" "$(printf 'wait-dashboard\tFAIL\tWAIT_INPUT')"
 assert_file_contains "summary has FAIL row" "$OUTPUT_A/summary.tsv" "$(printf 'fail\tFAIL')"
 assert_file_contains "summary has NO_OUTPUT row" "$OUTPUT_A/summary.tsv" "$(printf 'empty\tFAIL\tNO_OUTPUT')"
 assert_file_contains "summary has TIMEOUT row" "$OUTPUT_A/summary.tsv" "$(printf 'timeout\tTIMEOUT')"
