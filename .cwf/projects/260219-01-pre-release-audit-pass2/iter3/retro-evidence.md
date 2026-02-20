@@ -1,16 +1,16 @@
 # Retro Evidence Snapshot
 
-- Generated at: 2026-02-20T02:59:56Z
+- Generated at: 2026-02-20T05:08:09Z
 - Repository root: /home/hwidong/codes/claude-plugins
-- Session dir: /home/hwidong/codes/claude-plugins/.cwf/projects/260219-01-pre-release-audit-pass2/iter3
+- Session dir: .cwf/projects/260219-01-pre-release-audit-pass2/iter3
 - Since epoch filter: not set
 
 ## Sources
 
-- scratchpad: /home/hwidong/codes/claude-plugins/.cwf/projects/260219-01-pre-release-audit-pass2/iter3/hitl/hitl-scratchpad.md (missing)
-- hitl events: /home/hwidong/codes/claude-plugins/.cwf/projects/260219-01-pre-release-audit-pass2/iter3/hitl/events.log (missing)
+- scratchpad: .cwf/projects/260219-01-pre-release-audit-pass2/iter3/hitl/hitl-scratchpad.md (missing)
+- hitl events: .cwf/projects/260219-01-pre-release-audit-pass2/iter3/hitl/events.log (missing)
 - codex tui log: /home/hwidong/.codex/log/codex-tui.log
-- session logs dir: /home/hwidong/codes/claude-plugins/.cwf/projects/260219-01-pre-release-audit-pass2/iter3/session-logs
+- session logs dir: .cwf/projects/260219-01-pre-release-audit-pass2/iter3/session-logs
 - find-skills: unavailable
 
 ## Token Limit Signals
@@ -57,13 +57,11 @@ _none_
 ## Changed Files Snapshot
 
 ```text
- M .cwf/cwf-state.yaml
- M plugins/cwf/hooks/scripts/track-user-input.sh
- M plugins/cwf/skills/retro/SKILL.md
- M scripts/hook-core-smoke.sh
-?? .cwf/projects/260219-01-pre-release-audit-pass2/iter2/sandbox/
-?? .cwf/projects/260219-01-pre-release-audit-pass2/iter3/
-?? .cwf/sessions/.sync-state/aa018809.json
-?? .cwf/sessions/260220-1138-aa018809.codex.md
-?? plugins/cwf/scripts/retro-light-fastpath.sh
+ ? .cwf/projects/260219-01-pre-release-audit-pass2/iter2/sandbox/repo-install
+ ? .cwf/projects/260219-01-pre-release-audit-pass2/iter2/sandbox/repo-retro
+ ? .cwf/projects/260219-01-pre-release-audit-pass2/iter2/sandbox/repo-run
+ ? .cwf/projects/260219-01-pre-release-audit-pass2/iter2/sandbox/repo-setup
+ ? .cwf/projects/260219-01-pre-release-audit-pass2/iter2/sandbox/repo-smoke
+ M .cwf/sessions/.sync-state/aa018809.json
+ M .cwf/sessions/260220-1138-aa018809.codex.md
 ```
