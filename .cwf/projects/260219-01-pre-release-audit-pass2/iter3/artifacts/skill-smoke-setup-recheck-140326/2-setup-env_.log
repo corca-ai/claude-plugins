@@ -1,0 +1,8 @@
+WAIT_INPUT: setup requires user selection at phase 2.8.
+Could you choose one of the following for project config bootstrap?
+
+1. **Yes (Recommended)** — create missing templates (`.cwf-config.local.yaml`), keep existing `.cwf-config.yaml` unchanged, ensure `.gitignore` coverage
+2. **Overwrite templates** — re-write both templates with `--force`
+3. **Skip for now** — no file changes
+
+Please reply with your choice.

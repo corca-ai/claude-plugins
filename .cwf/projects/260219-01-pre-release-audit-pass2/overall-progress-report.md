@@ -4,6 +4,7 @@
 
 - 프로젝트: CWF 퍼블릭 배포 전 시나리오 검토
 - 완료 iteration: 2
+- 진행 중 iteration: 3
 
 ## Iteration별 요약
 
@@ -27,17 +28,28 @@
   - non-interactive 분류기 강화(`WAIT_INPUT`, `NO_OUTPUT`)
   - `cwf:retro --light`, task 포함 `cwf:run` timeout은 잔여
 
+### Iteration 3 (in progress)
+
+- 마스터: [.cwf/projects/260219-01-pre-release-audit-pass2/iter3/master-scenarios.md](iter3/master-scenarios.md)
+- 상세: [.cwf/projects/260219-01-pre-release-audit-pass2/iter3/progress.md](iter3/progress.md)
+- 중간 결론
+  - `cwf:run` task 포함 단건은 timeout 없이 PASS로 전환
+  - `track-user-input --guard-only`의 `session_id` 공백 우회는 fail-closed로 보강(`PASS(FIXED_PRIMARY_GAP)`)
+  - `cwf:retro --light` 직접 단건 timeout은 지속
+  - `retro-light-fastpath.sh` + retro gate strict PASS로 deterministic 우회 경로 확보
+
 ## 누적 핵심 리스크 (Iteration 2 기준)
 
-1. chain형 스킬(`run`, `retro`)의 non-interactive timeout 지속
-2. setup 계열 non-interactive 결과 변동성(질문형/timeout 혼재)
+1. `retro --light` direct non-interactive timeout 지속
+2. setup 계열 non-interactive 결과 변동성(질문형/timeout/무출력 혼재)
 3. smoke 분류는 개선됐지만 문구 기반 휴리스틱 유지 관리 필요
+4. worktree guard는 보강됐지만 메타데이터 완전 부재 시 탐지 한계 경계가 남음
 
 ## 다음 단계(권장)
 
-1. `run/retro` stage provenance flush 강제 후 timeout 지점 고정
-2. setup 질문 분기를 fail-fast `WAIT_INPUT` 표준 응답으로 통일
-3. quick-scan warning 2건(`review` line count, `setup` unreferenced file) 정리
+1. `retro --light` runtime 경로에서 fast-path 우선 실행/호출 여부를 검증
+2. setup 질문 분기를 fail-fast `WAIT_INPUT` 표준 응답으로 통일하고 `NO_OUTPUT` 제거
+3. worktree metadata 전부 비는 경계에서의 lightweight 경고 전략 추가
 
 ## 이번 사이클(Iteration 2) 산출물
 
@@ -51,3 +63,13 @@
 - refactor/retro
   - [.cwf/projects/260219-01-pre-release-audit-pass2/iter2/refactor.md](iter2/refactor.md)
   - [.cwf/projects/260219-01-pre-release-audit-pass2/iter2/retro.md](iter2/retro.md)
+
+## 이번 사이클(Iteration 3, 진행 중) 산출물
+
+- 마스터/프로그레스
+  - [.cwf/projects/260219-01-pre-release-audit-pass2/iter3/master-scenarios.md](iter3/master-scenarios.md)
+  - [.cwf/projects/260219-01-pre-release-audit-pass2/iter3/progress.md](iter3/progress.md)
+- 핵심 증거
+  - [.cwf/projects/260219-01-pre-release-audit-pass2/iter3/artifacts/I3-W20.log](iter3/artifacts/I3-W20.log)
+  - [.cwf/projects/260219-01-pre-release-audit-pass2/iter3/artifacts/I3-K46.log](iter3/artifacts/I3-K46.log)
+  - [.cwf/projects/260219-01-pre-release-audit-pass2/iter3/retro.md](iter3/retro.md)

@@ -1,0 +1,69 @@
+$ date -Iseconds
+2026-02-20T11:42:16+09:00
+$ bash scripts/premerge-cwf-gate.sh --mode predeploy --plugin cwf --repo corca-ai/claude-plugins --ref main
+CWF gate mode: predeploy
+Plugin: cwf
+---
+[gate] local marketplace entry
+status=FOUND
+source=./.claude-plugin/marketplace.json
+plugin=cwf
+message=Marketplace entry found.
+---
+[gate] plugin consistency
+---
+[gate] marketplace checker fixtures
+[PASS] found entry exits 0
+[PASS] found entry status output
+[PASS] case-insensitive plugin name is accepted
+[PASS] case-insensitive output status
+[PASS] missing entry exits 4
+[PASS] missing entry status output
+[PASS] invalid marketplace exits 3
+[PASS] invalid marketplace status output
+[PASS] missing file exits 2
+[PASS] missing file status output
+[PASS] json mode exits 0 for found entry
+[PASS] json mode status field
+---
+Fixtures: PASS=12 FAIL=0
+---
+[gate] non-interactive smoke fixtures
+[PASS] gate passes when thresholds allow fail/timeout
+[PASS] summary has PASS row
+[PASS] summary has WAIT_INPUT row
+[PASS] summary has WAIT_INPUT alt row
+[PASS] summary has WAIT_INPUT run row
+[PASS] summary has WAIT_INPUT confirm row
+[PASS] summary has WAIT_INPUT pipeline row
+[PASS] summary has FAIL row
+[PASS] summary has NO_OUTPUT row
+[PASS] summary has TIMEOUT row
+[PASS] gate fails when thresholds are strict
+[PASS] strict run summary exists
+---
+Fixtures: PASS=12 FAIL=0
+---
+[gate] hook core smoke
+[PASS] read-guard allows small file
+[PASS] read-guard small file output is empty
+[PASS] read-guard large file exits 0 with deny payload
+[PASS] read-guard large file includes deny decision
+[PASS] deletion-safety blocks repo file deletion
+[PASS] deletion-safety block payload
+[PASS] deletion-safety allows /tmp deletion
+[PASS] deletion-safety allow output is empty
+[PASS] workflow-gate blocks push while closing gates remain
+[PASS] workflow-gate block reason includes pending gates
+[PASS] workflow-gate allows non-protected prompt
+[PASS] workflow-gate allow payload
+---
+Hook smoke summary: PASS=12 FAIL=0
+---
+[gate] public marketplace entry (corca-ai/claude-plugins@main)
+status=FOUND
+source=https://raw.githubusercontent.com/corca-ai/claude-plugins/main/.claude-plugin/marketplace.json
+plugin=cwf
+message=Marketplace entry found.
+---
+CWF gate result: PASS

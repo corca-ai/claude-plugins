@@ -1,0 +1,3 @@
+id	result	reason	exit_code	duration_sec	log_file
+setup-full	FAIL	NO_OUTPUT	0	42	.cwf/projects/260219-01-pre-release-audit-pass2/iter3/artifacts/skill-smoke-setup-recheck-140326/1-setup-full_.log
+setup-env	FAIL	WAIT_INPUT	0	36	.cwf/projects/260219-01-pre-release-audit-pass2/iter3/artifacts/skill-smoke-setup-recheck-140326/2-setup-env_.log

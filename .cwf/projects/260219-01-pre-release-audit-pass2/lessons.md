@@ -63,3 +63,19 @@ When UserPromptSubmit 계약을 수정하면 -> 아래 3개를 같은 커밋에�
 - **Takeaway**: 배포 전에는 `plugin-deploy` 또는 동등한 consistency 체크를 필수 게이트로 실행해야 한다.
 
 When 릴리스 버전을 변경하면 -> `bash .claude/skills/plugin-deploy/scripts/check-consistency.sh cwf` 결과 `gap_count: 0`을 확인한다.
+
+## Iteration 3 Lesson — Guard Fail-Closed for Missing session_id (2026-02-20)
+
+- **Expected**: `session_id`가 비어도 compact guard가 session-map/live 정보를 활용해 우회 없이 동작한다.
+- **Actual**: `track-user-input --guard-only`가 `session_id` 공백에서 조기 종료되어 worktree mismatch block을 놓쳤다.
+- **Takeaway**: guard 모드에서는 `session_id`가 없어도 최소한 `session-map`/`live.worktree_root`를 근거로 fail-closed 판단을 해야 한다.
+
+When guard-only 입력에서 `session_id`가 비어 있으면 -> 즉시 통과하지 말고 `session-map` 존재 여부와 live worktree mismatch를 확인해 block 여부를 결정한다.
+
+## Iteration 3 Lesson — Retro Light Deterministic Fast-Path (2026-02-20)
+
+- **Expected**: `cwf:retro --light`가 non-interactive에서도 짧은 시간 내 종료하고 `retro.md`를 남긴다.
+- **Actual**: 직접 실행은 timeout이 지속되었지만, deterministic script 경로(`retro-light-fastpath.sh`)는 즉시 `retro.md`를 생성하고 gate를 통과했다.
+- **Takeaway**: long-context 분석형 스킬에는 non-interactive fallback 스크립트를 먼저 실행하는 경로를 항상 마련해야 한다.
+
+When `--light` 모드가 non-interactive timeout을 반복하면 -> 분석 단계 전 deterministic fast-path 스크립트로 `retro.md`를 먼저 생성하고 gate를 통과시킨다.

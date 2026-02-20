@@ -1,0 +1,14 @@
+$ date -Iseconds
+2026-02-20T14:02:31+09:00
+$ timeout 90s claude --print --dangerously-skip-permissions "cwf:setup --env"
+It seems AskUserQuestion is being blocked. Following the Non-Interactive Fallback policy:
+
+```
+WAIT_INPUT: setup requires user selection at phase 2.8.
+Could you choose one of the following for project config bootstrap?
+1. Yes (Recommended) — create missing templates
+2. Overwrite templates — re-write with --force
+3. Skip for now — no file changes
+Please reply with your choice.
+```
+CLAUDE_EXIT=0

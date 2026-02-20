@@ -18,9 +18,9 @@ Use this file as the only mention target when starting the next pre-release iter
 ## Current Known Risks Before Main Merge
 
 1. `cwf:retro --light` still times out in non-interactive single-run.
-2. `cwf:run` with explicit task still times out in non-interactive single-run.
-3. setup 계열은 non-interactive에서 질문형 종료/timeout 변동성이 있다.
-4. smoke 분류는 `WAIT_INPUT/NO_OUTPUT`까지 보강했지만 문구 기반 휴리스틱 유지가 필요하다.
+2. setup 계열은 non-interactive에서 질문형 종료/timeout 변동성이 있다.
+3. smoke 분류는 `WAIT_INPUT/NO_OUTPUT`까지 보강했지만 문구 기반 휴리스틱 유지가 필요하다.
+4. worktree guard 핵심 우회는 보강됐지만(session_id 공백 fail-closed), session-map/live worktree 메타데이터가 모두 비는 극단 경계는 별도 탐지 전략이 필요하다.
 
 ## Immediate Iteration Start Checklist
 

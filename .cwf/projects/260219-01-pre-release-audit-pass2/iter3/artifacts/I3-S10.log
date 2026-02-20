@@ -1,0 +1,20 @@
+$ date -Iseconds
+2026-02-20T14:01:26+09:00
+$ timeout 120s claude --print --dangerously-skip-permissions "cwf:setup"
+It seems AskUserQuestion is being blocked. Per the Non-Interactive Fail-Fast Policy:
+
+```text
+WAIT_INPUT: setup requires user selection at phase 1 (Hook Group Selection).
+
+Current state: all 9 groups enabled.
+
+Options:
+1. Keep all enabled (recommended)
+2. Disable lint_markdown and lint_shell only (keep other 7)
+3. Core only (log, read, deletion_safety, compact_recovery)
+4. Disable all
+5. Custom (specify group names to enable, e.g. "attention,log,read,compact_recovery")
+
+Please reply with your choice.
+```
+CLAUDE_EXIT=0
