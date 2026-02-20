@@ -12,7 +12,8 @@ Use this file as the only mention target when starting the next pre-release iter
 2. [Iteration 2 master scenarios](iter2/master-scenarios.md)
 3. [Iteration 2 progress](iter2/progress.md)
 4. [Iteration 3 recommendations](iter2/iter3-recommendations.md)
-5. [Overall progress report](overall-progress-report.md)
+5. [Lessons](lessons.md)
+6. [Overall progress report](overall-progress-report.md)
 
 ## Current Known Risks Before Main Merge
 
@@ -28,6 +29,29 @@ Use this file as the only mention target when starting the next pre-release iter
 3. Restart scenario loop from `iter2` master and create `iter3/scenarios` scratchpads.
 4. If behavior diverges from intent, stop that branch immediately and record in both scenario file and master.
 5. Finish iteration with plan -> review -> impl -> review -> refactor -> retro artifacts, then update overall progress report.
+
+## Pause Checkpoint (2026-02-20)
+
+- Branch baseline: `main`
+- Already merged on main:
+  - `6d530cf` `fix(cwf): align UserPromptSubmit hooks with Claude Code hook spec`
+  - `c6db3d8` `test(cwf): sync UserPromptSubmit gate assertions with hook spec`
+  - `e3fbeb1` `chore(gate): enforce plugin consistency in premerge checks`
+- Deterministic checks status at checkpoint:
+  - `bash plugins/cwf/scripts/test-hook-exit-codes.sh --suite workflow-gate` PASS
+  - `bash scripts/hook-core-smoke.sh` PASS
+  - `bash scripts/premerge-cwf-gate.sh --mode premerge --plugin cwf` PASS
+- Remaining Iteration 2 focus:
+  1. Re-run unresolved scenarios in `iter2/master-scenarios.md` (especially `I2-K46`, `I2-R60`, setup variability cases).
+  2. Keep scenario-by-scenario evidence logs under `iter2/artifacts/` and update `iter2/progress.md`.
+
+## Single-Mention Resume Contract
+
+If a new session mentions only this file, treat it as a full resume trigger:
+
+1. Load documents in the exact order above.
+2. Assume the checkpoint state in this file as canonical unless newer evidence is found in linked artifacts.
+3. Continue Iteration 2 from unresolved scenarios without asking for additional bootstrap context.
 
 ## Operator Note
 
