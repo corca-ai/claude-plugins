@@ -7,6 +7,8 @@ description: "Human-in-the-loop diff/chunk review to inject deliberate human jud
 
 Insert deliberate human judgment into branch-diff review (`<base>...HEAD`) with resumable chunk state. Reviews file-by-file in meaningful chunks, pauses for user input each chunk, and persists state/rules so work can resume anytime.
 
+Every chunk review must be presented as: `Primary Chunk + Related Context + Causal Lens`. Do not present isolated chunks.
+
 ## Quick Reference
 
 ```text
@@ -95,7 +97,9 @@ This gate prevents stale intent from leaking into the next chunk.
    - Markdown: heading/fence-safe semantic chunks (typically 60-120 lines)
    - Code/text: prefer git hunk boundaries; fallback fixed windows
 4. Assign chunk IDs and initial chunk status `pending`.
-5. Save queue to `queue.json`.
+5. Seed deterministic `context_refs` per chunk and save to `queue.json`.
+   - Code chunks: prefer call sites, definitions, tests, then adjacent fallback chunk.
+   - Docs chunks: prefer referenced/ referring sections, governing policy docs, then adjacent heading fallback chunk.
 6. Initialize `state.yaml`, `fix-queue.yaml`, and `events.log`.
 
 If high-impact edits were applied during Phase 0.5, build/rebuild queue after those edits so chunk boundaries and blob hashes are fresh.
@@ -106,17 +110,26 @@ Before every chunk presentation, enforce Phase 0.75 gate (`intent_resync_require
 
 For each chunk, output exactly:
 
-1. `Chunk` (`{file}:{start_line}-{end_line}` and EOF 여부)
-2. `Excerpt`
-3. `Meaning / Intent`
-4. `Review Focus (Line-Anchored)` with at least 2 concrete points
-5. `Link Syntax Check` (`[]()`) for docs chunks
-6. `De-dup / What-Why Check`
-7. `Discussion Prompt` (1-2 concrete questions)
+1. `Primary Chunk` (`{file}:{start_line}-{end_line}` and EOF 여부)
+2. `Primary Excerpt`
+3. `Related Context` (at least 1 context excerpt with path/line anchors + relation)
+4. `Causal Lens` (symptom, likely root cause, guardrail/invariant)
+5. `Review Focus (Line-Anchored)` with at least 2 concrete points
+6. `Consistency Check`:
+   - docs: link syntax + reference integrity checks
+   - code: call-path/definition-path impact checks
+7. `Root-Cause Discussion Prompt` (1-2 concrete questions)
 
 Then pause and wait for user acknowledgement.
 
 Before each pause, persist cursor/progress.
+
+### Related Context Resolution (Required, Always-On)
+
+1. Resolve related context before presenting the chunk and persist the selected `context_refs`.
+2. Keep the same context refs stable across retries/resume unless file drift invalidates anchors.
+3. If semantic matches are not found, use structural fallback context (adjacent chunk/heading) and mark relation as `adjacent_fallback`.
+4. Never present a chunk without at least one related context reference.
 
 ### Review-Fix Policy During Loop
 
@@ -174,14 +187,17 @@ On `--close` (or EOF completion):
 8. Default entry behavior: start with the agreement round (Phase 0.5), then move to chunk review.
 9. Keep artifacts separated by role: `fix-queue.yaml` for actionable edits, `hitl-scratchpad.md` for agreements/rationale.
 10. After any agreed edit is applied, update `hitl-scratchpad.md` before continuing.
-11. For comment-driven doc HITL (for example README reflection), present each item in this order: `Before` (current text), `After` (proposed text), `After Intent` (why this reflects the user's concern and any trade-off/opinion).
+11. No isolated chunk reviews: every presented chunk must include `Related Context`.
+12. For both code and docs, use one principle: `Primary Chunk + Related Context + Causal Lens`.
+13. `Root-Cause Discussion Prompt` must focus on cause validation, not symptom restatement.
+14. For comment-driven doc HITL (for example README reflection), keep the same chunk contract and include `Before`, `After`, `After Intent` within the `Primary Chunk` section.
     - `Before`/`After` must include enough surrounding context for user judgment (for example, the full paragraph or subsection, not a single isolated sentence).
-12. Do not ask a separate "proceed to next item?" question. When the current item is agreed, present the next pending item immediately; if not agreed, keep discussing the same item until agreement.
-13. If user manual edits are detected/reported, trigger Phase 0.75 immediately (set `intent_resync_required=true` and append trigger to `events.log`).
-14. While `intent_resync_required=true`, apply the Phase 0.75 block rule (no next chunk presentation).
-15. Clear `intent_resync_required` only through the Phase 0.75 completion contract (`hitl-scratchpad.md` intent delta + `last_intent_resync_at` update).
-16. During active HITL doc review, document edits and scratchpad state must stay synchronized; post-run checks should flag missing scratchpad updates.
-17. **Language override**: review-facing HITL outputs follow the user's language by default unless the user explicitly requests another language.
+15. Do not ask a separate "proceed to next item?" question. When the current item is agreed, present the next pending item immediately; if not agreed, keep discussing the same item until agreement.
+16. If user manual edits are detected/reported, trigger Phase 0.75 immediately (set `intent_resync_required=true` and append trigger to `events.log`).
+17. While `intent_resync_required=true`, apply the Phase 0.75 block rule (no next chunk presentation).
+18. Clear `intent_resync_required` only through the Phase 0.75 completion contract (`hitl-scratchpad.md` intent delta + `last_intent_resync_at` update).
+19. During active HITL doc review, document edits and scratchpad state must stay synchronized; post-run checks should flag missing scratchpad updates.
+20. **Language override**: review-facing HITL outputs follow the user's language by default unless the user explicitly requests another language.
 
 ## References
 
