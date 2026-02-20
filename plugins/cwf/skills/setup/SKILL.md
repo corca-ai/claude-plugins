@@ -60,6 +60,40 @@ When mode is full setup or tools-only setup, always run Phase 2.9 so Agent Team 
 
 When mode is full setup, tools-only setup, env-only setup, or run-mode-only setup, always run Phase 2.10 so `cwf:run` default ambiguity policy is explicit and reproducible.
 
+## Non-Interactive Fail-Fast Policy (Required)
+
+When AskUserQuestion is unavailable or blocked, do not wait silently and do not end with empty output.
+
+Mandatory behavior:
+
+1. Stop at the first unresolved user-choice phase.
+2. Print a deterministic `WAIT_INPUT` response with phase id, options, and a direct reply instruction.
+3. End the turn immediately after printing the waiting response.
+
+Standard response header:
+
+```text
+WAIT_INPUT: setup requires user selection at phase <phase-id>.
+```
+
+Examples:
+
+- phase `2.8` (project config bootstrap):
+  - option 1: create missing templates (recommended)
+  - option 2: overwrite templates (`--force`)
+  - option 3: skip for now
+- phase `2.10` (run ambiguity mode):
+  - option 1: `defer-blocking` (recommended)
+  - option 2: `strict`
+  - option 3: `defer-reversible`
+  - option 4: `explore-worktrees`
+
+Always include:
+
+```text
+Please reply with your choice.
+```
+
 ---
 
 ## Phase 1: Hook Group Selection

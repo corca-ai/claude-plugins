@@ -237,7 +237,7 @@ WAIT_INPUT_COUNT=0
 is_wait_input_log() {
   local log_file="$1"
   grep -Eiq \
-    'waiting for your selection|wait for your answer|select one of the options|질문이 표시|선택해 주세요|what task would you like|what task should .* pipeline execute|what would you like .* to work on|please describe the task|please provide your task description|which option would you like|which file should i review|choose one of the following|what did you have in mind|which would you like|would you like me to|would you like to provide|could you confirm|please confirm|please reply with your choice|any learnings from the setup process|should i create the project config templates|save this clarified requirement to a file|let me know,? or i can proceed' \
+    'waiting for your selection|wait for your answer|select one of the options|질문이 표시|선택해 주세요|what task would you like|what task should .* pipeline execute|what would you like .* to work on|please describe the task|please provide your task description|which option would you like|which file should i review|choose one of the following|what did you have in mind|which would you like|would you like me to|would you like to provide|could you confirm|please confirm|please reply with your choice|any learnings from the setup process|should i create the project config templates|save this clarified requirement to a file|let me know,? or i can proceed|wait_input:|setup requires user selection at phase|non-interactive fallback' \
     "$log_file"
 }
 

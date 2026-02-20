@@ -129,6 +129,21 @@ When user selects `Overwrite templates`, run:
 bash {SKILL_DIR}/scripts/bootstrap-project-config.sh --force
 ```
 
+### 2.8.N Non-Interactive Fallback
+
+If AskUserQuestion is blocked/unavailable, do not continue silently. Emit:
+
+```text
+WAIT_INPUT: setup requires user selection at phase 2.8.
+Could you choose one of the following for project config bootstrap?
+1. Yes (Recommended) — create missing templates
+2. Overwrite templates — re-write with --force
+3. Skip for now — no file changes
+Please reply with your choice.
+```
+
+Then stop this run.
+
 ### 2.8.2 Explain Runtime Priority
 
 After bootstrap decisions, always report the effective CWF config source priority:
@@ -247,6 +262,22 @@ Options:
   - still record decisions, but not merge-blocking by default
 - `explore-worktrees`:
   - implement alternatives in separate worktrees and compare before finalization
+
+### 2.10.N Non-Interactive Fallback
+
+If AskUserQuestion is blocked/unavailable, emit:
+
+```text
+WAIT_INPUT: setup requires user selection at phase 2.10.
+Select default ambiguity handling mode for cwf:run.
+1. defer-blocking (recommended)
+2. strict
+3. defer-reversible
+4. explore-worktrees
+Please reply with your choice.
+```
+
+Then stop this run.
 
 ### 2.10.3 Ask Config Scope
 
