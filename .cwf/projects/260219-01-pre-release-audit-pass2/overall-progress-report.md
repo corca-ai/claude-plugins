@@ -37,6 +37,7 @@
   - `track-user-input --guard-only`의 `session_id` 공백 우회는 fail-closed로 보강(`PASS(FIXED_PRIMARY_GAP)`)
   - `cwf:retro --light` 직접 단건 timeout은 지속
   - `retro-light-fastpath.sh` + retro gate strict PASS로 deterministic 우회 경로 확보
+  - iter1/iter2 sandbox gitlink 경계를 tracked directory로 정규화하고 내부 `.git` 스냅샷을 보존 백업으로 전환
 
 ## 누적 핵심 리스크 (Iteration 2 기준)
 
@@ -50,6 +51,7 @@
 1. `retro --light` runtime 경로에서 fast-path 우선 실행/호출 여부를 검증
 2. setup 질문 분기를 fail-fast `WAIT_INPUT` 표준 응답으로 통일하고 `NO_OUTPUT` 제거
 3. worktree metadata 전부 비는 경계에서의 lightweight 경고 전략 추가
+4. 다음 세션은 단일 멘션 파일([.cwf/projects/260219-01-pre-release-audit-pass2/next-iteration-entry.md](next-iteration-entry.md)) 기준으로 시작
 
 ## 이번 사이클(Iteration 2) 산출물
 

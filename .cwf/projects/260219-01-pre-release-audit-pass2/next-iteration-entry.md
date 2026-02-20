@@ -1,4 +1,4 @@
-# Next Iteration Single Entry
+# Next Iteration Single Entry (Iteration 4)
 
 Use this file as the only mention target when starting the next pre-release iteration.
 
@@ -8,51 +8,52 @@ Use this file as the only mention target when starting the next pre-release iter
 
 ## Mandatory Context Load Order
 
-1. [Initial request and operating philosophy](../../../project/initial-req.md)
-2. [Iteration 2 master scenarios](iter2/master-scenarios.md)
-3. [Iteration 2 progress](iter2/progress.md)
-4. [Iteration 3 recommendations](iter2/iter3-recommendations.md)
+1. [Initial request and operating philosophy](project/initial-req.md)
+2. [Iteration 3 master scenarios](iter3/master-scenarios.md)
+3. [Iteration 3 progress](iter3/progress.md)
+4. [Iteration 4 recommendations](iter3/iter4-recommendations.md)
 5. [Lessons](lessons.md)
 6. [Overall progress report](overall-progress-report.md)
+7. [Iteration 3 retro](iter3/retro.md)
 
 ## Current Known Risks Before Main Merge
 
-1. `cwf:retro --light` still times out in non-interactive single-run.
-2. setup 계열은 non-interactive에서 질문형 종료/timeout 변동성이 있다.
-3. smoke 분류는 `WAIT_INPUT/NO_OUTPUT`까지 보강했지만 문구 기반 휴리스틱 유지가 필요하다.
-4. worktree guard 핵심 우회는 보강됐지만(session_id 공백 fail-closed), session-map/live worktree 메타데이터가 모두 비는 극단 경계는 별도 탐지 전략이 필요하다.
+1. `cwf:retro --light` direct single-run timeout persists.
+2. `cwf:setup` full still shows intermittent `NO_OUTPUT` in spot-check runs.
+3. Primary worktree guard bypass was fixed, but metadata-all-missing boundary still lacks a dedicated alert path.
+4. smoke classifier is stronger (`WAIT_INPUT`, `NO_OUTPUT`) but still relies on phrase coverage maintenance.
 
 ## Immediate Iteration Start Checklist
 
 1. Re-validate deterministic local gate: `bash scripts/premerge-cwf-gate.sh --mode premerge --plugin cwf`.
 2. Re-check public gate on latest main: `bash scripts/premerge-cwf-gate.sh --mode predeploy --plugin cwf --repo corca-ai/claude-plugins --ref main`.
-3. Restart scenario loop from `iter2` master and create `iter3/scenarios` scratchpads.
-4. If behavior diverges from intent, stop that branch immediately and record in both scenario file and master.
-5. Finish iteration with plan -> review -> impl -> review -> refactor -> retro artifacts, then update overall progress report.
+3. Re-run unresolved scenarios first (`K46`, `S10`, `W20`) and write evidence under `iter4/artifacts/`.
+4. If behavior diverges from intended contract, stop that branch immediately and record discrepancy in both scenario file and master.
+5. Finish with plan -> review -> impl -> review -> refactor -> retro artifacts and update `overall-progress-report.md`.
 
-## Pause Checkpoint (2026-02-20)
+## Baseline Checkpoint (2026-02-20)
 
-- Branch baseline: `main`
-- Already merged on main:
-  - `6d530cf` `fix(cwf): align UserPromptSubmit hooks with Claude Code hook spec`
-  - `c6db3d8` `test(cwf): sync UserPromptSubmit gate assertions with hook spec`
-  - `e3fbeb1` `chore(gate): enforce plugin consistency in premerge checks`
-- Deterministic checks status at checkpoint:
-  - `bash plugins/cwf/scripts/test-hook-exit-codes.sh --suite workflow-gate` PASS
-  - `bash scripts/hook-core-smoke.sh` PASS
+- Active branch: `iter3/260219-01-pre-release-audit-pass2`
+- Latest stabilization commits:
+  - `e5f921b` `fix(cwf): fail-close worktree guard + retro light fastpath`
+  - `94806b5` `fix(setup): enforce wait-input fail-fast and smoke classifier coverage`
+  - `6cb4b1b` `chore(sandbox): convert iter2 sandbox gitlinks to tracked directories`
+  - `b464593` `chore(sandbox): convert iter1 sandbox gitlinks to tracked directories`
+  - `e80496e` `chore(sandbox): preserve nested repo metadata backups for iter1 and iter2`
+- Deterministic checks status in this branch:
   - `bash scripts/premerge-cwf-gate.sh --mode premerge --plugin cwf` PASS
-- Remaining Iteration 2 focus:
-  1. Re-run unresolved scenarios in `iter2/master-scenarios.md` (especially `I2-K46`, `I2-R60`, `I2-W20`, setup variability cases).
-  2. Keep scenario-by-scenario evidence logs under `iter2/artifacts/` and update `iter2/progress.md`.
+  - `bash scripts/premerge-cwf-gate.sh --mode predeploy --plugin cwf --repo corca-ai/claude-plugins --ref main` PASS
+  - `bash scripts/tests/noninteractive-skill-smoke-fixtures.sh` PASS
+  - `bash .claude/skills/plugin-deploy/scripts/check-consistency.sh cwf` => `gap_count: 0`
 
 ## Single-Mention Resume Contract
 
 If a new session mentions only this file, treat it as a full resume trigger:
 
 1. Load documents in the exact order above.
-2. Assume the checkpoint state in this file as canonical unless newer evidence is found in linked artifacts.
-3. Continue Iteration 2 from unresolved scenarios without asking for additional bootstrap context.
+2. Assume this checkpoint as canonical unless newer evidence exists in linked artifacts.
+3. Start Iteration 4 from unresolved risk scenarios without asking for extra bootstrap context.
 
 ## Operator Note
 
-If only one document is mentioned, treat this file as the canonical launch contract and follow its linked documents in order.
+If only one document is mentioned, treat this file as canonical launch contract and follow its linked documents in order.
