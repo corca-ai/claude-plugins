@@ -27,6 +27,17 @@ Close the remaining runtime residuals while keeping `main=deploy` stability.
 1. `K46`: historically unstable direct path; latest runtime-smoke checks show no timeout, but close condition must be confirmed repeatedly.
 2. `S10`: intermittent `NO_OUTPUT` still reproduces under strict repeated runs.
 
+## Additional Dogfooding Compatibility Risk (2026-02-20)
+
+1. `next-prompt-dir --bootstrap` with `cwf-state.yaml` inline `sessions: []` creates the session directory but can skip session auto-registration.
+2. Evidence:
+   - codex log reference (`~/.codex/log/codex-tui.log`): line `508367` documents the same compatibility constraint observed in another repository.
+   - local repro (this repo): with `sessions: []`, `DIR_CREATED=yes` but state remains unchanged (no appended session entry).
+3. Impact:
+   - `.cwf/projects/<session>` may exist, but session continuity checks that depend on `cwf-state.yaml` history can drift.
+4. Scope clarification:
+   - This is currently a registration compatibility gap, not a deterministic local reproduction of directory creation failure.
+
 ## New Persisted Runtime Gates (Added on 2026-02-20)
 
 1. `scripts/runtime-residual-smoke.sh`
@@ -59,7 +70,11 @@ Close the remaining runtime residuals while keeping `main=deploy` stability.
 4. Validate strict close condition:
    - `bash scripts/runtime-residual-smoke.sh --mode strict --plugin-dir plugins/cwf --workdir . --k46-timeout 120 --s10-timeout 120 --s10-runs 5`
    - optional integrated gate: `bash scripts/premerge-cwf-gate.sh --mode predeploy --plugin cwf --repo corca-ai/claude-plugins --ref main --runtime-residual-mode strict`
-5. Update scenario evidence, lessons, and overall progress report.
+5. Close bootstrap compatibility gap (`sessions: []`):
+   - update `plugins/cwf/scripts/next-prompt-dir.sh` to accept both block and inline-empty sessions forms
+   - preserve backward compatibility and avoid duplicate session append
+   - add fixture coverage to `scripts/tests/next-prompt-dir-fixtures.sh` for inline `sessions: []`
+6. Update scenario evidence, lessons, and overall progress report.
 
 ## Baseline Checkpoint (2026-02-20)
 
