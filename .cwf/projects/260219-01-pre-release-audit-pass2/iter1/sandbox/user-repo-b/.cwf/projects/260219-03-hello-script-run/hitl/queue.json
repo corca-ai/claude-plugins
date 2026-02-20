@@ -1,0 +1,32 @@
+{
+  "files": [
+    {
+      "path": "hello.sh",
+      "blob_sha": "c0d7ba9216c17c1b490fadbd8bb11d75f30658fa",
+      "status": "pending",
+      "chunks": [
+        {
+          "id": "hello.sh:1-2",
+          "start_line": 1,
+          "end_line": 2,
+          "is_eof": true,
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "path": "test_hello.sh",
+      "blob_sha": "400baf8a6cb57b0ae9e4115552daeba2450db5bc",
+      "status": "pending",
+      "chunks": [
+        {
+          "id": "test_hello.sh:1-9",
+          "start_line": 1,
+          "end_line": 9,
+          "is_eof": true,
+          "status": "pending"
+        }
+      ]
+    }
+  ]
+}

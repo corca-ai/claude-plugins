@@ -1,0 +1,33 @@
+hooks:
+  attention: true
+  log: true
+  read: true
+  lint_markdown: false
+  lint_shell: true
+  deletion_safety: true
+  workflow_gate: true
+  websearch_redirect: true
+  compact_recovery: true
+
+live:
+  phase: "retro"
+  task: "Minimal smoke test for hello.sh"
+  dir: ".cwf/projects/260219-03-hello-script-run"
+  state_file: ".cwf/sessions/clarify-hello-script/session-state.yaml"
+  session_id: "260219-03-hello-script-run"
+  branch: "feat/hello-script"
+  worktree_root: "/home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-b"
+  worktree_branch: "feat/hello-script"
+  active_pipeline: "cwf:run"
+  user_directive: "cwf:run"
+  ambiguity_mode: "defer-blocking"
+  blocking_decisions_pending: "false"
+  ambiguity_decisions_file: ".cwf/projects/260219-03-hello-script-run/run-ambiguity-decisions.md"
+  stage_provenance_file: ".cwf/projects/260219-03-hello-script-run/run-stage-provenance.md"
+  pipeline_override_reason: ""
+  state_version: "3"
+  remaining_gates:
+    - "review-code"
+    - "refactor"
+    - "retro"
+    - "ship"

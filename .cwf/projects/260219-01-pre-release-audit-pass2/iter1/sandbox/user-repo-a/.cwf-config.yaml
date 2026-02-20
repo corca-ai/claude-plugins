@@ -1,0 +1,22 @@
+# CWF project-shared config (non-secret).
+# Priority: .cwf-config.local.yaml > .cwf-config.yaml > process env > shell profile
+#
+# Put repository-wide defaults here (safe to commit).
+
+# Optional artifact path overrides
+# CWF_ARTIFACT_ROOT: ".cwf"
+# CWF_PROJECTS_DIR: ".cwf/projects"
+# CWF_STATE_FILE: ".cwf/cwf-state.yaml"
+
+# Optional runtime overrides (non-secret)
+# CWF_GATHER_OUTPUT_DIR: ".cwf/projects"
+# CWF_RUN_AMBIGUITY_MODE: "defer-blocking"
+# CWF_READ_WARN_LINES: 500
+# CWF_READ_DENY_LINES: 2000
+# CWF_SESSION_LOG_DIR: ".cwf/sessions"
+# CWF_SESSION_LOG_ENABLED: true
+# CWF_SESSION_LOG_TRUNCATE: 10
+# CWF_SESSION_LOG_AUTO_COMMIT: false
+
+# cwf:run ambiguity handling mode
+CWF_RUN_AMBIGUITY_MODE: "defer-blocking"

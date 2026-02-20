@@ -1,0 +1,14 @@
+{
+  "options": {
+    "include_local_skills": false,
+    "local_skill_globs": [
+  ".claude/skills/*/SKILL.md",
+  ".codex/skills/*/SKILL.md"
+]
+  },
+  "total_skills": 0,
+  "warnings": 0,
+  "errors": 0,
+  "flagged_skills": 0,
+  "results": []
+}

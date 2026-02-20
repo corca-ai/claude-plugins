@@ -1,0 +1,12 @@
+session_id: "260219-03-hitl"
+status: "in_progress"
+base_branch: "main"
+scope: "all"
+intent_resync_required: false
+last_user_manual_edit_at: ""
+last_intent_resync_at: ""
+intent_resync_note: ""
+cursor:
+  file_index: 0
+  chunk_index: 0
+started_at: "2026-02-19T10:30:00Z"

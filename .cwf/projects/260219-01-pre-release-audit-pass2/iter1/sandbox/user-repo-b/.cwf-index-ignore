@@ -1,0 +1,4 @@
+# AGENTS.md is self-referential in agents target and uses
+# relative path (../../AGENTS.md) in standalone file target.
+# Exclude from coverage required set to avoid path mismatch.
+AGENTS.md

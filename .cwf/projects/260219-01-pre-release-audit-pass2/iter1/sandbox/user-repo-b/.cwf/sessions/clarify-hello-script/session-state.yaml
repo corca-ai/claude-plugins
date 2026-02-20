@@ -1,0 +1,28 @@
+# session-state.yaml — volatile session live state
+# Synced from .cwf/cwf-state.yaml live section.
+
+live:
+  phase: "retro"
+  task: "Minimal smoke test for hello.sh"
+  dir: ".cwf/projects/260219-03-hello-script-run"
+  key_files:
+    - hello.sh
+    - test_hello.sh
+  decision_journal: []
+  session_id: "260219-03-hello-script-run"
+  branch: "feat/hello-script"
+  worktree_root: "/home/hwidong/codes/claude-plugins/project/iter1/sandbox/user-repo-b"
+  worktree_branch: "feat/hello-script"
+  active_pipeline: "cwf:run"
+  user_directive: "cwf:run"
+  ambiguity_mode: "defer-blocking"
+  blocking_decisions_pending: "false"
+  ambiguity_decisions_file: ".cwf/projects/260219-03-hello-script-run/run-ambiguity-decisions.md"
+  stage_provenance_file: ".cwf/projects/260219-03-hello-script-run/run-stage-provenance.md"
+  pipeline_override_reason: ""
+  state_version: "3"
+  remaining_gates:
+    - "review-code"
+    - "refactor"
+    - "retro"
+    - "ship"
