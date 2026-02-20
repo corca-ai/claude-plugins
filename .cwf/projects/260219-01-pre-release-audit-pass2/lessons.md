@@ -92,3 +92,11 @@ When setup run ends non-interactively with `exit 0` -> require explicit `WAIT_IN
 
 - direct 재실행에서는 `WAIT_INPUT`이 나와도, smoke spot-check에서 `setup-full`이 간헐적으로 `NO_OUTPUT`로 재발할 수 있다.
 - 다음 iteration에서는 `setup-full` 경로의 첫 출력 보장(최소 1줄 상태 라인) 여부를 deterministic check로 추가 검토한다.
+
+## Iteration 3 Lesson — Sandbox Gitlink Boundary Preservation (2026-02-20)
+
+- **Expected**: sandbox nested repo를 gitlink로 유지해도 outer repo에서 변경 이력 추적에 큰 문제가 없다.
+- **Actual**: outer repo는 gitlink 커밋 포인터만 저장하므로 파일 단위 증거 diff가 사라지고, iteration 간 회귀 원인 추적이 어려워졌다.
+- **Takeaway**: audit sandbox에서는 gitlink보다 tracked directory를 기본값으로 두고, 내부 `.git`은 timestamped backup으로 보존하는 방식이 더 안전하다.
+
+When a sandbox path is recorded as gitlink (`160000`) in the outer repo -> convert it to tracked directory for evidence diffs, and preserve nested `.git` under a timestamped backup directory.
