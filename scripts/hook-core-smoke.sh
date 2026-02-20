@@ -157,14 +157,14 @@ EOF
 result="$(run_capture bash -c "jq -nc --arg prompt 'git push origin main' --arg sid 'sess-h35' --arg cwd '$WF_REPO' '{prompt:\$prompt,session_id:\$sid,cwd:\$cwd}' | bash '$HOOK_DIR/workflow-gate.sh'")"
 rc="$(printf '%s\n' "$result" | sed -n '1p')"
 out="$(printf '%s\n' "$result" | sed -n '2,$p')"
-assert_eq "workflow-gate blocks push while closing gates remain" "1" "$rc"
+assert_eq "workflow-gate blocks push while closing gates remain" "0" "$rc"
 assert_contains "workflow-gate block reason includes pending gates" "run-closing gates are still pending" "$out"
 
 result="$(run_capture bash -c "jq -nc --arg prompt '다음 게이트 진행해' --arg sid 'sess-h35' --arg cwd '$WF_REPO' '{prompt:\$prompt,session_id:\$sid,cwd:\$cwd}' | bash '$HOOK_DIR/workflow-gate.sh'")"
 rc="$(printf '%s\n' "$result" | sed -n '1p')"
 out="$(printf '%s\n' "$result" | sed -n '2,$p')"
 assert_eq "workflow-gate allows non-protected prompt" "0" "$rc"
-assert_contains "workflow-gate allow payload" "\"decision\":\"allow\"" "$out"
+assert_contains "workflow-gate allow payload" "\"additionalContext\":" "$out"
 
 echo "---"
 echo "Hook smoke summary: PASS=$PASS FAIL=$FAIL"

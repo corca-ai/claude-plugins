@@ -43,3 +43,23 @@ When 점검 범위가 코드+문서+운영계약까지 걸치면 -> 탐색 서�
 - **Takeaway**: smoke 분류는 `WAIT_INPUT` + `NO_OUTPUT`를 fail-closed 기본값으로 두고, 신규 문구는 픽스처부터 추가해야 한다.
 
 When non-interactive smoke reports unexpected PASS with incomplete behavior -> first add fixture and classifier rule, then rerun gate before concluding.
+
+## Iteration 2 Lesson — UserPromptSubmit Contract Drift (2026-02-20)
+
+- **Expected**: `workflow-gate`를 UserPromptSubmit 스펙에 맞춰 수정해도 로컬 deterministic gate는 함께 유지된다.
+- **Actual**: 런타임 계약(allow payload, block exit code)은 바뀌었지만 테스트/스모크 assertion은 이전 계약에 머물러 회귀 실패가 발생했다.
+- **Takeaway**: 훅 계약을 변경할 때는 `hook script + hook tests + premerge smoke`를 하나의 변경 단위로 동기화해야 한다.
+
+When UserPromptSubmit 계약을 수정하면 -> 아래 3개를 같은 커밋에서 재검증한다.
+
+1. `bash plugins/cwf/scripts/test-hook-exit-codes.sh --suite workflow-gate`
+2. `bash scripts/hook-core-smoke.sh`
+3. `bash scripts/premerge-cwf-gate.sh --mode premerge --plugin cwf`
+
+## Iteration 2 Lesson — Release Metadata Drift (2026-02-20)
+
+- **Expected**: 버전 변경 시 `plugin.json`과 `.claude-plugin/marketplace.json`이 항상 동기화된다.
+- **Actual**: `plugin.json`만 증가하고 marketplace 버전은 유지되어 `cwf:update` 체감과 릴리스 메타데이터가 어긋날 수 있는 상태가 생겼다.
+- **Takeaway**: 배포 전에는 `plugin-deploy` 또는 동등한 consistency 체크를 필수 게이트로 실행해야 한다.
+
+When 릴리스 버전을 변경하면 -> `bash .claude/skills/plugin-deploy/scripts/check-consistency.sh cwf` 결과 `gap_count: 0`을 확인한다.

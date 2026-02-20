@@ -24,7 +24,7 @@ Options:
   -h, --help          Show this message.
 
 Suites:
-  workflow-gate       UserPromptSubmit pipeline block/allow behavior.
+  workflow-gate       UserPromptSubmit pipeline block/context behavior.
   deletion-safety     PreToolUse deletion caller block/allow behavior.
   path-filter         /tmp prompt artifact filtering (allow) and in-repo deny fixtures.
   compact-context-no-jq  SessionStart compact recovery output without jq dependency.
@@ -176,6 +176,15 @@ extract_decision() {
   printf '%s' "$output" | jq -r '.decision // empty' 2>/dev/null || true
 }
 
+extract_additional_context() {
+  local output="$1"
+  if [[ -z "$output" ]]; then
+    printf '%s\n' ""
+    return 0
+  fi
+  printf '%s' "$output" | jq -r '.additionalContext // .hookSpecificOutput.additionalContext // empty' 2>/dev/null || true
+}
+
 assert_decision() {
   local expected="$1"
   local label="$2"
@@ -185,6 +194,28 @@ assert_decision() {
     pass "$label (decision=$got)"
   else
     fail "$label (expected decision=$expected, got=${got:-<empty>})"
+  fi
+}
+
+assert_no_decision() {
+  local label="$1"
+  local got=""
+  got="$(extract_decision "$LAST_OUTPUT")"
+  if [[ -z "$got" ]]; then
+    pass "$label (decision=<empty>)"
+  else
+    fail "$label (expected empty decision, got=$got)"
+  fi
+}
+
+assert_has_additional_context() {
+  local label="$1"
+  local context=""
+  context="$(extract_additional_context "$LAST_OUTPUT")"
+  if [[ -n "$context" ]]; then
+    pass "$label"
+  else
+    fail "$label (expected additionalContext payload)"
   fi
 }
 
@@ -245,7 +276,8 @@ suite_workflow_gate() {
     --arg prompt "다음 단계 진행" \
     '{cwd:$cwd,session_id:$session,prompt:$prompt}')"
   run_hook "$hook" "$sandbox" "$input_json"
-  assert_decision "allow" "workflow-gate allows non-blocked prompt"
+  assert_no_decision "workflow-gate allows non-blocked prompt"
+  assert_has_additional_context "workflow-gate allow response includes additionalContext"
   assert_exit_code 0 "workflow-gate allow exit code"
 
   for gate in review-code refactor retro ship; do
@@ -254,10 +286,10 @@ suite_workflow_gate() {
       --arg cwd "$sandbox" \
       --arg session "S-TEST-1" \
       --arg prompt "git push 해" \
-      '{cwd:$cwd,session_id:$session,prompt:$prompt}')"
+    '{cwd:$cwd,session_id:$session,prompt:$prompt}')"
     run_hook "$hook" "$sandbox" "$input_json"
     assert_decision "block" "workflow-gate blocks push while $gate pending"
-    assert_exit_code 1 "workflow-gate block exit code while $gate pending"
+    assert_exit_code 0 "workflow-gate block exit code while $gate pending"
   done
 
   write_state "" plan
@@ -267,7 +299,8 @@ suite_workflow_gate() {
     --arg prompt "git push 해" \
     '{cwd:$cwd,session_id:$session,prompt:$prompt}')"
   run_hook "$hook" "$sandbox" "$input_json"
-  assert_decision "allow" "workflow-gate allows push when only non-closing gates remain"
+  assert_no_decision "workflow-gate allows push when only non-closing gates remain"
+  assert_has_additional_context "workflow-gate non-closing gate response includes additionalContext"
   assert_exit_code 0 "workflow-gate allow exit code for non-closing gate only"
 
   write_state "manual override approved" review-code
@@ -277,7 +310,8 @@ suite_workflow_gate() {
     --arg prompt "git push 해" \
     '{cwd:$cwd,session_id:$session,prompt:$prompt}')"
   run_hook "$hook" "$sandbox" "$input_json"
-  assert_decision "allow" "workflow-gate allows blocked action when override reason exists"
+  assert_no_decision "workflow-gate allows blocked action when override reason exists"
+  assert_has_additional_context "workflow-gate override response includes additionalContext"
   assert_exit_code 0 "workflow-gate override allow exit code"
 
   write_state "" review-code
@@ -287,7 +321,8 @@ suite_workflow_gate() {
     --arg prompt "git push 해" \
     '{cwd:$cwd,session_id:$session,prompt:$prompt}')"
   run_hook "$hook" "$sandbox" "$input_json"
-  assert_decision "allow" "workflow-gate allows stale pipeline session mismatch"
+  assert_no_decision "workflow-gate allows stale pipeline session mismatch"
+  assert_has_additional_context "workflow-gate stale pipeline response includes additionalContext"
   assert_exit_code 0 "workflow-gate stale pipeline allow exit code"
 
   write_state "" review-code
@@ -298,7 +333,7 @@ suite_workflow_gate() {
     '{cwd:$cwd,session_id:$session,prompt:$prompt}')"
   run_hook "$hook" "$sandbox" "$input_json"
   assert_decision "block" "workflow-gate blocks Korean commit intent while closing gate pending"
-  assert_exit_code 1 "workflow-gate Korean commit block exit code"
+  assert_exit_code 0 "workflow-gate Korean commit block exit code"
 
   cat > "$sandbox/.cwf/cwf-state.yaml" <<'EOF_STATE_MISSING_ACTIVE'
 live:
@@ -313,7 +348,8 @@ EOF_STATE_MISSING_ACTIVE
     --arg prompt "다음 단계 진행" \
     '{cwd:$cwd,session_id:$session,prompt:$prompt}')"
   run_hook "$hook" "$sandbox" "$input_json"
-  assert_decision "allow" "workflow-gate allows non-protected prompt when active_pipeline key is missing"
+  assert_no_decision "workflow-gate allows non-protected prompt when active_pipeline key is missing"
+  assert_has_additional_context "workflow-gate missing active_pipeline allow includes additionalContext"
   assert_exit_code 0 "workflow-gate missing active_pipeline allow exit code"
 
   input_json="$(jq -nc \
@@ -323,7 +359,7 @@ EOF_STATE_MISSING_ACTIVE
     '{cwd:$cwd,session_id:$session,prompt:$prompt}')"
   run_hook "$hook" "$sandbox" "$input_json"
   assert_decision "block" "workflow-gate blocks protected prompt when active_pipeline key is missing"
-  assert_exit_code 1 "workflow-gate missing active_pipeline block exit code"
+  assert_exit_code 0 "workflow-gate missing active_pipeline block exit code"
 
   cat > "$sandbox/.cwf/cwf-state.yaml" <<'EOF_STATE_MISSING_OPTIONAL'
 live:
@@ -339,7 +375,7 @@ EOF_STATE_MISSING_OPTIONAL
     '{cwd:$cwd,session_id:$session,prompt:$prompt}')"
   run_hook "$hook" "$sandbox" "$input_json"
   assert_decision "block" "workflow-gate still blocks push when optional live keys are missing"
-  assert_exit_code 1 "workflow-gate missing optional keys block exit code"
+  assert_exit_code 0 "workflow-gate missing optional keys block exit code"
 }
 
 suite_deletion_safety() {
