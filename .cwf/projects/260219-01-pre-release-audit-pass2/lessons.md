@@ -79,3 +79,11 @@ When guard-only 입력에서 `session_id`가 비어 있으면 -> 즉시 통과�
 - **Takeaway**: long-context 분석형 스킬에는 non-interactive fallback 스크립트를 먼저 실행하는 경로를 항상 마련해야 한다.
 
 When `--light` 모드가 non-interactive timeout을 반복하면 -> 분석 단계 전 deterministic fast-path 스크립트로 `retro.md`를 먼저 생성하고 gate를 통과시킨다.
+
+## Iteration 3 Lesson — Setup Non-Interactive Fail-Fast Output (2026-02-20)
+
+- **Expected**: `cwf:setup` 계열은 non-interactive에서도 최소한 분기 이유(`WAIT_INPUT`)를 명시하고 종료한다.
+- **Actual**: `cwf:setup` full에서 빈 출력 종료(`NO_OUTPUT`)가 간헐적으로 발생해 원인 추적이 어려웠다.
+- **Takeaway**: setup 스킬은 AskUserQuestion 불가 시 phase-id 포함 표준 `WAIT_INPUT` 포맷을 강제해 분류/운영 가시성을 확보해야 한다.
+
+When setup run ends non-interactively with `exit 0` -> require explicit `WAIT_INPUT: setup requires user selection at phase <id>` output and `Please reply with your choice.` trailer.
