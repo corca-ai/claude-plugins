@@ -1,0 +1,24 @@
+AskUserQuestion only supports up to 4 options. Since there are 9 hook groups, I need to use the Non-Interactive Fail-Fast Policy approach for this phase.
+
+### 1.2 Hook Group Selection
+
+현재 모든 9개 훅 그룹이 활성화되어 있습니다. 변경할 그룹을 선택해주세요:
+
+| # | Group | Description | Current |
+|---|-------|-------------|---------|
+| 1 | `attention` | Slack notifications on idle/waiting | enabled |
+| 2 | `log` | Auto-log turns + auto-commit transcripts | enabled |
+| 3 | `lint_markdown` | Markdown validation after Write/Edit | enabled |
+| 4 | `lint_shell` | ShellCheck validation after Write/Edit | enabled |
+| 5 | `read` | File-size aware reading guard | enabled |
+| 6 | `deletion_safety` | Blocks risky file deletions | enabled |
+| 7 | `workflow_gate` | Enforces workflow stage/branch safety rules | enabled |
+| 8 | `websearch_redirect` | Redirect WebSearch to cwf:gather | enabled |
+| 9 | `compact_recovery` | Inject live session state after auto-compact | enabled |
+
+Options:
+- **A**: Keep all enabled (no changes)
+- **B**: Disable specific groups — list the numbers to disable (e.g., "3, 4")
+- **C**: Enable only specific groups — list the numbers to enable
+
+Please reply with your choice.

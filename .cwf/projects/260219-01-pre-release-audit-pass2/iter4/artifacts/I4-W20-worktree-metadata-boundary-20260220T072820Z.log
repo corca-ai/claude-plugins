@@ -1,0 +1,4 @@
+I4-W20 metadata-boundary analysis
+Date: 2026-02-20
+
+[CASE 1] track-user-input guard-only with session_id present + mismatched worktree

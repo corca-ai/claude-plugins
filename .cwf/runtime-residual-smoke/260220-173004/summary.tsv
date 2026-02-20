@@ -1,0 +1,7 @@
+case	run	result	reason	exit_code	duration_sec	bytes	log_file
+K46	1	PASS	OK	0	105	882	.cwf/runtime-residual-smoke/260220-173004/K46-run1.log
+S10	1	FAIL	NO_OUTPUT	0	30	1	.cwf/runtime-residual-smoke/260220-173004/S10-run1.log
+S10	2	PASS	WAIT_INPUT	0	37	1235	.cwf/runtime-residual-smoke/260220-173004/S10-run2.log
+S10	3	PASS	OK	0	43	686	.cwf/runtime-residual-smoke/260220-173004/S10-run3.log
+S10	4	FAIL	NO_OUTPUT	0	28	1	.cwf/runtime-residual-smoke/260220-173004/S10-run4.log
+S10	5	PASS	WAIT_INPUT	0	28	1215	.cwf/runtime-residual-smoke/260220-173004/S10-run5.log

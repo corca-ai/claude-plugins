@@ -1,0 +1,15 @@
+Waiting for your hook group selection. All 9 groups are currently enabled:
+
+| # | Group | Description |
+|---|-------|-------------|
+| 1 | attention | Slack notifications on idle/waiting |
+| 2 | log | Auto-log turns + auto-commit transcripts |
+| 3 | read | File-size aware reading guard |
+| 4 | lint_markdown | Markdown validation after Write/Edit |
+| 5 | lint_shell | ShellCheck validation after Write/Edit |
+| 6 | deletion_safety | Blocks risky file deletions |
+| 7 | workflow_gate | Enforces stage/branch safety rules |
+| 8 | websearch_redirect | Redirect WebSearch to cwf:gather |
+| 9 | compact_recovery | Session state injection after auto-compact |
+
+How would you like to proceed?

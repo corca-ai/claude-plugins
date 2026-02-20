@@ -446,6 +446,13 @@ sessions:
     artifacts: [plan.md, lessons.md, next-session.md]
     stage_checkpoints: [handoff]
 
+
+  - id: "S260220-01"
+    title: "retro-light"
+    dir: ".cwf/projects/260220-01-retro-light"
+    branch: "main"
+    artifacts: [plan.md, lessons.md]
+
 tools:
   codex: unavailable
   gemini: unavailable

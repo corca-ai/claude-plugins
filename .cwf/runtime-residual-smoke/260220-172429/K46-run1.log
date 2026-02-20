@@ -1,0 +1,18 @@
+Gate passed. Here's the retro brief:
+
+---
+
+**Retro Brief** (`260220-01-retro-light`, light mode)
+
+- **세션 목적/결과**: pre-release audit pass2 iter4 완료 후 standalone `/retro --light` 호출. 구현 작업 없음.
+- **낭비 신호**: 없음. iter4 uncommitted 변경 8개 파일이 커밋 없이 남아있는 점은 인지 사항.
+- **CDM 교훈**: 선행 세션에 이미 deep retro가 있을 때 독립 dir 분리 + light 모드 선택은 적절한 비용 최적화.
+- **도구/역량**: retro light fast-path 정상 작동, gate PASS. 추가 도구 갭 없음.
+
+**Persist Proposals**
+
+| Finding | Tier | Target | Apply? |
+|---|---|---|---|
+| iter4 uncommitted 변경 장기 방치 리스크 | Doc | `next-iteration-entry.md` 체크리스트에 "uncommitted 변경 커밋 여부 확인" 항목 추가 | 선택적 |
+
+별도 persist 적용이 필요하면 말씀해 주세요.
