@@ -33,8 +33,11 @@ Deterministic checks for `cwf:retro` execution. Use this checklist before finali
 
 ## Persistence and Reporting Gates
 
-1. Persist findings using `eval > state > doc` ordering. Do not suggest new prose rules when deterministic checks can enforce behavior.
-2. AGENTS/runtime-adapter edits require explicit user approval.
-3. For direct invocation (`cwf:retro`, `/retro`), assistant response must include both:
+1. Run an ownership gate before tiering: classify each finding as `owner=repo` or `owner=plugin`, with `apply_layer=local|upstream` and concrete evidence.
+2. Route `owner=plugin` findings to upstream backlog targets; do not use local AGENTS/docs as the primary fix path.
+3. After ownership routing, persist findings using `eval > state > doc` ordering. Do not suggest new prose rules when deterministic checks can enforce behavior.
+4. AGENTS/runtime-adapter edits require explicit user approval.
+5. For direct invocation (`cwf:retro`, `/retro`), assistant response must include both:
    - `Retro Brief`
    - `Persist Proposals`
+6. Each direct-invocation persist proposal must include `owner`, `apply_layer`, and `evidence`.

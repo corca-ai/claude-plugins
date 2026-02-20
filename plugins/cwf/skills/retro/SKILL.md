@@ -43,14 +43,7 @@ Resolution order:
 
 #### 1.1 Non-Interactive Fallback (Required)
 
-If AskUserQuestion is unavailable/blocked (common in non-interactive runs), do not wait for user input. Resolve path with this deterministic fallback:
-
-1. explicit `[path]` argument
-2. current `live.dir` from resolved live-state file
-3. most recently modified directory under `.cwf/projects/`
-4. bootstrap new directory with `{CWF_PLUGIN_DIR}/scripts/next-prompt-dir.sh --bootstrap retro-light`
-
-When this fallback is used, record one short note in retro output (`Fast path` or `Post-Retro Findings`) so directory choice is auditable.
+If AskUserQuestion is unavailable/blocked, do not wait. Resolve path in this order: explicit `[path]` -> `live.dir` -> latest `.cwf/projects/` -> bootstrap via `{CWF_PLUGIN_DIR}/scripts/next-prompt-dir.sh --bootstrap retro-light`. Record a short note (`Fast path` or `Post-Retro Findings`) so the fallback choice is auditable.
 
 #### 1.2 Early Light Fast-Path Short-Circuit (Required)
 
@@ -87,7 +80,7 @@ Before reading artifacts, run the evidence collector (it includes best-effort Co
 bash {CWF_PLUGIN_DIR}/scripts/retro-collect-evidence.sh --session-dir "{output-dir}"
 ```
 
-Then read `retro-evidence.md` (if generated), `plan.md`, `lessons.md` (if they exist in target dir), AGENTS.md from project root (plus CLAUDE.md when runtime-specific behavior matters), project context document (e.g. docs/project-context.md), and `cwf-state.yaml` (if it exists) — to understand session goals, project stage, and avoid duplicating content.
+Then read `retro-evidence.md` (if generated), `plan.md`, `lessons.md`, and `cwf-state.yaml`. Read AGENTS/adapter docs and project-context docs only when those files exist.
 
 ### 3. Select Mode
 
@@ -101,20 +94,7 @@ Parse the `--deep` flag from the invocation arguments.
 
 ### 3.2 Light Fast Path (Required for `--light`)
 
-When mode is light, run a deterministic fast path first so non-interactive calls always produce `retro.md` quickly:
-
-```bash
-bash {CWF_PLUGIN_DIR}/scripts/retro-light-fastpath.sh \
-  --session-dir "{output-dir}" \
-  --invocation "{invocation_mode}" \
-  --lang "{user-language}"
-```
-
-Rules:
-- This command writes a minimal, gate-compliant `retro.md` with `- Mode: light`.
-- If Section 1.2 already completed, do not rerun this command unless `retro.md` is missing or invalid.
-- In non-interactive runs, you may stop after this fast path + retro gate validation.
-- Do not call AskUserQuestion in light mode when the fallback policy above is enough to proceed.
+Reuse the command and gate in Section 1.2. Do not rerun unless `retro.md` is missing/invalid. In non-interactive runs, stop after fast path + gate. Do not call AskUserQuestion when fallback policy is sufficient.
 
 ### 3.1 Detect Invocation Context
 
@@ -180,8 +160,8 @@ bash {CWF_PLUGIN_DIR}/scripts/agent-slot-preflight.sh --required 2 --json
 
 **Batch 1** — launch with the preflight-selected mode (only for agents whose result files are missing or invalid):
 
-- **Agent A — CDM Analysis**: `subagent_type: general-purpose`, `max_turns: 16`. Prompt: "Read `{SKILL_DIR}/references/cdm-guide.md`. Analyze the following session summary using CDM methodology. Session summary: {Sections 1-3 summary}. cwf-state context: {relevant cwf-state.yaml content}. Output Section 4 content. **Output Persistence**: Write your complete analysis to: `{session_dir}/retro-cdm-analysis.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`"
-- **Agent B — Learning Resources**: `subagent_type: general-purpose`, `max_turns: 20`. Prompt: "Based on the following session summary, search the web for 2-3 learning resources calibrated to the user's knowledge level. Follow the Web Research Protocol in {CWF_PLUGIN_DIR}/references/agent-patterns.md (discover URLs via WebSearch, fetch with WebFetch then agent-browser fallback for JS-rendered pages). You have Bash access for agent-browser CLI commands. Session summary: {Sections 1-3 summary}. For each resource: title + URL, 2-3 sentence summary of key takeaways, and why it matters for the user's work. Output Section 6 content. **Output Persistence**: Write your complete findings to: `{session_dir}/retro-learning-resources.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`"
+- **Agent A — CDM Analysis**: `subagent_type: general-purpose`, `max_turns: 16`. Read `{SKILL_DIR}/references/cdm-guide.md`, analyze Sections 1-3 summary + relevant `cwf-state.yaml`, write Section 4 content to `{session_dir}/retro-cdm-analysis.md`, append `<!-- AGENT_COMPLETE -->`.
+- **Agent B — Learning Resources**: `subagent_type: general-purpose`, `max_turns: 20`. Find 2-3 external resources using the Web Research Protocol in `{CWF_PLUGIN_DIR}/references/agent-patterns.md`, write Section 6 content to `{session_dir}/retro-learning-resources.md`, append `<!-- AGENT_COMPLETE -->`.
 
 Wait for Batch 1 to complete. Read output files from session directory:
 - `{session_dir}/retro-cdm-analysis.md` — CDM analysis (needed by Batch 2 experts)
@@ -196,8 +176,8 @@ Gate behavior after Batch 1:
 
 **Batch 2** — launch with the preflight-selected mode (after Batch 1, only for agents whose result files are missing or invalid):
 
-- **Agent C — Expert alpha**: `subagent_type: general-purpose`, `max_turns: 20`. Prompt: "Read `{CWF_PLUGIN_DIR}/references/expert-advisor-guide.md` and `{SKILL_DIR}/references/expert-lens-guide.md`. You are Expert α, operating in **retro mode**. Session summary: {Sections 1-4 summary, including CDM results from Agent A}. Deep-clarify experts: {names or 'not available'}. Analyze through your framework. Use web search to verify expert identity and cite published work (follow Web Research Protocol in {CWF_PLUGIN_DIR}/references/agent-patterns.md; you have Bash access for agent-browser fallback). Output your Expert α section. **Output Persistence**: Write your complete analysis to: `{session_dir}/retro-expert-alpha.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`"
-- **Agent D — Expert beta**: `subagent_type: general-purpose`, `max_turns: 20`. Prompt: "Read `{CWF_PLUGIN_DIR}/references/expert-advisor-guide.md` and `{SKILL_DIR}/references/expert-lens-guide.md`. You are Expert β, operating in **retro mode**. Session summary: {Sections 1-4 summary, including CDM results from Agent A}. Deep-clarify experts: {names or 'not available'}. Analyze through your framework. Use web search to verify expert identity and cite published work (follow Web Research Protocol in {CWF_PLUGIN_DIR}/references/agent-patterns.md; you have Bash access for agent-browser fallback). Output your Expert β section. **Output Persistence**: Write your complete analysis to: `{session_dir}/retro-expert-beta.md`. At the very end of the file, append this sentinel marker on its own line: `<!-- AGENT_COMPLETE -->`"
+- **Agent C — Expert alpha**: `subagent_type: general-purpose`, `max_turns: 20`. Read `{CWF_PLUGIN_DIR}/references/expert-advisor-guide.md` + `{SKILL_DIR}/references/expert-lens-guide.md`, analyze Sections 1-4 summary (including CDM output), write to `{session_dir}/retro-expert-alpha.md`, append `<!-- AGENT_COMPLETE -->`.
+- **Agent D — Expert beta**: `subagent_type: general-purpose`, `max_turns: 20`. Same contract as Expert alpha; write to `{session_dir}/retro-expert-beta.md`, append `<!-- AGENT_COMPLETE -->`.
 
 After Batch 2: read output files from session directory (`{session_dir}/retro-expert-alpha.md`, `{session_dir}/retro-expert-beta.md`). Draft Section 5 with the required agreement/disagreement synthesis subsection, then draft Section 7 inline (capability/tool scan), then integrate all results into retro.md.
 
@@ -206,7 +186,7 @@ Gate behavior after Batch 2:
   render Section 5 from available expert output(s) plus explicit omission note.
 - Record soft gate path in output (`PERSISTENCE_GATE=SOFT_CONTINUE` or equivalent).
 
-**Rationale for 2-batch design**: Expert Lens requires CDM results ("Sections 1-4 provided by orchestrator" per expert-advisor-guide.md). CDM and Learning Resources are independent → Batch 1 parallel. Expert alpha and Expert beta both need CDM results → Batch 2 after Batch 1.
+**Rationale for 2-batch design**: Expert Lens depends on CDM results. Batch 1 produces CDM + Learning in parallel, Batch 2 runs experts after CDM is available.
 
 #### Section 1: Context Worth Remembering
 
@@ -247,11 +227,7 @@ Identify 2-4 critical decision moments from the session. Apply CDM probes to eac
 
 **Mode: deep only.** In light mode, output: "Run `/retro --deep` for expert analysis."
 
-Condition: Does the session contain decisions that domain experts would analyze differently? If the session is too lightweight (simple config changes, routine tasks), skip this section with a brief note.
-
-**Expert selection**: Follow the Expert Selection rules in `{CWF_PLUGIN_DIR}/references/expert-advisor-guide.md` and the retro-specific constraints in `{SKILL_DIR}/references/expert-lens-guide.md` (read `expert_roster` from `cwf-state.yaml`, match domain, select 2 with contrast, fill gaps independently). If the conversation includes `/deep-clarify` or `cwf:clarify` expert names, use them as preferred starting points per the retro mode override.
-
-**Execution** (deep mode): Produced by Agent C (Expert alpha) and Agent D (Expert beta) from Batch 2. Integrate both results into Section 5.
+Follow `{SKILL_DIR}/references/expert-lens-guide.md` for full selection/execution rules. In deep mode this section is produced by Agent C/D outputs.
 
 **Agreement/Disagreement synthesis (required)**: Add `### Agreement and Disagreement Synthesis` under Section 5 with:
 - 2-4 shared conclusions across Expert α/β
@@ -262,9 +238,7 @@ Condition: Does the session contain decisions that domain experts would analyze 
 
 **Mode: deep only.** In light mode, output: "Run `/retro --deep` for learning resources."
 
-Condition: Does the session contain topics where the user showed knowledge gaps or genuine curiosity? If the session is too lightweight (simple config changes, routine tasks), skip this section with a brief note.
-
-**Execution** (deep mode): Produced by Agent B from Batch 1. Integrate the agent's output here. Each resource: title + URL, 2-3 sentence summary of key takeaways, and why it matters for the user's work.
+This section is produced by Agent B in deep mode. Include title + URL, 2-3 sentence takeaways, and relevance to the user's work.
 
 #### Section 7: Relevant Tools (Capabilities Included)
 
@@ -343,9 +317,34 @@ Then:
 
 ### 7. Persist Findings
 
-retro.md is session-specific. Persist findings to project-level documents using the **eval > state > doc** hierarchy.
+retro.md is session-specific. Persist findings to project-level improvements with a required ownership check before applying the **eval > state > doc** hierarchy.
 
-For each finding, evaluate enforcement mechanisms strongest-first:
+#### 7.0 Ownership Gate (Required, before tiering)
+
+For each finding, classify ownership first:
+
+- `owner=repo` — the fix belongs to this repository's local artifacts/policies.
+- `owner=plugin` — the fix belongs to CWF plugin/runtime/shared tooling behavior.
+
+Then set apply layer deterministically:
+
+- `owner=repo` -> `apply_layer=local`
+- `owner=plugin` -> `apply_layer=upstream`
+
+Required metadata for every persist proposal:
+
+- `owner`
+- `apply_layer`
+- `evidence` (command output, artifact path, or session-log line)
+
+Routing rules:
+
+- `owner=repo`: continue with tiering and local target updates.
+- `owner=plugin`: do not propose local AGENTS/doc edits as the primary fix. Output an upstream backlog item (issue/patch target under `plugins/cwf/` or related shared runtime files). Local edits are allowed only as clearly marked stopgaps.
+- If ownership is ambiguous: default to `owner=plugin`, state uncertainty explicitly, and avoid adding repo-local policy noise.
+- Keep durable behavior contracts in AGENTS/runtime adapters. Keep `next-session.md` delta-focused; do not move global contracts there.
+
+After ownership routing, evaluate enforcement mechanisms strongest-first:
 
 1. **Tier 1: Eval/Hook** (deterministic) — Can a script/hook catch this?
    - `check-session.sh` / `session_defaults` for missing artifacts
@@ -363,10 +362,10 @@ For each finding, evaluate enforcement mechanisms strongest-first:
 **Per-section persist actions**:
 
 - **S1 Context** → `project-context.md` (Tier 3 — context is inherently behavioral). Offer to append new context.
-- **S2 Collaboration** → Evaluate each suggestion through tiers individually. AskUserQuestion "Apply?" for AGENTS.md/adapter changes.
-- **S3 Waste / Root causes** → For each 5 Whys structural cause, present: "**Finding**: X. **Recommended tier**: {1|2|3}. **Mechanism**: {specific change}." Right-placement check: AGENTS.md (or runtime adapters) for behavioral rules, `project-context.md` for architectural patterns, protocol/skill docs for process changes.
+- **S2 Collaboration** → Classify owner first, then evaluate tier. AskUserQuestion "Apply?" for AGENTS.md/adapter changes only when `owner=repo`.
+- **S3 Waste / Root causes** → For each 5 Whys structural cause, present: "**Finding**: X. **Owner**: {repo|plugin}. **Apply layer**: {local|upstream}. **Recommended tier**: {1|2|3}. **Mechanism**: {specific change}. **Evidence**: {concrete trace}." Right-placement check: AGENTS.md (or runtime adapters) for behavioral rules, `project-context.md` for architectural patterns, protocol/skill docs for process changes.
 - **S4 CDM** → Key lessons through tiers (most → Tier 3 `project-context.md`).
-- **S7 Tools** → AskUserQuestion "Implement now?" for actionable capability improvements.
+- **S7 Tools** → For `owner=repo`, AskUserQuestion "Implement now?". For `owner=plugin`, AskUserQuestion "Queue upstream issue/patch now?".
 
 **Expert Roster Maintenance** (deep mode only, when Section 5 was produced):
 
@@ -387,22 +386,28 @@ If `invocation_mode=direct` (user-triggered `/retro` or `cwf:retro`):
    - critical tool/capability takeaway
 2. Provide `Persist Proposals` with 2-5 concrete items:
    - Finding
+   - Owner (`repo`, `plugin`)
+   - Apply layer (`local`, `upstream`)
    - Recommended tier (`Eval-Hook`, `State`, `Doc`)
-   - Target file/script
+   - Evidence
+   - Target file/script (local) or upstream backlog target (plugin)
    - Apply-now recommendation
-3. Ask whether to apply persist proposals now (yes/no).
+3. Ask whether to apply persist proposals now:
+   - repo-owned items: apply locally now? (yes/no)
+   - plugin-owned items: queue upstream issue/patch now? (yes/no)
 
 If `invocation_mode=run_chain`:
 
 - Provide compact 1-2 bullet completion report (pipeline continuity first).
-- Still include a short `Persist Proposals` pointer (at least 1 line) so persistence opportunities are not dropped.
+- Still include a short `Persist Proposals` pointer (at least 1 line) with owner/apply-layer so persistence opportunities are not dropped.
 
 ### 9. Post-Retro Discussion
 
 The user may continue the conversation after the retro. During post-retro discussion:
 - Update `retro.md` — append under `### Post-Retro Findings`
 - Update `lessons.md` with new learnings
-- **Persistence check** — for each new learning, evaluate through the eval > state > doc hierarchy: Can it be a hook/eval? A state change? Only then a doc rule.
+- **Ownership check first** — for each new learning, classify `owner`/`apply_layer`, then evaluate through eval > state > doc.
+- If `owner=plugin`, append an upstream backlog note instead of adding repo-local policy prose.
 - If plugin code was changed, follow normal release procedures (version bump, CHANGELOG)
 
 Do not prompt the user to start this discussion.
