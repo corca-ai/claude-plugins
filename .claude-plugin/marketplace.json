@@ -12,7 +12,7 @@
     {
       "name": "cwf",
       "source": "./plugins/cwf",
-      "version": "0.8.4",
+      "version": "0.8.5",
       "description": "Corca Workflow Framework — consolidated hooks and skill orchestration for structured development sessions",
       "keywords": [
         "workflow",
