@@ -2,6 +2,11 @@
 
 Use this file as the only mention target when starting the next pre-release iteration.
 
+## Superseded Entry
+
+- Latest single-entry contract for runtime hardening:
+  - [.cwf/projects/260219-01-pre-release-audit-pass2/next-iteration-entry-iter5-runtime-hardening.md](next-iteration-entry-iter5-runtime-hardening.md)
+
 ## Single Mention Target
 
 - [.cwf/projects/260219-01-pre-release-audit-pass2/next-iteration-entry.md](next-iteration-entry.md)

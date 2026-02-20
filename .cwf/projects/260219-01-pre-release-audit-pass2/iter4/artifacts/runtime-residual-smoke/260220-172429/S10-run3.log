@@ -1,0 +1,8 @@
+All 9 CWF hook groups are currently **enabled**. Would you like to keep them all or customize?
+
+1. **Keep all enabled** (Recommended) — all 9 groups stay active
+2. **Disable lint hooks only** — disable lint_markdown + lint_shell; keep other 7
+3. **Minimal set** — enable only log, read, deletion_safety, compact_recovery
+4. **Customize individually** — tell me which groups to disable
+
+Please reply with your choice.

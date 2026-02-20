@@ -1,0 +1,6 @@
+All 9 hook groups are currently enabled. How would you like to configure them?
+
+1. **Keep all enabled (Recommended)** — all 9 groups stay on
+2. **Disable some hooks** — I'll ask which to disable
+3. **Disable all hooks** — turn off everything
+4. **Skip hook config** — leave as-is, move to next phase
