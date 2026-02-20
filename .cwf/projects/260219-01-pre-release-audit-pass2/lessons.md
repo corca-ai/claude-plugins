@@ -87,3 +87,8 @@ When `--light` 모드가 non-interactive timeout을 반복하면 -> 분석 단�
 - **Takeaway**: setup 스킬은 AskUserQuestion 불가 시 phase-id 포함 표준 `WAIT_INPUT` 포맷을 강제해 분류/운영 가시성을 확보해야 한다.
 
 When setup run ends non-interactively with `exit 0` -> require explicit `WAIT_INPUT: setup requires user selection at phase <id>` output and `Please reply with your choice.` trailer.
+
+### 보강 메모
+
+- direct 재실행에서는 `WAIT_INPUT`이 나와도, smoke spot-check에서 `setup-full`이 간헐적으로 `NO_OUTPUT`로 재발할 수 있다.
+- 다음 iteration에서는 `setup-full` 경로의 첫 출력 보장(최소 1줄 상태 라인) 여부를 deterministic check로 추가 검토한다.

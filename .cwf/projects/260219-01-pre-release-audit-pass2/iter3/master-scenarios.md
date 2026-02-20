@@ -37,5 +37,6 @@
 - 2026-02-20: `I3-R60` 재실행 결과 `PASS` (timeout 없이 명시적 종료)
 - 2026-02-20: `I3-S10` 재실행 결과 `PARTIAL(WAIT_INPUT)` (phase 1 선택 대기)
 - 2026-02-20: `I3-S15` 재실행 결과 `PARTIAL(WAIT_INPUT)` (timeout 대신 질문형 종료)
+- 2026-02-20: setup 2케이스 spot-check에서 `setup-full` `NO_OUTPUT` 1회 재발(변동성 잔여)
 - 2026-02-20: `I3-W20` 보강 후 `PASS(FIXED_PRIMARY_GAP)` 전환(`session_id` 공백 + binding 존재 시 fail-closed)
 - 2026-02-20: `I3-K46` timeout은 지속되나 light fast-path(`retro-light-fastpath.sh`) + retro gate PASS 경로 확보
