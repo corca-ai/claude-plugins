@@ -208,6 +208,7 @@ bash scripts/noninteractive-skill-smoke.sh \
   --plugin-dir plugins/cwf \
   --workdir <user-repo-path> \
   --timeout 45 \
+  --adaptive-review-timeout \
   --max-failures 0 \
   --max-timeouts 0
 
@@ -225,8 +226,9 @@ bash scripts/premerge-cwf-gate.sh \
 - `3`: INVALID_MARKETPLACE (invalid JSON shape)
 - `4`: MISSING_ENTRY
 
-`noninteractive-skill-smoke.sh` outputs per-case `PASS|FAIL|TIMEOUT` with reason (`OK|ERROR|TIMEOUT|WAIT_INPUT`).
+`noninteractive-skill-smoke.sh` outputs per-case `PASS|FAIL|TIMEOUT` with reason (`OK|ERROR|TIMEOUT|WAIT_INPUT|NO_OUTPUT`).
 - If a skill exits successfully but the log shows an interactive follow-up prompt, the case is classified as `FAIL` with reason `WAIT_INPUT` (to prevent false PASS in CI).
+- `--adaptive-review-timeout` raises timeout only for review prompts based on detected review target size, while keeping non-review cases at the base `--timeout`.
 - The script fails gate (exit 1) when configured failure/timeout thresholds are exceeded.
 
 ## Repo Git Hooks

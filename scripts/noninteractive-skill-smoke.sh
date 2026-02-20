@@ -21,6 +21,10 @@ Options:
   --plugin-dir <path>      Plugin directory passed to Claude (default: plugins/cwf)
   --workdir <path>         Working directory where prompts are executed (default: current directory)
   --timeout <seconds>      Per-case timeout in seconds (default: 45)
+  --adaptive-review-timeout
+                           Enable adaptive timeout for review prompts based on target size.
+  --review-lines-override <n>
+                           Override estimated review target lines (for deterministic testing).
   --output-dir <path>      Output directory for logs/summaries (default: .cwf/smoke-<timestamp>)
   --cases-file <path>      Case definition file (format: id|prompt). If omitted, built-in cases are used.
   --max-failures <n>       Allowed FAIL count before gate failure (default: 0)
@@ -41,6 +45,8 @@ USAGE
 PLUGIN_DIR="plugins/cwf"
 WORKDIR="$(pwd)"
 TIMEOUT_SEC=45
+ADAPTIVE_REVIEW_TIMEOUT=0
+REVIEW_LINES_OVERRIDE=""
 OUTPUT_DIR=""
 CASES_FILE=""
 MAX_FAILURES=0
@@ -71,6 +77,18 @@ while [[ $# -gt 0 ]]; do
         exit 1
       fi
       TIMEOUT_SEC="$2"
+      shift 2
+      ;;
+    --adaptive-review-timeout)
+      ADAPTIVE_REVIEW_TIMEOUT=1
+      shift
+      ;;
+    --review-lines-override)
+      if [[ -z "${2:-}" ]] || [[ ! "$2" =~ ^[0-9]+$ ]]; then
+        echo "Error: --review-lines-override expects a non-negative integer." >&2
+        exit 1
+      fi
+      REVIEW_LINES_OVERRIDE="$2"
       shift 2
       ;;
     --output-dir)
@@ -161,7 +179,7 @@ fi
 mkdir -p "$OUTPUT_DIR"
 
 SUMMARY_FILE="$OUTPUT_DIR/summary.tsv"
-printf "id\tresult\treason\texit_code\tduration_sec\tlog_file\n" > "$SUMMARY_FILE"
+printf "id\tresult\treason\texit_code\tduration_sec\ttimeout_sec\tlog_file\n" > "$SUMMARY_FILE"
 
 declare -a CASE_IDS=()
 declare -a CASE_PROMPTS=()
@@ -241,6 +259,149 @@ is_wait_input_log() {
     "$log_file"
 }
 
+is_review_prompt() {
+  local prompt="$1"
+  [[ "$prompt" =~ (^|[[:space:]])(cwf:review|/review)([[:space:]]|$) ]]
+}
+
+detect_review_mode() {
+  local prompt="$1"
+
+  if [[ "$prompt" =~ --mode[[:space:]]+plan ]]; then
+    echo "plan"
+    return
+  fi
+  if [[ "$prompt" =~ --mode[[:space:]]+clarify ]]; then
+    echo "clarify"
+    return
+  fi
+  if [[ "$prompt" =~ --mode[[:space:]]+code ]]; then
+    echo "code"
+    return
+  fi
+
+  # /review defaults to code mode when unspecified.
+  echo "code"
+}
+
+extract_prompt_target_path() {
+  local prompt="$1"
+  local candidate
+
+  while IFS= read -r candidate; do
+    if [[ -f "$WORKDIR/$candidate" ]]; then
+      echo "$WORKDIR/$candidate"
+      return
+    fi
+  done < <(printf "%s\n" "$prompt" | grep -Eo '[A-Za-z0-9._/\-]+\.(md|txt|yaml|yml|json)' || true)
+}
+
+estimate_prompt_target_lines() {
+  local prompt="$1"
+  local target_path
+
+  target_path="$(extract_prompt_target_path "$prompt")"
+  if [[ -n "$target_path" ]]; then
+    wc -l < "$target_path" | tr -d ' '
+    return
+  fi
+
+  printf "%s\n" "$prompt" | wc -l | tr -d ' '
+}
+
+estimate_code_review_lines() {
+  local upstream
+  local committed=0
+  local staged=0
+  local unstaged=0
+
+  if [[ -n "$REVIEW_LINES_OVERRIDE" ]]; then
+    echo "$REVIEW_LINES_OVERRIDE"
+    return
+  fi
+
+  if ! git -C "$WORKDIR" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    echo 0
+    return
+  fi
+
+  upstream="$(git -C "$WORKDIR" rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || true)"
+  if [[ -n "$upstream" ]]; then
+    committed="$(git -C "$WORKDIR" diff "$upstream"..HEAD 2>/dev/null | wc -l | tr -d ' ')"
+  fi
+
+  staged="$(git -C "$WORKDIR" diff --cached 2>/dev/null | wc -l | tr -d ' ')"
+  unstaged="$(git -C "$WORKDIR" diff 2>/dev/null | wc -l | tr -d ' ')"
+  echo $((committed + staged + unstaged))
+}
+
+resolve_case_timeout() {
+  local case_id="$1"
+  local prompt="$2"
+  local mode
+  local target_lines=0
+  local timeout="$TIMEOUT_SEC"
+
+  if [[ "$ADAPTIVE_REVIEW_TIMEOUT" -ne 1 ]]; then
+    echo "$TIMEOUT_SEC"
+    return
+  fi
+
+  if ! is_review_prompt "$prompt"; then
+    echo "$TIMEOUT_SEC"
+    return
+  fi
+
+  mode="$(detect_review_mode "$prompt")"
+  case "$mode" in
+    code)
+      target_lines="$(estimate_code_review_lines)"
+      timeout=180
+      if [[ "$target_lines" -gt 400 ]]; then timeout=300; fi
+      if [[ "$target_lines" -gt 1200 ]]; then timeout=420; fi
+      if [[ "$target_lines" -gt 3000 ]]; then timeout=600; fi
+      if [[ "$target_lines" -gt 6000 ]]; then timeout=900; fi
+      if [[ "$prompt" =~ --correctness-provider[[:space:]]+claude ]]; then
+        timeout=$((timeout + 60))
+      fi
+      if [[ "$prompt" =~ --architecture-provider[[:space:]]+claude ]]; then
+        timeout=$((timeout + 60))
+      fi
+      ;;
+    plan)
+      target_lines="$(estimate_prompt_target_lines "$prompt")"
+      timeout=120
+      if [[ "$target_lines" -gt 200 ]]; then timeout=180; fi
+      if [[ "$target_lines" -gt 600 ]]; then timeout=300; fi
+      if [[ "$target_lines" -gt 1200 ]]; then timeout=420; fi
+      ;;
+    clarify)
+      target_lines="$(estimate_prompt_target_lines "$prompt")"
+      timeout=90
+      if [[ "$target_lines" -gt 200 ]]; then timeout=120; fi
+      if [[ "$target_lines" -gt 600 ]]; then timeout=180; fi
+      ;;
+    *)
+      timeout="$TIMEOUT_SEC"
+      ;;
+  esac
+
+  if [[ "$timeout" -lt "$TIMEOUT_SEC" ]]; then
+    timeout="$TIMEOUT_SEC"
+  fi
+  if [[ "$timeout" -gt 1800 ]]; then
+    timeout=1800
+  fi
+
+  # Keep case_id in signature to support future case-specific policy mapping.
+  if [[ -n "$case_id" ]]; then
+    echo "$timeout"
+    return
+  fi
+
+  echo "$timeout"
+}
+
 run_case() {
   local case_index="$1"
   local case_id="$2"
@@ -254,12 +415,14 @@ run_case() {
   local exit_code
   local result
   local reason
+  local case_timeout
   local case_pid
   local watcher_pid
 
   safe_id="$(echo "$case_id" | tr -cs 'A-Za-z0-9._-' '_')"
   log_file="$OUTPUT_DIR/$case_index-$safe_id.log"
   marker_file="$OUTPUT_DIR/.timeout-$case_index-$safe_id.marker"
+  case_timeout="$(resolve_case_timeout "$case_id" "$prompt")"
 
   start_ts="$(date +%s)"
 
@@ -270,7 +433,7 @@ run_case() {
   case_pid=$!
 
   (
-    sleep "$TIMEOUT_SEC"
+    sleep "$case_timeout"
     if kill -0 "$case_pid" >/dev/null 2>&1; then
       echo "timeout" > "$marker_file"
       kill "$case_pid" >/dev/null 2>&1 || true
@@ -328,14 +491,18 @@ run_case() {
     FAIL_COUNT=$((FAIL_COUNT + 1))
   fi
 
-  printf "%s\t%s\t%s\t%s\t%s\t%s\n" "$case_id" "$result" "$reason" "$exit_code" "$duration" "$log_file" >> "$SUMMARY_FILE"
-  printf "[%s] id=%s reason=%s exit=%s duration=%ss log=%s\n" "$result" "$case_id" "$reason" "$exit_code" "$duration" "$log_file"
+  printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "$case_id" "$result" "$reason" "$exit_code" "$duration" "$case_timeout" "$log_file" >> "$SUMMARY_FILE"
+  printf "[%s] id=%s reason=%s exit=%s duration=%ss timeout=%ss log=%s\n" "$result" "$case_id" "$reason" "$exit_code" "$duration" "$case_timeout" "$log_file"
 }
 
 echo "Smoke output dir: $OUTPUT_DIR"
 echo "Smoke workdir: $WORKDIR"
 echo "Smoke plugin-dir: $PLUGIN_DIR"
 echo "Smoke timeout: ${TIMEOUT_SEC}s"
+echo "Adaptive review timeout: $ADAPTIVE_REVIEW_TIMEOUT"
+if [[ -n "$REVIEW_LINES_OVERRIDE" ]]; then
+  echo "Review lines override: $REVIEW_LINES_OVERRIDE"
+fi
 echo "Smoke cases: ${#CASE_IDS[@]}"
 echo "---"
 

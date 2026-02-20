@@ -133,6 +133,11 @@ case "$prompt" in
     echo "late pass"
     exit 0
     ;;
+  *REVIEW_SLOW_CASE*)
+    sleep 2
+    echo "review finished"
+    exit 0
+    ;;
   *)
     echo "default pass"
     exit 0
@@ -153,6 +158,7 @@ wait-dashboard|WAIT_INPUT_DASHBOARD_CASE
 fail|FAIL_CASE
 empty|EMPTY_CASE
 timeout|TIMEOUT_CASE
+review-slow|/review --mode code REVIEW_SLOW_CASE
 EOF
 
 status="$(run_status bash "$SMOKE_SCRIPT" \
@@ -160,6 +166,8 @@ status="$(run_status bash "$SMOKE_SCRIPT" \
   --workdir "$REPO_ROOT" \
   --cases-file "$CASES_FILE" \
   --claude-bin "$MOCK_CLAUDE" \
+  --adaptive-review-timeout \
+  --review-lines-override 5000 \
   --timeout 1 \
   --max-failures 9 \
   --max-timeouts 1 \
@@ -176,6 +184,7 @@ assert_file_contains "summary has WAIT_INPUT dashboard row" "$OUTPUT_A/summary.t
 assert_file_contains "summary has FAIL row" "$OUTPUT_A/summary.tsv" "$(printf 'fail\tFAIL')"
 assert_file_contains "summary has NO_OUTPUT row" "$OUTPUT_A/summary.tsv" "$(printf 'empty\tFAIL\tNO_OUTPUT')"
 assert_file_contains "summary has TIMEOUT row" "$OUTPUT_A/summary.tsv" "$(printf 'timeout\tTIMEOUT')"
+assert_file_contains "adaptive review case avoids timeout" "$OUTPUT_A/summary.tsv" "$(printf 'review-slow\tPASS\tOK')"
 
 status="$(run_status bash "$SMOKE_SCRIPT" \
   --plugin-dir "$PLUGIN_DIR" \
