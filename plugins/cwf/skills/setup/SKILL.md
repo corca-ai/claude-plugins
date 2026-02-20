@@ -62,8 +62,10 @@ When mode is full setup, tools-only setup, env-only setup, or run-mode-only setu
 
 ## Namespace Routing Guard (Required)
 
-If the user command starts with `cwf:setup`, keep execution strictly in this CWF setup skill.
+If user input contains the token `cwf:setup` anywhere (start, middle, or end), keep execution strictly in this CWF setup skill.
 
+- Detect by token match, not prefix-only string checks.
+- Match the whole token `cwf:setup` (with optional flags/arguments after it), not loose `cwf` substrings.
 - Do not substitute similarly named setup flows from other plugins.
 - If routing is uncertain, emit `WAIT_INPUT` for the first unresolved setup phase instead of switching skill families.
 
