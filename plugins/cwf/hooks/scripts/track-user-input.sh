@@ -26,6 +26,18 @@ fi
 source "$(dirname "${BASH_SOURCE[0]}")/cwf-hook-gate.sh"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd)}"
+RESOLVER_SCRIPT="${PLUGIN_ROOT}/scripts/cwf-artifact-paths.sh"
+LIVE_RESOLVER_SCRIPT="${PLUGIN_ROOT}/scripts/cwf-live-state.sh"
+
+if [[ -f "$RESOLVER_SCRIPT" ]]; then
+    # shellcheck source=plugins/cwf/scripts/cwf-artifact-paths.sh
+    source "$RESOLVER_SCRIPT"
+fi
+if [[ -f "$LIVE_RESOLVER_SCRIPT" ]]; then
+    # shellcheck source=plugins/cwf/scripts/cwf-live-state.sh
+    source "$LIVE_RESOLVER_SCRIPT"
+fi
 
 # Read hook input
 INPUT=$(cat)
@@ -33,13 +45,132 @@ SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty')
 PROMPT=$(echo "$INPUT" | jq -r '.prompt // empty')
 CWD=$(echo "$INPUT" | jq -r '.cwd // empty')
 
-if [ -z "$SESSION_ID" ]; then
-    exit 0
-fi
-
 if [ -z "$CWD" ]; then
     CWD="$PWD"
 fi
+
+emit_block_payload() {
+    local message="$1"
+    local encoded=""
+    encoded=$(printf '%s' "$message" | jq -Rs .)
+    cat <<EOF
+{"decision":"block","reason":${encoded}}
+EOF
+}
+
+resolve_repo_root_for_cwd() {
+    local cwd="$1"
+    git -C "$cwd" rev-parse --show-toplevel 2>/dev/null || printf '%s' "$cwd"
+}
+
+resolve_live_state_file_for_cwd() {
+    local cwd="$1"
+    local repo_root=""
+    local root_state=""
+    local effective_state=""
+
+    repo_root=$(resolve_repo_root_for_cwd "$cwd")
+
+    if declare -F resolve_cwf_state_file >/dev/null 2>&1; then
+        root_state=$(resolve_cwf_state_file "$repo_root" 2>/dev/null || true)
+    else
+        root_state="$repo_root/.cwf/cwf-state.yaml"
+    fi
+    if [[ -z "$root_state" || ! -f "$root_state" ]]; then
+        return 1
+    fi
+
+    effective_state="$root_state"
+    if declare -F cwf_live_resolve_file >/dev/null 2>&1; then
+        effective_state=$(cwf_live_resolve_file "$repo_root" 2>/dev/null || true)
+    fi
+    if [[ -n "$effective_state" && -f "$effective_state" ]]; then
+        printf '%s\n' "$effective_state"
+        return 0
+    fi
+
+    printf '%s\n' "$root_state"
+    return 0
+}
+
+extract_live_scalar() {
+    local state_file="$1"
+    local key="$2"
+    awk -v wanted="$key" '
+        /^live:/ { in_live=1; next }
+        in_live && /^[^[:space:]]/ { exit }
+        in_live && $0 ~ "^[[:space:]]{2}" wanted ":[[:space:]]*" {
+            line=$0
+            sub("^[[:space:]]{2}" wanted ":[[:space:]]*", "", line)
+            gsub(/^[\"\047]|[\"\047]$/, "", line)
+            print line
+            exit
+        }
+    ' "$state_file" 2>/dev/null
+}
+
+normalize_expected_worktree() {
+    local repo_root="$1"
+    local expected="$2"
+    if [[ -z "$expected" ]]; then
+        return 1
+    fi
+    if [[ "$expected" == /* ]]; then
+        printf '%s\n' "$expected"
+    else
+        printf '%s\n' "$repo_root/$expected"
+    fi
+}
+
+resolve_live_session_id_for_cwd() {
+    local cwd="$1"
+    local state_file=""
+    state_file=$(resolve_live_state_file_for_cwd "$cwd" 2>/dev/null || true)
+    [[ -n "$state_file" && -f "$state_file" ]] || return 1
+    extract_live_scalar "$state_file" "session_id"
+}
+
+enforce_missing_session_guard() {
+    local cwd="$1"
+    local emit_block="${2:-false}"
+    local map_file=""
+    local current_root=""
+    local repo_root=""
+    local state_file=""
+    local expected_worktree=""
+    local normalized_expected=""
+    local expected_branch=""
+
+    current_root=$(resolve_repo_root_for_cwd "$cwd")
+    repo_root="$current_root"
+
+    map_file=$(session_map_file_for_cwd "$cwd" 2>/dev/null || true)
+    if [[ -n "$map_file" && -s "$map_file" ]]; then
+        if [[ "$emit_block" == "true" ]]; then
+            emit_block_payload "BLOCKED: missing session_id in guard mode while session-worktree bindings exist. Retry from the bound session/worktree context."
+        fi
+        return 1
+    fi
+
+    state_file=$(resolve_live_state_file_for_cwd "$cwd" 2>/dev/null || true)
+    if [[ -n "$state_file" && -f "$state_file" ]]; then
+        expected_worktree=$(extract_live_scalar "$state_file" "worktree_root")
+        expected_branch=$(extract_live_scalar "$state_file" "worktree_branch")
+        normalized_expected=$(normalize_expected_worktree "$repo_root" "$expected_worktree" 2>/dev/null || true)
+        if [[ -n "$normalized_expected" && "$current_root" != "$normalized_expected" ]]; then
+            if [[ "$emit_block" == "true" ]]; then
+                if [[ -n "$expected_branch" ]]; then
+                    emit_block_payload "BLOCKED: missing session_id in guard mode and current worktree ($current_root) does not match live bound worktree ($normalized_expected, branch: $expected_branch)."
+                else
+                    emit_block_payload "BLOCKED: missing session_id in guard mode and current worktree ($current_root) does not match live bound worktree ($normalized_expected)."
+                fi
+            fi
+            return 1
+        fi
+    fi
+
+    return 0
+}
 
 session_map_file_for_cwd() {
     local cwd="$1"
@@ -158,6 +289,17 @@ EOF
     session_map_upsert "$map_file" "$sid" "$current_root" "$current_branch" "$updated_at"
     return 0
 }
+
+if [ -z "$SESSION_ID" ]; then
+    SESSION_ID="$(resolve_live_session_id_for_cwd "$CWD" 2>/dev/null || true)"
+fi
+
+if [ -z "$SESSION_ID" ]; then
+    if [ "$MODE" = "guard" ]; then
+        enforce_missing_session_guard "$CWD" "true" || exit 0
+    fi
+    exit 0
+fi
 
 if [ "$MODE" = "guard" ]; then
     enforce_worktree_binding "$SESSION_ID" "$CWD" "true" || exit 0

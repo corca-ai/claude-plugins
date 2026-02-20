@@ -7,6 +7,7 @@ set -euo pipefail
 # - read-guard.sh
 # - check-deletion-safety.sh
 # - workflow-gate.sh
+# - track-user-input.sh (--guard-only)
 #
 # Exit codes:
 #   0 = all checks passed
@@ -78,7 +79,8 @@ run_capture() {
 
 if [[ ! -x "$HOOK_DIR/read-guard.sh" ]] \
   || [[ ! -x "$HOOK_DIR/check-deletion-safety.sh" ]] \
-  || [[ ! -x "$HOOK_DIR/workflow-gate.sh" ]]; then
+  || [[ ! -x "$HOOK_DIR/workflow-gate.sh" ]] \
+  || [[ ! -x "$HOOK_DIR/track-user-input.sh" ]]; then
   echo "Error: expected hook scripts are missing or not executable under $HOOK_DIR" >&2
   exit 1
 fi
@@ -165,6 +167,36 @@ rc="$(printf '%s\n' "$result" | sed -n '1p')"
 out="$(printf '%s\n' "$result" | sed -n '2,$p')"
 assert_eq "workflow-gate allows non-protected prompt" "0" "$rc"
 assert_contains "workflow-gate allow payload" "\"additionalContext\":" "$out"
+
+#
+# Case group D: track-user-input guard fallback
+#
+TRACK_REPO="$TMP_DIR/track-repo"
+TRACK_WT="$TMP_DIR/track-wt"
+mkdir -p "$TRACK_REPO"
+git -C "$TRACK_REPO" init -q
+git -C "$TRACK_REPO" config user.name "hook smoke"
+git -C "$TRACK_REPO" config user.email "hook-smoke@example.com"
+echo "seed" > "$TRACK_REPO/README.md"
+git -C "$TRACK_REPO" add README.md
+git -C "$TRACK_REPO" commit -q -m "seed"
+git -C "$TRACK_REPO" worktree add --detach "$TRACK_WT" >/dev/null
+
+TRACK_MAP_FILE="$(git -C "$TRACK_WT" rev-parse --git-common-dir)/cwf-session-worktree-map.tsv"
+printf 'sid-track\t%s\tmain\t1700000000\n' "$TRACK_REPO" > "$TRACK_MAP_FILE"
+
+result="$(run_capture bash -c "jq -nc --arg sid 'sid-track' --arg cwd '$TRACK_WT' --arg prompt 'test' '{session_id:\$sid,cwd:\$cwd,prompt:\$prompt}' | bash '$HOOK_DIR/track-user-input.sh' --guard-only")"
+rc="$(printf '%s\n' "$result" | sed -n '1p')"
+out="$(printf '%s\n' "$result" | sed -n '2,$p')"
+assert_eq "track-user-input guard blocks mismatched worktree with session_id" "0" "$rc"
+assert_contains "track-user-input guard mismatch emits block payload" "\"decision\":\"block\"" "$out"
+
+result="$(run_capture bash -c "jq -nc --arg sid '' --arg cwd '$TRACK_WT' --arg prompt 'test' '{session_id:\$sid,cwd:\$cwd,prompt:\$prompt}' | bash '$HOOK_DIR/track-user-input.sh' --guard-only")"
+rc="$(printf '%s\n' "$result" | sed -n '1p')"
+out="$(printf '%s\n' "$result" | sed -n '2,$p')"
+assert_eq "track-user-input guard fails closed when session_id is empty and binding map exists" "0" "$rc"
+assert_contains "track-user-input missing session_id emits block payload" "\"decision\":\"block\"" "$out"
+assert_contains "track-user-input missing session_id includes explicit reason" "missing session_id" "$out"
 
 echo "---"
 echo "Hook smoke summary: PASS=$PASS FAIL=$FAIL"

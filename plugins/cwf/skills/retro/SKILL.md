@@ -41,6 +41,17 @@ Resolution order:
 5. If multiple candidates exist, AskUserQuestion with candidates
 6. Otherwise run `{CWF_PLUGIN_DIR}/scripts/next-prompt-dir.sh --bootstrap <title>`
 
+#### 1.1 Non-Interactive Fallback (Required)
+
+If AskUserQuestion is unavailable/blocked (common in non-interactive runs), do not wait for user input. Resolve path with this deterministic fallback:
+
+1. explicit `[path]` argument
+2. current `live.dir` from resolved live-state file
+3. most recently modified directory under `.cwf/projects/`
+4. bootstrap new directory with `{CWF_PLUGIN_DIR}/scripts/next-prompt-dir.sh --bootstrap retro-light`
+
+When this fallback is used, record one short note in retro output (`Fast path` or `Post-Retro Findings`) so directory choice is auditable.
+
 ### 2. Read Existing Artifacts
 
 Before reading artifacts, run the evidence collector (it includes best-effort Codex session-log sync with timeout protection):
@@ -61,6 +72,22 @@ Parse the `--deep` flag from the invocation arguments.
 - **Light** (Sections 1-4 + 7): Only when `--light` is explicitly specified, OR session < 3 turns with routine/simple tasks (config changes, small fixes, doc edits)
 - **Default bias**: Deep. Invoking retro is itself a signal that the session warrants analysis. Use `--light` to explicitly request lightweight mode when cost savings is desired.
 
+### 3.2 Light Fast Path (Required for `--light`)
+
+When mode is light, run a deterministic fast path first so non-interactive calls always produce `retro.md` quickly:
+
+```bash
+bash {CWF_PLUGIN_DIR}/scripts/retro-light-fastpath.sh \
+  --session-dir "{output-dir}" \
+  --invocation "{invocation_mode}" \
+  --lang "{user-language}"
+```
+
+Rules:
+- This command writes a minimal, gate-compliant `retro.md` with `- Mode: light`.
+- In non-interactive runs, you may stop after this fast path + retro gate validation.
+- Do not call AskUserQuestion in light mode when the fallback policy above is enough to proceed.
+
 ### 3.1 Detect Invocation Context
 
 Determine invocation context from arguments and live task:
@@ -80,7 +107,7 @@ Draft everything internally before writing to file.
 
 #### Light Mode Path
 
-Analyze the full conversation to produce sections 1-4 and 7 inline. No sub-agents.
+After fast path bootstrap, enrich sections 1-4 and 7 inline only if time/context budget allows. No sub-agents.
 
 #### Deep Mode Path
 
@@ -359,8 +386,8 @@ Do not prompt the user to start this discussion.
 ```markdown
 # Retro: {session-title}
 
-> Session date: {YYYY-MM-DD}
-> Mode: light
+- Session date: {YYYY-MM-DD}
+- Mode: light
 
 ## 1. Context Worth Remembering
 ## 2. Collaboration Preferences
@@ -381,8 +408,8 @@ Do not prompt the user to start this discussion.
 ```markdown
 # Retro: {session-title}
 
-> Session date: {YYYY-MM-DD}
-> Mode: deep
+- Session date: {YYYY-MM-DD}
+- Mode: deep
 
 ## 1. Context Worth Remembering
 ## 2. Collaboration Preferences
