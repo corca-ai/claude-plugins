@@ -25,6 +25,17 @@
       "message": "Hook generator changes must regenerate tracked .githooks outputs."
     },
     {
+      "id": "pre_push_template_requires_runtime_and_generated_hook",
+      "when_changed": [
+        "plugins/cwf/skills/setup/assets/githooks/pre-push.template.sh"
+      ],
+      "require_all_changed": [
+        "plugins/cwf/skills/setup/scripts/check-configure-git-hooks-runtime.sh",
+        ".githooks/pre-push"
+      ],
+      "message": "Pre-push template changes must update runtime coverage and regenerate tracked pre-push hook."
+    },
+    {
       "id": "sot_or_policy_doc_change_requires_claim_sync",
       "when_changed": [
         "README.md",

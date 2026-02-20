@@ -60,6 +60,10 @@ assert_rendered_hook() {
   if grep -Fq '__CONFIG_SHA__' "$hook_path"; then
     fail "unrendered __CONFIG_SHA__ token remains: ${hook_path#"$fixture_repo"/}"
   fi
+  if [[ "$hook_path" == */pre-push ]]; then
+    grep -Fq 'run_pre_push_extension' "$hook_path" || fail "pre-push extension slot missing: ${hook_path#"$fixture_repo"/}"
+    grep -Fq 'hook_extensions:' "$hook_path" || fail "contract extension parser missing: ${hook_path#"$fixture_repo"/}"
+  fi
 }
 
 run_config

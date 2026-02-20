@@ -26,7 +26,7 @@
     {
       "id": "repo_agnostic_execution",
       "audience": "agent",
-      "assertion": "CWF execution remains repository-agnostic and host-specific checks are contract-gated.",
+      "assertion": "CWF execution remains repository-agnostic and host-specific checks are contract-gated, including pre-push extension slots.",
       "source_refs": [
         {
           "file": "docs/project-context.md",
@@ -35,6 +35,10 @@
         {
           "file": "plugins/cwf/skills/setup/references/setup-contract.md",
           "selector": "Hook Policy Field"
+        },
+        {
+          "file": "plugins/cwf/skills/setup/references/setup-contract.md",
+          "selector": "Hook Extension Field"
         },
         {
           "file": "plugins/cwf/skills/setup/SKILL.md",

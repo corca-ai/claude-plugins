@@ -1,7 +1,7 @@
 {
   "name": "cwf",
   "description": "Corca Workflow Framework — consolidated hooks and skill orchestration for structured development sessions",
-  "version": "0.8.5",
+  "version": "0.8.6",
   "author": {
     "name": "Corca",
     "url": "https://www.corca.ai/"

@@ -44,6 +44,10 @@ created_status="$(printf '%s' "$created_json" | jq -r '.status')"
 
 for required_key in \
   'policy:' \
+  'hook_extensions:' \
+  '  pre_push:' \
+  '    path: ""' \
+  '    required: false' \
   'core_tools:' \
   'repo_tools:' \
   'core_tools_required: true' \

@@ -75,6 +75,10 @@ bash {SKILL_DIR}/scripts/configure-git-hooks.sh --install <mode> --profile <prof
 
 This script updates repository git hook files (`pre-commit`, `pre-push`) under the configured hooks path and sets `git config core.hooksPath .githooks` when hooks are enabled.
 
+`pre-push` also supports contract-driven repo extension via `hook_extensions.pre_push` in `setup-contract.yaml`:
+- `path`: extension script path (relative to repo root or absolute)
+- `required`: `true` blocks push on missing/failure, `false` warns and continues
+
 ### 2.7.4 Report Effective State
 
 Always report:

@@ -24,6 +24,23 @@ Generate a repository-local setup contract on first setup so `cwf:setup` can:
 
 When the field is missing, runtime defaults to `authoring-only`.
 
+## Hook Extension Field
+
+`setup-contract.yaml` includes `hook_extensions.pre_push` so repositories can add local pre-push logic without editing generated hook code:
+
+```yaml
+hook_extensions:
+  pre_push:
+    path: ""
+    required: false
+```
+
+- `path`: relative to repo root (or absolute path) for the extension script.
+- `required: true`: missing/failing extension blocks push.
+- `required: false`: missing/failing extension is reported and skipped (non-blocking).
+
+When `path` is empty or missing, extension execution is skipped.
+
 ## Policy Decision: Portable vs Authoring Contracts
 
 Git hook and post-run gates use a contract split so CWF remains repository-agnostic:

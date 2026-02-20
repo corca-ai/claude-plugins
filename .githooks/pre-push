@@ -120,6 +120,15 @@ is_cwf_authoring_repo() {
   [[ -d "$REPO_ROOT/plugins/cwf" && -f "$REPO_ROOT/README.md" && -f "$REPO_ROOT/README.ko.md" ]]
 }
 
+normalize_contract_scalar_value() {
+  local value="$1"
+  value="$(printf '%s' "$value" | sed -E 's/[[:space:]]+#.*$//' | sed -E 's/^[[:space:]]+|[[:space:]]+$//g')"
+  if [[ "$value" =~ ^\".*\"$ ]] || [[ "$value" =~ ^\'.*\'$ ]]; then
+    value="${value:1:${#value}-2}"
+  fi
+  printf '%s\n' "$value"
+}
+
 read_contract_scalar() {
   local file_path="$1"
   local key="$2"
@@ -131,10 +140,55 @@ read_contract_scalar() {
   [[ -n "$line" ]] || return 1
 
   value="${line#*:}"
-  value="$(printf '%s' "$value" | sed -E 's/[[:space:]]+#.*$//' | sed -E 's/^[[:space:]]+|[[:space:]]+$//g')"
-  if [[ "$value" =~ ^\".*\"$ ]] || [[ "$value" =~ ^\'.*\'$ ]]; then
-    value="${value:1:${#value}-2}"
-  fi
+  value="$(normalize_contract_scalar_value "$value")"
+  [[ -n "$value" ]] || return 1
+  printf '%s\n' "$value"
+}
+
+read_pre_push_extension_scalar() {
+  local file_path="$1"
+  local key="$2"
+  local raw_line=""
+  local value=""
+  [[ -f "$file_path" ]] || return 1
+  raw_line="$(
+    awk -v key="$key" '
+      BEGIN { in_extensions=0; in_pre_push=0 }
+      /^[[:space:]]*#/ { next }
+      {
+        line=$0
+        if (!in_extensions) {
+          if (line ~ /^[[:space:]]*hook_extensions:[[:space:]]*($|#)/) {
+            in_extensions=1
+          }
+          next
+        }
+
+        if (line ~ /^[^[:space:]][^:]*:[[:space:]]*($|#)/) {
+          exit
+        }
+
+        if (!in_pre_push) {
+          if (line ~ /^[[:space:]][[:space:]]pre_push:[[:space:]]*($|#)/) {
+            in_pre_push=1
+          }
+          next
+        }
+
+        if (line ~ /^[[:space:]][[:space:]][A-Za-z0-9_-]+:[[:space:]]*($|#)/) {
+          exit
+        }
+
+        if (line ~ ("^[[:space:]][[:space:]][[:space:]][[:space:]]" key ":[[:space:]]*")) {
+          sub("^[[:space:]][[:space:]][[:space:]][[:space:]]" key ":[[:space:]]*", "", line)
+          print line
+          exit
+        }
+      }
+    ' "$file_path"
+  )"
+  [[ -n "$raw_line" ]] || return 1
+  value="$(normalize_contract_scalar_value "$raw_line")"
   [[ -n "$value" ]] || return 1
   printf '%s\n' "$value"
 }
@@ -151,6 +205,65 @@ resolve_setup_contract_path() {
     fi
   fi
   printf '%s\n' "$REPO_ROOT/.cwf/setup-contract.yaml"
+}
+
+resolve_pre_push_extension_required() {
+  local contract_path="$1"
+  local raw=""
+  raw="$(read_pre_push_extension_scalar "$contract_path" "required" 2>/dev/null || true)"
+  case "${raw,,}" in
+    1|true|yes|on|required)
+      printf 'true\n'
+      ;;
+    *)
+      printf 'false\n'
+      ;;
+  esac
+}
+
+run_pre_push_extension() {
+  local contract_path="$1"
+  local required="false"
+  local extension_path_raw=""
+  local extension_path_abs=""
+  local -a extension_cmd=()
+
+  extension_path_raw="$(read_pre_push_extension_scalar "$contract_path" "path" 2>/dev/null || true)"
+  [[ -n "$extension_path_raw" ]] || return 0
+
+  required="$(resolve_pre_push_extension_required "$contract_path")"
+  if [[ "$extension_path_raw" == /* ]]; then
+    extension_path_abs="$extension_path_raw"
+  else
+    extension_path_abs="$REPO_ROOT/${extension_path_raw#./}"
+  fi
+
+  if [[ ! -f "$extension_path_abs" ]]; then
+    if [[ "$required" == "true" ]]; then
+      echo "[pre-push] required contract extension missing: $extension_path_raw" >&2
+      return 1
+    fi
+    echo "[pre-push] optional contract extension missing; skipping: $extension_path_raw" >&2
+    return 0
+  fi
+
+  if [[ -x "$extension_path_abs" ]]; then
+    extension_cmd=("$extension_path_abs")
+  else
+    extension_cmd=(bash "$extension_path_abs")
+  fi
+
+  echo "[pre-push] contract extension: $extension_path_raw (required: $required)..."
+  if CWF_HOOK_EVENT="pre-push" CWF_HOOK_PROFILE="$PROFILE" CWF_SETUP_CONTRACT_PATH="$contract_path" "${extension_cmd[@]}"; then
+    return 0
+  fi
+
+  if [[ "$required" == "true" ]]; then
+    echo "[pre-push] required contract extension failed: $extension_path_raw" >&2
+    return 1
+  fi
+  echo "[pre-push] optional contract extension failed; continuing: $extension_path_raw" >&2
+  return 0
 }
 
 resolve_index_coverage_mode() {
@@ -201,6 +314,7 @@ ensure_markdownlint_cli2() {
 
 RUNTIME_SKIP_PREFIXES=()
 init_runtime_skip_prefixes
+SETUP_CONTRACT_PATH="$(resolve_setup_contract_path)"
 
 mapfile -t md_candidates < <(git ls-files '*.md' '*.mdx' || true)
 md_files=()
@@ -231,7 +345,7 @@ if [[ "$PROFILE" != "fast" ]]; then
   fi
 
   if [[ -n "$CWF_INDEX_COVERAGE" ]]; then
-    INDEX_COVERAGE_MODE="$(resolve_index_coverage_mode "$(resolve_setup_contract_path)")"
+    INDEX_COVERAGE_MODE="$(resolve_index_coverage_mode "$SETUP_CONTRACT_PATH")"
     should_run_index_coverage="false"
     index_coverage_blocking="true"
 
@@ -281,6 +395,10 @@ fi
 if [[ -n "$CWF_UNIFIED_GATE" ]]; then
   echo "[pre-push] unified portability gate (hook context)..."
   bash "$CWF_UNIFIED_GATE" --contract auto --context hook
+fi
+
+if ! run_pre_push_extension "$SETUP_CONTRACT_PATH"; then
+  exit 1
 fi
 
 if [[ "$PROFILE" == "strict" ]]; then
