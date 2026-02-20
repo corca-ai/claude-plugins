@@ -1,6 +1,6 @@
 # Retro Evidence Snapshot
 
-- Generated at: 2026-02-20T05:08:09Z
+- Generated at: 2026-02-20T05:09:42Z
 - Repository root: /home/hwidong/codes/claude-plugins
 - Session dir: .cwf/projects/260219-01-pre-release-audit-pass2/iter3
 - Since epoch filter: not set
@@ -63,5 +63,4 @@ _none_
  ? .cwf/projects/260219-01-pre-release-audit-pass2/iter2/sandbox/repo-setup
  ? .cwf/projects/260219-01-pre-release-audit-pass2/iter2/sandbox/repo-smoke
  M .cwf/sessions/.sync-state/aa018809.json
- M .cwf/sessions/260220-1138-aa018809.codex.md
 ```
