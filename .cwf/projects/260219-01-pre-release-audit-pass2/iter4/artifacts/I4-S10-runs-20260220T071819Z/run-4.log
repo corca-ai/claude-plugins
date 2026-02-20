@@ -1,0 +1,15 @@
+It seems the question prompt is waiting for approval. Let me try a different approach - I'll present the options as text.
+
+Your current configuration is **compact** mode. What would you like to set up?
+
+**Display modes:**
+1. **compact** (current) - 1 line: model, context, cost, rate limits
+2. **normal** - 2 lines: + project info, session duration, todos  
+3. **detailed** - 4 lines: + config counts, agent status, burn rate, other CLI usage
+4. **custom** - Choose exactly which widgets appear on each line
+
+**Other settings:**
+- Language: `auto` (current)
+- Plan: `max` (current)
+
+Please tell me which mode you'd like, or say "keep" to keep the current setup. You can also specify like: `detailed ko max`

@@ -6,6 +6,7 @@ Keep stable invariants here; keep implementation detail in scoped docs.
 
 - Prioritize task-level goals over local optimizations. Choose execution details autonomously.
 - The user communicates in Korean. Respond in Korean for conversation and English for code/docs (unless explicitly requested otherwise).
+- Treat `cwf:<skill>` commands as reserved CWF namespace routes; do not substitute similarly named skills from other plugins.
 - If implementation diverges from a pre-designed plan, record the discrepancy in session lessons, report it immediately, and ask for a user decision before proceeding.
 - Never delete user-created files without explicit confirmation. Prefer `mv` over `rm`.
 - For design decisions, surface meaningful alternatives with trade-offs and incorporate user-provided external references before concluding.

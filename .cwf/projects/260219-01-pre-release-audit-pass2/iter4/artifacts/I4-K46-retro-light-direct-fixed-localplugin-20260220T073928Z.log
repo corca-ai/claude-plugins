@@ -1,0 +1,4 @@
+[CMD] timeout 120s claude --print "cwf:retro --light" --dangerously-skip-permissions --plugin-dir plugins/cwf
+[START] 2026-02-20T07:39:28Z
+[END] 2026-02-20T07:41:28Z
+CLAUDE_EXIT=124

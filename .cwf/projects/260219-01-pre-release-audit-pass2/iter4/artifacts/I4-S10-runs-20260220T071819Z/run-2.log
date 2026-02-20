@@ -1,0 +1,19 @@
+Your current setup is already configured and up to date:
+
+**Current configuration:**
+- **Display mode:** compact (1 line)
+- **Language:** auto
+- **Plan:** max
+- **Plugin version:** 1.8.1 (latest installed, matches settings.json)
+
+Your status line looks like:
+```
+🤖 Opus │ ████████░░ 80% │ 160K/200K │ $0.25 │ 5h: 42% (2h30m) │ 7d: 69% │ 7d-S: 2%
+```
+
+To reconfigure, you can run with arguments directly:
+- `/claude-dashboard:setup normal` — 2-line display
+- `/claude-dashboard:setup detailed` — 4-line display  
+- `/claude-dashboard:setup custom auto max "model,context,cost|projectInfo,todoProgress"` — custom widgets
+
+Would you like to change your display mode or any other setting?

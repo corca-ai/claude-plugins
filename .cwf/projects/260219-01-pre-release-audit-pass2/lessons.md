@@ -100,3 +100,27 @@ When setup run ends non-interactively with `exit 0` -> require explicit `WAIT_IN
 - **Takeaway**: audit sandbox에서는 gitlink보다 tracked directory를 기본값으로 두고, 내부 `.git`은 timestamped backup으로 보존하는 방식이 더 안전하다.
 
 When a sandbox path is recorded as gitlink (`160000`) in the outer repo -> convert it to tracked directory for evidence diffs, and preserve nested `.git` under a timestamped backup directory.
+
+## Iteration 4 Lesson — Compact Metadata-All-Missing Alert Closure (2026-02-20)
+
+- **Expected**: `session-map`/`live.worktree_root`가 모두 비는 경계에서도 compact context가 drift 위험을 명시 경고한다.
+- **Actual**: 기존에는 `CASE4_ALERT=absent`로 침묵 경로가 남아 있었고, Iteration 4에서 dedicated `[WORKTREE ALERT]` 경로를 추가해 경계를 닫았다.
+- **Takeaway**: fail-closed guard가 있어도, compact-context 레이어에 관측 가능한 경고가 없으면 운영자가 경계 상태를 놓치기 쉽다.
+
+When session-map binding and `live.worktree_root` are both unavailable -> emit explicit `[WORKTREE ALERT] Unable to verify bound session worktree ...` context instead of silent recovery text.
+
+## Iteration 4 Lesson — Setup Output Variance Needs Runtime-Level Mitigation (2026-02-20)
+
+- **Expected**: `cwf:setup` full non-interactive repeated run에서 `WAIT_INPUT`만 안정적으로 출력된다.
+- **Actual**: classifier/문구 보강 후에도 `NO_OUTPUT`(1-byte log) 재발이 남아 있고, 질문형 표현 편차가 존재한다.
+- **Takeaway**: 문구 규약/분류기 보강만으로는 runtime 빈출력 경계를 완전히 제거하지 못한다. 런타임 계층(호출 wrapper/CLI 경로)의 fail-fast 출력 보장이 추가로 필요하다.
+
+When setup non-interactive spot-check still shows `NO_OUTPUT` after phrasing hardening -> treat it as runtime-layer gap and prioritize wrapper-level fallback or command-path enforcement over additional phrasing tweaks.
+
+## Iteration 4 Lesson — Direct Retro Timeout Persists Across Local Plugin Path (2026-02-20)
+
+- **Expected**: `--light` 조기 short-circuit 규약 강화 후 direct `cwf:retro --light` timeout이 완화된다.
+- **Actual**: 설치 경로와 `--plugin-dir plugins/cwf` 경로 모두 `CLAUDE_EXIT=124`가 지속되었다.
+- **Takeaway**: current release readiness에서는 direct runtime 경로보다 deterministic fast-path(`retro-light-fastpath.sh` + retro gate)를 신뢰 가능한 완료 경로로 명시하고 운영해야 한다.
+
+When direct `cwf:retro --light` keeps timing out even on local plugin path -> rely on deterministic fast-path+gate as authoritative completion path, and track direct runtime timeout separately as known residual risk.

@@ -1,0 +1,15 @@
+It seems AskUserQuestion is being blocked. Following the **Non-Interactive Fail-Fast Policy**, I'll emit the WAIT_INPUT response.
+
+---
+
+WAIT_INPUT: setup requires user selection at phase 1.2.
+
+**Hook Group Selection** — all 9 groups are currently enabled.
+
+How would you like to proceed?
+
+1. **Keep all enabled** (Recommended) — no changes, all 9 groups stay active
+2. **Customize selection** — choose which groups to enable/disable individually
+3. **Disable all** — turn off all hook groups
+
+Please reply with your choice.

@@ -1,0 +1,21 @@
+It seems AskUserQuestion is being blocked. Per the Non-Interactive Fail-Fast Policy, I must stop at the first unresolved user-choice phase.
+
+---
+
+WAIT_INPUT: setup requires user selection at phase 1.2.
+
+**Which hook groups should be enabled?** (All 9 are currently enabled)
+
+| # | Group | Description | Current |
+|---|-------|-------------|---------|
+| 1 | `attention` | Slack notifications on idle/waiting | enabled |
+| 2 | `log` | Auto-log turns + auto-commit transcripts | enabled |
+| 3 | `read` | File-size aware reading guard | enabled |
+| 4 | `lint_markdown` | Markdown validation after Write/Edit | enabled |
+| 5 | `lint_shell` | ShellCheck validation after Write/Edit | enabled |
+| 6 | `deletion_safety` | Blocks risky file deletions and requires policy-compliant justification | enabled |
+| 7 | `workflow_gate` | Enforces workflow stage/branch safety rules before edits and commands | enabled |
+| 8 | `websearch_redirect` | Redirect WebSearch to cwf:gather | enabled |
+| 9 | `compact_recovery` | Inject live session state after auto-compact and guard session↔worktree binding on prompts | enabled |
+
+Please reply with the numbers of groups to enable (e.g., "1,2,3,4,5,6,7,8,9" for all, or "1,2,3,6,7,9" for a subset).

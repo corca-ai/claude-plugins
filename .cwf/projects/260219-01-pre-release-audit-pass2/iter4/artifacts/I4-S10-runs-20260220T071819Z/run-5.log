@@ -1,0 +1,26 @@
+WAIT_INPUT: setup requires user selection at phase 1.2.
+
+**Hook Group Selection** — all 9 groups are currently enabled:
+
+| # | Group | Enabled | Description |
+|---|-------|---------|-------------|
+| 1 | `attention` | yes | Slack notifications on idle/waiting |
+| 2 | `log` | yes | Auto-log turns + auto-commit transcripts |
+| 3 | `read` | yes | File-size aware reading guard |
+| 4 | `lint_markdown` | yes | Markdown validation after Write/Edit |
+| 5 | `lint_shell` | yes | ShellCheck validation after Write/Edit |
+| 6 | `deletion_safety` | yes | Blocks risky file deletions |
+| 7 | `workflow_gate` | yes | Enforces workflow stage/branch safety |
+| 8 | `websearch_redirect` | yes | Redirect WebSearch to cwf:gather |
+| 9 | `compact_recovery` | yes | Inject live state after auto-compact |
+
+Note: `shellcheck` and `markdownlint-cli2` are currently unavailable on this system — the lint hooks will attempt validation but the underlying tools are missing.
+
+Options:
+1. **Keep all enabled** (recommended)
+2. **Disable lint_markdown** (markdownlint-cli2 unavailable)
+3. **Disable lint_shell** (shellcheck unavailable)
+4. **Disable both lint groups** (both tools unavailable)
+5. **Custom selection** — tell me which groups to enable/disable
+
+Please reply with your choice.

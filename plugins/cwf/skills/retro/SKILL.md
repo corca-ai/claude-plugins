@@ -52,7 +52,34 @@ If AskUserQuestion is unavailable/blocked (common in non-interactive runs), do n
 
 When this fallback is used, record one short note in retro output (`Fast path` or `Post-Retro Findings`) so directory choice is auditable.
 
+#### 1.2 Early Light Fast-Path Short-Circuit (Required)
+
+If invocation includes `--light`, run deterministic fast path immediately after output-dir resolution (before evidence collection and large artifact reads):
+
+```bash
+bash {CWF_PLUGIN_DIR}/scripts/retro-light-fastpath.sh \
+  --session-dir "{output-dir}" \
+  --invocation "{invocation_mode}" \
+  --lang "{user-language}"
+```
+
+Then validate retro stage gate immediately:
+
+```bash
+bash {CWF_PLUGIN_DIR}/scripts/check-run-gate-artifacts.sh \
+  --session-dir "{output-dir}" \
+  --stage retro \
+  --strict
+```
+
+Rules:
+- Determine `invocation_mode` with the same criteria as Section 3.1 before running this command.
+- In non-interactive direct runs, stop after this short-circuit path succeeds.
+- Do not call AskUserQuestion in this path.
+
 ### 2. Read Existing Artifacts
+
+Skip this section when Section 1.2 completed and execution already ended in non-interactive light mode.
 
 Before reading artifacts, run the evidence collector (it includes best-effort Codex session-log sync with timeout protection):
 
@@ -85,6 +112,7 @@ bash {CWF_PLUGIN_DIR}/scripts/retro-light-fastpath.sh \
 
 Rules:
 - This command writes a minimal, gate-compliant `retro.md` with `- Mode: light`.
+- If Section 1.2 already completed, do not rerun this command unless `retro.md` is missing or invalid.
 - In non-interactive runs, you may stop after this fast path + retro gate validation.
 - Do not call AskUserQuestion in light mode when the fallback policy above is enough to proceed.
 

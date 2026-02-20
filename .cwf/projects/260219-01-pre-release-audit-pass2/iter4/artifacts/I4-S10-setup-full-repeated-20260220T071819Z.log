@@ -1,0 +1,29 @@
+[SCENARIO] I4-S10 repeated non-interactive setup-full
+[START] 2026-02-20T07:18:19Z
+[RUN 1] START 2026-02-20T07:18:19Z
+[RUN 1] EXIT=0 BYTES=0 CLASS=NO_OUTPUT LOG=.cwf/projects/260219-01-pre-release-audit-pass2/iter4/artifacts/I4-S10-runs-20260220T071819Z/run-1.log
+[RUN 2] START 2026-02-20T07:20:19Z
+[RUN 2] EXIT=0 BYTES=726 CLASS=OTHER LOG=.cwf/projects/260219-01-pre-release-audit-pass2/iter4/artifacts/I4-S10-runs-20260220T071819Z/run-2.log
+[RUN 2 TAIL] - `/claude-dashboard:setup normal` — 2-line display
+[RUN 2 TAIL] - `/claude-dashboard:setup detailed` — 4-line display  
+[RUN 2 TAIL] - `/claude-dashboard:setup custom auto max "model,context,cost|projectInfo,todoProgress"` — custom widgets
+[RUN 2 TAIL] 
+[RUN 2 TAIL] Would you like to change your display mode or any other setting?
+[RUN 3] START 2026-02-20T07:21:11Z
+[RUN 3] EXIT=0 BYTES=0 CLASS=NO_OUTPUT LOG=.cwf/projects/260219-01-pre-release-audit-pass2/iter4/artifacts/I4-S10-runs-20260220T071819Z/run-3.log
+[RUN 4] START 2026-02-20T07:23:11Z
+[RUN 4] EXIT=0 BYTES=707 CLASS=OTHER LOG=.cwf/projects/260219-01-pre-release-audit-pass2/iter4/artifacts/I4-S10-runs-20260220T071819Z/run-4.log
+[RUN 4 TAIL] **Other settings:**
+[RUN 4 TAIL] - Language: `auto` (current)
+[RUN 4 TAIL] - Plan: `max` (current)
+[RUN 4 TAIL] 
+[RUN 4 TAIL] Please tell me which mode you'd like, or say "keep" to keep the current setup. You can also specify like: `detailed ko max`
+[RUN 5] START 2026-02-20T07:23:55Z
+[RUN 5] EXIT=0 BYTES=1272 CLASS=WAIT_INPUT LOG=.cwf/projects/260219-01-pre-release-audit-pass2/iter4/artifacts/I4-S10-runs-20260220T071819Z/run-5.log
+[RUN 5 TAIL] 3. **Disable lint_shell** (shellcheck unavailable)
+[RUN 5 TAIL] 4. **Disable both lint groups** (both tools unavailable)
+[RUN 5 TAIL] 5. **Custom selection** — tell me which groups to enable/disable
+[RUN 5 TAIL] 
+[RUN 5 TAIL] Please reply with your choice.
+[SUMMARY] WAIT_INPUT=1 NO_OUTPUT=2 TIMEOUT=0 OTHER=2
+[END] 2026-02-20T07:25:53Z

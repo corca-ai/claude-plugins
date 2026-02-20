@@ -20,12 +20,12 @@ Resolve the remaining non-interactive reliability risks and finalize merge-ready
 
 | ID | Category | Goal | Status | Notes |
 |---|---|---|---|---|
-| I4-S00 | bootstrap | capture baseline checkpoint and gate evidence | PENDING | premerge/predeploy re-run |
-| I4-G01 | gate | verify premerge deterministic gate remains PASS | PENDING | `scripts/premerge-cwf-gate.sh --mode premerge` |
-| I4-G02 | gate | verify predeploy/public marketplace gate remains PASS | PENDING | `scripts/premerge-cwf-gate.sh --mode predeploy` |
-| I4-K46 | retro | remove `cwf:retro --light` direct timeout path | PENDING | require explicit non-timeout result |
-| I4-S10 | setup/full | eliminate intermittent `NO_OUTPUT` and force explicit output | PENDING | repeated non-interactive runs |
-| I4-W20 | worktree/guard | add metadata-all-missing alert path evidence | PENDING | warning or block must be observable |
+| I4-S00 | bootstrap | capture baseline checkpoint and gate evidence | PASS(BASELINE_CAPTURED) | [.cwf/projects/260219-01-pre-release-audit-pass2/iter4/scenarios/I4-S00.md](scenarios/I4-S00.md) |
+| I4-G01 | gate | verify premerge deterministic gate remains PASS | PASS | [.cwf/projects/260219-01-pre-release-audit-pass2/iter4/scenarios/I4-G01.md](scenarios/I4-G01.md) |
+| I4-G02 | gate | verify predeploy/public marketplace gate remains PASS | PASS | [.cwf/projects/260219-01-pre-release-audit-pass2/iter4/scenarios/I4-G02.md](scenarios/I4-G02.md) |
+| I4-K46 | retro | remove `cwf:retro --light` direct timeout path | FAIL(TIMEOUT) | [.cwf/projects/260219-01-pre-release-audit-pass2/iter4/scenarios/I4-K46.md](scenarios/I4-K46.md) |
+| I4-S10 | setup/full | eliminate intermittent `NO_OUTPUT` and force explicit output | PARTIAL(WAIT_INPUT+NO_OUTPUT_RECUR) | [.cwf/projects/260219-01-pre-release-audit-pass2/iter4/scenarios/I4-S10.md](scenarios/I4-S10.md) |
+| I4-W20 | worktree/guard | add metadata-all-missing alert path evidence | PASS(FIXED_METADATA_ALERT) | [.cwf/projects/260219-01-pre-release-audit-pass2/iter4/scenarios/I4-W20.md](scenarios/I4-W20.md) |
 
 ## Initial Execution Order
 
@@ -33,3 +33,10 @@ Resolve the remaining non-interactive reliability risks and finalize merge-ready
 2. `I4-K46` (highest risk)
 3. `I4-S10`
 4. `I4-W20`
+
+## Execution Notes
+
+- 2026-02-20: `I4-G01`, `I4-G02` baseline/post-fix gate 재검증 PASS.
+- 2026-02-20: `I4-K46` direct run은 설치/로컬 plugin-dir 모두 `CLAUDE_EXIT=124` 재현.
+- 2026-02-20: `I4-S10`는 WAIT_INPUT 출력 비율은 증가했지만 `NO_OUTPUT`가 반복 재발.
+- 2026-02-20: `I4-W20`는 metadata-all-missing 경계 전용 `[WORKTREE ALERT]` 경로를 추가하고 재현 로그 PASS 확보.

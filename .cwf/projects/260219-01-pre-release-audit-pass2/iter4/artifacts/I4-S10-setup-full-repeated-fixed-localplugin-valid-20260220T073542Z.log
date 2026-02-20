@@ -1,0 +1,32 @@
+[SCENARIO] I4-S10 repeated non-interactive setup-full (local plugin-dir, valid CLI order)
+[CMD] timeout 120s claude --print "cwf:setup" --dangerously-skip-permissions --plugin-dir plugins/cwf
+[START] 2026-02-20T07:35:42Z
+[RUN 1] START 2026-02-20T07:35:42Z
+[RUN 1] EXIT=0 DURATION=48s BYTES=532 CLASS=WAIT_INPUT LOG=.cwf/projects/260219-01-pre-release-audit-pass2/iter4/artifacts/I4-S10-runs-fixed-localplugin-valid-20260220T073542Z/run-1.log
+[RUN 1 TAIL] 1. **Keep all enabled** (Recommended) — no changes, all 9 groups stay active
+[RUN 1 TAIL] 2. **Customize selection** — choose which groups to enable/disable individually
+[RUN 1 TAIL] 3. **Disable all** — turn off all hook groups
+[RUN 1 TAIL] 
+[RUN 1 TAIL] Please reply with your choice.
+[RUN 2] START 2026-02-20T07:36:30Z
+[RUN 2] EXIT=0 DURATION=38s BYTES=1229 CLASS=WAIT_INPUT LOG=.cwf/projects/260219-01-pre-release-audit-pass2/iter4/artifacts/I4-S10-runs-fixed-localplugin-valid-20260220T073542Z/run-2.log
+[RUN 2 TAIL] | 7 | `workflow_gate` | Enforces workflow stage/branch safety rules before edits and commands | enabled |
+[RUN 2 TAIL] | 8 | `websearch_redirect` | Redirect WebSearch to cwf:gather | enabled |
+[RUN 2 TAIL] | 9 | `compact_recovery` | Inject live session state after auto-compact and guard session↔worktree binding on prompts | enabled |
+[RUN 2 TAIL] 
+[RUN 2 TAIL] Please reply with the numbers of groups to enable (e.g., "1,2,3,4,5,6,7,8,9" for all, or "1,2,3,6,7,9" for a subset).
+[RUN 3] START 2026-02-20T07:37:08Z
+[RUN 3] EXIT=0 DURATION=38s BYTES=1 CLASS=NO_OUTPUT LOG=.cwf/projects/260219-01-pre-release-audit-pass2/iter4/artifacts/I4-S10-runs-fixed-localplugin-valid-20260220T073542Z/run-3.log
+[RUN 3 TAIL] 
+[RUN 4] START 2026-02-20T07:37:46Z
+[RUN 4] EXIT=0 DURATION=53s BYTES=689 CLASS=OTHER LOG=.cwf/projects/260219-01-pre-release-audit-pass2/iter4/artifacts/I4-S10-runs-fixed-localplugin-valid-20260220T073542Z/run-4.log
+[RUN 4 TAIL] 7. **workflow_gate** — Enforces workflow stage/branch safety rules
+[RUN 4 TAIL] 8. **websearch_redirect** — Redirect WebSearch to cwf:gather
+[RUN 4 TAIL] 9. **compact_recovery** — Inject live session state after auto-compact
+[RUN 4 TAIL] 
+[RUN 4 TAIL] **Keep all enabled**, or tell me which groups to disable/enable.
+[RUN 5] START 2026-02-20T07:38:39Z
+[RUN 5] EXIT=0 DURATION=32s BYTES=1 CLASS=NO_OUTPUT LOG=.cwf/projects/260219-01-pre-release-audit-pass2/iter4/artifacts/I4-S10-runs-fixed-localplugin-valid-20260220T073542Z/run-5.log
+[RUN 5 TAIL] 
+[SUMMARY] WAIT_INPUT=2 NO_OUTPUT=2 TIMEOUT=0 OTHER=1
+[END] 2026-02-20T07:39:11Z

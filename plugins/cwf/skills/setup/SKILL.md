@@ -60,15 +60,23 @@ When mode is full setup or tools-only setup, always run Phase 2.9 so Agent Team 
 
 When mode is full setup, tools-only setup, env-only setup, or run-mode-only setup, always run Phase 2.10 so `cwf:run` default ambiguity policy is explicit and reproducible.
 
+## Namespace Routing Guard (Required)
+
+If the user command starts with `cwf:setup`, keep execution strictly in this CWF setup skill.
+
+- Do not substitute similarly named setup flows from other plugins.
+- If routing is uncertain, emit `WAIT_INPUT` for the first unresolved setup phase instead of switching skill families.
+
 ## Non-Interactive Fail-Fast Policy (Required)
 
 When AskUserQuestion is unavailable or blocked, do not wait silently and do not end with empty output.
 
 Mandatory behavior:
 
-1. Stop at the first unresolved user-choice phase.
-2. Print a deterministic `WAIT_INPUT` response with phase id, options, and a direct reply instruction.
-3. End the turn immediately after printing the waiting response.
+1. Resolve mode and identify the first unresolved user-choice phase before running heavy phases (full setup starts at phase `1.2`).
+2. Stop immediately at that first unresolved phase when AskUserQuestion is unavailable/blocked.
+3. Print a deterministic `WAIT_INPUT` response with phase id, options, and a direct reply instruction.
+4. End the turn immediately after printing the waiting response.
 
 Standard response header:
 

@@ -1,0 +1,52 @@
+I4-W20 metadata-boundary analysis
+Date: 2026-02-20
+
+[CASE 1] track-user-input guard-only with session_id present + mismatched worktree
+CASE1_RC=0
+CASE1_OUT={"decision":"block","reason":"BLOCKED: session S-TEST is bound to worktree /tmp/tmp.MoheoAgfkN/repo (branch: main) (recorded at epoch 1700000000), but current worktree is /tmp/tmp.MoheoAgfkN/wt. Switch to the bound worktree before continuing."}
+
+[CASE 2] track-user-input guard-only with empty session_id + mismatched worktree
+CASE2_RC=0
+CASE2_OUT={"decision":"block","reason":"BLOCKED: missing session_id in guard mode while session-worktree bindings exist. Retry from the bound session/worktree context."}
+
+[CASE 3] compact-context fallback with live.worktree_root populated (session_id empty input)
+CASE3_RC=0
+CASE3_ALERT=present
+CASE3_OUT={
+  "hookSpecificOutput": {
+    "hookEventName": "SessionStart",
+    "additionalContext": "[Compact Recovery] Session: S-TEST | Phase: impl
+Task: I4-W20 fixture
+Branch: main
+Session dir: .cwf/projects/s-test
+Expected worktree: /tmp/tmp.MoheoAgfkN/repo
+Expected worktree branch: main
+
+[WORKTREE ALERT] Current worktree (/tmp/tmp.MoheoAgfkN/wt) does not match bound session worktree (/tmp/tmp.MoheoAgfkN/repo).
+Switch before continuing:
+  cd /tmp/tmp.MoheoAgfkN/repo
+  git switch main
+
+Read the CWF state file and the plan file in the session dir to restore full context."
+  }
+}
+
+[CASE 4] compact-context with empty session_id input + empty live.worktree_root + empty session map
+CASE4_RC=0
+CASE4_ALERT=absent
+CASE4_OUT={
+  "hookSpecificOutput": {
+    "hookEventName": "SessionStart",
+    "additionalContext": "[Compact Recovery] Session: S-TEST | Phase: impl
+Task: I4-W20 fixture
+Branch: main
+Session dir: .cwf/projects/s-test
+
+Read the CWF state file and the plan file in the session dir to restore full context."
+  }
+}
+
+Assessment:
+- guard blocks with session_id present and with empty session_id when map exists.
+- compact emits [WORKTREE ALERT] when live.worktree_root exists.
+- when both session map and live worktree metadata are absent, dedicated alert path is absent if CASE4_ALERT=absent.

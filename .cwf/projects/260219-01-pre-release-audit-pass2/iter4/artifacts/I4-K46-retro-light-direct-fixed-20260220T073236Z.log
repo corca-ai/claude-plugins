@@ -1,0 +1,4 @@
+[CMD] timeout 120s claude --print --dangerously-skip-permissions "cwf:retro --light"
+[START] 2026-02-20T07:32:36Z
+[END] 2026-02-20T07:34:36Z
+CLAUDE_EXIT=124
