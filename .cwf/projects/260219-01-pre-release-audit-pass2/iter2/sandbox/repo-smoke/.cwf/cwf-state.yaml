@@ -1,0 +1,6 @@
+live:
+  phase: "retro"
+  task: "Modify hello.txt — append Smoke iteration 2"
+  key_files:
+    - hello.txt
+  decision_journal: []

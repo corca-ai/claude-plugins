@@ -1,0 +1,24 @@
+# session-state.yaml — volatile session live state
+# Synced from .cwf/cwf-state.yaml live section.
+
+live:
+  session_id: "260219-01-hello-world-shell-script"
+  dir: ".cwf/projects/260219-01-hello-world-shell-script"
+  phase: "gather"
+  branch: "main"
+  task: "build a tiny hello-world shell script and explain how to run it"
+  active_pipeline: "cwf:run"
+  ambiguity_mode: "defer-blocking"
+  blocking_decisions_pending: "false"
+  state_version: "2"
+  worktree_root: "/home/hwidong/codes/claude-plugins/.cwf/projects/260219-01-pre-release-audit-pass2/iter2/sandbox/repo-run"
+  worktree_branch: "main"
+  user_directive: "build a tiny hello-world shell script and explain how to run it"
+  ambiguity_decisions_file: ".cwf/projects/260219-01-hello-world-shell-script/run-ambiguity-decisions.md"
+  stage_provenance_file: ".cwf/projects/260219-01-hello-world-shell-script/run-stage-provenance.md"
+  pipeline_override_reason: ""
+  remaining_gates:
+    - "review-code"
+    - "refactor"
+    - "retro"
+    - "ship"
