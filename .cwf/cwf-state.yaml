@@ -488,6 +488,13 @@ sessions:
     branch: "main"
     artifacts: [plan.md, lessons.md]
 
+
+  - id: "S260220-07"
+    title: "scenario-dashboard-html"
+    dir: ".cwf/projects/260220-07-scenario-dashboard-html"
+    branch: "main"
+    artifacts: [plan.md, lessons.md]
+
 tools:
   codex: unavailable
   gemini: unavailable
