@@ -1,0 +1,29 @@
+I2-W20 worktree-compact drift analysis
+Date: 2026-02-20
+
+[CASE 1] track-user-input guard-only with session_id present + mismatched worktree
+Command result:
+CASE1_RC=0
+CASE1_OUT={"decision":"block","reason":"BLOCKED: session S-TEST is bound to worktree /tmp/cwf-worktree-guard-0xwcs0/repo (branch: main) (recorded at epoch 1700000000), but current worktree is /tmp/cwf-worktree-guard-0xwcs0/wt. Switch to the bound worktree before continuing."}
+
+[CASE 2] track-user-input guard-only with empty session_id + mismatched worktree
+Command result:
+CASE2_RC=0
+CASE2_OUT=<empty>
+
+[CASE 3] compact-context fallback with live.worktree_root populated (session_id empty input)
+Observed context lines:
+1:[Compact Recovery] Session: S-TEST | Phase: impl
+5:Expected worktree: /tmp/cwf-compact-worktree-ZLzqdN/repo
+6:Expected worktree branch: main
+8:[WORKTREE ALERT] Current worktree (/tmp/cwf-compact-worktree-ZLzqdN/wt) does not match bound session worktree (/tmp/cwf-compact-worktree-ZLzqdN/repo).
+
+[CASE 4] compact-context with empty session_id input + empty live.worktree_root
+Command result:
+ALERT_ABSENT
+
+Assessment:
+- Guard blocks correctly only when session_id is present.
+- If session_id is empty, guard bypasses without block.
+- compact-context can still warn via [WORKTREE ALERT] only when expected worktree metadata exists.
+- Therefore, compact 이후 worktree drift는 session_id 공백 + 기대 worktree 메타데이터 부재 조건에서 재발 가능.

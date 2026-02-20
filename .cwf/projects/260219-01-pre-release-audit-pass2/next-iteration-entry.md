@@ -42,7 +42,7 @@ Use this file as the only mention target when starting the next pre-release iter
   - `bash scripts/hook-core-smoke.sh` PASS
   - `bash scripts/premerge-cwf-gate.sh --mode premerge --plugin cwf` PASS
 - Remaining Iteration 2 focus:
-  1. Re-run unresolved scenarios in `iter2/master-scenarios.md` (especially `I2-K46`, `I2-R60`, setup variability cases).
+  1. Re-run unresolved scenarios in `iter2/master-scenarios.md` (especially `I2-K46`, `I2-R60`, `I2-W20`, setup variability cases).
   2. Keep scenario-by-scenario evidence logs under `iter2/artifacts/` and update `iter2/progress.md`.
 
 ## Single-Mention Resume Contract

@@ -3,11 +3,11 @@
 ## 요약
 
 - 기준 문서: [.cwf/projects/260219-01-pre-release-audit-pass2/iter2/master-scenarios.md](master-scenarios.md)
-- 실행 시나리오: 12
+- 실행 시나리오: 13
 - 결과 집계
   - PASS: 5
   - PARTIAL(WAIT_INPUT): 1
-  - FAIL(TIMEOUT): 3
+  - FAIL(TIMEOUT/GAP): 4
   - DONE: 3
 
 ## 핵심 진전
@@ -31,6 +31,10 @@
 3. setup full/env non-interactive 변동성
    - `cwf:setup` full: WAIT_INPUT 종료
    - `cwf:setup --env`: 단건 timeout
+4. compact 이후 worktree 고정 경계
+   - `session_id` 누락 입력에서 `track-user-input --guard-only` block 우회 가능
+   - `live.worktree_root` 메타데이터가 비면 compact 경고(`[WORKTREE ALERT]`)도 사라질 수 있음
+   - 증거: [.cwf/projects/260219-01-pre-release-audit-pass2/iter2/artifacts/I2-W20-analysis.log](artifacts/I2-W20-analysis.log)
 
 ## 스모크 지표(최신 분류기 기준)
 

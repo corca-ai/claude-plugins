@@ -32,6 +32,7 @@
 | I2-K61 | 스모크 | 14케이스 final 스모크 + 최신 분류기 기준 재집계 | DONE | [.cwf/projects/260219-01-pre-release-audit-pass2/iter2/scenarios/I2-K61.md](scenarios/I2-K61.md) |
 | I2-K46 | 스모크 | `cwf:retro --light` 단건 확인 | FAIL(TIMEOUT) | [.cwf/projects/260219-01-pre-release-audit-pass2/iter2/scenarios/I2-K46.md](scenarios/I2-K46.md) |
 | I2-R60 | run/e2e | `cwf:run` task 포함 단건 실행 | FAIL(TIMEOUT) | [.cwf/projects/260219-01-pre-release-audit-pass2/iter2/scenarios/I2-R60.md](scenarios/I2-R60.md) |
+| I2-W20 | worktree/compact | compact 이후 worktree 고정 및 `session_id` 누락 우회 점검 | FAIL(GAP) | [.cwf/projects/260219-01-pre-release-audit-pass2/iter2/scenarios/I2-W20.md](scenarios/I2-W20.md) |
 
 ## 진행 로그
 
@@ -39,3 +40,4 @@
 - 2026-02-19: 설치 blocker 해소 재확인(project/local scope PASS)
 - 2026-02-19: non-interactive 분류기 `WAIT_INPUT`/`NO_OUTPUT` 강화 및 픽스처 확장
 - 2026-02-19: final 스모크/게이트 재실행 및 Iteration 2 문서화 완료
+- 2026-02-20: compact 이후 worktree drift 재점검(I2-W20)에서 `session_id` 공백 시 guard 우회 가능성 확인
