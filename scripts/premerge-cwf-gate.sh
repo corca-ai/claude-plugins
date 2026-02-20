@@ -64,6 +64,7 @@ if [[ "$MODE" != "premerge" && "$MODE" != "predeploy" ]]; then
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONSISTENCY_CHECKER="$SCRIPT_DIR/../.claude/skills/plugin-deploy/scripts/check-consistency.sh"
 
 run_step() {
   local label="$1"
@@ -73,11 +74,35 @@ run_step() {
   "$@"
 }
 
+run_plugin_consistency_gate() {
+  local report=""
+
+  if [[ ! -x "$CONSISTENCY_CHECKER" ]]; then
+    echo "Error: consistency checker missing or not executable: $CONSISTENCY_CHECKER" >&2
+    return 1
+  fi
+  if ! command -v jq >/dev/null 2>&1; then
+    echo "Error: jq is required for plugin consistency gate." >&2
+    return 1
+  fi
+
+  report="$(bash "$CONSISTENCY_CHECKER" "$PLUGIN")"
+  printf '%s\n' "$report" | jq -r '.gaps[]?'
+
+  if ! printf '%s\n' "$report" | jq -e '.gap_count == 0' >/dev/null; then
+    echo "Error: plugin consistency gaps detected." >&2
+    return 1
+  fi
+}
+
 echo "CWF gate mode: $MODE"
 echo "Plugin: $PLUGIN"
 
 run_step "local marketplace entry" \
   bash "$SCRIPT_DIR/check-marketplace-entry.sh" --source . --plugin "$PLUGIN"
+
+run_step "plugin consistency" \
+  run_plugin_consistency_gate
 
 run_step "marketplace checker fixtures" \
   bash "$SCRIPT_DIR/tests/check-marketplace-entry-fixtures.sh"
