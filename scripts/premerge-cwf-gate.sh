@@ -19,6 +19,8 @@ Options:
   --repo <owner/name>          Public repo for predeploy check (default: corca-ai/claude-plugins)
   --ref <git-ref>              Public ref for predeploy check (default: main)
   --plugin <name>              Plugin name for marketplace checks (default: cwf)
+  --runtime-residual-mode <off|observe|strict>
+                               Runtime residual gate mode (default: off for premerge, observe for predeploy)
   -h, --help                   Show this message
 USAGE
 }
@@ -27,6 +29,7 @@ MODE="premerge"
 PUBLIC_REPO="corca-ai/claude-plugins"
 PUBLIC_REF="main"
 PLUGIN="cwf"
+RUNTIME_RESIDUAL_MODE="auto"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -46,6 +49,10 @@ while [[ $# -gt 0 ]]; do
       PLUGIN="${2:-}"
       shift 2
       ;;
+    --runtime-residual-mode)
+      RUNTIME_RESIDUAL_MODE="${2:-}"
+      shift 2
+      ;;
     -h|--help)
       usage
       exit 0
@@ -60,6 +67,19 @@ done
 
 if [[ "$MODE" != "premerge" && "$MODE" != "predeploy" ]]; then
   echo "Error: unsupported mode: $MODE" >&2
+  exit 1
+fi
+
+if [[ "$RUNTIME_RESIDUAL_MODE" == "auto" ]]; then
+  if [[ "$MODE" == "predeploy" ]]; then
+    RUNTIME_RESIDUAL_MODE="observe"
+  else
+    RUNTIME_RESIDUAL_MODE="off"
+  fi
+fi
+
+if [[ "$RUNTIME_RESIDUAL_MODE" != "off" && "$RUNTIME_RESIDUAL_MODE" != "observe" && "$RUNTIME_RESIDUAL_MODE" != "strict" ]]; then
+  echo "Error: unsupported runtime residual mode: $RUNTIME_RESIDUAL_MODE" >&2
   exit 1
 fi
 
@@ -109,6 +129,20 @@ run_step "marketplace checker fixtures" \
 
 run_step "non-interactive smoke fixtures" \
   bash "$SCRIPT_DIR/tests/noninteractive-skill-smoke-fixtures.sh"
+
+run_step "runtime residual smoke fixtures" \
+  bash "$SCRIPT_DIR/tests/runtime-residual-smoke-fixtures.sh"
+
+if [[ "$RUNTIME_RESIDUAL_MODE" != "off" ]]; then
+  run_step "runtime residual smoke (${RUNTIME_RESIDUAL_MODE})" \
+    bash "$SCRIPT_DIR/runtime-residual-smoke.sh" \
+      --mode "$RUNTIME_RESIDUAL_MODE" \
+      --plugin-dir "$SCRIPT_DIR/../plugins/cwf" \
+      --workdir "$SCRIPT_DIR/.." \
+      --k46-timeout 120 \
+      --s10-timeout 120 \
+      --s10-runs 5
+fi
 
 run_step "hook core smoke" \
   bash "$SCRIPT_DIR/hook-core-smoke.sh"
