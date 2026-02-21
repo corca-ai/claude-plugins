@@ -502,6 +502,14 @@ sessions:
     branch: "main"
     artifacts: [plan.md, lessons.md]
 
+
+  - id: "S260221-01"
+    title: "retro-cwf-081-plus-postmortem"
+    dir: ".cwf/projects/260221-01-retro-cwf-081-plus-postmortem"
+    branch: "main"
+    artifacts: [plan.md, lessons.md, retro.md, retro-cdm-analysis.md, retro-learning-resources.md, retro-expert-alpha.md, retro-expert-beta.md]
+    stage_checkpoints: [retro]
+
 tools:
   codex: unavailable
   gemini: unavailable
@@ -538,7 +546,7 @@ git_hooks:
 # check-session.sh --live validates required fields are populated.
 live:
   session_id: ""
-  dir: ""
+  dir: ".cwf/projects/260221-01-retro-cwf-081-plus-postmortem"
   branch: ""
   phase: "retro"
   task: ""
@@ -550,7 +558,7 @@ live:
     state_file: ""
     rules_file: ""
     updated_at: ""
-  state_file: ""
+  state_file: ".cwf/projects/260221-01-retro-cwf-081-plus-postmortem/session-state.yaml"
   remaining_gates: []
   state_version: "6"
   worktree_root: ""
@@ -594,7 +602,14 @@ expert_roster:
     source: "Sources of Power: How People Make Decisions (MIT Press, 1998)"
     rationale: "Applied to agreement bias analysis and mental simulation protocols, S260217-01: RPD analysis of triage distortion and deletion decision-point intervention"
     introduced: "S13.5-B2"
-    usage_count: 3
+    usage_count: 4
+    verified: true
+  - name: "Daniel Kahneman"
+    domain: "judgment under uncertainty, cognitive bias, System 1/System 2 decision-making"
+    source: "Thinking, Fast and Slow (2011); Judgment under Uncertainty: Heuristics and Biases (Science, 1974)"
+    rationale: "Applied in S260221-01 deep retro to diagnose oracle/proxy substitution and overconfidence in cached update-latest inference under release pressure"
+    introduced: "S260221-01"
+    usage_count: 1
     verified: true
   - name: "James Reason"
     domain: "organizational accidents, Swiss cheese model, defense-in-depth"
