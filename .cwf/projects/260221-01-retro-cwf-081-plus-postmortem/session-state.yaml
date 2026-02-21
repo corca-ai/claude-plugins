@@ -1,0 +1,30 @@
+# session-state.yaml — volatile session live state
+# Synced from .cwf/cwf-state.yaml live section.
+
+live:
+  session_id: ""
+  dir: ".cwf/projects/260221-01-retro-cwf-081-plus-postmortem"
+  branch: ""
+  phase: "retro"
+  task: ""
+  key_files: []
+  decisions: []
+  decision_journal: []
+  hitl:
+    session_id: ""
+    state_file: ""
+    rules_file: ""
+    updated_at: ""
+  remaining_gates: []
+  state_version: "6"
+  worktree_root: ""
+  worktree_branch: ""
+  active_pipeline: ""
+  user_directive: ""
+  pipeline_override_reason: ""
+  ambiguity_mode: ""
+  blocking_decisions_pending: ""
+  ambiguity_decisions_file: ".cwf/projects/260218-03-pre-release-refactor-audit/run-ambiguity-decisions.md"
+  clarify_result_file: "project/initial-req.md"
+  clarify_completed_at: "2026-02-19T00:40:57Z"
+  stage_provenance_file: ".cwf/projects/260218-03-pre-release-refactor-audit/run-stage-provenance.md"

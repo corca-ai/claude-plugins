@@ -11,6 +11,7 @@ Deterministic checks for `cwf:retro` execution. Use this checklist before finali
 5. Always include language specifiers for fenced code blocks (`bash`, `yaml`, `markdown`, `text`, etc.).
 6. Read `cwf-state.yaml` (when present) during artifact intake for lifecycle/stage context.
 7. Use `retro-collect-evidence.sh` as the default evidence path and include `retro-evidence.md` when present.
+8. In deep mode, generate coverage-contract artifacts (`retro-coverage-contract.sh`) before causal narrative and cite coverage counts in `retro.md`.
 
 ## Section Scope Gates
 
@@ -30,6 +31,7 @@ Deterministic checks for `cwf:retro` execution. Use this checklist before finali
    - If `retro.md` says `Mode: deep`, all four deep artifacts must exist and end with `<!-- AGENT_COMPLETE -->`.
    - Otherwise downgrade to light mode with explicit reason.
 4. In deep mode, Section 6 must include external web resources (URLs) discovered in the current run; internal docs can be supplemental only.
+5. In deep mode, include a `Coverage Matrix` subsection and keep `coverage/` artifacts non-empty.
 
 ## Persistence and Reporting Gates
 
@@ -40,4 +42,4 @@ Deterministic checks for `cwf:retro` execution. Use this checklist before finali
 5. For direct invocation (`cwf:retro`, `/retro`), assistant response must include both:
    - `Retro Brief`
    - `Persist Proposals`
-6. Each direct-invocation persist proposal must include `owner`, `apply_layer`, and `evidence`.
+6. Each direct-invocation persist proposal must include `owner`, `apply_layer`, `promotion_target`, `due_release`, and `evidence`.

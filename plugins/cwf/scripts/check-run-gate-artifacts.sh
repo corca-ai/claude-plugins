@@ -214,11 +214,17 @@ check_retro_stage() {
   local retro_file="$SESSION_DIR/retro.md"
   local mode_line=""
   local noncritical_file=""
+  local coverage_file=""
   local critical_file="$SESSION_DIR/retro-cdm-analysis.md"
   local noncritical_files=(
     "$SESSION_DIR/retro-learning-resources.md"
     "$SESSION_DIR/retro-expert-alpha.md"
     "$SESSION_DIR/retro-expert-beta.md"
+  )
+  local coverage_files=(
+    "$SESSION_DIR/coverage/diff-all-excl-session-logs.txt"
+    "$SESSION_DIR/coverage/diff-top-level-breakdown.txt"
+    "$SESSION_DIR/coverage/project-lessons-retro-primary.txt"
   )
 
   ensure_nonempty_file "$stage" "$retro_file" || return 0
@@ -230,6 +236,16 @@ check_retro_stage() {
 
   append_pass "$stage" "mode declaration: $mode_line"
   if printf '%s' "$mode_line" | grep -Eiq 'deep'; then
+    if grep -Eiq 'Coverage Matrix' "$retro_file"; then
+      append_pass "$stage" "deep retro includes Coverage Matrix section"
+    else
+      append_fail "$stage" "deep retro missing Coverage Matrix section"
+    fi
+
+    for coverage_file in "${coverage_files[@]}"; do
+      ensure_nonempty_file "$stage" "$coverage_file" || true
+    done
+
     check_retro_critical_output "$stage" "$critical_file" || true
     for noncritical_file in "${noncritical_files[@]}"; do
       check_retro_noncritical_output "$stage" "$noncritical_file" || true
@@ -398,6 +414,10 @@ EOF_LESSONS
     else
       printf '\n## Run Gate Soft Continue — %s\n' "$ts"
     fi
+    printf -- "- **Owner**: \`plugin\`\n"
+    printf -- "- **Apply Layer**: \`upstream\`\n"
+    printf -- "- **Promotion Target**: \`plugins/cwf/scripts/check-run-gate-artifacts.sh\`\n"
+    printf -- "- **Due Release**: \`next-release\`\n"
     printf -- "- Gate checker: \`%s\`\n" "plugins/cwf/scripts/check-run-gate-artifacts.sh"
     printf -- "- Persistence gate: \`%s\`\n" "$PERSISTENCE_GATE"
     if [[ "${#FAILS[@]}" -gt 0 ]]; then

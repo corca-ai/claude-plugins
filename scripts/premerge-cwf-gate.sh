@@ -21,6 +21,8 @@ Options:
   --plugin <name>              Plugin name for marketplace checks (default: cwf)
   --runtime-residual-mode <off|observe|strict>
                                Runtime residual gate mode (default: off for premerge, observe for predeploy)
+  --update-top-level-scope <user|project|local>
+                               Scope used for top-level update consistency gate in predeploy mode (default: user)
   -h, --help                   Show this message
 USAGE
 }
@@ -30,6 +32,7 @@ PUBLIC_REPO="corca-ai/claude-plugins"
 PUBLIC_REF="main"
 PLUGIN="cwf"
 RUNTIME_RESIDUAL_MODE="auto"
+UPDATE_TOP_LEVEL_SCOPE="user"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -51,6 +54,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --runtime-residual-mode)
       RUNTIME_RESIDUAL_MODE="${2:-}"
+      shift 2
+      ;;
+    --update-top-level-scope)
+      UPDATE_TOP_LEVEL_SCOPE="${2:-}"
       shift 2
       ;;
     -h|--help)
@@ -83,8 +90,14 @@ if [[ "$RUNTIME_RESIDUAL_MODE" != "off" && "$RUNTIME_RESIDUAL_MODE" != "observe"
   exit 1
 fi
 
+if [[ "$UPDATE_TOP_LEVEL_SCOPE" != "user" && "$UPDATE_TOP_LEVEL_SCOPE" != "project" && "$UPDATE_TOP_LEVEL_SCOPE" != "local" ]]; then
+  echo "Error: unsupported update top-level scope: $UPDATE_TOP_LEVEL_SCOPE" >&2
+  exit 1
+fi
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONSISTENCY_CHECKER="$SCRIPT_DIR/../.claude/skills/plugin-deploy/scripts/check-consistency.sh"
+UPDATE_CONSISTENCY_CHECKER="$SCRIPT_DIR/../plugins/cwf/scripts/check-update-latest-consistency.sh"
 
 run_step() {
   local label="$1"
@@ -127,6 +140,21 @@ run_step "plugin consistency" \
 run_step "marketplace checker fixtures" \
   bash "$SCRIPT_DIR/tests/check-marketplace-entry-fixtures.sh"
 
+run_step "update consistency fixtures" \
+  bash "$SCRIPT_DIR/tests/check-update-latest-consistency-fixtures.sh"
+
+run_step "lessons metadata fixtures" \
+  bash "$SCRIPT_DIR/tests/check-lessons-metadata-fixtures.sh"
+
+run_step "retro coverage contract fixtures" \
+  bash "$SCRIPT_DIR/tests/retro-coverage-contract-fixtures.sh"
+
+run_step "update consistency contract" \
+  bash "$UPDATE_CONSISTENCY_CHECKER" --mode contract
+
+run_step "deep retro lessons metadata" \
+  bash "$SCRIPT_DIR/../plugins/cwf/scripts/check-lessons-metadata.sh" --root "$SCRIPT_DIR/../.cwf/projects"
+
 run_step "non-interactive smoke fixtures" \
   bash "$SCRIPT_DIR/tests/noninteractive-skill-smoke-fixtures.sh"
 
@@ -148,6 +176,9 @@ run_step "hook core smoke" \
   bash "$SCRIPT_DIR/hook-core-smoke.sh"
 
 if [[ "$MODE" == "predeploy" ]]; then
+  run_step "update consistency top-level (${UPDATE_TOP_LEVEL_SCOPE})" \
+    bash "$UPDATE_CONSISTENCY_CHECKER" --mode top-level --scope "$UPDATE_TOP_LEVEL_SCOPE"
+
   run_step "public marketplace entry (${PUBLIC_REPO}@${PUBLIC_REF})" \
     bash "$SCRIPT_DIR/check-public-marketplace-entry.sh" \
       --repo "$PUBLIC_REPO" \

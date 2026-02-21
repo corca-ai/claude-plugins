@@ -82,6 +82,19 @@ bash {CWF_PLUGIN_DIR}/scripts/retro-collect-evidence.sh --session-dir "{output-d
 
 Then read `retro-evidence.md` (if generated), `plan.md`, `lessons.md`, and `cwf-state.yaml`. Read AGENTS/adapter docs and project-context docs only when those files exist.
 
+When running deep mode (or when user explicitly specifies a diff baseline/scope), generate coverage-contract artifacts before drafting narrative sections:
+
+```bash
+bash {CWF_PLUGIN_DIR}/scripts/retro-coverage-contract.sh \
+  --session-dir "{output-dir}" \
+  --base-ref "{retro_base_ref:-HEAD~1}"
+```
+
+Then cite at least:
+- total changed file count (artifact name: "diff-all-excl-session-logs.txt")
+- top-level breakdown (artifact name: "diff-top-level-breakdown.txt")
+- historical lessons/retro primary corpus count (artifact name: "project-lessons-retro-primary.txt")
+
 ### 3. Select Mode
 
 Parse the `--deep` flag from the invocation arguments.
@@ -335,6 +348,8 @@ Required metadata for every persist proposal:
 
 - `owner`
 - `apply_layer`
+- `promotion_target`
+- `due_release`
 - `evidence` (command output, artifact path, or session-log line)
 
 Routing rules:
@@ -388,6 +403,8 @@ If `invocation_mode=direct` (user-triggered `/retro` or `cwf:retro`):
    - Finding
    - Owner (`repo`, `plugin`)
    - Apply layer (`local`, `upstream`)
+   - Promotion target (gate/script/doc/backlog endpoint)
+   - Due release (or due date)
    - Recommended tier (`Eval-Hook`, `State`, `Doc`)
    - Evidence
    - Target file/script (local) or upstream backlog target (plugin)
@@ -409,6 +426,11 @@ The user may continue the conversation after the retro. During post-retro discus
 - Update `lessons.md` with new learnings
 - **Ownership check first** — for each new learning, classify `owner`/`apply_layer`, then evaluate through eval > state > doc.
 - If `owner=plugin`, append an upstream backlog note instead of adding repo-local policy prose.
+- For deep retro lessons, include metadata lines:
+  - `- **Owner**: \`repo|plugin\``
+  - `- **Apply Layer**: \`local|upstream\``
+  - `- **Promotion Target**: \`...\``
+  - `- **Due Release**: \`...\``
 - If plugin code was changed, follow normal release procedures (version bump, CHANGELOG)
 
 Do not prompt the user to start this discussion.

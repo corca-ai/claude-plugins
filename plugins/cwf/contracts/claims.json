@@ -113,6 +113,37 @@
           "command": "bash plugins/cwf/scripts/check-portability-contract.sh --contract authoring --context manual"
         }
       ]
+    },
+    {
+      "id": "update_latest_oracle_fail_closed",
+      "audience": "agent",
+      "assertion": "Update latest-version checks must use authoritative source verification, expose UNVERIFIED fail-closed states, and remain wired to deterministic release gates.",
+      "source_refs": [
+        {
+          "file": "plugins/cwf/skills/update/SKILL.md",
+          "selector": "Compare Versions (Authoritative + Fail-Closed)"
+        },
+        {
+          "file": "plugins/cwf/contracts/authoring-contract.json",
+          "selector": "update_latest_consistency_contract"
+        },
+        {
+          "file": "scripts/premerge-cwf-gate.sh",
+          "selector": "update consistency top-level"
+        }
+      ],
+      "tests": [
+        {
+          "id": "update_latest_consistency_contract",
+          "path": "plugins/cwf/scripts/check-update-latest-consistency.sh",
+          "command": "bash plugins/cwf/scripts/check-update-latest-consistency.sh --mode contract"
+        },
+        {
+          "id": "update_latest_consistency_fixtures",
+          "path": "scripts/tests/check-update-latest-consistency-fixtures.sh",
+          "command": "bash scripts/tests/check-update-latest-consistency-fixtures.sh"
+        }
+      ]
     }
   ]
 }

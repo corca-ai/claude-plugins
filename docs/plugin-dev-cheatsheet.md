@@ -216,6 +216,7 @@ bash scripts/noninteractive-skill-smoke.sh \
 bash scripts/premerge-cwf-gate.sh \
   --mode predeploy \
   --plugin cwf \
+  --update-top-level-scope user \
   --repo corca-ai/claude-plugins \
   --ref main
 ```
@@ -230,6 +231,7 @@ bash scripts/premerge-cwf-gate.sh \
 - If a skill exits successfully but the log shows an interactive follow-up prompt, the case is classified as `FAIL` with reason `WAIT_INPUT` (to prevent false PASS in CI).
 - `--adaptive-review-timeout` raises timeout only for review prompts based on detected review target size, while keeping non-review cases at the base `--timeout`.
 - The script fails gate (exit 1) when configured failure/timeout thresholds are exceeded.
+- In `--mode predeploy`, gate now includes top-level update latest-consistency verification (`UNVERIFIED` and cache/authoritative mismatch are both hard-fail).
 
 ## Repo Git Hooks
 

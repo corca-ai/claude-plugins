@@ -22,6 +22,18 @@
       "command": "bash \"$CWF_PLUGIN_ROOT/scripts/check-hook-sync.sh\" --repo-root \"$CWF_HOST_REPO_ROOT\""
     },
     {
+      "id": "update_latest_consistency_contract",
+      "mode": "fail",
+      "contexts": ["manual", "post-run"],
+      "command": "bash \"$CWF_PLUGIN_ROOT/scripts/check-update-latest-consistency.sh\" --mode contract"
+    },
+    {
+      "id": "deep_retro_lessons_metadata",
+      "mode": "fail",
+      "contexts": ["manual", "post-run"],
+      "command": "bash \"$CWF_PLUGIN_ROOT/scripts/check-lessons-metadata.sh\" --root \"$CWF_HOST_REPO_ROOT/.cwf/projects\""
+    },
+    {
       "id": "setup_contract_runtime",
       "mode": "fail",
       "contexts": ["manual"],

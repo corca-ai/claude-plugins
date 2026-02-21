@@ -1,0 +1,82 @@
+=== .claude-plugin/marketplace.json ===
+commits=7
+=== .githooks/pre-push ===
+commits=1
+=== AGENTS.md ===
+commits=1
+=== README.ko.md ===
+commits=2
+=== README.md ===
+commits=2
+=== docs/plugin-dev-cheatsheet.md ===
+commits=1
+=== plugins/cwf/.claude-plugin/plugin.json ===
+commits=7
+=== plugins/cwf/contracts/change-impact.json ===
+commits=1
+=== plugins/cwf/contracts/claims.json ===
+commits=1
+=== plugins/cwf/hooks/hooks.json ===
+commits=1
+=== plugins/cwf/hooks/scripts/compact-context.sh ===
+commits=1
+=== plugins/cwf/hooks/scripts/track-user-input.sh ===
+commits=1
+=== plugins/cwf/hooks/scripts/workflow-gate.sh ===
+commits=2
+=== plugins/cwf/scripts/README.md ===
+commits=1
+=== plugins/cwf/scripts/check-run-gate-artifacts.sh ===
+commits=1
+=== plugins/cwf/scripts/check-setup-readiness.sh ===
+commits=1
+=== plugins/cwf/scripts/next-prompt-dir.sh ===
+commits=2
+=== plugins/cwf/scripts/retro-light-fastpath.sh ===
+commits=1
+=== plugins/cwf/scripts/test-hook-exit-codes.sh ===
+commits=1
+=== plugins/cwf/skills/hitl/SKILL.md ===
+commits=1
+=== plugins/cwf/skills/hitl/references/hitl-state-model.md ===
+commits=1
+=== plugins/cwf/skills/retro/SKILL.md ===
+commits=3
+=== plugins/cwf/skills/retro/references/retro-gates-checklist.md ===
+commits=1
+=== plugins/cwf/skills/run/SKILL.md ===
+commits=1
+=== plugins/cwf/skills/setup/SKILL.md ===
+commits=3
+=== plugins/cwf/skills/setup/assets/githooks/pre-push.template.sh ===
+commits=1
+=== plugins/cwf/skills/setup/references/runtime-and-index-phases.md ===
+commits=2
+=== plugins/cwf/skills/setup/references/setup-contract.md ===
+commits=1
+=== plugins/cwf/skills/setup/scripts/bootstrap-setup-contract.sh ===
+commits=1
+=== plugins/cwf/skills/setup/scripts/check-configure-git-hooks-runtime.sh ===
+commits=1
+=== plugins/cwf/skills/setup/scripts/check-setup-contract-runtime.sh ===
+commits=1
+=== plugins/cwf/skills/setup/scripts/sync-hook-state.sh ===
+commits=1
+=== plugins/cwf/skills/update/SKILL.md ===
+commits=1
+=== scripts/hook-core-smoke.sh ===
+commits=3
+=== scripts/noninteractive-skill-smoke.sh ===
+commits=3
+=== scripts/premerge-cwf-gate.sh ===
+commits=2
+=== scripts/runtime-residual-smoke.sh ===
+commits=2
+=== scripts/tests/check-setup-readiness-fixtures.sh ===
+commits=1
+=== scripts/tests/next-prompt-dir-fixtures.sh ===
+commits=2
+=== scripts/tests/noninteractive-skill-smoke-fixtures.sh ===
+commits=3
+=== scripts/tests/runtime-residual-smoke-fixtures.sh ===
+commits=2

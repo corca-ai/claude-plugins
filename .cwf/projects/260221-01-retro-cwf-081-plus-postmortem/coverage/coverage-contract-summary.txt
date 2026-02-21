@@ -1,0 +1,9 @@
+retro_coverage_contract=PASS
+base_ref=c8b87e0f69e3578b763942086a73456af326ecfe
+diff_total=1067
+diff_non_cwf=46
+diff_plugins_cwf=32
+project_lessons_retro_total=64
+project_lessons_retro_primary=51
+project_lessons_retro_sandbox=13
+historical_signal_matches=145

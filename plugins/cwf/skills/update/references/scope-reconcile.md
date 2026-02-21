@@ -5,7 +5,7 @@ Detailed prompts, parsing patterns, and command matrix for `update` Phase 0 and 
 ## Contents
 
 - [Phase 0 Details](#phase-0-details)
-- [Phase 1 Cache Resolution Details](#phase-1-cache-resolution-details)
+- [Phase 1 Latest Resolution Details](#phase-1-latest-resolution-details)
 - [Phase 3 Details](#phase-3-details)
 
 ## Phase 0 Details
@@ -96,9 +96,25 @@ Active scope is {active_scope}, but update target is user-global. Continue with 
 
 If declined, return to scope selection.
 
-## Phase 1 Cache Resolution Details
+## Phase 1 Latest Resolution Details
 
-After marketplace metadata refresh, resolve latest cached `plugin.json` using context-aware cache roots:
+After marketplace metadata refresh, resolve latest verdict through authoritative checker first:
+
+```bash
+consistency_json="$(
+  bash {CWF_PLUGIN_DIR}/scripts/check-update-latest-consistency.sh \
+    --mode top-level \
+    --scope "$selected_scope" \
+    --json
+)"
+verdict="$(printf '%s' "$consistency_json" | jq -r '.verdict // "UNVERIFIED"')"
+```
+
+Fail-closed behavior:
+- `verdict=UNVERIFIED`: stop update flow immediately (no success-style no-update output)
+- `verdict=UP_TO_DATE|OUTDATED`: continue normal flow using checker-provided `current_version` and `authoritative_latest`
+
+Cache snapshot remains supporting evidence only. Checker internally resolves latest cached `plugin.json` using context-aware cache roots and validates it against authoritative marketplace metadata:
 
 ```bash
 extra_cache_roots_raw="${CWF_UPDATE_CACHE_ROOTS:-}"
@@ -124,7 +140,7 @@ for cache_root in "${cache_roots[@]}"; do
 done
 ```
 
-If unresolved, stop with explicit guidance (`CLAUDE_HOME`, `CWF_UPDATE_CACHE_ROOTS`, or cache-root path).
+If authoritative fetch or top-level marketplace update is unavailable, checker returns `UNVERIFIED` and the update flow must stop.
 
 ## Phase 3 Details
 

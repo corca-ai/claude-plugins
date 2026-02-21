@@ -1,0 +1,13 @@
+/home/hwidong/codes/claude-plugins/.cwf/projects/260219-01-pre-release-audit-pass2/iter1/sandbox/user-repo-b/.cwf/projects/260219-01-hello-script/lessons.md
+/home/hwidong/codes/claude-plugins/.cwf/projects/260219-01-pre-release-audit-pass2/iter1/sandbox/user-repo-b/.cwf/projects/260219-02-hello-script-run/lessons.md
+/home/hwidong/codes/claude-plugins/.cwf/projects/260219-01-pre-release-audit-pass2/iter1/sandbox/user-repo-b/.cwf/projects/260219-03-hello-script-run/lessons.md
+/home/hwidong/codes/claude-plugins/.cwf/projects/260219-01-pre-release-audit-pass2/iter1/sandbox/user-repo-b/.cwf/sessions/clarify-hello-script/lessons.md
+/home/hwidong/codes/claude-plugins/.cwf/projects/260219-01-pre-release-audit-pass2/iter2/sandbox/repo-retro/.cwf/projects/260219-01-retro-light-sandbox/lessons.md
+/home/hwidong/codes/claude-plugins/.cwf/projects/260219-01-pre-release-audit-pass2/iter2/sandbox/repo-run/.cwf/projects/260219-01-hello-world-shell-script/lessons.md
+/home/hwidong/codes/claude-plugins/.cwf/projects/260219-01-pre-release-audit-pass2/iter2/sandbox/repo-smoke/.cwf/projects/260219-01-minimal-smoke-plan/lessons.md
+/home/hwidong/codes/claude-plugins/.cwf/projects/260219-01-pre-release-audit-pass2/iter2/sandbox/repo-smoke/.cwf/projects/260219-02-refactor-quick-scan/lessons.md
+/home/hwidong/codes/claude-plugins/.cwf/projects/260219-01-pre-release-audit-pass2/iter2/sandbox/repo-smoke/.cwf/projects/260219-03-refactor-quick-scan/lessons.md
+/home/hwidong/codes/claude-plugins/.cwf/projects/260219-01-pre-release-audit-pass2/iter2/sandbox/repo-smoke/.cwf/projects/260219-03-refactor-quick-scan/retro.md
+/home/hwidong/codes/claude-plugins/.cwf/projects/260219-01-pre-release-audit-pass2/iter2/sandbox/repo-smoke/.cwf/projects/260219-04-minimal-smoke-plan/lessons.md
+/home/hwidong/codes/claude-plugins/.cwf/projects/260219-01-pre-release-audit-pass2/iter2/sandbox/repo-smoke/.cwf/projects/260219-04-minimal-smoke-plan/retro.md
+/home/hwidong/codes/claude-plugins/.cwf/projects/260219-01-pre-release-audit-pass2/iter2/sandbox/repo-smoke/.cwf/projects/260219-05-refactor-quick-scan/lessons.md

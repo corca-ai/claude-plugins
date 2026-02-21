@@ -1,0 +1,9 @@
+   1021 .cwf
+     32 plugins
+      8 scripts
+      1 docs
+      1 README.md
+      1 README.ko.md
+      1 AGENTS.md
+      1 .githooks
+      1 .claude-plugin

@@ -76,44 +76,56 @@ Always refresh marketplace metadata first:
 claude plugin marketplace update corca-plugins
 ```
 
-### 1.3 Compare Versions
+### 1.3 Compare Versions (Authoritative + Fail-Closed)
 
-Resolve latest marketplace payload snapshot:
+Run authoritative consistency checker after marketplace refresh:
 
 ```bash
-extra_cache_roots_raw="${CWF_UPDATE_CACHE_ROOTS:-}"
-IFS=':' read -r -a extra_cache_roots <<< "$extra_cache_roots_raw"
-cache_roots=(
-  "${CLAUDE_HOME:-$HOME/.claude}/plugins/cache"
-  "$HOME/.claude/plugins/cache"
-  "${XDG_CACHE_HOME:-$HOME/.cache}/claude/plugins/cache"
-  "/usr/local/share/claude/plugins/cache"
-)
-for extra_root in "${extra_cache_roots[@]}"; do
-  [ -n "$extra_root" ] || continue
-  cache_roots+=("$extra_root")
-done
-latest_plugin_json=""
-for cache_root in "${cache_roots[@]}"; do
-  [ -d "$cache_root" ] || continue
-  candidate="$(ls -1dt "$cache_root"/*/cwf/*/.claude-plugin/plugin.json 2>/dev/null | head -n1)"
-  if [ -n "$candidate" ]; then
-    latest_plugin_json="$candidate"
-    break
-  fi
-done
-[ -n "$latest_plugin_json" ] || {
-  echo "Latest CWF metadata not found after marketplace update."
-  echo "Checked cache roots: ${cache_roots[*]}"
-  echo "Set CLAUDE_HOME, CWF_UPDATE_CACHE_ROOTS, or provide a valid cache root."
+consistency_json="$(
+  bash {CWF_PLUGIN_DIR}/scripts/check-update-latest-consistency.sh \
+    --mode top-level \
+    --scope "$selected_scope" \
+    --json
+)"
+```
+
+Parse result:
+
+```bash
+verdict="$(printf '%s' "$consistency_json" | jq -r '.verdict // "UNVERIFIED"')"
+consistency_reason="$(printf '%s' "$consistency_json" | jq -r '.reason // "UNKNOWN"')"
+checked_current_version="$(printf '%s' "$consistency_json" | jq -r '.current_version // empty')"
+authoritative_latest_version="$(printf '%s' "$consistency_json" | jq -r '.authoritative_latest // empty')"
+```
+
+Fail-closed rule:
+
+```bash
+if [ "$verdict" = "UNVERIFIED" ]; then
+  echo "Latest-version verification is UNVERIFIED (reason: $consistency_reason)."
+  echo "Do not emit success-style no-update verdicts in this state."
+  echo "Re-run from a top-level environment where marketplace update + authoritative fetch are available."
+  exit 2
+fi
+```
+
+Then set compare values and post-marketplace snapshot:
+
+```bash
+[ -n "$checked_current_version" ] || {
+  echo "Current version missing from consistency check output."
+  exit 1
+}
+[ -n "$authoritative_latest_version" ] || {
+  echo "Authoritative latest version missing from consistency check output."
   exit 1
 }
 
-latest_plugin_root="$(dirname "$(dirname "$latest_plugin_json")")"
-latest_version="$(jq -r '.version' "$latest_plugin_json")"
-marketplace_root="$(mktemp -d "${TMPDIR:-/tmp}/cwf-after-marketplace.XXXXXX")"
-cp -a "$latest_plugin_root"/. "$marketplace_root"/
-new_diff_root="$marketplace_root"
+current_version="$checked_current_version"
+latest_version="$authoritative_latest_version"
+authoritative_snapshot_root="$(mktemp -d "${TMPDIR:-/tmp}/cwf-after-marketplace.XXXXXX")"
+cp -a "$current_install_path"/. "$authoritative_snapshot_root"/
+new_diff_root="$authoritative_snapshot_root"
 ```
 
 Report:
@@ -122,15 +134,16 @@ Report:
 Target scope:    user|project|local
 Current version: 0.6.0
 Latest version:  0.7.0
+Verdict:         UP_TO_DATE|OUTDATED
 ```
 
-Persist for later phases: `old_diff_root`, `new_diff_root`, `current_version`, `latest_version`, `selected_scope`, `selected_project_root`.
+Persist for later phases: `old_diff_root`, `new_diff_root`, `current_version`, `latest_version`, `verdict`, `selected_scope`, `selected_project_root`.
 
 ---
 
 ## Phase 2: Apply Update (Scope-Aware)
 
-Skip this phase if `--check` was used or versions already match, and report that no update mutation was applied when the skip reason is version parity.
+Skip this phase if `--check` was used or `verdict=UP_TO_DATE`, and report that no update mutation was applied when the skip reason is parity. `verdict=UNVERIFIED` never enters this phase (fail-closed in Phase 1.3).
 
 ### 2.1 Apply Update to Selected Scope (No Confirmation Prompt)
 
@@ -286,14 +299,18 @@ Add `update` to `cwf-state.yaml` current session's `stage_checkpoints` list if l
 6. **No fail-open scope fallback**: If scope detection fails or returns `none`, require explicit scope selection before mutation.
 7. **No mutation in check mode**: `cwf:update --check` must not install/update/reconcile; it reports status and suggested commands only.
 8. **Changelog summary is opt-in**: Run changelog summary only when the user explicitly requests it in Phase 4.
-9. **Changes take effect after restart**: Always remind user to restart Claude Code.
-10. **All code fences must have language specifier**: Never use bare fences.
+9. **Authoritative latest only**: cache is supporting evidence, not oracle; latest-version verdict must come from authoritative metadata path.
+10. **UNVERIFIED is fail-closed**: never present `No update needed` when verdict is `UNVERIFIED`.
+11. **Top-level verification required**: release confidence claims require top-level marketplace update + authoritative fetch success.
+12. **Changes take effect after restart**: Always remind user to restart Claude Code.
+13. **All code fences must have language specifier**: Never use bare fences.
 
 ## References
 
 - [README.md](README.md) — File-map entry for this skill directory (not release notes)
 - [agent-patterns.md](../../references/agent-patterns.md) — Single pattern
 - [references/scope-reconcile.md](references/scope-reconcile.md) — detailed scope resolution and Codex reconcile matrix
+- [check-update-latest-consistency.sh](../../scripts/check-update-latest-consistency.sh) — authoritative latest-version consistency checker (`contract`, `top-level`)
 - [detect-plugin-scope.sh](../../scripts/detect-plugin-scope.sh) — active Claude plugin scope detection for cwd
 - [sync-skills.sh](../../scripts/codex/sync-skills.sh) — Codex scope-aware skill sync
 - [install-wrapper.sh](../../scripts/codex/install-wrapper.sh) — Codex scope-aware wrapper management

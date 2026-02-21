@@ -413,7 +413,8 @@ Checks scope-specific installed vs latest state, auto-applies updates for the se
 1. A newer version is applied immediately in the selected scope (unless `--check` is used).
 2. Check mode reports status without installation or reconcile mutations.
 3. Reconcile reports before/after integration state when install-path drift exists.
-4. Changelog summary runs only when the user explicitly opts in.
+4. If latest-version verification is `UNVERIFIED`, update flow fails closed (no success-style no-update verdict).
+5. Changelog summary runs only when the user explicitly opts in.
 
 ### Codex Integration
 

@@ -62,6 +62,20 @@
         "plugins/cwf/contracts/claims.json"
       ],
       "message": "Unified gate/contract changes must keep claim-test mapping aligned."
+    },
+    {
+      "id": "update_latest_oracle_change_requires_consistency_gate",
+      "when_changed": [
+        "plugins/cwf/skills/update/SKILL.md",
+        "plugins/cwf/skills/update/references/scope-reconcile.md",
+        "plugins/cwf/scripts/check-update-latest-consistency.sh"
+      ],
+      "require_any_changed": [
+        "scripts/premerge-cwf-gate.sh",
+        "scripts/tests/check-update-latest-consistency-fixtures.sh",
+        "plugins/cwf/contracts/authoring-contract.json"
+      ],
+      "message": "Update latest-oracle behavior changes must update consistency gate wiring and fixtures."
     }
   ]
 }
