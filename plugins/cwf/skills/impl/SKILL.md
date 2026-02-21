@@ -204,6 +204,15 @@ Read `{SKILL_DIR}/../../references/agent-patterns.md` for general agent principl
 | 4-6 | 3 | Balance parallelism vs coordination |
 | 7+ | 4 (hard cap) | Beyond 4, overhead exceeds gains |
 
+### 2.4.1 Web Debug Classification (Conditional)
+
+Before finalizing work items, detect browser-runtime debugging scope from step text and file signals (for example: `console`, `DOM`, `CDP`, `DevTools`, click/focus/navigation regressions, viewport or mobile regressions, HTML/CSS/SPA runtime files).
+
+If detected:
+- mark the work item as `web-debug`
+- require [Web Debug Loop Protocol](../../references/agent-patterns.md#web-debug-loop-protocol) execution during Phase 3 (before/after evidence)
+- resolve `session_dir` from `live.dir` in the resolved live-state file, then reserve `{session_dir}/debug/{timestamp}-{slug}/`
+
 ### 2.5 Cross-Cutting Assessment
 
 Before finalizing decomposition, assess whether changes are cross-cutting:
@@ -248,12 +257,13 @@ For simple plans (1 work item, ≤3 files).
 1. Execute each step in the work item sequentially
 2. Use Write, Edit, Bash, and other allowed tools directly
 3. Follow the plan's step descriptions precisely
-4. Respect the "Don't Touch" list — never modify those files
-5. If phase-handoff.md was loaded, apply its Implementation Hints during execution and respect its "Do NOT" constraints
-6. Append newly discovered learnings to `lessons.md` before commit (user language).
-7. **Commit Gate**: Apply the [Commit Gate](references/impl-gates.md#commit-gate). Stage specific files and commit with Conventional Commit format.
+4. If the item is `web-debug`, run [Web Debug Loop Protocol](../../references/agent-patterns.md#web-debug-loop-protocol) and persist before/after evidence under `{session_dir}/debug/{timestamp}-{slug}/`
+5. Respect the "Don't Touch" list — never modify those files
+6. If phase-handoff.md was loaded, apply its Implementation Hints during execution and respect its "Do NOT" constraints
+7. Append newly discovered learnings to `lessons.md` before commit (user language).
+8. **Commit Gate**: Apply the [Commit Gate](references/impl-gates.md#commit-gate). Stage specific files and commit with Conventional Commit format.
 
-8. After commit, proceed to Phase 4
+9. After commit, proceed to Phase 4
 
 ---
 
@@ -271,6 +281,7 @@ For each work item, build an agent prompt using the template from `{SKILL_DIR}/r
 - The Don't Touch list (full list — every agent must respect it)
 - Context from the plan (Goal, relevant Context sections)
 - Phase handoff protocols, hints, and "Do NOT" constraints (if phase-handoff.md was loaded)
+- For `web-debug` items, explicit instruction to run [Web Debug Loop Protocol](../../references/agent-patterns.md#web-debug-loop-protocol) and persist evidence paths in the final report
 
 ### 3b.2 Parallel Launch
 
@@ -445,9 +456,10 @@ the plan's success criteria, run:
 15. **Incremental lessons are mandatory**: Update `lessons.md` as implementation progresses, not only at the end.
 16. **Structural Triage Contract**: For each triage item referencing analysis documents, enforce the triage record contract in [agent-patterns.md](../../references/agent-patterns.md#broken-link-triage-protocol): include `source_ref`, `source_recommendation`, `triage_action`, `runtime_caller_check`, `deletion_premortem`, and `decision_id`. If `source_recommendation` is missing, stop and complete triage context first. If `triage_action` diverges from `source_recommendation`, ask the user before proceeding. For deletion actions, do not continue until runtime-caller check and pre-mortem are both recorded.
 17. **Language override is mandatory**: implementation/code artifacts stay in English, while `lessons.md` stays in the user's language.
+18. **Web-debug evidence is mandatory**: Work items classified as `web-debug` must include before/after browser evidence and a reproducible path using [Web Debug Loop Protocol](../../references/agent-patterns.md#web-debug-loop-protocol).
 
 ## References
 
 - [references/impl-gates.md](references/impl-gates.md) — Branch, Clarify, and Commit gate definitions
 - [references/agent-prompts.md](references/agent-prompts.md) — Agent prompt template, domain signals, dependency heuristics
-- [agent-patterns.md](../../references/agent-patterns.md) — Shared agent orchestration patterns
+- [agent-patterns.md](../../references/agent-patterns.md) — Shared agent orchestration, Web Research, and Web Debug protocols

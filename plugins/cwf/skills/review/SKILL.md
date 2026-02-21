@@ -181,6 +181,17 @@ Store the resolved `cli_timeout` value for use in Phase 2.
 - Persist the cutoff evidence in synthesis Confidence Note:
   - `External CLI skipped: prompt_lines={prompt_lines} cutoff=1200 reason=prompt_lines_gt_1200`
 
+### 6. Detect Browser-Runtime Verification Scope (Code Mode)
+
+When `--mode code`, detect whether browser-runtime verification is needed before reviewer launch.
+
+Set `web_debug_scope=true` if review target includes one or more signals:
+- frontend/web runtime files (`*.html`, `*.css`, `*.js`, `*.ts`, `*.tsx`) with UI behavior changes
+- browser runtime failures (`console error`, `DOM`, `hydration`, `navigation`, `viewport`, `mobile`)
+- explicit mentions of CDP/DevTools/`agent-browser`
+
+If `web_debug_scope=true`, every reviewer prompt must include [Web Debug Loop Protocol](../../references/agent-patterns.md#web-debug-loop-protocol) as a required verification path for browser-behavior claims.
+
 ---
 
 ## Phase 2: Launch All Reviewers
@@ -240,6 +251,9 @@ You are conducting a {mode} review as the {reviewer_name}.
 {behavioral criteria + holdout checks as checklist, qualitative criteria as narrative items}
 (If none: "No specific success criteria provided. Review based on general best practices.")
 
+## Browser Runtime Verification (when web_debug_scope=true)
+Follow [Web Debug Loop Protocol](../../references/agent-patterns.md#web-debug-loop-protocol) for browser-behavior claims. Include repro steps, evidence paths, and before/after comparison.
+
 ## Output Format
 {output format section from prompts.md}
 
@@ -257,6 +271,7 @@ For **external** reviewer slots (Correctness, Architecture):
 3. Create temp dir: `mktemp -d /tmp/claude-review-XXXXXX`
 4. Write prompt files to temp dir: `correctness-prompt.md` and `architecture-prompt.md`
    - Same structure as internal prompts (role + mode checklist + review target + criteria)
+   - If `web_debug_scope=true`, append Browser Runtime Verification block with [Web Debug Loop Protocol](../../references/agent-patterns.md#web-debug-loop-protocol)
    - These are perspective prompts, not provider-bound prompts.
    - Use the **external provenance format** from `external-review.md` (includes `duration_ms`, `command`)
 
@@ -488,6 +503,7 @@ Use the deterministic error-handling matrix in [references/synthesis-and-gates.m
 15. **Code-mode session-log fields are mandatory** — always include deterministic `session_log_*` keys in Confidence Note for `--mode code`.
 16. **Code-mode artifact gate is mandatory** — `review-code` is not complete unless `check-run-gate-artifacts.sh --stage review-code --strict` passes.
 17. **Language override** — synthesis output follows the user's language; reviewer prompts remain in English.
+18. **Browser-runtime claims need evidence** — when `web_debug_scope=true`, reviewers must provide reproducible browser evidence following [Web Debug Loop Protocol](../../references/agent-patterns.md#web-debug-loop-protocol).
 
 ---
 
@@ -503,5 +519,5 @@ Use the canonical BDD acceptance checks from [references/synthesis-and-gates.md]
 - External reviewer perspectives & CLI templates: [references/external-review.md](references/external-review.md)
 - Orchestration and fallback templates: [references/orchestration-and-fallbacks.md](references/orchestration-and-fallbacks.md)
 - Synthesis template, error matrix, and BDD checks: [references/synthesis-and-gates.md](references/synthesis-and-gates.md)
-- Agent patterns (provenance, synthesis, execution): [agent-patterns.md](../../references/agent-patterns.md)
+- Agent patterns (provenance, synthesis, execution, web-debug): [agent-patterns.md](../../references/agent-patterns.md)
 - Expert advisor guide (expert sub-agent identity, grounding, review format): [expert-advisor-guide.md](../../references/expert-advisor-guide.md)

@@ -190,7 +190,7 @@ Detect availability of external AI/search tools and local runtime dependencies u
 
 ### 2.1 Check Tools
 
-Run external tool checks (`codex`, `gemini`, API keys) and local dependency checks (`shellcheck`, `jq`, `gh`, `node`, `python3`, `lychee`, `markdownlint-cli2`) as defined in [tool-detection-and-deps.md](references/tool-detection-and-deps.md).
+Run external tool checks (`codex`, `gemini`, `agent-browser`, API keys) and local dependency checks (`shellcheck`, `jq`, `gh`, `node`, `python3`, `lychee`, `markdownlint-cli2`) as defined in [tool-detection-and-deps.md](references/tool-detection-and-deps.md).
 
 ### 2.2 Update cwf-state.yaml
 
@@ -198,8 +198,8 @@ Rewrite `cwf-state.yaml` `tools:` section with the detection results.
 
 ### 2.3 Report Results
 
-Report both groups:
-- AI/search tools + API-key presence
+Report detection groups:
+- AI/search/browser tools + API-key presence
 - local runtime dependency status
 
 ### 2.3.1 Missing Dependency Install Prompt (Required)
@@ -217,6 +217,13 @@ When `Install missing now` was selected, re-run 2.1 -> 2.2 -> 2.3 in full so `cw
 ### 2.3.4 Setup Contract Bootstrap + Repo-Tool Proposal (Required for full/tools setup)
 
 Bootstrap setup contract draft (`.cwf/setup-contract.yaml` by default), report contract status (`created|existing|updated|fallback`), and ask whether to apply repo-specific tool suggestions now. If bootstrap returns `fallback`, stop setup immediately and resolve bootstrap failure first.
+
+### 2.3.5 agent-browser Capability Install Prompt (Optional but Recommended)
+
+If Phase 2 reports `agent-browser: unavailable`, ask whether to install browser-debug capability now.
+
+- If approved, run the install/retry branch from [tool-detection-and-deps.md](references/tool-detection-and-deps.md) and re-check availability once.
+- If declined, continue setup and report that browser-runtime automation paths will be limited until installed.
 
 Detailed checks, prompts, and commands: [tool-detection-and-deps.md](references/tool-detection-and-deps.md).
 

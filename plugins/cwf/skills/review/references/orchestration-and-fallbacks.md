@@ -6,6 +6,14 @@ Detailed `review` procedure for heavy execution blocks:
 
 `SKILL.md` keeps mode routing and invariant summaries, while this file stores full templates.
 
+If `web_debug_scope=true` (resolved in `SKILL.md` Phase 1), append this block to every slot prompt:
+
+```text
+## Browser Runtime Verification
+Follow Web Debug Loop Protocol in {CWF_PLUGIN_DIR}/references/agent-patterns.md#web-debug-loop-protocol.
+Include reproducible steps, evidence artifact paths, and before/after comparison for browser-behavior claims.
+```
+
 ## 2.3 Launch reviewers (single batch or deterministic batches)
 
 Run agent-slot preflight first:

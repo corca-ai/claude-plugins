@@ -259,6 +259,15 @@ Write your complete output to: <output_md>
 The file MUST exist when you finish and must end with: <!-- AGENT_COMPLETE -->
 ```
 
+### Web Debug Trigger (Autonomous)
+
+If `query_raw` indicates browser-runtime debugging (for example: console error, DOM interaction failure, CDP/DevTools reproduction, viewport/mobile regression), require the Task agent to follow [Web Debug Loop Protocol](../../references/agent-patterns.md#web-debug-loop-protocol) in addition to normal codebase exploration.
+
+In this branch, the Task output must also include:
+- reproducible browser steps used
+- evidence artifact paths under `{OUTPUT_DIR}/debug/...`
+- suspected source files and patch hypotheses (no code edits in gather)
+
 Execution and failure handling:
 1. Run Task once using the prompt contract above.
 2. Validate output contract (`output_md` exists, has non-whitespace content, and ends with `<!-- AGENT_COMPLETE -->`).
@@ -336,6 +345,7 @@ Environment variables:
 5. **Sub-agent for --local**: Always use Task tool, never inline exploration
 6. **All code fences must have language specifier**: Never use bare fences
 7. **Missing dependency interaction**: For missing required tools/keys, ask to install/configure now; do not only report unavailability.
+8. **Web debug queries use shared protocol**: Browser-runtime debugging requests in `--local` mode must follow [Web Debug Loop Protocol](../../references/agent-patterns.md#web-debug-loop-protocol) and persist evidence paths.
 
 ## References
 
@@ -345,3 +355,4 @@ Environment variables:
 - [references/TOON.md](references/TOON.md) — TOON format for spreadsheets
 - [references/search-api-reference.md](references/search-api-reference.md) — Tavily/Exa API parameters
 - [references/query-intelligence.md](references/query-intelligence.md) — Search routing and query enrichment
+- [agent-patterns.md](../../references/agent-patterns.md) — Shared Web Research and Web Debug protocols

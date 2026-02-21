@@ -294,6 +294,51 @@ URL discovered via WebSearch
 3. **No retry loops**: Each URL gets at most 2 attempts (WebFetch +
    agent-browser). Never retry the same URL with the same tool.
 
+## Web Debug Loop Protocol
+
+Use this protocol for browser-runtime issues that require reproducible evidence before and after code changes. This is a shared cross-stage protocol for `gather`, `impl`, and `review`.
+
+### Trigger Signals
+
+Apply when at least one signal is present:
+- browser-only failures (works in unit tests but fails in page runtime)
+- console/runtime errors, network failures, hydration/render mismatches
+- interaction regressions (click/focus/navigation/modal/scroll/viewport)
+- user requests mentioning CDP, DevTools, `agent-browser`, or "reproduce in browser"
+
+### Loop Steps
+
+1. **Reproduce baseline**
+   - Open the target page in a deterministic session (`agent-browser --session-name ... open ...`).
+   - Wait for stable load (`wait --load networkidle`), then collect initial snapshot.
+2. **Capture evidence**
+   - Collect `snapshot -i`, `console`, `errors`, and at least one screenshot.
+   - For request-level issues, collect `network requests` output.
+3. **Map to code**
+   - Identify likely source files and minimal change hypothesis.
+   - Do not edit unrelated files.
+4. **Apply minimal fix**
+   - Implement the smallest change that explains the observed failure.
+5. **Re-run the same browser path**
+   - Repeat Step 1-2 on the patched code.
+   - Compare before/after evidence and state whether the issue is resolved.
+
+### Output Contract
+
+Persist artifacts under stage-local output root:
+- `gather`: use `{OUTPUT_DIR}/debug/{timestamp}-{slug}/`
+- `impl`/`review`: use `{session_dir}/debug/{timestamp}-{slug}/`
+
+Each debug run should include:
+- `report.md` (symptom, repro steps, hypothesis, patch summary, result)
+- screenshots (before/after)
+- console/errors captures (text)
+- optional network/trace capture when relevant
+
+### Availability Rule
+
+If `agent-browser` is unavailable, ask whether to install/configure now, retry once after approval, then continue with explicit limitation notes if still unavailable.
+
 ## Design Principles
 
 ### Deliberate Naivete

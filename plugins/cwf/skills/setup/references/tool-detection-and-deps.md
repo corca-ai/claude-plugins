@@ -6,7 +6,7 @@ Detailed procedure reference for setup Phase 2 (tool detection, dependency promp
 
 ## Phase 2: External Tool Detection
 
-Detect availability of external AI/search tools and local runtime dependencies used by CWF checks/skills.
+Detect availability of external AI/search/browser tools and local runtime dependencies used by CWF checks/skills.
 
 ### 2.1 Check Tools
 
@@ -15,6 +15,8 @@ Run the following checks via Bash:
 ```bash
 command -v codex >/dev/null 2>&1     # Codex CLI
 command -v gemini >/dev/null 2>&1 || npx @google/gemini-cli --version 2>/dev/null  # Gemini CLI
+command -v agent-browser >/dev/null 2>&1 # Browser automation CLI
+command -v npx >/dev/null 2>&1        # npx runner (used for optional capability installs)
 command -v shellcheck >/dev/null 2>&1 # Shell lint gate
 command -v jq >/dev/null 2>&1         # JSON parsing for scripts
 command -v gh >/dev/null 2>&1         # GitHub CLI for ship
@@ -39,6 +41,7 @@ Edit `cwf-state.yaml` `tools:` section with AI/search results:
 tools:
   codex: available      # or "unavailable"
   gemini: available     # or "unavailable"
+  agent_browser: available  # or "unavailable"
   tavily: available     # or "unavailable"
   exa: unavailable      # or "available"
 ```
@@ -53,6 +56,7 @@ Display two result groups:
 Tool Detection Results:
   codex   : available
   gemini  : available
+  agent_browser: available
   tavily  : unavailable (TAVILY_API_KEY not set)
   exa     : unavailable (EXA_API_KEY not set)
 ```
@@ -154,3 +158,34 @@ bash {SKILL_DIR}/scripts/install-tooling-deps.sh --install <tool1,tool2,...>
 ```
 
 Contract details and status semantics: [setup-contract.md](setup-contract.md)
+
+### 2.3.5 agent-browser Capability Install Prompt (Optional)
+
+If `agent_browser` is unavailable, use AskUserQuestion (single choice):
+
+```text
+Browser runtime debugging capability (agent-browser) is unavailable. Install it now?
+```
+
+Options:
+- `Install now (recommended)`:
+  - install agent-browser skill package
+  - re-check browser capability once
+- `Show commands only`:
+  - print install and verification commands without mutation
+- `Skip for now`:
+  - continue setup with explicit limitation note
+
+Install command:
+
+```bash
+npx skills add vercel-labs/agent-browser@agent-browser -g -y
+```
+
+Verification command (pass when either direct CLI or npx execution succeeds):
+
+```bash
+command -v agent-browser >/dev/null 2>&1 || npx -y agent-browser --help >/dev/null 2>&1
+```
+
+If install/verification still fails, report unresolved status and ask whether to continue setup or stop for manual environment fixes.
