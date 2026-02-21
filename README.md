@@ -67,7 +67,7 @@ claude plugin update cwf@corca-plugins
 Or from inside Claude Code / Codex CLI:
 
 ```text
-cwf:update               # Check + update if newer version exists
+cwf:update               # Check + auto-update if newer version exists
 cwf:update --check       # Version check only
 ```
 
@@ -406,13 +406,14 @@ Keep installed CWF behavior aligned with the latest contracts, fixes, and guardr
 
 **What Happens**
 
-Checks scope-specific installed vs latest state, requires explicit confirmation before mutation, applies updates, and reconciles scope-aware Codex linkage when needed.
+Checks scope-specific installed vs latest state, auto-applies updates for the selected scope when a newer version exists, and reconciles scope-aware Codex linkage when needed.
 
 **Expected Outcomes**
 
-1. A newer version requires explicit user confirmation before mutation.
+1. A newer version is applied immediately in the selected scope (unless `--check` is used).
 2. Check mode reports status without installation or reconcile mutations.
 3. Reconcile reports before/after integration state when install-path drift exists.
+4. Changelog summary runs only when the user explicitly opts in.
 
 ### Codex Integration
 

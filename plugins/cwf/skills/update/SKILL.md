@@ -10,7 +10,7 @@ Keep installed CWF behavior aligned with the latest marketplace version and fixe
 ## Quick Start
 
 ```text
-cwf:update               # Check + update selected scope if newer version exists
+cwf:update               # Check + auto-update selected scope if newer version exists
 cwf:update --check       # Version/scope/reconcile check only (no install, no mutation)
 ```
 
@@ -130,23 +130,14 @@ Persist for later phases: `old_diff_root`, `new_diff_root`, `current_version`, `
 
 ## Phase 2: Apply Update (Scope-Aware)
 
-Skip this phase if `--check` was used or versions already match.
+Skip this phase if `--check` was used or versions already match, and report that no update mutation was applied when the skip reason is version parity.
 
-### 2.1 Confirm with User
-
-Use AskUserQuestion:
-
-```text
-Update CWF in scope {selected_scope} from {current_version} to {latest_version}?
-```
-
-Options: `Yes, update` / `No, skip`
-
-### 2.2 Apply Update to Selected Scope
+### 2.1 Apply Update to Selected Scope (No Confirmation Prompt)
 
 Run scope-aware update:
 
 ```bash
+echo "Updating CWF in scope $selected_scope from $current_version to $latest_version..."
 claude plugin update "cwf@corca-plugins" --scope "$selected_scope"
 ```
 
@@ -156,7 +147,7 @@ If update command is unavailable in current runtime, fallback:
 claude plugin install "cwf@corca-plugins" --scope "$selected_scope"
 ```
 
-### 2.3 Refresh Installed Snapshot
+### 2.2 Refresh Installed Snapshot
 
 Re-resolve selected-scope install path after update and overwrite `new_diff_root`:
 
@@ -180,7 +171,7 @@ new_diff_root="$post_install_root"
 latest_version="$installed_version"
 ```
 
-### 2.4 Report Success
+### 2.3 Report Success
 
 ```text
 CWF updated in scope {selected_scope} to {installed_version}. Restart Claude Code for changes to take effect.
@@ -234,9 +225,20 @@ Include alias boundary note:
 
 ---
 
-## Phase 4: Changelog Summary
+## Phase 4: Changelog Summary (Opt-In)
 
-After update/check, summarize diff evidence with stable roots:
+After update/check, ask whether to summarize changelog/diff evidence.
+
+Use AskUserQuestion:
+
+```text
+Show changelog summary for changes between {current_version} and {latest_version}?
+```
+
+Options: `Yes, summarize` / `No, skip`
+
+- If user selects `No, skip`, do not run diff commands and continue.
+- If user selects `Yes, summarize`, collect and summarize diff evidence with stable roots:
 
 1. Build file-change inventory:
 
@@ -279,12 +281,13 @@ Add `update` to `cwf-state.yaml` current session's `stage_checkpoints` list if l
 1. **Resolve scope first**: Always resolve and report active/selected scope before version check or update.
 2. **Update marketplace first**: Always run marketplace update before plugin update/install.
 3. **Scope-aware apply**: Update/install must target explicit scope via `--scope`.
-4. **Require user confirmation**: Never auto-update without asking.
+4. **Auto-apply when newer version exists**: In normal mode (not `--check`), apply update immediately without a separate update-confirmation prompt.
 5. **Reconcile Codex links after update**: For existing Codex integrations in selected scope, run reconcile in the same update flow.
 6. **No fail-open scope fallback**: If scope detection fails or returns `none`, require explicit scope selection before mutation.
 7. **No mutation in check mode**: `cwf:update --check` must not install/update/reconcile; it reports status and suggested commands only.
-8. **Changes take effect after restart**: Always remind user to restart Claude Code.
-9. **All code fences must have language specifier**: Never use bare fences.
+8. **Changelog summary is opt-in**: Run changelog summary only when the user explicitly requests it in Phase 4.
+9. **Changes take effect after restart**: Always remind user to restart Claude Code.
+10. **All code fences must have language specifier**: Never use bare fences.
 
 ## References
 
