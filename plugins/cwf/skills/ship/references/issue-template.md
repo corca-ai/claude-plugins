@@ -22,6 +22,12 @@ The agent reads this file and substitutes `{VARIABLES}` to compose the issue bod
 
 {SCOPE}
 
+## 회고 요약 및 영속화 제안
+
+{RETRO_SUMMARY}
+
+{RETRO_PERSIST_PROPOSALS}
+
 ## 세션 정보
 
 - **Branch**: `{BRANCH}`

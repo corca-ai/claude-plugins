@@ -24,6 +24,7 @@ STAGES=()
 FAILS=()
 WARNS=()
 PASSES=()
+RETRO_SOFT_WARNINGS=()
 CONTRACT_STAGE_REVIEW_CODE="fail"
 CONTRACT_STAGE_REFACTOR="fail"
 CONTRACT_STAGE_RETRO="fail"
@@ -38,6 +39,11 @@ mark_soft_continue() {
   if [[ "$PERSISTENCE_GATE" != "HARD_FAIL" ]]; then
     PERSISTENCE_GATE="SOFT_CONTINUE"
   fi
+}
+
+append_retro_soft_warning() {
+  local message="$1"
+  RETRO_SOFT_WARNINGS+=("$message")
 }
 
 check_retro_critical_output() {
@@ -55,6 +61,7 @@ check_retro_noncritical_output() {
 
   if [[ ! -s "$file_path" ]]; then
     append_warn "$stage" "soft gate: non-critical artifact missing or empty: $rel (continue with omission note)"
+    append_retro_soft_warning "$rel: missing or empty non-critical artifact"
     mark_soft_continue
     return 1
   fi
@@ -66,6 +73,7 @@ check_retro_noncritical_output() {
   fi
 
   append_warn "$stage" "soft gate: missing sentinel <!-- AGENT_COMPLETE --> in $rel (continue with omission note)"
+  append_retro_soft_warning "$rel: missing sentinel <!-- AGENT_COMPLETE -->"
   mark_soft_continue
   return 1
 }
@@ -372,7 +380,9 @@ record_lessons_failure() {
   local item=""
 
   [[ "$RECORD_LESSONS" == true ]] || return 0
-  [[ "${#FAILS[@]}" -gt 0 ]] || return 0
+  if [[ "${#FAILS[@]}" -eq 0 && "${#RETRO_SOFT_WARNINGS[@]}" -eq 0 ]]; then
+    return 0
+  fi
 
   ts="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
   if [[ ! -f "$lessons_file" ]]; then
@@ -383,13 +393,25 @@ EOF_LESSONS
   fi
 
   {
-    printf '\n## Run Gate Violation — %s\n' "$ts"
+    if [[ "${#FAILS[@]}" -gt 0 ]]; then
+      printf '\n## Run Gate Violation — %s\n' "$ts"
+    else
+      printf '\n## Run Gate Soft Continue — %s\n' "$ts"
+    fi
     printf -- "- Gate checker: \`%s\`\n" "plugins/cwf/scripts/check-run-gate-artifacts.sh"
     printf -- "- Persistence gate: \`%s\`\n" "$PERSISTENCE_GATE"
-    printf -- '- Recorded failures:\n'
-    for item in "${FAILS[@]}"; do
-      printf '  - %s\n' "$item"
-    done
+    if [[ "${#FAILS[@]}" -gt 0 ]]; then
+      printf -- '- Recorded failures:\n'
+      for item in "${FAILS[@]}"; do
+        printf '  - %s\n' "$item"
+      done
+    fi
+    if [[ "${#RETRO_SOFT_WARNINGS[@]}" -gt 0 ]]; then
+      printf -- '- Retro soft-gate omissions (SOFT_CONTINUE):\n'
+      for item in "${RETRO_SOFT_WARNINGS[@]}"; do
+        printf '  - %s\n' "$item"
+      done
+    fi
   } >> "$lessons_file"
 }
 
@@ -507,6 +529,12 @@ echo "  pass        : ${#PASSES[@]}"
 echo "  warn        : ${#WARNS[@]}"
 echo "  fail        : ${#FAILS[@]}"
 echo "  PERSISTENCE_GATE=$PERSISTENCE_GATE"
+if [[ "${#RETRO_SOFT_WARNINGS[@]}" -gt 0 ]]; then
+  echo "  Retro soft-gate omissions (PERSISTENCE_GATE=SOFT_CONTINUE):"
+  for item in "${RETRO_SOFT_WARNINGS[@]}"; do
+    echo "    - $item"
+  done
+fi
 
 for item in "${WARNS[@]}"; do
   echo "[WARN] $item"

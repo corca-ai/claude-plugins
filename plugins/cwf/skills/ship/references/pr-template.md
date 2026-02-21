@@ -34,6 +34,14 @@ The agent reads this file and substitutes `{VARIABLES}` to compose the PR body.
 
 {FUTURE_IMPACT}
 
+## 회고 결과 요약
+
+{RETRO_SUMMARY}
+
+## 영속화 및 후속 제안
+
+{RETRO_PERSIST_PROPOSALS}
+
 <details>
 <summary>상세 아티팩트 (diff stat, lessons, CDM)</summary>
 
@@ -56,6 +64,7 @@ The agent reads this file and substitutes `{VARIABLES}` to compose the PR body.
 - [ ] Code changes match PR description
 - [ ] No unintended file changes
 - [ ] Tests pass (if applicable)
+- [ ] Retro persistence proposals are tracked as follow-up actions/issues
 {CONDITIONAL_ITEMS}
 
 ---

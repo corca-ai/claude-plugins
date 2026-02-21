@@ -104,6 +104,13 @@ Create a GitHub issue for the current session and optionally a feature branch.
      - `{BRANCH}` — the feature branch name to be created
      - `{BASE}` — the base branch
      - `{PLAN_LINK}` — relative path to plan.md
+     - `{RETRO_SUMMARY}` — concise retro outcome summary from `.cwf/projects/{session}/retro.md`
+       - Prefer `Post-Retro Findings` when present
+       - Otherwise synthesize up to 3 bullets from waste/CDM/tools sections
+       - If retro artifact is missing, use `_No retro summary recorded yet._`
+     - `{RETRO_PERSIST_PROPOSALS}` — actionable persistence proposals from retro/lessons
+       - Include owner/apply-layer/target when available
+       - If no actionable proposal exists, use `_No persistence proposal recorded yet._`
    - If plan.md is missing or incomplete, ask the user for the missing fields
 
 3. **Create issue**:
@@ -178,6 +185,13 @@ Create a pull request from the current feature branch.
      otherwise write `_No lessons recorded for this session._`
    - `{CDM}` — extract from `.cwf/projects/{session}/retro.md` CDM section if exists,
      otherwise write `_No CDM recorded yet._`
+   - `{RETRO_SUMMARY}` — concise retro outcome summary from `.cwf/projects/{session}/retro.md`
+     - Prefer `Post-Retro Findings` when present
+     - Otherwise synthesize up to 3 bullets from waste/CDM/tools sections
+     - If retro artifact is missing, use `_No retro summary recorded yet._`
+   - `{RETRO_PERSIST_PROPOSALS}` — actionable persistence proposals from retro/lessons
+     - Include owner/apply-layer/target when available
+     - If no actionable proposal exists, use `_No persistence proposal recorded yet._`
    - `{CONDITIONAL_ITEMS}` — add checklist items based on changed file types:
      - `*.sh` changed → `- [ ] Scripts are executable and pass shellcheck`
      - `SKILL.md` changed → `- [ ] SKILL.md under 500 lines`
@@ -341,6 +355,7 @@ Defaults: base=auto-detected (origin/HEAD -> main -> master), merge=squash
 8. `/ship` must always persist `{session_dir}/ship.md` before returning.
 9. In `defer-blocking` mode, unresolved ambiguity debt is merge-blocking until tracked follow-up references are recorded and `blocking_open_count` is zero.
 10. **Language override**: issue/PR narrative sections are written in the user's language; code blocks, file paths, commit hashes, and CLI output remain verbatim.
+11. `retro` outcomes and persistence proposals must be visible in issue/PR body sections, not only hidden in collapsed details blocks.
 
 ## References
 

@@ -398,8 +398,9 @@ If `invocation_mode=direct` (user-triggered `/retro` or `cwf:retro`):
 
 If `invocation_mode=run_chain`:
 
-- Provide compact 1-2 bullet completion report (pipeline continuity first).
-- Still include a short `Persist Proposals` pointer (at least 1 line) with owner/apply-layer so persistence opportunities are not dropped.
+- Provide compact 2-3 bullet completion report (pipeline continuity first), and include at least one concrete takeaway (waste/root-cause signal, CDM lesson, or next action).
+- Include a short `Persist Proposals` mini-list with 1-2 concrete items that each state owner/apply-layer/target (file or backlog). If no actionable item exists, state that explicitly.
+- Do not ask apply-now questions in run-chain mode; keep this report informative and hand off execution decisions to downstream run/ship flow.
 
 ### 9. Post-Retro Discussion
 

@@ -13,6 +13,7 @@ File-level map for [setup](SKILL.md).
 - [scripts/check-index-coverage.sh](scripts/check-index-coverage.sh): Validates generated index coverage for cap/repo profiles.
 - [scripts/configure-git-hooks.sh](scripts/configure-git-hooks.sh): Installs/removes repo git hooks and applies gate profiles (`fast`, `balanced`, `strict`).
 - [scripts/check-configure-git-hooks-runtime.sh](scripts/check-configure-git-hooks-runtime.sh): Runtime regression check for hook rendering path (`perl`) and deterministic degraded paths (`sed`, `sha-unavailable` marker).
+- [scripts/bootstrap-gate-contract.sh](scripts/bootstrap-gate-contract.sh): Bootstraps repository-local run gate contract (`{artifact_root}/gate-contract.yaml`) with fail-closed stage defaults.
 - [scripts/bootstrap-project-config.sh](scripts/bootstrap-project-config.sh): Bootstraps .cwf-config.yaml + .cwf-config.local.yaml and ensures local config gitignore.
 - [scripts/configure-agent-teams.sh](scripts/configure-agent-teams.sh): Toggles Claude Agent Team runtime mode by editing `~/.claude/settings.json` env key.
 - [scripts/configure-run-mode.sh](scripts/configure-run-mode.sh): Persists `cwf:run` ambiguity mode (`strict|defer-blocking|defer-reversible|explore-worktrees`) into project config.

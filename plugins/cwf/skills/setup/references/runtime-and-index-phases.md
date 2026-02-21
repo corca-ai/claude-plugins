@@ -93,6 +93,22 @@ And summarize:
 - what each hook enforces at that profile
 - resolved contract mode policy (`auto -> portable`) and when to run explicit `authoring`
 
+### 2.7.5 Bootstrap Run Gate Contract
+
+Run:
+
+```bash
+bash {SKILL_DIR}/scripts/bootstrap-gate-contract.sh --json
+```
+
+Interpret `status`:
+- `created|existing|updated`: continue setup and report the resolved `path`
+- `fallback`: stop setup and ask the user to fix path/permission, then rerun phase 2.7
+
+Reporting checklist:
+- print `status`, `path`, and `artifact_root`
+- explicitly mention default fail-closed retro stage policy (`stages.retro: fail`)
+
 ---
 
 ## Phase 2.8: Project Config Bootstrap

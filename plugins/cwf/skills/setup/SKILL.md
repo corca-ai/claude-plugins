@@ -341,6 +341,20 @@ Always report effective hooks state (`core.hooksPath`, installed hooks, selected
 
 Detailed prompts, command templates, and reporting checklist: [runtime-and-index-phases.md](references/runtime-and-index-phases.md).
 
+### 2.7.5 Bootstrap Run Gate Contract (Required)
+
+Bootstrap the run gate contract under artifact root (`{artifact_root}/gate-contract.yaml`), then report status (`created|existing|updated|fallback`) and resolved path.
+
+Run:
+
+```bash
+bash {SKILL_DIR}/scripts/bootstrap-gate-contract.sh --json
+```
+
+Fail-safe:
+- If status is `fallback`, stop setup and ask the user to fix path/permission first.
+- For `created|existing|updated`, confirm that retro stage policy remains fail-closed by default (`stages.retro: fail`) unless the user explicitly changes it later.
+
 ---
 
 ## Phase 2.8: Project Config Bootstrap
@@ -480,6 +494,7 @@ Detailed lessons/checkpoint format: [runtime-and-index-phases.md](references/run
 7. **No fail-open scope fallback**: If scope detection fails or returns `none`, require explicit user scope selection before any Codex mutation.
 8. **Setup-contract first-run invariant**: Full/tools setup must bootstrap setup-contract and explicitly report `created|existing|updated|fallback` status. `fallback` is fail-safe and must halt setup.
 9. **Formatting invariant**: All code fences in this skill must include language specifiers.
+10. **Run gate contract invariant**: Setup must bootstrap run gate contract and report its status/path so external repos do not silently rely on implicit gate defaults.
 
 ## References
 
@@ -496,6 +511,7 @@ Detailed lessons/checkpoint format: [runtime-and-index-phases.md](references/run
 - [verify-skill-links.sh](../../scripts/codex/verify-skill-links.sh) — Codex skill link validation
 - [scripts/configure-git-hooks.sh](scripts/configure-git-hooks.sh) — installs and profiles repository git hook gates
 - [scripts/check-configure-git-hooks-runtime.sh](scripts/check-configure-git-hooks-runtime.sh) — validates configure-git-hooks runtime behavior across profile/force paths
+- [scripts/bootstrap-gate-contract.sh](scripts/bootstrap-gate-contract.sh) — bootstraps repository-local run gate contract (`{artifact_root}/gate-contract.yaml`)
 - [assets/githooks/pre-commit.template.sh](assets/githooks/pre-commit.template.sh) — pre-commit hook template rendered by `configure-git-hooks.sh`
 - [assets/githooks/pre-push.template.sh](assets/githooks/pre-push.template.sh) — pre-push hook template rendered by `configure-git-hooks.sh`
 - [scripts/bootstrap-project-config.sh](scripts/bootstrap-project-config.sh) — project config template/bootstrap and `.gitignore` sync

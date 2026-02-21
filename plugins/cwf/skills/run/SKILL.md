@@ -485,7 +485,7 @@ After all stages complete (or the pipeline is halted):
    fi
    ```
 
-   If any FAIL items are reported, fix them before proceeding. This is a forced function — the pipeline is not complete until all checks pass.
+   If any FAIL items are reported, fix them before proceeding; this is a forced function and the pipeline is not complete until all checks pass. If gate output includes `Retro soft-gate omissions (PERSISTENCE_GATE=SOFT_CONTINUE)`, copy those items into the final pipeline summary under `Retro Gate Follow-ups` (do not compress into a generic warning).
 
 1. Update state:
    - Clear pending gates first:
@@ -517,6 +517,9 @@ After all stages complete (or the pipeline is halted):
 - Retro: {path to retro.md}
 - Stage provenance: {session_dir}/run-stage-provenance.md
 - Session dir: {session_dir}
+
+### Retro Gate Follow-ups
+- {none | each retro soft-gate omission from check-run-gate-artifacts output}
 ```
 
 ---
