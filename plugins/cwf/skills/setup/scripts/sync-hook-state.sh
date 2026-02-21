@@ -202,7 +202,11 @@ replace_hooks_section() {
 
   if [[ ! -f "$state_file_path" ]]; then
     mkdir -p "$(dirname "$state_file_path")"
-    cp "$block_file" "$state_file_path"
+    {
+      cat "$block_file"
+      echo ""
+      echo "sessions: []"
+    } > "$state_file_path"
     return 0
   fi
 
@@ -245,6 +249,14 @@ replace_hooks_section() {
   ' "$state_file_path" > "$tmp_file"
 
   mv "$tmp_file" "$state_file_path"
+}
+
+ensure_sessions_section() {
+  local state_file_path="$1"
+  if grep -Eq '^sessions:[[:space:]]*' "$state_file_path"; then
+    return 0
+  fi
+  printf '\nsessions: []\n' >> "$state_file_path"
 }
 
 read_state_hook_value() {
@@ -398,10 +410,12 @@ fi
 parse_selected_groups "$ENABLED_CSV"
 write_hook_config "$HOOK_CONFIG"
 
+mkdir -p "$(dirname "$STATE_FILE")"
 hooks_block_file="$(mktemp "${STATE_FILE}.hooks.XXXXXX")"
 render_hooks_block > "$hooks_block_file"
 replace_hooks_section "$STATE_FILE" "$hooks_block_file"
 rm -f "$hooks_block_file"
+ensure_sessions_section "$STATE_FILE"
 
 if ! run_check; then
   exit 1

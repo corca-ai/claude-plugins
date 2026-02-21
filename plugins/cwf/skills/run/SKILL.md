@@ -24,6 +24,61 @@ Operational note:
 
 ---
 
+## Namespace Routing Guard (Required)
+
+If user input contains the token `cwf:run` anywhere, keep execution strictly in this CWF run skill.
+
+- Detect by token match, not prefix-only string checks.
+- Match the whole token `cwf:run` (with optional flags/arguments), not loose `cwf` substrings.
+- Do not substitute similarly named run flows from other plugins.
+- If routing is uncertain, emit `WAIT_INPUT` instead of switching skill families.
+
+## Non-Interactive Fail-Fast Policy (Required)
+
+When interactive confirmation is unavailable, do not continue with inferred defaults for setup/readiness gates.
+
+Mandatory behavior:
+
+1. Evaluate setup readiness first (Phase 0).
+2. If readiness is not satisfied, stop immediately before stage initialization.
+3. Print a deterministic waiting response with exact next actions.
+4. End the turn immediately after the waiting response.
+
+Standard response header:
+
+```text
+WAIT_INPUT: run requires setup readiness before pipeline initialization.
+```
+
+Always include:
+
+```text
+Run `cwf:setup` first, then retry `cwf:run`.
+```
+
+---
+
+## Phase 0: Setup Readiness Preflight
+
+Before initializing pipeline state, validate that repository setup prerequisites exist.
+
+1. Run deterministic readiness check:
+
+   ```bash
+   bash {CWF_PLUGIN_DIR}/scripts/check-setup-readiness.sh --base-dir . --summary
+   ```
+
+1. If check fails, do not initialize live state and do not create run artifacts.
+1. Return deterministic waiting output:
+
+   ```text
+   WAIT_INPUT: run requires setup readiness before pipeline initialization.
+   Missing setup prerequisites were detected.
+   Run `cwf:setup` first, then retry `cwf:run`.
+   ```
+
+---
+
 ## Phase 1: Initialize
 
 1. Parse task description and flags (`--from`, `--skip`, `--ambiguity-mode`)
@@ -480,6 +535,7 @@ After all stages complete (or the pipeline is halted):
 1. **Worktree consistency gate**: During an active pipeline, if current worktree root diverges from `live.worktree_root`, stop immediately and request explicit user decision before any write/edit/ship action.
 1. **Fail-closed run gates**: While `active_pipeline="cwf:run"` and `remaining_gates` includes `review-code`, ship/push/commit intents must be blocked unless `pipeline_override_reason` is explicitly set.
 1. **Artifact gate is mandatory for stage closure**: `review-code`, `refactor`, `retro`, and `ship` are not complete unless `check-run-gate-artifacts.sh --strict` passes for that stage.
+1. **Setup readiness is mandatory before run init**: `cwf:run` must execute `check-setup-readiness.sh` and halt with `WAIT_INPUT` when prerequisites are missing.
 1. **Ambiguity mode precedence**: `--ambiguity-mode` flag overrides config. Config (`CWF_RUN_AMBIGUITY_MODE`) overrides built-in default (`defer-blocking`).
 1. **Defer modes require persistence**: Any non-`strict` T3 carry-over must be recorded in `{session_dir}/run-ambiguity-decisions.md` and synchronized to `live.blocking_decisions_pending` via `sync-ambiguity-debt.sh`.
 1. **defer-blocking merge discipline**: If unresolved blocking debt exists, ship must treat it as merge-blocking until linked issue/PR follow-up is recorded and blocking count reaches zero.
@@ -490,3 +546,4 @@ After all stages complete (or the pipeline is halted):
 
 - [agent-patterns.md](../../references/agent-patterns.md) — Shared agent orchestration patterns
 - [plan-protocol.md](../../references/plan-protocol.md) — Session artifact location/protocol
+- [check-setup-readiness.sh](../../scripts/check-setup-readiness.sh) — Deterministic setup preflight guard for `cwf:run`

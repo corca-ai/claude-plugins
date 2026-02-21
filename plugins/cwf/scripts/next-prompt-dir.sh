@@ -174,6 +174,16 @@ session_entry_exists() {
   ' "$state_file"
 }
 
+ensure_sessions_key() {
+  local state_file="$1"
+
+  if grep -Eq '^sessions:[[:space:]]*' "$state_file"; then
+    return 0
+  fi
+
+  printf '\nsessions: []\n' >> "$state_file"
+}
+
 append_session_entry() {
   local state_file="$1"
   local session_id="$2"
@@ -268,6 +278,8 @@ EOF
   if [[ ! -f "$state_file" ]]; then
     return 0
   fi
+
+  ensure_sessions_key "$state_file"
 
   if ! grep -Eq '^sessions:[[:space:]]*($|\[[[:space:]]*\][[:space:]]*)(#.*)?$' "$state_file"; then
     return 0

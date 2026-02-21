@@ -441,7 +441,7 @@ CWF는 자동으로 실행되는 9개 훅 그룹을 포함합니다. 모두 기�
 | `lint_markdown` | PostToolUse → Write\|Edit | 마크다운 린트 + 로컬 링크 검증 -- 린트 위반 시 자동 수정 유도, 깨진 링크 비동기 보고 |
 | `lint_shell` | PostToolUse → Write\|Edit | 셸 스크립트용 ShellCheck 검증 |
 | `deletion_safety` | PreToolUse → Bash | 위험한 삭제 명령을 차단하고 정책 준수 근거를 요구 |
-| `workflow_gate` | UserPromptSubmit | `cwf:run` 게이트가 남아 있으면 ship/push/merge 의도를 차단 |
+| `workflow_gate` | UserPromptSubmit | setup 선행 조건이 없으면 `cwf:run`을 차단하고, `cwf:run` 게이트가 남아 있으면 ship/push/merge 의도를 차단 |
 | `websearch_redirect` | PreToolUse → WebSearch | Claude의 WebSearch를 `cwf:gather --search`로 리다이렉트 |
 | `compact_recovery` | SessionStart → compact, UserPromptSubmit | auto-compact 후 라이브 상태를 주입하고, 프롬프트 제출 시 세션-워크트리 바인딩 불일치를 차단 |
 

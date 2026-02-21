@@ -470,7 +470,7 @@ CWF includes 9 hook groups that run automatically. All are enabled by default; u
 | `lint_markdown` | PostToolUse → Write\|Edit | Markdown lint + local link validation — lint violations trigger self-correction, broken links reported async |
 | `lint_shell` | PostToolUse → Write\|Edit | ShellCheck validation for shell scripts |
 | `deletion_safety` | PreToolUse → Bash | Block risky deletion commands and require policy-compliant justification |
-| `workflow_gate` | UserPromptSubmit | Block ship/push/merge intents when run-stage gates are unresolved |
+| `workflow_gate` | UserPromptSubmit | Block `cwf:run` when setup prerequisites are missing, and block ship/push/merge intents when run-stage gates are unresolved |
 | `websearch_redirect` | PreToolUse → WebSearch | Redirect Claude's WebSearch to `cwf:gather --search` |
 | `compact_recovery` | SessionStart → compact, UserPromptSubmit | Inject live session state after auto-compact and guard session↔worktree binding on prompts |
 

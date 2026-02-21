@@ -147,6 +147,41 @@ else
   fail "plugin bootstrap expands inline empty sessions into block format"
 fi
 
+STATE_FILE_NO_SESSIONS="$TMP_DIR/cwf-state-no-sessions.yaml"
+cat > "$STATE_FILE_NO_SESSIONS" <<'EOF'
+workflow:
+  current_stage: harden
+tools: {}
+hooks: {}
+live:
+  session_id: ""
+  dir: ""
+  branch: ""
+  phase: ""
+  task: ""
+EOF
+
+plugin_bootstrap_no_sessions_path="$(
+  CWF_PROJECTS_DIR="$PROJECTS_DIR" \
+  CWF_STATE_FILE="$STATE_FILE_NO_SESSIONS" \
+  CWF_NEXT_PROMPT_DATE=260214 \
+  bash "$PLUGIN_SCRIPT" --bootstrap boot-no-sessions
+)"
+expected_plugin_bootstrap_no_sessions="$PROJECTS_DIR/260214-05-boot-no-sessions"
+assert_eq "plugin bootstrap returns resolved path when sessions key is missing" "$expected_plugin_bootstrap_no_sessions" "$plugin_bootstrap_no_sessions_path"
+
+if grep -Eq '^sessions:[[:space:]]*$' "$STATE_FILE_NO_SESSIONS"; then
+  pass "plugin bootstrap creates sessions key when missing"
+else
+  fail "plugin bootstrap creates sessions key when missing"
+fi
+
+if grep -Fq "dir: \"$expected_plugin_bootstrap_no_sessions\"" "$STATE_FILE_NO_SESSIONS"; then
+  pass "plugin bootstrap registers session dir when sessions key was missing"
+else
+  fail "plugin bootstrap registers session dir when sessions key was missing"
+fi
+
 set +e
 CWF_PROJECTS_DIR="$PROJECTS_DIR" CWF_NEXT_PROMPT_DATE=2026-02-14 bash "$PLUGIN_SCRIPT" bad >/dev/null 2>&1
 invalid_status=$?

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# workflow-gate.sh — UserPromptSubmit gate for active cwf:run workflows.
-# Emits status warnings and blocks ship/push/commit intents while critical gates remain.
+# workflow-gate.sh — UserPromptSubmit gate for cwf:run workflows.
+# Emits status warnings, blocks cwf:run when setup prerequisites are missing,
+# and blocks ship/push/commit intents while critical run gates remain.
 
 HOOK_GROUP="workflow_gate"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -12,9 +13,11 @@ INPUT="$(cat)"
 PLUGIN_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 LIVE_STATE_SCRIPT="$PLUGIN_ROOT/scripts/cwf-live-state.sh"
 ARTIFACT_PATHS_SCRIPT="$PLUGIN_ROOT/scripts/cwf-artifact-paths.sh"
+SETUP_READINESS_SCRIPT="$PLUGIN_ROOT/scripts/check-setup-readiness.sh"
 BLOCKED_ACTION_REGEX='(^|[[:space:]])(cwf:ship|/ship|git[[:space:]]+push|git[[:space:]]+merge|'
 BLOCKED_ACTION_REGEX+='gh[[:space:]]+pr[[:space:]]+create|gh[[:space:]]+pr[[:space:]]+merge|'
 BLOCKED_ACTION_REGEX+='커밋해|푸시해|배포해)([[:space:]]|$)'
+RUN_COMMAND_REGEX='^[[:space:]]*cwf:run([[:space:]]|$)'
 RUN_CLOSING_GATES=(review-code refactor retro ship)
 
 json_block() {
@@ -115,14 +118,26 @@ prompt_requests_blocked_action() {
   printf '%s' "$prompt" | grep -Eiq "$BLOCKED_ACTION_REGEX"
 }
 
+prompt_requests_run_command() {
+  local prompt="$1"
+  printf '%s' "$prompt" | grep -Eiq "$RUN_COMMAND_REGEX"
+}
+
 PROMPT="$(extract_json_field "$INPUT" "prompt")"
 SESSION_ID="$(extract_json_field "$INPUT" "session_id")"
 BLOCKED_REQUEST="false"
+RUN_REQUEST="false"
 if prompt_requests_blocked_action "$PROMPT" || prompt_requests_blocked_action "$INPUT"; then
   BLOCKED_REQUEST="true"
 fi
+if prompt_requests_run_command "$PROMPT"; then
+  RUN_REQUEST="true"
+fi
 
 if ! command -v jq >/dev/null 2>&1; then
+  if [[ "$RUN_REQUEST" == "true" ]]; then
+    json_block "BLOCKED: workflow gate dependency missing (jq). Run cwf:setup after installing jq, then retry cwf:run."
+  fi
   if [[ "$BLOCKED_REQUEST" == "true" ]]; then
     json_block "BLOCKED: workflow gate dependency missing (jq). Protected actions are denied until jq is available."
   fi
@@ -130,6 +145,9 @@ if ! command -v jq >/dev/null 2>&1; then
 fi
 
 if [[ ! -f "$LIVE_STATE_SCRIPT" ]]; then
+  if [[ "$RUN_REQUEST" == "true" ]]; then
+    json_block "BLOCKED: workflow gate dependency missing (${LIVE_STATE_SCRIPT}). Reinstall CWF before cwf:run."
+  fi
   if [[ "$BLOCKED_REQUEST" == "true" ]]; then
     json_block "BLOCKED: workflow gate dependency missing (${LIVE_STATE_SCRIPT}). Protected actions are denied."
   fi
@@ -137,6 +155,22 @@ if [[ ! -f "$LIVE_STATE_SCRIPT" ]]; then
 fi
 
 BASE_DIR="$(resolve_base_dir "$INPUT")"
+
+if [[ "$RUN_REQUEST" == "true" ]]; then
+  if [[ ! -x "$SETUP_READINESS_SCRIPT" ]]; then
+    json_block "BLOCKED: setup readiness checker missing (${SETUP_READINESS_SCRIPT}). Reinstall CWF and run cwf:setup before cwf:run."
+  fi
+
+  set +e
+  setup_readiness_summary="$(bash "$SETUP_READINESS_SCRIPT" --base-dir "$BASE_DIR" --summary 2>&1)"
+  setup_readiness_rc=$?
+  set -e
+
+  if [[ "$setup_readiness_rc" -ne 0 ]]; then
+    setup_readiness_summary="$(printf '%s' "$setup_readiness_summary" | tr '\n' ' ' | sed 's/[[:space:]]\+/ /g; s/[[:space:]]$//')"
+    json_block "BLOCKED: cwf:run requires setup readiness (${setup_readiness_summary}). Run 'cwf:setup' first."
+  fi
+fi
 
 LIVE_STATE_FILE="$(bash "$LIVE_STATE_SCRIPT" resolve "$BASE_DIR" 2>/dev/null || true)"
 if [[ -z "$LIVE_STATE_FILE" || ! -f "$LIVE_STATE_FILE" ]]; then

@@ -17,6 +17,7 @@ This file maps scripts under [plugins/cwf/scripts](.).
 - [check-shared-reference-conformance.sh](check-shared-reference-conformance.sh): Verifies shared output-persistence reference adoption across composing skills and duplication threshold.
 - [check-run-gate-artifacts.sh](check-run-gate-artifacts.sh): Validates stage artifacts for `cwf:run` gate closure (`review-code`, `refactor`, `retro`, `ship`) with contract-driven stage/policy modes (session/project/explicit contract priority), and can append gate failures to `lessons.md`.
 - [check-run-gate-artifacts-lib.sh](check-run-gate-artifacts-lib.sh): Shared helper functions for `check-run-gate-artifacts.sh`.
+- [check-setup-readiness.sh](check-setup-readiness.sh): Deterministically validates `cwf:run` prerequisites (state/setup-contract/config/run-mode) and emits fail-closed readiness summaries.
 - [bootstrap-review-code-artifacts.sh](bootstrap-review-code-artifacts.sh): Scaffolds required `review-code` artifacts (`review-*.md`, synthesis skeleton) for deterministic gate closure preparation.
 - [sync-ambiguity-debt.sh](sync-ambiguity-debt.sh): Synchronizes and validates `live.blocking_decisions_pending` against `run-ambiguity-decisions.md` for deterministic defer-mode debt handling.
 - [check-session-lib.sh](check-session-lib.sh): Shared helper functions for `check-session.sh`.

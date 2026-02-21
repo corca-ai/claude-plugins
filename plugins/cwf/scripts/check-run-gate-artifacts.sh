@@ -256,41 +256,48 @@ check_ship_stage() {
   local blocking_open_count_raw=""
   local blocking_open_count=0
   local merge_allowed=""
-  local stage_provenance_row_pattern=""
-
-  stage_provenance_row_pattern+='^\| Stage \| Skill \| Args \| Started At \(UTC\) \|'
-  stage_provenance_row_pattern+=' Finished At \(UTC\) \| Duration \(s\) \| Artifacts \|'
-  stage_provenance_row_pattern+=' Gate Outcome \|$'
+  local stage_provenance_header_seen=0
+  local stage_provenance_schema_seen=0
 
   ensure_nonempty_file "$stage" "$stage_provenance_file" || true
   if [[ -s "$stage_provenance_file" ]]; then
     if grep -Fqx "$stage_provenance_header" "$stage_provenance_file"; then
       append_pass "$stage" "stage provenance header contract present"
+      stage_provenance_header_seen=1
     else
       append_fail "$stage" "run-stage-provenance.md missing required header row"
     fi
 
     if grep -Fqx "$stage_provenance_schema" "$stage_provenance_file"; then
       append_pass "$stage" "stage provenance schema divider present"
+      stage_provenance_schema_seen=1
     else
       append_fail "$stage" "run-stage-provenance.md missing required schema divider row"
     fi
 
-    stage_provenance_row_count="$(awk -v header_pattern="$stage_provenance_row_pattern" '
-      $0 ~ header_pattern { header_seen=1; next }
-      header_seen && /^\|---\|---\|---\|---\|---\|---\|---\|---\|$/ { schema_seen=1; next }
-      schema_seen && /^\|.*\|$/ {
-        pipes = gsub(/\|/, "&")
-        if (pipes == 9) {
-          count += 1
+    if [[ "$stage_provenance_header_seen" -eq 1 && "$stage_provenance_schema_seen" -eq 1 ]]; then
+      stage_provenance_row_count="$(awk -v header_row="$stage_provenance_header" -v schema_row="$stage_provenance_schema" '
+        $0 == header_row { header_seen=1; next }
+        header_seen && $0 == schema_row { schema_seen=1; next }
+        schema_seen && /^\|.*\|$/ {
+          row = $0
+          pipe_count = gsub(/\|/, "", row)
+          if (pipe_count == 9) {
+            split($0, cols, "|")
+            stage_value = cols[2]
+            gsub(/^[[:space:]]+|[[:space:]]+$/, "", stage_value)
+            if (stage_value != "" && stage_value !~ /^-+$/) {
+              count += 1
+            }
+          }
         }
-      }
-      END { print count + 0 }
-    ' "$stage_provenance_file")"
-    if [[ "$stage_provenance_row_count" -gt 0 ]]; then
-      append_pass "$stage" "stage provenance has at least one data row"
-    else
-      append_fail "$stage" "run-stage-provenance.md must include at least one data row"
+        END { print count + 0 }
+      ' "$stage_provenance_file")"
+      if [[ "$stage_provenance_row_count" -gt 0 ]]; then
+        append_pass "$stage" "stage provenance has at least one data row"
+      else
+        append_fail "$stage" "run-stage-provenance.md must include at least one data row"
+      fi
     fi
   fi
 
