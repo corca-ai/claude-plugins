@@ -213,244 +213,31 @@ updated_at: {ISO-8601 UTC}
 
 #### `explore-worktrees` operational flow
 
-When `mode=explore-worktrees` and unresolved T3 alternatives exist, use this concrete workflow:
-
-1. Create a deterministic worktree workspace under the session directory:
-
-   ```bash
-   session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . dir)
-   wt_root="$session_dir/worktrees"
-   mkdir -p "$wt_root"
-   ```
-
-1. For each alternative `{option_slug}`, create a dedicated branch + worktree:
-
-   ```bash
-   branch_name="run/t3-{decision_id}-{option_slug}"
-   worktree_path="$wt_root/{decision_id}-{option_slug}"
-   git worktree add -b "$branch_name" "$worktree_path" HEAD
-   ```
-
-1. Execute the minimal downstream validation path in each worktree (usually `plan` + `review-plan`, or targeted `impl` delta) and capture artifacts per option.
-1. Select a baseline option and record the choice in `run-ambiguity-decisions.md` (decision ID, selected branch/worktree, rationale, follow-up).
-1. Reconcile and clean up:
-   - Keep baseline changes on the main pipeline branch via merge/cherry-pick.
-   - Remove non-baseline worktrees and branches after confirming no needed uncommitted work remains:
-
-     ```bash
-     dirty_status=$(git -C "{worktree_path}" status --porcelain)
-     if [[ -n "$dirty_status" ]]; then
-       echo "WORKTREE_DIRTY: {worktree_path}"
-       echo "$dirty_status"
-       # Ask user whether to keep, commit/stash, or explicitly allow discard before cleanup.
-     else
-       git worktree remove "{worktree_path}"
-       if ! git branch -d "run/t3-{decision_id}-{option_slug}"; then
-         echo "BRANCH_NOT_MERGED: run/t3-{decision_id}-{option_slug}"
-         # Ask user whether to keep branch for follow-up or explicitly allow force-delete.
-       fi
-     fi
-     ```
-
-   - Keep a non-baseline branch only if explicitly recorded as deferred follow-up.
+Use the deterministic worktree creation/validation/reconcile flow from [references/stage-operations.md](references/stage-operations.md#explore-worktrees-operational-flow).
 
 ### Stage Execution Loop
 
-For each stage (respecting `--from` and `--skip` flags):
-
-1. Verify worktree consistency (compact/restart safety gate):
-
-   ```bash
-   live_state_file=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh resolve .)
-   expected_worktree=$(awk '
-     /^live:/ { in_live=1; next }
-     in_live && /^[^[:space:]]/ { exit }
-     in_live && /^[[:space:]]{2}worktree_root:[[:space:]]*/ {
-       sub(/^[[:space:]]{2}worktree_root:[[:space:]]*/, "", $0)
-       gsub(/^[\"\047]|[\"\047]$/, "", $0)
-       print $0
-       exit
-     }
-   ' "$live_state_file")
-   current_worktree=$(git rev-parse --show-toplevel)
-   if [[ -n "$expected_worktree" && "$expected_worktree" != "$current_worktree" ]]; then
-     echo "WORKTREE_MISMATCH: expected $expected_worktree, got $current_worktree"
-     # Halt and ask user before continuing
-   fi
-   ```
-
-1. Update phase using the live-state helper:
-
-   ```bash
-   bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh set . phase="{current stage name}"
-   bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh list-set . \
-     remaining_gates="{remaining gate stages in order}"
-   ```
-1. For stages that consume session logs (`review-code`, `retro`, `ship`), run a best-effort Codex sync immediately before invocation:
-
-   ```bash
-   if [[ "{current stage name}" == "review-code" || "{current stage name}" == "retro" || "{current stage name}" == "ship" ]]; then
-     bash {CWF_PLUGIN_DIR}/scripts/codex/sync-session-logs.sh --cwd "$PWD" --quiet || true
-   fi
-   ```
-1. Invoke the skill using the Skill tool:
-
-   ```bash
-   stage_started_at=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-   stage_started_epoch=$(date -u +%s)
-   # invoke stage skill
-   Skill(skill="{skill-name}", args="{args if any}")
-   stage_finished_at=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-   stage_finished_epoch=$(date -u +%s)
-   stage_duration_s=$((stage_finished_epoch - stage_started_epoch))
-   ```
-
-1. If current stage is `clarify`, apply ambiguity-mode handling:
-
-   1. Resolve session dir and ambiguity file path:
-
-      ```bash
-      session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . dir)
-      mode=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . ambiguity_mode)
-      ambiguity_file=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . ambiguity_decisions_file)
-      ```
-
-   1. Determine whether clarify left unresolved T3 debt (use clarify summary/artifacts and explicit T3 table).
-   1. Apply mode behavior:
-      - `strict`: halt and ask user for each unresolved T3 item before proceeding.
-      - `defer-blocking`: record autonomous decision + follow-up in `run-ambiguity-decisions.md`; set `blocking_decisions_pending="true"` if any blocking items remain open.
-      - `defer-reversible`: record autonomous decision + reversible structure note; keep `blocking_decisions_pending="false"` unless user explicitly marks an item as blocking.
-      - `explore-worktrees`: evaluate alternatives in separate worktrees; record comparison + final choice; set blocking flag based on remaining open debt.
-   1. Synchronize live state:
-
-      ```bash
-      bash {CWF_PLUGIN_DIR}/scripts/sync-ambiguity-debt.sh \
-        --base-dir . \
-        --session-dir "$session_dir"
-      ```
-
-1. Enforce deterministic stage-artifact gate for run-closing stages (`review-code`, `refactor`, `retro`, `ship`):
-
-   ```bash
-   session_dir=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh get . dir)
-   bash {CWF_PLUGIN_DIR}/scripts/check-run-gate-artifacts.sh \
-     --session-dir "$session_dir" \
-     --stage "{current stage name}" \
-     --strict \
-     --record-lessons
-   ```
-
-   - If this gate fails, stop immediately.
-   - Report the failure to the user with file-level details.
-   - Ask the user whether to revise and re-run the stage.
-
-1. After skill completes, apply the gate:
-
-#### User Gates (auto: false)
-
-Ask the user with `AskUserQuestion`:
-
-```text
-{stage} complete. How to proceed?
-```
-
-Options:
-- **Proceed** — continue to next stage
-- **Revise** — re-run the current stage (with user's feedback as additional context)
-- **Skip next** — skip the next stage and continue
-- **Stop** — halt the pipeline
-
-Clarify-stage exception:
-- If stage is `clarify` and `ambiguity_mode` is `strict`, unresolved T3 items must be resolved with the user before `Proceed`.
-- If stage is `clarify` and mode is not `strict`, T3 debt may continue only after `run-ambiguity-decisions.md` is updated and `blocking_decisions_pending` is synchronized.
-
-#### Auto Gates (auto: true)
-
-For review stages, check the verdict:
-- **Pass** or **Conditional Pass** — proceed automatically
-- **Revise** — attempt auto-fix (see Review Failure Handling)
-- **Fail** — hard-stop the pipeline; summarize blocking findings and ask the user how to proceed
-
-For non-review auto stages (impl, refactor, retro) — proceed automatically.
-
-#### Stage Provenance Checklist (Required)
-
-Append exactly one row to `{session_dir}/run-stage-provenance.md` for every stage outcome (`Proceed`, `Revise`, `Fail`, `Skipped`, `User Stop`), including early-stop paths before halting.
-
-- `Stage`: current stage name
-- `Skill` and `Args`: invoked skill + resolved args
-- `Started At (UTC)` / `Finished At (UTC)` / `Duration (s)`
-- `Artifacts`: key output paths produced by this stage (or `—`)
-- `Gate Outcome`: `Proceed`, `Revise`, `Fail`, `Skipped`, or `User Stop`
-
-Append format:
-
-```bash
-printf '| %s | %s | %s | %s | %s | %s | %s | %s |\n' \
-  "{stage}" "{skill}" "{args}" \
-  "$stage_started_at" "$stage_finished_at" "$stage_duration_s" \
-  "{artifact_paths_or_dash}" "{gate_outcome}" \
-  >> "{session_dir}/run-stage-provenance.md"
-```
-
-For skip or pre-invocation stop paths (for example `WORKTREE_MISMATCH`, review hard-stop, or user-selected `Stop`), set unavailable timing/skill fields to `—` and still append before exit.
+For each stage (respecting `--from` and `--skip`), execute deterministic loop from [references/stage-operations.md](references/stage-operations.md#stage-execution-loop), including:
+- worktree consistency gate
+- live-state phase + remaining gate updates
+- best-effort session-log sync for `review-code|retro|ship`
+- stage invocation timing capture
+- clarify-stage ambiguity synchronization
+- run-closing artifact gate (`check-run-gate-artifacts.sh --strict`)
+- user/auto gate handling
+- mandatory stage-provenance row append for all outcomes
 
 ### Review Failure Handling
 
-When a review returns **Revise**:
-
-1. Extract the concerns from the review output
-1. If the failed review was `review-plan`:
-   - Re-invoke `cwf:plan` with concerns as additional context
-   - Re-invoke `cwf:review --mode plan`
-   - If still Revise: halt and ask user
-1. If the failed review was `review-code`:
-   - Create a fix plan from the concerns
-   - Re-invoke `cwf:impl` with the fix plan
-   - Re-invoke `cwf:review --mode code`
-   - If still Revise: halt and ask user
-
-Maximum 1 auto-fix attempt per review stage. After that, escalate to user.
-
-When a review returns **Fail**:
-
-1. Do not auto-fix or auto-retry.
-1. Halt pipeline progression immediately.
-1. Report fail reasons with file-level references and the stage name.
-1. Ask user for an explicit decision: `Revise plan/code`, `Skip downstream stages`, or `Stop`.
-1. Keep `remaining_gates` unchanged until the user explicitly resolves the fail path.
+Use deterministic Revise/Fail handling from [references/stage-operations.md](references/stage-operations.md#review-failure-handling). Invariant: max 1 auto-fix attempt for `Revise`; `Fail` always hard-stops and requires explicit user decision.
 
 ### --from Flag
 
-When `--from <stage>` is provided:
-
-1. Skip all stages before `<stage>`
-1. Run deterministic prerequisite gate:
-
-   ```bash
-   bash {CWF_PLUGIN_DIR}/scripts/check-run-from-prereqs.sh --from "<stage>" --base-dir .
-   ```
-
-1. Use checker result as the authority:
-   - `--from impl`: requires non-empty `{session_dir}/plan.md`
-   - `--from review-code`: requires `impl` stage row (`outcome != Skipped`) and clean tracked git working tree
-   - `--from refactor`: requires `review-code` stage row (`outcome != Skipped`)
-   - `--from retro`: requires `refactor` stage row (run or `Skipped`)
-   - `--from ship`: requires `retro` stage row (run or `Skipped`)
-1. If checker fails, print missing checks verbatim and ask user whether to proceed anyway.
-1. If user explicitly overrides, record reason in live state (`pipeline_override_reason`) before continuing.
+Follow deterministic precheck path in [references/stage-operations.md](references/stage-operations.md#--from-flag). `check-run-from-prereqs.sh` output is authoritative for prerequisite pass/fail.
 
 ### --skip Flag
 
-When `--skip <stage1>,<stage2>` is provided:
-
-1. Mark listed stages as skipped in the pipeline
-1. During execution, skip them and proceed to the next stage
-1. Report each skip:
-
-```text
-Skipping {stage} (--skip flag).
-```
+Follow deterministic skip behavior in [references/stage-operations.md](references/stage-operations.md#--skip-flag).
 
 ---
 
@@ -559,3 +346,4 @@ After all stages complete (or the pipeline is halted):
 - [plan-protocol.md](../../references/plan-protocol.md) — Session artifact location/protocol
 - [check-setup-readiness.sh](../../scripts/check-setup-readiness.sh) — Deterministic setup preflight guard for `cwf:run`
 - [check-run-from-prereqs.sh](../../scripts/check-run-from-prereqs.sh) — Deterministic `--from` prerequisite gate for stage resume safety
+- [references/stage-operations.md](references/stage-operations.md) — Detailed stage loop, ambiguity worktree flow, and review-failure handling
