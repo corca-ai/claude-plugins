@@ -346,12 +346,24 @@ Keep entries concise and in the user's language.
 
 ### 3b.4 Result Collection
 
-For each completed agent:
+For each completed agent, append a structured result record (session artifact):
+
+- path: `{session_dir}/impl-result-provenance.md`
+- shape: one row per agent output (including failures)
+
+For each row, capture:
 
 1. Record which steps were completed
 2. Note any files created or modified
 3. Capture any issues or deviations reported by the agent
-4. If an agent reports failure, record the failure and continue with other agents
+4. Capture provenance metadata (required):
+   - `source` (`REAL_EXECUTION` | `CACHED` | `FALLBACK`)
+   - `tool` (for example `claude-task`, `codex`, `gemini`)
+   - `agent_id` (or slot identifier)
+   - `started_at_utc`, `finished_at_utc`, `duration_ms`
+5. If an agent reports failure, record the failure with the same provenance fields and continue with other agents
+
+If any provenance field is unavailable, persist `—` explicitly (never omit key columns).
 
 ---
 
