@@ -4,6 +4,18 @@ Detailed procedure reference for setup-contract generation and approval in `cwf:
 
 `SKILL.md` remains the workflow router and invariant contract. Use this file for concrete command templates, status handling, and prompt text.
 
+## Contents
+
+- [Goal](#goal)
+- [Hook Policy Field](#hook-policy-field)
+- [Hook Extension Field](#hook-extension-field)
+- [Policy Decision: Portable vs Authoring Contracts](#policy-decision-portable-vs-authoring-contracts)
+- [Contract Location and Status](#contract-location-and-status)
+- [First-Run Flow (Required)](#first-run-flow-required)
+- [Install Path](#install-path)
+- [Fallback Behavior](#fallback-behavior)
+- [Runtime Validation](#runtime-validation)
+
 ## Goal
 
 Generate a repository-local setup contract on first setup so `cwf:setup` can:

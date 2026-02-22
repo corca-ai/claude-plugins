@@ -552,11 +552,10 @@ CWF_SESSION_LOG_AUTO_COMMIT=true                   # default: false
 # CWF_STATE_FILE=".cwf/custom-state.yaml"          # default: {CWF_ARTIFACT_ROOT}/cwf-state.yaml
 ```
 
-Legacy env migration is intentionally out of the default `cwf:setup` flow in v3. If you are upgrading from pre-v3 keys (`CLAUDE_CORCA_*`, `CLAUDE_ATTENTION_*`), run this prompt in Claude Code / Codex:
+Legacy env migration is intentionally out of the default `cwf:setup` flow in v3. If you are upgrading from pre-v3 keys (`CLAUDE_CORCA_*`, `CLAUDE_ATTENTION_*`), migrate manually by copying needed values to the current `CWF_*` keys, then run:
 
-```text
-I upgraded from a pre-v3 CWF setup and may still have legacy CLAUDE_CORCA_* / CLAUDE_ATTENTION_* env vars.
-Please detect my installed CWF plugin path, run migrate-env-vars.sh --scan, show the migration candidates, and ask for confirmation before running --apply --cleanup-legacy --include-placeholders.
+```bash
+bash plugins/cwf/scripts/check-setup-readiness.sh --base-dir . --summary
 ```
 
 ## License

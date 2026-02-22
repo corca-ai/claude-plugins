@@ -4,6 +4,18 @@ Detailed procedure reference for setup Phase 2 (tool detection, dependency promp
 
 `SKILL.md` remains the routing and invariant contract. Use this file for concrete checks, AskUserQuestion text, and command templates.
 
+## Contents
+
+- [Phase 2: External Tool Detection](#phase-2-external-tool-detection)
+- [2.1 Check Tools](#21-check-tools)
+- [2.2 Update cwf-state.yaml](#22-update-cwf-stateyaml)
+- [2.3 Report Results](#23-report-results)
+- [2.3.1 Missing Dependency Install Prompt (Required)](#231-missing-dependency-install-prompt-required)
+- [2.3.2 Retry Check (After Install Attempt)](#232-retry-check-after-install-attempt)
+- [2.3.3 Post-Install Re-Detection + `cwf-state.yaml` Rewrite (Required)](#233-post-install-re-detection--cwf-stateyaml-rewrite-required)
+- [2.3.4 Setup Contract Bootstrap and Repo-Tool Proposal (Required for full/tools setup)](#234-setup-contract-bootstrap-and-repo-tool-proposal-required-for-fulltools-setup)
+- [2.3.5 agent-browser Capability Install Prompt (Optional)](#235-agent-browser-capability-install-prompt-optional)
+
 ## Phase 2: External Tool Detection
 
 Detect availability of external AI/search/browser tools and local runtime dependencies used by CWF checks/skills.

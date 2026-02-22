@@ -523,12 +523,10 @@ CWF_SESSION_LOG_AUTO_COMMIT=true                    # 기본값: false
 # CWF_STATE_FILE=".cwf/custom-state.yaml"           # 기본값: {CWF_ARTIFACT_ROOT}/cwf-state.yaml
 ```
 
-v3에서는 레거시 env 마이그레이션을 기본 `cwf:setup` 흐름에서 분리했습니다. v3 이전 키(`CLAUDE_CORCA_*`, `CLAUDE_ATTENTION_*`)를 쓰던 사용자라면 Claude Code / Codex에서 아래 프롬프트를 실행하세요.
+v3에서는 레거시 env 마이그레이션을 기본 `cwf:setup` 흐름에서 분리했습니다. v3 이전 키(`CLAUDE_CORCA_*`, `CLAUDE_ATTENTION_*`)를 사용 중이라면 필요한 값을 현재 `CWF_*` 키로 수동 이전한 뒤, 아래 명령으로 상태를 확인하세요.
 
-```text
-pre-v3 CWF 환경에서 업그레이드해서 CLAUDE_CORCA_* / CLAUDE_ATTENTION_* 레거시 env 키가 남아 있을 수 있습니다.
-설치된 CWF 플러그인 경로를 자동으로 찾고, migrate-env-vars.sh --scan 결과를 먼저 보여준 다음,
---apply --cleanup-legacy --include-placeholders 실행 전에 확인을 요청해 주세요.
+```bash
+bash plugins/cwf/scripts/check-setup-readiness.sh --base-dir . --summary
 ```
 
 ## 라이선스

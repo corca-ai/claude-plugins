@@ -323,44 +323,20 @@ Use this phase when:
 - Mode is full setup (`cwf:setup`)
 - User runs `cwf:setup --git-hooks ...`
 
-### 2.7.1 Resolve Install Mode
+Mandatory execution order:
+1. Resolve hook install mode (`--git-hooks` or AskUserQuestion).
+2. Resolve gate profile (`fast|balanced|strict`) unless mode is `none`.
+3. Apply [scripts/configure-git-hooks.sh](scripts/configure-git-hooks.sh).
+4. Bootstrap run gate contract:
 
-Resolve install mode with this priority:
-1. `--git-hooks <value>` flag
-2. AskUserQuestion selection (`both`, `pre-commit`, `pre-push`, `none`)
+   ```bash
+   bash {SKILL_DIR}/scripts/bootstrap-gate-contract.sh --json
+   ```
 
-### 2.7.2 Resolve Gate Profile
+5. If contract status is `fallback`, stop setup (fail-safe) and request path/permission fix.
+6. Report effective hook state + contract policy summary (`auto -> portable`, explicit `authoring` path only for maintainer flows).
 
-Profiles:
-- `fast`
-- `balanced`
-- `strict`
-
-Resolve profile from `--gate-profile` flag or AskUserQuestion. Skip profile selection when install mode is `none`.
-
-### 2.7.3 Apply Configuration
-
-Apply via [scripts/configure-git-hooks.sh](scripts/configure-git-hooks.sh) with resolved mode/profile.
-
-### 2.7.4 Report Effective State
-
-Always report effective hooks state (`core.hooksPath`, installed hooks, selected profile, enforced checks) and contract-gate resolution policy (`auto` => `authoring` only for CWF authoring repos, otherwise `portable`).
-
-Detailed prompts, command templates, and reporting checklist: [runtime-and-index-phases.md](references/runtime-and-index-phases.md).
-
-### 2.7.5 Bootstrap Run Gate Contract (Required)
-
-Bootstrap the run gate contract under artifact root (`{artifact_root}/gate-contract.yaml`), then report status (`created|existing|updated|fallback`) and resolved path.
-
-Run:
-
-```bash
-bash {SKILL_DIR}/scripts/bootstrap-gate-contract.sh --json
-```
-
-Fail-safe:
-- If status is `fallback`, stop setup and ask the user to fix path/permission first.
-- For `created|existing|updated`, confirm that retro stage policy remains fail-closed by default (`stages.retro: fail`) unless the user explicitly changes it later.
+Detailed prompts, command matrix, and reporting checklist: [runtime-and-index-phases.md](references/runtime-and-index-phases.md#phase-27-git-hook-gate-installation).
 
 ---
 
@@ -371,19 +347,13 @@ Use this phase when:
 - User runs `cwf:setup --tools`
 - User runs `cwf:setup --env`
 
-### 2.8.1 Bootstrap Project Config Files
+Mandatory behavior:
+1. Ask whether to create templates, overwrite templates, or skip.
+2. Run [scripts/bootstrap-project-config.sh](scripts/bootstrap-project-config.sh) (`--force` only for overwrite).
+3. Report effective runtime priority (`.cwf-config.local.yaml` > `.cwf-config.yaml` > process env > shell exports).
+4. If interactive prompts are unavailable, emit deterministic `WAIT_INPUT` and stop this run.
 
-Ask whether to bootstrap project config templates, then run `bootstrap-project-config.sh` (`--force` when overwrite is selected).
-
-### 2.8.2 Explain Runtime Priority
-
-Always report effective runtime priority:
-1. `.cwf-config.local.yaml`
-2. `.cwf-config.yaml`
-3. process environment
-4. shell profile exports
-
-Detailed prompts, command templates, and reporting checklist: [runtime-and-index-phases.md](references/runtime-and-index-phases.md).
+Detailed prompts, command templates, and reporting checklist: [runtime-and-index-phases.md](references/runtime-and-index-phases.md#phase-28-project-config-bootstrap).
 
 ---
 
@@ -394,19 +364,12 @@ Use this phase when:
 - User runs `cwf:setup --tools`
 - User runs `cwf:setup --agent-teams`
 
-### 2.9.1 Ask Team Mode Policy
+Mandatory behavior:
+1. Ask mode policy (`enable`, `keep`, `disable`).
+2. Apply via [scripts/configure-agent-teams.sh](scripts/configure-agent-teams.sh) with `--enable`, `--status`, or `--disable`.
+3. Report effective status and remind restart/new session requirement.
 
-Ask whether to enable, keep, or disable Agent Team mode.
-
-### 2.9.2 Apply Selection
-
-Apply via [scripts/configure-agent-teams.sh](scripts/configure-agent-teams.sh) with `--enable`, `--status`, or `--disable`.
-
-### 2.9.3 Report Effective State
-
-Always report current status and remind restart/new session for consistent activation.
-
-Detailed prompts, command templates, and reporting checklist: [runtime-and-index-phases.md](references/runtime-and-index-phases.md).
+Detailed prompts, command templates, and reporting checklist: [runtime-and-index-phases.md](references/runtime-and-index-phases.md#phase-29-agent-team-mode-setup).
 
 ---
 
@@ -418,32 +381,15 @@ Use this phase when:
 - User runs `cwf:setup --env`
 - User runs `cwf:setup --run-mode`
 
-### 2.10.1 Detect Current Effective Mode
+Mandatory behavior:
+1. Detect current effective `CWF_RUN_AMBIGUITY_MODE` (default fallback: `defer-blocking`).
+2. Ask desired default mode (`defer-blocking|strict|defer-reversible|explore-worktrees`).
+3. Ask target config scope (`shared|local`).
+4. Persist via [scripts/configure-run-mode.sh](scripts/configure-run-mode.sh), bootstrapping project templates when needed.
+5. Report selected mode/scope/path and precedence order (`--ambiguity-mode` flag > local config > shared config > env/shell > built-in default).
+6. If interactive prompts are unavailable, emit deterministic `WAIT_INPUT` and stop this run.
 
-Detect current effective `CWF_RUN_AMBIGUITY_MODE` using env loader; fallback default is `defer-blocking`.
-
-### 2.10.2 Ask Desired Default Mode
-
-Ask desired default mode (`defer-blocking`, `strict`, `defer-reversible`, `explore-worktrees`).
-
-### 2.10.3 Ask Config Scope
-
-Ask config target scope (`shared` or `local`).
-
-### 2.10.4 Persist Selection
-
-Persist via [scripts/configure-run-mode.sh](scripts/configure-run-mode.sh); bootstrap templates first when missing, then retry persist command.
-
-### 2.10.5 Report Effective State
-
-Report selected mode/scope/path and precedence reminder:
-- `--ambiguity-mode` flag
-- `.cwf-config.local.yaml`
-- `.cwf-config.yaml`
-- env/shell
-- built-in default (`defer-blocking`)
-
-Detailed prompts, command templates, and reporting checklist: [runtime-and-index-phases.md](references/runtime-and-index-phases.md).
+Detailed prompts, command templates, and reporting checklist: [runtime-and-index-phases.md](references/runtime-and-index-phases.md#phase-210-cwf-run-ambiguity-mode-setup).
 
 ---
 
