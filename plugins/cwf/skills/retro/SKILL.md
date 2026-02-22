@@ -203,95 +203,31 @@ Gate behavior after Batch 2:
 
 #### Section 1: Context Worth Remembering
 
-User, org, and project facts useful for future sessions: domain knowledge, tech stack, conventions, team structure, decision-making patterns. Only genuinely useful items.
+Use section-writing guidance from [section-authoring.md](references/section-authoring.md#section-authoring-guide).
 
 #### Section 2: Collaboration Preferences
 
-Work style and communication observations; compare against current AGENTS.md (and CLAUDE.md when runtime-specific). If warranted, draft `### Suggested Agent-Guide Updates` as a bullet list (omit if none). **Right-placement check**: if a learning belongs to a doc already referenced by AGENTS/adapter docs, suggest updating that doc instead.
+Use section-writing guidance from [section-authoring.md](references/section-authoring.md#section-2-collaboration-preferences).
 
 #### Section 3: Waste Reduction
 
-Identify all forms of wasted effort in the session. Broader than prompting habits — covers the full spectrum of inefficiency:
-
-- **Wasted turns**: Misunderstandings, wrong assumptions, rework
-- **Over-engineering**: Unnecessary complexity, premature abstractions
-- **Missed shortcuts**: Existing tools/patterns/code that could have been used
-- **Context waste**: Large file reads, redundant searches, information not reused
-- **Communication waste**: Ambiguous instructions that caused wrong-direction work
-
-Format: free-form analysis citing specific session moments. No table required. Frame constructively with actionable suggestions.
-
-**Root cause drill-down (5 Whys)**: For each significant waste item, don't stop at the symptom. Ask "why did this happen?" repeatedly until you reach a structural or systemic cause. The goal is to distinguish:
-- **One-off mistake** (no action needed beyond noting it)
-- **Knowledge gap** (persist as context or learning resource)
-- **Process gap** (suggest tool, checklist, or protocol change)
-- **Structural constraint** (persist to project-context or agent-guide docs)
-
-Shallow analysis (stopping at "we should have done X") misses persist-worthy structural insights. Always drill to the level where you can recommend a durable fix.
+Use section-writing guidance from [section-authoring.md](references/section-authoring.md#section-3-waste-reduction), including mandatory 5 Whys depth for major waste signals.
 
 #### Section 4: Critical Decision Analysis (CDM)
 
-- **Light mode**: Draft inline. Read `{SKILL_DIR}/references/cdm-guide.md` for methodology.
-- **Deep mode**: Produced by Agent A (Batch 1). Integrate the agent's output here.
-
-Identify 2-4 critical decision moments from the session. Apply CDM probes to each. This section is unconditional — every retro-worthy session has decisions worth analyzing.
+Use section-writing guidance from [section-authoring.md](references/section-authoring.md#section-4-critical-decision-analysis-cdm).
 
 #### Section 5: Expert Lens
 
-**Mode: deep only.** In light mode, output: "Run `/retro --deep` for expert analysis."
-
-Follow `{SKILL_DIR}/references/expert-lens-guide.md` for full selection/execution rules. In deep mode this section is produced by Agent C/D outputs.
-
-**Agreement/Disagreement synthesis (required)**: Add `### Agreement and Disagreement Synthesis` under Section 5 with:
-- 2-4 shared conclusions across Expert α/β
-- 1-3 explicit disagreements with underlying assumption differences
-- a synthesis decision: what to adopt now, what to defer, and what evidence would resolve the disagreement
+Use section-writing guidance from [section-authoring.md](references/section-authoring.md#section-5-expert-lens). Agreement/disagreement synthesis subsection remains mandatory in deep mode.
 
 #### Section 6: Learning Resources
 
-**Mode: deep only.** In light mode, output: "Run `/retro --deep` for learning resources."
-
-This section is produced by Agent B in deep mode. Include title + URL, 2-3 sentence takeaways, and relevance to the user's work.
+Use section-writing guidance from [section-authoring.md](references/section-authoring.md#section-6-learning-resources).
 
 #### Section 7: Relevant Tools (Capabilities Included)
 
-**Step 1 — Inventory available capabilities** (always, both modes):
-
-1. Scan installed agent skills first:
-   - Marketplace: `~/.claude/plugins/*/skills/*/SKILL.md`
-   - Local: `.claude/skills/*/SKILL.md`
-   - For each: read frontmatter (name, description, triggers)
-2. Inventory deterministic repo tools/checks already available (hooks, linters, validators, scripts).
-3. Summarize what was used vs available-but-unused in this session.
-
-**Step 2 — Tool gap analysis** (if workflow gap or repetition identified):
-
-Assess whether the session reveals a repeated or high-impact gap not covered by current capabilities. If no clear gap: state "No additional tool gaps identified."
-
-When a gap exists, classify proposals by category:
-- Missing or underused **agent skill**
-- Missing **static analysis** check/tool
-- Missing **validation/reachability** check
-- Missing **indexing/search/dedup** utility
-- Missing **workflow automation** (hook/CI/script)
-
-For each proposal, include:
-- Problem signal from this session
-- Candidate (skill and/or external tool)
-- Integration point (hook, script, CI, or manual command)
-- Expected gain and risk/cost
-- Pilot scope (small, reversible first step)
-
-**Step 3 — Action path by category**:
-
-- If primarily a skill gap:
-  - **Finding existing skills**: Use `/find-skills` to search for existing solutions and report findings.
-  - Record command/result evidence in Section 7. If unavailable, record explicit evidence (`command -v find-skills`) and fallback rationale.
-  - **Creating new skills**: If no existing skill fits, use `/skill-creator` to describe and scaffold the needed skill.
-- If primarily a non-skill tool gap:
-  - Recommend concrete tool candidates with a minimal pilot integration plan.
-- **Prerequisite check**:
-  - If `find-skills` (by Vercel) or `skill-creator` (by Anthropic) are not installed, recommend installing them from https://skills.sh/ when relevant.
+Use section-writing guidance from [section-authoring.md](references/section-authoring.md#section-7-relevant-tools-capabilities-included), including capability inventory, gap classification, and action path.
 
 ### 5. Write retro.md
 
@@ -437,47 +373,7 @@ Do not prompt the user to start this discussion.
 
 ## Output Format
 
-### Light mode
-
-```markdown
-# Retro: {session-title}
-
-- Session date: {YYYY-MM-DD}
-- Mode: light
-
-## 1. Context Worth Remembering
-## 2. Collaboration Preferences
-### Suggested Agent-Guide Updates
-## 3. Waste Reduction
-## 4. Critical Decision Analysis (CDM)
-## 5. Expert Lens
-> Run `/retro --deep` for expert analysis.
-## 6. Learning Resources
-> Run `/retro --deep` for learning resources.
-## 7. Relevant Tools (Capabilities Included)
-### Installed Capabilities
-### Tool Gaps
-```
-
-### Deep mode
-
-```markdown
-# Retro: {session-title}
-
-- Session date: {YYYY-MM-DD}
-- Mode: deep
-
-## 1. Context Worth Remembering
-## 2. Collaboration Preferences
-### Suggested Agent-Guide Updates
-## 3. Waste Reduction
-## 4. Critical Decision Analysis (CDM)
-## 5. Expert Lens
-## 6. Learning Resources
-## 7. Relevant Tools (Capabilities Included)
-### Installed Capabilities
-### Tool Gaps
-```
+Use canonical templates from [section-authoring.md](references/section-authoring.md#output-templates) for both light/deep modes.
 
 ## Rules
 
@@ -493,6 +389,7 @@ Do not prompt the user to start this discussion.
 
 - `{SKILL_DIR}/references/cdm-guide.md` — CDM probe methodology and output format
 - `{SKILL_DIR}/references/expert-lens-guide.md` — Retro-specific expert lens constraints and output format
+- [section-authoring.md](references/section-authoring.md) — Section 1-7 writing guidance and canonical light/deep output templates
 - [retro-gates-checklist.md](references/retro-gates-checklist.md) — Deterministic retro artifact gates and reporting checklist
 - [expert-advisor-guide.md](../../references/expert-advisor-guide.md) — Expert identity, grounding, selection, and retro mode format
 - [agent-patterns.md](../../references/agent-patterns.md) — Shared agent orchestration patterns
