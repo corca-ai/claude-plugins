@@ -31,6 +31,27 @@ Skeleton policy (enforced):
 - `## Rules` must appear before `## References`.
 - Sections between Quick and Rules are intentionally flexible by skill.
 
+## Enforcement Map (How)
+
+`skill-conventions.md` defines **what/why**. Deterministic checks define **how**.
+
+| Concern | What/Why source | Review criteria (semantic) | Deterministic enforcement |
+|---|---|---|---|
+| Skeleton/order, language contract, frontmatter baseline | this document | [review-criteria.md](../skills/refactor/references/review-criteria.md) | CORCA gates (`skill-frontmatter-schema`, `skill-skeleton-language-contract`) |
+| SKILL size, progressive disclosure, resource hygiene | this document | [review-criteria.md](../skills/refactor/references/review-criteria.md) | [quick-scan.sh](../skills/refactor/scripts/quick-scan.sh) |
+| Documentation structure/portability baseline | this document + repository documentation principles | [docs-criteria.md](../skills/refactor/references/docs-criteria.md) | markdownlint/link/doc-graph + hook gates |
+
+Resolution order for conflicts:
+1. deterministic gate/script output
+2. criteria documents (`review-criteria`, `docs-criteria`)
+3. this conventions document (intent and direction)
+
+Practical check command:
+
+```bash
+bash plugins/cwf/skills/refactor/scripts/quick-scan.sh .
+```
+
 ## README Skill Summary Format
 
 The top-level repository README (including locale mirrors) MUST keep each skill summary in this section order:
@@ -55,11 +76,13 @@ Rules:
 ---
 name: {skill-name}
 description: "{One-line description.} Triggers: \"{cwf:name}\", \"{natural language triggers}\""
+# allowed-tools: [Read, Bash]  # optional: only when explicit tool allowlist is required
 ---
 ```
 
 - `name`: lowercase, matches directory name
 - `description`: single-line with embedded `Triggers:` clause (CORCA003 lint rule enforces single-line for runtime portability; do not use block scalar `|` or `>`)
+- `allowed-tools` (optional): include only when the runtime requires an explicit allowlist; otherwise omit for lean metadata
 
 ## Language Contract (Global)
 
