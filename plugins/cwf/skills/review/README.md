@@ -7,4 +7,5 @@ File-level map for [review](SKILL.md).
 - [references/external-review.md](references/external-review.md): Reference file used by this skill (external-review).
 - [references/orchestration-and-fallbacks.md](references/orchestration-and-fallbacks.md): Detailed six-slot launch and external-failure fallback templates.
 - [references/prompts.md](references/prompts.md): Reference file used by this skill (prompts).
+- [references/target-and-routing.md](references/target-and-routing.md): Deterministic review-target detection and pre-launch routing details.
 - [references/synthesis-and-gates.md](references/synthesis-and-gates.md): Detailed synthesis markdown template, error-handling matrix, and BDD acceptance checks.
