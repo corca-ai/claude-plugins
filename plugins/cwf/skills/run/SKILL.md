@@ -425,12 +425,20 @@ When a review returns **Fail**:
 When `--from <stage>` is provided:
 
 1. Skip all stages before `<stage>`
-1. Verify prerequisites exist:
-   - `--from impl`: plan.md must exist
-   - `--from review-code`: implementation must be committed
-   - `--from refactor`: code review must have run
-   - `--from retro`: refactor must have run (or be explicitly skipped)
-1. If prerequisites are missing, report and ask user whether to proceed anyway
+1. Run deterministic prerequisite gate:
+
+   ```bash
+   bash {CWF_PLUGIN_DIR}/scripts/check-run-from-prereqs.sh --from "<stage>" --base-dir .
+   ```
+
+1. Use checker result as the authority:
+   - `--from impl`: requires non-empty `{session_dir}/plan.md`
+   - `--from review-code`: requires `impl` stage row (`outcome != Skipped`) and clean tracked git working tree
+   - `--from refactor`: requires `review-code` stage row (`outcome != Skipped`)
+   - `--from retro`: requires `refactor` stage row (run or `Skipped`)
+   - `--from ship`: requires `retro` stage row (run or `Skipped`)
+1. If checker fails, print missing checks verbatim and ask user whether to proceed anyway.
+1. If user explicitly overrides, record reason in live state (`pipeline_override_reason`) before continuing.
 
 ### --skip Flag
 
@@ -550,3 +558,4 @@ After all stages complete (or the pipeline is halted):
 - [agent-patterns.md](../../references/agent-patterns.md) — Shared agent orchestration patterns
 - [plan-protocol.md](../../references/plan-protocol.md) — Session artifact location/protocol
 - [check-setup-readiness.sh](../../scripts/check-setup-readiness.sh) — Deterministic setup preflight guard for `cwf:run`
+- [check-run-from-prereqs.sh](../../scripts/check-run-from-prereqs.sh) — Deterministic `--from` prerequisite gate for stage resume safety

@@ -21,6 +21,7 @@ This file maps scripts under [plugins/cwf/scripts](.).
 - [check-lessons-metadata.sh](check-lessons-metadata.sh): Validates required deep-retro lesson metadata fields (owner/apply-layer/promotion-target/due-release).
 - [retro-coverage-contract.sh](retro-coverage-contract.sh): Generates deterministic deep-retro coverage artifacts (diff corpus, top-level breakdown, historical lessons/retro corpus signals).
 - [check-setup-readiness.sh](check-setup-readiness.sh): Deterministically validates `cwf:run` prerequisites (state/setup-contract/config/run-mode) and emits fail-closed readiness summaries.
+- [check-run-from-prereqs.sh](check-run-from-prereqs.sh): Deterministically validates `cwf:run --from <stage>` prerequisites using session artifacts, stage provenance, and git cleanliness checks.
 - [bootstrap-review-code-artifacts.sh](bootstrap-review-code-artifacts.sh): Scaffolds required `review-code` artifacts (`review-*.md`, synthesis skeleton) for deterministic gate closure preparation.
 - [sync-ambiguity-debt.sh](sync-ambiguity-debt.sh): Synchronizes and validates `live.blocking_decisions_pending` against `run-ambiguity-decisions.md` for deterministic defer-mode debt handling.
 - [check-session-lib.sh](check-session-lib.sh): Shared helper functions for `check-session.sh`.
