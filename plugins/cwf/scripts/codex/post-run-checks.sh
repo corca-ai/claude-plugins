@@ -453,7 +453,10 @@ HITL_SCRATCHPAD_GLOB_PREFIX=".cwf/projects"
 LIVE_STATE_FILE_PROBE="$REPO_ROOT/.cwf/cwf-state.yaml"
 init_runtime_skip_paths
 
-readarray -t changed_candidates < <(
+changed_candidates=()
+while IFS= read -r changed_candidate; do
+  changed_candidates+=("$changed_candidate")
+done < <(
   {
     git diff --name-only --diff-filter=ACMR || true
     git diff --cached --name-only --diff-filter=ACMR || true

@@ -127,7 +127,10 @@ ensure_markdownlint_cli2() {
 RUNTIME_SKIP_PREFIXES=()
 init_runtime_skip_prefixes
 
-mapfile -t plugin_meta_files < <(
+plugin_meta_files=()
+while IFS= read -r plugin_meta_file; do
+  plugin_meta_files+=("$plugin_meta_file")
+done < <(
   git diff --cached --name-only --diff-filter=ACMR -- \
     '.claude-plugin/marketplace.json' \
     'plugins/*/.claude-plugin/plugin.json' \
@@ -179,7 +182,10 @@ if [ "${#plugin_meta_files[@]}" -gt 0 ]; then
   fi
 fi
 
-mapfile -t md_candidates < <(git diff --cached --name-only --diff-filter=ACMR -- '*.md' '*.mdx' || true)
+md_candidates=()
+while IFS= read -r md_candidate; do
+  md_candidates+=("$md_candidate")
+done < <(git diff --cached --name-only --diff-filter=ACMR -- '*.md' '*.mdx' || true)
 md_files=()
 for file in "${md_candidates[@]}"; do
   if [[ "$file" == references/anthropic-skills-guide/* ]]; then
@@ -214,7 +220,10 @@ if [ "${#md_files[@]}" -gt 0 ]; then
 fi
 
 if [[ "$PROFILE" != "fast" ]]; then
-  mapfile -t sh_files < <(git diff --cached --name-only --diff-filter=ACMR -- '*.sh' || true)
+  sh_files=()
+  while IFS= read -r sh_file; do
+    sh_files+=("$sh_file")
+  done < <(git diff --cached --name-only --diff-filter=ACMR -- '*.sh' || true)
   if [ "${#sh_files[@]}" -gt 0 ]; then
     if command -v shellcheck >/dev/null 2>&1; then
       echo "[pre-commit] shellcheck on staged shell scripts..."

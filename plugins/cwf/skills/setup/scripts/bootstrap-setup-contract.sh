@@ -20,7 +20,7 @@ CORE_TOOLS=(shellcheck jq gh node python3 lychee markdownlint-cli2)
 REPO_TOOL_CANDIDATES=(yq rg realpath perl)
 
 declare -a REPO_TOOLS_FOUND=()
-declare -A REPO_TOOL_EVIDENCE=()
+declare -a REPO_TOOL_EVIDENCE=()
 
 usage() {
   cat <<'USAGE'
@@ -59,6 +59,33 @@ append_warning() {
   else
     WARNING="$WARNING; $message"
   fi
+}
+
+set_repo_tool_evidence() {
+  local key="$1"
+  local value="$2"
+  local idx=""
+  local entry=""
+  for idx in "${!REPO_TOOL_EVIDENCE[@]}"; do
+    entry="${REPO_TOOL_EVIDENCE[idx]}"
+    if [[ "${entry%%$'\t'*}" == "$key" ]]; then
+      REPO_TOOL_EVIDENCE[idx]="$key"$'\t'"$value"
+      return 0
+    fi
+  done
+  REPO_TOOL_EVIDENCE+=("$key"$'\t'"$value")
+}
+
+get_repo_tool_evidence() {
+  local key="$1"
+  local entry=""
+  for entry in "${REPO_TOOL_EVIDENCE[@]}"; do
+    if [[ "${entry%%$'\t'*}" == "$key" ]]; then
+      printf '%s\n' "${entry#*$'\t'}"
+      return 0
+    fi
+  done
+  return 1
 }
 
 emit_result() {
@@ -262,7 +289,10 @@ collect_repo_tool_evidence() {
   fi
 
   if [[ "${#scan_files[@]}" -eq 0 ]]; then
-    mapfile -t scan_files < <(
+    scan_files=()
+    while IFS= read -r scan_path; do
+      scan_files+=("$scan_path")
+    done < <(
       find "$REPO_ROOT" \
         \( \
           -path "$REPO_ROOT/.git" \
@@ -294,7 +324,7 @@ collect_repo_tool_evidence() {
 
     if [[ -n "$evidence_lines" ]]; then
       REPO_TOOLS_FOUND+=("$tool")
-      REPO_TOOL_EVIDENCE["$tool"]="$(printf '%s' "$evidence_lines" | sed '/^$/d' | sort -u)"
+      set_repo_tool_evidence "$tool" "$(printf '%s' "$evidence_lines" | sed '/^$/d' | sort -u)"
     fi
   done
 }
@@ -341,7 +371,7 @@ write_contract_file() {
         echo '    reason: '"$(yaml_quote "$(tool_reason "$tool")")"
         echo '    install_hint: '"$(yaml_quote "$(tool_install_hint "$tool")")"
         echo '    evidence:'
-        evidence="${REPO_TOOL_EVIDENCE[$tool]-}"
+        evidence="$(get_repo_tool_evidence "$tool" 2>/dev/null || true)"
         while IFS= read -r evidence_path; do
           [[ -n "$evidence_path" ]] || continue
           echo '      - '"$(yaml_quote "$evidence_path")"

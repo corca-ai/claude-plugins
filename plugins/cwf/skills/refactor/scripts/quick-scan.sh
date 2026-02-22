@@ -93,7 +93,7 @@ results=()
 total_skills=0
 warn_count=0
 error_count=0
-declare -A seen_skill_files=()
+declare -a seen_skill_files=()
 
 get_frontmatter_description_length() {
   local skill_md="$1"
@@ -307,12 +307,15 @@ scan_skill_file_once() {
   local skill_md="$3"
   local scan_origin="$4"
   local plugin_json="${5:-}"
+  local seen_skill=""
 
   [[ -f "$skill_md" ]] || return 0
-  if [[ -n "${seen_skill_files[$skill_md]:-}" ]]; then
-    return 0
-  fi
-  seen_skill_files["$skill_md"]=1
+  for seen_skill in "${seen_skill_files[@]}"; do
+    if [[ "$seen_skill" == "$skill_md" ]]; then
+      return 0
+    fi
+  done
+  seen_skill_files+=("$skill_md")
   scan_skill "$plugin_name" "$skill_name" "$skill_md" "$scan_origin" "$plugin_json"
 }
 

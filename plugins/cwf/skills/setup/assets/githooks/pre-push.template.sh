@@ -210,8 +210,10 @@ resolve_setup_contract_path() {
 resolve_pre_push_extension_required() {
   local contract_path="$1"
   local raw=""
+  local raw_lower=""
   raw="$(read_pre_push_extension_scalar "$contract_path" "required" 2>/dev/null || true)"
-  case "${raw,,}" in
+  raw_lower="$(printf '%s' "$raw" | tr '[:upper:]' '[:lower:]')"
+  case "$raw_lower" in
     1|true|yes|on|required)
       printf 'true\n'
       ;;
@@ -316,7 +318,10 @@ RUNTIME_SKIP_PREFIXES=()
 init_runtime_skip_prefixes
 SETUP_CONTRACT_PATH="$(resolve_setup_contract_path)"
 
-mapfile -t md_candidates < <(git ls-files '*.md' '*.mdx' || true)
+md_candidates=()
+while IFS= read -r md_candidate; do
+  md_candidates+=("$md_candidate")
+done < <(git ls-files '*.md' '*.mdx' || true)
 md_files=()
 for file in "${md_candidates[@]}"; do
   if [[ "$file" == references/anthropic-skills-guide/* ]]; then

@@ -166,7 +166,10 @@ awk 'index($0, ".cwf/") != 1' "$DIFF_ALL" > "$DIFF_NON_CWF"
 awk 'index($0, "plugins/cwf/") == 1' "$DIFF_ALL" > "$DIFF_PLUGINS_CWF"
 
 if [[ -s "$DIFF_NON_CWF" ]]; then
-  mapfile -t non_cwf_files < "$DIFF_NON_CWF"
+  non_cwf_files=()
+  while IFS= read -r non_cwf_file; do
+    non_cwf_files+=("$non_cwf_file")
+  done < "$DIFF_NON_CWF"
   git -C "$REPO_ROOT" diff --stat "$BASE_REF..HEAD" -- "${non_cwf_files[@]}" > "$DIFF_NON_CWF_STAT" 2>/dev/null || true
 else
   : > "$DIFF_NON_CWF_STAT"
@@ -185,7 +188,10 @@ awk 'index($0, "/sandbox/") != 0' "$PROJECT_FILES" > "$PROJECT_SANDBOX"
 # 5) Historical signal extraction.
 if command -v rg >/dev/null 2>&1; then
   if [[ -s "$PROJECT_PRIMARY" ]]; then
-    mapfile -t primary_files < "$PROJECT_PRIMARY"
+    primary_files=()
+    while IFS= read -r primary_file; do
+      primary_files+=("$primary_file")
+    done < "$PROJECT_PRIMARY"
     rg -i -n --no-heading \
       "stale|drift|timeout|no[_ -]?output|fail[- ]?open|unverified|unknown|marketplace|latest" \
       "${primary_files[@]}" \

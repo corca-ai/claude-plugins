@@ -85,13 +85,18 @@ FRESH_EPOCH=$((NOW - 7 * 86400))
 CURRENT_EPOCH=$((NOW - 30 * 86400))
 
 # Collect markdown files while honoring .gitignore.
+MD_FILES=()
 if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-  mapfile -t MD_FILES < <(
+  while IFS= read -r md_file; do
+    MD_FILES+=("$md_file")
+  done < <(
     git ls-files --cached --others --exclude-standard -- '*.md' \
       | sort
   )
 else
-  mapfile -t MD_FILES < <(
+  while IFS= read -r md_file; do
+    MD_FILES+=("$md_file")
+  done < <(
     find . -name "*.md" -type f ! -path "./.git/*" ! -path "*/node_modules/*" \
       | sed 's|^\./||' \
       | sort

@@ -69,7 +69,9 @@ if [[ ! -f "$MARKETPLACE_JSON" ]]; then
 fi
 
 if [[ "${#TARGET_PLUGINS[@]}" -eq 0 ]]; then
-  mapfile -t TARGET_PLUGINS < <(jq -r '.plugins[].name' "$MARKETPLACE_JSON")
+  while IFS= read -r plugin_name; do
+    TARGET_PLUGINS+=("$plugin_name")
+  done < <(jq -r '.plugins[].name' "$MARKETPLACE_JSON")
 fi
 
 if [[ "${#TARGET_PLUGINS[@]}" -eq 0 ]]; then

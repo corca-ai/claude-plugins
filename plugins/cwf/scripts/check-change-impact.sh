@@ -44,12 +44,25 @@ matches_pattern() {
 }
 
 any_file_matches_any_pattern() {
-  local -n files_ref=$1
-  local -n patterns_ref=$2
+  local seen_delimiter="false"
+  local -a files=()
+  local -a patterns=()
+  local arg=""
   local file=""
   local pattern=""
-  for file in "${files_ref[@]}"; do
-    for pattern in "${patterns_ref[@]}"; do
+  for arg in "$@"; do
+    if [[ "$arg" == "--" ]]; then
+      seen_delimiter="true"
+      continue
+    fi
+    if [[ "$seen_delimiter" == "false" ]]; then
+      files+=("$arg")
+    else
+      patterns+=("$arg")
+    fi
+  done
+  for file in "${files[@]}"; do
+    for pattern in "${patterns[@]}"; do
       if matches_pattern "$file" "$pattern"; then
         return 0
       fi
@@ -59,10 +72,10 @@ any_file_matches_any_pattern() {
 }
 
 any_file_matches_pattern() {
-  local -n files_ref=$1
-  local pattern="$2"
+  local pattern="$1"
+  shift
   local file=""
-  for file in "${files_ref[@]}"; do
+  for file in "$@"; do
     if matches_pattern "$file" "$pattern"; then
       return 0
     fi
@@ -114,9 +127,13 @@ fi
 
 changed_files=()
 if [[ "$MODE" == "staged" ]]; then
-  mapfile -t changed_files < <(git -C "$REPO_ROOT" diff --cached --name-only --diff-filter=ACMR | sed '/^$/d')
+  while IFS= read -r changed_file; do
+    changed_files+=("$changed_file")
+  done < <(git -C "$REPO_ROOT" diff --cached --name-only --diff-filter=ACMR | sed '/^$/d')
 else
-  mapfile -t changed_files < <(
+  while IFS= read -r changed_file; do
+    changed_files+=("$changed_file")
+  done < <(
     {
       git -C "$REPO_ROOT" diff --name-only --diff-filter=ACMR || true
       git -C "$REPO_ROOT" diff --cached --name-only --diff-filter=ACMR || true
@@ -137,23 +154,32 @@ for ((i=0; i<rule_count; i++)); do
   rule_id="$(jq -r ".rules[$i].id // \"rule-$i\"" "$CONTRACT_PATH")"
   rule_msg="$(jq -r ".rules[$i].message // \"\"" "$CONTRACT_PATH")"
 
-  mapfile -t when_changed < <(jq -r ".rules[$i].when_changed[]?" "$CONTRACT_PATH")
+  when_changed=()
+  while IFS= read -r pattern; do
+    when_changed+=("$pattern")
+  done < <(jq -r ".rules[$i].when_changed[]?" "$CONTRACT_PATH")
   if [[ "${#when_changed[@]}" -eq 0 ]]; then
     echo "CHECK_FAIL: [$rule_id] when_changed is empty" >&2
     fail_count=$((fail_count + 1))
     continue
   fi
 
-  if ! any_file_matches_any_pattern changed_files when_changed; then
+  if ! any_file_matches_any_pattern "${changed_files[@]}" -- "${when_changed[@]}"; then
     continue
   fi
 
-  mapfile -t require_all < <(jq -r ".rules[$i].require_all_changed[]?" "$CONTRACT_PATH")
-  mapfile -t require_any < <(jq -r ".rules[$i].require_any_changed[]?" "$CONTRACT_PATH")
+  require_all=()
+  while IFS= read -r pattern; do
+    require_all+=("$pattern")
+  done < <(jq -r ".rules[$i].require_all_changed[]?" "$CONTRACT_PATH")
+  require_any=()
+  while IFS= read -r pattern; do
+    require_any+=("$pattern")
+  done < <(jq -r ".rules[$i].require_any_changed[]?" "$CONTRACT_PATH")
 
   if [[ "${#require_all[@]}" -gt 0 ]]; then
     for pattern in "${require_all[@]}"; do
-      if ! any_file_matches_pattern changed_files "$pattern"; then
+      if ! any_file_matches_pattern "$pattern" "${changed_files[@]}"; then
         echo "CHECK_FAIL: [$rule_id] missing required changed file (all): $pattern" >&2
         [[ -n "$rule_msg" ]] && echo "  -> $rule_msg" >&2
         fail_count=$((fail_count + 1))
@@ -162,7 +188,7 @@ for ((i=0; i<rule_count; i++)); do
   fi
 
   if [[ "${#require_any[@]}" -gt 0 ]]; then
-    if ! any_file_matches_any_pattern changed_files require_any; then
+    if ! any_file_matches_any_pattern "${changed_files[@]}" -- "${require_any[@]}"; then
       echo "CHECK_FAIL: [$rule_id] requires at least one companion change: ${require_any[*]}" >&2
       [[ -n "$rule_msg" ]] && echo "  -> $rule_msg" >&2
       fail_count=$((fail_count + 1))
