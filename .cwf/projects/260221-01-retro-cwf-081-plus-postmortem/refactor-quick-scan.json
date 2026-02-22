@@ -1,0 +1,182 @@
+{
+  "options": {
+    "include_local_skills": false,
+    "local_skill_globs": [
+  ".claude/skills/*/SKILL.md",
+  ".codex/skills/*/SKILL.md"
+]
+  },
+  "total_skills": 13,
+  "warnings": 6,
+  "errors": 0,
+  "flagged_skills": 4,
+  "results": [{
+    "origin": "marketplace",
+    "plugin": "cwf",
+    "skill": "clarify",
+    "word_count": 2080,
+    "line_count": 456,
+    "size_severity": "ok",
+    "resource_files": 4,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "origin": "marketplace",
+    "plugin": "cwf",
+    "skill": "gather",
+    "word_count": 1981,
+    "line_count": 358,
+    "size_severity": "ok",
+    "resource_files": 14,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "origin": "marketplace",
+    "plugin": "cwf",
+    "skill": "handoff",
+    "word_count": 2110,
+    "line_count": 358,
+    "size_severity": "ok",
+    "resource_files": 0,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "origin": "marketplace",
+    "plugin": "cwf",
+    "skill": "hitl",
+    "word_count": 1407,
+    "line_count": 204,
+    "size_severity": "ok",
+    "resource_files": 1,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "origin": "marketplace",
+    "plugin": "cwf",
+    "skill": "impl",
+    "word_count": 2690,
+    "line_count": 465,
+    "size_severity": "ok",
+    "resource_files": 2,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "origin": "marketplace",
+    "plugin": "cwf",
+    "skill": "plan",
+    "word_count": 1596,
+    "line_count": 292,
+    "size_severity": "ok",
+    "resource_files": 0,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "origin": "marketplace",
+    "plugin": "cwf",
+    "skill": "refactor",
+    "word_count": 1572,
+    "line_count": 331,
+    "size_severity": "ok",
+    "resource_files": 25,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "origin": "marketplace",
+    "plugin": "cwf",
+    "skill": "retro",
+    "word_count": 3033,
+    "line_count": 498,
+    "size_severity": "warning",
+    "resource_files": 3,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 1,
+    "flags": [
+  "word_count_warning (3033w > 3000)"
+]
+  },{
+    "origin": "marketplace",
+    "plugin": "cwf",
+    "skill": "review",
+    "word_count": 3083,
+    "line_count": 523,
+    "size_severity": "warning",
+    "resource_files": 4,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 2,
+    "flags": [
+  "word_count_warning (3083w > 3000)",
+  "line_count_warning (523L > 500)"
+]
+  },{
+    "origin": "marketplace",
+    "plugin": "cwf",
+    "skill": "run",
+    "word_count": 2911,
+    "line_count": 552,
+    "size_severity": "ok",
+    "resource_files": 0,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 1,
+    "flags": [
+  "line_count_warning (552L > 500)"
+]
+  },{
+    "origin": "marketplace",
+    "plugin": "cwf",
+    "skill": "setup",
+    "word_count": 2833,
+    "line_count": 532,
+    "size_severity": "ok",
+    "resource_files": 16,
+    "unreferenced_files": [
+  "scripts/migrate-env-vars.sh"
+],
+    "large_references": [],
+    "flag_count": 2,
+    "flags": [
+  "line_count_warning (532L > 500)",
+  "unreferenced: scripts/migrate-env-vars.sh"
+]
+  },{
+    "origin": "marketplace",
+    "plugin": "cwf",
+    "skill": "ship",
+    "word_count": 1941,
+    "line_count": 364,
+    "size_severity": "ok",
+    "resource_files": 2,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  },{
+    "origin": "marketplace",
+    "plugin": "cwf",
+    "skill": "update",
+    "word_count": 1395,
+    "line_count": 316,
+    "size_severity": "ok",
+    "resource_files": 1,
+    "unreferenced_files": [],
+    "large_references": [],
+    "flag_count": 0,
+    "flags": []
+  }]
+}
