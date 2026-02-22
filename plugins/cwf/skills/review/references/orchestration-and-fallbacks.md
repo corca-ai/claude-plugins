@@ -6,6 +6,12 @@ Detailed `review` procedure for heavy execution blocks:
 
 `SKILL.md` keeps mode routing and invariant summaries, while this file stores full templates.
 
+## Contents
+
+- [2.3 Launch reviewers (single batch or deterministic batches)](#23-launch-reviewers-single-batch-or-deterministic-batches)
+- [Expert slot selection inputs](#expert-slot-selection-inputs)
+- [3.2 Handle external failures](#32-handle-external-failures)
+
 If `web_debug_scope=true` (resolved in `SKILL.md` Phase 1), append this block to every slot prompt:
 
 ```text
@@ -133,9 +139,26 @@ echo '' >> '{session_dir}/review-architecture-{mode}.md'
 echo '<!-- AGENT_COMPLETE -->' >> '{session_dir}/review-architecture-{mode}.md'
 ```
 
+### Expert slot selection inputs
+
+Before launching Slot 5/6, resolve `expert_roster` from project state and pick contrasting experts deterministically:
+
+1. Resolve state file path:
+
+```bash
+source {CWF_PLUGIN_DIR}/scripts/cwf-artifact-paths.sh
+cwf_state_file=$(resolve_cwf_state_file "$(pwd)")
+```
+
+- Load `expert_roster` from `{cwf_state_file}`.
+- Match review-target keywords against each expert's `domain`.
+- Pick two experts with contrasting frameworks.
+- Tie-break order: stronger domain match, then lower `usage_count`, then lexicographic `name`.
+- If fewer than two roster matches exist, fill remaining slot(s) via independent expert selection and persist rationale in synthesis Confidence Note.
+
 **Slot 5 — Expert α (always Task):**
 
-Expert selection: Read `expert_roster` from `cwf-state.yaml`. Analyze the review target for domain keywords; match against each roster entry's `domain` field. Select 2 experts with contrasting frameworks. If roster has < 2 matches, fill via independent selection.
+Expert selection source: use identities resolved from the procedure above.
 
 ```text
 Task(subagent_type="general-purpose", name="expert-alpha", max_turns={max_turns}, prompt="

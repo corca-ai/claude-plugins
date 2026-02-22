@@ -7,6 +7,13 @@ Detailed `review` procedure for:
 
 `SKILL.md` keeps summary-level gate declarations and links to this file for full templates.
 
+## Contents
+
+- [2. Render Review Synthesis](#2-render-review-synthesis)
+- [Error Handling](#error-handling)
+- [Rules](#rules)
+- [BDD Acceptance Checks](#bdd-acceptance-checks)
+
 ## 2. Render Review Synthesis
 
 Output to the conversation **and** persist to `{session_dir}/review-synthesis-{mode}.md`:
@@ -71,6 +78,8 @@ Output to the conversation **and** persist to `{session_dir}/review-synthesis-{m
 - Perspective differences between real CLI output and fallback interpretation
 - Suggestions deliberately not adopted due to explicit user decision or approved plan constraints:
   "Considered-not-adopted: {item} — {reason/reference}"
+- Expert-slot selection provenance:
+  "Experts: α={name} β={name}; selection_basis={domain-match/usage/tie-break or independent fill}"
 - Session-log cross-check fields (code mode):
   - `session_log_present: {true|false}`
   - `session_log_lines: {int}`

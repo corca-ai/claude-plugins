@@ -71,8 +71,11 @@ Try in order (first non-empty wins):
 
 1. Resolve base strategy:
    - If `--base <branch>` is provided:
-     - Verify branch exists locally (`refs/heads/{branch}`) or in origin (`refs/remotes/origin/{branch}`).
-     - If only remote exists, use `origin/{branch}`.
+     - Verify branch exists locally (`refs/heads/{branch}`) or in any remote (`refs/remotes/*/{branch}`).
+     - If only remote exists, resolve `{remote}/{branch}` deterministically:
+       1. prefer current upstream remote (from `@{upstream}`) when it has `{branch}`
+       2. then remote from first `refs/remotes/*/HEAD` symbolic ref
+       3. then lexicographically first remote that has `{branch}`
      - If neither exists: stop with explicit error and ask user for a valid branch.
      - Record `base_strategy: explicit (--base)`.
    - If `--base` is not provided:
@@ -80,7 +83,7 @@ Try in order (first non-empty wins):
        `git rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/null`
      - If upstream exists, use it and record `base_strategy: upstream`.
      - Otherwise fallback to `main`, `master`, then default remote branch
-       (`git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||'`)
+       (`git for-each-ref --format='%(symref)' 'refs/remotes/*/HEAD' | sed -n '1s#^refs/remotes/##p'`)
        and record `base_strategy: fallback`.
 2. Branch diff vs resolved base:
    `git diff $(git merge-base HEAD {resolved_base})..HEAD`
@@ -324,12 +327,30 @@ Use preflight result:
 
 Record the preflight decision in synthesis Confidence Note when batching was required.
 
+### 2.2.2 Resolve experts for Slot 5/6 (required)
+
+Before launch, resolve expert identities from project state:
+
+```bash
+source {CWF_PLUGIN_DIR}/scripts/cwf-artifact-paths.sh
+cwf_state_file=$(resolve_cwf_state_file "$(pwd)")
+```
+
+Selection procedure (deterministic):
+1. Load `expert_roster` from `{cwf_state_file}`.
+2. Analyze review target keywords and match against each entry's `domain`.
+3. Select 2 experts with contrasting frameworks.
+4. Tie-break order: `domain-match quality` → lower `usage_count` → lexicographic `name`.
+5. If roster yields fewer than 2 valid matches, fill remaining slot(s) via independent expert selection and record why.
+
+Persist selected experts and selection rationale in synthesis Confidence Note for replayability.
+
 ### 2.3 Launch reviewers (single batch or deterministic batches)
 
 Launch slots with mode-suffixed output persistence:
 - Slot 1/2: internal Task reviewers (Security, UX/DX)
 - Slot 3/4: provider-routed external reviewers (Correctness, Architecture)
-- Slot 5/6: expert Task reviewers with contrasting frameworks
+- Slot 5/6: expert Task reviewers with contrasting frameworks, using identities resolved in Phase 2.2.2
 
 Required invariants:
 - Every slot writes `{session_dir}/review-*-{mode}.md` and appends `<!-- AGENT_COMPLETE -->`.
