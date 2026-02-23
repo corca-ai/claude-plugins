@@ -500,8 +500,12 @@ input[type="search"], select {
 }
 .checks { display: grid; gap: 7px; max-height: 220px; overflow: auto; }
 label.check { display: flex; align-items: center; gap: 8px; font-size: .92rem; }
-main { display: grid; grid-template-rows: 48% 52%; }
-.table-wrap { overflow: auto; border-bottom: 1px solid var(--line); }
+main {
+  display: grid;
+  grid-template-columns: minmax(760px, 1.45fr) minmax(360px, 1fr);
+  min-height: calc(100vh - 98px);
+}
+.table-wrap { overflow: auto; border-right: 1px solid var(--line); }
 table { border-collapse: collapse; width: 100%; min-width: 980px; }
 th, td { border-bottom: 1px solid var(--line); padding: 10px 12px; text-align: left; vertical-align: top; }
 th { position: sticky; top: 0; background: #fffaf0; z-index: 1; font-size: .86rem; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; }
@@ -527,7 +531,7 @@ tr.delta-new td:first-child { border-left: 4px solid #6d28d9; }
 .badge.delta-regressed { background: #fee2e2; color: #991b1b; }
 .badge.delta-changed { background: #ffedd5; color: #9a3412; }
 .badge.delta-unchanged { background: #e5e7eb; color: #374151; }
-.details { padding: 16px; overflow: auto; }
+.details { padding: 16px; overflow: auto; background: #fff; }
 .details h2 { margin: 0 0 6px 0; font-size: 1.16rem; }
 .meta { color: var(--muted); font-size: .9rem; margin-bottom: 12px; }
 .grid { display: grid; grid-template-columns: repeat(2, minmax(220px, 1fr)); gap: 10px; }
@@ -552,7 +556,15 @@ tr.delta-new td:first-child { border-left: 4px solid #6d28d9; }
 @media (max-width: 980px) {
   .layout { grid-template-columns: 1fr; }
   .controls { border-right: 0; border-bottom: 1px solid var(--line); }
-  main { grid-template-rows: 52vh auto; }
+  main {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+  .table-wrap {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    max-height: 52vh;
+  }
 }
 </style>
 </head>
@@ -807,7 +819,7 @@ function renderDetails(item) {
     "</div>",
     '<div class="grid">',
       '<div class="card"><h3>Delta</h3><pre>' +
-      escapeHtml("baseline: " + baselineSummary + "\ncurrent: " + item.status + "\nmode: " + payload.compareMode) +
+      escapeHtml("baseline: " + baselineSummary + "\\ncurrent: " + item.status + "\\nmode: " + payload.compareMode) +
       "</pre></div>",
       '<div class="card"><h3>Goal</h3><pre>' + escapeHtml(item.goal || "-") + "</pre></div>",
       '<div class="card"><h3>Objective</h3><pre>' + escapeHtml(item.objective || "-") + "</pre></div>",

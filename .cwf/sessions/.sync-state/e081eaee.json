@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "offset": 952780,
+  "jsonl_path": "/Users/ted/.codex/sessions/2026/02/23/rollout-2026-02-23T11-56-12-019c886d-0740-7030-a13c-fc1ef218874f.jsonl",
+  "out_file": "/Users/ted/codes/corca/claude-plugins/.cwf/sessions/260223-1156-e081eaee.codex.md",
+  "last_mtime": 1771815620,
+  "emitted_turns": 1,
+  "has_turn": false,
+  "turn_user_text": "",
+  "turn_user_ts": "",
+  "turn_assistant_text": "",
+  "turn_assistant_last_ts": "",
+  "turn_tools": "",
+  "last_turn_fingerprint": "e905c9236af76152159b135ee2fc62dc60262a4f5119451f55d7d65ee9d986f9"
+}
