@@ -352,9 +352,9 @@ After each answer:
 | 3 | ... | ... | Human | advisory context |
 ```
 
-Then ask: "Save this clarified requirement to a file?" If yes: save to a project-appropriate location with a descriptive filename.
+Save this clarified requirement to a project-appropriate location with a descriptive filename (required).
 
-**Completion tracking** (after saving the summary file):
+**Completion tracking** (after writing the required summary file):
 
 1. Run:
    `bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh set . clarify_completed_at="{ISO 8601 UTC timestamp}"`
@@ -418,9 +418,9 @@ while ambiguities remain:
 | ... | ... |
 ```
 
-Then offer to save.
+Save the summary to a project-appropriate location with a descriptive filename (required).
 
-**Completion tracking** (after saving the summary file):
+**Completion tracking** (after writing the required summary file):
 
 1. Run:
    `bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh set . clarify_completed_at="{ISO 8601 UTC timestamp}"`

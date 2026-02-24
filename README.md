@@ -226,13 +226,13 @@ Create an execution contract that implementation and review can enforce consiste
 
 **What Happens**
 
-Builds a structured `plan.md` with scope, file-level changes, and testable success criteria, then records carry-forward lessons for later phases.
+Starts from existing `gather`/`clarify` evidence to draft scope, file-level changes, and testable success criteria; runs extra research only for unresolved decision gaps, then records planning-time learnings in `lessons.md`.
 
 **Expected Outcomes**
 
 1. `plan.md` includes explicit scope, target files, and testable success criteria.
-2. Unresolved assumptions are surfaced as open items instead of being embedded silently.
-3. `cwf:review --mode plan` can validate contract quality before coding starts.
+2. Unresolved assumptions are surfaced as open items, and additional research runs only for evidence gaps.
+3. `lessons.md` captures planning-stage clarifications/preferences before implementation, and `cwf:review --mode plan` can validate contract quality before coding starts.
 
 ### [impl](plugins/cwf/skills/impl/SKILL.md)
 
@@ -395,6 +395,7 @@ Guides initial contract bootstrap for hooks, dependencies, environment, config, 
 1. Baseline setup artifacts and policy context are created for a fresh repository.
 2. Missing required dependencies trigger interactive install-now prompts and deterministic rechecks.
 3. Selected Codex integration reports reconciled scope-aware links and wrapper state.
+4. Detailed Codex execution contract stays in setup docs, while README keeps a what/why summary.
 
 ### [update](plugins/cwf/skills/update/SKILL.md)
 
@@ -418,63 +419,37 @@ Checks scope-specific installed vs latest state, auto-applies updates for the se
 
 ### Codex Integration
 
-If Codex CLI is installed, recommended setup is:
+Codex integration is part of `cwf:setup`.
+
+- What: sync CWF skills/references into the active Codex scope, and optionally install a Codex wrapper.
+- Why: keep Claude Code and Codex aligned on the same CWF knowledge and persist Codex session logs as CWF artifacts.
+- Re-run only Codex integration when needed:
 
 ```bash
 cwf:setup --codex
 cwf:setup --codex-wrapper
 ```
 
-What this enables:
-- Script map for Codex/session helpers: [plugins/cwf/scripts/README.md](plugins/cwf/scripts/README.md)
-- Scope-aware target resolution (active plugin scope precedence: `local > project > user`)
-- User scope targets: `~/.agents/skills/*`, `~/.agents/references`, `~/.local/bin/codex`
-- Project/local scope targets: `{projectRoot}/.codex/skills/*`, `{projectRoot}/.codex/references`, `{projectRoot}/.codex/bin/codex`
-- Non-user runs do not mutate user-global Codex paths unless explicitly confirmed
-- Every `codex` run auto-syncs session markdown logs into `.cwf/sessions/` as `*.codex.md`
-- Session log sync is append-first with checkpointed incremental updates to reduce exit-time latency; if state is missing/inconsistent, it safely falls back to full rebuild
-- Session artifact directories (`plan.md`, `retro.md`, `next-session.md`) remain under `.cwf/projects/{YYMMDD}-{NN}-{title}/`
-- Sync is anchored to the session updated during the current run (reduces wrong-session exports on shared cwd)
-- Raw JSONL copy is opt-in (`--raw`); redaction still applies when raw export is enabled
-- Post-run quality checks on changed files (markdownlint, local link checks, shellcheck when available, live state check, `apply_patch via exec_command` hygiene detection, and HITL scratchpad sync detection for doc edits) with `warn|strict` mode control
-- `cwf:update` reconciles stale Codex symlink/wrapper targets for the selected scope after plugin update
-- Runtime controls:
-  - `CWF_CODEX_POST_RUN_CHECKS=true|false` (default: `true`)
-  - `CWF_CODEX_POST_RUN_MODE=warn|strict` (default: `warn`)
-  - `CWF_CODEX_POST_RUN_QUIET=true|false` (default: `false`)
-
-Verify:
-
-```bash
-bash plugins/cwf/scripts/codex/install-wrapper.sh --scope user --status
-# or for project/local scope
-bash plugins/cwf/scripts/codex/install-wrapper.sh --scope project --project-root "$PWD" --status
-type -a codex
-```
-
-For one-time cleanup of existing session logs:
-
-```bash
-bash plugins/cwf/scripts/codex/redact-session-logs.sh
-```
-
-After install, open a new shell (or `source ~/.zshrc`). Aliases that call `codex` (for example `codexyolo='codex ...'`) also use the wrapper.
+Detailed flow, scope/path matrix, and rollback/report commands:
+- [plugins/cwf/skills/setup/SKILL.md](plugins/cwf/skills/setup/SKILL.md)
+- [plugins/cwf/skills/setup/references/codex-scope-integration.md](plugins/cwf/skills/setup/references/codex-scope-integration.md)
+- [plugins/cwf/scripts/README.md](plugins/cwf/scripts/README.md)
 
 ## Hooks
 
-CWF includes 9 hook groups that run automatically. All are enabled by default; use `cwf:setup --hooks` to toggle individual groups.
+CWF includes 9 hook groups that run automatically in Claude Code. In Codex CLI, the Claude hook runtime does not execute; Codex wrapper integration provides partial equivalents for selected checks/logging.
 
-| Group | Hook Type | What It Does |
-|-------|-----------|-------------|
-| `attention` | Notification, Pre/PostToolUse | Slack notifications on idle and AskUserQuestion |
-| `log` | Stop, SessionEnd | Auto-log conversation turns to markdown |
-| `read` | PreToolUse → Read | File-size aware reading guard (warn >500 lines, block >2000) |
-| `lint_markdown` | PostToolUse → Write\|Edit | Markdown lint + local link validation — lint violations trigger self-correction, broken links reported async |
-| `lint_shell` | PostToolUse → Write\|Edit | ShellCheck validation for shell scripts |
-| `deletion_safety` | PreToolUse → Bash | Block risky deletion commands and require policy-compliant justification |
-| `workflow_gate` | UserPromptSubmit | Block `cwf:run` when setup prerequisites are missing, and block ship/push/merge intents when run-stage gates are unresolved |
-| `websearch_redirect` | PreToolUse → WebSearch | Redirect Claude's WebSearch to `cwf:gather --search` |
-| `compact_recovery` | SessionStart → compact, UserPromptSubmit | Inject live session state after auto-compact and guard session↔worktree binding on prompts |
+| Group | Hook Type | What It Does | Codex Integration |
+|-------|-----------|-------------|-------------------|
+| `attention` | Notification, Pre/PostToolUse | Slack notifications on idle and AskUserQuestion | No direct auto-hook equivalent |
+| `log` | Stop, SessionEnd | Auto-log conversation turns to markdown | Via `cwf:setup --codex-wrapper`: export Codex sessions to `.cwf/sessions/*.codex.md` |
+| `read` | PreToolUse → Read | File-size aware reading guard (warn >500 lines, block >2000) | No direct auto-hook equivalent |
+| `lint_markdown` | PostToolUse → Write\|Edit | Markdown lint + local link validation — lint violations trigger self-correction, broken links reported async | Partial via wrapper post-run checks on changed markdown files |
+| `lint_shell` | PostToolUse → Write\|Edit | ShellCheck validation for shell scripts | Partial via wrapper post-run checks on changed shell files (if `shellcheck` is available) |
+| `deletion_safety` | PreToolUse → Bash | Block risky deletion commands and require policy-compliant justification | No direct auto-hook equivalent |
+| `workflow_gate` | UserPromptSubmit | Block `cwf:run` when setup prerequisites are missing, and block ship/push/merge intents when run-stage gates are unresolved | No direct auto-hook equivalent |
+| `websearch_redirect` | PreToolUse → WebSearch | Redirect Claude's WebSearch to `cwf:gather --search` | No direct auto-hook equivalent |
+| `compact_recovery` | SessionStart → compact, UserPromptSubmit | Inject live session state after auto-compact and guard session↔worktree binding on prompts | No direct auto-hook equivalent |
 
 ## Configuration
 

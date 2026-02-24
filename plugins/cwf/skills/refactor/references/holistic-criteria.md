@@ -49,7 +49,7 @@ Identify good patterns one skill has that others should adopt:
 - Sub-agent usage: when skills use Task tool, do they follow the mature pattern (reference guide in `references/`, parallel execution, structured output)?
 - Usage message: do skills with subcommands show help when invoked with no args?
 - Configuration: are env vars named consistently (`CWF_{DOMAIN}_{SETTING}`)?
-- Output persistence: do skills that produce artifacts offer to save them?
+- Output persistence: do skills that produce artifacts persist them as required artifacts (not optional save prompts)?
 - Progressive Disclosure: do all skills follow the three-level hierarchy (metadata → body → references)?
 
 For each gap, name the source skill (where the pattern is done well) and the target skills (where it's missing). Be specific about what to add — not "add language adaptation" but "add a Rules-level language override for synthesis output."

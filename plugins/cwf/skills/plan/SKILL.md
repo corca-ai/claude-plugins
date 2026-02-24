@@ -1,6 +1,6 @@
 ---
 name: plan
-description: "Agent-assisted plan drafting to define a reviewable execution contract before coding. Includes parallel research, BDD success criteria, and cwf:review integration, then persists plan+lessons as runtime-independent files for plan→impl→review continuity. Triggers: \"cwf:plan\", \"plan this task\""
+description: "Agent-assisted plan drafting to define a reviewable execution contract before coding. Reuses gather/clarify evidence first, fills unresolved gaps with targeted research, applies BDD success criteria and cwf:review integration, then persists plan+lessons as runtime-independent files for plan→impl→review continuity. Triggers: \"cwf:plan\", \"plan this task\""
 ---
 
 # Plan
@@ -58,7 +58,7 @@ bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh set . \
 - **Known Constraints**: {limitations, boundaries}
 ```
 
-## Phase 2: Parallel Research
+## Phase 2: Evidence Baseline & Gap-Fill Research
 
 ### 2.0 Resolve session directory
 
@@ -72,32 +72,55 @@ live_state_file=$(bash {CWF_PLUGIN_DIR}/scripts/cwf-live-state.sh resolve)
 session_dir: "{live.dir value from resolved live-state file}"
 ```
 
-### 2.1 Context recovery check
+### 2.1 Build baseline from existing artifacts
 
-Apply the [context recovery protocol](../../references/context-recovery-protocol.md) to these files:
+Use persisted artifacts as the default planning evidence before launching any new research.
+
+1. Resolve the effective live-state file and read `live.clarify_result_file` when set.
+2. Read gather/clarify artifacts already available for this session, prioritizing:
+   - clarify summary file (`live.clarify_result_file`)
+   - `{session_dir}/clarify-codebase-research.md`
+   - `{session_dir}/clarify-web-research.md`
+   - `{session_dir}/clarify-expert-alpha.md`
+   - `{session_dir}/clarify-expert-beta.md`
+   - relevant gathered markdown outputs (and matching `.meta.yaml`) from the current session directory
+3. Build an **Evidence Gap List**:
+   - which decision points are already answerable from existing evidence
+   - which decision points still need additional investigation
+
+If no reusable artifacts are available, treat all unresolved decision points as gap candidates and continue to Phase 2.2.
+
+### 2.2 Context recovery check (gap-fill outputs)
+
+Apply the [context recovery protocol](../../references/context-recovery-protocol.md) to these gap-fill output files:
 
 | Agent | Output file |
 |-------|-------------|
 | Prior Art Researcher | `{session_dir}/plan-prior-art-research.md` |
 | Codebase Analyst | `{session_dir}/plan-codebase-analysis.md` |
 
-Skip to Phase 3 if both files are valid. These two files are **critical outputs** for plan synthesis.
+Decision:
 
-### 2.2 Adaptive Sizing Gate
+- If Evidence Gap List is empty: skip to Phase 3 (no extra research needed).
+- If Evidence Gap List is non-empty and both files are valid: reuse them and skip to Phase 3.
+- Otherwise continue to Phase 2.3.
 
-Assess task complexity to decide research depth:
+### 2.3 Adaptive gap triage
 
-| Complexity signal | Agent decision |
-|-------------------|----------------|
-| Task has clear scope + few files + well-known patterns | Skip Prior Art Researcher; launch Codebase Analyst only |
-| Task has moderate scope OR unfamiliar domain | Launch both agents (default) |
-| Task scope is explicitly narrow (e.g., single-file typo fix) | Skip Phase 2 entirely; go to Phase 3 |
+Assess each unresolved gap to decide which extra research lane is needed:
 
-Default to launching both agents when uncertain.
+| Gap type | Agent decision |
+|----------|----------------|
+| Gap is mainly repository-specific (existing architecture, constraints, local patterns) | Launch Codebase Analyst only |
+| Gap is mainly external best practice / prior art | Launch Prior Art Researcher only |
+| Gap spans both repository constraints and external practice | Launch both agents in parallel |
+| Gap is already answerable from baseline after re-check | No launch for that gap |
 
-### 2.3 Launch sub-agents
+When uncertain, prefer launching both agents.
 
-Launch sub-agents **simultaneously** using the Task tool — only for agents whose result files are missing or invalid.
+### 2.4 Launch targeted sub-agents
+
+Launch sub-agents **simultaneously** using the Task tool — only for lanes selected in Phase 2.3 and only when their result files are missing or invalid.
 - Shared output persistence contract: [agent-patterns.md § Sub-agent Output Persistence Contract](../../references/agent-patterns.md#sub-agent-output-persistence-contract).
 
 #### Sub-agent A: Prior Art Researcher
@@ -129,6 +152,12 @@ Task tool:
     Key decisions:
     {decisions from Phase 1}
 
+    Baseline evidence summary from gather/clarify:
+    {summary from Phase 2.1}
+
+    Unresolved evidence gaps to investigate:
+    {gap list for prior-art lane from Phase 2.3}
+
     ## Output Persistence
     Write your complete findings to: {session_dir}/plan-prior-art-research.md
     At the very end of the file, append this sentinel marker on its own line:
@@ -155,6 +184,12 @@ Task tool:
     Key decisions:
     {decisions from Phase 1}
 
+    Baseline evidence summary from gather/clarify:
+    {summary from Phase 2.1}
+
+    Unresolved evidence gaps to investigate:
+    {gap list for codebase lane from Phase 2.3}
+
     ## Output Persistence
     Write your complete findings to: {session_dir}/plan-codebase-analysis.md
     At the very end of the file, append this sentinel marker on its own line:
@@ -163,27 +198,29 @@ Task tool:
 
 Wait for all launched sub-agents to complete. Re-validate each launched file using the context recovery protocol.
 
-### 2.4 Read output files
+### 2.5 Read output files
 
 After sub-agents complete, read the result files from the session directory (not in-memory return values):
 
 - `{session_dir}/plan-prior-art-research.md` — Prior art research findings
 - `{session_dir}/plan-codebase-analysis.md` — Codebase analysis findings
 
-Use these file contents as input for Phase 3 synthesis.
+Use these file contents as additional input for Phase 3 synthesis.
 
-### 2.5 Persistence Gate (Critical)
+### 2.6 Persistence Gate (Critical when gap-fill research runs)
 
-Apply the stage-tier policy from the context recovery protocol:
+Apply the stage-tier policy from the context recovery protocol when Phase 2.4 launched any gap-fill sub-agent:
 
 1. `plan-prior-art-research.md` and `plan-codebase-analysis.md` are critical.
 2. If either file is still invalid after one bounded retry, **hard fail** the
    stage with explicit file-level error and stop plan drafting.
 3. Record gate path in output (`PERSISTENCE_GATE=HARD_FAIL` or equivalent).
 
+If no gap-fill sub-agent was launched, record `PERSISTENCE_GATE=SKIP_NO_GAP` and proceed.
+
 ## Phase 3: Plan Drafting
 
-Synthesize research from both sub-agents into a structured plan. Read `{SKILL_DIR}/../../references/plan-protocol.md` for protocol rules on location, sections, and format.
+Synthesize baseline evidence (from gather/clarify artifacts) and any additional gap-fill research into a structured plan. Read `{SKILL_DIR}/../../references/plan-protocol.md` for protocol rules on location, sections, and format.
 
 ### Cross-Cutting Pattern Gate
 
@@ -238,7 +275,8 @@ Keep only these skill-specific additions in the generated plan:
 
 ### Research Integration
 
-- Incorporate prior art findings into the plan rationale
+- Start from gather/clarify evidence as the primary baseline for plan rationale
+- Incorporate gap-fill findings only for unresolved decisions
 - Note where codebase patterns inform implementation steps
 - Flag conflicts between best practices and existing code as decision points
 
@@ -260,6 +298,8 @@ Write the complete plan from Phase 3, following `plan-protocol.md` and the skill
 
 Initialize `lessons.md` using the shared format in `plan-protocol.md` (user language). If no learnings exist yet, create the file with a header and a short placeholder note.
 
+Before finishing this skill, append plan-stage learnings captured during user ping-pong (for example: clarified constraints, corrected assumptions, revealed preferences). Do not defer these to implementation.
+
 ## Phase 5: Review Offer
 
 After writing plan artifacts, suggest review:
@@ -275,7 +315,7 @@ For a multi-perspective review before implementation, run:
 
 ## Rules
 
-1. **Research before drafting**: Always complete parallel research before writing the plan
+1. **Evidence-first before drafting**: Use gather/clarify artifacts as baseline first; run additional research only for unresolved evidence gaps
 2. **Two-layer criteria**: Success criteria must include both BDD and qualitative layers
 3. **Cite evidence**: Reference specific files, URLs, or sources for plan decisions
 4. **Follow protocol**: Adhere to plan-protocol.md for format and location
@@ -284,8 +324,9 @@ For a multi-perspective review before implementation, run:
 7. **Cross-cutting → shared reference first**: When identical logic applies to 3+ targets, create a shared reference file as Step 0. "동일 적용" is a plan smell — replace with an explicit shared file path
 8. **Commit Strategy is required**: Every plan must include a Commit Strategy section. Default is one commit per Step.
 9. **Preparatory refactoring check**: When a target file is 300+ lines with 3+ planned changes, add Step 0 to extract separable blocks first
-10. **Critical persistence outputs hard-fail**: If `plan-prior-art-research.md` or `plan-codebase-analysis.md` remains invalid after bounded retry, stop with explicit error instead of drafting from partial data
+10. **Conditional critical persistence hard-fail**: When gap-fill research is launched, if `plan-prior-art-research.md` or `plan-codebase-analysis.md` remains invalid after bounded retry, stop with explicit error instead of drafting from partial data
 11. **Language override is mandatory**: `plan.md` is in English; `lessons.md` is in the user's language
+12. **Plan-stage learnings must be logged immediately**: Record conversation-time learnings in `lessons.md` during planning, not only after implementation
 
 ## References
 
