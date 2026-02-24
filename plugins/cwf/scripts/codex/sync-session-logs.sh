@@ -195,13 +195,15 @@ START_HHMM=$(utc_to_local "$SESSION_STARTED_UTC" "%H%M")
 
 mkdir -p "$OUT_DIR"
 OUT_FILE="$OUT_DIR/${DATE_STR}-${START_HHMM}-${HASH}.codex.md"
+OUT_WRITE_FILE="$OUT_FILE"
+OUT_TMP_FILE=""
 
 CURRENT_SIZE="$(wc -c < "$JSONL_PATH" | tr -d ' ')"
 CURRENT_MTIME="$(file_mtime_epoch "$JSONL_PATH")"
 SOURCE_JSONL="$JSONL_PATH"
 CHUNK_FILE=""
 EVENTS_FILE="$(mktemp)"
-trap 'rm -f "$EVENTS_FILE" "$CHUNK_FILE"' EXIT
+trap 'rm -f "$EVENTS_FILE" "$CHUNK_FILE" "$OUT_TMP_FILE"' EXIT
 
 APPEND_MODE="$(normalize_bool "$APPEND_MODE")"
 STATE_FILE="$OUT_DIR/.sync-state/${HASH}.json"
@@ -230,6 +232,8 @@ if [ "$APPEND_MODE" = "true" ] && command -v jq >/dev/null 2>&1; then
 fi
 
 if [ "$REBUILD_MODE" = "true" ]; then
+  OUT_TMP_FILE="$(mktemp "$OUT_DIR/.sync-${HASH}.XXXXXX")"
+  OUT_WRITE_FILE="$OUT_TMP_FILE"
   write_session_header
 else
   if [ "$STATE_OFFSET" -ge "$CURRENT_SIZE" ]; then
@@ -249,6 +253,10 @@ else
     exit 0
   fi
 
+  OUT_TMP_FILE="$(mktemp "$OUT_DIR/.sync-${HASH}.XXXXXX")"
+  cp "$OUT_FILE" "$OUT_TMP_FILE"
+  OUT_WRITE_FILE="$OUT_TMP_FILE"
+
   CHUNK_FILE="$(mktemp)"
   tail -c "+$((STATE_OFFSET + 1))" "$JSONL_PATH" > "$CHUNK_FILE"
   SOURCE_JSONL="$CHUNK_FILE"
@@ -263,6 +271,7 @@ if ! build_events_from_source "$SOURCE_JSONL"; then
     reset_turn_state
     EMITTED_TURNS=0
     LAST_TURN_FINGERPRINT=""
+    : > "$OUT_WRITE_FILE"
     write_session_header
     build_events_from_source "$SOURCE_JSONL"
   else
@@ -303,7 +312,7 @@ flush_turn() {
     echo ""
     echo "### User"
     echo "$TURN_USER_TEXT"
-  } >> "$OUT_FILE"
+  } >> "$OUT_WRITE_FILE"
 
   if [ -n "$TURN_ASSISTANT_TEXT" ]; then
     local line_count
@@ -311,7 +320,7 @@ flush_turn() {
     {
       echo ""
       echo "### Assistant (${line_count} lines$([ "$line_count" -gt "$TRUNCATE_THRESHOLD" ] && echo " -> truncated"))"
-    } >> "$OUT_FILE"
+    } >> "$OUT_WRITE_FILE"
 
     if [ "$line_count" -gt "$TRUNCATE_THRESHOLD" ]; then
       local half omitted
@@ -323,19 +332,19 @@ flush_turn() {
         echo "...(${omitted} lines truncated)..."
         echo ""
         printf '%s\n' "$TURN_ASSISTANT_TEXT" | tail -n "$half"
-      } >> "$OUT_FILE"
+      } >> "$OUT_WRITE_FILE"
     else
-      printf '%s\n' "$TURN_ASSISTANT_TEXT" >> "$OUT_FILE"
+      printf '%s\n' "$TURN_ASSISTANT_TEXT" >> "$OUT_WRITE_FILE"
     fi
   fi
 
   if [ -n "$TURN_TOOLS" ]; then
-    echo "" >> "$OUT_FILE"
-    echo "### Tools" >> "$OUT_FILE"
+    echo "" >> "$OUT_WRITE_FILE"
+    echo "### Tools" >> "$OUT_WRITE_FILE"
     local idx=1
     while IFS= read -r tool_line; do
       [ -n "$tool_line" ] || continue
-      echo "${idx}. ${tool_line}" >> "$OUT_FILE"
+      echo "${idx}. ${tool_line}" >> "$OUT_WRITE_FILE"
       idx=$((idx + 1))
     done <<< "$TURN_TOOLS"
   fi
@@ -392,7 +401,12 @@ if [ "$HAS_TURN" = "true" ]; then
   reset_turn_state
 fi
 
-redact_file_in_place "$OUT_FILE"
+redact_file_in_place "$OUT_WRITE_FILE"
+
+if [ "$OUT_WRITE_FILE" != "$OUT_FILE" ]; then
+  mv "$OUT_WRITE_FILE" "$OUT_FILE"
+  OUT_TMP_FILE=""
+fi
 
 if [ "$STATE_ENABLED" = "true" ]; then
   save_sync_state "$STATE_FILE" "$CURRENT_SIZE" "$JSONL_PATH" "$OUT_FILE" "$CURRENT_MTIME"

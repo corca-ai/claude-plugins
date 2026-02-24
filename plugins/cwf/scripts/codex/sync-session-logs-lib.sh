@@ -357,6 +357,8 @@ build_events_from_source() {
 }
 
 write_session_header() {
+  local target_file
+  target_file="${OUT_WRITE_FILE:-$OUT_FILE}"
   # shellcheck disable=SC2153
   {
     echo "# Session: ${HASH}"
@@ -365,5 +367,5 @@ write_session_header() {
     echo "CWD: ${SESSION_CWD}"
     echo "Started: ${STARTED_LOCAL} | Codex CLI v${CLI_VERSION}"
     echo "Session ID: ${SESSION_ID}"
-  } > "$OUT_FILE"
+  } > "$target_file"
 }

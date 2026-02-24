@@ -39,6 +39,7 @@ SYNC_DONE="false"
 EXIT_CODE=0
 RUN_COMPLETED="false"
 SYNC_TIMEOUT_SEC="${CWF_CODEX_SYNC_TIMEOUT_SEC:-10}"
+SYNC_RETRY_TIMEOUT_SEC="${CWF_CODEX_SYNC_RETRY_TIMEOUT_SEC:-60}"
 POST_RUN_TIMEOUT_SEC="${CWF_CODEX_POST_RUN_TIMEOUT_SEC:-15}"
 SYNC_UNBOUNDED_FALLBACK="${CWF_CODEX_SYNC_UNBOUNDED_FALLBACK:-auto}"
 if [ "$SYNC_UNBOUNDED_FALLBACK" = "auto" ]; then
@@ -63,6 +64,12 @@ wrapper_log() {
   mkdir -p "$(dirname "$WRAPPER_DEBUG_LOG")" 2>/dev/null || true
   printf '%s pid=%s ppid=%s tty=%s %s\n' \
     "$ts" "$$" "${PPID:-0}" "$tty_name" "$*" >> "$WRAPPER_DEBUG_LOG" 2>/dev/null || true
+}
+
+wrapper_warn() {
+  local msg="$*"
+  printf '[cwf:codex wrapper] WARN: %s\n' "$msg" >&2
+  wrapper_log "warn $msg"
 }
 
 is_same_file() {
@@ -103,10 +110,16 @@ run_with_optional_timeout() {
   local timeout_sec="$1"
   shift
   if command -v timeout >/dev/null 2>&1; then
-    timeout "$timeout_sec" "$@" || true
-    return 0
+    timeout "$timeout_sec" "$@"
+    return $?
   fi
-  "$@" || true
+  "$@"
+  return $?
+}
+
+is_timeout_exit() {
+  local code="${1:-0}"
+  [ "$code" -eq 124 ] || [ "$code" -eq 137 ] || [ "$code" -eq 143 ]
 }
 
 run_sync_once() {
@@ -121,20 +134,59 @@ run_sync_once() {
     return 0
   fi
 
+  local sync_status=0
+  local force_unbounded="false"
+
   # First pass: bounded to this wrapper invocation window.
   if [ -n "${RUN_START_EPOCH:-}" ]; then
-    wrapper_log "sync bounded begin since_epoch=$RUN_START_EPOCH"
-    run_with_optional_timeout "$SYNC_TIMEOUT_SEC" \
-      "$SYNC_SCRIPT" --cwd "$PWD" --since-epoch "$RUN_START_EPOCH" --quiet
-    wrapper_log "sync bounded end"
+    wrapper_log "sync bounded begin since_epoch=$RUN_START_EPOCH timeout=$SYNC_TIMEOUT_SEC"
+    if run_with_optional_timeout "$SYNC_TIMEOUT_SEC" \
+      "$SYNC_SCRIPT" --cwd "$PWD" --since-epoch "$RUN_START_EPOCH" --quiet; then
+      wrapper_log "sync bounded end status=ok"
+    else
+      sync_status=$?
+      force_unbounded="true"
+      wrapper_log "sync bounded end status=fail exit=$sync_status"
+      if is_timeout_exit "$sync_status"; then
+        wrapper_warn "session log sync timed out (${SYNC_TIMEOUT_SEC}s); retrying with ${SYNC_RETRY_TIMEOUT_SEC}s."
+      else
+        wrapper_warn "session log sync failed (exit=$sync_status); retrying with ${SYNC_RETRY_TIMEOUT_SEC}s."
+      fi
+
+      if run_with_optional_timeout "$SYNC_RETRY_TIMEOUT_SEC" \
+        "$SYNC_SCRIPT" --cwd "$PWD" --since-epoch "$RUN_START_EPOCH" --quiet; then
+        wrapper_log "sync bounded retry end status=ok"
+        force_unbounded="false"
+      else
+        sync_status=$?
+        wrapper_log "sync bounded retry end status=fail exit=$sync_status"
+        if is_timeout_exit "$sync_status"; then
+          wrapper_warn "session log retry also timed out (${SYNC_RETRY_TIMEOUT_SEC}s)."
+        else
+          wrapper_warn "session log retry failed (exit=$sync_status)."
+        fi
+      fi
+    fi
   fi
+
   # Optional second pass: unbounded fallback can pick unrelated sessions when many are active.
-  if [ "$SYNC_UNBOUNDED_FALLBACK" = "true" ]; then
-    wrapper_log "sync unbounded begin"
-    run_with_optional_timeout "$SYNC_TIMEOUT_SEC" \
-      "$SYNC_SCRIPT" --cwd "$PWD" --quiet
-    wrapper_log "sync unbounded end"
+  if [ "$SYNC_UNBOUNDED_FALLBACK" = "true" ] || [ "$force_unbounded" = "true" ]; then
+    wrapper_log "sync unbounded begin timeout=$SYNC_RETRY_TIMEOUT_SEC"
+    if run_with_optional_timeout "$SYNC_RETRY_TIMEOUT_SEC" \
+      "$SYNC_SCRIPT" --cwd "$PWD" --quiet; then
+      wrapper_log "sync unbounded end status=ok"
+    else
+      sync_status=$?
+      wrapper_log "sync unbounded end status=fail exit=$sync_status"
+      if is_timeout_exit "$sync_status"; then
+        wrapper_warn "unbounded session log sync timed out (${SYNC_RETRY_TIMEOUT_SEC}s). Run manually: $SYNC_SCRIPT --cwd \"$PWD\""
+      else
+        wrapper_warn "unbounded session log sync failed (exit=$sync_status). Run manually: $SYNC_SCRIPT --cwd \"$PWD\""
+      fi
+    fi
   fi
+
+  return 0
 }
 
 cleanup_on_exit() {
