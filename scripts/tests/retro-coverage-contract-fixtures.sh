@@ -60,10 +60,11 @@ bash "$SCRIPT" \
 assert_file_nonempty "coverage summary exists" "$SESSION_DIR/coverage/coverage-contract-summary.txt"
 if [[ "$base_ref" == "HEAD" ]]; then
   assert_file_exists "diff all file exists (single-commit fallback)" "$SESSION_DIR/coverage/diff-all-excl-session-logs.txt"
+  assert_file_exists "top-level breakdown exists (single-commit fallback)" "$SESSION_DIR/coverage/diff-top-level-breakdown.txt"
 else
   assert_file_nonempty "diff all exists" "$SESSION_DIR/coverage/diff-all-excl-session-logs.txt"
+  assert_file_nonempty "top-level breakdown exists" "$SESSION_DIR/coverage/diff-top-level-breakdown.txt"
 fi
-assert_file_nonempty "top-level breakdown exists" "$SESSION_DIR/coverage/diff-top-level-breakdown.txt"
 assert_file_nonempty "project primary corpus exists" "$SESSION_DIR/coverage/project-lessons-retro-primary.txt"
 
 echo "---"
