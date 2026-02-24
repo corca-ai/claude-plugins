@@ -88,11 +88,11 @@
       "assertion": "Portable and authoring gate policies are separated; auto uses portable baseline and authoring remains selectable.",
       "source_refs": [
         {
-          "file": "plugins/cwf/contracts/portable-contract.json",
+          "file": "plugins/cwf/contracts/portable-contract.yaml",
           "selector": "name=portable"
         },
         {
-          "file": "plugins/cwf/contracts/authoring-contract.json",
+          "file": "plugins/cwf/contracts/authoring-contract.yaml",
           "selector": "name=authoring"
         }
       ],
@@ -124,7 +124,7 @@
           "selector": "Compare Versions (Authoritative + Fail-Closed)"
         },
         {
-          "file": "plugins/cwf/contracts/authoring-contract.json",
+          "file": "plugins/cwf/contracts/authoring-contract.yaml",
           "selector": "update_latest_consistency_contract"
         },
         {

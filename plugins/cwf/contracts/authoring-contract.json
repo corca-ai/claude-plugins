@@ -7,7 +7,7 @@
       "id": "claim_test_mapping",
       "mode": "fail",
       "contexts": ["manual", "hook", "post-run"],
-      "command": "bash \"$CWF_PLUGIN_ROOT/scripts/check-claim-test-mapping.sh\" --contract \"$CWF_PLUGIN_ROOT/contracts/claims.json\""
+      "command": "bash \"$CWF_PLUGIN_ROOT/scripts/check-claim-test-mapping.sh\" --contract \"$CWF_PLUGIN_ROOT/contracts/claims.yaml\""
     },
     {
       "id": "change_impact",

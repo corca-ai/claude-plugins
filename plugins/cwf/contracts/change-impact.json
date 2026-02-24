@@ -45,8 +45,8 @@
         "plugins/cwf/skills/setup/references/setup-contract.md"
       ],
       "require_any_changed": [
-        "plugins/cwf/contracts/claims.json",
-        "plugins/cwf/contracts/change-impact.json"
+        "plugins/cwf/contracts/claims.yaml",
+        "plugins/cwf/contracts/change-impact.yaml"
       ],
       "message": "Policy/SoT document changes must update claim/change-impact contracts."
     },
@@ -54,12 +54,12 @@
       "id": "unified_gate_or_contract_change_requires_mapping_validation",
       "when_changed": [
         "plugins/cwf/scripts/check-portability-contract.sh",
-        "plugins/cwf/contracts/portable-contract.json",
-        "plugins/cwf/contracts/authoring-contract.json"
+        "plugins/cwf/contracts/portable-contract.yaml",
+        "plugins/cwf/contracts/authoring-contract.yaml"
       ],
       "require_any_changed": [
         "plugins/cwf/scripts/check-claim-test-mapping.sh",
-        "plugins/cwf/contracts/claims.json"
+        "plugins/cwf/contracts/claims.yaml"
       ],
       "message": "Unified gate/contract changes must keep claim-test mapping aligned."
     },
@@ -73,7 +73,7 @@
       "require_any_changed": [
         "scripts/premerge-cwf-gate.sh",
         "scripts/tests/check-update-latest-consistency-fixtures.sh",
-        "plugins/cwf/contracts/authoring-contract.json"
+        "plugins/cwf/contracts/authoring-contract.yaml"
       ],
       "message": "Update latest-oracle behavior changes must update consistency gate wiring and fixtures."
     }

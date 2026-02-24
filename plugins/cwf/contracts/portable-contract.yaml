@@ -1,0 +1,14 @@
+version: 1
+name: portable
+description: Portable baseline gates safe for host repositories with no authoring-repo assumptions.
+checks:
+  - id: setup_contract_runtime
+    mode: fail
+    contexts:
+      - manual
+    command: bash "$CWF_PLUGIN_ROOT/skills/setup/scripts/check-setup-contract-runtime.sh"
+  - id: portability_fixtures
+    mode: warn
+    contexts:
+      - manual
+    command: bash "$CWF_PLUGIN_ROOT/scripts/check-portability-fixtures.sh"
