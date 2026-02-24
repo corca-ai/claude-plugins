@@ -11,6 +11,5 @@
 - Review-code synthesis was corrected to include required session-log fields for gate compliance.
 
 ## Follow-ups
-- Decide exclusion sunset policy before ship.
-- Optionally retire legacy JSON contract files after deletion policy confirmation.
-
+- Exclusion sunset policy fixed to `release-based` in concept registry governance.
+- Legacy JSON contract files removed from `plugins/cwf/contracts/` (YAML-only active path).

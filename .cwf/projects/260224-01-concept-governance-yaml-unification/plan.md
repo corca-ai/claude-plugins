@@ -164,7 +164,8 @@
 | 2 | Concept registry authority | `gather.md` + existing `concept-map.md` usage (high) | docs-only map vs machine registry-only | Machine registry in `plugins/cwf/concepts/registry.yaml`; `concept-map.md` remains reference narrative | resolved | agent | 2026-02-24T00:00:00Z |
 | 3 | Migration sequencing | `gather.md` hotspot coupling findings (high) | one-shot rewrite vs phased cutover | Phased cutover in one branch/run | resolved | agent | 2026-02-24T00:00:00Z |
 | 4 | Expert model split and refactor deep integration | `gather.md` + refactor scripts/contract evidence (high) | keep split policy vs unify all into one file | Introduce expert contract+roster, preserve fixed-expert profile semantics in refactor deep | resolved | user plan + agent | 2026-02-24T00:00:00Z |
-| 5 | Exclusion sunset policy in concept registry | `initial-plan.md` open questions (medium) | date-based vs release-based | release-based sunset metadata in registry excludes | open | TBD | TBD |
+| 5 | Exclusion sunset policy in concept registry | `initial-plan.md` open questions (medium) | date-based vs release-based | release-based sunset metadata in registry excludes | resolved | user | 2026-02-24T02:02:18Z |
+| 6 | Concept checker aggregate output standard | `review-synthesis-plan.md` suggestion (medium) | JSONL vs YAML | Standardize checker aggregate format as JSONL (`registry governance`) | resolved | user | 2026-02-24T02:02:18Z |
 
 ## Success Criteria
 
@@ -195,6 +196,5 @@ Then version is 1.0.0 and README.md/README.ko.md describe only the migrated arch
 - Documentation reflects runtime truth (no stale legacy guidance).
 
 ## Deferred Actions
-- [ ] Decide exclusion sunset policy default (`release-based` vs `date-based`) before ship stage.
-- [ ] Confirm whether concept checker aggregate output should standardize on JSONL or YAML before ship stage.
-
+- [x] Decide exclusion sunset policy default (`release-based` vs `date-based`) before ship stage.
+- [x] Confirm whether concept checker aggregate output should standardize on JSONL or YAML before ship stage.
