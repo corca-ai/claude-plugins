@@ -28,7 +28,6 @@ const ROOT_DOCS = new Set([
   "CLAUDE.md",
   "README.md",
   "README.ko.md",
-  "CHANGELOG.md",
   "AI_NATIVE_PRODUCT_TEAM.md",
   "AI_NATIVE_PRODUCT_TEAM.ko.md"
 ]);

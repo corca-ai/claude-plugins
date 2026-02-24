@@ -238,14 +238,14 @@ Include alias boundary note:
 
 ---
 
-## Phase 4: Changelog Summary (Opt-In)
+## Phase 4: Change Summary (Opt-In)
 
-After update/check, ask whether to summarize changelog/diff evidence.
+After update/check, ask whether to summarize diff evidence.
 
 Use AskUserQuestion:
 
 ```text
-Show changelog summary for changes between {current_version} and {latest_version}?
+Show change summary for differences between {current_version} and {latest_version}?
 ```
 
 Options: `Yes, summarize` / `No, skip`
@@ -259,14 +259,6 @@ Options: `Yes, summarize` / `No, skip`
 git --no-pager diff --no-index --name-status "$old_diff_root" "$new_diff_root" || true
 ```
 
-1. Diff changelog first:
-
-```bash
-git --no-pager diff --no-index \
-  "$old_diff_root/CHANGELOG.md" \
-  "$new_diff_root/CHANGELOG.md" || true
-```
-
 1. Diff README for user-facing guidance changes:
 
 ```bash
@@ -276,10 +268,9 @@ git --no-pager diff --no-index \
 ```
 
 1. Summary procedure:
-   - If changelog diff exists, summarize changes between `{current_version}` and `{latest_version}` first.
-   - Add notable `SKILL.md`/script/manifest changes from name-status diff.
+   - Summarize notable `SKILL.md`/script/manifest changes from name-status diff.
    - Add README delta as "user-facing setup/usage guidance changes".
-   - If changelog is absent on both sides, state that explicitly and rely on deterministic file diff evidence.
+   - If diff evidence is sparse, state that explicitly and keep the summary minimal.
 
 ---
 
@@ -298,7 +289,7 @@ Add `update` to `cwf-state.yaml` current session's `stage_checkpoints` list if l
 5. **Reconcile Codex links after update**: For existing Codex integrations in selected scope, run reconcile in the same update flow.
 6. **No fail-open scope fallback**: If scope detection fails or returns `none`, require explicit scope selection before mutation.
 7. **No mutation in check mode**: `cwf:update --check` must not install/update/reconcile; it reports status and suggested commands only.
-8. **Changelog summary is opt-in**: Run changelog summary only when the user explicitly requests it in Phase 4.
+8. **Change summary is opt-in**: Run change summary only when the user explicitly requests it in Phase 4.
 9. **Authoritative latest only**: cache is supporting evidence, not oracle; latest-version verdict must come from authoritative metadata path.
 10. **UNVERIFIED is fail-closed**: never present `No update needed` when verdict is `UNVERIFIED`.
 11. **Top-level verification required**: release confidence claims require top-level marketplace update + authoritative fetch success.

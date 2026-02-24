@@ -207,7 +207,7 @@ if [ "${#md_files[@]}" -gt 0 ]; then
       echo "[pre-commit] local link validation on staged markdown files..."
       for file in "${md_files[@]}"; do
         case "$file" in
-          CHANGELOG.md|references/*)
+          references/*)
             continue
             ;;
         esac

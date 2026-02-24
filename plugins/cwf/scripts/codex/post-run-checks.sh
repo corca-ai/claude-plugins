@@ -527,7 +527,7 @@ if [[ "${#md_files[@]}" -gt 0 ]]; then
     log "local link checks on changed markdown files"
     for file in "${md_files[@]}"; do
       case "$file" in
-        CHANGELOG.md|references/*)
+        references/*)
           continue
           ;;
       esac

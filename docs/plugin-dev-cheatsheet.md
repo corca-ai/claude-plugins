@@ -277,12 +277,11 @@ Default executor for plugin changes: [plugin-deploy](../.claude/skills/plugin-de
 
 1. Bump version in `plugin.json` (see version bump rules above)
 2. Sync `marketplace.json` entry (version if listed, description, keywords)
-3. Update [CHANGELOG.md](../CHANGELOG.md) if the plugin has one (describe what changed)
-4. Update [README.md](../README.md) and [README.ko.md](../README.ko.md) (table + detail section)
-5. New plugins: check [AI_NATIVE_PRODUCT_TEAM.md](../AI_NATIVE_PRODUCT_TEAM.md) for link opportunities
-6. Test locally
-7. Commit and push
-8. On **main branch**: run `cwf:update` to sync installed behavior with latest plugin changes
+3. Update [README.md](../README.md) and [README.ko.md](../README.ko.md) (table + detail section)
+4. New plugins: check [AI_NATIVE_PRODUCT_TEAM.md](../AI_NATIVE_PRODUCT_TEAM.md) for link opportunities
+5. Test locally
+6. Commit and push
+7. On **main branch**: run `cwf:update` to sync installed behavior with latest plugin changes
 
 Inform users after deploy:
 ```text

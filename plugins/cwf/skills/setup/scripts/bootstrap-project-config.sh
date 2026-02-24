@@ -94,6 +94,13 @@ ensure_gitignore_entries() {
     ".cwf-config.local.yaml"
     ".cwf/sessions/.sync-*"
     ".cwf/sessions/.sync-state/"
+    ".cwf/sessions/raw/"
+    "**/.cwf/sessions/raw/"
+    "**/.cwf/projects/**/session-logs/"
+    ".codex/tmp/"
+    ".codex/.skill-sync-backup/"
+    "**/.codex/tmp/"
+    "**/.codex/.skill-sync-backup/"
     "**/.cwf/sessions/.sync-*"
     "**/.cwf/sessions/.sync-state/"
   )

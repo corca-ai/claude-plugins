@@ -83,7 +83,7 @@ Never reduce review depth or agent count for cost reasons. All 6 reviewers alway
 
 ### #6 Setup / Update Separation
 
-`cwf:setup` = initial config + hook selection + external tool detection. `cwf:update` = version check + changelog. Separated because setup is one-time interactive, update is periodic automated.
+`cwf:setup` = initial config + hook selection + external tool detection. `cwf:update` = version check + scope-aware reconcile. Separated because setup is one-time interactive, update is periodic automated.
 
 ### #13 Auto-Generated Handoff
 

@@ -367,7 +367,7 @@ The user may continue the conversation after the retro. During post-retro discus
   - `- **Apply Layer**: \`local|upstream\``
   - `- **Promotion Target**: \`...\``
   - `- **Due Release**: \`...\``
-- If plugin code was changed, follow normal release procedures (version bump, CHANGELOG)
+- If plugin code was changed, follow normal release procedures (version bump and release note updates in README/docs as needed)
 
 Do not prompt the user to start this discussion.
 

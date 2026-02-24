@@ -281,7 +281,6 @@ function collectMdFiles(rootDir) {
       relPath.startsWith('node_modules/') ||
       relPath.includes('/node_modules/') ||
       isRuntimeArtifactRelPath(relPath) ||
-      relPath === 'CHANGELOG.md' ||
       relPath.startsWith('references/')
     ) {
       continue;

@@ -172,8 +172,8 @@ run_contract_mode() {
     echo "contract missing: no-confirmation apply section" >&2
     missing=1
   fi
-  if ! grep -Fq "Changelog Summary (Opt-In)" "$skill_file"; then
-    echo "contract missing: changelog opt-in section" >&2
+  if ! grep -Fq "Change Summary (Opt-In)" "$skill_file"; then
+    echo "contract missing: change summary opt-in section" >&2
     missing=1
   fi
   if ! grep -Fq "Auto-apply when newer version exists" "$skill_file"; then

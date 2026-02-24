@@ -23,7 +23,7 @@ Repeatable, resumable workflow for user-facing documentation outside [session ar
 
 ### Include
 
-- Root docs: [AGENTS.md](../AGENTS.md), [README.md](../README.md), [README.ko.md](../README.ko.md), [CLAUDE.md](../CLAUDE.md), [AI_NATIVE_PRODUCT_TEAM.md](../AI_NATIVE_PRODUCT_TEAM.md), [AI_NATIVE_PRODUCT_TEAM.ko.md](../AI_NATIVE_PRODUCT_TEAM.ko.md), [CHANGELOG.md](../CHANGELOG.md)
+- Root docs: [AGENTS.md](../AGENTS.md), [README.md](../README.md), [README.ko.md](../README.ko.md), [CLAUDE.md](../CLAUDE.md), [AI_NATIVE_PRODUCT_TEAM.md](../AI_NATIVE_PRODUCT_TEAM.md), [AI_NATIVE_PRODUCT_TEAM.ko.md](../AI_NATIVE_PRODUCT_TEAM.ko.md)
 - Project docs: [docs/*.md](.)
 - Plugin shared references: [plugins/cwf/references/*.md](../plugins/cwf/references/)
 - Plugin internal reference docs: [plugins/cwf/skills/*/references/*.md](../plugins/cwf/skills/)
@@ -67,8 +67,7 @@ Reference command:
     README.md \
     README.ko.md \
     AI_NATIVE_PRODUCT_TEAM.md \
-    AI_NATIVE_PRODUCT_TEAM.ko.md \
-    CHANGELOG.md
+    AI_NATIVE_PRODUCT_TEAM.ko.md
 
   rg --files docs -g '*.md' | sort
   rg --files plugins/cwf/references -g '*.md' | sort
