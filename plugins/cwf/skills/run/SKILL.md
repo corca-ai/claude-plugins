@@ -82,6 +82,38 @@ Before initializing pipeline state, validate that repository setup prerequisites
 ## Phase 1: Initialize
 
 1. Parse task description and flags (`--from`, `--skip`, `--ambiguity-mode`)
+1. Resolve base branch (for branch/ship policy):
+
+   ```bash
+   resolved_base_branch="$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||')"
+   if [[ -z "$resolved_base_branch" ]]; then
+     if git show-ref --verify --quiet refs/heads/main; then
+       resolved_base_branch="main"
+     elif git show-ref --verify --quiet refs/heads/master; then
+       resolved_base_branch="master"
+     else
+       echo "WAIT_INPUT: base branch could not be resolved (tried origin/HEAD, main, master)."
+       exit 1
+     fi
+   fi
+   ```
+1. Enforce run-start branch policy:
+
+   ```bash
+   current_branch="$(git branch --show-current)"
+   if [[ "$current_branch" == "$resolved_base_branch" ]]; then
+     session_slug="{sanitized-title}"
+     run_branch="feat/${session_slug}"
+     if git show-ref --verify --quiet "refs/heads/$run_branch"; then
+       run_branch="feat/${session_slug}-$(date +%H%M%S)"
+     fi
+     git checkout -b "$run_branch"
+     current_branch="$run_branch"
+   fi
+   ```
+
+   - If run starts on the base branch (typically `main`), create and switch to a dedicated feature branch before stage writes.
+   - If run starts on a non-base branch, keep that branch and treat it as the active run branch.
 1. Resolve ambiguity mode (`--ambiguity-mode` or config default):
 
    ```bash
@@ -184,7 +216,7 @@ Execute stages in order. Each stage invokes the corresponding CWF skill via the 
 | 6 | review-code | `cwf:review --mode code` | Verdict-based | true |
 | 7 | refactor | `cwf:refactor` | — | true |
 | 8 | retro | `cwf:retro --from-run` | — | true |
-| 9 | ship | `cwf:ship` | User confirms PR | false |
+| 9 | ship | `cwf:ship issue` → `cwf:ship pr` (non-base branch) | User confirms PR | false |
 
 ### Ambiguity Modes (Clarify T3 Policy)
 
@@ -339,6 +371,8 @@ After all stages complete (or the pipeline is halted):
 1. **defer-blocking merge discipline**: If unresolved blocking debt exists, ship must treat it as merge-blocking until linked issue/PR follow-up is recorded and blocking count reaches zero.
 1. **Per-stage provenance is mandatory**: Every stage outcome (`Proceed`/`Revise`/`Fail`/`Skipped`/`User Stop`) must append a provenance row, including early-stop paths before halt/return.
 1. **Review `Fail` is not `Revise`**: `Fail` halts automation immediately and requires explicit user direction before any downstream stage.
+1. **Run-start branch creation is mandatory**: When `cwf:run` starts on the resolved base branch, create/switch to a dedicated feature branch before editing.
+1. **Non-base ship must create issue and PR**: When the active branch is not the resolved base branch, ship stage must execute issue creation and PR creation (or report existing URLs) instead of stopping at status-only output.
 
 ## References
 
