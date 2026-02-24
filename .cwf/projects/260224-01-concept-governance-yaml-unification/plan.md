@@ -18,7 +18,7 @@
    - state = runtime/live execution status
    - roster/history = persistent memory artifact, separate from live state
 5. Contract format should be unified to YAML.
-6. Breaking change is acceptable; version should move from `0.8.12` to `0.9.0`.
+6. Breaking change is acceptable; version should move from `0.8.12` to `1.0.0`.
 
 ## Scope Summary
 - Create a concept governance layer under `plugins/cwf/concepts`.
@@ -28,11 +28,12 @@
 - Migrate contract artifacts from mixed JSON/YAML to YAML-only policy.
 - Integrate Expert concept with shared contract + roster model.
 - Recompose skill/hook docs and execution flow to align with concept gates.
+- Reflect final architecture/policy changes in README docs before release (`README.md`, `README.ko.md`).
 
 ## Non-Goals
 - Preserve old contract file paths or mixed-format readers.
 - Maintain old behavior compatibility for external consumers.
-- Finish English/Korean README parity in this same change unless needed for gate pass.
+- Maintain strict README locale parity at every intermediate commit during migration.
 
 ## Baseline Findings (Before Migration)
 - Contract format is mixed:
@@ -107,8 +108,9 @@
 ### Phase 5 — Gate Wiring and Release
 1. Wire `check-concepts.sh` into hook/post-run/premerge gates.
 2. Run full deterministic suite (schemas, hooks, link checks, concept gates).
-3. Bump plugin version `0.8.12 -> 0.9.0`.
-4. Record migration notes for reinstall-first workflow.
+3. Bump plugin version `0.8.12 -> 1.0.0`.
+4. Update README docs to faithfully reflect branch outcomes and new operating model (`README.md`, `README.ko.md`).
+5. Record migration notes for reinstall-first workflow.
 
 ## Risk Management (Focus: JSON -> YAML Migration)
 
@@ -161,7 +163,7 @@
 | 2 | Contract format target | YAML-only across CWF contracts. | resolved |
 | 3 | Expert policy ownership | Repo-local expert contract + separate roster memory file. | resolved |
 | 4 | Refactor deep fixed experts | Keep fixed experts as profile-level mandatory policy. | resolved |
-| 5 | Release impact | Breaking architecture update in minor bump (`0.9.0`). | resolved |
+| 5 | Release impact | Breaking architecture update in major bump (`1.0.0`). | resolved |
 
 ## Success Criteria
 
@@ -184,7 +186,11 @@ Then fixed experts remain mandatory and contextual experts are added determinist
 
 Given release preparation
 When plugin metadata is updated
-Then version is bumped from 0.8.12 to 0.9.0 and migration notes are documented
+Then version is bumped from 0.8.12 to 1.0.0 and migration notes are documented
+
+Given release documentation finalization
+When concept/contract/expert migration work is complete
+Then README.md and README.ko.md both describe the new model and constraints without stale legacy guidance
 ```
 
 ## Open Questions for Next Session Kickoff
