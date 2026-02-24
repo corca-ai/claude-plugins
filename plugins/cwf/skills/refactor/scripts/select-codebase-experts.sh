@@ -26,7 +26,7 @@ Usage:
 
 Options:
   --scan <path>       Codebase scan JSON path (required)
-  --contract <path>   Contract path (default: {artifact_root}/codebase-contract.json)
+  --contract <path>   Contract path (default: {artifact_root}/codebase-contract.yaml)
   -h, --help          Show help
 USAGE
 }
@@ -101,7 +101,7 @@ if [[ -z "$CONTRACT_PATH" ]]; then
   if [[ -z "$artifact_root" ]]; then
     artifact_root="$REPO_ROOT/.cwf"
   fi
-  CONTRACT_PATH="$artifact_root/codebase-contract.json"
+  CONTRACT_PATH="$artifact_root/codebase-contract.yaml"
 else
   CONTRACT_PATH="$(path_to_abs "$PWD" "$CONTRACT_PATH")"
 fi
@@ -112,11 +112,16 @@ import os
 import sys
 from copy import deepcopy
 
+try:
+    import yaml
+except Exception:  # pragma: no cover - optional dependency at runtime
+    yaml = None
+
 scan_path = os.path.abspath(sys.argv[1])
 contract_path = os.path.abspath(sys.argv[2])
 
 
-def load_json(path):
+def load_json_document(path):
     if not os.path.isfile(path):
         return None
     try:
@@ -124,6 +129,49 @@ def load_json(path):
             return json.load(f)
     except Exception:
         return None
+
+
+def load_contract_document(path):
+    if not os.path.isfile(path):
+        return {}, "contract file missing; using default deep-review contract"
+
+    try:
+        with open(path, encoding="utf-8") as f:
+            raw_text = f.read()
+    except Exception as exc:
+        return {}, f"unable to read contract file; using default deep-review contract ({exc})"
+
+    parse_errors = []
+
+    try:
+        loaded = json.loads(raw_text)
+    except Exception as exc:
+        parse_errors.append(f"json: {exc}")
+    else:
+        if loaded is None:
+            loaded = {}
+        if isinstance(loaded, dict):
+            return loaded, ""
+        return {}, "invalid contract root type from JSON; expected object; using defaults"
+
+    if yaml is None:
+        detail = parse_errors[0] if parse_errors else "json parser unavailable"
+        return {}, f"unable to parse contract YAML without PyYAML; using defaults ({detail})"
+
+    try:
+        loaded = yaml.safe_load(raw_text)
+    except Exception as exc:
+        parse_errors.append(f"yaml: {exc}")
+        joined = "; ".join(parse_errors)
+        return {}, f"invalid contract document; using defaults ({joined})"
+
+    if loaded is None:
+        loaded = {}
+
+    if not isinstance(loaded, dict):
+        return {}, "invalid contract root type from YAML; expected mapping; using defaults"
+
+    return loaded, ""
 
 
 def norm_expert(raw):
@@ -203,8 +251,11 @@ def enrich_fixed(entry, defaults):
 
 
 def main():
-    scan = load_json(scan_path) or {}
-    loaded = load_json(contract_path) or {}
+    scan = load_json_document(scan_path) or {}
+    loaded, contract_warning = load_contract_document(contract_path)
+    warnings = []
+    if contract_warning:
+        warnings.append(contract_warning)
 
     default_contract = {
         "deep_review": {
@@ -255,7 +306,6 @@ def main():
             contract[key] = value
 
     deep_cfg = contract.get("deep_review", {})
-    warnings = []
 
     fixed_defaults = {
         "Martin Fowler": {
