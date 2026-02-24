@@ -12,7 +12,7 @@ Repository-local contract used by `cwf:refactor --codebase` to define scope and 
 
 ## Default Location
 
-`{artifact_root}/codebase-contract.json`
+`{artifact_root}/codebase-contract.yaml`
 
 Path resolution follows CWF artifact rules:
 
@@ -51,7 +51,7 @@ Path resolution follows CWF artifact rules:
 | `checks.shell_strict_mode.file_overrides` | object | File-level relax allowlist keyed by repository-relative path. |
 | `deep_review.enabled` | bool | Enable/disable codebase deep review with expert sub-agents. |
 | `deep_review.fixed_experts[]` | list | Mandatory experts (always included first). |
-| `deep_review.context_experts[]` | list | Context expert roster in contract JSON. |
+| `deep_review.context_experts[]` | list | Context expert roster in contract document. |
 | `deep_review.context_expert_count` | number | Number of additional context-matched experts from contract roster. |
 | `deep_review.selection_keywords.*[]` | list | Optional keyword overrides for context expert scoring per check. |
 | `reporting.top_findings_limit` | number | Maximum findings per severity in final output. |

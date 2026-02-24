@@ -274,12 +274,18 @@ check_ship_stage() {
     '^mode: (strict|defer-blocking|defer-reversible|explore-worktrees)$'
     '^blocking_open_count: [0-9]+$'
     '^blocking_issue_refs: '
+    '^issue_ref: '
+    '^pr_ref: '
     '^merge_allowed: (yes|no)$'
   )
   local mode=""
   local blocking_open_count_raw=""
   local blocking_open_count=0
+  local issue_ref=""
+  local pr_ref=""
   local merge_allowed=""
+  local current_branch=""
+  local resolved_base_branch=""
   local stage_provenance_header_seen=0
   local stage_provenance_schema_seen=0
 
@@ -337,6 +343,8 @@ check_ship_stage() {
 
   mode="$(grep -E '^mode: ' "$ship_file" | head -n 1 | sed 's/^mode:[[:space:]]*//')"
   blocking_open_count_raw="$(grep -E '^blocking_open_count: ' "$ship_file" | head -n 1 | sed 's/^blocking_open_count:[[:space:]]*//')"
+  issue_ref="$(grep -E '^issue_ref: ' "$ship_file" | head -n 1 | sed 's/^issue_ref:[[:space:]]*//')"
+  pr_ref="$(grep -E '^pr_ref: ' "$ship_file" | head -n 1 | sed 's/^pr_ref:[[:space:]]*//')"
   merge_allowed="$(grep -E '^merge_allowed: ' "$ship_file" | head -n 1 | sed 's/^merge_allowed:[[:space:]]*//')"
 
   if [[ "$blocking_open_count_raw" =~ ^[0-9]+$ ]]; then
@@ -352,6 +360,40 @@ check_ship_stage() {
     else
       append_fail "$stage" "defer-blocking with open debt must set merge_allowed: no"
     fi
+  fi
+
+  current_branch="$(git -C "$BASE_DIR" branch --show-current 2>/dev/null || true)"
+  resolved_base_branch="$(git -C "$BASE_DIR" symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||' || true)"
+  if [[ -z "$resolved_base_branch" ]]; then
+    if git -C "$BASE_DIR" show-ref --verify --quiet refs/heads/main; then
+      resolved_base_branch="main"
+    elif git -C "$BASE_DIR" show-ref --verify --quiet refs/heads/master; then
+      resolved_base_branch="master"
+    fi
+  fi
+
+  if [[ -n "$current_branch" && -n "$resolved_base_branch" ]]; then
+    if [[ "$current_branch" != "$resolved_base_branch" ]]; then
+      if [[ "$issue_ref" == "none" || -z "$issue_ref" ]]; then
+        append_fail "$stage" "non-base ship requires issue_ref URL (branch=$current_branch base=$resolved_base_branch)"
+      elif [[ "$issue_ref" =~ ^https://github\.com/[^/]+/[^/]+/issues/[0-9]+$ ]]; then
+        append_pass "$stage" "issue_ref URL present for non-base ship"
+      else
+        append_fail "$stage" "invalid issue_ref URL format: $issue_ref"
+      fi
+
+      if [[ "$pr_ref" == "none" || -z "$pr_ref" ]]; then
+        append_fail "$stage" "non-base ship requires pr_ref URL (branch=$current_branch base=$resolved_base_branch)"
+      elif [[ "$pr_ref" =~ ^https://github\.com/[^/]+/[^/]+/pull/[0-9]+$ ]]; then
+        append_pass "$stage" "pr_ref URL present for non-base ship"
+      else
+        append_fail "$stage" "invalid pr_ref URL format: $pr_ref"
+      fi
+    else
+      append_pass "$stage" "base-branch ship detected; issue/pr URL requirement skipped"
+    fi
+  else
+    append_warn "$stage" "base/non-base branch policy check skipped (branch or base unresolved)"
   fi
 
   if [[ -x "$ambiguity_sync_script" ]]; then

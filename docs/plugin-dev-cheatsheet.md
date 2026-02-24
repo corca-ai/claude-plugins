@@ -258,7 +258,7 @@ git config core.hooksPath .githooks
 - Contract gate:
   - pre-commit/pre-push also run `check-portability-contract.sh --contract auto --context hook`
   - `auto` resolves `authoring` only for CWF authoring repos; all other repos use `portable`
-  - contract files live under `plugins/cwf/contracts/` (`portable-contract.json`, `authoring-contract.json`, `claims.json`, `change-impact.json`)
+  - contract files live under `plugins/cwf/contracts/` (`portable-contract.yaml`, `authoring-contract.yaml`, `claims.yaml`, `change-impact.yaml`)
 - [pre-commit](../.githooks/pre-commit): staged checks for markdown and shell scripts.
 - [pre-push](../.githooks/pre-push): repo-wide markdown/link checks plus index coverage checks.
 - [plugins/cwf/skills/setup/scripts/configure-git-hooks.sh](../plugins/cwf/skills/setup/scripts/configure-git-hooks.sh): deterministic hook installer/profile applier used by setup.

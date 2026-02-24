@@ -6,7 +6,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-CONTRACT_PATH="$PLUGIN_ROOT/contracts/claims.json"
+CONTRACT_PATH="$PLUGIN_ROOT/contracts/claims.yaml"
+CONTRACT_JSON_TMP=""
 
 usage() {
   cat <<'USAGE'
@@ -16,7 +17,7 @@ Usage:
   check-claim-test-mapping.sh [--contract <path>]
 
 Options:
-  --contract <path>  Claim mapping JSON path (default: plugins/cwf/contracts/claims.json)
+  --contract <path>  Claim mapping YAML path (default: plugins/cwf/contracts/claims.yaml)
   -h, --help         Show this help
 USAGE
 }
@@ -32,6 +33,12 @@ warn() {
 
 require_cmd() {
   command -v "$1" >/dev/null 2>&1 || fail "missing required command: $1"
+}
+
+cleanup() {
+  if [[ -n "$CONTRACT_JSON_TMP" && -f "$CONTRACT_JSON_TMP" ]]; then
+    rm -f "$CONTRACT_JSON_TMP"
+  fi
 }
 
 while [[ $# -gt 0 ]]; do
@@ -52,6 +59,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 require_cmd jq
+require_cmd yq
 
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 if [[ "$CONTRACT_PATH" != /* ]]; then
@@ -64,16 +72,23 @@ fi
 
 [[ -f "$CONTRACT_PATH" ]] || fail "contract file not found: $CONTRACT_PATH"
 
-if ! jq -e '.version and (.claims | type == "array")' "$CONTRACT_PATH" >/dev/null; then
+CONTRACT_JSON_TMP="$(mktemp)"
+trap cleanup EXIT
+
+if ! yq -o=json '.' "$CONTRACT_PATH" >"$CONTRACT_JSON_TMP" 2>/dev/null; then
+  fail "invalid contract format: expected YAML/JSON object"
+fi
+
+if ! jq -e '.version and (.claims | type == "array")' "$CONTRACT_JSON_TMP" >/dev/null; then
   fail "invalid contract schema: expected version + claims[]"
 fi
 
-claim_count="$(jq '.claims | length' "$CONTRACT_PATH")"
+claim_count="$(jq '.claims | length' "$CONTRACT_JSON_TMP")"
 if [[ "$claim_count" -le 0 ]]; then
   fail "claims array must contain at least one claim"
 fi
 
-duplicate_ids="$(jq -r '.claims[].id // empty' "$CONTRACT_PATH" | sed '/^$/d' | sort | uniq -d)"
+duplicate_ids="$(jq -r '.claims[].id // empty' "$CONTRACT_JSON_TMP" | sed '/^$/d' | sort | uniq -d)"
 if [[ -n "$duplicate_ids" ]]; then
   fail "duplicate claim IDs detected: $(echo "$duplicate_ids" | tr '\n' ' ' | sed 's/[[:space:]]\+$//')"
 fi
@@ -82,9 +97,9 @@ fail_count=0
 warn_count=0
 
 for ((i=0; i<claim_count; i++)); do
-  claim_id="$(jq -r ".claims[$i].id // empty" "$CONTRACT_PATH")"
-  audience="$(jq -r ".claims[$i].audience // empty" "$CONTRACT_PATH")"
-  assertion="$(jq -r ".claims[$i].assertion // empty" "$CONTRACT_PATH")"
+  claim_id="$(jq -r ".claims[$i].id // empty" "$CONTRACT_JSON_TMP")"
+  audience="$(jq -r ".claims[$i].audience // empty" "$CONTRACT_JSON_TMP")"
+  assertion="$(jq -r ".claims[$i].assertion // empty" "$CONTRACT_JSON_TMP")"
 
   if [[ -z "$claim_id" ]]; then
     echo "CHECK_FAIL: claims[$i] missing id" >&2
@@ -102,14 +117,14 @@ for ((i=0; i<claim_count; i++)); do
     fail_count=$((fail_count + 1))
   fi
 
-  src_count="$(jq ".claims[$i].source_refs | if type==\"array\" then length else 0 end" "$CONTRACT_PATH")"
+  src_count="$(jq ".claims[$i].source_refs | if type==\"array\" then length else 0 end" "$CONTRACT_JSON_TMP")"
   if [[ "$src_count" -le 0 ]]; then
     echo "CHECK_FAIL: [$claim_id] source_refs must have at least one entry" >&2
     fail_count=$((fail_count + 1))
   else
     for ((s=0; s<src_count; s++)); do
-      src_file="$(jq -r ".claims[$i].source_refs[$s].file // empty" "$CONTRACT_PATH")"
-      src_selector="$(jq -r ".claims[$i].source_refs[$s].selector // empty" "$CONTRACT_PATH")"
+      src_file="$(jq -r ".claims[$i].source_refs[$s].file // empty" "$CONTRACT_JSON_TMP")"
+      src_selector="$(jq -r ".claims[$i].source_refs[$s].selector // empty" "$CONTRACT_JSON_TMP")"
       if [[ -z "$src_file" ]]; then
         echo "CHECK_FAIL: [$claim_id] source_refs[$s].file is empty" >&2
         fail_count=$((fail_count + 1))
@@ -126,15 +141,15 @@ for ((i=0; i<claim_count; i++)); do
     done
   fi
 
-  test_count="$(jq ".claims[$i].tests | if type==\"array\" then length else 0 end" "$CONTRACT_PATH")"
+  test_count="$(jq ".claims[$i].tests | if type==\"array\" then length else 0 end" "$CONTRACT_JSON_TMP")"
   if [[ "$test_count" -le 0 ]]; then
     echo "CHECK_FAIL: [$claim_id] tests must have at least one entry" >&2
     fail_count=$((fail_count + 1))
   else
     for ((t=0; t<test_count; t++)); do
-      test_id="$(jq -r ".claims[$i].tests[$t].id // empty" "$CONTRACT_PATH")"
-      test_path="$(jq -r ".claims[$i].tests[$t].path // empty" "$CONTRACT_PATH")"
-      test_cmd="$(jq -r ".claims[$i].tests[$t].command // empty" "$CONTRACT_PATH")"
+      test_id="$(jq -r ".claims[$i].tests[$t].id // empty" "$CONTRACT_JSON_TMP")"
+      test_path="$(jq -r ".claims[$i].tests[$t].path // empty" "$CONTRACT_JSON_TMP")"
+      test_cmd="$(jq -r ".claims[$i].tests[$t].command // empty" "$CONTRACT_JSON_TMP")"
 
       if [[ -z "$test_id" || -z "$test_path" || -z "$test_cmd" ]]; then
         echo "CHECK_FAIL: [$claim_id] tests[$t] requires id/path/command" >&2

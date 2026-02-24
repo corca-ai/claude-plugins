@@ -6,8 +6,9 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-CONTRACT_PATH="$PLUGIN_ROOT/contracts/change-impact.json"
+CONTRACT_PATH="$PLUGIN_ROOT/contracts/change-impact.yaml"
 MODE="staged"
+CONTRACT_JSON_TMP=""
 
 usage() {
   cat <<'USAGE'
@@ -17,7 +18,7 @@ Usage:
   check-change-impact.sh [options]
 
 Options:
-  --contract <path>  Change-impact JSON path (default: plugins/cwf/contracts/change-impact.json)
+  --contract <path>  Change-impact YAML path (default: plugins/cwf/contracts/change-impact.yaml)
   --staged           Evaluate staged changes only (default)
   --working          Evaluate working-tree + staged + untracked changes
   -h, --help         Show this help
@@ -31,6 +32,12 @@ fail() {
 
 require_cmd() {
   command -v "$1" >/dev/null 2>&1 || fail "missing required command: $1"
+}
+
+cleanup() {
+  if [[ -n "$CONTRACT_JSON_TMP" && -f "$CONTRACT_JSON_TMP" ]]; then
+    rm -f "$CONTRACT_JSON_TMP"
+  fi
 }
 
 matches_pattern() {
@@ -109,6 +116,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 require_cmd jq
+require_cmd yq
 
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 if [[ "$CONTRACT_PATH" != /* ]]; then
@@ -121,7 +129,14 @@ fi
 
 [[ -f "$CONTRACT_PATH" ]] || fail "contract file not found: $CONTRACT_PATH"
 
-if ! jq -e '.version and (.rules | type == "array")' "$CONTRACT_PATH" >/dev/null; then
+CONTRACT_JSON_TMP="$(mktemp)"
+trap cleanup EXIT
+
+if ! yq -o=json '.' "$CONTRACT_PATH" >"$CONTRACT_JSON_TMP" 2>/dev/null; then
+  fail "invalid contract format: expected YAML/JSON object"
+fi
+
+if ! jq -e '.version and (.rules | type == "array")' "$CONTRACT_JSON_TMP" >/dev/null; then
   fail "invalid contract schema: expected version + rules[]"
 fi
 
@@ -147,17 +162,17 @@ if [[ "${#changed_files[@]}" -eq 0 ]]; then
   exit 0
 fi
 
-rule_count="$(jq '.rules | length' "$CONTRACT_PATH")"
+rule_count="$(jq '.rules | length' "$CONTRACT_JSON_TMP")"
 fail_count=0
 
 for ((i=0; i<rule_count; i++)); do
-  rule_id="$(jq -r ".rules[$i].id // \"rule-$i\"" "$CONTRACT_PATH")"
-  rule_msg="$(jq -r ".rules[$i].message // \"\"" "$CONTRACT_PATH")"
+  rule_id="$(jq -r ".rules[$i].id // \"rule-$i\"" "$CONTRACT_JSON_TMP")"
+  rule_msg="$(jq -r ".rules[$i].message // \"\"" "$CONTRACT_JSON_TMP")"
 
   when_changed=()
   while IFS= read -r pattern; do
     when_changed+=("$pattern")
-  done < <(jq -r ".rules[$i].when_changed[]?" "$CONTRACT_PATH")
+  done < <(jq -r ".rules[$i].when_changed[]?" "$CONTRACT_JSON_TMP")
   if [[ "${#when_changed[@]}" -eq 0 ]]; then
     echo "CHECK_FAIL: [$rule_id] when_changed is empty" >&2
     fail_count=$((fail_count + 1))
@@ -171,11 +186,11 @@ for ((i=0; i<rule_count; i++)); do
   require_all=()
   while IFS= read -r pattern; do
     require_all+=("$pattern")
-  done < <(jq -r ".rules[$i].require_all_changed[]?" "$CONTRACT_PATH")
+  done < <(jq -r ".rules[$i].require_all_changed[]?" "$CONTRACT_JSON_TMP")
   require_any=()
   while IFS= read -r pattern; do
     require_any+=("$pattern")
-  done < <(jq -r ".rules[$i].require_any_changed[]?" "$CONTRACT_PATH")
+  done < <(jq -r ".rules[$i].require_any_changed[]?" "$CONTRACT_JSON_TMP")
 
   if [[ "${#require_all[@]}" -gt 0 ]]; then
     for pattern in "${require_all[@]}"; do

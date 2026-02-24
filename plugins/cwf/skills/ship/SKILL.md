@@ -56,9 +56,12 @@ For every `/ship` invocation (`issue`, `pr`, `merge`, `status`, and `help` or no
    - `mode: strict|defer-blocking|defer-reversible|explore-worktrees`
    - `blocking_open_count: <integer>`
    - `blocking_issue_refs: <comma-separated refs or none>`
+   - `issue_ref: <issue URL or none>`
+   - `pr_ref: <PR URL or none>`
    - `merge_allowed: yes|no`
    - Resolve `mode` from live state (`live.ambiguity_mode`) and derive counts from `{session_dir}/run-ambiguity-decisions.md` if it exists.
    - For `defer-blocking`, `merge_allowed` must be `no` when `blocking_open_count > 0`.
+   - When the current branch is not the resolved base branch, `issue_ref` and `pr_ref` must contain concrete GitHub URLs before ship-stage closure.
 4. Synchronize live ambiguity debt state before gate closure:
 
 ```bash

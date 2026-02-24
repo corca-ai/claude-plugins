@@ -1,0 +1,89 @@
+version: 1
+
+governance:
+  exclusion_sunset_mode: release-based
+  checker_aggregate_format: jsonl
+
+concepts:
+  expert:
+    doc: plugins/cwf/concepts/expert.md
+    checker: plugins/cwf/concepts/checkers/check-expert.sh
+    target_docs: plugins/cwf/concepts/README.md,plugins/cwf/references/contract-governance.md
+    required_links: [expert](../concepts/expert.md)
+  contract:
+    doc: plugins/cwf/concepts/contract.md
+    checker: plugins/cwf/concepts/checkers/check-contract.sh
+    target_docs: plugins/cwf/concepts/README.md,plugins/cwf/references/contract-governance.md
+    required_links: [contract](../concepts/contract.md)
+  decision-point:
+    doc: plugins/cwf/concepts/decision-point.md
+    checker: plugins/cwf/concepts/checkers/check-decision-point.sh
+    target_docs: plugins/cwf/concepts/README.md,plugins/cwf/references/contract-governance.md
+    required_links: [decision-point](../concepts/decision-point.md)
+  tier-classification:
+    doc: plugins/cwf/concepts/tier-classification.md
+    checker: plugins/cwf/concepts/checkers/check-tier-classification.sh
+    target_docs: plugins/cwf/concepts/README.md,plugins/cwf/references/contract-governance.md
+    required_links: [tier-classification](../concepts/tier-classification.md)
+  agent-orchestration:
+    doc: plugins/cwf/concepts/agent-orchestration.md
+    checker: plugins/cwf/concepts/checkers/check-agent-orchestration.sh
+    target_docs: plugins/cwf/concepts/README.md,plugins/cwf/references/contract-governance.md
+    required_links: [agent-orchestration](../concepts/agent-orchestration.md)
+  handoff:
+    doc: plugins/cwf/concepts/handoff.md
+    checker: plugins/cwf/concepts/checkers/check-handoff.sh
+    target_docs: plugins/cwf/concepts/README.md,plugins/cwf/references/contract-governance.md
+    required_links: [handoff](../concepts/handoff.md)
+  provenance:
+    doc: plugins/cwf/concepts/provenance.md
+    checker: plugins/cwf/concepts/checkers/check-provenance.sh
+    target_docs: plugins/cwf/concepts/README.md,plugins/cwf/references/contract-governance.md
+    required_links: [provenance](../concepts/provenance.md)
+
+skill_bindings:
+  "plugins/cwf/skills/clarify/SKILL.md": contract,decision-point,expert
+  "plugins/cwf/skills/gather/SKILL.md": provenance,tier-classification
+  "plugins/cwf/skills/handoff/SKILL.md": handoff,provenance,agent-orchestration
+  "plugins/cwf/skills/hitl/SKILL.md": decision-point,expert,handoff
+  "plugins/cwf/skills/impl/SKILL.md": agent-orchestration,contract,decision-point
+  "plugins/cwf/skills/plan/SKILL.md": contract,decision-point,tier-classification
+  "plugins/cwf/skills/refactor/SKILL.md": contract,tier-classification,expert
+  "plugins/cwf/skills/retro/SKILL.md": expert,provenance,handoff
+  "plugins/cwf/skills/review/SKILL.md": expert,contract,decision-point
+  "plugins/cwf/skills/run/SKILL.md": agent-orchestration,decision-point,tier-classification
+  "plugins/cwf/skills/setup/SKILL.md": contract,tier-classification
+  "plugins/cwf/skills/ship/SKILL.md": contract,decision-point,provenance
+  "plugins/cwf/skills/update/SKILL.md": contract,provenance
+
+skill_exclusions:
+  # "plugins/cwf/skills/example/SKILL.md":
+  #   owner: plugin
+  #   reason: "temporary exclusion rationale"
+  #   sunset_release: "1.1.0"
+  #   tracked_ref: "https://github.com/<org>/<repo>/issues/<id>"
+
+hook_bindings:
+  "SessionStart@@compact@@${CLAUDE_PLUGIN_ROOT}/hooks/scripts/compact-context.sh": handoff,provenance
+  "UserPromptSubmit@@@@${CLAUDE_PLUGIN_ROOT}/hooks/scripts/workflow-gate.sh": contract,decision-point,agent-orchestration
+  "UserPromptSubmit@@@@${CLAUDE_PLUGIN_ROOT}/hooks/scripts/track-user-input.sh --guard-only": provenance,contract
+  "UserPromptSubmit@@@@${CLAUDE_PLUGIN_ROOT}/hooks/scripts/track-user-input.sh": provenance
+  "Notification@@idle_prompt@@${CLAUDE_PLUGIN_ROOT}/hooks/scripts/attention.sh": tier-classification,decision-point
+  "PreToolUse@@Bash@@${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check-deletion-safety.sh": contract,decision-point
+  "PreToolUse@@AskUserQuestion@@${CLAUDE_PLUGIN_ROOT}/hooks/scripts/start-timer.sh": handoff,decision-point
+  "PreToolUse@@Read@@${CLAUDE_PLUGIN_ROOT}/hooks/scripts/read-guard.sh": contract,tier-classification
+  "PreToolUse@@WebSearch@@${CLAUDE_PLUGIN_ROOT}/hooks/scripts/redirect-websearch.sh": tier-classification,provenance
+  "PreToolUse@@@@${CLAUDE_PLUGIN_ROOT}/hooks/scripts/heartbeat.sh": provenance
+  "PostToolUse@@AskUserQuestion@@${CLAUDE_PLUGIN_ROOT}/hooks/scripts/cancel-timer.sh": handoff
+  "PostToolUse@@Write|Edit@@${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check-markdown.sh": contract,tier-classification
+  "PostToolUse@@Write|Edit@@${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check-shell.sh": contract,tier-classification
+  "PostToolUse@@Write|Edit@@${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check-links-local.sh": contract,provenance
+  "Stop@@@@${CLAUDE_PLUGIN_ROOT}/hooks/scripts/log-turn.sh": provenance,handoff
+  "SessionEnd@@@@${CLAUDE_PLUGIN_ROOT}/hooks/scripts/log-turn.sh session_end": provenance,handoff
+
+hook_exclusions:
+  # "PreToolUse@@Tool@@${CLAUDE_PLUGIN_ROOT}/hooks/scripts/example.sh":
+  #   owner: plugin
+  #   reason: "temporary exclusion rationale"
+  #   sunset_release: "1.1.0"
+  #   tracked_ref: "https://github.com/<org>/<repo>/issues/<id>"

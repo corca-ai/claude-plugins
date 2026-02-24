@@ -57,8 +57,8 @@ When `path` is empty or missing, extension execution is skipped.
 
 Git hook and post-run gates use a contract split so CWF remains repository-agnostic:
 
-- [plugins/cwf/contracts/portable-contract.json](../../../contracts/portable-contract.json): safe baseline checks for arbitrary host repositories.
-- [plugins/cwf/contracts/authoring-contract.json](../../../contracts/authoring-contract.json): stricter checks that depend on CWF authoring-repo structure.
+- [plugins/cwf/contracts/portable-contract.yaml](../../../contracts/portable-contract.yaml): safe baseline checks for arbitrary host repositories.
+- [plugins/cwf/contracts/authoring-contract.yaml](../../../contracts/authoring-contract.yaml): stricter checks that depend on CWF authoring-repo structure.
 
 `check-portability-contract.sh --contract auto` always selects `portable`.
 
@@ -71,7 +71,7 @@ This keeps runtime dependency direction one-way (`repo -> cwf`, not `cwf -> this
 
 ### Audience boundary for policy IDs
 
-Claim IDs and test IDs belong in machine-readable contracts (`claims.json`, `change-impact.json`) instead of user-facing README text or SKILL flow prose. This preserves deterministic traceability without leaking low-signal identifiers into conversational guidance.
+Claim IDs and test IDs belong in machine-readable contracts (`claims.yaml`, `change-impact.yaml`) instead of user-facing README text or SKILL flow prose. This preserves deterministic traceability without leaking low-signal identifiers into conversational guidance.
 
 ## Contract Location and Status
 

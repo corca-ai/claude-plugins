@@ -170,7 +170,7 @@ gather → clarify → plan → review(plan) → impl → review(code) → refac
 - 모든 스킬은 실행시 `.cwf/projects/{session-dir}/` 산출물과 `.cwf/cwf-state.yaml` 상태 정보가 갱신될 수 있습니다.
 - 전문가 관점은 코드/웹 근거만으로는 놓치기 쉬운 가정, 트레이드오프, 리스크를 조기에 드러내 의사결정 품질을 보강하기 위해 사용합니다.
 - `clarify`, `review`, `retro`(심층)는 세션 간 관점 연속성이 중요하므로, 활용한 전문가를 `cwf-state.yaml`의 `expert_roster`에 기록하고 다음 실행에서 재사용합니다.
-- `refactor --codebase --deep`는 목적이 "세션 연속성"보다 "코드베이스 기준 재현성"에 가까워 `expert_roster`를 쓰지 않고, `codebase-contract.json`의 고정 전문가+컨텍스트 전문가 구성을 계약 기반으로 선택합니다.
+- `refactor --codebase --deep`는 목적이 "세션 연속성"보다 "코드베이스 기준 재현성"에 가까워 `expert_roster`를 쓰지 않고, `codebase-contract.yaml`의 고정 전문가+컨텍스트 전문가 구성을 계약 기반으로 선택합니다.
 
 ### [gather](plugins/cwf/skills/gather/SKILL.md)
 

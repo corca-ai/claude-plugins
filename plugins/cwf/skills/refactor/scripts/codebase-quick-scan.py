@@ -9,6 +9,11 @@ import sys
 from copy import deepcopy
 from datetime import date
 
+try:
+    import yaml
+except Exception:  # pragma: no cover - optional dependency at runtime
+    yaml = None
+
 repo_root = os.path.abspath(sys.argv[1])
 contract_path = os.path.abspath(sys.argv[2])
 source_mode = sys.argv[3]
@@ -108,22 +113,59 @@ def deep_merge(base, override):
     return base
 
 
+def load_contract_document(path):
+    if not os.path.isfile(path):
+        return None, "contract file missing; fallback defaults used"
+
+    try:
+        with open(path, encoding="utf-8") as f:
+            raw_text = f.read()
+    except Exception as exc:
+        return None, f"unable to read contract file; fallback defaults used ({exc})"
+
+    parse_errors = []
+
+    try:
+        loaded = json.loads(raw_text)
+    except Exception as exc:
+        parse_errors.append(f"json: {exc}")
+    else:
+        if loaded is None:
+            loaded = {}
+        if isinstance(loaded, dict):
+            return loaded, ""
+        return None, "invalid contract root type from JSON; expected object; fallback defaults used"
+
+    if yaml is None:
+        detail = parse_errors[0] if parse_errors else "json parser unavailable"
+        return None, f"unable to parse contract YAML without PyYAML; fallback defaults used ({detail})"
+
+    try:
+        loaded = yaml.safe_load(raw_text)
+    except Exception as exc:
+        parse_errors.append(f"yaml: {exc}")
+        joined = "; ".join(parse_errors)
+        return None, f"invalid contract document; fallback defaults used ({joined})"
+
+    if loaded is None:
+        loaded = {}
+
+    if not isinstance(loaded, dict):
+        return None, "invalid contract root type from YAML; expected mapping; fallback defaults used"
+
+    return loaded, ""
+
+
 contract = deepcopy(defaults)
 contract_status = "fallback"
 contract_warning = []
 
-if os.path.isfile(contract_path):
-    try:
-        with open(contract_path, encoding="utf-8") as f:
-            loaded = json.load(f)
-        if not isinstance(loaded, dict):
-            raise ValueError("contract root must be an object")
-        contract = deep_merge(contract, loaded)
-        contract_status = "loaded"
-    except Exception as exc:
-        contract_warning.append(f"invalid contract JSON; fallback defaults used ({exc})")
-else:
-    contract_warning.append("contract file missing; fallback defaults used")
+loaded_contract, warning_text = load_contract_document(contract_path)
+if warning_text:
+    contract_warning.append(warning_text)
+if isinstance(loaded_contract, dict):
+    contract = deep_merge(contract, loaded_contract)
+    contract_status = "loaded"
 
 
 def as_posix(path_value):

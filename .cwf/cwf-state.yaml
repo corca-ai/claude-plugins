@@ -510,6 +510,13 @@ sessions:
     artifacts: [plan.md, lessons.md, retro.md, retro-cdm-analysis.md, retro-learning-resources.md, retro-expert-alpha.md, retro-expert-beta.md]
     stage_checkpoints: [retro]
 
+
+  - id: "S260224-01"
+    title: "concept-governance-yaml-unification"
+    dir: ".cwf/projects/260224-01-concept-governance-yaml-unification"
+    branch: "main"
+    artifacts: [plan.md, lessons.md]
+
 tools:
   codex: unavailable
   gemini: unavailable
@@ -545,11 +552,11 @@ git_hooks:
 # read by SessionStart(compact) hook for context recovery after auto-compact.
 # check-session.sh --live validates required fields are populated.
 live:
-  session_id: ""
-  dir: ".cwf/projects/260221-01-retro-cwf-081-plus-postmortem"
-  branch: ""
-  phase: "retro"
-  task: ""
+  session_id: "S260224-01"
+  dir: ".cwf/projects/260224-01-concept-governance-yaml-unification"
+  branch: "feat/260224-concept-governance-plan"
+  phase: "done"
+  task: "concept governance + yaml unification migration run"
   key_files: []
   decisions: []
   decision_journal: []
@@ -560,18 +567,18 @@ live:
     updated_at: ""
   state_file: ".cwf/projects/260221-01-retro-cwf-081-plus-postmortem/session-state.yaml"
   remaining_gates: []
-  state_version: "6"
-  worktree_root: ""
-  worktree_branch: ""
+  state_version: "8"
+  worktree_root: "/home/hwidong/codes/claude-plugins"
+  worktree_branch: "feat/260224-concept-governance-plan"
   active_pipeline: ""
   user_directive: ""
   pipeline_override_reason: ""
-  ambiguity_mode: ""
-  blocking_decisions_pending: ""
-  ambiguity_decisions_file: ".cwf/projects/260218-03-pre-release-refactor-audit/run-ambiguity-decisions.md"
-  clarify_result_file: "project/initial-req.md"
-  clarify_completed_at: "2026-02-19T00:40:57Z"
-  stage_provenance_file: ".cwf/projects/260218-03-pre-release-refactor-audit/run-stage-provenance.md"
+  ambiguity_mode: "defer-blocking"
+  blocking_decisions_pending: "false"
+  ambiguity_decisions_file: ".cwf/projects/260224-01-concept-governance-yaml-unification/run-ambiguity-decisions.md"
+  clarify_result_file: ".cwf/projects/260224-01-concept-governance-yaml-unification/clarify-result.md"
+  clarify_completed_at: "2026-02-24T00:22:09Z"
+  stage_provenance_file: ".cwf/projects/260224-01-concept-governance-yaml-unification/run-stage-provenance.md"
 # Expert roster for domain expert sub-agents (used by clarify, review, retro)
 # Semi-automatic evolution: usage_count auto-incremented, new experts user-approved
 # verified: true = skip web identity verification, cite source field directly

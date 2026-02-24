@@ -25,7 +25,7 @@ Usage:
   codebase-quick-scan.sh [repo-root] [--contract <path>]
 
 Options:
-  --contract <path>  Contract path (default: {artifact_root}/codebase-contract.json)
+  --contract <path>  Contract path (default: {artifact_root}/codebase-contract.yaml)
   -h, --help         Show help
 USAGE
 }
@@ -100,7 +100,7 @@ if [[ -z "$CONTRACT_PATH" ]]; then
   if [[ -z "$artifact_root" ]]; then
     artifact_root="$REPO_ROOT/.cwf"
   fi
-  CONTRACT_PATH="$artifact_root/codebase-contract.json"
+  CONTRACT_PATH="$artifact_root/codebase-contract.yaml"
 else
   CONTRACT_PATH="$(path_to_abs "$PWD" "$CONTRACT_PATH")"
 fi

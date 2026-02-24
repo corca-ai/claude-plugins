@@ -62,7 +62,9 @@ Skill-internal files are documented in each skill-local README (for example, [cl
 - [agent-patterns](plugins/cwf/references/agent-patterns.md): Shared multi-agent orchestration patterns.
 - [context-recovery-protocol](plugins/cwf/references/context-recovery-protocol.md): Compact recovery and persistence protocol.
 - [concept-map](plugins/cwf/references/concept-map.md): Concept synchronization map across composing skills.
+- [contract-governance](plugins/cwf/references/contract-governance.md): Contract ownership and lifecycle policy for concept-governed execution.
 - [expert-advisor-guide](plugins/cwf/references/expert-advisor-guide.md): Expert advisor operation model.
+- [readme-skill-summary-template](plugins/cwf/references/readme-skill-summary-template.md): Standard skill-summary template for README-level progressive disclosure.
 
 ### plugins/cwf/hooks — Deterministic runtime hook behavior and gating logic
 

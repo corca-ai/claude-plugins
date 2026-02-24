@@ -94,11 +94,25 @@ bash {CWF_PLUGIN_DIR}/scripts/codex/sync-session-logs.sh --cwd "$PWD" --quiet ||
 ```bash
 stage_started_at=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 stage_started_epoch=$(date -u +%s)
-Skill(skill="{skill-name}", args="{args if any}")
+if [[ "{stage}" == "ship" ]]; then
+  current_branch=$(git branch --show-current)
+  if [[ "$current_branch" != "$resolved_base_branch" ]]; then
+    Skill(skill="cwf:ship", args="issue")
+    Skill(skill="cwf:ship", args="pr")
+  else
+    Skill(skill="cwf:ship", args="")
+  fi
+else
+  Skill(skill="{skill-name}", args="{args if any}")
+fi
 stage_finished_at=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 stage_finished_epoch=$(date -u +%s)
 stage_duration_s=$((stage_finished_epoch - stage_started_epoch))
 ```
+
+- Ship stage policy:
+  - If active branch is not the resolved base branch, run `cwf:ship issue` and `cwf:ship pr` in order.
+  - If active branch is the resolved base branch, do not auto-create issue/PR; report status and request user decision.
 
 - Clarify-stage ambiguity handling:
   - resolve `session_dir`, `ambiguity_mode`, `ambiguity_file`

@@ -8,6 +8,7 @@ CONTRACT_SELECTOR="auto"
 CONTEXT="manual"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+CONTRACT_JSON_TMP=""
 
 usage() {
   cat <<'USAGE'
@@ -38,17 +39,29 @@ require_cmd() {
   command -v "$1" >/dev/null 2>&1 || fail "missing required command: $1"
 }
 
+cleanup() {
+  if [[ -n "$CONTRACT_JSON_TMP" && -f "$CONTRACT_JSON_TMP" ]]; then
+    rm -f "$CONTRACT_JSON_TMP"
+  fi
+}
+
+resolve_profile_contract_path() {
+  local profile="$1"
+  local yaml_path="$PLUGIN_ROOT/contracts/${profile}-contract.yaml"
+  echo "$yaml_path"
+}
+
 resolve_contract_path() {
   local selector="$1"
   case "$selector" in
     auto)
-      echo "$PLUGIN_ROOT/contracts/portable-contract.json"
+      resolve_profile_contract_path "portable"
       ;;
     portable)
-      echo "$PLUGIN_ROOT/contracts/portable-contract.json"
+      resolve_profile_contract_path "portable"
       ;;
     authoring)
-      echo "$PLUGIN_ROOT/contracts/authoring-contract.json"
+      resolve_profile_contract_path "authoring"
       ;;
     *)
       if [[ "$selector" == /* ]]; then
@@ -104,23 +117,31 @@ case "$CONTEXT" in
 esac
 
 require_cmd jq
+require_cmd yq
 
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 CONTRACT_PATH="$(resolve_contract_path "$CONTRACT_SELECTOR")"
 [[ -f "$CONTRACT_PATH" ]] || fail "contract file not found: $CONTRACT_PATH"
 
-if ! jq -e '.version and (.checks | type == "array")' "$CONTRACT_PATH" >/dev/null; then
+CONTRACT_JSON_TMP="$(mktemp)"
+trap cleanup EXIT
+
+if ! yq -o=json '.' "$CONTRACT_PATH" >"$CONTRACT_JSON_TMP" 2>/dev/null; then
+  fail "invalid contract format: expected YAML/JSON object"
+fi
+
+if ! jq -e '.version and (.checks | type == "array")' "$CONTRACT_JSON_TMP" >/dev/null; then
   fail "invalid contract schema: expected version + checks[]"
 fi
 
-check_count="$(jq '.checks | length' "$CONTRACT_PATH")"
+check_count="$(jq '.checks | length' "$CONTRACT_JSON_TMP")"
 run_count=0
 pass_count=0
 warn_count=0
 fail_count=0
 
 for ((i=0; i<check_count; i++)); do
-  check_json="$(jq -c ".checks[$i]" "$CONTRACT_PATH")"
+  check_json="$(jq -c ".checks[$i]" "$CONTRACT_JSON_TMP")"
   check_id="$(jq -r '.id // "unnamed"' <<<"$check_json")"
   check_mode="$(jq -r '.mode // "fail"' <<<"$check_json")"
   check_cmd="$(jq -r '.command // empty' <<<"$check_json")"

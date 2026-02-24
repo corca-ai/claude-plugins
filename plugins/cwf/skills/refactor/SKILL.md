@@ -174,7 +174,7 @@ bash {SKILL_DIR}/scripts/bootstrap-codebase-contract.sh --json
 
 Behavior:
 
-- Default location: `{artifact_root}/codebase-contract.json`
+- Default location: `{artifact_root}/codebase-contract.yaml`
 - If contract is missing: create a draft contract
 - If contract exists: do not overwrite unless explicit force is used
 - If bootstrap fails (`status=fallback` with non-zero exit): stop this mode and fix bootstrap/path issues before scanning
