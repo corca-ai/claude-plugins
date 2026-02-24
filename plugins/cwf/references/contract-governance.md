@@ -31,6 +31,7 @@ This document summarizes ownership and lifecycle policy for concept-governed con
 - Active skills and hook entries require at least one concept binding, unless explicitly excluded in registry.
 - Registry-listed target docs must contain registry-listed concept links.
 - Concept checker scripts provide deterministic pass/warn/fail outcomes.
+- Implementation changes should be committed in meaningful units with explicit boundary rationale instead of one end-of-session monolithic commit.
 
 ## Change Control
 

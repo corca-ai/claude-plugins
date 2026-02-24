@@ -48,15 +48,7 @@ cleanup() {
 resolve_profile_contract_path() {
   local profile="$1"
   local yaml_path="$PLUGIN_ROOT/contracts/${profile}-contract.yaml"
-  local json_path="$PLUGIN_ROOT/contracts/${profile}-contract.json"
-
-  if [[ -f "$yaml_path" ]]; then
-    echo "$yaml_path"
-  elif [[ -f "$json_path" ]]; then
-    echo "$json_path"
-  else
-    echo "$yaml_path"
-  fi
+  echo "$yaml_path"
 }
 
 resolve_contract_path() {

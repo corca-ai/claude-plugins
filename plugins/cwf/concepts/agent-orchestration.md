@@ -13,6 +13,7 @@ Agent Orchestration is the governance concept for sequencing, delegating, and co
 
 - Orchestration must maintain explicit stage ordering and evidence joins.
 - Parallel work must converge through a deterministic synthesis step.
+- Long-running execution should checkpoint progress with meaningful-unit commits before moving to the next major unit.
 
 ## Related Concepts
 
