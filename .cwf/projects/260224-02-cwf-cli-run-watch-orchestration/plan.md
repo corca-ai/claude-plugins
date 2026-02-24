@@ -29,12 +29,13 @@
 ## Architecture Direction
 
 ### Target State
-1. A repository-local executable entrypoint `cwf` supports:
+1. A user-scope shell command `cwf` (wired by setup via shell rc/PATH) supports:
    - `cwf run "<prompt>"`
    - `cwf run "<issue-url>"`
 2. `cwf:setup` installs/updates shell-accessible `cwf` command.
-3. `cwf run` is the only end-to-end orchestrator.
-4. `plugins/cwf/skills/run/` is removed.
+3. `cwf:update` reconciles shell wiring when plugin-cache command paths change.
+4. `cwf run` is the only end-to-end orchestrator.
+5. `plugins/cwf/skills/run/` is removed.
 
 ### Separation of Concerns
 - `run core`: stage state machine, restart logic, branch/worktree policy.
@@ -144,7 +145,8 @@ Substep invariants:
 
 ### Step 1 — CLI Entrypoint + Setup Wiring
 - Implement `cwf` dispatcher (`run` subcommand in scope).
-- Implement install/status/disable flow and setup integration.
+- Implement user-scope install/status/disable flow and setup integration (`zshrc`/`PATH` wiring).
+- Add update-path reconciliation so `cwf:update` rewrites stale command target paths deterministically.
 - Extend readiness check for runner contract + `cwf` command availability.
 
 ### Step 2 — Run Bootstrap
@@ -190,6 +192,7 @@ Substep invariants:
 2. Runtime dry checks
    - `cwf --help`, `cwf run --help`
    - readiness check with runner contract
+   - setup/update roundtrip keeps a valid `cwf` command target in shell rc
 3. Functional smoke
    - `cwf run "test prompt"` dry-run fixture
    - `cwf run "<issue-url>"` with mocked `gh`
@@ -209,6 +212,7 @@ Substep invariants:
 | 3 | Agent mapping | user directive | single-agent vs mixed | codex/claude mixed | resolved |
 | 4 | Commit policy | user directive | fixed 3 vs max 3 | max 3 + empty-skip | resolved |
 | 5 | `watch` scope | user directive (split) | integrated plan vs split plan | split into separate `watch-plan.md` | resolved |
+| 6 | Command install scope | latest user directive | repo-local entrypoint vs user-scope shell wiring | user-scope shell wiring + update-time path reconciliation | resolved |
 
 ## Success Criteria
 

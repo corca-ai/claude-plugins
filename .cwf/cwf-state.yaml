@@ -583,8 +583,8 @@ live:
   ambiguity_mode: "defer-blocking"
   blocking_decisions_pending: "false"
   ambiguity_decisions_file: ".cwf/projects/260224-01-concept-governance-yaml-unification/run-ambiguity-decisions.md"
-  clarify_result_file: ".cwf/projects/260224-01-concept-governance-yaml-unification/clarify-result.md"
-  clarify_completed_at: "2026-02-24T00:22:09Z"
+  clarify_result_file: ".cwf/projects/260224-02-cwf-cli-run-watch-orchestration/clarify-run.md"
+  clarify_completed_at: "2026-02-24T09:21:43Z"
   stage_provenance_file: ".cwf/projects/260224-01-concept-governance-yaml-unification/run-stage-provenance.md"
 # Expert roster for domain expert sub-agents (used by clarify, review, retro)
 # Semi-automatic evolution: usage_count auto-incremented, new experts user-approved
