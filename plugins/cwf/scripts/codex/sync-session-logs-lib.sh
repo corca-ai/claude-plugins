@@ -147,6 +147,7 @@ reset_turn_state() {
   TURN_ASSISTANT_TEXT=""
   TURN_ASSISTANT_LAST_TS=""
   TURN_TOOLS=""
+  TURN_TOOL_COUNT=0
 }
 
 load_sync_state() {
@@ -172,11 +173,13 @@ load_sync_state() {
   TURN_ASSISTANT_TEXT="$(jq -r '.turn_assistant_text // ""' "$f" 2>/dev/null || echo "")"
   TURN_ASSISTANT_LAST_TS="$(jq -r '.turn_assistant_last_ts // ""' "$f" 2>/dev/null || echo "")"
   TURN_TOOLS="$(jq -r '.turn_tools // ""' "$f" 2>/dev/null || echo "")"
+  TURN_TOOL_COUNT="$(jq -r '.turn_tool_count // 0' "$f" 2>/dev/null || echo "0")"
   LAST_TURN_FINGERPRINT="$(jq -r '.last_turn_fingerprint // ""' "$f" 2>/dev/null || echo "")"
 
   [ -n "$STATE_OFFSET" ] || STATE_OFFSET=0
   [ -n "$STATE_LAST_MTIME" ] || STATE_LAST_MTIME=0
   [ -n "$EMITTED_TURNS" ] || EMITTED_TURNS=0
+  [[ "$TURN_TOOL_COUNT" =~ ^[0-9]+$ ]] || TURN_TOOL_COUNT=0
   return 0
 }
 
@@ -200,6 +203,7 @@ save_sync_state() {
     --arg turn_assistant_text "$TURN_ASSISTANT_TEXT" \
     --arg turn_assistant_last_ts "$TURN_ASSISTANT_LAST_TS" \
     --arg turn_tools "$TURN_TOOLS" \
+    --argjson turn_tool_count "$TURN_TOOL_COUNT" \
     --arg last_turn_fingerprint "$LAST_TURN_FINGERPRINT" \
     '{
       version: $version,
@@ -214,6 +218,7 @@ save_sync_state() {
       turn_assistant_text: $turn_assistant_text,
       turn_assistant_last_ts: $turn_assistant_last_ts,
       turn_tools: $turn_tools,
+      turn_tool_count: $turn_tool_count,
       last_turn_fingerprint: $last_turn_fingerprint
     }' > "$f"
 }

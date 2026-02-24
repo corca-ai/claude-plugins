@@ -18,3 +18,9 @@ scripts/node_modules/
 # Generated doc-graph artifacts (local working files)
 docs/doc-graph.snapshot.json
 docs/doc-graph.scope.json
+
+# CWF local runtime cache
+.cwf/sessions/.sync-*
+.cwf/sessions/.sync-state/
+**/.cwf/sessions/.sync-*
+**/.cwf/sessions/.sync-state/

@@ -86,26 +86,40 @@ write_if_missing_or_forced() {
   fi
 }
 
-ensure_gitignore_entry() {
+ensure_gitignore_entries() {
   local gitignore_path="$1"
-  local entry=".cwf-config.local.yaml"
-
-  if [[ -f "$gitignore_path" ]] && grep -qxF "$entry" "$gitignore_path"; then
-    printf '%s\n' "present"
-    return 0
-  fi
+  local added="false"
+  local entry=""
+  local -a entries=(
+    ".cwf-config.local.yaml"
+    ".cwf/sessions/.sync-*"
+    ".cwf/sessions/.sync-state/"
+    "**/.cwf/sessions/.sync-*"
+    "**/.cwf/sessions/.sync-state/"
+  )
 
   mkdir -p "$(dirname "$gitignore_path")"
   touch "$gitignore_path"
 
-  if [[ -s "$gitignore_path" ]]; then
-    printf '\n' >> "$gitignore_path"
+  for entry in "${entries[@]}"; do
+    if grep -qxF "$entry" "$gitignore_path"; then
+      continue
+    fi
+    if [[ "$added" != "true" ]]; then
+      if [[ -s "$gitignore_path" ]]; then
+        printf '\n' >> "$gitignore_path"
+      fi
+      printf '%s\n' "# CWF local runtime cache" >> "$gitignore_path"
+      added="true"
+    fi
+    printf '%s\n' "$entry" >> "$gitignore_path"
+  done
+
+  if [[ "$added" == "true" ]]; then
+    printf '%s\n' "added"
+  else
+    printf '%s\n' "present"
   fi
-  {
-    printf '%s\n' "# CWF local project config"
-    printf '%s\n' "$entry"
-  } >> "$gitignore_path"
-  printf '%s\n' "added"
 }
 
 PROJECT_ROOT="$(resolve_project_root "$PROJECT_ROOT_INPUT")"
@@ -157,7 +171,7 @@ EOF
 
 shared_status="$(write_if_missing_or_forced "$SHARED_CONFIG_PATH" "$SHARED_TEMPLATE")"
 local_status="$(write_if_missing_or_forced "$LOCAL_CONFIG_PATH" "$LOCAL_TEMPLATE")"
-gitignore_status="$(ensure_gitignore_entry "$GITIGNORE_PATH")"
+gitignore_status="$(ensure_gitignore_entries "$GITIGNORE_PATH")"
 
 echo "project_root: $PROJECT_ROOT"
 echo "shared_config: $shared_status ($SHARED_CONFIG_PATH)"

@@ -31,6 +31,8 @@ DEFAULT_CWD="$(pwd)"
 DEFAULT_OUT_DIR="$(resolve_cwf_session_logs_dir "$DEFAULT_CWD")"
 CODEX_SESSIONS_DIR="${CODEX_SESSIONS_DIR:-$HOME/.codex/sessions}"
 TRUNCATE_THRESHOLD="${CODEX_SESSION_LOG_TRUNCATE:-20}"
+TOOL_LOG_MODE="${CODEX_SESSION_LOG_TOOL_MODE:-summary}"
+TOOL_LOG_MAX_LINES="${CODEX_SESSION_LOG_TOOL_MAX_LINES:-6}"
 
 SESSION_ID=""
 JSONL_PATH=""
@@ -55,7 +57,16 @@ TURN_USER_TS=""
 TURN_ASSISTANT_TEXT=""
 TURN_ASSISTANT_LAST_TS=""
 TURN_TOOLS=""
+TURN_TOOL_COUNT=0
 LAST_TURN_FINGERPRINT=""
+
+normalize_tool_log_mode() {
+  case "${1:-summary}" in
+    off|OFF) echo "off" ;;
+    full|FULL) echo "full" ;;
+    *) echo "summary" ;;
+  esac
+}
 
 usage() {
   cat <<'USAGE'
@@ -75,11 +86,20 @@ Options:
   --append             Incremental append sync when possible (default)
   --no-append          Disable incremental append and always rebuild
   -h, --help           Show help
+
+Environment:
+  CODEX_SESSION_LOG_TOOL_MODE=summary|full|off   (default: summary)
+  CODEX_SESSION_LOG_TOOL_MAX_LINES=<n>           (default: 6, summary mode only)
 USAGE
 }
 
 # shellcheck source=plugins/cwf/scripts/codex/sync-session-logs-lib.sh
 source "$SCRIPT_DIR/sync-session-logs-lib.sh"
+
+TOOL_LOG_MODE="$(normalize_tool_log_mode "$TOOL_LOG_MODE")"
+if ! [[ "$TOOL_LOG_MAX_LINES" =~ ^[0-9]+$ ]]; then
+  TOOL_LOG_MAX_LINES=6
+fi
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -285,7 +305,13 @@ flush_turn() {
   fi
 
   local fingerprint
-  fingerprint=$(printf '%s\n%s\n%s\n' "$TURN_USER_TEXT" "$TURN_ASSISTANT_TEXT" "$TURN_TOOLS" | shasum -a 256 | cut -d' ' -f1)
+  fingerprint=$(printf '%s\n%s\n%s\n%s\n%s\n' \
+    "$TURN_USER_TEXT" \
+    "$TURN_ASSISTANT_TEXT" \
+    "$TOOL_LOG_MODE" \
+    "$TURN_TOOL_COUNT" \
+    "$TURN_TOOLS" \
+    | shasum -a 256 | cut -d' ' -f1)
   if [ -n "$LAST_TURN_FINGERPRINT" ] && [ "$LAST_TURN_FINGERPRINT" = "$fingerprint" ]; then
     return
   fi
@@ -338,15 +364,26 @@ flush_turn() {
     fi
   fi
 
-  if [ -n "$TURN_TOOLS" ]; then
+  if [ "$TOOL_LOG_MODE" != "off" ] && [ "$TURN_TOOL_COUNT" -gt 0 ]; then
     echo "" >> "$OUT_WRITE_FILE"
-    echo "### Tools" >> "$OUT_WRITE_FILE"
+    if [ "$TOOL_LOG_MODE" = "summary" ]; then
+      echo "### Tools (summary)" >> "$OUT_WRITE_FILE"
+      echo "1. total calls: $TURN_TOOL_COUNT" >> "$OUT_WRITE_FILE"
+    else
+      echo "### Tools" >> "$OUT_WRITE_FILE"
+    fi
     local idx=1
+    if [ "$TOOL_LOG_MODE" = "summary" ]; then
+      idx=2
+    fi
     while IFS= read -r tool_line; do
       [ -n "$tool_line" ] || continue
       echo "${idx}. ${tool_line}" >> "$OUT_WRITE_FILE"
       idx=$((idx + 1))
     done <<< "$TURN_TOOLS"
+    if [ "$TOOL_LOG_MODE" = "summary" ] && [ "$TURN_TOOL_COUNT" -gt "$TOOL_LOG_MAX_LINES" ]; then
+      echo "${idx}. ... (+$((TURN_TOOL_COUNT - TOOL_LOG_MAX_LINES)) more calls)" >> "$OUT_WRITE_FILE"
+    fi
   fi
 
   EMITTED_TURNS=$((EMITTED_TURNS + 1))
@@ -372,6 +409,7 @@ while IFS= read -r event; do
       TURN_ASSISTANT_TEXT=""
       TURN_ASSISTANT_LAST_TS=""
       TURN_TOOLS=""
+      TURN_TOOL_COUNT=0
     else
       if [ "$HAS_TURN" = "true" ]; then
         if [ -n "$TURN_ASSISTANT_TEXT" ]; then
@@ -387,11 +425,27 @@ while IFS= read -r event; do
       tool_name=$(echo "$event" | jq -r '.name // "tool"')
       tool_args=$(echo "$event" | jq -r '.arguments // ""')
       tool_summary=$(summarize_tool "$tool_name" "$tool_args")
-      if [ -n "$TURN_TOOLS" ]; then
-        TURN_TOOLS="${TURN_TOOLS}"$'\n'"${tool_summary}"
-      else
-        TURN_TOOLS="$tool_summary"
-      fi
+      TURN_TOOL_COUNT=$((TURN_TOOL_COUNT + 1))
+      case "$TOOL_LOG_MODE" in
+        off)
+          ;;
+        full)
+          if [ -n "$TURN_TOOLS" ]; then
+            TURN_TOOLS="${TURN_TOOLS}"$'\n'"${tool_summary}"
+          else
+            TURN_TOOLS="$tool_summary"
+          fi
+          ;;
+        summary)
+          if [ "$TOOL_LOG_MAX_LINES" -gt 0 ] && [ "$TURN_TOOL_COUNT" -le "$TOOL_LOG_MAX_LINES" ]; then
+            if [ -n "$TURN_TOOLS" ]; then
+              TURN_TOOLS="${TURN_TOOLS}"$'\n'"${tool_summary}"
+            else
+              TURN_TOOLS="$tool_summary"
+            fi
+          fi
+          ;;
+      esac
     fi
   fi
 done < "$EVENTS_FILE"
