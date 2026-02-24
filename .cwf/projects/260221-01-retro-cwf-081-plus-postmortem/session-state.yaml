@@ -2,11 +2,11 @@
 # Synced from .cwf/cwf-state.yaml live section.
 
 live:
-  session_id: ""
-  dir: ".cwf/projects/260221-01-retro-cwf-081-plus-postmortem"
-  branch: ""
-  phase: "retro"
-  task: ""
+  session_id: "S260224-01"
+  dir: ".cwf/projects/260224-01-concept-governance-yaml-unification"
+  branch: "feat/260224-concept-governance-plan"
+  phase: "done"
+  task: "concept governance + yaml unification migration run"
   key_files: []
   decisions: []
   decision_journal: []
@@ -16,15 +16,15 @@ live:
     rules_file: ""
     updated_at: ""
   remaining_gates: []
-  state_version: "6"
-  worktree_root: ""
-  worktree_branch: ""
+  state_version: "8"
+  worktree_root: "/home/hwidong/codes/claude-plugins"
+  worktree_branch: "feat/260224-concept-governance-plan"
   active_pipeline: ""
   user_directive: ""
   pipeline_override_reason: ""
-  ambiguity_mode: ""
-  blocking_decisions_pending: ""
-  ambiguity_decisions_file: ".cwf/projects/260218-03-pre-release-refactor-audit/run-ambiguity-decisions.md"
-  clarify_result_file: "project/initial-req.md"
-  clarify_completed_at: "2026-02-19T00:40:57Z"
-  stage_provenance_file: ".cwf/projects/260218-03-pre-release-refactor-audit/run-stage-provenance.md"
+  ambiguity_mode: "defer-blocking"
+  blocking_decisions_pending: "false"
+  ambiguity_decisions_file: ".cwf/projects/260224-01-concept-governance-yaml-unification/run-ambiguity-decisions.md"
+  clarify_result_file: ".cwf/projects/260224-01-concept-governance-yaml-unification/clarify-result.md"
+  clarify_completed_at: "2026-02-24T00:22:09Z"
+  stage_provenance_file: ".cwf/projects/260224-01-concept-governance-yaml-unification/run-stage-provenance.md"

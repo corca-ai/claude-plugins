@@ -3,197 +3,198 @@
 ## Task
 "Reorganize CWF around explicit concept governance, unify contract files to YAML, and refactor skills/hooks to compose registered concepts with deterministic concept gates. Backward compatibility is not required for this migration."
 
-## Why This Work Exists (Philosophy and Intent)
-- CWF claims concept-driven composition (Daniel Jackson framing), but enforcement is currently implicit and fragmented.
-- When concept ownership is implicit, behavior drifts across skills and hooks, and reviewers cannot prove whether the system still follows its own design.
-- This migration turns concepts into first-class executable contracts: each concept has principle docs, deterministic checks, and explicit composition registration.
-- The goal is not cosmetic cleanup; the goal is to make architecture auditable and fail-closed when concept integrity is broken.
-
-## Context Captured from Today
-1. Expert usage must be treated as one concept with shared execution semantics, not skill-specific ad-hoc behavior.
-2. Repo-level expert policy should live in a contract file (proposed `.cwf/expert-contract.yaml`), not embedded in one script.
-3. `refactor --codebase --deep` keeps fixed-expert policy because it is valuable in refactoring context.
-4. Contract/state split should be explicit:
-   - contract = policy (repository-specific and editable)
-   - state = runtime/live execution status
-   - roster/history = persistent memory artifact, separate from live state
-5. Contract format should be unified to YAML.
-6. Breaking change is acceptable; version should move from `0.8.12` to `1.0.0`.
-
 ## Scope Summary
-- Create a concept governance layer under `plugins/cwf/concepts`.
-- Define concept registry + binding model for all skills/hooks.
-- Enforce "every active skill/hook maps to >=1 concept" via deterministic gate.
-- Require registered targets to reference concept docs and pass concept checks.
-- Migrate contract artifacts from mixed JSON/YAML to YAML-only policy.
-- Integrate Expert concept with shared contract + roster model.
-- Recompose skill/hook docs and execution flow to align with concept gates.
-- Reflect final architecture/policy changes in README docs before release (`README.md`, `README.ko.md`).
+- **Goal**: Make concept governance executable and auditable via deterministic gates, while completing YAML-only contract governance.
+- **Key Decisions**:
+  - Registry-first concept governance under `plugins/cwf/concepts/`.
+  - YAML-only contract end-state; JSON contract artifacts removed from active runtime.
+  - Expert policy split into contract/roster/runtime-state model.
+  - Fail-closed concept gate wired into deterministic checks.
+- **Known Constraints**:
+  - Breaking migration is acceptable (`1.0.0`).
+  - `refactor --codebase --deep` fixed experts remain mandatory.
+  - No user-created file deletion without explicit confirmation.
 
-## Non-Goals
-- Preserve old contract file paths or mixed-format readers.
-- Maintain old behavior compatibility for external consumers.
-- Maintain strict README locale parity at every intermediate commit during migration.
+## Evidence Baseline
+- Gather artifacts:
+  - `gather.md`
+  - `initial-plan.md`
+- Clarify artifact:
+  - `clarify-result.md`
+- Codebase findings:
+  - No `plugins/cwf/concepts/` package exists yet.
+  - Runtime still depends on JSON contracts in `plugins/cwf/contracts/*.json` and `.cwf/codebase-contract.json`.
+  - Multiple scripts are JSON-coupled (`check-portability-contract.sh`, `check-change-impact.sh`, `check-claim-test-mapping.sh`, refactor codebase contract scripts).
+  - `expert_roster` is currently bound to `.cwf/cwf-state.yaml` and schema-enforced there.
 
-## Baseline Findings (Before Migration)
-- Contract format is mixed:
-  - `.cwf/codebase-contract.json`
-  - `.cwf/docs-contract.yaml`
-  - `.cwf/setup-contract.yaml` / `.cwf/gate-contract.yaml`
-  - `plugins/cwf/contracts/*.json`
-- Expert roster currently lives in `.cwf/cwf-state.yaml` while refactor deep uses `codebase-contract.json`, causing split policy semantics.
-- No single "contract governance owner" document currently defines format/ownership/lifecycle globally.
+## Evidence Gap List
+- No blocking evidence gap remains for plan drafting.
+- `PERSISTENCE_GATE=SKIP_NO_GAP`
 
-## Target Architecture
+## Architecture Direction
 
-### 1) Concept Package (`plugins/cwf/concepts/`)
-- One concept = two files (same basename):
-  - `<concept>.md` (principles, required behavior/state/actions, composition rules)
-  - `<concept>.sh|py|mjs` (deterministic checker)
-- Initial mandatory concepts:
-  - `expert`
-  - `contract`
-  - `decision-point`
-  - `tier-classification`
-  - `agent-orchestration`
-  - `handoff`
-  - `provenance`
+### Target State
+1. Concept package exists at `plugins/cwf/concepts/` with:
+   - concept docs (`*.md`)
+   - concept checkers (`*.sh|*.py|*.mjs`)
+   - machine registry (`registry.yaml`)
+2. Deterministic concept gate exists at `plugins/cwf/scripts/check-concepts.sh`.
+3. Active contracts are YAML-only.
+4. Expert policy is split:
+   - `.cwf/expert-contract.yaml` (policy)
+   - `.cwf/expert-roster.yaml` (persistent memory)
+   - `.cwf/cwf-state.yaml` (runtime/live execution only)
+5. Skill/hook binding to concepts is explicit and checked.
 
-### 2) Registry and Binding (`plugins/cwf/concepts/registry.yaml`)
-- `concepts`: concept metadata, checker path, severity mode.
-- `bindings.skills`: skill-to-concept mapping.
-- `bindings.hooks`: hook-to-concept mapping.
-- `exclude`: non-composed files explicitly excluded with reason/owner.
+### Migration Principle
+- Execute as phased cutover in one branch:
+  - Build scaffolding first.
+  - Migrate contracts and parsers.
+  - Rebind skills/hooks and enforce fail-closed gates.
+  - Finalize release metadata/docs.
 
-### 3) Concept Gate (`plugins/cwf/scripts/check-concepts.sh`)
-- Fail when a skill/hook is not registered and not excluded.
-- Fail when a registered target maps to zero concepts.
-- Fail when concept reference links are missing from the target doc.
-- Run all bound concept checkers and aggregate fail/warn verdict.
+## Files to Create/Modify
 
-### 4) Contract Model (YAML-Only)
-- Canonical policy files in `.cwf/*.yaml`.
-- No new `*contract*.json` artifacts after migration.
-- Contract concept checker enforces YAML format and ownership rules.
-
-### 5) Expert Model (Unified Concept)
-- Policy: `.cwf/expert-contract.yaml`
-- Roster memory: `.cwf/expert-roster.yaml`
-- Runtime state: keep only live execution data in `.cwf/cwf-state.yaml`
-- Shared expert execution path for `clarify`, `review`, `retro`, and `refactor --codebase --deep` with profile-based policy.
-
-## Execution Plan
-
-### Phase 1 — Governance Skeleton
-1. Add `plugins/cwf/references/contract-governance.md` as the single owner for contract lifecycle and format policy.
-2. Add `plugins/cwf/concepts/README.md` and `plugins/cwf/concepts/registry.yaml`.
-3. Define naming/IO contract for concept checkers (inputs, outputs, exit codes).
-
-### Phase 2 — Concept Artifacts
-1. Author initial concept docs (`*.md`) from `references/essence-of-software/distillation.md`.
-2. Implement initial checkers (`*.sh|py|mjs`) for each concept.
-3. Add deterministic tests for concept checker runtime behavior.
-
-### Phase 3 — Expert and Contract Unification
-1. Create `.cwf/expert-contract.yaml` and `.cwf/expert-roster.yaml` schema + bootstrap/update scripts.
-2. Move expert roster logic out of `cwf-state.yaml` flows.
-3. Migrate `codebase-contract.json` to `.cwf/codebase-contract.yaml`.
-4. Convert portability/authoring contracts to YAML and update gate parser logic.
-
-### Phase 4 — Skill/Hook Recomposure
-1. Rebind all `plugins/cwf/skills/*/SKILL.md` and `plugins/cwf/hooks/hooks.json` entries to concepts.
-2. Update each bound target to reference concept docs directly.
-3. Ensure concept checkers are invoked for each bound target in deterministic gates.
-
-### Phase 5 — Gate Wiring and Release
-1. Wire `check-concepts.sh` into hook/post-run/premerge gates.
-2. Run full deterministic suite (schemas, hooks, link checks, concept gates).
-3. Bump plugin version `0.8.12 -> 1.0.0`.
-4. Update README docs to faithfully reflect branch outcomes and new operating model (`README.md`, `README.ko.md`).
-5. Record migration notes for reinstall-first workflow.
-
-## Risk Management (Focus: JSON -> YAML Migration)
-
-### Risk A: Parser/tooling breakage during migration
-- Cause: many scripts currently assume JSON (`jq`, Python `json.load`).
-- Mitigation:
-  1. Introduce a shared YAML access layer first (single helper interface used by scripts).
-  2. Promote `yq` from optional candidate to required setup dependency for this repo.
-  3. Migrate one contract path at a time with runtime checks before broad rollout.
-
-### Risk B: Silent policy drift after conversion
-- Cause: schema/field mismatch when porting JSON contracts to YAML.
-- Mitigation:
-  1. Add schema parity tests before and after conversion.
-  2. Add migration diff check that compares semantic keys, not text format.
-  3. Fail closed on missing required keys.
-
-### Risk C: Concept gate too strict/too noisy
-- Cause: immediate full enforcement without scoped exclusions.
-- Mitigation:
-  1. Start with explicit `exclude` entries and reasons.
-  2. Require owner + sunset criteria for each exclusion.
-  3. Convert exclusions to bindings incrementally.
-
-### Risk D: Expert unification weakens refactor deep fixed-expert value
-- Cause: over-generalized expert selection path.
-- Mitigation:
-  1. Keep `refactor_codebase_deep` profile with fixed experts as mandatory.
-  2. Add dedicated checker assertions for fixed slots.
-  3. Validate deep outputs still include fixed+context rationale.
-
-## Files Expected to Be Created or Reworked
+### Create
 - `plugins/cwf/concepts/README.md`
 - `plugins/cwf/concepts/registry.yaml`
-- `plugins/cwf/concepts/*.md`
-- `plugins/cwf/concepts/*.sh` / `*.py` / `*.mjs`
+- `plugins/cwf/concepts/expert.md`
+- `plugins/cwf/concepts/contract.md`
+- `plugins/cwf/concepts/decision-point.md`
+- `plugins/cwf/concepts/tier-classification.md`
+- `plugins/cwf/concepts/agent-orchestration.md`
+- `plugins/cwf/concepts/handoff.md`
+- `plugins/cwf/concepts/provenance.md`
+- `plugins/cwf/concepts/check-expert.sh`
+- `plugins/cwf/concepts/check-contract.sh`
+- `plugins/cwf/concepts/check-decision-point.sh`
+- `plugins/cwf/concepts/check-tier-classification.sh`
+- `plugins/cwf/concepts/check-agent-orchestration.sh`
+- `plugins/cwf/concepts/check-handoff.sh`
+- `plugins/cwf/concepts/check-provenance.sh`
 - `plugins/cwf/scripts/check-concepts.sh`
 - `plugins/cwf/references/contract-governance.md`
 - `.cwf/expert-contract.yaml`
 - `.cwf/expert-roster.yaml`
-- `.cwf/codebase-contract.yaml` (replacing JSON)
-- `plugins/cwf/contracts/*.yaml` (replacing JSON variants)
-- Skill/hook docs and scripts touched by concept binding and contract parser updates
+- `.cwf/codebase-contract.yaml`
+
+### Modify
+- `plugins/cwf/hooks/hooks.json`
+- `plugins/cwf/scripts/check-portability-contract.sh`
+- `plugins/cwf/scripts/check-change-impact.sh`
+- `plugins/cwf/scripts/check-claim-test-mapping.sh`
+- `plugins/cwf/skills/refactor/scripts/bootstrap-codebase-contract.sh`
+- `plugins/cwf/skills/refactor/scripts/codebase-quick-scan.py`
+- `plugins/cwf/skills/refactor/scripts/select-codebase-experts.sh`
+- `plugins/cwf/skills/*/SKILL.md` (concept binding references where needed)
+- `scripts/schemas/cwf-state.schema.json`
+- `.cwf/cwf-state.yaml` (expert model path changes)
+- `README.md`
+- `README.ko.md`
+- plugin metadata/version file(s) (for `1.0.0` bump)
+
+### Decommission (post-migration)
+- `.cwf/codebase-contract.json`
+- `plugins/cwf/contracts/authoring-contract.json`
+- `plugins/cwf/contracts/portable-contract.json`
+- `plugins/cwf/contracts/claims.json`
+- `plugins/cwf/contracts/change-impact.json`
+
+## Implementation Steps
+
+### Step 0 — Shared Governance Skeleton
+- Add concept package scaffold (`README`, `registry.yaml`, initial concept docs/checker stubs).
+- Add `contract-governance.md` as single ownership spec.
+- Define checker I/O contract and severity model in `registry.yaml`.
+
+### Step 1 — Deterministic Concept Gate
+- Implement `check-concepts.sh`:
+  - target discovery for skills/hooks
+  - binding validation (bound or excluded)
+  - concept link/reference checks
+  - checker execution and aggregate verdict
+- Add deterministic exit codes and concise summary output.
+
+### Step 2 — YAML Contract Migration Core
+- Introduce YAML equivalents for active contract artifacts.
+- Update parsers/checkers to consume YAML.
+- Remove active JSON read-path dependency from portability/change-impact/claim checks.
+
+### Step 3 — Expert Model Unification
+- Add `.cwf/expert-contract.yaml` + `.cwf/expert-roster.yaml`.
+- Refactor expert read/write paths in clarify/review/retro and refactor deep integration points.
+- Update cwf-state schema/state semantics so runtime state excludes persistent policy memory.
+
+### Step 4 — Skill/Hook Binding and Gate Wiring
+- Bind all active skills/hooks in `registry.yaml`.
+- Add required concept references in SKILL/hook docs.
+- Wire `check-concepts.sh` into deterministic gate execution paths.
+
+### Step 5 — Release Closure
+- Remove retired JSON contract artifacts.
+- Run deterministic suite:
+  - schema checks
+  - link checks
+  - portability/claim/change-impact checks
+  - concept gate
+- Bump version to `1.0.0`.
+- Update `README.md` and `README.ko.md` to migrated model.
+
+## Commit Strategy
+- Default: **one commit per step** (`Step 0` to `Step 5`).
+- If a step becomes too large, split by coherent change pattern:
+  - `contracts+parsers`
+  - `expert-model`
+  - `bindings+gates`
+  - `docs+release`
+- No monolithic end-of-session commit.
+
+## Validation Plan
+1. Run deterministic scripts after each step where possible.
+2. Run `cwf:review --mode code` after implementation milestones.
+3. Ensure no active contract JSON remains before release closure.
+4. Verify concept gate blocks unbound skills/hooks.
+5. Verify refactor deep still enforces fixed experts.
 
 ## Decision Log
 
-| # | Decision Point | Resolution | Status |
-|---|---|---|---|
-| 1 | Backward compatibility required? | No. Reinstall-first migration accepted. | resolved |
-| 2 | Contract format target | YAML-only across CWF contracts. | resolved |
-| 3 | Expert policy ownership | Repo-local expert contract + separate roster memory file. | resolved |
-| 4 | Refactor deep fixed experts | Keep fixed experts as profile-level mandatory policy. | resolved |
-| 5 | Release impact | Breaking architecture update in major bump (`1.0.0`). | resolved |
+| # | Decision Point | Evidence / Source (artifact or URL + confidence) | Alternatives Considered | Resolution | Status | Resolved By | Resolved At (UTC) |
+|---|----------------|---------------------------------------------------|-------------------------|------------|--------|-------------|-------------------|
+| 1 | Draft handling | `clarify-result.md` (high) | Keep as `plan.md` vs rename seed | Preserve prior draft as `initial-plan.md`, regenerate `plan.md` | resolved | user + agent | 2026-02-24T00:00:00Z |
+| 2 | Concept registry authority | `gather.md` + existing `concept-map.md` usage (high) | docs-only map vs machine registry-only | Machine registry in `plugins/cwf/concepts/registry.yaml`; `concept-map.md` remains reference narrative | resolved | agent | 2026-02-24T00:00:00Z |
+| 3 | Migration sequencing | `gather.md` hotspot coupling findings (high) | one-shot rewrite vs phased cutover | Phased cutover in one branch/run | resolved | agent | 2026-02-24T00:00:00Z |
+| 4 | Expert model split and refactor deep integration | `gather.md` + refactor scripts/contract evidence (high) | keep split policy vs unify all into one file | Introduce expert contract+roster, preserve fixed-expert profile semantics in refactor deep | resolved | user plan + agent | 2026-02-24T00:00:00Z |
+| 5 | Exclusion sunset policy in concept registry | `initial-plan.md` open questions (medium) | date-based vs release-based | release-based sunset metadata in registry excludes | open | TBD | TBD |
 
 ## Success Criteria
+
+### Behavioral (BDD)
 
 ```gherkin
 Given concept registry and bindings are defined
 When deterministic concept gate runs
-Then every active skill/hook is either bound to >=1 concept or explicitly excluded with reason
+Then every active skill/hook is either bound to >=1 concept or explicitly excluded with reason and owner
 
 Given contract migration is complete
-When searching for contract artifacts
-Then no active contract file remains in JSON format
+When repository contract checks run
+Then all active contracts are YAML and no active contract JSON remains
 
-Given expert concept unification is complete
-When clarify/review/retro/refactor deep invoke expert workflows
-Then selection/execution/roster updates follow one shared contract-driven path with profile-specific policy
+Given expert model unification is complete
+When clarify/review/retro/refactor-deep resolve experts
+Then policy and roster data come from dedicated expert contract/roster artifacts and runtime state carries only live execution status
 
-Given refactor codebase deep profile
-When expert selection is resolved
-Then fixed experts remain mandatory and contextual experts are added deterministically
-
-Given release preparation
-When plugin metadata is updated
-Then version is bumped from 0.8.12 to 1.0.0 and migration notes are documented
-
-Given release documentation finalization
-When concept/contract/expert migration work is complete
-Then README.md and README.ko.md both describe the new model and constraints without stale legacy guidance
+Given release closure
+When final verification suite runs
+Then version is 1.0.0 and README.md/README.ko.md describe only the migrated architecture
 ```
 
-## Open Questions for Next Session Kickoff
-1. Should concept checker outputs be normalized to one machine-readable format (`jsonl` vs `yaml`) for gate aggregation?
-2. Do we want one global contract schema file for all contract types, or per-contract schema with shared meta-fields?
-3. For exclusions, should expiration be date-based or release-based?
+### Qualitative
+- Deterministic gates are fail-closed and explain failure cause in one screen.
+- Concept ownership is auditable by file-level bindings.
+- Migration is understandable to maintainers without session memory.
+- Documentation reflects runtime truth (no stale legacy guidance).
+
+## Deferred Actions
+- [ ] Decide exclusion sunset policy default (`release-based` vs `date-based`) before ship stage.
+- [ ] Confirm whether concept checker aggregate output should standardize on JSONL or YAML before ship stage.
+
