@@ -1,5 +1,9 @@
 version: 1
 
+governance:
+  exclusion_sunset_mode: release-based
+  checker_aggregate_format: jsonl
+
 concepts:
   expert:
     doc: plugins/cwf/concepts/expert.md
@@ -53,6 +57,11 @@ skill_bindings:
   "plugins/cwf/skills/update/SKILL.md": contract,provenance
 
 skill_exclusions:
+  # "plugins/cwf/skills/example/SKILL.md":
+  #   owner: plugin
+  #   reason: "temporary exclusion rationale"
+  #   sunset_release: "1.1.0"
+  #   tracked_ref: "https://github.com/<org>/<repo>/issues/<id>"
 
 hook_bindings:
   "SessionStart@@compact@@${CLAUDE_PLUGIN_ROOT}/hooks/scripts/compact-context.sh": handoff,provenance
@@ -73,3 +82,8 @@ hook_bindings:
   "SessionEnd@@@@${CLAUDE_PLUGIN_ROOT}/hooks/scripts/log-turn.sh session_end": provenance,handoff
 
 hook_exclusions:
+  # "PreToolUse@@Tool@@${CLAUDE_PLUGIN_ROOT}/hooks/scripts/example.sh":
+  #   owner: plugin
+  #   reason: "temporary exclusion rationale"
+  #   sunset_release: "1.1.0"
+  #   tracked_ref: "https://github.com/<org>/<repo>/issues/<id>"

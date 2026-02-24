@@ -15,6 +15,7 @@ This directory defines governance concepts used by CWF runtime artifacts. The re
 ## Files
 
 - `registry.yaml`: concept metadata, binding matrix, exclusions, and link targets.
+- [registry.yaml](registry.yaml): `governance` defines global policy (`exclusion_sunset_mode=release-based`, `checker_aggregate_format=jsonl`).
 - `checkers/`: one deterministic checker script per concept.
 - `*.md`: concept definitions and governance expectations.
 

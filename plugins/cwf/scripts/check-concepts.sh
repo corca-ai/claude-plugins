@@ -4,8 +4,9 @@ set -euo pipefail
 # check-concepts.sh — concept governance conformance check.
 #
 # Verifies that:
-# - registry.yaml is structurally usable
+# - registry.yaml is structurally usable and governance policy is declared
 # - every active skill and hook entry is bound to >=1 concept or explicitly excluded
+# - exclusion entries (when present) include deterministic sunset metadata
 # - target docs include required concept reference links from the registry
 # - concept-specific checker scripts execute and aggregate pass/warn/fail
 #
@@ -22,7 +23,7 @@ Usage:
   check-concepts.sh [--summary] [--strict]
 
 Options:
-  --summary   Suppress PASS detail and print compact results.
+  --summary   Suppress PASS detail and print compact results (text mode only).
   --strict    Treat warnings as failures.
   -h, --help  Show this message.
 USAGE
@@ -77,11 +78,24 @@ fi
 PASS_COUNT=0
 WARN_COUNT=0
 FAIL_COUNT=0
+AGGREGATE_FORMAT="text"
+
+emit_jsonl_event() {
+  local level="$1"
+  local message="$2"
+  jq -cn \
+    --arg level "$level" \
+    --arg message "$message" \
+    --arg source "plugins/cwf/scripts/check-concepts.sh" \
+    '{type:"concept_gate_event",level:$level,message:$message,source:$source}'
+}
 
 report_pass() {
   local msg="$1"
   PASS_COUNT=$((PASS_COUNT + 1))
-  if [[ "$SUMMARY" != "true" ]]; then
+  if [[ "$AGGREGATE_FORMAT" == "jsonl" ]]; then
+    emit_jsonl_event "pass" "$msg"
+  elif [[ "$SUMMARY" != "true" ]]; then
     echo "[PASS] $msg"
   fi
 }
@@ -89,13 +103,21 @@ report_pass() {
 report_warn() {
   local msg="$1"
   WARN_COUNT=$((WARN_COUNT + 1))
-  echo "[WARN] $msg"
+  if [[ "$AGGREGATE_FORMAT" == "jsonl" ]]; then
+    emit_jsonl_event "warn" "$msg"
+  else
+    echo "[WARN] $msg"
+  fi
 }
 
 report_fail() {
   local msg="$1"
   FAIL_COUNT=$((FAIL_COUNT + 1))
-  echo "[FAIL] $msg"
+  if [[ "$AGGREGATE_FORMAT" == "jsonl" ]]; then
+    emit_jsonl_event "fail" "$msg"
+  else
+    echo "[FAIL] $msg"
+  fi
 }
 
 trim() {
@@ -140,11 +162,25 @@ declare -A SKILL_BINDINGS=()
 declare -A HOOK_BINDINGS=()
 declare -A SKILL_EXCLUDED=()
 declare -A HOOK_EXCLUDED=()
+declare -A SKILL_EXCLUSION_OWNER=()
+declare -A SKILL_EXCLUSION_REASON=()
+declare -A SKILL_EXCLUSION_SUNSET_RELEASE=()
+declare -A SKILL_EXCLUSION_SUNSET_DATE=()
+declare -A SKILL_EXCLUSION_TRACKED_REF=()
+declare -A HOOK_EXCLUSION_OWNER=()
+declare -A HOOK_EXCLUSION_REASON=()
+declare -A HOOK_EXCLUSION_SUNSET_RELEASE=()
+declare -A HOOK_EXCLUSION_SUNSET_DATE=()
+declare -A HOOK_EXCLUSION_TRACKED_REF=()
+GOVERNANCE_EXCLUSION_SUNSET_MODE=""
+GOVERNANCE_CHECKER_AGGREGATE_FORMAT=""
 
 parse_registry() {
   local line=""
   local section=""
   local current_concept=""
+  local current_skill_exclusion=""
+  local current_hook_exclusion=""
   local key=""
   local value=""
 
@@ -162,31 +198,55 @@ parse_registry() {
       concepts:)
         section="concepts"
         current_concept=""
+        current_skill_exclusion=""
+        current_hook_exclusion=""
+        continue
+        ;;
+      governance:)
+        section="governance"
+        current_concept=""
+        current_skill_exclusion=""
+        current_hook_exclusion=""
         continue
         ;;
       skill_bindings:)
         section="skill_bindings"
         current_concept=""
+        current_skill_exclusion=""
+        current_hook_exclusion=""
         continue
         ;;
       skill_exclusions:*)
         section="skill_exclusions"
         current_concept=""
+        current_skill_exclusion=""
+        current_hook_exclusion=""
         continue
         ;;
       hook_bindings:)
         section="hook_bindings"
         current_concept=""
+        current_skill_exclusion=""
+        current_hook_exclusion=""
         continue
         ;;
       hook_exclusions:*)
         section="hook_exclusions"
         current_concept=""
+        current_skill_exclusion=""
+        current_hook_exclusion=""
         continue
         ;;
     esac
 
     case "$section" in
+      governance)
+        if [[ "$line" =~ ^[[:space:]]{2}exclusion_sunset_mode:[[:space:]]*(.+)$ ]]; then
+          GOVERNANCE_EXCLUSION_SUNSET_MODE="$(strip_quotes "${BASH_REMATCH[1]}")"
+        elif [[ "$line" =~ ^[[:space:]]{2}checker_aggregate_format:[[:space:]]*(.+)$ ]]; then
+          GOVERNANCE_CHECKER_AGGREGATE_FORMAT="$(strip_quotes "${BASH_REMATCH[1]}")"
+        fi
+        ;;
       concepts)
         if [[ "$line" =~ ^[[:space:]]{2}([a-z0-9-]+):[[:space:]]*$ ]]; then
           current_concept="${BASH_REMATCH[1]}"
@@ -227,15 +287,47 @@ parse_registry() {
         fi
         ;;
       skill_exclusions)
-        if [[ "$line" =~ ^[[:space:]]{2}-[[:space:]]*(.+)$ ]]; then
+        if [[ "$line" =~ ^[[:space:]]{2}\"([^\"]+)\":[[:space:]]*$ ]]; then
+          key="${BASH_REMATCH[1]}"
+          current_skill_exclusion="$key"
+          SKILL_EXCLUDED["$key"]=1
+        elif [[ "$line" =~ ^[[:space:]]{2}-[[:space:]]*(.+)$ ]]; then
+          # legacy list-style exclusion entry
           key="$(strip_quotes "${BASH_REMATCH[1]}")"
+          current_skill_exclusion="$key"
           [[ -n "$key" ]] && SKILL_EXCLUDED["$key"]=1
+        elif [[ -n "$current_skill_exclusion" && "$line" =~ ^[[:space:]]{4}owner:[[:space:]]*(.+)$ ]]; then
+          SKILL_EXCLUSION_OWNER["$current_skill_exclusion"]="$(strip_quotes "${BASH_REMATCH[1]}")"
+        elif [[ -n "$current_skill_exclusion" && "$line" =~ ^[[:space:]]{4}reason:[[:space:]]*(.+)$ ]]; then
+          SKILL_EXCLUSION_REASON["$current_skill_exclusion"]="$(strip_quotes "${BASH_REMATCH[1]}")"
+        elif [[ -n "$current_skill_exclusion" && "$line" =~ ^[[:space:]]{4}sunset_release:[[:space:]]*(.+)$ ]]; then
+          SKILL_EXCLUSION_SUNSET_RELEASE["$current_skill_exclusion"]="$(strip_quotes "${BASH_REMATCH[1]}")"
+        elif [[ -n "$current_skill_exclusion" && "$line" =~ ^[[:space:]]{4}sunset_date:[[:space:]]*(.+)$ ]]; then
+          SKILL_EXCLUSION_SUNSET_DATE["$current_skill_exclusion"]="$(strip_quotes "${BASH_REMATCH[1]}")"
+        elif [[ -n "$current_skill_exclusion" && "$line" =~ ^[[:space:]]{4}tracked_ref:[[:space:]]*(.+)$ ]]; then
+          SKILL_EXCLUSION_TRACKED_REF["$current_skill_exclusion"]="$(strip_quotes "${BASH_REMATCH[1]}")"
         fi
         ;;
       hook_exclusions)
-        if [[ "$line" =~ ^[[:space:]]{2}-[[:space:]]*(.+)$ ]]; then
+        if [[ "$line" =~ ^[[:space:]]{2}\"([^\"]+)\":[[:space:]]*$ ]]; then
+          key="${BASH_REMATCH[1]}"
+          current_hook_exclusion="$key"
+          HOOK_EXCLUDED["$key"]=1
+        elif [[ "$line" =~ ^[[:space:]]{2}-[[:space:]]*(.+)$ ]]; then
+          # legacy list-style exclusion entry
           key="$(strip_quotes "${BASH_REMATCH[1]}")"
+          current_hook_exclusion="$key"
           [[ -n "$key" ]] && HOOK_EXCLUDED["$key"]=1
+        elif [[ -n "$current_hook_exclusion" && "$line" =~ ^[[:space:]]{4}owner:[[:space:]]*(.+)$ ]]; then
+          HOOK_EXCLUSION_OWNER["$current_hook_exclusion"]="$(strip_quotes "${BASH_REMATCH[1]}")"
+        elif [[ -n "$current_hook_exclusion" && "$line" =~ ^[[:space:]]{4}reason:[[:space:]]*(.+)$ ]]; then
+          HOOK_EXCLUSION_REASON["$current_hook_exclusion"]="$(strip_quotes "${BASH_REMATCH[1]}")"
+        elif [[ -n "$current_hook_exclusion" && "$line" =~ ^[[:space:]]{4}sunset_release:[[:space:]]*(.+)$ ]]; then
+          HOOK_EXCLUSION_SUNSET_RELEASE["$current_hook_exclusion"]="$(strip_quotes "${BASH_REMATCH[1]}")"
+        elif [[ -n "$current_hook_exclusion" && "$line" =~ ^[[:space:]]{4}sunset_date:[[:space:]]*(.+)$ ]]; then
+          HOOK_EXCLUSION_SUNSET_DATE["$current_hook_exclusion"]="$(strip_quotes "${BASH_REMATCH[1]}")"
+        elif [[ -n "$current_hook_exclusion" && "$line" =~ ^[[:space:]]{4}tracked_ref:[[:space:]]*(.+)$ ]]; then
+          HOOK_EXCLUSION_TRACKED_REF["$current_hook_exclusion"]="$(strip_quotes "${BASH_REMATCH[1]}")"
         fi
         ;;
     esac
@@ -250,6 +342,33 @@ if [[ "${#CONCEPT_IDS[@]}" -eq 0 ]]; then
 fi
 
 mapfile -t SORTED_CONCEPTS < <(printf '%s\n' "${!CONCEPT_IDS[@]}" | sort)
+
+validate_governance_policy() {
+  case "$GOVERNANCE_EXCLUSION_SUNSET_MODE" in
+    release-based|date-based)
+      report_pass "governance exclusion sunset mode: $GOVERNANCE_EXCLUSION_SUNSET_MODE"
+      ;;
+    "")
+      report_fail "registry governance missing exclusion_sunset_mode"
+      ;;
+    *)
+      report_fail "invalid exclusion_sunset_mode: $GOVERNANCE_EXCLUSION_SUNSET_MODE"
+      ;;
+  esac
+
+  case "$GOVERNANCE_CHECKER_AGGREGATE_FORMAT" in
+    jsonl)
+      AGGREGATE_FORMAT="jsonl"
+      report_pass "governance checker aggregate format: jsonl"
+      ;;
+    "")
+      report_fail "registry governance missing checker_aggregate_format"
+      ;;
+    *)
+      report_fail "invalid checker_aggregate_format: $GOVERNANCE_CHECKER_AGGREGATE_FORMAT (expected: jsonl)"
+      ;;
+  esac
+}
 
 validate_concept_definitions() {
   local concept_id=""
@@ -336,6 +455,55 @@ validate_binding_concepts() {
   report_pass "$owner_kind bound to concepts: $owner_key"
 }
 
+validate_exclusion_metadata() {
+  local owner_kind="$1"
+  local owner_key="$2"
+  local owner="$3"
+  local reason="$4"
+  local tracked_ref="$5"
+  local sunset_release="$6"
+  local sunset_date="$7"
+  local has_failure=0
+
+  if [[ -z "$(trim "$owner")" ]]; then
+    report_fail "$owner_kind exclusion missing owner: $owner_key"
+    has_failure=1
+  fi
+  if [[ -z "$(trim "$reason")" ]]; then
+    report_fail "$owner_kind exclusion missing reason: $owner_key"
+    has_failure=1
+  fi
+  if [[ -z "$(trim "$tracked_ref")" ]]; then
+    report_fail "$owner_kind exclusion missing tracked_ref: $owner_key"
+    has_failure=1
+  fi
+
+  case "$GOVERNANCE_EXCLUSION_SUNSET_MODE" in
+    release-based)
+      if [[ -z "$(trim "$sunset_release")" ]]; then
+        report_fail "$owner_kind exclusion missing sunset_release: $owner_key"
+        has_failure=1
+      elif [[ ! "$sunset_release" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]]; then
+        report_fail "$owner_kind exclusion invalid sunset_release: $owner_key -> $sunset_release"
+        has_failure=1
+      fi
+      ;;
+    date-based)
+      if [[ -z "$(trim "$sunset_date")" ]]; then
+        report_fail "$owner_kind exclusion missing sunset_date: $owner_key"
+        has_failure=1
+      elif [[ ! "$sunset_date" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+        report_fail "$owner_kind exclusion invalid sunset_date: $owner_key -> $sunset_date"
+        has_failure=1
+      fi
+      ;;
+  esac
+
+  if [[ "$has_failure" -eq 0 ]]; then
+    report_pass "$owner_kind exclusion metadata valid: $owner_key"
+  fi
+}
+
 check_skill_coverage() {
   local skill_path=""
   local binding_csv=""
@@ -352,7 +520,14 @@ check_skill_coverage() {
     fi
 
     if [[ -n "${SKILL_EXCLUDED[$skill_path]-}" ]]; then
-      report_pass "skill explicitly excluded: $skill_path"
+      validate_exclusion_metadata \
+        "skill" \
+        "$skill_path" \
+        "${SKILL_EXCLUSION_OWNER[$skill_path]-}" \
+        "${SKILL_EXCLUSION_REASON[$skill_path]-}" \
+        "${SKILL_EXCLUSION_TRACKED_REF[$skill_path]-}" \
+        "${SKILL_EXCLUSION_SUNSET_RELEASE[$skill_path]-}" \
+        "${SKILL_EXCLUSION_SUNSET_DATE[$skill_path]-}"
       continue
     fi
 
@@ -406,7 +581,14 @@ check_hook_coverage() {
     fi
 
     if [[ -n "${HOOK_EXCLUDED[$hook_key]-}" ]]; then
-      report_pass "hook explicitly excluded: $hook_key"
+      validate_exclusion_metadata \
+        "hook" \
+        "$hook_key" \
+        "${HOOK_EXCLUSION_OWNER[$hook_key]-}" \
+        "${HOOK_EXCLUSION_REASON[$hook_key]-}" \
+        "${HOOK_EXCLUSION_TRACKED_REF[$hook_key]-}" \
+        "${HOOK_EXCLUSION_SUNSET_RELEASE[$hook_key]-}" \
+        "${HOOK_EXCLUSION_SUNSET_DATE[$hook_key]-}"
       continue
     fi
 
@@ -479,15 +661,25 @@ run_concept_checkers() {
   done
 }
 
+validate_governance_policy
 validate_concept_definitions
 check_skill_coverage
 check_hook_coverage
 run_concept_checkers
 
-echo "Concept governance check"
-echo "  pass : $PASS_COUNT"
-echo "  warn : $WARN_COUNT"
-echo "  fail : $FAIL_COUNT"
+if [[ "$AGGREGATE_FORMAT" == "jsonl" ]]; then
+  jq -cn \
+    --arg source "plugins/cwf/scripts/check-concepts.sh" \
+    --argjson pass "$PASS_COUNT" \
+    --argjson warn "$WARN_COUNT" \
+    --argjson fail "$FAIL_COUNT" \
+    '{type:"concept_gate_summary",source:$source,pass:$pass,warn:$warn,fail:$fail}'
+else
+  echo "Concept governance check"
+  echo "  pass : $PASS_COUNT"
+  echo "  warn : $WARN_COUNT"
+  echo "  fail : $FAIL_COUNT"
+fi
 
 if [[ "$FAIL_COUNT" -gt 0 ]]; then
   exit 1

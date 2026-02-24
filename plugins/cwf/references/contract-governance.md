@@ -29,6 +29,8 @@ This document summarizes ownership and lifecycle policy for concept-governed con
 ## Policy Rules
 
 - Active skills and hook entries require at least one concept binding, unless explicitly excluded in registry.
+- Exclusions are governed by `registry.yaml` policy and must include `owner`, `reason`, `tracked_ref`, and sunset metadata aligned with `exclusion_sunset_mode` (default: `release-based`).
+- Concept checker aggregate format is standardized as `jsonl` via `registry.yaml` governance policy.
 - Registry-listed target docs must contain registry-listed concept links.
 - Concept checker scripts provide deterministic pass/warn/fail outcomes.
 - Implementation changes should be committed in meaningful units with explicit boundary rationale instead of one end-of-session monolithic commit.
