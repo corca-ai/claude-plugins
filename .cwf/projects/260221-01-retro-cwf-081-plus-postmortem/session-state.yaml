@@ -3,10 +3,10 @@
 
 live:
   session_id: "S260224-01"
-  dir: ".cwf/projects/260224-01-concept-governance-yaml-unification"
-  branch: "feat/260224-concept-governance-plan"
-  phase: "done"
-  task: "concept governance + yaml unification migration run"
+  dir: ".cwf/projects/260224-02-cwf-cli-run-watch-orchestration"
+  branch: "feat/cwf-run-bash-orchestrator"
+  phase: "plan"
+  task: "cwf shell runner migration planning"
   key_files: []
   decisions: []
   decision_journal: []
