@@ -510,6 +510,13 @@ sessions:
     artifacts: [plan.md, lessons.md, retro.md, retro-cdm-analysis.md, retro-learning-resources.md, retro-expert-alpha.md, retro-expert-beta.md]
     stage_checkpoints: [retro]
 
+
+  - id: "S260224-01"
+    title: "concept-governance-yaml-unification"
+    dir: ".cwf/projects/260224-01-concept-governance-yaml-unification"
+    branch: "main"
+    artifacts: [plan.md, lessons.md]
+
 tools:
   codex: unavailable
   gemini: unavailable
