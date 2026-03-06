@@ -234,7 +234,8 @@ Wrapper source:
 Wrapper post-run behavior:
 
 ```bash
-bash {CWF_PLUGIN_DIR}/scripts/codex/sync-session-logs.sh --cwd "$PWD"
+# launched in background; wrapper does not wait for sync completion
+bash {CWF_PLUGIN_DIR}/scripts/codex/sync-session-logs.sh --cwd "$PWD" >/dev/null 2>&1 &
 bash {CWF_PLUGIN_DIR}/scripts/codex/post-run-checks.sh --cwd "$PWD" --mode warn
 ```
 

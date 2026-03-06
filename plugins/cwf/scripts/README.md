@@ -35,7 +35,7 @@ This file maps scripts under [plugins/cwf/scripts](.).
 - [retro-collect-evidence.sh](retro-collect-evidence.sh): Collects retro evidence snapshot (token-limit signals, HITL decisions/events, warning lines, changed-files context).
 - [agent-slot-preflight.sh](agent-slot-preflight.sh): Computes slot availability and recommended batch sizing before parallel sub-agent launches.
 - [provenance-check.sh](provenance-check.sh): Verifies provenance sidecar freshness against current CWF skill/hook counts.
-- [codex/codex-with-log.sh](codex/codex-with-log.sh): Wrapper entrypoint that runs Codex and syncs logs.
+- [codex/codex-with-log.sh](codex/codex-with-log.sh): Wrapper entrypoint that runs Codex, queues session-log sync in the background, and then applies optional post-run checks.
 - [codex/post-run-checks.sh](codex/post-run-checks.sh): Post-run quality checks (changed files only) for markdown/shell/link/live-state gates plus tool-hygiene, HITL scratchpad sync guards, and contract-driven portability gate (`--context post-run`).
 - [codex/install-wrapper.sh](codex/install-wrapper.sh): Installs, checks, or disables a Codex wrapper for `user`/`project`/`local` scopes.
 - [codex/sync-skills.sh](codex/sync-skills.sh): Symlinks CWF skills/references into Codex scope-specific destinations.

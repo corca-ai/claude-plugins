@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# codex-with-log.sh: Run Codex CLI and sync session logs after completion.
+# codex-with-log.sh: Run Codex CLI and queue session log sync after completion.
 
 set -euo pipefail
 
@@ -32,6 +32,7 @@ if [ -t 0 ] && [ -t 1 ]; then
 fi
 WRAPPER_DEBUG="${CWF_CODEX_WRAPPER_DEBUG:-false}"
 WRAPPER_DEBUG_LOG="${CWF_CODEX_WRAPPER_DEBUG_LOG:-$HOME/.codex/log/cwf-codex-wrapper.log}"
+WRAPPER_ASYNC_LOG="${CWF_CODEX_WRAPPER_ASYNC_LOG:-$HOME/.codex/log/cwf-codex-wrapper-async.log}"
 
 # Keep trap path safe under nounset even if exit happens unexpectedly early.
 RUN_START_EPOCH=""
@@ -117,18 +118,29 @@ run_with_optional_timeout() {
   return $?
 }
 
+resolve_async_log_target() {
+  local target="${WRAPPER_ASYNC_LOG:-/dev/null}"
+  local target_dir=""
+
+  if [ "$target" = "/dev/null" ]; then
+    printf '%s\n' "$target"
+    return 0
+  fi
+
+  target_dir="$(dirname "$target")"
+  if mkdir -p "$target_dir" 2>/dev/null && touch "$target" 2>/dev/null; then
+    printf '%s\n' "$target"
+  else
+    printf '/dev/null\n'
+  fi
+}
+
 is_timeout_exit() {
   local code="${1:-0}"
   [ "$code" -eq 124 ] || [ "$code" -eq 137 ] || [ "$code" -eq 143 ]
 }
 
-run_sync_once() {
-  if [ "${SYNC_DONE:-false}" = "true" ]; then
-    wrapper_log "sync skipped reason=already_done"
-    return 0
-  fi
-  SYNC_DONE="true"
-
+run_sync_worker() {
   if [ ! -x "${SYNC_SCRIPT:-}" ]; then
     wrapper_log "sync skipped reason=missing_script path=${SYNC_SCRIPT:-}"
     return 0
@@ -189,11 +201,35 @@ run_sync_once() {
   return 0
 }
 
+schedule_sync_once() {
+  local async_log_target=""
+  local bg_pid=""
+
+  if [ "${SYNC_DONE:-false}" = "true" ]; then
+    wrapper_log "sync skipped reason=already_done"
+    return 0
+  fi
+  SYNC_DONE="true"
+
+  async_log_target="$(resolve_async_log_target)"
+
+  (
+    exec </dev/null >>"$async_log_target" 2>&1
+    printf '[cwf:codex wrapper] INFO: background session log sync started pid=%s cwd=%s since_epoch=%s\n' \
+      "${BASHPID:-$$}" "$PWD" "${RUN_START_EPOCH:-unknown}"
+    run_sync_worker
+  ) &
+  bg_pid="$!"
+  wrapper_log "sync scheduled background pid=$bg_pid log=$async_log_target"
+
+  return 0
+}
+
 cleanup_on_exit() {
   # shellcheck disable=SC2317
   wrapper_log "trap EXIT"
   # shellcheck disable=SC2317
-  run_sync_once
+  schedule_sync_once
 }
 
 trap cleanup_on_exit EXIT
@@ -205,7 +241,7 @@ RUN_COMPLETED="true"
 set -e
 wrapper_log "real codex returned exit_code=$EXIT_CODE"
 
-run_sync_once
+schedule_sync_once
 
 if [ "$INTERACTIVE_TTY" = "true" ]; then
   POST_RUN_ENABLED="${CWF_CODEX_POST_RUN_CHECKS:-false}"
